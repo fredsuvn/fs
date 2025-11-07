@@ -236,7 +236,7 @@ public class AssignTest {
         }
 
         private void testAssign(Type assigned, Type assignee, boolean expected) {
-            assertEquals(TypeKit.isAssignable(assigned, assignee), expected,
+            assertEquals(expected, TypeKit.isAssignable(assigned, assignee),
                 String.format("Assign error: %s = %s", assigned.getTypeName(), assignee.getTypeName())
             );
         }
@@ -1060,14 +1060,14 @@ public class AssignTest {
         }
 
         private void testAssign(Type assigned, Type assignee, boolean expected) {
-            assertEquals(TypeKit.isAssignable(assigned, assignee), expected,
+            assertEquals(expected, TypeKit.isAssignable(assigned, assignee),
                 String.format("Assign error: %s = %s", assigned.getTypeName(), assignee.getTypeName())
             );
         }
     }
 
     private static void testAssign(Type assigned, Type assignee, boolean expected) {
-        assertEquals(TypeKit.isAssignable(assigned, assignee), expected,
+        assertEquals(expected, TypeKit.isAssignable(assigned, assignee),
             String.format("Assign error: %s = %s", assigned.getTypeName(), assignee.getTypeName())
         );
     }

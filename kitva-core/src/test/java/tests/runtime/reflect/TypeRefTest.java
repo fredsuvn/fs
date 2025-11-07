@@ -21,21 +21,21 @@ public class TypeRefTest {
         }.asParameterized();
         assertEquals(parameterizedType, listType);
         ;
-        assertEquals(new TypeRef<String>() {
-        }.type(), String.class);
+        assertEquals(String.class, new TypeRef<String>() {
+        }.type());
 
         // inheritance:
         class TestRef extends TypeRef<String> {
         }
         TestRef testRef = new TestRef();
-        assertEquals(testRef.type(), String.class);
+        assertEquals(String.class, testRef.type());
         class TestRef2 extends TestRef {
         }
         TestRef2 testRef2 = new TestRef2();
-        assertEquals(testRef2.type(), String.class);
+        assertEquals(String.class, testRef2.type());
         class TestRef3<T> extends TypeRef<T> {
         }
-        assertEquals(new TestRef3<String>() {
-        }.type(), String.class);
+        assertEquals(String.class, new TestRef3<String>() {
+        }.type());
     }
 }

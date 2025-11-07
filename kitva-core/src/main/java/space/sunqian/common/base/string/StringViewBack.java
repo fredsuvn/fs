@@ -94,4 +94,7 @@ final class StringViewBack {
             }
         }
     }
+
+    private StringViewBack() {
+    }
 }

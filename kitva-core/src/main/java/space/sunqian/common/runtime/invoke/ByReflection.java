@@ -78,4 +78,7 @@ final class ByReflection {
             }
         }
     }
+
+    private ByReflection() {
+    }
 }

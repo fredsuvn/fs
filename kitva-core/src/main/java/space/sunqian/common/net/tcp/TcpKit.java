@@ -40,4 +40,7 @@ public class TcpKit {
             handler.exceptionCaught(context, e);
         }
     }
+
+    private TcpKit() {
+    }
 }

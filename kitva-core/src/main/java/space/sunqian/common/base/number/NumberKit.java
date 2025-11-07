@@ -138,4 +138,7 @@ public class NumberKit {
         }
         throw new UnsupportedOperationException("Unsupported number type: " + numType);
     }
+
+    private NumberKit() {
+    }
 }

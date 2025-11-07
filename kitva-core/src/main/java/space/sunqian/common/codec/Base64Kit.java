@@ -480,4 +480,7 @@ public class Base64Kit {
             return position;
         }
     }
+
+    private Base64Kit() {
+    }
 }

@@ -65,4 +65,7 @@ public class CodingKit {
         }
         return merger.apply(Collections.singletonList(Kit.as(objOrColl)));
     }
+
+    private CodingKit() {
+    }
 }

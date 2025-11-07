@@ -59,10 +59,10 @@ public class TypeTest {
         assertEquals(TypeKit.getLastName(TypeKit.class), TypeKit.class.getSimpleName());
         Method method = TypeKit.class.getDeclaredMethod("getLastName", String.class);
         method.setAccessible(true);
-        assertEquals(method.invoke(null, "123"), "123");
-        assertEquals(method.invoke(null, ".123"), "123");
-        assertEquals(method.invoke(null, ".1.23"), "23");
-        assertEquals(method.invoke(null, ".12.3"), "3");
+        assertEquals("123", method.invoke(null, "123"));
+        assertEquals("123", method.invoke(null, ".123"));
+        assertEquals("23", method.invoke(null, ".1.23"));
+        assertEquals("3", method.invoke(null, ".12.3"));
     }
 
     @Test
@@ -70,9 +70,9 @@ public class TypeTest {
         class X {
             List<String> list;
         }
-        assertEquals(TypeKit.getRawClass(String.class), String.class);
+        assertEquals(String.class, TypeKit.getRawClass(String.class));
         Type listType = X.class.getDeclaredField("list").getGenericType();
-        assertEquals(TypeKit.getRawClass(listType), List.class);
+        assertEquals(List.class, TypeKit.getRawClass(listType));
         assertNull(TypeKit.getRawClass(List.class.getTypeParameters()[0]));
         assertNull(TypeKit.getRawClass(TypeTest.errorParameterizedType()));
     }
@@ -86,23 +86,23 @@ public class TypeTest {
         }
         ParameterizedType upperParam = (ParameterizedType) X.class.getDeclaredField("upper").getGenericType();
         WildcardType upper = (WildcardType) upperParam.getActualTypeArguments()[0];
-        assertEquals(TypeKit.getUpperBound(upper), String.class);
+        assertEquals(String.class, TypeKit.getUpperBound(upper));
         assertNull(TypeKit.getLowerBound(upper));
         ParameterizedType lowerParam = (ParameterizedType) X.class.getDeclaredField("lower").getGenericType();
         WildcardType lower = (WildcardType) lowerParam.getActualTypeArguments()[0];
-        assertEquals(TypeKit.getLowerBound(lower), String.class);
-        assertEquals(TypeKit.getUpperBound(lower), Object.class);
+        assertEquals(String.class, TypeKit.getLowerBound(lower));
+        assertEquals(Object.class, TypeKit.getUpperBound(lower));
         ParameterizedType queryParam = (ParameterizedType) X.class.getDeclaredField("query").getGenericType();
         WildcardType query = (WildcardType) queryParam.getActualTypeArguments()[0];
         assertNull(TypeKit.getLowerBound(upper));
-        assertEquals(TypeKit.getUpperBound(query), Object.class);
+        assertEquals(Object.class, TypeKit.getUpperBound(query));
         TypeVariable<?> t = X.class.getTypeParameters()[0];
-        assertEquals(TypeKit.getFirstBound(t), String.class);
+        assertEquals(String.class, TypeKit.getFirstBound(t));
         TypeVariable<?> u = X.class.getTypeParameters()[1];
-        assertEquals(TypeKit.getFirstBound(u), Object.class);
+        assertEquals(Object.class, TypeKit.getFirstBound(u));
 
         // special:
-        assertEquals(TypeKit.getUpperBound(new WildcardType() {
+        assertEquals(Object.class, TypeKit.getUpperBound(new WildcardType() {
 
             @Override
             public Type @Nonnull [] getUpperBounds() {
@@ -113,8 +113,8 @@ public class TypeTest {
             public Type @Nonnull [] getLowerBounds() {
                 return new Type[0];
             }
-        }), Object.class);
-        assertEquals(TypeKit.getFirstBound(new TypeVariable<Class<?>>() {
+        }));
+        assertEquals(Object.class, TypeKit.getFirstBound(new TypeVariable<Class<?>>() {
 
             @Override
             public <T extends Annotation> @Nullable T getAnnotation(@Nonnull Class<T> annotationClass) {
@@ -150,7 +150,7 @@ public class TypeTest {
             public AnnotatedType @Nonnull [] getAnnotatedBounds() {
                 return new AnnotatedType[0];
             }
-        }), Object.class);
+        }));
     }
 
     @Test
@@ -174,24 +174,24 @@ public class TypeTest {
         // component type:
         assertNull(TypeKit.getComponentType(l1Type));
         assertEquals(TypeKit.getComponentType(l2Type), l1Type);
-        assertEquals(TypeKit.getComponentType(int[].class), int.class);
+        assertEquals(int.class, TypeKit.getComponentType(int[].class));
     }
 
     @Test
     public void testRuntimeClass() throws Exception {
-        assertEquals(TypeKit.toRuntimeClass(int.class), int.class);
+        assertEquals(int.class, TypeKit.toRuntimeClass(int.class));
         class X<T extends String, U extends List<? extends String>> {
             List<? extends String> l1 = null;
             List<? extends String>[] l2 = null;
         }
         Type l1Type = X.class.getDeclaredField("l1").getGenericType();
-        assertEquals(TypeKit.toRuntimeClass(l1Type), List.class);
+        assertEquals(List.class, TypeKit.toRuntimeClass(l1Type));
         Type l2Type = X.class.getDeclaredField("l2").getGenericType();
-        assertEquals(TypeKit.toRuntimeClass(l2Type), List[].class);
-        assertEquals(TypeKit.toRuntimeClass(X.class.getTypeParameters()[0]), String.class);
-        assertEquals(TypeKit.toRuntimeClass(X.class.getTypeParameters()[1]), List.class);
+        assertEquals(List[].class, TypeKit.toRuntimeClass(l2Type));
+        assertEquals(String.class, TypeKit.toRuntimeClass(X.class.getTypeParameters()[0]));
+        assertEquals(List.class, TypeKit.toRuntimeClass(X.class.getTypeParameters()[1]));
         GenericArrayType arrayType = TypeKit.arrayType(X.class.getTypeParameters()[0]);
-        assertEquals(TypeKit.toRuntimeClass(arrayType), String[].class);
+        assertEquals(String[].class, TypeKit.toRuntimeClass(arrayType));
         ParameterizedType p = (ParameterizedType) TypeKit.getFirstBound(X.class.getTypeParameters()[1]);
         Type w = p.getActualTypeArguments()[0];
         assertNull(TypeKit.toRuntimeClass(w));
@@ -238,16 +238,16 @@ public class TypeTest {
         }
         Type cls3 = X.class.getDeclaredField("cls3").getGenericType();
         Map<TypeVariable<?>, Type> map = TypeKit.typeParametersMapping(cls3);
-        assertEquals(getTypeParameter(map, MappingCls2.class, 0), CharSequence.class);
-        assertEquals(getTypeParameter(map, MappingCls1.class, 0), String.class);
+        assertEquals(CharSequence.class, getTypeParameter(map, MappingCls2.class, 0));
+        assertEquals(String.class, getTypeParameter(map, MappingCls1.class, 0));
         assertEquals(getTypeParameter(map, MappingCls1.class, 1), MappingCls2.class.getTypeParameters()[0]);
-        assertEquals(getTypeParameter(map, MappingInterA.class, 0), Integer.class);
-        assertEquals(getTypeParameter(map, MappingInterA.class, 1), Long.class);
-        assertEquals(getTypeParameter(map, MappingInterA.class, 2), Float.class);
+        assertEquals(Integer.class, getTypeParameter(map, MappingInterA.class, 0));
+        assertEquals(Long.class, getTypeParameter(map, MappingInterA.class, 1));
+        assertEquals(Float.class, getTypeParameter(map, MappingInterA.class, 2));
         assertEquals(getTypeParameter(map, MappingInterA.class, 3), MappingCls1.class.getTypeParameters()[0]);
-        assertEquals(getTypeParameter(map, MappingInterB.class, 0), Boolean.class);
-        assertEquals(getTypeParameter(map, MappingInterB.class, 1), Byte.class);
-        assertEquals(getTypeParameter(map, MappingInterB.class, 2), Short.class);
+        assertEquals(Boolean.class, getTypeParameter(map, MappingInterB.class, 0));
+        assertEquals(Byte.class, getTypeParameter(map, MappingInterB.class, 1));
+        assertEquals(Short.class, getTypeParameter(map, MappingInterB.class, 2));
         assertEquals(getTypeParameter(map, MappingInterB.class, 3), MappingCls1.class.getTypeParameters()[1]);
         assertEquals(getTypeParameter(map, MappingInterA1.class, 0), MappingInterA.class.getTypeParameters()[0]);
         assertEquals(getTypeParameter(map, MappingInterA1.class, 1), MappingInterA.class.getTypeParameters()[1]);
@@ -257,11 +257,11 @@ public class TypeTest {
         assertEquals(getTypeParameter(map, MappingInterB1.class, 1), MappingInterB.class.getTypeParameters()[1]);
         assertEquals(getTypeParameter(map, MappingInterB2.class, 0), MappingInterB.class.getTypeParameters()[2]);
         assertEquals(getTypeParameter(map, MappingInterB2.class, 1), MappingInterB.class.getTypeParameters()[3]);
-        assertEquals(map.size(), 19);
+        assertEquals(19, map.size());
         Type cls2 = X.class.getDeclaredField("cls2").getGenericType();
         Map<TypeVariable<?>, Type> map2 = TypeKit.typeParametersMapping(cls2);
-        assertEquals(getTypeParameter(map2, MappingCls2.class, 0), Void.class);
-        assertEquals(map2.size(), 19);
+        assertEquals(Void.class, getTypeParameter(map2, MappingCls2.class, 0));
+        assertEquals(19, map2.size());
 
         // special exception:
         {
@@ -317,7 +317,7 @@ public class TypeTest {
                 ? extends List<? extends List<? extends Hashtable>[]>
                 > r6;
         }
-        assertEquals(TypeKit.replaceType(X.class, X.class, Object.class), Object.class);
+        assertEquals(Object.class, TypeKit.replaceType(X.class, X.class, Object.class));
         Type t1 = X.class.getDeclaredField("f1").getGenericType();
         Type r1 = X.class.getDeclaredField("r1").getGenericType();
         Type rp1 = TypeKit.replaceType(t1, String.class, Integer.class);
@@ -456,7 +456,7 @@ public class TypeTest {
         assertFalse(l1.equals(list2));
         assertFalse(l1.equals(list3));
         assertFalse(l1.equals(String.class));
-        assertEquals(TypeKit.wildcardType(Kit.array(), Kit.array()).toString(), "??");
+        assertEquals("??", TypeKit.wildcardType(Kit.array(), Kit.array()).toString());
     }
 
     @Test

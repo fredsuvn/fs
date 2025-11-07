@@ -313,4 +313,7 @@ public class MapKit {
             }
         };
     }
+
+    private MapKit() {
+    }
 }

@@ -164,10 +164,7 @@ public class UdpServerBuilder {
 
         @Override
         public void await() throws NetException {
-            try {
-                mainThread.join();
-            } catch (InterruptedException ignored) {
-            }
+            Kit.ignoreException(mainThread::join);
         }
 
         @Override

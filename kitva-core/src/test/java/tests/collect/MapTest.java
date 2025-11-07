@@ -52,9 +52,9 @@ public class MapTest {
         map.put(3, 4);
         map.put(5, 6);
         assertEquals(MapKit.hashMap(1, 2, 3, 4, 5, 6), new HashMap<>(map));
-        assertEquals(MapKit.hashMap(1, 2, 3, 4, 5, 6).getClass(), HashMap.class);
+        assertEquals(HashMap.class, MapKit.hashMap(1, 2, 3, 4, 5, 6).getClass());
         assertEquals(MapKit.linkedHashMap(1, 2, 3, 4, 5, 6), new LinkedHashMap<>(map));
-        assertEquals(MapKit.linkedHashMap(1, 2, 3, 4, 5, 6).getClass(), LinkedHashMap.class);
+        assertEquals(LinkedHashMap.class, MapKit.linkedHashMap(1, 2, 3, 4, 5, 6).getClass());
     }
 
     @Test
@@ -69,17 +69,17 @@ public class MapTest {
 
         assertEquals(MapKit.toHashMap(list), new HashMap<>(map));
         assertNotSame(MapKit.toHashMap(list), new HashMap<>(map));
-        assertEquals(MapKit.toHashMap(list).getClass(), HashMap.class);
+        assertEquals(HashMap.class, MapKit.toHashMap(list).getClass());
         assertEquals(MapKit.toHashMap(list::iterator), new HashMap<>(map));
         assertNotSame(MapKit.toHashMap(list::iterator), new HashMap<>(map));
-        assertEquals(MapKit.toHashMap(list::iterator).getClass(), HashMap.class);
+        assertEquals(HashMap.class, MapKit.toHashMap(list::iterator).getClass());
 
         assertEquals(MapKit.toLinkedHashMap(list), new LinkedHashMap<>(map));
         assertNotSame(MapKit.toLinkedHashMap(list), new LinkedHashMap<>(map));
-        assertEquals(MapKit.toLinkedHashMap(list).getClass(), LinkedHashMap.class);
+        assertEquals(LinkedHashMap.class, MapKit.toLinkedHashMap(list).getClass());
         assertEquals(MapKit.toLinkedHashMap(list::iterator), new LinkedHashMap<>(map));
         assertNotSame(MapKit.toLinkedHashMap(list::iterator), new LinkedHashMap<>(map));
-        assertEquals(MapKit.toLinkedHashMap(list::iterator).getClass(), LinkedHashMap.class);
+        assertEquals(LinkedHashMap.class, MapKit.toLinkedHashMap(list::iterator).getClass());
 
 
         Map<Integer, Integer> intMap = new LinkedHashMap<>();
@@ -142,8 +142,8 @@ public class MapTest {
         map.put(7, 8);
         map.put(8, 9);
         map.put(9, 8);
-        assertEquals(MapKit.resolveChain(map, 1, new HashSet<>()), 3);
-        assertEquals(MapKit.resolveChain(map, 2, new HashSet<>()), 3);
+        assertEquals(3, MapKit.resolveChain(map, 1, new HashSet<>()));
+        assertEquals(3, MapKit.resolveChain(map, 2, new HashSet<>()));
         assertNull(MapKit.resolveChain(map, 3, new HashSet<>()));
         assertNull(MapKit.resolveChain(map, 10, new HashSet<>()));
         assertNull(MapKit.resolveChain(map, 11, new HashSet<>()));
@@ -154,8 +154,8 @@ public class MapTest {
     @Test
     public void testEntry() {
         Map.Entry<String, String> entry = MapKit.entry("1", "2");
-        assertEquals(entry.getKey(), "1");
-        assertEquals(entry.getValue(), "2");
+        assertEquals("1", entry.getKey());
+        assertEquals("2", entry.getValue());
         assertThrows(UnsupportedOperationException.class, () -> entry.setValue("3"));
     }
 }

@@ -44,49 +44,49 @@ public class ValueTest {
             // boolean
             assertSame(BooleanVal.ofTrue(), BooleanVal.ofTrue());
             assertSame(BooleanVal.ofFalse(), BooleanVal.ofFalse());
-            assertEquals(BooleanVal.of(true).get(), true);
-            assertEquals(BooleanVal.of(true).toVal().get(), Boolean.TRUE);
+            assertEquals(true, BooleanVal.of(true).get());
+            assertEquals(Boolean.TRUE, BooleanVal.of(true).toVal().get());
         }
         {
             // byte
             assertSame(ByteVal.ofZero(), ByteVal.ofZero());
-            assertEquals(ByteVal.of(1).get(), 1);
+            assertEquals(1, ByteVal.of(1).get());
             assertEquals(ByteVal.of(1).toVal().get(), Byte.valueOf((byte) 1));
         }
         {
             // char
             assertSame(CharVal.ofZero(), CharVal.ofZero());
-            assertEquals(CharVal.of(1).get(), 1);
+            assertEquals(1, CharVal.of(1).get());
             assertEquals(CharVal.of(1).toVal().get(), Character.valueOf((char) 1));
         }
         {
             // short
             assertSame(ShortVal.ofZero(), ShortVal.ofZero());
-            assertEquals(ShortVal.of(1).get(), 1);
+            assertEquals(1, ShortVal.of(1).get());
             assertEquals(ShortVal.of(1).toVal().get(), Short.valueOf((short) 1));
         }
         {
             // int
             assertSame(IntVal.ofZero(), IntVal.ofZero());
-            assertEquals(IntVal.of(1).get(), 1);
+            assertEquals(1, IntVal.of(1).get());
             assertEquals(IntVal.of(1).toVal().get(), Integer.valueOf(1));
         }
         {
             // long
             assertSame(LongVal.ofZero(), LongVal.ofZero());
-            assertEquals(LongVal.of(1).get(), 1);
+            assertEquals(1, LongVal.of(1).get());
             assertEquals(LongVal.of(1).toVal().get(), Long.valueOf(1));
         }
         {
             // float
             assertSame(FloatVal.ofZero(), FloatVal.ofZero());
-            assertEquals(FloatVal.of(1.0).get(), 1);
+            assertEquals(1, FloatVal.of(1.0).get());
             assertEquals(FloatVal.of(1).toVal().get(), Float.valueOf(1));
         }
         {
             // double
             assertSame(DoubleVal.ofZero(), DoubleVal.ofZero());
-            assertEquals(DoubleVal.of(1).get(), 1);
+            assertEquals(1, DoubleVal.of(1).get());
             assertEquals(DoubleVal.of(1).toVal().get(), Double.valueOf(1));
         }
     }
@@ -98,107 +98,108 @@ public class ValueTest {
             Object o = new Object();
             assertSame(Var.of(o).get(), o);
             Var<Integer> vi = Var.of(1);
-            assertEquals(vi.get(), 1);
+            assertEquals(1, vi.get());
             Var<Integer> v2 = vi.set(2);
             assertSame(v2, vi);
-            assertEquals(v2.get(), 2);
+            assertEquals(2, v2.get());
             assertNull(v2.clear().get());
         }
         {
             // boolean
-            assertEquals(BooleanVar.of(true).get(), true);
-            assertEquals(BooleanVar.of(true).set(false).get(), false);
-            assertEquals(BooleanVar.of(true).toggle().get(), false);
-            assertEquals(BooleanVar.of(true).toggleAndGet(), false);
+            assertEquals(true, BooleanVar.of(true).get());
+            assertEquals(false, BooleanVar.of(true).set(false).get());
+            assertEquals(false, BooleanVar.of(true).toggle().get());
+            assertEquals(true, BooleanVar.of(false).toggle().get());
+            assertEquals(false, BooleanVar.of(true).toggleAndGet());
             BooleanVar bool = BooleanVar.of(true);
-            assertEquals(bool.getAndToggle(), true);
-            assertEquals(bool.get(), false);
-            assertEquals(BooleanVar.of(true).toVar().get(), Boolean.TRUE);
+            assertEquals(true, bool.getAndToggle());
+            assertEquals(false, bool.get());
+            assertEquals(Boolean.TRUE, BooleanVar.of(true).toVar().get());
             assertFalse(BooleanVar.of(true).clear().get());
         }
         {
             // byte
-            assertEquals(ByteVar.of(1).get(), 1);
-            assertEquals(ByteVar.of(1).set(2).get(), 2);
-            assertEquals(ByteVar.of(1).add(1).get(), 2);
-            assertEquals(ByteVar.of(1).getAndIncrement(), 1);
-            assertEquals(ByteVar.of(1).incrementAndGet(), 2);
+            assertEquals(1, ByteVar.of(1).get());
+            assertEquals(2, ByteVar.of(1).set(2).get());
+            assertEquals(2, ByteVar.of(1).add(1).get());
+            assertEquals(1, ByteVar.of(1).getAndIncrement());
+            assertEquals(2, ByteVar.of(1).incrementAndGet());
             ByteVar bv = ByteVar.of(1);
-            assertEquals(bv.getAndIncrement(), 1);
-            assertEquals(bv.get(), 2);
+            assertEquals(1, bv.getAndIncrement());
+            assertEquals(2, bv.get());
             assertEquals(ByteVar.of(1).toVar().get(), Byte.valueOf((byte) 1));
-            assertEquals(ByteVar.of(111).clear().get(), 0);
+            assertEquals(0, ByteVar.of(111).clear().get());
         }
         {
             // char
-            assertEquals(CharVar.of(1).get(), 1);
-            assertEquals(CharVar.of(1).set(2).get(), 2);
-            assertEquals(CharVar.of(1).add(1).get(), 2);
-            assertEquals(CharVar.of(1).getAndIncrement(), 1);
-            assertEquals(CharVar.of(1).incrementAndGet(), 2);
+            assertEquals(1, CharVar.of(1).get());
+            assertEquals(2, CharVar.of(1).set(2).get());
+            assertEquals(2, CharVar.of(1).add(1).get());
+            assertEquals(1, CharVar.of(1).getAndIncrement());
+            assertEquals(2, CharVar.of(1).incrementAndGet());
             CharVar cv = CharVar.of(1);
-            assertEquals(cv.getAndIncrement(), 1);
-            assertEquals(cv.get(), 2);
+            assertEquals(1, cv.getAndIncrement());
+            assertEquals(2, cv.get());
             assertEquals(CharVar.of(1).toVar().get(), Character.valueOf((char) 1));
-            assertEquals(CharVar.of(111).clear().get(), 0);
+            assertEquals(0, CharVar.of(111).clear().get());
         }
         {
             // short
-            assertEquals(ShortVar.of(1).get(), 1);
-            assertEquals(ShortVar.of(1).set(2).get(), 2);
-            assertEquals(ShortVar.of(1).add(1).get(), 2);
-            assertEquals(ShortVar.of(1).getAndIncrement(), 1);
-            assertEquals(ShortVar.of(1).incrementAndGet(), 2);
+            assertEquals(1, ShortVar.of(1).get());
+            assertEquals(2, ShortVar.of(1).set(2).get());
+            assertEquals(2, ShortVar.of(1).add(1).get());
+            assertEquals(1, ShortVar.of(1).getAndIncrement());
+            assertEquals(2, ShortVar.of(1).incrementAndGet());
             ShortVar sv = ShortVar.of(1);
-            assertEquals(sv.getAndIncrement(), 1);
-            assertEquals(sv.get(), 2);
+            assertEquals(1, sv.getAndIncrement());
+            assertEquals(2, sv.get());
             assertEquals(ShortVar.of(1).toVar().get(), Short.valueOf((short) 1));
-            assertEquals(ShortVar.of(111).clear().get(), 0);
+            assertEquals(0, ShortVar.of(111).clear().get());
         }
         {
             // int
-            assertEquals(IntVar.of(1).get(), 1);
-            assertEquals(IntVar.of(1).set(2).get(), 2);
-            assertEquals(IntVar.of(1).add(1).get(), 2);
-            assertEquals(IntVar.of(1).getAndIncrement(), 1);
-            assertEquals(IntVar.of(1).incrementAndGet(), 2);
+            assertEquals(1, IntVar.of(1).get());
+            assertEquals(2, IntVar.of(1).set(2).get());
+            assertEquals(2, IntVar.of(1).add(1).get());
+            assertEquals(1, IntVar.of(1).getAndIncrement());
+            assertEquals(2, IntVar.of(1).incrementAndGet());
             IntVar iv = IntVar.of(1);
-            assertEquals(iv.getAndIncrement(), 1);
-            assertEquals(iv.get(), 2);
+            assertEquals(1, iv.getAndIncrement());
+            assertEquals(2, iv.get());
             assertEquals(IntVar.of(1).toVar().get(), Integer.valueOf(1));
-            assertEquals(IntVar.of(111).clear().get(), 0);
+            assertEquals(0, IntVar.of(111).clear().get());
         }
         {
             // long
-            assertEquals(LongVar.of(1).get(), 1);
-            assertEquals(LongVar.of(1).set(2).get(), 2);
-            assertEquals(LongVar.of(1).add(1).get(), 2);
-            assertEquals(LongVar.of(1).getAndIncrement(), 1);
-            assertEquals(LongVar.of(1).incrementAndGet(), 2);
+            assertEquals(1, LongVar.of(1).get());
+            assertEquals(2, LongVar.of(1).set(2).get());
+            assertEquals(2, LongVar.of(1).add(1).get());
+            assertEquals(1, LongVar.of(1).getAndIncrement());
+            assertEquals(2, LongVar.of(1).incrementAndGet());
             LongVar lv = LongVar.of(1);
-            assertEquals(lv.getAndIncrement(), 1);
-            assertEquals(lv.get(), 2);
+            assertEquals(1, lv.getAndIncrement());
+            assertEquals(2, lv.get());
             assertEquals(LongVar.of(1).toVar().get(), Long.valueOf(1));
-            assertEquals(LongVar.of(111).clear().get(), 0);
+            assertEquals(0, LongVar.of(111).clear().get());
         }
         {
             // float
-            assertEquals(FloatVar.of(1).get(), 1);
-            assertEquals(FloatVar.of(1).set(2).get(), 2);
-            assertEquals(FloatVar.of(1).add(1).get(), 2);
+            assertEquals(1, FloatVar.of(1).get());
+            assertEquals(2, FloatVar.of(1).set(2).get());
+            assertEquals(2, FloatVar.of(1).add(1).get());
             assertEquals(FloatVar.of(1).toVar().get(), Float.valueOf(1));
-            assertEquals(FloatVar.of(1.0).get(), 1);
-            assertEquals(FloatVar.of(1.0).set(2.0).get(), 2);
-            assertEquals(FloatVar.of(1.0).add(1.0).get(), 2);
-            assertEquals(FloatVar.of(111).clear().get(), 0);
+            assertEquals(1, FloatVar.of(1.0).get());
+            assertEquals(2, FloatVar.of(1.0).set(2.0).get());
+            assertEquals(2, FloatVar.of(1.0).add(1.0).get());
+            assertEquals(0, FloatVar.of(111).clear().get());
         }
         {
             // double
-            assertEquals(DoubleVar.of(1).get(), 1);
-            assertEquals(DoubleVar.of(1).set(2).get(), 2);
-            assertEquals(DoubleVar.of(1).add(1).get(), 2);
+            assertEquals(1, DoubleVar.of(1).get());
+            assertEquals(2, DoubleVar.of(1).set(2).get());
+            assertEquals(2, DoubleVar.of(1).add(1).get());
             assertEquals(DoubleVar.of(1).toVar().get(), Double.valueOf(1));
-            assertEquals(DoubleVar.of(111).clear().get(), 0);
+            assertEquals(0, DoubleVar.of(111).clear().get());
         }
     }
 
@@ -209,34 +210,34 @@ public class ValueTest {
         {
             // span
             assertEquals(Span.of(start, end), Span.of(start, end));
-            assertEquals(Span.of(start, end).startIndex(), start);
-            assertEquals(Span.of(start, end).endIndex(), end);
+            assertEquals(start, Span.of(start, end).startIndex());
+            assertEquals(end, Span.of(start, end).endIndex());
             assertNotEquals(Span.of(start, end), Span.of(start, end + 1));
             assertNotEquals(Span.of(start, end), Span.of(start + 1, end));
             assertNotEquals(Span.of(start, end), Span.of(start + 1, end + 1));
             assertFalse(Span.of(start, end).equals(""));
             assertEquals(Span.of(start, end).hashCode(), Span.of(start, end).hashCode());
-            assertEquals(Span.of(start, end).toString(), "[1, 10)");
-            assertEquals(Span.of(start, end).isEmpty(), false);
-            assertEquals(Span.of(start, start).isEmpty(), true);
-            assertEquals(Span.of(start, end).length(), end - start);
+            assertEquals("[1, 10)", Span.of(start, end).toString());
+            assertEquals(false, Span.of(start, end).isEmpty());
+            assertEquals(true, Span.of(start, start).isEmpty());
+            assertEquals(end - start, Span.of(start, end).length());
             assertThrows(IllegalArgumentException.class, () -> Span.of(end, start));
             assertSame(Span.empty(), Span.empty());
         }
         {
             // long span
             assertEquals(LongSpan.of(start, end), LongSpan.of(start, end));
-            assertEquals(LongSpan.of(start, end).startIndex(), start);
-            assertEquals(LongSpan.of(start, end).endIndex(), end);
+            assertEquals(start, LongSpan.of(start, end).startIndex());
+            assertEquals(end, LongSpan.of(start, end).endIndex());
             assertNotEquals(LongSpan.of(start, end), LongSpan.of(start, end + 1));
             assertNotEquals(LongSpan.of(start, end), LongSpan.of(start + 1, end));
             assertNotEquals(LongSpan.of(start, end), LongSpan.of(start + 1, end + 1));
             assertFalse(LongSpan.of(start, end).equals(""));
             assertEquals(LongSpan.of(start, end).hashCode(), LongSpan.of(start, end).hashCode());
-            assertEquals(LongSpan.of(start, end).toString(), "[1, 10)");
-            assertEquals(LongSpan.of(start, end).isEmpty(), false);
-            assertEquals(LongSpan.of(start, start).isEmpty(), true);
-            assertEquals(LongSpan.of(start, end).length(), end - start);
+            assertEquals("[1, 10)", LongSpan.of(start, end).toString());
+            assertEquals(false, LongSpan.of(start, end).isEmpty());
+            assertEquals(true, LongSpan.of(start, start).isEmpty());
+            assertEquals(end - start, LongSpan.of(start, end).length());
             assertThrows(IllegalArgumentException.class, () -> LongSpan.of(end, start));
             assertSame(LongSpan.empty(), LongSpan.empty());
         }

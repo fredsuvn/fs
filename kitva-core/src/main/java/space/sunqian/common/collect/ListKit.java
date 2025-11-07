@@ -211,4 +211,7 @@ public class ListKit {
     public static <T> @Nonnull List<T> compositeView(@Nonnull List<T> @Nonnull ... lists) {
         return ListBack.compositeList(lists);
     }
+
+    private ListKit() {
+    }
 }

@@ -65,14 +65,14 @@ public class ProtobufTest implements PrintTest {
             .setXEnum(xEnum.E1);
         ObjectSchema builderSchema = protoParser.parse(Data.Builder.class);
         printFor("Builder", builderSchema);
-        assertEquals(builderSchema.type(), Data.Builder.class);
-        assertEquals(builderSchema.rawType(), Data.Builder.class);
+        assertEquals(Data.Builder.class, builderSchema.type());
+        assertEquals(Data.Builder.class, builderSchema.rawType());
         testSchemaHandler(builderSchema, builder, true);
         Data message = builder.build();
         ObjectSchema messageSchema = protoParser.parse(Data.class);
         printFor("Message", messageSchema);
-        assertEquals(messageSchema.type(), Data.class);
-        assertEquals(messageSchema.rawType(), Data.class);
+        assertEquals(Data.class, messageSchema.type());
+        assertEquals(Data.class, messageSchema.rawType());
         testSchemaHandler(messageSchema, message, false);
 
         // writes new values
@@ -94,30 +94,30 @@ public class ProtobufTest implements PrintTest {
         builderSchema.getProperty("strList").setValue(builder, ListKit.list("newStrList"));
         builderSchema.getProperty("xEnum").setValue(builder, xEnum.E2);
         Data message2 = builder.build();
-        assertEquals(message2.getStr(), "newStr");
-        assertEquals(message2.getI32(), 2);
-        assertEquals(message2.getU64(), 3L);
-        assertEquals(message2.getF32(), 4);
-        assertEquals(message2.getF64(), 5L);
-        assertEquals(message2.getSf32(), 6);
-        assertEquals(message2.getSf64(), 7L);
-        assertEquals(message2.getSint32(), 8);
-        assertEquals(message2.getSint64(), 9L);
-        assertEquals(message2.getBytes().toStringUtf8(), "newBytes");
-        assertEquals(message2.getBool(), false);
-        assertEquals(message2.getFloat(), 2.1f);
-        assertEquals(message2.getDouble(), 2.2);
+        assertEquals("newStr", message2.getStr());
+        assertEquals(2, message2.getI32());
+        assertEquals(3L, message2.getU64());
+        assertEquals(4, message2.getF32());
+        assertEquals(5L, message2.getF64());
+        assertEquals(6, message2.getSf32());
+        assertEquals(7L, message2.getSf64());
+        assertEquals(8, message2.getSint32());
+        assertEquals(9L, message2.getSint64());
+        assertEquals("newBytes", message2.getBytes().toStringUtf8());
+        assertEquals(false, message2.getBool());
+        assertEquals(2.1f, message2.getFloat());
+        assertEquals(2.2, message2.getDouble());
         assertEquals(message2.getSiMapMap(), MapKit.map("siMap", 2));
         assertEquals(message2.getIListList(), ListKit.list(2));
         assertEquals(message2.getStrListList(), ListKit.list("newStrList"));
-        assertEquals(message2.getXEnum(), xEnum.E2);
+        assertEquals(xEnum.E2, message2.getXEnum());
 
         // error
         class T<T> {}
         ObjectSchema NonClassSchema = protoParser.parse(T.class.getTypeParameters()[0]);
-        assertEquals(NonClassSchema.properties().size(), 0);
+        assertEquals(0, NonClassSchema.properties().size());
         ObjectSchema NonProtoSchema = protoParser.parse(String.class);
-        assertEquals(NonProtoSchema.properties().size(), 0);
+        assertEquals(0, NonProtoSchema.properties().size());
     }
 
     private void testSchemaHandler(ObjectSchema schema, Object inst, boolean writable) throws Exception {
@@ -130,8 +130,8 @@ public class ProtobufTest implements PrintTest {
             // str
             ObjectProperty str = schema.getProperty("str");
             assertNotNull(str);
-            assertEquals(str.type(), String.class);
-            assertEquals(str.getValue(inst), "str");
+            assertEquals(String.class, str.type());
+            assertEquals("str", str.getValue(inst));
             assertTrue(str.isReadable());
             assertEquals(str.isWritable(), writable);
             assertNotNull(str.getterMethod());
@@ -148,8 +148,8 @@ public class ProtobufTest implements PrintTest {
             // i32
             ObjectProperty i32 = schema.getProperty("i32");
             assertNotNull(i32);
-            assertEquals(i32.type(), int.class);
-            assertEquals(i32.getValue(inst), 1);
+            assertEquals(int.class, i32.type());
+            assertEquals(1, i32.getValue(inst));
             assertTrue(i32.isReadable());
             assertEquals(i32.isWritable(), writable);
             assertNotNull(i32.getterMethod());
@@ -166,8 +166,8 @@ public class ProtobufTest implements PrintTest {
             // u64
             ObjectProperty u64 = schema.getProperty("u64");
             assertNotNull(u64);
-            assertEquals(u64.type(), long.class);
-            assertEquals(u64.getValue(inst), 2L);
+            assertEquals(long.class, u64.type());
+            assertEquals(2L, u64.getValue(inst));
             assertTrue(u64.isReadable());
             assertEquals(u64.isWritable(), writable);
             assertNotNull(u64.getterMethod());
@@ -184,8 +184,8 @@ public class ProtobufTest implements PrintTest {
             // f32
             ObjectProperty f32 = schema.getProperty("f32");
             assertNotNull(f32);
-            assertEquals(f32.type(), int.class);
-            assertEquals(f32.getValue(inst), 3);
+            assertEquals(int.class, f32.type());
+            assertEquals(3, f32.getValue(inst));
             assertTrue(f32.isReadable());
             assertEquals(f32.isWritable(), writable);
             assertNotNull(f32.getterMethod());
@@ -202,8 +202,8 @@ public class ProtobufTest implements PrintTest {
             // f64
             ObjectProperty f64 = schema.getProperty("f64");
             assertNotNull(f64);
-            assertEquals(f64.type(), long.class);
-            assertEquals(f64.getValue(inst), 4L);
+            assertEquals(long.class, f64.type());
+            assertEquals(4L, f64.getValue(inst));
             assertTrue(f64.isReadable());
             assertEquals(f64.isWritable(), writable);
             assertNotNull(f64.getterMethod());
@@ -220,8 +220,8 @@ public class ProtobufTest implements PrintTest {
             // sf32
             ObjectProperty sf32 = schema.getProperty("sf32");
             assertNotNull(sf32);
-            assertEquals(sf32.type(), int.class);
-            assertEquals(sf32.getValue(inst), 5);
+            assertEquals(int.class, sf32.type());
+            assertEquals(5, sf32.getValue(inst));
             assertTrue(sf32.isReadable());
             assertEquals(sf32.isWritable(), writable);
             assertNotNull(sf32.getterMethod());
@@ -238,8 +238,8 @@ public class ProtobufTest implements PrintTest {
             // sf64
             ObjectProperty sf64 = schema.getProperty("sf64");
             assertNotNull(sf64);
-            assertEquals(sf64.type(), long.class);
-            assertEquals(sf64.getValue(inst), 6L);
+            assertEquals(long.class, sf64.type());
+            assertEquals(6L, sf64.getValue(inst));
             assertTrue(sf64.isReadable());
             assertEquals(sf64.isWritable(), writable);
             assertNotNull(sf64.getterMethod());
@@ -256,8 +256,8 @@ public class ProtobufTest implements PrintTest {
             // sint32
             ObjectProperty sint32 = schema.getProperty("sint32");
             assertNotNull(sint32);
-            assertEquals(sint32.type(), int.class);
-            assertEquals(sint32.getValue(inst), 7);
+            assertEquals(int.class, sint32.type());
+            assertEquals(7, sint32.getValue(inst));
             assertTrue(sint32.isReadable());
             assertEquals(sint32.isWritable(), writable);
             assertNotNull(sint32.getterMethod());
@@ -274,8 +274,8 @@ public class ProtobufTest implements PrintTest {
             // sint64
             ObjectProperty sint64 = schema.getProperty("sint64");
             assertNotNull(sint64);
-            assertEquals(sint64.type(), long.class);
-            assertEquals(sint64.getValue(inst), 8L);
+            assertEquals(long.class, sint64.type());
+            assertEquals(8L, sint64.getValue(inst));
             assertTrue(sint64.isReadable());
             assertEquals(sint64.isWritable(), writable);
             assertNotNull(sint64.getterMethod());
@@ -292,7 +292,7 @@ public class ProtobufTest implements PrintTest {
             // bytes
             ObjectProperty bytes = schema.getProperty("bytes");
             assertNotNull(bytes);
-            assertEquals(bytes.type(), ByteString.class);
+            assertEquals(ByteString.class, bytes.type());
             assertEquals(bytes.getValue(inst), ByteString.copyFromUtf8("bytes"));
             assertTrue(bytes.isReadable());
             assertEquals(bytes.isWritable(), writable);
@@ -310,8 +310,8 @@ public class ProtobufTest implements PrintTest {
             // bool
             ObjectProperty bool = schema.getProperty("bool");
             assertNotNull(bool);
-            assertEquals(bool.type(), boolean.class);
-            assertEquals(bool.getValue(inst), true);
+            assertEquals(boolean.class, bool.type());
+            assertEquals(true, bool.getValue(inst));
             assertTrue(bool.isReadable());
             assertEquals(bool.isWritable(), writable);
             assertNotNull(bool.getterMethod());
@@ -328,8 +328,8 @@ public class ProtobufTest implements PrintTest {
             // float
             ObjectProperty floatProp = schema.getProperty("float");
             assertNotNull(floatProp);
-            assertEquals(floatProp.type(), float.class);
-            assertEquals(floatProp.getValue(inst), 1.1f);
+            assertEquals(float.class, floatProp.type());
+            assertEquals(1.1f, floatProp.getValue(inst));
             assertTrue(floatProp.isReadable());
             assertEquals(floatProp.isWritable(), writable);
             assertNotNull(floatProp.getterMethod());
@@ -346,8 +346,8 @@ public class ProtobufTest implements PrintTest {
             // double
             ObjectProperty doubleProp = schema.getProperty("double");
             assertNotNull(doubleProp);
-            assertEquals(doubleProp.type(), double.class);
-            assertEquals(doubleProp.getValue(inst), 1.2);
+            assertEquals(double.class, doubleProp.type());
+            assertEquals(1.2, doubleProp.getValue(inst));
             assertTrue(doubleProp.isReadable());
             assertEquals(doubleProp.isWritable(), writable);
             assertNotNull(doubleProp.getterMethod());
@@ -418,7 +418,7 @@ public class ProtobufTest implements PrintTest {
             // xEnum
             ObjectProperty xEnum = schema.getProperty("xEnum");
             assertNotNull(xEnum);
-            assertEquals(xEnum.type(), xEnum.class);
+            assertEquals(xEnum.class, xEnum.type());
             assertEquals(xEnum.getValue(inst), tests.protobuf.xEnum.E1);
             assertTrue(xEnum.isReadable());
             assertEquals(xEnum.isWritable(), writable);
@@ -506,11 +506,11 @@ public class ProtobufTest implements PrintTest {
             .withFirstHandler(new ProtobufConvertHandler());
         String str = "12313213213";
         ByteString byteString = converter.convert(str, ByteString.class);
-        assertEquals(byteString.toStringUtf8(), str);
-        assertEquals(converter.convert(byteString, String.class), str);
+        assertEquals(str, byteString.toStringUtf8());
+        assertEquals(str, converter.convert(byteString, String.class));
         ProtocolStringList psList = converter.convert(ListKit.list("1", "2", "3"), ProtocolStringList.class);
         assertEquals(psList, ListKit.list("1", "2", "3"));
-        assertSame(converter.convert(str, String.class), str);
+        assertSame(str, converter.convert(str, String.class));
         assertThrows(UnsupportedObjectConvertException.class, () -> converter.convert(null, List.class));
         ObjectConverter cvt2 = ObjectConverter
             .newConverter(new ProtobufConvertHandler());

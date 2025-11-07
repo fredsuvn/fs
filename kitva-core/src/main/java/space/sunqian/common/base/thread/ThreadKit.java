@@ -96,4 +96,7 @@ public class ThreadKit {
             throw new AwaitingException(e);
         }
     }
+
+    private ThreadKit() {
+    }
 }

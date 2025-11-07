@@ -51,7 +51,7 @@ public interface ByteReader extends Closeable {
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
     static @Nonnull ByteReader from(@Nonnull InputStream src, int bufSize) throws IllegalArgumentException {
-        return ByteReaderImpl.of(src, bufSize);
+        return ByteReaderBack.of(src, bufSize);
     }
 
     /**
@@ -87,7 +87,7 @@ public interface ByteReader extends Closeable {
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
     static @Nonnull ByteReader from(@Nonnull ReadableByteChannel src, int bufSize) throws IllegalArgumentException {
-        return ByteReaderImpl.of(src, bufSize);
+        return ByteReaderBack.of(src, bufSize);
     }
 
     /**
@@ -131,7 +131,7 @@ public interface ByteReader extends Closeable {
      * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     static @Nonnull ByteReader from(byte @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
-        return ByteReaderImpl.of(src, off, len);
+        return ByteReaderBack.of(src, off, len);
     }
 
     /**
@@ -151,7 +151,7 @@ public interface ByteReader extends Closeable {
      * @return the given buffer as a new {@link ByteReader}
      */
     static @Nonnull ByteReader from(@Nonnull ByteBuffer src) {
-        return ByteReaderImpl.of(src);
+        return ByteReaderBack.of(src);
     }
 
     /**
@@ -554,7 +554,7 @@ public interface ByteReader extends Closeable {
      * @throws IllegalArgumentException if the limit argument is negative
      */
     default @Nonnull ByteReader limit(long limit) throws IllegalArgumentException {
-        return ByteReaderImpl.limit(this, limit);
+        return ByteReaderBack.limit(this, limit);
     }
 
     /**
@@ -570,6 +570,6 @@ public interface ByteReader extends Closeable {
      * @return an {@link InputStream} represents this reader. Its content and status are shared with this reader
      */
     default @Nonnull InputStream asInputStream() {
-        return ByteReaderImpl.asInputStream(this);
+        return ByteReaderBack.asInputStream(this);
     }
 }

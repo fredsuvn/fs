@@ -113,4 +113,7 @@ final class LoggingBack {
             return stackElements[i + 1];
         }
     }
+
+    private LoggingBack() {
+    }
 }

@@ -20,7 +20,7 @@ public interface CharSegment {
      * @return a new {@link CharSegment} with the given data and end flag
      */
     static @Nonnull CharSegment of(@Nonnull CharBuffer data, boolean end) {
-        return CharReaderImpl.newSeg(data, end);
+        return CharReaderBack.newSeg(data, end);
     }
 
     /**
@@ -30,7 +30,7 @@ public interface CharSegment {
      * @return an empty singleton {@link CharSegment} with the end flag
      */
     static @Nonnull CharSegment empty(boolean end) {
-        return CharReaderImpl.emptySeg(end);
+        return CharReaderBack.emptySeg(end);
     }
 
     /**

@@ -56,11 +56,11 @@ public class KitTest implements AssertTest, PrintTest {
         {
             // uncheck no return
             int[] i = {0};
-            assertEquals(i[0], 0);
+            assertEquals(0, i[0]);
             Kit.uncheck(() -> {
                 i[0]++;
             }, RuntimeException::new);
-            assertEquals(i[0], 1);
+            assertEquals(1, i[0]);
             assertThrows(RuntimeException.class, () -> Kit.uncheck(() -> {
                 i[1]++;
             }, e -> {
@@ -70,7 +70,7 @@ public class KitTest implements AssertTest, PrintTest {
         }
         {
             // uncheck return
-            assertEquals(Kit.uncheck(() -> 1, RuntimeException::new), 1);
+            assertEquals(1, Kit.uncheck(() -> 1, RuntimeException::new));
             Exception cause = new Exception();
             assertThrows(RuntimeException.class, () -> Kit.uncheck(() -> {
                 throw cause;
@@ -82,13 +82,13 @@ public class KitTest implements AssertTest, PrintTest {
         {
             // call
             Exception cause = new Exception();
-            assertEquals(Kit.call(() -> 1, 2), 1);
-            assertEquals(Kit.call(() -> throwEx(cause), 2), 2);
-            assertEquals(Kit.callUncheck(() -> 1, e -> 2), 1);
-            assertEquals(Kit.callUncheck(() -> throwEx(cause), e -> {
+            assertEquals(1, Kit.call(() -> 1, 2));
+            assertEquals(2, Kit.call(() -> throwEx(cause), 2));
+            assertEquals(1, Kit.callUncheck(() -> 1, e -> 2));
+            assertEquals(2, Kit.callUncheck(() -> throwEx(cause), e -> {
                 assertSame(e, cause);
                 return 2;
-            }), 2);
+            }));
         }
         {
             // ignore
@@ -303,25 +303,25 @@ public class KitTest implements AssertTest, PrintTest {
         StringProps sp = new StringProps("1", "2", "3");
         IntProps ip1 = new IntProps();
         Kit.copyProperties(sp, ip1);
-        assertEquals(ip1, new IntProps(1, 2, 3));
+        assertEquals(new IntProps(1, 2, 3), ip1);
         IntProps ip2 = new IntProps();
         Kit.copyProperties(sp, sp.getClass(), ip2, ip2.getClass());
-        assertEquals(ip2, new IntProps(1, 2, 3));
+        assertEquals(new IntProps(1, 2, 3), ip2);
         IntProps ip3 = new IntProps();
         Kit.copyProperties(sp, sp.getClass(), ip3, ip3.getClass(), ObjectConverter.defaultConverter());
-        assertEquals(ip3, new IntProps(1, 2, 3));
+        assertEquals(new IntProps(1, 2, 3), ip3);
         IntProps ip4 = new IntProps();
         Kit.copyProperties(sp, ip4, ObjectConverter.defaultConverter());
-        assertEquals(ip4, new IntProps(1, 2, 3));
+        assertEquals(new IntProps(1, 2, 3), ip4);
     }
 
     @Test
     public void testObjectConversion() {
         StringProps sp = new StringProps("1", "2", "3");
-        assertEquals(Kit.convert(sp, IntProps.class), new IntProps(1, 2, 3));
-        assertEquals(Kit.convert(sp, sp.getClass(), IntProps.class), new IntProps(1, 2, 3));
-        assertEquals(Kit.convert(sp, new TypeRef<IntProps>() {}), new IntProps(1, 2, 3));
-        assertEquals(Kit.convert(sp, sp.getClass(), new TypeRef<IntProps>() {}), new IntProps(1, 2, 3));
+        assertEquals(new IntProps(1, 2, 3), Kit.convert(sp, IntProps.class));
+        assertEquals(new IntProps(1, 2, 3), Kit.convert(sp, sp.getClass(), IntProps.class));
+        assertEquals(new IntProps(1, 2, 3), Kit.convert(sp, new TypeRef<IntProps>() {}));
+        assertEquals(new IntProps(1, 2, 3), Kit.convert(sp, sp.getClass(), new TypeRef<IntProps>() {}));
     }
 
     @Data

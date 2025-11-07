@@ -102,7 +102,7 @@ public class FileTest implements DataTest, PrintTest, AssertTest {
         }
         assertThrows(IORuntimeException.class, errRef::fileOutputStream);
         try (FileInputStream in = fileRef.fileInputStream()) {
-            assertEquals(IOKit.string(in), hello);
+            assertEquals(hello, IOKit.string(in));
         }
         assertThrows(IORuntimeException.class, errRef::fileInputStream);
         // new Stream
@@ -111,7 +111,7 @@ public class FileTest implements DataTest, PrintTest, AssertTest {
         }
         assertThrows(IORuntimeException.class, errRef::newOutputStream);
         try (InputStream in = fileRef.newInputStream()) {
-            assertEquals(IOKit.string(in), hello);
+            assertEquals(hello, IOKit.string(in));
         }
         assertThrows(IORuntimeException.class, errRef::newInputStream);
         // File Channel
@@ -125,14 +125,14 @@ public class FileTest implements DataTest, PrintTest, AssertTest {
         }
         assertThrows(IORuntimeException.class, errRef::newFileChannel);
         // read
-        assertEquals(fileRef.readString(), hello);
+        assertEquals(hello, fileRef.readString());
         assertEquals(fileRef.readLines(), Collections.singletonList(hello));
         assertThrows(IORuntimeException.class, errRef::readString);
         assertThrows(IORuntimeException.class, errRef::readLines);
         // write
         String world = "world";
         fileRef.writeString(world);
-        assertEquals(fileRef.readString(), world);
+        assertEquals(world, fileRef.readString());
         assertThrows(IORuntimeException.class, () -> errRef.writeString(world));
     }
 }

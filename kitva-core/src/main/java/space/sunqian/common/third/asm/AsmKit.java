@@ -442,4 +442,7 @@ public class AsmKit {
             + "$V" + Kit.LIB_VERSION.replace('.', '_')
             + "$C" + count;
     }
+
+    private AsmKit() {
+    }
 }

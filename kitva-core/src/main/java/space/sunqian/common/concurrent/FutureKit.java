@@ -115,4 +115,7 @@ public class FutureKit {
             return defaultValue;
         }
     }
+
+    private FutureKit() {
+    }
 }

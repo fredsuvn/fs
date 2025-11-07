@@ -31,9 +31,9 @@ public class AssertTestTest implements AssertTest {
     @Test
     public void testThrows() throws Exception {
         Method throwError = Tt.class.getDeclaredMethod("throwError");
-        assertEquals(invokeThrows(KitvaTestException.class, throwError, null).getClass(), KitvaTestException.class);
+        assertEquals(KitvaTestException.class, invokeThrows(KitvaTestException.class, throwError, null).getClass());
         Method string = Tt.class.getDeclaredMethod("string");
-        assertEquals(invokeThrows(AssertTest.NoThrows.class, string, null).getClass(), AssertTest.NoThrows.class);
+        assertEquals(NoThrows.class, invokeThrows(NoThrows.class, string, null).getClass());
     }
 
     @Test
@@ -69,8 +69,8 @@ public class AssertTestTest implements AssertTest {
             byte[] bytes = new byte[1024];
             Arrays.fill(bytes, (byte) 66);
             ByteBuffer bb = MaterialBox.copyPadding(bytes);
-            assertEquals(bb.arrayOffset(), 10);
-            assertEquals(bb.position(), 0);
+            assertEquals(10, bb.arrayOffset());
+            assertEquals(0, bb.position());
             assertEquals(bb.limit(), bytes.length);
             assertEquals(bb.capacity(), bytes.length);
         }
@@ -119,8 +119,8 @@ public class AssertTestTest implements AssertTest {
             char[] chars = new char[1024];
             Arrays.fill(chars, (char) 66);
             CharBuffer bb = MaterialBox.copyPadding(chars);
-            assertEquals(bb.arrayOffset(), 10);
-            assertEquals(bb.position(), 0);
+            assertEquals(10, bb.arrayOffset());
+            assertEquals(0, bb.position());
             assertEquals(bb.limit(), chars.length);
             assertEquals(bb.capacity(), chars.length);
         }

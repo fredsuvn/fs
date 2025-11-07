@@ -15,22 +15,22 @@ public class NumberTest implements DataTest, PrintTest {
 
     @Test
     public void testStringToNumber() {
-        assertEquals(NumberKit.toNumber("-123", byte.class), (byte) -123);
-        assertEquals(NumberKit.toNumber("-123", short.class), (short) -123L);
-        assertEquals(NumberKit.toNumber("123", char.class), (char) 123);
-        assertEquals(NumberKit.toNumber("123", int.class), 123);
-        assertEquals(NumberKit.toNumber("123", long.class), 123L);
-        assertEquals(NumberKit.toNumber("123", float.class), 123f);
-        assertEquals(NumberKit.toNumber("123", double.class), 123.0);
-        assertEquals(NumberKit.toNumber("-123", Byte.class), (byte) -123);
-        assertEquals(NumberKit.toNumber("-123", Short.class), (short) -123L);
-        assertEquals(NumberKit.toNumber("123", Character.class), (char) 123);
-        assertEquals(NumberKit.toNumber("123", Integer.class), 123);
-        assertEquals(NumberKit.toNumber("123", Long.class), 123L);
-        assertEquals(NumberKit.toNumber("123", Float.class), 123f);
-        assertEquals(NumberKit.toNumber("123", Double.class), 123.0);
-        assertEquals(NumberKit.toNumber("123", BigInteger.class), new BigInteger("123"));
-        assertEquals(NumberKit.toNumber("123", BigDecimal.class), new BigDecimal("123"));
+        assertEquals((byte) -123, NumberKit.toNumber("-123", byte.class));
+        assertEquals((short) -123L, NumberKit.toNumber("-123", short.class));
+        assertEquals((char) 123, NumberKit.toNumber("123", char.class));
+        assertEquals(123, NumberKit.toNumber("123", int.class));
+        assertEquals(123L, NumberKit.toNumber("123", long.class));
+        assertEquals(123f, NumberKit.toNumber("123", float.class));
+        assertEquals(123.0, NumberKit.toNumber("123", double.class));
+        assertEquals((byte) -123, NumberKit.toNumber("-123", Byte.class));
+        assertEquals((short) -123L, NumberKit.toNumber("-123", Short.class));
+        assertEquals((char) 123, NumberKit.toNumber("123", Character.class));
+        assertEquals(123, NumberKit.toNumber("123", Integer.class));
+        assertEquals(123L, NumberKit.toNumber("123", Long.class));
+        assertEquals(123f, NumberKit.toNumber("123", Float.class));
+        assertEquals(123.0, NumberKit.toNumber("123", Double.class));
+        assertEquals(new BigInteger("123"), NumberKit.toNumber("123", BigInteger.class));
+        assertEquals(new BigDecimal("123"), NumberKit.toNumber("123", BigDecimal.class));
         assertThrows(NumberFormatException.class, () -> NumberKit.toNumber("kkk", Integer.class));
         assertThrows(UnsupportedOperationException.class, () -> NumberKit.toNumber("kkk", String.class));
     }
@@ -75,20 +75,20 @@ public class NumberTest implements DataTest, PrintTest {
     }
 
     public void testNumberToNumber(Number number) {
-        assertEquals(NumberKit.toNumber(number, byte.class), (byte) 123);
-        assertEquals(NumberKit.toNumber(number, short.class), (short) 123L);
-        assertEquals(NumberKit.toNumber(number, char.class), (char) 123);
-        assertEquals(NumberKit.toNumber(number, int.class), 123);
-        assertEquals(NumberKit.toNumber(number, long.class), 123L);
-        assertEquals(NumberKit.toNumber(number, float.class), 123f);
-        assertEquals(NumberKit.toNumber(number, double.class), 123.0);
-        assertEquals(NumberKit.toNumber(number, Byte.class), (byte) 123);
-        assertEquals(NumberKit.toNumber(number, Short.class), (short) 123L);
-        assertEquals(NumberKit.toNumber(number, Character.class), (char) 123);
-        assertEquals(NumberKit.toNumber(number, Integer.class), 123);
-        assertEquals(NumberKit.toNumber(number, Long.class), 123L);
-        assertEquals(NumberKit.toNumber(number, Float.class), 123f);
-        assertEquals(NumberKit.toNumber(number, Double.class), 123.0);
+        assertEquals((byte) 123, NumberKit.toNumber(number, byte.class));
+        assertEquals((short) 123L, NumberKit.toNumber(number, short.class));
+        assertEquals((char) 123, NumberKit.toNumber(number, char.class));
+        assertEquals(123, NumberKit.toNumber(number, int.class));
+        assertEquals(123L, NumberKit.toNumber(number, long.class));
+        assertEquals(123f, NumberKit.toNumber(number, float.class));
+        assertEquals(123.0, NumberKit.toNumber(number, double.class));
+        assertEquals((byte) 123, NumberKit.toNumber(number, Byte.class));
+        assertEquals((short) 123L, NumberKit.toNumber(number, Short.class));
+        assertEquals((char) 123, NumberKit.toNumber(number, Character.class));
+        assertEquals(123, NumberKit.toNumber(number, Integer.class));
+        assertEquals(123L, NumberKit.toNumber(number, Long.class));
+        assertEquals(123f, NumberKit.toNumber(number, Float.class));
+        assertEquals(123.0, NumberKit.toNumber(number, Double.class));
         if (!(number instanceof Float || number instanceof Double)) {
             assertEquals(NumberKit.toNumber(number, BigInteger.class), new BigInteger(number.toString()));
         }

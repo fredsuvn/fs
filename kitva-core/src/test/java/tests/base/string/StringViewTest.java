@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -33,7 +34,7 @@ public class StringViewTest implements PrintTest {
         Method findNode = sv.getClass().getDeclaredMethod("findNode", int.class);
         findNode.setAccessible(true);
         Throwable invokeEx = assertThrows(InvocationTargetException.class, () -> findNode.invoke(sv, 100));
-        assertTrue(invokeEx.getCause() instanceof UnreachablePointException);
+        assertInstanceOf(UnreachablePointException.class, invokeEx.getCause());
     }
 
     private void testStringView(String fullString, List<String> strings) {

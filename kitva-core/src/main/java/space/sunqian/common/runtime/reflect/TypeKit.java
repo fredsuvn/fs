@@ -851,4 +851,7 @@ public class TypeKit {
             return getTypeName();
         }
     }
+
+    private TypeKit() {
+    }
 }

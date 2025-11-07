@@ -153,20 +153,20 @@ public class IOOperatorTest implements DataTest {
             byte[] data = new byte[0];
             BytesBuilder bb = new BytesBuilder();
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), bb),
-                -1
+                -1,
+                IOKit.readTo(new ByteArrayInputStream(data), bb)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), bb, 0),
-                0
+                0,
+                IOKit.readTo(new ByteArrayInputStream(data), bb, 0)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), bb, 11),
-                -1
+                -1,
+                IOKit.readTo(new ByteArrayInputStream(data), bb, 11)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
         }
         {
             // size 0: stream to channel
@@ -174,20 +174,20 @@ public class IOOperatorTest implements DataTest {
             BytesBuilder bb = new BytesBuilder();
             WritableByteChannel channel = Channels.newChannel(bb);
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), channel),
-                -1
+                -1,
+                IOKit.readTo(new ByteArrayInputStream(data), channel)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), channel, 0),
-                0
+                0,
+                IOKit.readTo(new ByteArrayInputStream(data), channel, 0)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), channel, 11),
-                -1
+                -1,
+                IOKit.readTo(new ByteArrayInputStream(data), channel, 11)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
         }
         {
             // size 0: stream to array
@@ -195,97 +195,97 @@ public class IOOperatorTest implements DataTest {
             byte[] aar = new byte[64];
             Arrays.fill(aar, (byte) 7);
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), aar),
-                -1
+                -1,
+                IOKit.readTo(new ByteArrayInputStream(data), aar)
             );
-            assertEquals(aar[0], (byte) 7);
+            assertEquals((byte) 7, aar[0]);
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), new byte[0]),
-                0
+                0,
+                IOKit.readTo(new ByteArrayInputStream(data), new byte[0])
             );
-            assertEquals(aar[0], (byte) 7);
+            assertEquals((byte) 7, aar[0]);
         }
         {
             // size 0: stream to heap buffer
             byte[] data = new byte[0];
             ByteBuffer dst1 = ByteBuffer.allocate(1);
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), dst1),
-                -1
+                -1,
+                IOKit.readTo(new ByteArrayInputStream(data), dst1)
             );
-            assertEquals(dst1.position(), 0);
+            assertEquals(0, dst1.position());
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), dst1, 1),
-                -1
+                -1,
+                IOKit.readTo(new ByteArrayInputStream(data), dst1, 1)
             );
-            assertEquals(dst1.position(), 0);
+            assertEquals(0, dst1.position());
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), dst1, 0),
-                0
+                0,
+                IOKit.readTo(new ByteArrayInputStream(data), dst1, 0)
             );
-            assertEquals(dst1.position(), 0);
+            assertEquals(0, dst1.position());
             ByteBuffer dst2 = ByteBuffer.allocate(0);
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), dst2),
-                0
+                0,
+                IOKit.readTo(new ByteArrayInputStream(data), dst2)
             );
-            assertEquals(dst2.position(), 0);
+            assertEquals(0, dst2.position());
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), dst2, 1),
-                0
+                0,
+                IOKit.readTo(new ByteArrayInputStream(data), dst2, 1)
             );
-            assertEquals(dst2.position(), 0);
+            assertEquals(0, dst2.position());
         }
         {
             // size 0: stream to direct buffer
             byte[] data = new byte[0];
             ByteBuffer dst1 = ByteBuffer.allocateDirect(1);
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), dst1),
-                -1
+                -1,
+                IOKit.readTo(new ByteArrayInputStream(data), dst1)
             );
-            assertEquals(dst1.position(), 0);
+            assertEquals(0, dst1.position());
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), dst1, 1),
-                -1
+                -1,
+                IOKit.readTo(new ByteArrayInputStream(data), dst1, 1)
             );
-            assertEquals(dst1.position(), 0);
+            assertEquals(0, dst1.position());
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), dst1, 0),
-                0
+                0,
+                IOKit.readTo(new ByteArrayInputStream(data), dst1, 0)
             );
-            assertEquals(dst1.position(), 0);
+            assertEquals(0, dst1.position());
             ByteBuffer dst2 = ByteBuffer.allocateDirect(0);
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), dst2),
-                0
+                0,
+                IOKit.readTo(new ByteArrayInputStream(data), dst2)
             );
-            assertEquals(dst2.position(), 0);
+            assertEquals(0, dst2.position());
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), dst2, 1),
-                0
+                0,
+                IOKit.readTo(new ByteArrayInputStream(data), dst2, 1)
             );
-            assertEquals(dst2.position(), 0);
+            assertEquals(0, dst2.position());
         }
         {
             // size 0: channel to channel
             byte[] data = new byte[0];
             BytesBuilder bb = new BytesBuilder();
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb)),
-                -1
+                -1,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb))
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 0),
-                0
+                0,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 0)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 11),
-                -1
+                -1,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 11)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
         }
         {
             // size 0: channel to stream
@@ -293,20 +293,20 @@ public class IOOperatorTest implements DataTest {
             BytesBuilder bb = new BytesBuilder();
             ReadableByteChannel channel = Channels.newChannel(new ByteArrayInputStream(data));
             assertEquals(
-                IOKit.readTo(channel, bb),
-                -1
+                -1,
+                IOKit.readTo(channel, bb)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
             assertEquals(
-                IOKit.readTo(channel, bb, 0),
-                0
+                0,
+                IOKit.readTo(channel, bb, 0)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
             assertEquals(
-                IOKit.readTo(channel, bb, 11),
-                -1
+                -1,
+                IOKit.readTo(channel, bb, 11)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
         }
         {
             // size 0: channel to array
@@ -314,77 +314,77 @@ public class IOOperatorTest implements DataTest {
             byte[] aar = new byte[64];
             Arrays.fill(aar, (byte) 7);
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), aar),
-                -1
+                -1,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), aar)
             );
-            assertEquals(aar[0], (byte) 7);
+            assertEquals((byte) 7, aar[0]);
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), new byte[0]),
-                0
+                0,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), new byte[0])
             );
-            assertEquals(aar[0], (byte) 7);
+            assertEquals((byte) 7, aar[0]);
         }
         {
             // size 0: channel to heap buffer
             byte[] data = new byte[0];
             ByteBuffer buf = ByteBuffer.allocate(1);
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf),
-                -1
+                -1,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf)
             );
-            assertEquals(buf.position(), 0);
+            assertEquals(0, buf.position());
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1),
-                -1
+                -1,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1)
             );
-            assertEquals(buf.position(), 0);
+            assertEquals(0, buf.position());
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 0),
-                0
+                0,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 0)
             );
-            assertEquals(buf.position(), 0);
+            assertEquals(0, buf.position());
             ByteBuffer dst2 = ByteBuffer.allocate(0);
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst2),
-                0
+                0,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst2)
             );
-            assertEquals(dst2.position(), 0);
+            assertEquals(0, dst2.position());
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst2, 1),
-                0
+                0,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst2, 1)
             );
-            assertEquals(dst2.position(), 0);
+            assertEquals(0, dst2.position());
         }
         {
             // size 0: channel to direct buffer
             byte[] data = new byte[0];
             ByteBuffer buf = ByteBuffer.allocateDirect(1);
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf),
-                -1
+                -1,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf)
             );
-            assertEquals(buf.position(), 0);
+            assertEquals(0, buf.position());
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1),
-                -1
+                -1,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1)
             );
-            assertEquals(buf.position(), 0);
+            assertEquals(0, buf.position());
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 0),
-                0
+                0,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 0)
             );
-            assertEquals(buf.position(), 0);
+            assertEquals(0, buf.position());
             ByteBuffer dst2 = ByteBuffer.allocateDirect(0);
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst2),
-                0
+                0,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst2)
             );
-            assertEquals(dst2.position(), 0);
+            assertEquals(0, dst2.position());
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst2, 1),
-                0
+                0,
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst2, 1)
             );
-            assertEquals(dst2.position(), 0);
+            assertEquals(0, dst2.position());
         }
 
         {
@@ -824,28 +824,28 @@ public class IOOperatorTest implements DataTest {
             assertNull(IOKit.available(emptyCh));
             assertNull(IOKit.available(emptyCh, 1));
             BytesBuilder builder = new BytesBuilder();
-            assertEquals(IOKit.availableTo(empty, builder), -1);
-            assertEquals(IOKit.availableTo(empty, builder, 1), -1);
-            assertEquals(IOKit.availableTo(empty, Channels.newChannel(builder)), -1);
-            assertEquals(IOKit.availableTo(empty, Channels.newChannel(builder), 1), -1);
-            assertEquals(IOKit.availableTo(empty, new byte[1]), -1);
-            assertEquals(IOKit.availableTo(empty, new byte[1], 0, 1), -1);
-            assertEquals(IOKit.availableTo(empty, ByteBuffer.allocate(1)), -1);
-            assertEquals(IOKit.availableTo(empty, ByteBuffer.allocate(1), 1), -1);
-            assertEquals(IOKit.availableTo(emptyCh, builder), -1);
-            assertEquals(IOKit.availableTo(emptyCh, builder, 1), -1);
-            assertEquals(IOKit.availableTo(emptyCh, Channels.newChannel(builder)), -1);
-            assertEquals(IOKit.availableTo(emptyCh, Channels.newChannel(builder), 1), -1);
-            assertEquals(IOKit.availableTo(emptyCh, new byte[1]), -1);
-            assertEquals(IOKit.availableTo(emptyCh, new byte[1], 0, 1), -1);
-            assertEquals(IOKit.availableTo(emptyCh, ByteBuffer.allocate(1)), -1);
-            assertEquals(IOKit.availableTo(emptyCh, ByteBuffer.allocate(1), 1), -1);
-            assertEquals(IOKit.availableTo(empty, ByteBuffer.allocate(0)), 0);
-            assertEquals(IOKit.availableTo(empty, ByteBuffer.allocate(0), 1), 0);
-            assertEquals(IOKit.availableTo(empty, ByteBuffer.allocate(1), 0), 0);
-            assertEquals(IOKit.availableTo(emptyCh, ByteBuffer.allocate(0)), 0);
-            assertEquals(IOKit.availableTo(emptyCh, ByteBuffer.allocate(0), 1), 0);
-            assertEquals(IOKit.availableTo(emptyCh, ByteBuffer.allocate(1), 0), 0);
+            assertEquals(-1, IOKit.availableTo(empty, builder));
+            assertEquals(-1, IOKit.availableTo(empty, builder, 1));
+            assertEquals(-1, IOKit.availableTo(empty, Channels.newChannel(builder)));
+            assertEquals(-1, IOKit.availableTo(empty, Channels.newChannel(builder), 1));
+            assertEquals(-1, IOKit.availableTo(empty, new byte[1]));
+            assertEquals(-1, IOKit.availableTo(empty, new byte[1], 0, 1));
+            assertEquals(-1, IOKit.availableTo(empty, ByteBuffer.allocate(1)));
+            assertEquals(-1, IOKit.availableTo(empty, ByteBuffer.allocate(1), 1));
+            assertEquals(-1, IOKit.availableTo(emptyCh, builder));
+            assertEquals(-1, IOKit.availableTo(emptyCh, builder, 1));
+            assertEquals(-1, IOKit.availableTo(emptyCh, Channels.newChannel(builder)));
+            assertEquals(-1, IOKit.availableTo(emptyCh, Channels.newChannel(builder), 1));
+            assertEquals(-1, IOKit.availableTo(emptyCh, new byte[1]));
+            assertEquals(-1, IOKit.availableTo(emptyCh, new byte[1], 0, 1));
+            assertEquals(-1, IOKit.availableTo(emptyCh, ByteBuffer.allocate(1)));
+            assertEquals(-1, IOKit.availableTo(emptyCh, ByteBuffer.allocate(1), 1));
+            assertEquals(0, IOKit.availableTo(empty, ByteBuffer.allocate(0)));
+            assertEquals(0, IOKit.availableTo(empty, ByteBuffer.allocate(0), 1));
+            assertEquals(0, IOKit.availableTo(empty, ByteBuffer.allocate(1), 0));
+            assertEquals(0, IOKit.availableTo(emptyCh, ByteBuffer.allocate(0)));
+            assertEquals(0, IOKit.availableTo(emptyCh, ByteBuffer.allocate(0), 1));
+            assertEquals(0, IOKit.availableTo(emptyCh, ByteBuffer.allocate(1), 0));
         }
     }
 
@@ -980,7 +980,7 @@ public class IOOperatorTest implements DataTest {
             // available to OutputStream
             In in1 = new In();
             BytesBuilder builder = new BytesBuilder();
-            assertEquals(IOKit.availableTo(in1, builder), 0);
+            assertEquals(0, IOKit.availableTo(in1, builder));
             while (true) {
                 long readSize = IOKit.availableTo(in1, builder);
                 if (readSize < 0) {
@@ -990,7 +990,7 @@ public class IOOperatorTest implements DataTest {
             assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             In in2 = new In();
-            assertEquals(IOKit.availableTo(in2, builder, size * 2L), 0);
+            assertEquals(0, IOKit.availableTo(in2, builder, size * 2L));
             while (true) {
                 long readSize = IOKit.availableTo(in2, builder, size * 2L);
                 if (readSize < 0) {
@@ -1000,7 +1000,7 @@ public class IOOperatorTest implements DataTest {
             assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             ReadableByteChannel c3 = new Cin();
-            assertEquals(IOKit.availableTo(c3, builder), 0);
+            assertEquals(0, IOKit.availableTo(c3, builder));
             while (true) {
                 long readSize = IOKit.availableTo(c3, builder);
                 if (readSize < 0) {
@@ -1010,7 +1010,7 @@ public class IOOperatorTest implements DataTest {
             assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             ReadableByteChannel c4 = new Cin();
-            assertEquals(IOKit.availableTo(c4, builder, size * 2L), 0);
+            assertEquals(0, IOKit.availableTo(c4, builder, size * 2L));
             while (true) {
                 long readSize = IOKit.availableTo(c4, builder, size * 2L);
                 if (readSize < 0) {
@@ -1025,7 +1025,7 @@ public class IOOperatorTest implements DataTest {
             In in1 = new In();
             BytesBuilder builder = new BytesBuilder();
             WritableByteChannel outChannel = Channels.newChannel(builder);
-            assertEquals(IOKit.availableTo(in1, builder), 0);
+            assertEquals(0, IOKit.availableTo(in1, builder));
             while (true) {
                 long readSize = IOKit.availableTo(in1, outChannel);
                 if (readSize < 0) {
@@ -1035,7 +1035,7 @@ public class IOOperatorTest implements DataTest {
             assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             In in2 = new In();
-            assertEquals(IOKit.availableTo(in2, builder, size * 2L), 0);
+            assertEquals(0, IOKit.availableTo(in2, builder, size * 2L));
             while (true) {
                 long readSize = IOKit.availableTo(in2, outChannel, size * 2L);
                 if (readSize < 0) {
@@ -1045,7 +1045,7 @@ public class IOOperatorTest implements DataTest {
             assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             ReadableByteChannel c3 = new Cin();
-            assertEquals(IOKit.availableTo(c3, builder), 0);
+            assertEquals(0, IOKit.availableTo(c3, builder));
             while (true) {
                 long readSize = IOKit.availableTo(c3, outChannel);
                 if (readSize < 0) {
@@ -1055,7 +1055,7 @@ public class IOOperatorTest implements DataTest {
             assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             ReadableByteChannel c4 = new Cin();
-            assertEquals(IOKit.availableTo(c4, builder, size * 2L), 0);
+            assertEquals(0, IOKit.availableTo(c4, builder, size * 2L));
             while (true) {
                 long readSize = IOKit.availableTo(c4, outChannel, size * 2L);
                 if (readSize < 0) {
@@ -1070,7 +1070,7 @@ public class IOOperatorTest implements DataTest {
             In in1 = new In();
             byte[] dst = new byte[size * 2];
             int c = 0;
-            assertEquals(IOKit.availableTo(in1, dst), 0);
+            assertEquals(0, IOKit.availableTo(in1, dst));
             while (c < size) {
                 long readSize = IOKit.availableTo(in1, dst, c, size - c);
                 if (readSize < 0) {
@@ -1082,7 +1082,7 @@ public class IOOperatorTest implements DataTest {
             dst = new byte[size * 2];
             c = 0;
             Cin c1 = new Cin();
-            assertEquals(IOKit.availableTo(c1, dst), 0);
+            assertEquals(0, IOKit.availableTo(c1, dst));
             while (c < size) {
                 long readSize = IOKit.availableTo(c1, dst, c, size - c);
                 if (readSize < 0) {
@@ -1097,7 +1097,7 @@ public class IOOperatorTest implements DataTest {
             In in1 = new In();
             ByteBuffer dst = ByteBuffer.allocate(size * 2);
             int c = 0;
-            assertEquals(IOKit.availableTo(in1, dst), 0);
+            assertEquals(0, IOKit.availableTo(in1, dst));
             while (c < size) {
                 long readSize = IOKit.availableTo(in1, dst, size * 2);
                 if (readSize < 0) {
@@ -1110,7 +1110,7 @@ public class IOOperatorTest implements DataTest {
             dst = ByteBuffer.allocate(size * 2);
             c = 0;
             Cin c1 = new Cin();
-            assertEquals(IOKit.availableTo(c1, dst), 0);
+            assertEquals(0, IOKit.availableTo(c1, dst));
             while (c < size) {
                 long readSize = IOKit.availableTo(c1, dst, size * 2);
                 if (readSize < 0) {
@@ -1230,20 +1230,20 @@ public class IOOperatorTest implements DataTest {
             char[] data = new char[0];
             CharsBuilder bb = new CharsBuilder();
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), bb),
-                -1
+                -1,
+                IOKit.readTo(new CharArrayReader(data), bb)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), bb, 0),
-                0
+                0,
+                IOKit.readTo(new CharArrayReader(data), bb, 0)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), bb, 11),
-                -1
+                -1,
+                IOKit.readTo(new CharArrayReader(data), bb, 11)
             );
-            assertEquals(bb.size(), 0);
+            assertEquals(0, bb.size());
         }
         {
             // size 0: reader to array
@@ -1251,82 +1251,82 @@ public class IOOperatorTest implements DataTest {
             char[] aar = new char[64];
             Arrays.fill(aar, (char) 7);
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), aar),
-                -1
+                -1,
+                IOKit.readTo(new CharArrayReader(data), aar)
             );
-            assertEquals(aar[0], (char) 7);
+            assertEquals((char) 7, aar[0]);
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), new char[0]),
-                0
+                0,
+                IOKit.readTo(new CharArrayReader(data), new char[0])
             );
-            assertEquals(aar[0], (char) 7);
+            assertEquals((char) 7, aar[0]);
         }
         {
             // size 0: reader to heap buffer
             char[] data = new char[0];
             CharBuffer dst1 = CharBuffer.allocate(1);
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), dst1),
-                -1
+                -1,
+                IOKit.readTo(new CharArrayReader(data), dst1)
             );
-            assertEquals(dst1.position(), 0);
+            assertEquals(0, dst1.position());
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), CharBuffer.allocate(0)),
-                0
+                0,
+                IOKit.readTo(new CharArrayReader(data), CharBuffer.allocate(0))
             );
-            assertEquals(dst1.position(), 0);
+            assertEquals(0, dst1.position());
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), dst1, 1),
-                -1
+                -1,
+                IOKit.readTo(new CharArrayReader(data), dst1, 1)
             );
-            assertEquals(dst1.position(), 0);
+            assertEquals(0, dst1.position());
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), dst1, 0),
-                0
+                0,
+                IOKit.readTo(new CharArrayReader(data), dst1, 0)
             );
-            assertEquals(dst1.position(), 0);
+            assertEquals(0, dst1.position());
             CharBuffer dst2 = CharBuffer.allocate(0);
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), dst2),
-                0
+                0,
+                IOKit.readTo(new CharArrayReader(data), dst2)
             );
-            assertEquals(dst2.position(), 0);
+            assertEquals(0, dst2.position());
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), dst2, 1),
-                0
+                0,
+                IOKit.readTo(new CharArrayReader(data), dst2, 1)
             );
-            assertEquals(dst2.position(), 0);
+            assertEquals(0, dst2.position());
         }
         {
             // size 0: reader to direct buffer
             char[] data = new char[0];
             CharBuffer dst1 = BufferKit.directCharBuffer(1);
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), dst1),
-                -1
+                -1,
+                IOKit.readTo(new CharArrayReader(data), dst1)
             );
-            assertEquals(dst1.position(), 0);
+            assertEquals(0, dst1.position());
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), dst1, 1),
-                -1
+                -1,
+                IOKit.readTo(new CharArrayReader(data), dst1, 1)
             );
-            assertEquals(dst1.position(), 0);
+            assertEquals(0, dst1.position());
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), dst1, 0),
-                0
+                0,
+                IOKit.readTo(new CharArrayReader(data), dst1, 0)
             );
-            assertEquals(dst1.position(), 0);
+            assertEquals(0, dst1.position());
             CharBuffer dst2 = BufferKit.directCharBuffer(0);
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), dst2),
-                0
+                0,
+                IOKit.readTo(new CharArrayReader(data), dst2)
             );
-            assertEquals(dst2.position(), 0);
+            assertEquals(0, dst2.position());
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), dst2, 1),
-                0
+                0,
+                IOKit.readTo(new CharArrayReader(data), dst2, 1)
             );
-            assertEquals(dst2.position(), 0);
+            assertEquals(0, dst2.position());
         }
 
         {
@@ -1506,15 +1506,15 @@ public class IOOperatorTest implements DataTest {
             assertNull(IOKit.availableString(empty));
             assertNull(IOKit.availableString(empty, 1));
             CharsBuilder builder = new CharsBuilder();
-            assertEquals(IOKit.availableTo(empty, builder), -1);
-            assertEquals(IOKit.availableTo(empty, builder, 1), -1);
-            assertEquals(IOKit.availableTo(empty, new char[1]), -1);
-            assertEquals(IOKit.availableTo(empty, new char[1], 0, 1), -1);
-            assertEquals(IOKit.availableTo(empty, CharBuffer.allocate(1)), -1);
-            assertEquals(IOKit.availableTo(empty, CharBuffer.allocate(1), 1), -1);
-            assertEquals(IOKit.availableTo(empty, CharBuffer.allocate(0)), 0);
-            assertEquals(IOKit.availableTo(empty, CharBuffer.allocate(0), 1), 0);
-            assertEquals(IOKit.availableTo(empty, CharBuffer.allocate(1), 0), 0);
+            assertEquals(-1, IOKit.availableTo(empty, builder));
+            assertEquals(-1, IOKit.availableTo(empty, builder, 1));
+            assertEquals(-1, IOKit.availableTo(empty, new char[1]));
+            assertEquals(-1, IOKit.availableTo(empty, new char[1], 0, 1));
+            assertEquals(-1, IOKit.availableTo(empty, CharBuffer.allocate(1)));
+            assertEquals(-1, IOKit.availableTo(empty, CharBuffer.allocate(1), 1));
+            assertEquals(0, IOKit.availableTo(empty, CharBuffer.allocate(0)));
+            assertEquals(0, IOKit.availableTo(empty, CharBuffer.allocate(0), 1));
+            assertEquals(0, IOKit.availableTo(empty, CharBuffer.allocate(1), 0));
         }
     }
 
@@ -1583,7 +1583,7 @@ public class IOOperatorTest implements DataTest {
             builder.reset();
             In in2 = new In();
             String s2 = IOKit.availableString(in2);
-            assertEquals(s2, emptyStr);
+            assertEquals(emptyStr, s2);
             while (true) {
                 String b = IOKit.availableString(in2);
                 if (b == null) {
@@ -1607,7 +1607,7 @@ public class IOOperatorTest implements DataTest {
             builder.reset();
             In in4 = new In();
             String s4 = IOKit.availableString(in4, size * 2);
-            assertEquals(s4, emptyStr);
+            assertEquals(emptyStr, s4);
             while (true) {
                 String b = IOKit.availableString(in4);
                 if (b == null) {
@@ -1622,7 +1622,7 @@ public class IOOperatorTest implements DataTest {
             // available to Appender
             In in1 = new In();
             CharsBuilder builder = new CharsBuilder();
-            assertEquals(IOKit.availableTo(in1, builder), 0);
+            assertEquals(0, IOKit.availableTo(in1, builder));
             while (true) {
                 long readSize = IOKit.availableTo(in1, builder);
                 if (readSize < 0) {
@@ -1632,7 +1632,7 @@ public class IOOperatorTest implements DataTest {
             assertArrayEquals(builder.toCharArray(), src);
             builder.reset();
             In in2 = new In();
-            assertEquals(IOKit.availableTo(in2, builder, size * 2L), 0);
+            assertEquals(0, IOKit.availableTo(in2, builder, size * 2L));
             while (true) {
                 long readSize = IOKit.availableTo(in2, builder, size * 2L);
                 if (readSize < 0) {
@@ -1647,7 +1647,7 @@ public class IOOperatorTest implements DataTest {
             In in1 = new In();
             char[] dst = new char[size * 2];
             int c = 0;
-            assertEquals(IOKit.availableTo(in1, dst), 0);
+            assertEquals(0, IOKit.availableTo(in1, dst));
             while (c < size) {
                 long readSize = IOKit.availableTo(in1, dst, c, size - c);
                 if (readSize < 0) {
@@ -1662,7 +1662,7 @@ public class IOOperatorTest implements DataTest {
             In in1 = new In();
             CharBuffer dst = CharBuffer.allocate(size * 2);
             int c = 0;
-            assertEquals(IOKit.availableTo(in1, dst), 0);
+            assertEquals(0, IOKit.availableTo(in1, dst));
             while (c < size) {
                 long readSize = IOKit.availableTo(in1, dst, size * 2);
                 if (readSize < 0) {
@@ -1690,7 +1690,7 @@ public class IOOperatorTest implements DataTest {
         {
             // get operator
             assertSame(IOOperator.get(IOKit.bufferSize()), IOOperator.get(IOKit.bufferSize()));
-            assertEquals(IOOperator.newOperator(666).bufferSize(), 666);
+            assertEquals(666, IOOperator.newOperator(666).bufferSize());
         }
         {
             // error

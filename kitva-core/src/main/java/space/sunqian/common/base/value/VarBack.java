@@ -329,4 +329,7 @@ final class VarBack {
             return this;
         }
     }
+
+    private VarBack() {
+    }
 }

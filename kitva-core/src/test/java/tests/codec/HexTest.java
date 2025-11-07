@@ -36,45 +36,45 @@ public class HexTest implements DataTest {
             HexKit.HexException e;
             byte[] errorLen = new byte[3];
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorLen));
-            assertEquals(e.position(), -1);
+            assertEquals(-1, e.position());
             byte[] errorChar = new byte[2];
             errorChar[0] = '0' - 1;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(e.position(), 0);
+            assertEquals(0, e.position());
             errorChar[0] = '9' + 1;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(e.position(), 0);
+            assertEquals(0, e.position());
             errorChar[0] = 'A' - 1;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(e.position(), 0);
+            assertEquals(0, e.position());
             errorChar[0] = 'F' + 1;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(e.position(), 0);
+            assertEquals(0, e.position());
             errorChar[0] = 'a' - 1;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(e.position(), 0);
+            assertEquals(0, e.position());
             errorChar[0] = 'f' + 1;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(e.position(), 0);
+            assertEquals(0, e.position());
             errorChar[0] = '0';
             errorChar[1] = '0' - 1;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(e.position(), 1);
+            assertEquals(1, e.position());
             errorChar[1] = '9' + 1;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(e.position(), 1);
+            assertEquals(1, e.position());
             errorChar[1] = 'A' - 1;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(e.position(), 1);
+            assertEquals(1, e.position());
             errorChar[1] = 'F' + 1;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(e.position(), 1);
+            assertEquals(1, e.position());
             errorChar[1] = 'a' - 1;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(e.position(), 1);
+            assertEquals(1, e.position());
             errorChar[1] = 'f' + 1;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(e.position(), 1);
+            assertEquals(1, e.position());
         }
     }
 
@@ -125,9 +125,9 @@ public class HexTest implements DataTest {
             assertArrayEquals(HexKit.decoder(false).decode(lowerBuf2), src);
             HexKit.HexException e;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(defectiveUpper));
-            assertEquals(e.position(), -1);
+            assertEquals(-1, e.position());
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(defectiveLower));
-            assertEquals(e.position(), -1);
+            assertEquals(-1, e.position());
             String defectiveUpper2 =
                 hexUpper.substring(0, midIndex) +
                     "%" +
@@ -146,7 +146,7 @@ public class HexTest implements DataTest {
             assertEquals(e.position(), midIndex);
             String upperTail = hexUpper + "A";
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder(false).decode(upperTail));
-            assertEquals(e.position(), -1);
+            assertEquals(-1, e.position());
         }
     }
 
@@ -156,34 +156,34 @@ public class HexTest implements DataTest {
         e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException();
         });
-        assertEquals(e.position(), -1);
+        assertEquals(-1, e.position());
         e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException("");
         });
-        assertEquals(e.position(), -1);
+        assertEquals(-1, e.position());
         e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException("", new RuntimeException());
         });
-        assertEquals(e.position(), -1);
+        assertEquals(-1, e.position());
         e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException(new RuntimeException());
         });
-        assertEquals(e.position(), -1);
+        assertEquals(-1, e.position());
         e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException(66);
         });
-        assertEquals(e.position(), 66);
+        assertEquals(66, e.position());
         e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException(66, "");
         });
-        assertEquals(e.position(), 66);
+        assertEquals(66, e.position());
         e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException(66, "", new RuntimeException());
         });
-        assertEquals(e.position(), 66);
+        assertEquals(66, e.position());
         e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException(66, new RuntimeException());
         });
-        assertEquals(e.position(), 66);
+        assertEquals(66, e.position());
     }
 }

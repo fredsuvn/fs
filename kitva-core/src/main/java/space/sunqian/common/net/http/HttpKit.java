@@ -129,4 +129,7 @@ public class HttpKit {
             throw new HttpNetException(e);
         }
     }
+
+    private HttpKit() {
+    }
 }

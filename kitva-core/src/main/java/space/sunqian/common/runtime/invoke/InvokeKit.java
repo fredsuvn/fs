@@ -49,4 +49,7 @@ public class InvokeKit {
         System.arraycopy(args, 0, instanceArgs, 1, args.length);
         return instanceArgs;
     }
+
+    private InvokeKit() {
+    }
 }

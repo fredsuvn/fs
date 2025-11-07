@@ -183,7 +183,7 @@ public class TcpTest implements DataTest, PrintTest {
         List<NetServer.Worker> workers = server.workers();
         for (int i = 0; i < workers.size(); i++) {
             NetServer.Worker worker = workers.get(i);
-            assertEquals(worker.clientCount(), 1);
+            assertEquals(1, worker.clientCount());
             XThread thread = (XThread) worker.thread();
             assertEquals(thread.num, i);
         }
@@ -233,7 +233,7 @@ public class TcpTest implements DataTest, PrintTest {
         Thread.sleep(100 * 3);
         server.await();
         closeLatch.await();
-        assertEquals(closeCount.get(), 11);
+        assertEquals(11, closeCount.get());
         assertSame(server.localAddress(), serverLocal);
 
         // close contexts again

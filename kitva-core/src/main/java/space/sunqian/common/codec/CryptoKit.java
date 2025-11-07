@@ -60,4 +60,7 @@ public class CryptoKit {
             }
         };
     }
+
+    private CryptoKit() {
+    }
 }

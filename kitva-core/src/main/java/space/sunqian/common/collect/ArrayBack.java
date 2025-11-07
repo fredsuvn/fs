@@ -214,4 +214,7 @@ final class ArrayBack {
             return ((Object[]) array).length;
         }
     }
+
+    private ArrayBack() {
+    }
 }

@@ -102,4 +102,7 @@ public class OSKit {
     private static @Nonnull String getOsName() {
         return SystemKit.getOsName();
     }
+
+    private OSKit() {
+    }
 }

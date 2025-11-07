@@ -404,4 +404,7 @@ public class HexKit {
             return position;
         }
     }
+
+    private HexKit() {
+    }
 }

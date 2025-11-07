@@ -213,4 +213,7 @@ final class TimeBack {
             return true;
         }
     }
+
+    private TimeBack() {
+    }
 }

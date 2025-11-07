@@ -599,4 +599,7 @@ public class ClassKit {
             !Modifier.isStatic(mod) &&
             !Modifier.isPrivate(mod);
     }
+
+    private ClassKit() {
+    }
 }

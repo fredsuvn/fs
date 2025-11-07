@@ -36,17 +36,17 @@ public class CacheTest implements PrintTest, DataTest {
         assertNull(cache.get(1));
         assertNull(cache.getVal(1));
         cache.put(1, 1);
-        assertEquals(cache.get(1), 1);
-        assertEquals(cache.getVal(1).get(), 1);
+        assertEquals(1, cache.get(1));
+        assertEquals(1, cache.getVal(1).get());
         cache.put(1, 2);
-        assertEquals(cache.get(1), 2);
-        assertEquals(cache.getVal(1).get(), 2);
+        assertEquals(2, cache.get(1));
+        assertEquals(2, cache.getVal(1).get());
         assertNull(cache.getVal(2));
         cache.put(1, null);
         assertNull(cache.get(1));
         assertNotNull(cache.getVal(1));
         assertNull(cache.getVal(1).get());
-        assertEquals(cache.size(), 1);
+        assertEquals(1, cache.size());
 
         // remove
         cache.remove(0);
@@ -55,20 +55,20 @@ public class CacheTest implements PrintTest, DataTest {
         cache.remove(1);
         assertNull(cache.get(1));
         assertNull(cache.getVal(1));
-        assertEquals(cache.size(), 0);
+        assertEquals(0, cache.size());
 
         // producer
         assertNull(cache.getVal(2));
-        assertEquals(cache.get(2, k -> 2), 2);
-        assertEquals(cache.get(2), 2);
-        assertEquals(cache.get(2, k -> 3), 2);
+        assertEquals(2, cache.get(2, k -> 2));
+        assertEquals(2, cache.get(2));
+        assertEquals(2, cache.get(2, k -> 3));
         assertNull(cache.getVal(3));
-        assertEquals(cache.getVal(3, k -> Val.of(3)).get(), 3);
-        assertEquals(cache.get(3), 3);
-        assertEquals(cache.getVal(3, k -> Val.of(4)).get(), 3);
+        assertEquals(3, cache.getVal(3, k -> Val.of(3)).get());
+        assertEquals(3, cache.get(3));
+        assertEquals(3, cache.getVal(3, k -> Val.of(4)).get());
         assertNull(cache.getVal(4, k -> null));
         assertNull(cache.getVal(4));
-        assertEquals(cache.size(), 2);
+        assertEquals(2, cache.size());
 
         // clear
         assertNotNull(cache.getVal(2));
@@ -77,7 +77,7 @@ public class CacheTest implements PrintTest, DataTest {
         assertNull(cache.getVal(2));
         assertNull(cache.getVal(3));
         assertNull(cache.getVal(4));
-        assertEquals(cache.size(), 0);
+        assertEquals(0, cache.size());
     }
 
     @Test
@@ -114,8 +114,8 @@ public class CacheTest implements PrintTest, DataTest {
         }
         XCache xc = new XCache();
         xc.put(1, 1);
-        assertSame(xc.get(1, k -> 2), hello);
-        assertSame(xc.getVal(1, k -> Val.of(2)).get(), hello);
+        assertSame(hello, xc.get(1, k -> 2));
+        assertSame(hello, xc.getVal(1, k -> Val.of(2)).get());
     }
 
     @Test
@@ -128,13 +128,13 @@ public class CacheTest implements PrintTest, DataTest {
 
         // producer
         assertNull(cache.getVal(2));
-        assertEquals(cache.get(2, k -> 2), 2);
-        assertEquals(cache.get(2, k -> 3), 3);
+        assertEquals(2, cache.get(2, k -> 2));
+        assertEquals(3, cache.get(2, k -> 3));
         assertNull(cache.get(2));
         assertNull(cache.getVal(2));
         assertNull(cache.getVal(3));
-        assertEquals(cache.getVal(3, k -> Val.of(2)).get(), 2);
-        assertEquals(cache.getVal(3, k -> Val.of(3)).get(), 3);
+        assertEquals(2, cache.getVal(3, k -> Val.of(2)).get());
+        assertEquals(3, cache.getVal(3, k -> Val.of(3)).get());
         assertNull(cache.get(3));
         assertNull(cache.getVal(3));
 
@@ -156,9 +156,9 @@ public class CacheTest implements PrintTest, DataTest {
         cache.get(1);
         cache.remove(1);
         cache.clean();
-        assertEquals(cache.get(6, k -> 6), 6);
+        assertEquals(6, cache.get(6, k -> 6));
         assertNull(cache.get(7, k -> null));
-        assertEquals(cache.getVal(8, k -> Val.of(8)).get(), 8);
+        assertEquals(8, cache.getVal(8, k -> Val.of(8)).get());
         assertNull(cache.getVal(9, k -> null));
     }
 

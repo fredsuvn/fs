@@ -1329,4 +1329,7 @@ public class ArrayKit {
     public static @Nonnull List<@Nonnull Double> asList(double @Nonnull @RetainedParam [] array) {
         return ListBack.asList(array);
     }
+
+    private ArrayKit() {
+    }
 }

@@ -1,12 +1,12 @@
 package tests.base.process;
 
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.process.ProcessKit;
 import space.sunqian.common.base.process.VirtualProcess;
 import space.sunqian.common.base.system.OSKit;
 import space.sunqian.common.io.IOKit;
-import internal.test.PrintTest;
 
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ProcessTest implements PrintTest {
 
@@ -61,7 +61,7 @@ public class ProcessTest implements PrintTest {
             assertFalse(process.waitFor(1, TimeUnit.MILLISECONDS));
             assertThrows(IllegalThreadStateException.class, process::exitValue);
             process.destroy();
-            assertEquals(process.waitFor(), 0);
+            assertEquals(0, process.waitFor());
             assertEquals(process.getInputStream(), IOKit.emptyInputStream());
             assertEquals(process.getOutputStream(), IOKit.nullOutputStream());
             assertEquals(process.getErrorStream(), IOKit.emptyInputStream());
@@ -72,7 +72,7 @@ public class ProcessTest implements PrintTest {
             assertThrows(IllegalThreadStateException.class, process::exitValue);
             process.normal(false);
             assertSame(process.destroyForcibly(), process);
-            assertEquals(process.waitFor(), 1);
+            assertEquals(1, process.waitFor());
         }
     }
 }

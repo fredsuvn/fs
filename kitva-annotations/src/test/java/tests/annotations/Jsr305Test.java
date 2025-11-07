@@ -21,8 +21,8 @@ public class Jsr305Test extends Samples {
         assertNull(testNonnullMaybe(-1));
         Nonnull.Checker checker = new Nonnull.Checker();
         Nonnull nonnull = Jsr305Test.class.getDeclaredMethod("testNonnullAlways").getAnnotation(Nonnull.class);
-        assertEquals(checker.forConstantValue(nonnull, null), When.NEVER);
-        assertEquals(checker.forConstantValue(nonnull, "testNonnullAlways"), When.ALWAYS);
+        assertEquals(When.NEVER, checker.forConstantValue(nonnull, null));
+        assertEquals(When.ALWAYS, checker.forConstantValue(nonnull, "testNonnullAlways"));
     }
 
     @Nonnull(when = When.ALWAYS)

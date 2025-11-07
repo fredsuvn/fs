@@ -279,4 +279,7 @@ public class SystemKeys {
             FILE_ENCODING
         );
     }
+
+    private SystemKeys() {
+    }
 }

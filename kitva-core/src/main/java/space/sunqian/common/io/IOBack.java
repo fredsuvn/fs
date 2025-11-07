@@ -1646,4 +1646,7 @@ final class IOBack {
         public void close() {
         }
     }
+
+    private IOBack() {
+    }
 }

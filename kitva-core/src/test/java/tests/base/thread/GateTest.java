@@ -35,7 +35,7 @@ public class GateTest {
             }).start();
         }
         latch1.await();
-        assertEquals(count.get(), 0);
+        assertEquals(0, count.get());
         gate.open();
         assertTrue(gate.isOpened());
         assertFalse(gate.isClosed());

@@ -51,4 +51,7 @@ public class KitVa {
         Enum<?> enumObj = EnumKit.findEnum(Kit.as(cls), "INST");
         return Kit.as(enumObj);
     }
+
+    private KitVa() {
+    }
 }

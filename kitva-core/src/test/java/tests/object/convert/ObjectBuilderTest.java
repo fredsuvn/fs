@@ -27,8 +27,8 @@ public class ObjectBuilderTest {
         ObjectBuilder ob0 = ObjectBuilder.get(String.class);
         Object str = ob0.newBuilder();
         assertNotNull(str);
-        assertEquals(str, "");
-        assertEquals(ob0.builderType(), String.class);
+        assertEquals("", str);
+        assertEquals(String.class, ob0.builderType());
         class X {}
         Map<Type, ObjectBuilder> cache = new HashMap<>();
         ObjectBuilderProvider provider = ObjectBuilderProvider.newProvider(
@@ -60,7 +60,7 @@ public class ObjectBuilderTest {
         Object x1 = ob.newBuilder();
         assertNotNull(x1);
         assertSame(x1, ob.build(x1));
-        assertEquals(ob.builderType(), X.class);
+        assertEquals(X.class, ob.builderType());
         assertNull(provider.builder(String.class));
         {
             // withLastHandler
@@ -71,13 +71,13 @@ public class ObjectBuilderTest {
             Object x2 = ob2.newBuilder();
             assertNotNull(x2);
             assertSame(x2, ob2.build(x2));
-            assertEquals(ob2.builderType(), X.class);
+            assertEquals(X.class, ob2.builderType());
             ObjectBuilder ob3 = provider2.builder(String.class);
             assertNotNull(ob3);
             Object x3 = ob3.newBuilder();
             assertNotNull(x3);
-            assertEquals(ob3.build(x3), "");
-            assertEquals(ob3.builderType(), String.class);
+            assertEquals("", ob3.build(x3));
+            assertEquals(String.class, ob3.builderType());
         }
         {
             // withFirstHandler
@@ -88,13 +88,13 @@ public class ObjectBuilderTest {
             Object x2 = ob2.newBuilder();
             assertNotNull(x2);
             assertSame(x2, ob2.build(x2));
-            assertEquals(ob2.builderType(), X.class);
+            assertEquals(X.class, ob2.builderType());
             ObjectBuilder ob3 = provider2.builder(String.class);
             assertNotNull(ob3);
             Object x3 = ob3.newBuilder();
             assertNotNull(x3);
-            assertEquals(ob3.build(x3), "");
-            assertEquals(ob3.builderType(), String.class);
+            assertEquals("", ob3.build(x3));
+            assertEquals(String.class, ob3.builderType());
         }
         {
             // error

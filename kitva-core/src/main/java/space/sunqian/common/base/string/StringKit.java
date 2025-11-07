@@ -727,4 +727,7 @@ public class StringKit {
             }
         }
     }
+
+    private StringKit() {
+    }
 }

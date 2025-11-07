@@ -42,4 +42,7 @@ public class ResKit {
         Enumeration<URL> urls = Kit.uncheck(() -> classLoader.getResources(path), IORuntimeException::new);
         return SetKit.toSet(() -> CollectKit.asIterator(urls));
     }
+
+    private ResKit() {
+    }
 }

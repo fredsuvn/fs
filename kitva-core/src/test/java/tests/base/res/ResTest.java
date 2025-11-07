@@ -15,16 +15,16 @@ public class ResTest {
     @Test
     public void testFindResource() throws Exception {
         URL res1 = ResKit.findResource("res/res1.txt");
-        assertEquals(IOKit.string(res1.openStream()), "res1");
+        assertEquals("res1", IOKit.string(res1.openStream()));
         URL res2 = ResKit.findResource("res/res2.txt");
-        assertEquals(IOKit.string(res2.openStream()), "res2");
+        assertEquals("res2", IOKit.string(res2.openStream()));
         Set<URL> resSet = ResKit.findResources("res/res1.txt");
-        assertEquals(resSet.size(), 1);
+        assertEquals(1, resSet.size());
         URL res = resSet.iterator().next();
-        assertEquals(IOKit.string(res.openStream()), "res1");
+        assertEquals("res1", IOKit.string(res.openStream()));
         Set<URL> resSet2 = ResKit.findResources("res/res11.txt");
-        assertEquals(resSet2.size(), 0);
+        assertEquals(0, resSet2.size());
         assertNull(ResKit.findResource("res/res11.txt"));
-        assertEquals(ResKit.findResources("res/res11.txt").size(), 0);
+        assertEquals(0, ResKit.findResources("res/res11.txt").size());
     }
 }

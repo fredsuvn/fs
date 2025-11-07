@@ -11,12 +11,12 @@ public class EnumTest {
 
     @Test
     public void testFindEnum() {
-        assertEquals(EnumKit.findEnum(X.class, "A"), X.A);
-        assertEquals(EnumKit.findEnum(X.class, "B"), X.B);
-        assertEquals(EnumKit.findEnum(X.class, "C"), X.C);
-        assertEquals(EnumKit.findEnum(X.class, 0), X.A);
-        assertEquals(EnumKit.findEnum(X.class, 1), X.B);
-        assertEquals(EnumKit.findEnum(X.class, 2), X.C);
+        assertEquals(X.A, EnumKit.findEnum(X.class, "A"));
+        assertEquals(X.B, EnumKit.findEnum(X.class, "B"));
+        assertEquals(X.C, EnumKit.findEnum(X.class, "C"));
+        assertEquals(X.A, EnumKit.findEnum(X.class, 0));
+        assertEquals(X.B, EnumKit.findEnum(X.class, 1));
+        assertEquals(X.C, EnumKit.findEnum(X.class, 2));
         assertNull(EnumKit.findEnum(X.class, "D"));
         assertNull(EnumKit.findEnum(Kit.as(String.class), "D"));
         assertNull(EnumKit.findEnum(X.class, 3));

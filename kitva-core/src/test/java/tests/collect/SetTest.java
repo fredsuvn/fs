@@ -20,7 +20,7 @@ public class SetTest {
         // Test string array
         String[] stringArray = {"hello", "world", "java", "tests", "array"};
         Set<String> stringSet = SetKit.set(stringArray);
-        assertEquals(stringSet.size(), 5);
+        assertEquals(5, stringSet.size());
         assertEquals(stringSet, new LinkedHashSet<>(Arrays.asList(stringArray)));
         assertThrows(UnsupportedOperationException.class, () -> stringSet.add("modified"));
     }
@@ -29,9 +29,9 @@ public class SetTest {
     public void testNewSet() {
         List<Integer> list = Arrays.asList(1, 2, 3);
         assertEquals(SetKit.hashSet(1, 2, 3), new HashSet<>(list));
-        assertEquals(SetKit.hashSet(1, 2, 3).getClass(), HashSet.class);
+        assertEquals(HashSet.class, SetKit.hashSet(1, 2, 3).getClass());
         assertEquals(SetKit.linkedHashSet(1, 2, 3), new LinkedHashSet<>(list));
-        assertEquals(SetKit.linkedHashSet(1, 2, 3).getClass(), LinkedHashSet.class);
+        assertEquals(LinkedHashSet.class, SetKit.linkedHashSet(1, 2, 3).getClass());
     }
 
     @Test
@@ -43,16 +43,16 @@ public class SetTest {
 
         assertEquals(SetKit.toHashSet(list), new HashSet<>(list));
         assertNotSame(SetKit.toHashSet(list), new HashSet<>(list));
-        assertEquals(SetKit.toHashSet(list).getClass(), HashSet.class);
+        assertEquals(HashSet.class, SetKit.toHashSet(list).getClass());
         assertEquals(SetKit.toHashSet(list::iterator), new HashSet<>(list));
         assertNotSame(SetKit.toHashSet(list::iterator), new HashSet<>(list));
-        assertEquals(SetKit.toHashSet(list::iterator).getClass(), HashSet.class);
+        assertEquals(HashSet.class, SetKit.toHashSet(list::iterator).getClass());
 
         assertEquals(SetKit.toLinkedHashSet(list), new LinkedHashSet<>(list));
         assertNotSame(SetKit.toLinkedHashSet(list), new LinkedHashSet<>(list));
-        assertEquals(SetKit.toLinkedHashSet(list).getClass(), LinkedHashSet.class);
+        assertEquals(LinkedHashSet.class, SetKit.toLinkedHashSet(list).getClass());
         assertEquals(SetKit.toLinkedHashSet(list::iterator), new LinkedHashSet<>(list));
         assertNotSame(SetKit.toLinkedHashSet(list::iterator), new LinkedHashSet<>(list));
-        assertEquals(SetKit.toLinkedHashSet(list::iterator).getClass(), LinkedHashSet.class);
+        assertEquals(LinkedHashSet.class, SetKit.toLinkedHashSet(list::iterator).getClass());
     }
 }

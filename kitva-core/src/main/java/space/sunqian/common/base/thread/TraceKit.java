@@ -113,4 +113,7 @@ public class TraceKit {
     public static @Nonnull Map<Object, Object> contextMap() {
         return CONTEXT.get();
     }
+
+    private TraceKit() {
+    }
 }

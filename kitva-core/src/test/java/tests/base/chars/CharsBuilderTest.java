@@ -62,11 +62,11 @@ public class CharsBuilderTest implements DataTest, AssertTest {
         CharsBuilder cbs = new CharsBuilder(1, 1);
         cbs.flush();
         cbs.write(1);
-        assertEquals(cbs.length(), 1);
-        assertEquals(cbs.charAt(0), 1);
+        assertEquals(1, cbs.length());
+        assertEquals(1, cbs.charAt(0));
         assertThrows(IndexOutOfBoundsException.class, () -> cbs.charAt(-1));
         assertThrows(IndexOutOfBoundsException.class, () -> cbs.charAt(1));
-        assertEquals(cbs.subSequence(0, 1), new String(new char[]{1}));
+        assertEquals(new String(new char[]{1}), cbs.subSequence(0, 1));
         assertThrows(IllegalStateException.class, () -> cbs.write(1));
         CharsBuilder cbs2 = new CharsBuilder(2, 3);
         cbs2.write(1);
@@ -97,7 +97,7 @@ public class CharsBuilderTest implements DataTest, AssertTest {
         arrayBuf.get(new char[5]);
         bb.append(arrayBuf);
         assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 30));
-        assertEquals(buffer.position(), 5);
+        assertEquals(5, buffer.position());
         assertFalse(buffer.hasRemaining());
         bb.append(IOKit.newReader(Arrays.copyOfRange(bs, 30, 40)));
         assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 40));
@@ -114,7 +114,7 @@ public class CharsBuilderTest implements DataTest, AssertTest {
         assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 70));
         bb.append(BufferKit.directCharBuffer(0));
         assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 70));
-        assertEquals(buffer2.position(), 10);
+        assertEquals(10, buffer2.position());
         assertFalse(buffer2.hasRemaining());
         bb.append(CharsKit.emptyBuffer());
         assertThrows(IORuntimeException.class, () -> bb.append(new Reader() {
@@ -132,7 +132,7 @@ public class CharsBuilderTest implements DataTest, AssertTest {
         assertThrows(IllegalArgumentException.class, () ->
             bb.append(new CharArrayReader(new char[0]), -1)
         );
-        assertEquals(bb.size(), 70);
+        assertEquals(70, bb.size());
         assertEquals(bb.toCharBuffer(), CharBuffer.wrap(bs, 0, 70));
         assertArrayEquals(Arrays.copyOf(cs, 70), bb.toString().toCharArray());
         bb.reset();

@@ -574,4 +574,7 @@ final class ByOthers {
             return null;
         }
     }
+
+    private ByOthers() {
+    }
 }

@@ -123,48 +123,48 @@ public class NameFormatterTest {
             // file
             NameFormatter format = NameFormatter.fileNaming();
             assertEquals(
-                format.format("a", "b", "c"),
-                "ab.c"
+                "ab.c",
+                format.format("a", "b", "c")
             );
             assertEquals(
-                format.format("a", "b"),
-                "a.b"
+                "a.b",
+                format.format("a", "b")
             );
             assertEquals(
-                format.format("a"),
-                "a"
+                "a",
+                format.format("a")
             );
             assertEquals(
-                format.format(""),
-                ""
+                "",
+                format.format("")
             );
             assertEquals(
-                format.format(),
-                ""
+                "",
+                format.format()
             );
             assertEquals(
-                format.format("", format),
-                ""
+                "",
+                format.format("", format)
             );
             assertEquals(
-                format.format("a.b.c", NameFormatter.fileNaming()),
-                "a.b.c"
+                "a.b.c",
+                format.format("a.b.c", NameFormatter.fileNaming())
             );
             assertEquals(
-                format.format("a.b", NameFormatter.fileNaming()),
-                "a.b"
+                "a.b",
+                format.format("a.b", NameFormatter.fileNaming())
             );
             assertEquals(
-                format.format("a", NameFormatter.fileNaming()),
-                "a"
+                "a",
+                format.format("a", NameFormatter.fileNaming())
             );
             assertEquals(
-                format.format("abc", new Span[]{Span.of(0, 1), Span.of(1, 2), Span.of(2, 3)}),
-                "ab.c"
+                "ab.c",
+                format.format("abc", new Span[]{Span.of(0, 1), Span.of(1, 2), Span.of(2, 3)})
             );
             assertEquals(
-                format.format("abc", new Span[0]),
-                ""
+                "",
+                format.format("abc", new Span[0])
             );
             assertThrows(NameFormatException.class, () ->
                 format.format(ArrayKit.array("a"), new ErrorAppender()));
@@ -175,52 +175,52 @@ public class NameFormatterTest {
             // delimiter
             NameFormatter format = NameFormatter.delimiterCase("-");
             assertEquals(
-                format.format("a", "b", "c"),
-                "a-b-c"
+                "a-b-c",
+                format.format("a", "b", "c")
             );
             assertEquals(
-                format.format("a", "b"),
-                "a-b"
+                "a-b",
+                format.format("a", "b")
             );
             assertEquals(
-                format.format("a"),
-                "a"
+                "a",
+                format.format("a")
             );
             assertEquals(
-                format.format(""),
-                ""
+                "",
+                format.format("")
             );
             assertEquals(
-                format.format(),
-                ""
+                "",
+                format.format()
             );
             assertEquals(
-                format.format("", format),
-                ""
+                "",
+                format.format("", format)
             );
             assertEquals(
-                format.format("a-b-c", NameFormatter.delimiterCase(".")),
-                "a.b.c"
+                "a.b.c",
+                format.format("a-b-c", NameFormatter.delimiterCase("."))
             );
             assertEquals(
-                format.format("a-b", NameFormatter.delimiterCase(".")),
-                "a.b"
+                "a.b",
+                format.format("a-b", NameFormatter.delimiterCase("."))
             );
             assertEquals(
-                format.format("a", NameFormatter.delimiterCase(".")),
-                "a"
+                "a",
+                format.format("a", NameFormatter.delimiterCase("."))
             );
             assertEquals(
-                format.format("abc", new Span[]{Span.of(0, 1), Span.of(1, 2), Span.of(2, 3)}),
-                "a-b-c"
+                "a-b-c",
+                format.format("abc", new Span[]{Span.of(0, 1), Span.of(1, 2), Span.of(2, 3)})
             );
             assertEquals(
-                format.format("abc", new Span[]{Span.of(0, 1), Span.of(1, 2), Span.of(2, 2), Span.of(2, 3)}),
-                "a-b--c"
+                "a-b--c",
+                format.format("abc", new Span[]{Span.of(0, 1), Span.of(1, 2), Span.of(2, 2), Span.of(2, 3)})
             );
             assertEquals(
-                format.format("abc", new Span[0]),
-                ""
+                "",
+                format.format("abc", new Span[0])
             );
             assertThrows(NameFormatException.class, () ->
                 format.format(ArrayKit.array("a"), new ErrorAppender()));
@@ -231,68 +231,68 @@ public class NameFormatterTest {
             // upper camel
             NameFormatter format = NameFormatter.upperCamel();
             assertEquals(
-                format.format("aa", "b", "cc"),
-                "AaBCc"
+                "AaBCc",
+                format.format("aa", "b", "cc")
             );
             assertEquals(
-                format.format("aa", "BB", "cc"),
-                "AaBBCc"
+                "AaBBCc",
+                format.format("aa", "BB", "cc")
             );
             assertEquals(
-                format.format("a", "b"),
-                "AB"
+                "AB",
+                format.format("a", "b")
             );
             assertEquals(
-                format.format("a"),
-                "A"
+                "A",
+                format.format("a")
             );
             assertEquals(
-                format.format(""),
-                ""
+                "",
+                format.format("")
             );
             assertEquals(
-                format.format(),
-                ""
+                "",
+                format.format()
             );
             assertEquals(
-                format.format("", format),
-                ""
+                "",
+                format.format("", format)
             );
             assertEquals(
-                format.format("someName", NameFormatter.lowerCamel()),
-                "someName"
+                "someName",
+                format.format("someName", NameFormatter.lowerCamel())
             );
             assertEquals(
-                format.format("SomeName", NameFormatter.lowerCamel()),
-                "someName"
+                "someName",
+                format.format("SomeName", NameFormatter.lowerCamel())
             );
             assertEquals(
-                format.format("SOMEName", NameFormatter.lowerCamel()),
-                "SOMEName"
+                "SOMEName",
+                format.format("SOMEName", NameFormatter.lowerCamel())
             );
             assertEquals(
-                format.format("someName", new Span[]{Span.of(0, 4), Span.of(4, 8)}),
-                "SomeName"
+                "SomeName",
+                format.format("someName", new Span[]{Span.of(0, 4), Span.of(4, 8)})
             );
             assertEquals(
-                format.format("someName", new Span[]{Span.of(0, 4), Span.of(4, 4), Span.of(4, 8)}),
-                "SomeName"
+                "SomeName",
+                format.format("someName", new Span[]{Span.of(0, 4), Span.of(4, 4), Span.of(4, 8)})
             );
             assertEquals(
-                format.format("SOMEName", new Span[]{Span.of(0, 4), Span.of(4, 8)}),
-                "SOMEName"
+                "SOMEName",
+                format.format("SOMEName", new Span[]{Span.of(0, 4), Span.of(4, 8)})
             );
             assertEquals(
-                format.format("SOMENAME", new Span[]{Span.of(0, 4), Span.of(4, 8)}),
-                "SOMENAME"
+                "SOMENAME",
+                format.format("SOMENAME", new Span[]{Span.of(0, 4), Span.of(4, 8)})
             );
             assertEquals(
-                format.format("someName", new Span[]{Span.of(0, 8)}),
-                "SomeName"
+                "SomeName",
+                format.format("someName", new Span[]{Span.of(0, 8)})
             );
             assertEquals(
-                format.format("someName", new Span[0]),
-                ""
+                "",
+                format.format("someName", new Span[0])
             );
             assertThrows(NameFormatException.class, () ->
                 format.format(ArrayKit.array("a"), new ErrorAppender()));
@@ -303,68 +303,68 @@ public class NameFormatterTest {
             // lower camel
             NameFormatter format = NameFormatter.lowerCamel();
             assertEquals(
-                format.format("aa", "b", "cc"),
-                "aaBCc"
+                "aaBCc",
+                format.format("aa", "b", "cc")
             );
             assertEquals(
-                format.format("aa", "BB", "cc"),
-                "aaBBCc"
+                "aaBBCc",
+                format.format("aa", "BB", "cc")
             );
             assertEquals(
-                format.format("a", "b"),
-                "aB"
+                "aB",
+                format.format("a", "b")
             );
             assertEquals(
-                format.format("a"),
-                "a"
+                "a",
+                format.format("a")
             );
             assertEquals(
-                format.format(""),
-                ""
+                "",
+                format.format("")
             );
             assertEquals(
-                format.format(),
-                ""
+                "",
+                format.format()
             );
             assertEquals(
-                format.format("", format),
-                ""
+                "",
+                format.format("", format)
             );
             assertEquals(
-                format.format("someName", NameFormatter.upperCamel()),
-                "SomeName"
+                "SomeName",
+                format.format("someName", NameFormatter.upperCamel())
             );
             assertEquals(
-                format.format("SomeName", NameFormatter.upperCamel()),
-                "SomeName"
+                "SomeName",
+                format.format("SomeName", NameFormatter.upperCamel())
             );
             assertEquals(
-                format.format("SOMEName", NameFormatter.upperCamel()),
-                "SOMEName"
+                "SOMEName",
+                format.format("SOMEName", NameFormatter.upperCamel())
             );
             assertEquals(
-                format.format("someName", new Span[]{Span.of(0, 4), Span.of(4, 8)}),
-                "someName"
+                "someName",
+                format.format("someName", new Span[]{Span.of(0, 4), Span.of(4, 8)})
             );
             assertEquals(
-                format.format("someName", new Span[]{Span.of(0, 4), Span.of(4, 4), Span.of(4, 8)}),
-                "someName"
+                "someName",
+                format.format("someName", new Span[]{Span.of(0, 4), Span.of(4, 4), Span.of(4, 8)})
             );
             assertEquals(
-                format.format("SOMEName", new Span[]{Span.of(0, 4), Span.of(4, 8)}),
-                "SOMEName"
+                "SOMEName",
+                format.format("SOMEName", new Span[]{Span.of(0, 4), Span.of(4, 8)})
             );
             assertEquals(
-                format.format("SOMENAME", new Span[]{Span.of(0, 4), Span.of(4, 8)}),
-                "SOMENAME"
+                "SOMENAME",
+                format.format("SOMENAME", new Span[]{Span.of(0, 4), Span.of(4, 8)})
             );
             assertEquals(
-                format.format("someName", new Span[]{Span.of(0, 8)}),
-                "someName"
+                "someName",
+                format.format("someName", new Span[]{Span.of(0, 8)})
             );
             assertEquals(
-                format.format("someName", new Span[0]),
-                ""
+                "",
+                format.format("someName", new Span[0])
             );
             assertThrows(NameFormatException.class, () ->
                 format.format(ArrayKit.array("a"), new ErrorAppender()));
@@ -381,9 +381,9 @@ public class NameFormatterTest {
         NameFormatter delimiterUpper = NameFormatter.delimiterCase("-",
             (dst, originalName, span, index) ->
                 dst.append(originalName.subSequence(span.startIndex(), span.endIndex()).toString().toUpperCase()));
-        assertEquals(lowerCase.format("someName", upperCase), "SomeName");
-        assertEquals(lowerCase.format("someName", delimiterCase), "some-Name");
-        assertEquals(lowerCase.format("someName", delimiterUpper), "SOME-NAME");
+        assertEquals("SomeName", lowerCase.format("someName", upperCase));
+        assertEquals("some-Name", lowerCase.format("someName", delimiterCase));
+        assertEquals("SOME-NAME", lowerCase.format("someName", delimiterUpper));
     }
 
     @Test

@@ -997,4 +997,7 @@ public class Kit {
     }
 
     //---------------- Process Begin ----------------//
+
+    private Kit() {
+    }
 }

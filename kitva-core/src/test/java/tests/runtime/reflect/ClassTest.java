@@ -91,11 +91,11 @@ public class ClassTest implements AssertTest {
 
     @Test
     public void testNewInstance() throws Exception {
-        assertEquals(ClassKit.newInstance(String.class.getName()), "");
+        assertEquals("", ClassKit.newInstance(String.class.getName()));
         assertNull(ClassKit.newInstance("123"));
         assertNull(ClassKit.newInstance(List.class));
         Constructor<?> constructor = String.class.getConstructor();
-        assertEquals(ClassKit.newInstance(constructor), "");
+        assertEquals("", ClassKit.newInstance(constructor));
         assertNull(ClassKit.newInstance(ErrorConstructor.class.getConstructor()));
         assertEquals(
             ClassKit.runtimeInstances(String.class.getName(), String.class.getName()),
@@ -143,16 +143,16 @@ public class ClassTest implements AssertTest {
 
     @Test
     public void testWrapper() throws Exception {
-        assertEquals(ClassKit.wrapperClass(boolean.class), Boolean.class);
-        assertEquals(ClassKit.wrapperClass(byte.class), Byte.class);
-        assertEquals(ClassKit.wrapperClass(short.class), Short.class);
-        assertEquals(ClassKit.wrapperClass(char.class), Character.class);
-        assertEquals(ClassKit.wrapperClass(int.class), Integer.class);
-        assertEquals(ClassKit.wrapperClass(long.class), Long.class);
-        assertEquals(ClassKit.wrapperClass(float.class), Float.class);
-        assertEquals(ClassKit.wrapperClass(double.class), Double.class);
-        assertEquals(ClassKit.wrapperClass(void.class), Void.class);
-        assertEquals(ClassKit.wrapperClass(Object.class), Object.class);
+        assertEquals(Boolean.class, ClassKit.wrapperClass(boolean.class));
+        assertEquals(Byte.class, ClassKit.wrapperClass(byte.class));
+        assertEquals(Short.class, ClassKit.wrapperClass(short.class));
+        assertEquals(Character.class, ClassKit.wrapperClass(char.class));
+        assertEquals(Integer.class, ClassKit.wrapperClass(int.class));
+        assertEquals(Long.class, ClassKit.wrapperClass(long.class));
+        assertEquals(Float.class, ClassKit.wrapperClass(float.class));
+        assertEquals(Double.class, ClassKit.wrapperClass(double.class));
+        assertEquals(Void.class, ClassKit.wrapperClass(void.class));
+        assertEquals(Object.class, ClassKit.wrapperClass(Object.class));
 
         // unreachable:
         Method wrapperPrimitive = ClassKit.class.getDeclaredMethod("wrapperPrimitive", Class.class);

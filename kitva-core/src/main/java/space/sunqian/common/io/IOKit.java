@@ -2728,4 +2728,7 @@ public class IOKit {
     public static @Nonnull Writer nullWriter() {
         return IOBack.nullWriter();
     }
+
+    private IOKit() {
+    }
 }

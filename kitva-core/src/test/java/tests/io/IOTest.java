@@ -225,7 +225,7 @@ public class IOTest implements DataTest {
             String str = "hello world";
             ByteArrayOutputStream dst = new ByteArrayOutputStream();
             IOKit.write(dst, str);
-            assertEquals(dst.toString("UTF-8"), str);
+            assertEquals(str, dst.toString("UTF-8"));
             OutputStream dst2 = IOKit.newOutputStream(new byte[1]);
             assertThrows(IORuntimeException.class, () -> IOKit.write(dst2, str));
         }
@@ -262,12 +262,12 @@ public class IOTest implements DataTest {
             // available stream string
             TestInputStream tin = new TestInputStream(new ByteArrayInputStream(data));
             tin.setNextOperation(ReadOps.READ_ZERO, 99);
-            assertEquals(IOKit.availableString(tin), "");
+            assertEquals("", IOKit.availableString(tin));
             tin.setNextOperation(ReadOps.READ_NORMAL, 99);
             assertEquals(IOKit.availableString(tin), new String(chars));
             assertNull(IOKit.availableString(tin));
             // available channel string
-            assertEquals(IOKit.availableString(tch), "");
+            assertEquals("", IOKit.availableString(tch));
             ReadableByteChannel tch2 = Channels.newChannel(new ByteArrayInputStream(data));
             assertEquals(IOKit.availableString(tch2), new String(chars));
             assertNull(IOKit.availableString(tch2));
@@ -284,12 +284,12 @@ public class IOTest implements DataTest {
             // available stream string
             TestInputStream tin = new TestInputStream(new ByteArrayInputStream(data));
             tin.setNextOperation(ReadOps.READ_ZERO, 99);
-            assertEquals(IOKit.availableString(tin, CharsKit.defaultCharset()), "");
+            assertEquals("", IOKit.availableString(tin, CharsKit.defaultCharset()));
             tin.setNextOperation(ReadOps.READ_NORMAL, 99);
             assertEquals(IOKit.availableString(tin, CharsKit.defaultCharset()), new String(chars));
             assertNull(IOKit.availableString(tin, CharsKit.defaultCharset()));
             // available channel string
-            assertEquals(IOKit.availableString(tch, CharsKit.defaultCharset()), "");
+            assertEquals("", IOKit.availableString(tch, CharsKit.defaultCharset()));
             ReadableByteChannel tch2 = Channels.newChannel(new ByteArrayInputStream(data));
             assertEquals(IOKit.availableString(tch2, CharsKit.defaultCharset()), new String(chars));
             assertNull(IOKit.availableString(tch2, CharsKit.defaultCharset()));
@@ -332,8 +332,8 @@ public class IOTest implements DataTest {
                 public void close() {
                 }
             };
-            assertArrayEquals(IOKit.availableBytes(zch), new byte[0]);
-            assertArrayEquals(IOKit.availableBytes(zch, 1), new byte[0]);
+            assertArrayEquals(new byte[0], IOKit.availableBytes(zch));
+            assertArrayEquals(new byte[0], IOKit.availableBytes(zch, 1));
         }
     }
 
@@ -375,8 +375,8 @@ public class IOTest implements DataTest {
         }
         {
             // mode
-            assertEquals(IOMode.valueOf("BLOCKING"), IOMode.BLOCKING);
-            assertEquals(IOMode.valueOf("NON_BLOCKING"), IOMode.NON_BLOCKING);
+            assertEquals(IOMode.BLOCKING, IOMode.valueOf("BLOCKING"));
+            assertEquals(IOMode.NON_BLOCKING, IOMode.valueOf("NON_BLOCKING"));
         }
         {
             // default io operator

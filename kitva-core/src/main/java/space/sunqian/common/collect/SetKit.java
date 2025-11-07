@@ -100,4 +100,7 @@ public class SetKit {
         }
         return CollectKit.addAll(new LinkedHashSet<>(), it);
     }
+
+    private SetKit() {
+    }
 }

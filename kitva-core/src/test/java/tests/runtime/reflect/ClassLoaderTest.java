@@ -24,7 +24,7 @@ public class ClassLoaderTest {
             );
             byte[] bytes = IOKit.read(in);
             Class<?> cls = loader.loadClass(LA.class.getName(), bytes);
-            assertNotEquals(cls, LA.class);
+            assertNotEquals(LA.class, cls);
             assertEquals(cls.getName(), LA.class.getName());
             assertSame(
                 loader.loadClass(LA.class.getName(), ByteBuffer.wrap(bytes)),
@@ -39,7 +39,7 @@ public class ClassLoaderTest {
             );
             byte[] bytes = IOKit.read(in);
             Class<?> cls = loader.loadClass(LA.class.getName(), ByteBuffer.wrap(bytes));
-            assertNotEquals(cls, LA.class);
+            assertNotEquals(LA.class, cls);
             assertEquals(cls.getName(), LA.class.getName());
             assertSame(
                 loader.loadClass(LA.class.getName(), bytes),
@@ -54,7 +54,7 @@ public class ClassLoaderTest {
             );
             byte[] bytes = IOKit.read(in);
             Class<?> cls = loader.loadClass(null, bytes);
-            assertNotEquals(cls, LA.class);
+            assertNotEquals(LA.class, cls);
             assertEquals(cls.getName(), LA.class.getName());
             assertSame(
                 loader.loadClass(LA.class.getName(), ByteBuffer.wrap(bytes)),
@@ -69,7 +69,7 @@ public class ClassLoaderTest {
             );
             byte[] bytes = IOKit.read(in);
             Class<?> cls = loader.loadClass(null, ByteBuffer.wrap(bytes));
-            assertNotEquals(cls, LA.class);
+            assertNotEquals(LA.class, cls);
             assertEquals(cls.getName(), LA.class.getName());
             assertSame(
                 loader.loadClass(LA.class.getName(), bytes),
@@ -97,8 +97,8 @@ public class ClassLoaderTest {
         in2.close();
         assertEquals(cls1.getName(), cls2.getName());
         assertEquals(cls1.getName(), LA.class.getName());
-        assertNotEquals(cls1, LA.class);
-        assertNotEquals(cls2, LA.class);
+        assertNotEquals(LA.class, cls1);
+        assertNotEquals(LA.class, cls2);
         assertNotEquals(cls1, cls2);
         Object o1 = cls1.getConstructor().newInstance();
         Object o2 = cls2.getConstructor().newInstance();
@@ -114,7 +114,7 @@ public class ClassLoaderTest {
         Object lac = cls3.getConstructor().newInstance();
         assertTrue(lac instanceof LA);
         String test = "tests";
-        assertEquals(la.compute(test), test + test);
-        assertEquals(((LA) lac).compute(test), test);
+        assertEquals(test + test, la.compute(test));
+        assertEquals(test, ((LA) lac).compute(test));
     }
 }

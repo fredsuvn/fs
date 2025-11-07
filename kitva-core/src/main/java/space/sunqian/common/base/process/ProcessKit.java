@@ -32,4 +32,7 @@ public class ProcessKit {
     public static @Nonnull Process start(@Nonnull String @Nonnull ... command) throws IORuntimeException {
         return Kit.uncheck(() -> Runtime.getRuntime().exec(command), IORuntimeException::new);
     }
+
+    private ProcessKit() {
+    }
 }

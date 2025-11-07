@@ -181,7 +181,7 @@ public class ByteReaderTest implements DataTest {
     }
 
     private void testSkipBytes(ByteReader reader, byte[] data, int readSize) {
-        assertEquals(reader.skip(0), 0);
+        assertEquals(0, reader.skip(0));
         int hasRead = 0;
         while (hasRead < data.length) {
             long skipped = reader.skip(readSize);
@@ -189,8 +189,8 @@ public class ByteReaderTest implements DataTest {
             assertEquals(skipped, actualLen);
             hasRead += actualLen;
         }
-        assertEquals(reader.skip(0), 0);
-        assertEquals(reader.skip(1), 0);
+        assertEquals(0, reader.skip(0));
+        assertEquals(0, reader.skip(1));
     }
 
     @Test
@@ -265,13 +265,13 @@ public class ByteReaderTest implements DataTest {
             BytesBuilder builder = new BytesBuilder();
             if (data.length == 0) {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(builder), -1);
-                assertEquals(reader.readTo(builder, 0), 0);
+                assertEquals(-1, reader.readTo(builder));
+                assertEquals(0, reader.readTo(builder, 0));
                 reader.close();
-                assertEquals(reader.readTo(builder, 0), 0);
+                assertEquals(0, reader.readTo(builder, 0));
             } else {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(builder, 0), 0);
+                assertEquals(0, reader.readTo(builder, 0));
                 if (reader.markSupported()) {
                     reader.mark();
                 }
@@ -289,10 +289,10 @@ public class ByteReaderTest implements DataTest {
                     assertEquals(reader.readTo(builder), restLen == 0 ? -1 : restLen);
                     assertArrayEquals(builder.toByteArray(), data);
                 }
-                assertEquals(reader.readTo(builder), -1);
-                assertEquals(reader.readTo(builder, 66), -1);
+                assertEquals(-1, reader.readTo(builder));
+                assertEquals(-1, reader.readTo(builder, 66));
                 reader.close();
-                assertEquals(reader.readTo(builder, 0), 0);
+                assertEquals(0, reader.readTo(builder, 0));
             }
             // error
             assertThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
@@ -307,13 +307,13 @@ public class ByteReaderTest implements DataTest {
             WritableByteChannel channel = Channels.newChannel(builder);
             if (data.length == 0) {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(channel), -1);
-                assertEquals(reader.readTo(channel, 0), 0);
+                assertEquals(-1, reader.readTo(channel));
+                assertEquals(0, reader.readTo(channel, 0));
                 reader.close();
-                assertEquals(reader.readTo(channel, 0), 0);
+                assertEquals(0, reader.readTo(channel, 0));
             } else {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(channel, 0), 0);
+                assertEquals(0, reader.readTo(channel, 0));
                 if (reader.markSupported()) {
                     reader.mark();
                 }
@@ -331,10 +331,10 @@ public class ByteReaderTest implements DataTest {
                     assertEquals(reader.readTo(channel), restLen == 0 ? -1 : restLen);
                     assertArrayEquals(builder.toByteArray(), data);
                 }
-                assertEquals(reader.readTo(channel), -1);
-                assertEquals(reader.readTo(channel, 66), -1);
+                assertEquals(-1, reader.readTo(channel));
+                assertEquals(-1, reader.readTo(channel, 66));
                 reader.close();
-                assertEquals(reader.readTo(channel, 0), 0);
+                assertEquals(0, reader.readTo(channel, 0));
             }
             // error
             assertThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
@@ -350,13 +350,13 @@ public class ByteReaderTest implements DataTest {
             WritableByteChannel channel = new OneByteWritableChannel(builder);
             if (data.length == 0) {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(channel), -1);
-                assertEquals(reader.readTo(channel, 0), 0);
+                assertEquals(-1, reader.readTo(channel));
+                assertEquals(0, reader.readTo(channel, 0));
                 reader.close();
-                assertEquals(reader.readTo(channel, 0), 0);
+                assertEquals(0, reader.readTo(channel, 0));
             } else {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(channel, 0), 0);
+                assertEquals(0, reader.readTo(channel, 0));
                 if (reader.markSupported()) {
                     reader.mark();
                 }
@@ -374,10 +374,10 @@ public class ByteReaderTest implements DataTest {
                     assertEquals(reader.readTo(channel), restLen == 0 ? -1 : restLen);
                     assertArrayEquals(builder.toByteArray(), data);
                 }
-                assertEquals(reader.readTo(channel), -1);
-                assertEquals(reader.readTo(channel, 66), -1);
+                assertEquals(-1, reader.readTo(channel));
+                assertEquals(-1, reader.readTo(channel, 66));
                 reader.close();
-                assertEquals(reader.readTo(channel, 0), 0);
+                assertEquals(0, reader.readTo(channel, 0));
             }
             // error
             assertThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
@@ -390,13 +390,13 @@ public class ByteReaderTest implements DataTest {
             // to byte array full
             if (data.length == 0) {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(new byte[0]), 0);
-                assertEquals(reader.readTo(new byte[1]), -1);
+                assertEquals(0, reader.readTo(new byte[0]));
+                assertEquals(-1, reader.readTo(new byte[1]));
                 reader.close();
-                assertEquals(reader.readTo(new byte[0]), 0);
+                assertEquals(0, reader.readTo(new byte[0]));
             } else {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(new byte[0]), 0);
+                assertEquals(0, reader.readTo(new byte[0]));
                 byte[] dst = new byte[DST_SIZE];
                 if (reader.markSupported()) {
                     reader.mark();
@@ -416,22 +416,22 @@ public class ByteReaderTest implements DataTest {
                 dst = new byte[data.length];
                 assertEquals(reader.readTo(dst), data.length);
                 assertArrayEquals(dst, data);
-                assertEquals(reader.readTo(new byte[1]), -1);
+                assertEquals(-1, reader.readTo(new byte[1]));
                 reader.close();
-                assertEquals(reader.readTo(new byte[0]), 0);
+                assertEquals(0, reader.readTo(new byte[0]));
             }
         }
         {
             // to byte array offset
             if (data.length == 0) {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(new byte[0], 0, 0), 0);
-                assertEquals(reader.readTo(new byte[1], 0, 1), -1);
+                assertEquals(0, reader.readTo(new byte[0], 0, 0));
+                assertEquals(-1, reader.readTo(new byte[1], 0, 1));
                 reader.close();
-                assertEquals(reader.readTo(new byte[0], 0, 0), 0);
+                assertEquals(0, reader.readTo(new byte[0], 0, 0));
             } else {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(new byte[0], 0, 0), 0);
+                assertEquals(0, reader.readTo(new byte[0], 0, 0));
                 byte[] dst = new byte[DST_SIZE + 6];
                 if (reader.markSupported()) {
                     reader.mark();
@@ -451,9 +451,9 @@ public class ByteReaderTest implements DataTest {
                 dst = new byte[data.length + 2];
                 assertEquals(reader.readTo(dst, 1, data.length), data.length);
                 assertArrayEquals(Arrays.copyOfRange(dst, 1, 1 + data.length), data);
-                assertEquals(reader.readTo(new byte[1], 0, 1), -1);
+                assertEquals(-1, reader.readTo(new byte[1], 0, 1));
                 reader.close();
-                assertEquals(reader.readTo(new byte[0], 0, 0), 0);
+                assertEquals(0, reader.readTo(new byte[0], 0, 0));
             }
             // error
             assertThrows(IndexOutOfBoundsException.class, () -> supplier.get().readTo(new byte[0], 0, -1));
@@ -463,17 +463,17 @@ public class ByteReaderTest implements DataTest {
             // to buffer full
             if (data.length == 0) {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(ByteBuffer.allocate(0)), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocate(1)), -1);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0)), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1)), -1);
+                assertEquals(0, reader.readTo(ByteBuffer.allocate(0)));
+                assertEquals(-1, reader.readTo(ByteBuffer.allocate(1)));
+                assertEquals(0, reader.readTo(ByteBuffer.allocateDirect(0)));
+                assertEquals(-1, reader.readTo(ByteBuffer.allocateDirect(1)));
                 reader.close();
-                assertEquals(reader.readTo(ByteBuffer.allocate(0)), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0)), 0);
+                assertEquals(0, reader.readTo(ByteBuffer.allocate(0)));
+                assertEquals(0, reader.readTo(ByteBuffer.allocateDirect(0)));
             } else {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(ByteBuffer.allocate(0)), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0)), 0);
+                assertEquals(0, reader.readTo(ByteBuffer.allocate(0)));
+                assertEquals(0, reader.readTo(ByteBuffer.allocateDirect(0)));
                 ByteBuffer dst = ByteBuffer.allocate(DST_SIZE);
                 if (reader.markSupported()) {
                     reader.mark();
@@ -496,11 +496,11 @@ public class ByteReaderTest implements DataTest {
                 assertEquals(reader.readTo(dst), data.length);
                 dst.flip();
                 assertArrayEquals(BufferKit.copyContent(dst), data);
-                assertEquals(reader.readTo(ByteBuffer.allocate(1)), -1);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1)), -1);
+                assertEquals(-1, reader.readTo(ByteBuffer.allocate(1)));
+                assertEquals(-1, reader.readTo(ByteBuffer.allocateDirect(1)));
                 reader.close();
-                assertEquals(reader.readTo(ByteBuffer.allocate(0)), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0)), 0);
+                assertEquals(0, reader.readTo(ByteBuffer.allocate(0)));
+                assertEquals(0, reader.readTo(ByteBuffer.allocateDirect(0)));
             }
             // error
             if (data.length > 0) {
@@ -514,23 +514,23 @@ public class ByteReaderTest implements DataTest {
             // to buffer offset
             if (data.length == 0) {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(ByteBuffer.allocate(1), 0), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocate(0), 1), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocate(1), 1), -1);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 0), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0), 1), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 1), -1);
+                assertEquals(0, reader.readTo(ByteBuffer.allocate(1), 0));
+                assertEquals(0, reader.readTo(ByteBuffer.allocate(0), 1));
+                assertEquals(-1, reader.readTo(ByteBuffer.allocate(1), 1));
+                assertEquals(0, reader.readTo(ByteBuffer.allocateDirect(1), 0));
+                assertEquals(0, reader.readTo(ByteBuffer.allocateDirect(0), 1));
+                assertEquals(-1, reader.readTo(ByteBuffer.allocateDirect(1), 1));
                 reader.close();
-                assertEquals(reader.readTo(ByteBuffer.allocate(1), 0), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocate(0), 1), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 0), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0), 1), 0);
+                assertEquals(0, reader.readTo(ByteBuffer.allocate(1), 0));
+                assertEquals(0, reader.readTo(ByteBuffer.allocate(0), 1));
+                assertEquals(0, reader.readTo(ByteBuffer.allocateDirect(1), 0));
+                assertEquals(0, reader.readTo(ByteBuffer.allocateDirect(0), 1));
             } else {
                 ByteReader reader = supplier.get();
-                assertEquals(reader.readTo(ByteBuffer.allocate(1), 0), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocate(0), 1), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 0), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0), 1), 0);
+                assertEquals(0, reader.readTo(ByteBuffer.allocate(1), 0));
+                assertEquals(0, reader.readTo(ByteBuffer.allocate(0), 1));
+                assertEquals(0, reader.readTo(ByteBuffer.allocateDirect(1), 0));
+                assertEquals(0, reader.readTo(ByteBuffer.allocateDirect(0), 1));
                 ByteBuffer dst = ByteBuffer.allocate(DST_SIZE);
                 if (reader.markSupported()) {
                     reader.mark();
@@ -553,13 +553,13 @@ public class ByteReaderTest implements DataTest {
                 assertEquals(reader.readTo(dst, data.length), data.length);
                 dst.flip();
                 assertArrayEquals(BufferKit.copyContent(dst), data);
-                assertEquals(reader.readTo(ByteBuffer.allocate(1), 1), -1);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 1), -1);
+                assertEquals(-1, reader.readTo(ByteBuffer.allocate(1), 1));
+                assertEquals(-1, reader.readTo(ByteBuffer.allocateDirect(1), 1));
                 reader.close();
-                assertEquals(reader.readTo(ByteBuffer.allocate(1), 0), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocate(0), 1), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 0), 0);
-                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0), 1), 0);
+                assertEquals(0, reader.readTo(ByteBuffer.allocate(1), 0));
+                assertEquals(0, reader.readTo(ByteBuffer.allocate(0), 1));
+                assertEquals(0, reader.readTo(ByteBuffer.allocateDirect(1), 0));
+                assertEquals(0, reader.readTo(ByteBuffer.allocateDirect(0), 1));
             }
             // error
             assertThrows(IllegalArgumentException.class, () ->
@@ -605,33 +605,33 @@ public class ByteReaderTest implements DataTest {
         {
             // limited
             ByteReader reader1 = ByteReader.from(new ZeroIn()).limit(11);
-            assertEquals(reader1.availableTo(IOKit.nullOutputStream()), 0);
-            assertEquals(reader1.availableTo(IOKit.nullOutputStream(), 100), 0);
-            assertEquals(reader1.availableTo(Channels.newChannel(IOKit.nullOutputStream())), 0);
-            assertEquals(reader1.availableTo(Channels.newChannel(IOKit.nullOutputStream()), 100), 0);
-            assertEquals(reader1.availableTo(new byte[1]), 0);
-            assertEquals(reader1.availableTo(new byte[1], 0, 1), 0);
-            assertEquals(reader1.availableTo(ByteBuffer.allocate(1)), 0);
-            assertEquals(reader1.availableTo(ByteBuffer.allocate(1), 1), 0);
+            assertEquals(0, reader1.availableTo(IOKit.nullOutputStream()));
+            assertEquals(0, reader1.availableTo(IOKit.nullOutputStream(), 100));
+            assertEquals(0, reader1.availableTo(Channels.newChannel(IOKit.nullOutputStream())));
+            assertEquals(0, reader1.availableTo(Channels.newChannel(IOKit.nullOutputStream()), 100));
+            assertEquals(0, reader1.availableTo(new byte[1]));
+            assertEquals(0, reader1.availableTo(new byte[1], 0, 1));
+            assertEquals(0, reader1.availableTo(ByteBuffer.allocate(1)));
+            assertEquals(0, reader1.availableTo(ByteBuffer.allocate(1), 1));
             // -1
             ByteReader reader2 = ByteReader.from(new ByteArrayInputStream(new byte[10])).limit(1);
-            assertEquals(reader2.availableTo(IOKit.nullOutputStream()), 1);
-            assertEquals(reader2.availableTo(IOKit.nullOutputStream()), -1);
-            assertEquals(reader2.availableTo(IOKit.nullOutputStream(), 1), -1);
-            assertEquals(reader2.availableTo(Channels.newChannel(IOKit.nullOutputStream())), -1);
-            assertEquals(reader2.availableTo(Channels.newChannel(IOKit.nullOutputStream()), 100), -1);
-            assertEquals(reader2.availableTo(new byte[1]), -1);
-            assertEquals(reader2.availableTo(new byte[1], 0, 1), -1);
-            assertEquals(reader2.availableTo(ByteBuffer.allocate(1)), -1);
-            assertEquals(reader2.availableTo(ByteBuffer.allocate(1), 1), -1);
+            assertEquals(1, reader2.availableTo(IOKit.nullOutputStream()));
+            assertEquals(-1, reader2.availableTo(IOKit.nullOutputStream()));
+            assertEquals(-1, reader2.availableTo(IOKit.nullOutputStream(), 1));
+            assertEquals(-1, reader2.availableTo(Channels.newChannel(IOKit.nullOutputStream())));
+            assertEquals(-1, reader2.availableTo(Channels.newChannel(IOKit.nullOutputStream()), 100));
+            assertEquals(-1, reader2.availableTo(new byte[1]));
+            assertEquals(-1, reader2.availableTo(new byte[1], 0, 1));
+            assertEquals(-1, reader2.availableTo(ByteBuffer.allocate(1)));
+            assertEquals(-1, reader2.availableTo(ByteBuffer.allocate(1), 1));
             // 0
-            assertEquals(reader2.availableTo(IOKit.nullOutputStream(), 0), 0);
-            assertEquals(reader2.availableTo(Channels.newChannel(IOKit.nullOutputStream()), 0), 0);
-            assertEquals(reader2.availableTo(new byte[0]), 0);
-            assertEquals(reader2.availableTo(new byte[1], 0, 0), 0);
-            assertEquals(reader2.availableTo(ByteBuffer.allocate(0)), 0);
-            assertEquals(reader2.availableTo(ByteBuffer.allocate(0), 1), 0);
-            assertEquals(reader2.availableTo(ByteBuffer.allocate(1), 0), 0);
+            assertEquals(0, reader2.availableTo(IOKit.nullOutputStream(), 0));
+            assertEquals(0, reader2.availableTo(Channels.newChannel(IOKit.nullOutputStream()), 0));
+            assertEquals(0, reader2.availableTo(new byte[0]));
+            assertEquals(0, reader2.availableTo(new byte[1], 0, 0));
+            assertEquals(0, reader2.availableTo(ByteBuffer.allocate(0)));
+            assertEquals(0, reader2.availableTo(ByteBuffer.allocate(0), 1));
+            assertEquals(0, reader2.availableTo(ByteBuffer.allocate(1), 0));
         }
     }
 
@@ -751,7 +751,7 @@ public class ByteReaderTest implements DataTest {
             } else {
                 ByteSegment s0 = reader.available();
                 assertFalse(s0.end());
-                assertEquals(BufferKit.copyContent(s0.data()).length, 0);
+                assertEquals(0, BufferKit.copyContent(s0.data()).length);
                 BytesBuilder builder = new BytesBuilder();
                 while (true) {
                     ByteSegment s1 = reader.available();
@@ -1035,7 +1035,7 @@ public class ByteReaderTest implements DataTest {
         assertArrayEquals(segment.copyArray(), bytes);
         assertNotSame(segment.copyArray(), bytes);
         assertArrayEquals(segment.array(), bytes);
-        assertArrayEquals(segment.array(), new byte[0]);
+        assertArrayEquals(new byte[0], segment.array());
     }
 
     @Test
@@ -1147,47 +1147,47 @@ public class ByteReaderTest implements DataTest {
             ByteReader reader = ByteReader.from(new ByteArrayInputStream(data));
             assertEquals(reader.ready(), size);
             reader.read();
-            assertEquals(reader.ready(), 0);
+            assertEquals(0, reader.ready());
         }
         {
             // channel
             ByteReader reader = ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data)));
-            assertEquals(reader.ready(), 0);
+            assertEquals(0, reader.ready());
             reader.read();
-            assertEquals(reader.ready(), 0);
+            assertEquals(0, reader.ready());
         }
         {
             // array
             ByteReader reader = ByteReader.from(data);
             assertEquals(reader.ready(), size);
             reader.read();
-            assertEquals(reader.ready(), 0);
+            assertEquals(0, reader.ready());
         }
         {
             // buffer
             ByteReader reader = ByteReader.from(ByteBuffer.wrap(data));
             assertEquals(reader.ready(), size);
             reader.read();
-            assertEquals(reader.ready(), 0);
+            assertEquals(0, reader.ready());
         }
         {
             // limited
             ByteReader reader1 = ByteReader.from(data).limit(size);
             assertEquals(reader1.ready(), size);
             reader1.read();
-            assertEquals(reader1.ready(), 0);
+            assertEquals(0, reader1.ready());
             ByteReader reader2 = ByteReader.from(data).limit(size - 5);
             assertEquals(reader2.ready(), size - 5);
             reader2.read();
-            assertEquals(reader2.ready(), 0);
+            assertEquals(0, reader2.ready());
             ByteReader reader3 = ByteReader.from(data).limit(size + 5);
             assertEquals(reader3.ready(), size);
             reader3.read();
-            assertEquals(reader3.ready(), 0);
+            assertEquals(0, reader3.ready());
             ByteReader reader4 = ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))).limit(size);
-            assertEquals(reader4.ready(), 0);
+            assertEquals(0, reader4.ready());
             reader4.read();
-            assertEquals(reader4.ready(), 0);
+            assertEquals(0, reader4.ready());
         }
     }
 

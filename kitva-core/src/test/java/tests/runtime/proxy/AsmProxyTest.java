@@ -146,24 +146,24 @@ public class AsmProxyTest implements PrintTest {
             );
             SameMethodA sa = pc.newInstance();
             assertFalse(sa.equals(""));
-            assertEquals(counter.get(), 0);
+            assertEquals(0, counter.get());
             assertEquals(sa.hashCode(), Kit.hashId(sa));
-            assertEquals(counter.get(), 0);
+            assertEquals(0, counter.get());
             assertEquals(sa.toString(), sa.getClass().getName() + '@' + Integer.toHexString(sa.hashCode()));
-            assertEquals(counter.get(), 0);
+            assertEquals(0, counter.get());
             if (isA.get()) {
-                assertEquals(sa.ss(66), 66 * 2);
+                assertEquals(66 * 2, sa.ss(66));
             } else {
-                assertEquals(sa.ss(66), 66 * 4);
+                assertEquals(66 * 4, sa.ss(66));
             }
-            assertEquals(counter.get(), 1);
+            assertEquals(1, counter.get());
             SameMethodA sb = pc.newInstance();
             if (isA.get()) {
-                assertEquals(sb.ss(66), 66 * 2);
+                assertEquals(66 * 2, sb.ss(66));
             } else {
-                assertEquals(sb.ss(66), 66 * 4);
+                assertEquals(66 * 4, sb.ss(66));
             }
-            assertEquals(counter.get(), 2);
+            assertEquals(2, counter.get());
             counter.clear();
         }
         {
@@ -172,7 +172,7 @@ public class AsmProxyTest implements PrintTest {
             Class<?> c = pc.proxyClass();
             printFor("ASM proxy class: ", c);
             Constructor<?>[] constructors = c.getConstructors();
-            assertEquals(constructors.length, 1);
+            assertEquals(1, constructors.length);
             assertEquals(
                 Kit.list(constructors[0].getParameterTypes()),
                 Kit.list(ProxyHandler.class, Method[].class)
@@ -213,11 +213,11 @@ public class AsmProxyTest implements PrintTest {
             class ClaAProxy extends ClsA implements DefaultInter {}
             Object asmProxy = pc.newInstance();
             ClaAProxy manProxy = new ClaAProxy();
-            assertEquals(counter.get(), 0);
+            assertEquals(0, counter.get());
             assertEquals(((ClsA) asmProxy).a1("666"), manProxy.a1("666"));
-            assertEquals(counter.get(), 2);
+            assertEquals(2, counter.get());
             assertEquals(((DefaultInter) asmProxy).defaultInt(999), manProxy.defaultInt(999));
-            assertEquals(counter.get(), 3);
+            assertEquals(3, counter.get());
         }
         {
             // invoke
@@ -258,14 +258,14 @@ public class AsmProxyTest implements PrintTest {
                 }
             );
             Object asmProxy = pc.newInstance();
-            assertEquals(counter.get(), 0);
+            assertEquals(0, counter.get());
             assertEquals(((ClsA) asmProxy).a1("666"), manProxy.a1("666"));
-            assertEquals(((ClsA) asmProxy).a1("666"), "666888");
-            assertEquals(counter.get(), 2);
+            assertEquals("666888", ((ClsA) asmProxy).a1("666"));
+            assertEquals(2, counter.get());
             assertEquals(((DefaultInter) asmProxy).defaultInt(999), manProxy.defaultInt(999));
-            assertEquals(counter.get(), 3);
-            assertEquals(((DefaultInter) asmProxy).defaultInt(999), 999 + 1);
-            assertEquals(counter.get(), 4);
+            assertEquals(3, counter.get());
+            assertEquals(999 + 1, ((DefaultInter) asmProxy).defaultInt(999));
+            assertEquals(4, counter.get());
         }
         {
             // stack overflow
@@ -524,64 +524,64 @@ public class AsmProxyTest implements PrintTest {
 
     private void testInterA(InterA obj, IntVar counter) {
         assertFalse(obj.equals(""));
-        assertEquals(counter.get(), 1);
+        assertEquals(1, counter.get());
         assertEquals(obj.hashCode(), Kit.hashId(obj));
-        assertEquals(counter.get(), 2);
+        assertEquals(2, counter.get());
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
-        assertEquals(counter.get(), 5);
+        assertEquals(5, counter.get());
         assertThrows(AbstractMethodError.class, obj::a1);
-        assertEquals(counter.get(), 6);
+        assertEquals(6, counter.get());
         assertThrows(AbstractMethodError.class, obj::a2);
-        assertEquals(counter.get(), 7);
+        assertEquals(7, counter.get());
         assertThrows(AbstractMethodError.class, obj::a3);
-        assertEquals(counter.get(), 8);
+        assertEquals(8, counter.get());
         assertThrows(AbstractMethodError.class, obj::a4);
-        assertEquals(counter.get(), 9);
+        assertEquals(9, counter.get());
         assertThrows(AbstractMethodError.class, obj::a5);
-        assertEquals(counter.get(), 10);
+        assertEquals(10, counter.get());
         assertThrows(AbstractMethodError.class, obj::a6);
-        assertEquals(counter.get(), 11);
+        assertEquals(11, counter.get());
         assertThrows(AbstractMethodError.class, obj::a7);
-        assertEquals(counter.get(), 12);
+        assertEquals(12, counter.get());
         assertThrows(AbstractMethodError.class, obj::a8);
-        assertEquals(counter.get(), 13);
+        assertEquals(13, counter.get());
         assertThrows(AbstractMethodError.class, obj::a9);
-        assertEquals(counter.get(), 14);
+        assertEquals(14, counter.get());
         assertThrows(AbstractMethodError.class, obj::a10);
-        assertEquals(counter.get(), 15);
+        assertEquals(15, counter.get());
         assertThrows(AbstractMethodError.class, obj::a11);
-        assertEquals(counter.get(), 16);
+        assertEquals(16, counter.get());
     }
 
     private void testInterB(InterB obj, IntVar counter) {
         assertFalse(obj.equals(""));
-        assertEquals(counter.get(), 1);
+        assertEquals(1, counter.get());
         assertEquals(obj.hashCode(), Kit.hashId(obj));
-        assertEquals(counter.get(), 2);
+        assertEquals(2, counter.get());
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
-        assertEquals(counter.get(), 5);
+        assertEquals(5, counter.get());
         assertThrows(AbstractMethodError.class, () -> obj.b1(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
-        assertEquals(counter.get(), 6);
+        assertEquals(6, counter.get());
         assertThrows(AbstractMethodError.class, () -> obj.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
-        assertEquals(counter.get(), 7);
+        assertEquals(7, counter.get());
         assertThrows(AbstractMethodError.class, () -> obj.b3(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
-        assertEquals(counter.get(), 8);
+        assertEquals(8, counter.get());
         assertThrows(AbstractMethodError.class, () -> obj.b4(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
-        assertEquals(counter.get(), 9);
+        assertEquals(9, counter.get());
         assertThrows(AbstractMethodError.class, () -> obj.b5(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
-        assertEquals(counter.get(), 10);
+        assertEquals(10, counter.get());
         assertThrows(AbstractMethodError.class, () -> obj.b6(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
-        assertEquals(counter.get(), 11);
+        assertEquals(11, counter.get());
         assertThrows(AbstractMethodError.class, () -> obj.b7(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
-        assertEquals(counter.get(), 12);
+        assertEquals(12, counter.get());
         assertThrows(AbstractMethodError.class, () -> obj.b8(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
-        assertEquals(counter.get(), 13);
+        assertEquals(13, counter.get());
         assertThrows(AbstractMethodError.class, () -> obj.b9(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
-        assertEquals(counter.get(), 14);
+        assertEquals(14, counter.get());
         assertThrows(AbstractMethodError.class, () -> obj.b10(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
-        assertEquals(counter.get(), 15);
+        assertEquals(15, counter.get());
         assertThrows(AbstractMethodError.class, () -> obj.b11(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
-        assertEquals(counter.get(), 16);
+        assertEquals(16, counter.get());
     }
 
     private void testInterD(InterD obj, ClsD cd, IntVar counter) {
@@ -590,130 +590,130 @@ public class AsmProxyTest implements PrintTest {
         assertEquals(obj.hashCode(), Kit.hashId(obj));
         assertEquals(2, counter.get());
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
-        assertEquals(counter.get(), 5);
+        assertEquals(5, counter.get());
         assertEquals(
             obj.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
             cd.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
         );
-        assertEquals(counter.get(), 6);
+        assertEquals(6, counter.get());
         assertEquals(
             obj.b3(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
             cd.b3(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
         );
-        assertEquals(counter.get(), 7);
+        assertEquals(7, counter.get());
         assertEquals(
             obj.b4(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
             cd.b4(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
         );
-        assertEquals(counter.get(), 8);
+        assertEquals(8, counter.get());
         assertEquals(
             obj.b5(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
             cd.b5(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
         );
-        assertEquals(counter.get(), 9);
+        assertEquals(9, counter.get());
         assertEquals(
             obj.b6(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
             cd.b6(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
         );
-        assertEquals(counter.get(), 10);
+        assertEquals(10, counter.get());
         assertEquals(
             obj.b7(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
             cd.b7(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
         );
-        assertEquals(counter.get(), 11);
+        assertEquals(11, counter.get());
         assertEquals(
             obj.b8(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
             cd.b8(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
         );
-        assertEquals(counter.get(), 12);
+        assertEquals(12, counter.get());
         assertEquals(
             obj.b9(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
             cd.b9(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
         );
-        assertEquals(counter.get(), 13);
+        assertEquals(13, counter.get());
         assertEquals(
             obj.b10(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
             cd.b10(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
         );
-        assertEquals(counter.get(), 14);
+        assertEquals(14, counter.get());
         assertEquals(
             obj.b11(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
             cd.b11(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
         );
-        assertEquals(counter.get(), 15);
+        assertEquals(15, counter.get());
         obj.b1(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8");
-        assertEquals(counter.get(), 16);
+        assertEquals(16, counter.get());
     }
 
     private void testInterC(InterC obj1, InterC<String> obj2, IntVar counter) {
         assertFalse(obj1.equals(""));
-        assertEquals(counter.get(), 1);
+        assertEquals(1, counter.get());
         assertEquals(obj1.hashCode(), Kit.hashId(obj1));
-        assertEquals(counter.get(), 2);
+        assertEquals(2, counter.get());
         assertEquals(obj1.toString(), obj1.getClass().getName() + '@' + Integer.toHexString(obj1.hashCode()));
-        assertEquals(counter.get(), 5);
-        assertEquals(obj1.c1("aaa"), "aaa");
-        assertEquals(counter.get(), 6);
+        assertEquals(5, counter.get());
+        assertEquals("aaa", obj1.c1("aaa"));
+        assertEquals(6, counter.get());
         counter.clear();
         assertFalse(obj2.equals(""));
-        assertEquals(counter.get(), 1);
+        assertEquals(1, counter.get());
         assertEquals(obj2.hashCode(), Kit.hashId(obj2));
-        assertEquals(counter.get(), 2);
+        assertEquals(2, counter.get());
         assertEquals(obj2.toString(), obj2.getClass().getName() + '@' + Integer.toHexString(obj2.hashCode()));
-        assertEquals(counter.get(), 5);
+        assertEquals(5, counter.get());
         String c2Str = obj2.c1("bbb");
-        assertEquals(c2Str, "bbb");
-        assertEquals(counter.get(), 6);
+        assertEquals("bbb", c2Str);
+        assertEquals(6, counter.get());
     }
 
     private void testClsA(ClsA obj, IntVar counter) {
         assertFalse(obj.equals(""));
-        assertEquals(counter.get(), 1);
+        assertEquals(1, counter.get());
         assertEquals(obj.hashCode(), Kit.hashId(obj));
-        assertEquals(counter.get(), 2);
+        assertEquals(2, counter.get());
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
-        assertEquals(counter.get(), 5);
-        assertEquals(obj.a1("aaa"), "aaa");
-        assertEquals(counter.get(), 7);// public + protected
+        assertEquals(5, counter.get());
+        assertEquals("aaa", obj.a1("aaa"));
+        assertEquals(7, counter.get());// public + protected
     }
 
     private void testClsB(ClsB obj1, ClsB<String> obj2, IntVar counter) {
         assertFalse(obj1.equals(""));
-        assertEquals(counter.get(), 1);
+        assertEquals(1, counter.get());
         assertEquals(obj1.hashCode(), Kit.hashId(obj1));
-        assertEquals(counter.get(), 2);
+        assertEquals(2, counter.get());
         assertEquals(obj1.toString(), obj1.getClass().getName() + '@' + Integer.toHexString(obj1.hashCode()));
-        assertEquals(counter.get(), 5);
-        assertEquals(obj1.b1("aaa"), "aaa");
-        assertEquals(counter.get(), 7);// public + protected
+        assertEquals(5, counter.get());
+        assertEquals("aaa", obj1.b1("aaa"));
+        assertEquals(7, counter.get());// public + protected
         counter.clear();
         assertFalse(obj2.equals(""));
-        assertEquals(counter.get(), 1);
+        assertEquals(1, counter.get());
         assertEquals(obj2.hashCode(), Kit.hashId(obj2));
-        assertEquals(counter.get(), 2);
+        assertEquals(2, counter.get());
         assertEquals(obj2.toString(), obj2.getClass().getName() + '@' + Integer.toHexString(obj2.hashCode()));
-        assertEquals(counter.get(), 5);
+        assertEquals(5, counter.get());
         String c2Str = obj2.b1("bbb");
-        assertEquals(c2Str, "bbb");
-        assertEquals(counter.get(), 7);// public + protected
+        assertEquals("bbb", c2Str);
+        assertEquals(7, counter.get());// public + protected
     }
 
     private void testClsC(ClsC obj, IntVar counter) {
         assertFalse(obj.equals(""));
-        assertEquals(counter.get(), 1);
+        assertEquals(1, counter.get());
         assertEquals(obj.hashCode(), Kit.hashId(obj));
-        assertEquals(counter.get(), 2);
+        assertEquals(2, counter.get());
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
-        assertEquals(counter.get(), 5);
-        assertEquals(obj.b1("aaa"), "aaa");
-        assertEquals(counter.get(), 6);
+        assertEquals(5, counter.get());
+        assertEquals("aaa", obj.b1("aaa"));
+        assertEquals(6, counter.get());
         ClsB<String> b1 = Kit.as(obj);
-        assertEquals(b1.b1("bbb"), "bbb");
-        assertEquals(counter.get(), 7);
+        assertEquals("bbb", b1.b1("bbb"));
+        assertEquals(7, counter.get());
         ClsB<Object> b2 = Kit.as(obj);
         Object b2Result = b2.b1("bbb");
-        assertEquals(b2Result, "bbb");
-        assertEquals(counter.get(), 8);
+        assertEquals("bbb", b2Result);
+        assertEquals(8, counter.get());
     }
 
     private ProxySpec generateProxy(Class<?> superclass, List<Class<?>> interfaces, IntVar counter) {
@@ -978,9 +978,9 @@ public class AsmProxyTest implements PrintTest {
                 @Nullable Object result, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target
             ) throws Throwable {
                 if (replace.get()) {
-                    assertEquals(args[0], "b");
+                    assertEquals("b", args[0]);
                 } else {
-                    assertEquals(args[0], "a");
+                    assertEquals("a", args[0]);
                 }
                 count.getAndIncrement();
                 return result;
@@ -990,9 +990,9 @@ public class AsmProxyTest implements PrintTest {
                 @Nonnull Throwable ex, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target
             ) {
                 if (replace.get()) {
-                    assertEquals(args[0], "b");
+                    assertEquals("b", args[0]);
                 } else {
-                    assertEquals(args[0], "a");
+                    assertEquals("a", args[0]);
                 }
                 count.getAndIncrement();
                 Object[] result = (Object[]) args[args.length - 1];
@@ -1003,18 +1003,18 @@ public class AsmProxyTest implements PrintTest {
             // String
             ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                "atrue234567.08.0"
+                "atrue234567.08.0",
+                sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             replace.set(true);
             assertEquals(
-                sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                "btrue234567.08.0"
+                "btrue234567.08.0",
+                sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -1022,22 +1022,22 @@ public class AsmProxyTest implements PrintTest {
             // void
             ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             Object[] result = new Object[1];
             sc.getVoid("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result);
             assertEquals(
-                result[0],
-                "atrue234567.08.0"
+                "atrue234567.08.0",
+                result[0]
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             replace.set(true);
             result[0] = null;
             sc.getVoid("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result);
             assertEquals(
-                result[0],
-                "btrue234567.08.0"
+                "btrue234567.08.0",
+                result[0]
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -1045,17 +1045,17 @@ public class AsmProxyTest implements PrintTest {
             // boolean
             ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getBoolean("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                true
+                true,
+                sc.getBoolean("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getBoolean("a", false, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                false
+                false,
+                sc.getBoolean("a", false, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -1063,17 +1063,17 @@ public class AsmProxyTest implements PrintTest {
             // byte
             ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getByte("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                2
+                2,
+                sc.getByte("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getByte("a", true, (byte) 20, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                20
+                20,
+                sc.getByte("a", true, (byte) 20, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -1081,17 +1081,17 @@ public class AsmProxyTest implements PrintTest {
             // char
             ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getChar("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                '3'
+                '3',
+                sc.getChar("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getChar("a", true, (byte) 2, '6', (short) 4, 5, 6L, 7.0f, 8.0d),
-                '6'
+                '6',
+                sc.getChar("a", true, (byte) 2, '6', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -1099,17 +1099,17 @@ public class AsmProxyTest implements PrintTest {
             // short
             ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getShort("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                4
+                4,
+                sc.getShort("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getShort("a", true, (byte) 2, '3', (short) 40, 5, 6L, 7.0f, 8.0d),
-                40
+                40,
+                sc.getShort("a", true, (byte) 2, '3', (short) 40, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -1117,17 +1117,17 @@ public class AsmProxyTest implements PrintTest {
             // int
             ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getInt("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                5
+                5,
+                sc.getInt("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getInt("a", true, (byte) 2, '3', (short) 4, 50, 6L, 7.0f, 8.0d),
-                50
+                50,
+                sc.getInt("a", true, (byte) 2, '3', (short) 4, 50, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -1135,17 +1135,17 @@ public class AsmProxyTest implements PrintTest {
             // long
             ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                6L
+                6L,
+                sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 60L, 7.0f, 8.0d),
-                60L
+                60L,
+                sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 60L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -1153,17 +1153,17 @@ public class AsmProxyTest implements PrintTest {
             // float
             ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                7.0f
+                7.0f,
+                sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 70.0f, 8.0d),
-                70.0f
+                70.0f,
+                sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 70.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -1171,17 +1171,17 @@ public class AsmProxyTest implements PrintTest {
             // double
             ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                8.0
+                8.0,
+                sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 80.0d),
-                80.0
+                80.0,
+                sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 80.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -1189,17 +1189,17 @@ public class AsmProxyTest implements PrintTest {
             // throw
             ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             Object[] result = new Object[1];
             assertEquals(
-                sc.throwDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result),
-                8.0
+                8.0,
+                sc.throwDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result)
             );
             assertEquals(
-                result[0],
-                8.0
+                8.0,
+                result[0]
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             count.clear();
             replace.clear();
             // direct throw
@@ -1220,7 +1220,7 @@ public class AsmProxyTest implements PrintTest {
             ProxyTestException ex = assertThrows(ProxyTestException.class, () ->
                 sc2.throwDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, null)
             );
-            assertEquals(ex.getMessage(), "hello!");
+            assertEquals("hello!", ex.getMessage());
         }
     }
 

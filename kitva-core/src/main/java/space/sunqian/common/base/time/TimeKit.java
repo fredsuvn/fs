@@ -170,4 +170,7 @@ public class TimeKit {
     public static @Nonnull ZoneOffset nowOffset() {
         return ZoneOffset.systemDefault().getRules().getOffset(Instant.now());
     }
+
+    private TimeKit() {
+    }
 }

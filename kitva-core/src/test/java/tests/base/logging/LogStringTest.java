@@ -10,6 +10,6 @@ public class LogStringTest {
     @Test
     public void testLogString() {
         LogString logString = LogString.of(() -> "hello world");
-        assertEquals(logString.toString(), "hello world");
+        assertEquals("hello world", logString.toString());
     }
 }

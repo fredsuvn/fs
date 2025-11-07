@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.CharBuffer;
 
-final class CharReaderImpl {
+final class CharReaderBack {
 
     static @Nonnull CharReader of(@Nonnull Reader src, int bufSize) throws IllegalArgumentException {
         IOChecker.checkBufSize(bufSize);
@@ -1169,5 +1169,8 @@ final class CharReaderImpl {
                 throw new IOException(e);
             }
         }
+    }
+
+    private CharReaderBack() {
     }
 }

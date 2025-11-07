@@ -15,7 +15,7 @@ public class LoggerTest {
     @Test
     public void testLogger() throws Exception {
         SimpleLogger sysLogger = SimpleLogger.system();
-        assertEquals(sysLogger.level(), SimpleLogger.Level.INFO);
+        assertEquals(SimpleLogger.Level.INFO, sysLogger.level());
         sysLogger.fatal("This", " is ", "a fatal message!");
         sysLogger.error("This", " is ", "a error message!");
         sysLogger.warn("This", " is ", "a warn message!");

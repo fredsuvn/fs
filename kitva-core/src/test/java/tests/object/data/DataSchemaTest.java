@@ -1,5 +1,7 @@
 package tests.object.data;
 
+import internal.test.PrintTest;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -17,7 +19,6 @@ import space.sunqian.common.object.data.ObjectSchemaParser;
 import space.sunqian.common.object.data.handlers.SimpleBeanSchemaHandler;
 import space.sunqian.common.runtime.invoke.Invocable;
 import space.sunqian.common.runtime.reflect.TypeRef;
-import internal.test.PrintTest;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -34,8 +35,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DataSchemaTest implements PrintTest {
 
@@ -45,7 +46,7 @@ public class DataSchemaTest implements PrintTest {
         ObjectSchema schema = ObjectSchema.parse(type);
         assertSame(schema.parser(), ObjectSchemaParser.defaultParser());
         assertEquals(schema.type(), type);
-        assertEquals(schema.rawType(), TestData.class);
+        assertEquals(TestData.class, schema.rawType());
         assertTrue(schema.isObjectSchema());
         assertFalse(schema.isMapSchema());
         assertSame(schema.asObjectSchema(), schema);
@@ -66,7 +67,7 @@ public class DataSchemaTest implements PrintTest {
         // instance
         TestData<CharSequence, String> instance = new TestData<>();
         assertNull(instance.str);
-        assertEquals(instance.i, 0);
+        assertEquals(0, instance.i);
         assertNull(instance.strArray);
         assertNull(instance.t);
         assertNull(instance.u);
@@ -95,9 +96,9 @@ public class DataSchemaTest implements PrintTest {
         // property str
         ObjectProperty str = schema.getProperty("str");
         assertSame(str.owner(), schema);
-        assertEquals(str.name(), "str");
-        assertEquals(str.type(), String.class);
-        assertEquals(str.rawType(), String.class);
+        assertEquals("str", str.name());
+        assertEquals(String.class, str.type());
+        assertEquals(String.class, str.rawType());
         assertEquals(str.field(), strField);
         assertEquals(str.getterMethod(), strGetter);
         assertEquals(str.setterMethod(), strSetter);
@@ -105,26 +106,26 @@ public class DataSchemaTest implements PrintTest {
         assertNull(str.getValue(instance));
         assertTrue(str.isWritable());
         str.setValue(instance, "hello");
-        assertEquals(instance.str, "hello");
+        assertEquals("hello", instance.str);
         // property i
         ObjectProperty i = schema.getProperty("i");
         assertSame(i.owner(), schema);
-        assertEquals(i.name(), "i");
-        assertEquals(i.type(), int.class);
-        assertEquals(i.rawType(), int.class);
+        assertEquals("i", i.name());
+        assertEquals(int.class, i.type());
+        assertEquals(int.class, i.rawType());
         assertEquals(i.field(), iField);
         assertEquals(i.getterMethod(), iGetter);
         assertNull(i.setterMethod());
         assertTrue(i.isReadable());
-        assertEquals(i.getValue(instance), 0);
+        assertEquals(0, i.getValue(instance));
         assertFalse(i.isWritable());
         assertThrows(DataObjectException.class, () -> i.setValue(instance, 1));
         // property strArray
         ObjectProperty strArray = schema.getProperty("strArray");
         assertSame(strArray.owner(), schema);
-        assertEquals(strArray.name(), "strArray");
-        assertEquals(strArray.type(), String[].class);
-        assertEquals(strArray.rawType(), String[].class);
+        assertEquals("strArray", strArray.name());
+        assertEquals(String[].class, strArray.type());
+        assertEquals(String[].class, strArray.rawType());
         assertEquals(strArray.field(), strArrayField);
         assertNull(strArray.getterMethod());
         assertEquals(strArray.setterMethod(), strArraySetter);
@@ -132,13 +133,13 @@ public class DataSchemaTest implements PrintTest {
         assertThrows(DataObjectException.class, () -> strArray.getValue(instance));
         assertTrue(strArray.isWritable());
         strArray.setValue(instance, new String[]{"hello"});
-        assertArrayEquals(instance.strArray, new String[]{"hello"});
+        assertArrayEquals(new String[]{"hello"}, instance.strArray);
         // property t
         ObjectProperty t = schema.getProperty("t");
         assertSame(t.owner(), schema);
-        assertEquals(t.name(), "t");
-        assertEquals(t.type(), CharSequence.class);
-        assertEquals(t.rawType(), CharSequence.class);
+        assertEquals("t", t.name());
+        assertEquals(CharSequence.class, t.type());
+        assertEquals(CharSequence.class, t.rawType());
         assertEquals(t.field(), tField);
         assertEquals(t.getterMethod(), tGetter);
         assertEquals(t.setterMethod(), tSetter);
@@ -146,13 +147,13 @@ public class DataSchemaTest implements PrintTest {
         assertNull(t.getValue(instance));
         assertTrue(t.isWritable());
         t.setValue(instance, "hello");
-        assertEquals(instance.t, "hello");
+        assertEquals("hello", instance.t);
         // property UU
         ObjectProperty UU = schema.getProperty("UU");
         assertSame(UU.owner(), schema);
-        assertEquals(UU.name(), "UU");
-        assertEquals(UU.type(), String.class);
-        assertEquals(UU.rawType(), String.class);
+        assertEquals("UU", UU.name());
+        assertEquals(String.class, UU.type());
+        assertEquals(String.class, UU.rawType());
         assertNull(UU.field());
         assertEquals(UU.getterMethod(), uGetter);
         assertEquals(UU.setterMethod(), uSetter);
@@ -160,25 +161,25 @@ public class DataSchemaTest implements PrintTest {
         assertNull(UU.getValue(instance));
         assertTrue(UU.isWritable());
         UU.setValue(instance, "hello");
-        assertEquals(instance.u, "hello");
+        assertEquals("hello", instance.u);
         // property class
         ObjectProperty classProp = schema.getProperty("class");
         assertSame(classProp.owner(), schema);
-        assertEquals(classProp.name(), "class");
+        assertEquals("class", classProp.name());
         assertEquals(classProp.type(), new TypeRef<Class<?>>() {}.type());
-        assertEquals(classProp.rawType(), Class.class);
+        assertEquals(Class.class, classProp.rawType());
         assertNull(classProp.field());
         assertEquals(classProp.getterMethod(), classGetter);
         assertNull(classProp.setterMethod());
         assertTrue(classProp.isReadable());
-        assertEquals(classProp.getValue(instance), TestData.class);
+        assertEquals(TestData.class, classProp.getValue(instance));
         assertFalse(classProp.isWritable());
         // properties b, bb, BB
         ObjectProperty b = schema.getProperty("b");
         assertSame(b.owner(), schema);
-        assertEquals(b.name(), "b");
-        assertEquals(b.type(), boolean.class);
-        assertEquals(b.rawType(), boolean.class);
+        assertEquals("b", b.name());
+        assertEquals(boolean.class, b.type());
+        assertEquals(boolean.class, b.rawType());
         assertEquals(b.field(), bField);
         assertEquals(b.getterMethod(), bGetter);
         assertNull(b.setterMethod());
@@ -187,9 +188,9 @@ public class DataSchemaTest implements PrintTest {
         assertFalse(b.isWritable());
         ObjectProperty bb = schema.getProperty("bb");
         assertSame(bb.owner(), schema);
-        assertEquals(bb.name(), "bb");
-        assertEquals(bb.type(), boolean.class);
-        assertEquals(bb.rawType(), boolean.class);
+        assertEquals("bb", bb.name());
+        assertEquals(boolean.class, bb.type());
+        assertEquals(boolean.class, bb.rawType());
         assertEquals(bb.field(), bbField);
         assertEquals(bb.getterMethod(), bbGetter);
         assertNull(bb.setterMethod());
@@ -198,9 +199,9 @@ public class DataSchemaTest implements PrintTest {
         assertFalse(bb.isWritable());
         ObjectProperty BB = schema.getProperty("BB");
         assertSame(BB.owner(), schema);
-        assertEquals(BB.name(), "BB");
-        assertEquals(BB.type(), boolean.class);
-        assertEquals(BB.rawType(), boolean.class);
+        assertEquals("BB", BB.name());
+        assertEquals(boolean.class, BB.type());
+        assertEquals(boolean.class, BB.rawType());
         assertEquals(BB.field(), BBField);
         assertEquals(BB.getterMethod(), BBGetter);
         assertNull(BB.setterMethod());
@@ -213,6 +214,13 @@ public class DataSchemaTest implements PrintTest {
         ObjectSchema raw = ObjectSchema.parse(TestData.class);
         assertEquals(raw.getProperty("t").type(), TestData.class.getTypeParameters()[0]);
         assertEquals(raw.getProperty("UU").type(), TestData.class.getTypeParameters()[1]);
+
+        // public field
+        ObjectSchema publicFieldSchema = ObjectSchema.parse(ForPublicFiled.class);
+        assertEquals(
+            ForPublicFiled.class.getField("publicField"),
+            publicFieldSchema.getProperty("publicField").field()
+        );
     }
 
     @Test
@@ -228,8 +236,8 @@ public class DataSchemaTest implements PrintTest {
         }
         ObjectSchemaParser preParser = ObjectSchemaParser.defaultParser().withFirstHandler(new PreHandler());
         ObjectSchema preSchema = preParser.parse(Object.class);
-        assertEquals(preSchema.type(), Object.class);
-        assertEquals(preSchema.properties().size(), 0);
+        assertEquals(Object.class, preSchema.type());
+        assertEquals(0, preSchema.properties().size());
         class LastHandler implements ObjectSchemaParser.Handler {
             @Override
             public boolean parse(@Nonnull ObjectSchemaParser.Context context) throws Exception {
@@ -276,15 +284,15 @@ public class DataSchemaTest implements PrintTest {
         }
         ObjectSchemaParser lastParser = ObjectSchemaParser.defaultParser().withLastHandler(new LastHandler());
         ObjectSchema lastSchema = lastParser.parse(Object.class);
-        assertEquals(lastSchema.type(), Object.class);
+        assertEquals(Object.class, lastSchema.type());
         assertEquals(lastSchema.properties().keySet(), SetKit.set("class", "test"));
         ObjectSchemaParser asPreParser = ObjectSchemaParser.newParser(preParser.asHandler());
         ObjectSchema asPreSchema = asPreParser.parse(Object.class);
-        assertEquals(asPreSchema.type(), Object.class);
-        assertEquals(asPreSchema.properties().size(), 0);
+        assertEquals(Object.class, asPreSchema.type());
+        assertEquals(0, asPreSchema.properties().size());
         ObjectSchemaParser asLastParser = ObjectSchemaParser.newParser(lastParser.asHandler());
         ObjectSchema asLastSchema = asLastParser.parse(Object.class);
-        assertEquals(asLastSchema.type(), Object.class);
+        assertEquals(Object.class, asLastSchema.type());
         assertEquals(asLastSchema.properties().keySet(), SetKit.set("class", "test"));
     }
 
@@ -333,14 +341,14 @@ public class DataSchemaTest implements PrintTest {
     public void testMapSchema() throws Exception {
         MapSchema schema = MapSchema.parse(HelloMap.class);
         assertSame(schema.parser(), MapSchemaParser.defaultParser());
-        assertEquals(schema.type(), HelloMap.class);
-        assertEquals(schema.rawType(), HelloMap.class);
+        assertEquals(HelloMap.class, schema.type());
+        assertEquals(HelloMap.class, schema.rawType());
         assertTrue(schema.isMapSchema());
         assertFalse(schema.isObjectSchema());
         assertSame(schema.asMapSchema(), schema);
         assertThrows(ClassCastException.class, schema::asObjectSchema);
-        assertEquals(schema.keyType(), String.class);
-        assertEquals(schema.valueType(), Long.class);
+        assertEquals(String.class, schema.keyType());
+        assertEquals(Long.class, schema.valueType());
         printFor("MapSchema toString", schema);
         assertEquals(
             schema.toString(),
@@ -348,11 +356,11 @@ public class DataSchemaTest implements PrintTest {
         );
         assertThrows(DataObjectException.class, () -> MapSchema.parse(String.class));
         MapSchema schemaWithTypes = MapSchema.parse(Map.class, Object.class, Long.class);
-        assertEquals(schemaWithTypes.type(), Map.class);
-        assertEquals(schemaWithTypes.rawType(), Map.class);
+        assertEquals(Map.class, schemaWithTypes.type());
+        assertEquals(Map.class, schemaWithTypes.rawType());
         assertSame(schemaWithTypes.parser(), MapSchemaParser.defaultParser());
-        assertEquals(schemaWithTypes.keyType(), Object.class);
-        assertEquals(schemaWithTypes.valueType(), Long.class);
+        assertEquals(Object.class, schemaWithTypes.keyType());
+        assertEquals(Long.class, schemaWithTypes.valueType());
         // schema equal
         MapSchema m1 = MapSchema.parse(Map.class);
         MapSchema m2 = MapSchema.parse(Map.class);
@@ -533,5 +541,12 @@ public class DataSchemaTest implements PrintTest {
         public Set<Entry<String, Long>> entrySet() {
             return null;
         }
+    }
+
+    @Data
+    public static class ForPublicFiled {
+
+        public String publicField;
+
     }
 }

@@ -29,8 +29,8 @@ public class InvokeTest {
         Object a = Invocable.of(A.class.getConstructor()).invoke(null);
         assertTrue(a instanceof A);
         assertEquals(
-            Invocable.of(A.class.getMethod("instanceMethod", String.class)).invoke(a, "aaa"),
-            "aaa"
+            "aaa",
+            Invocable.of(A.class.getMethod("instanceMethod", String.class)).invoke(a, "aaa")
         );
         for (InvocationMode mode : InvocationMode.values()) {
             testInvokeConstructor(mode);
@@ -93,8 +93,8 @@ public class InvokeTest {
         assertTrue(a instanceof A);
         MethodHandle handle2 = MethodHandles.lookup().unreflect(A.class.getMethod("instanceMethod", String.class));
         assertEquals(
-            Invocable.of(handle2, false).invoke(a, "aaa"),
-            "aaa"
+            "aaa",
+            Invocable.of(handle2, false).invoke(a, "aaa")
         );
         MethodHandle handle3 = MethodHandles.lookup().unreflect(A.class.getMethod("instanceMethod", String.class));
         assertEquals(

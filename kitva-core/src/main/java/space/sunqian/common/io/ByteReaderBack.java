@@ -2,6 +2,7 @@ package space.sunqian.common.io;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.Kit;
 import space.sunqian.common.base.bytes.BytesKit;
 import space.sunqian.common.base.math.MathKit;
 import space.sunqian.common.io.IOChecker.ReadChecker;
@@ -14,7 +15,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
-final class ByteReaderImpl {
+final class ByteReaderBack {
 
     static @Nonnull ByteReader of(@Nonnull InputStream src, int bufSize) throws IllegalArgumentException {
         IOChecker.checkBufSize(bufSize);
@@ -1371,10 +1372,7 @@ final class ByteReaderImpl {
 
         @Override
         public void mark(int readAheadLimit) {
-            try {
-                in.mark();
-            } catch (Exception ignored) {
-            }
+            Kit.ignoreException(in::mark);
         }
 
         @Override
@@ -1399,5 +1397,8 @@ final class ByteReaderImpl {
         public int available() {
             return in.ready();
         }
+    }
+
+    private ByteReaderBack() {
     }
 }

@@ -132,4 +132,7 @@ public class StreamKit {
             }
         };
     }
+
+    private StreamKit() {
+    }
 }

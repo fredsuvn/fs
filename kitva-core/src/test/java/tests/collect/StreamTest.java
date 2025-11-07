@@ -43,33 +43,33 @@ public class StreamTest {
         {
             // Object
             Supplier<String> supplier = StreamKit.toSupplier(StreamKit.stream("1", "2", "3"));
-            assertEquals(supplier.get(), "1");
-            assertEquals(supplier.get(), "2");
-            assertEquals(supplier.get(), "3");
+            assertEquals("1", supplier.get());
+            assertEquals("2", supplier.get());
+            assertEquals("3", supplier.get());
             assertThrows(NoSuchElementException.class, supplier::get);
         }
         {
             // int
             IntSupplier supplier = StreamKit.toSupplier(IntStream.of(1, 2, 3));
-            assertEquals(supplier.getAsInt(), 1);
-            assertEquals(supplier.getAsInt(), 2);
-            assertEquals(supplier.getAsInt(), 3);
+            assertEquals(1, supplier.getAsInt());
+            assertEquals(2, supplier.getAsInt());
+            assertEquals(3, supplier.getAsInt());
             assertThrows(NoSuchElementException.class, supplier::getAsInt);
         }
         {
             // long
             LongSupplier supplier = StreamKit.toSupplier(LongStream.of(1, 2, 3));
-            assertEquals(supplier.getAsLong(), 1);
-            assertEquals(supplier.getAsLong(), 2);
-            assertEquals(supplier.getAsLong(), 3);
+            assertEquals(1, supplier.getAsLong());
+            assertEquals(2, supplier.getAsLong());
+            assertEquals(3, supplier.getAsLong());
             assertThrows(NoSuchElementException.class, supplier::getAsLong);
         }
         {
             // double
             DoubleSupplier supplier = StreamKit.toSupplier(DoubleStream.of(1, 2, 3));
-            assertEquals(supplier.getAsDouble(), 1.0);
-            assertEquals(supplier.getAsDouble(), 2.0);
-            assertEquals(supplier.getAsDouble(), 3.0);
+            assertEquals(1.0, supplier.getAsDouble());
+            assertEquals(2.0, supplier.getAsDouble());
+            assertEquals(3.0, supplier.getAsDouble());
             assertThrows(NoSuchElementException.class, supplier::getAsDouble);
         }
     }

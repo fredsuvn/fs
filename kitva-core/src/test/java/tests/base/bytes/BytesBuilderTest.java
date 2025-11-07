@@ -79,7 +79,7 @@ public class BytesBuilderTest implements DataTest, AssertTest {
         arrayBuf.get(new byte[5]);
         bb.append(arrayBuf);
         assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 30));
-        assertEquals(buffer.position(), 5);
+        assertEquals(5, buffer.position());
         assertFalse(buffer.hasRemaining());
         bb.append(IOKit.newInputStream(Arrays.copyOfRange(bs, 30, 40)));
         assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 40));
@@ -96,7 +96,7 @@ public class BytesBuilderTest implements DataTest, AssertTest {
         assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 70));
         bb.append(ByteBuffer.allocateDirect(0));
         assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 70));
-        assertEquals(buffer2.position(), 10);
+        assertEquals(10, buffer2.position());
         assertFalse(buffer2.hasRemaining());
         bb.append(BytesKit.emptyBuffer());
         assertThrows(IORuntimeException.class, () -> bb.append(new InputStream() {
@@ -108,7 +108,7 @@ public class BytesBuilderTest implements DataTest, AssertTest {
         assertThrows(IllegalArgumentException.class, () ->
             bb.append(new ByteArrayInputStream(new byte[0]), -1)
         );
-        assertEquals(bb.size(), 70);
+        assertEquals(70, bb.size());
         assertEquals(bb.toByteBuffer(), ByteBuffer.wrap(bs, 0, 70));
         assertArrayEquals(Arrays.copyOf(cs, 70), bb.toString().toCharArray());
         assertArrayEquals(Arrays.copyOf(cs, 70), bb.toString("utf-8").toCharArray());

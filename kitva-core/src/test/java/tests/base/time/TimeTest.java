@@ -130,7 +130,7 @@ public class TimeTest implements PrintTest {
         {
             // pattern
             TimeFormatter p = TimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            assertEquals(p.pattern(), "yyyy-MM-dd HH:mm:ss");
+            assertEquals("yyyy-MM-dd HH:mm:ss", p.pattern());
             assertTrue(p.hasPattern());
             TimeFormatter f = TimeFormatter.ofFormatter(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             assertThrows(DateTimeException.class, f::pattern);
@@ -144,7 +144,7 @@ public class TimeTest implements PrintTest {
         {
             // default formatter
             // assertEquals(TimeKit.formatter().pattern(), TimeKit.DEFAULT_PATTERN);
-            assertEquals(TimeFormatter.defaultFormatter().pattern(), TimeKit.DEFAULT_PATTERN);
+            assertEquals(TimeKit.DEFAULT_PATTERN, TimeFormatter.defaultFormatter().pattern());
         }
     }
 

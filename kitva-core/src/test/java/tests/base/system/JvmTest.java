@@ -35,14 +35,14 @@ public class JvmTest implements AssertTest, PrintTest {
     public void testJavaVersion() {
         printFor("JVM description", JvmKit.jvmDescription());
         printFor("JDK major version", JvmKit.javaMajorVersion());
-        assertEquals(JvmKit.javaMajorVersion("1.8.0_452"), 8);
-        assertEquals(JvmKit.javaMajorVersion("25"), 25);
-        assertEquals(JvmKit.javaMajorVersion("25.0.0-ea"), 25);
-        assertEquals(JvmKit.javaMajorVersion("17-ea"), 17);
-        assertEquals(JvmKit.javaMajorVersion("21-preview"), 21);
-        assertEquals(JvmKit.javaMajorVersion("1.8"), 8);
-        assertEquals(JvmKit.javaMajorVersion("1.8-ea"), 8);
-        assertEquals(JvmKit.javaMajorVersion("1.ea"), -1);
+        assertEquals(8, JvmKit.javaMajorVersion("1.8.0_452"));
+        assertEquals(25, JvmKit.javaMajorVersion("25"));
+        assertEquals(25, JvmKit.javaMajorVersion("25.0.0-ea"));
+        assertEquals(17, JvmKit.javaMajorVersion("17-ea"));
+        assertEquals(21, JvmKit.javaMajorVersion("21-preview"));
+        assertEquals(8, JvmKit.javaMajorVersion("1.8"));
+        assertEquals(8, JvmKit.javaMajorVersion("1.8-ea"));
+        assertEquals(-1, JvmKit.javaMajorVersion("1.ea"));
     }
 
     @Test

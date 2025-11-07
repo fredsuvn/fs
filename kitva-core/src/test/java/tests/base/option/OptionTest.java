@@ -13,10 +13,10 @@ public class OptionTest {
     @Test
     public void testOption() {
         Option<?, ?>[] opts = array(Option.of("a", "1"), Option.of("b", "2"), Option.of("c", "3"));
-        assertEquals(Option.findValue("b", opts), "2");
-        assertEquals(Option.findValue("d", opts), (String) null);
-        assertEquals(Option.findValue("d", Option.emptyOptions()), (String) null);
-        assertEquals(Option.findValue("b", opts), "2");
+        assertEquals("2", Option.findValue("b", opts));
+        assertEquals((String) null, Option.findValue("d", opts));
+        assertEquals((String) null, Option.findValue("d", Option.emptyOptions()));
+        assertEquals("2", Option.findValue("b", opts));
         assertTrue(Option.containsKey("a", opts));
         assertFalse(Option.containsKey("d", opts));
     }

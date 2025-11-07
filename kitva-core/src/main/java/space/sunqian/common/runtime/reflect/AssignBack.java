@@ -200,4 +200,7 @@ final class AssignBack {
         Type assigneeComponent = assignee.getGenericComponentType();
         return isAssignable(assignedComponent, assigneeComponent);
     }
+
+    private AssignBack() {
+    }
 }

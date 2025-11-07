@@ -36,11 +36,11 @@ public class BufferTest implements DataTest {
         byte[] bytes = new byte[100];
         ByteBuffer buffer = MaterialBox.copyPadding(bytes);
         buffer.get();
-        assertEquals(buffer.arrayOffset(), 10);
-        assertEquals(buffer.position(), 1);
-        assertEquals(buffer.remaining(), 99);
-        assertEquals(BufferKit.arrayStartIndex(buffer), 10 + 1);
-        assertEquals(BufferKit.arrayEndIndex(buffer), 10 + 1 + 99);
+        assertEquals(10, buffer.arrayOffset());
+        assertEquals(1, buffer.position());
+        assertEquals(99, buffer.remaining());
+        assertEquals(10 + 1, BufferKit.arrayStartIndex(buffer));
+        assertEquals(10 + 1 + 99, BufferKit.arrayEndIndex(buffer));
     }
 
     @Test
@@ -61,15 +61,15 @@ public class BufferTest implements DataTest {
             byte[] data = randomBytes(128);
             ByteBuffer buffer = BufferKit.copyDirect(data);
             assertEquals(buffer, ByteBuffer.wrap(data));
-            assertEquals(buffer.position(), 0);
+            assertEquals(0, buffer.position());
             assertEquals(buffer.limit(), data.length);
             assertEquals(buffer.capacity(), data.length);
             assertTrue(buffer.isDirect());
             buffer = BufferKit.copyDirect(data, 6, 66);
             assertEquals(buffer, ByteBuffer.wrap(data, 6, 66));
-            assertEquals(buffer.position(), 0);
-            assertEquals(buffer.limit(), 66);
-            assertEquals(buffer.capacity(), 66);
+            assertEquals(0, buffer.position());
+            assertEquals(66, buffer.limit());
+            assertEquals(66, buffer.capacity());
             assertTrue(buffer.isDirect());
         }
         {
@@ -77,15 +77,15 @@ public class BufferTest implements DataTest {
             char[] data = randomChars(128);
             CharBuffer buffer = BufferKit.copyDirect(data);
             assertEquals(buffer, CharBuffer.wrap(data));
-            assertEquals(buffer.position(), 0);
+            assertEquals(0, buffer.position());
             assertEquals(buffer.limit(), data.length);
             assertEquals(buffer.capacity(), data.length);
             assertTrue(buffer.isDirect());
             buffer = BufferKit.copyDirect(data, 6, 66);
             assertEquals(buffer, CharBuffer.wrap(data, 6, 66));
-            assertEquals(buffer.position(), 0);
-            assertEquals(buffer.limit(), 66);
-            assertEquals(buffer.capacity(), 66);
+            assertEquals(0, buffer.position());
+            assertEquals(66, buffer.limit());
+            assertEquals(66, buffer.capacity());
             assertTrue(buffer.isDirect());
         }
     }
@@ -107,8 +107,8 @@ public class BufferTest implements DataTest {
             assertTrue(b4.isDirect());
             ByteBuffer b5 = ByteBuffer.wrap(data, 6, 66);
             assertArrayEquals(BufferKit.copyContent(b5), Arrays.copyOfRange(data, 6, 6 + 66));
-            assertEquals(b5.position(), 6);
-            assertEquals(b5.remaining(), 66);
+            assertEquals(6, b5.position());
+            assertEquals(66, b5.remaining());
         }
         {
             // char
@@ -127,8 +127,8 @@ public class BufferTest implements DataTest {
             assertTrue(b4.isDirect());
             CharBuffer b5 = CharBuffer.wrap(data, 6, 66);
             assertArrayEquals(BufferKit.copyContent(b5), Arrays.copyOfRange(data, 6, 6 + 66));
-            assertEquals(b5.position(), 6);
-            assertEquals(b5.remaining(), 66);
+            assertEquals(6, b5.position());
+            assertEquals(66, b5.remaining());
         }
     }
 
@@ -170,10 +170,10 @@ public class BufferTest implements DataTest {
             byte[] data = ArrayKit.fill(new byte[size], (byte) 6);
             ByteBuffer buffer = ByteBuffer.wrap(data);
             ByteBuffer slice = BufferKit.slice(buffer, length);
-            assertEquals(buffer.position(), 0);
+            assertEquals(0, buffer.position());
             assertEquals(buffer.limit(), size);
             assertEquals(buffer.capacity(), size);
-            assertEquals(slice.position(), 0);
+            assertEquals(0, slice.position());
             assertEquals(slice.limit(), length);
             assertEquals(slice.capacity(), length);
             slice.put(ArrayKit.fill(new byte[length], (byte) 8));
@@ -191,10 +191,10 @@ public class BufferTest implements DataTest {
             byte[] data = ArrayKit.fill(new byte[size], (byte) 6);
             ByteBuffer buffer = ByteBuffer.wrap(data);
             ByteBuffer slice = BufferKit.slice(buffer, offset, length);
-            assertEquals(buffer.position(), 0);
+            assertEquals(0, buffer.position());
             assertEquals(buffer.limit(), size);
             assertEquals(buffer.capacity(), size);
-            assertEquals(slice.position(), 0);
+            assertEquals(0, slice.position());
             assertEquals(slice.limit(), length);
             assertEquals(slice.capacity(), length);
             slice.put(ArrayKit.fill(new byte[length], (byte) 8));
@@ -216,10 +216,10 @@ public class BufferTest implements DataTest {
             char[] data = ArrayKit.fill(new char[size], (char) 6);
             CharBuffer buffer = CharBuffer.wrap(data);
             CharBuffer slice = BufferKit.slice(buffer, length);
-            assertEquals(buffer.position(), 0);
+            assertEquals(0, buffer.position());
             assertEquals(buffer.limit(), size);
             assertEquals(buffer.capacity(), size);
-            assertEquals(slice.position(), 0);
+            assertEquals(0, slice.position());
             assertEquals(slice.limit(), length);
             assertEquals(slice.capacity(), length);
             slice.put(ArrayKit.fill(new char[length], (char) 8));
@@ -237,10 +237,10 @@ public class BufferTest implements DataTest {
             char[] data = ArrayKit.fill(new char[size], (char) 6);
             CharBuffer buffer = CharBuffer.wrap(data);
             CharBuffer slice = BufferKit.slice(buffer, offset, length);
-            assertEquals(buffer.position(), 0);
+            assertEquals(0, buffer.position());
             assertEquals(buffer.limit(), size);
             assertEquals(buffer.capacity(), size);
-            assertEquals(slice.position(), 0);
+            assertEquals(0, slice.position());
             assertEquals(slice.limit(), length);
             assertEquals(slice.capacity(), length);
             slice.put(ArrayKit.fill(new char[length], (char) 8));
@@ -272,7 +272,7 @@ public class BufferTest implements DataTest {
             // byte to string
             String hello = "hello";
             byte[] bytes = hello.getBytes(CharsKit.defaultCharset());
-            assertEquals(BufferKit.string(ByteBuffer.wrap(bytes)), hello);
+            assertEquals(hello, BufferKit.string(ByteBuffer.wrap(bytes)));
             assertNull(BufferKit.string(ByteBuffer.allocate(0)));
         }
 
@@ -354,8 +354,8 @@ public class BufferTest implements DataTest {
             assertEquals(dst.position(), actualLen);
             src.clear();
             dst = ByteBuffer.allocate(0);
-            assertEquals(BufferKit.readTo(src, dst, readSize), 0);
-            assertEquals(src.position(), 0);
+            assertEquals(0, BufferKit.readTo(src, dst, readSize));
+            assertEquals(0, src.position());
         }
         {
             // buffer to channel
@@ -512,8 +512,8 @@ public class BufferTest implements DataTest {
             assertEquals(dst.position(), actualLen);
             src.clear();
             dst = CharBuffer.allocate(0);
-            assertEquals(BufferKit.readTo(src, dst, readSize), 0);
-            assertEquals(src.position(), 0);
+            assertEquals(0, BufferKit.readTo(src, dst, readSize));
+            assertEquals(0, src.position());
         }
         {
             // heap buffer to appender
@@ -559,7 +559,7 @@ public class BufferTest implements DataTest {
         ByteBuffer dst = ByteBuffer.allocate(strBytes.length);
         BufferKit.write(dst, str);
         dst.flip();
-        assertEquals(BufferKit.string(dst), str);
+        assertEquals(str, BufferKit.string(dst));
         ByteBuffer dst2 = ByteBuffer.allocate(strBytes.length - 1);
         assertThrows(IORuntimeException.class, () -> BufferKit.write(dst2, str));
     }

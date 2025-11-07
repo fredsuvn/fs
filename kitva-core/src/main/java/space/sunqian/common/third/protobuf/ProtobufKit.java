@@ -18,4 +18,7 @@ public class ProtobufKit {
     public static boolean isAvailable() {
         return ClassKit.classExists("com.google.protobuf.Message");
     }
+
+    private ProtobufKit() {
+    }
 }

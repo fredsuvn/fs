@@ -71,13 +71,13 @@ public class SpecialReaderTest {
         Arrays.fill(dest, (byte) 9);
 
         test.setNextOperation(ReadOps.READ_ZERO);
-        assertEquals(test.read(dest), 0);
+        assertEquals(0, test.read(dest));
         assertNotEquals(dest, bytes);
         in.reset();
         Arrays.fill(dest, (byte) 9);
 
         test.setNextOperation(ReadOps.REACH_END);
-        assertEquals(test.read(dest), -1);
+        assertEquals(-1, test.read(dest));
         assertNotEquals(dest, bytes);
         in.reset();
         Arrays.fill(dest, (byte) 9);
@@ -92,20 +92,20 @@ public class SpecialReaderTest {
         byte[] bytes = new byte[]{1, 2, 3, 4, 5, 6};
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         TestInputStream test = new TestInputStream(in);
-        assertEquals(test.read(), 1);
+        assertEquals(1, test.read());
         in.reset();
 
         test.setNextOperation(ReadOps.READ_NORMAL);
         ;
-        assertEquals(test.read(), 1);
+        assertEquals(1, test.read());
         in.reset();
 
         test.setNextOperation(ReadOps.READ_ZERO);
-        assertEquals(test.read(), -1);
+        assertEquals(-1, test.read());
         in.reset();
 
         test.setNextOperation(ReadOps.REACH_END);
-        assertEquals(test.read(), -1);
+        assertEquals(-1, test.read());
         in.reset();
 
         test.setNextOperation(ReadOps.THROW);
@@ -117,20 +117,20 @@ public class SpecialReaderTest {
         byte[] bytes = new byte[]{1, 2, 3, 4, 5, 6};
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         TestInputStream test = new TestInputStream(in);
-        assertEquals(test.skip(6), 6);
+        assertEquals(6, test.skip(6));
         in.reset();
 
         test.setNextOperation(ReadOps.READ_NORMAL);
         ;
-        assertEquals(test.skip(6), 6);
+        assertEquals(6, test.skip(6));
         in.reset();
 
         test.setNextOperation(ReadOps.READ_ZERO);
-        assertEquals(test.skip(6), 0);
+        assertEquals(0, test.skip(6));
         in.reset();
 
         test.setNextOperation(ReadOps.REACH_END);
-        assertEquals(test.skip(6), 0);
+        assertEquals(0, test.skip(6));
         in.reset();
 
         test.setNextOperation(ReadOps.THROW);
@@ -142,19 +142,19 @@ public class SpecialReaderTest {
         byte[] bytes = new byte[]{1, 2, 3, 4, 5, 6};
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         TestInputStream test = new TestInputStream(in);
-        assertEquals(test.available(), 6);
+        assertEquals(6, test.available());
         in.reset();
 
         test.setNextOperation(ReadOps.READ_NORMAL);
-        assertEquals(test.available(), 6);
+        assertEquals(6, test.available());
         in.reset();
 
         test.setNextOperation(ReadOps.READ_ZERO);
-        assertEquals(test.available(), 0);
+        assertEquals(0, test.available());
         in.reset();
 
         test.setNextOperation(ReadOps.REACH_END);
-        assertEquals(test.available(), 0);
+        assertEquals(0, test.available());
         in.reset();
 
         test.setNextOperation(ReadOps.THROW);
@@ -213,13 +213,13 @@ public class SpecialReaderTest {
         Arrays.fill(dest, (char) 9);
 
         test.setNextOperation(ReadOps.READ_ZERO);
-        assertEquals(test.read(dest), 0);
+        assertEquals(0, test.read(dest));
         assertNotEquals(dest, chars);
         in.reset();
         Arrays.fill(dest, (char) 9);
 
         test.setNextOperation(ReadOps.REACH_END);
-        assertEquals(test.read(dest), -1);
+        assertEquals(-1, test.read(dest));
         assertNotEquals(dest, chars);
         in.reset();
         Arrays.fill(dest, (char) 9);
@@ -234,20 +234,20 @@ public class SpecialReaderTest {
         char[] chars = new char[]{1, 2, 3, 4, 5, 6};
         CharArrayReader in = new CharArrayReader(chars);
         TestReader test = new TestReader(in);
-        assertEquals(test.read(), 1);
+        assertEquals(1, test.read());
         in.reset();
 
         test.setNextOperation(ReadOps.READ_NORMAL);
         ;
-        assertEquals(test.read(), 1);
+        assertEquals(1, test.read());
         in.reset();
 
         test.setNextOperation(ReadOps.READ_ZERO);
-        assertEquals(test.read(), -1);
+        assertEquals(-1, test.read());
         in.reset();
 
         test.setNextOperation(ReadOps.REACH_END);
-        assertEquals(test.read(), -1);
+        assertEquals(-1, test.read());
         in.reset();
 
         test.setNextOperation(ReadOps.THROW);
@@ -259,20 +259,20 @@ public class SpecialReaderTest {
         char[] chars = new char[]{1, 2, 3, 4, 5, 6};
         CharArrayReader in = new CharArrayReader(chars);
         TestReader test = new TestReader(in);
-        assertEquals(test.skip(6), 6);
+        assertEquals(6, test.skip(6));
         in.reset();
 
         test.setNextOperation(ReadOps.READ_NORMAL);
         ;
-        assertEquals(test.skip(6), 6);
+        assertEquals(6, test.skip(6));
         in.reset();
 
         test.setNextOperation(ReadOps.READ_ZERO);
-        assertEquals(test.skip(6), 0);
+        assertEquals(0, test.skip(6));
         in.reset();
 
         test.setNextOperation(ReadOps.REACH_END);
-        assertEquals(test.skip(6), 0);
+        assertEquals(0, test.skip(6));
         in.reset();
 
         test.setNextOperation(ReadOps.THROW);

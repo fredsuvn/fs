@@ -1189,4 +1189,7 @@ public class BufferKit {
             throw new IORuntimeException(e);
         }
     }
+
+    private BufferKit() {
+    }
 }

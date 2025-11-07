@@ -108,4 +108,7 @@ final class IOChecker {
             return count == 0 ? (lastReadSize < 0 ? -1 : 0) : count;
         }
     }
+
+    private IOChecker() {
+    }
 }

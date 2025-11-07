@@ -50,19 +50,19 @@ public class JdkProxyTest {
             ProxySpec spec = proxyMaker.make(
                 null, Kit.list(InterA.class, InterB.class, InterC.class), proxyHandler
             );
-            assertEquals(spec.proxiedClass(), Object.class);
+            assertEquals(Object.class, spec.proxiedClass());
             assertEquals(spec.proxiedInterfaces(), Kit.list(InterA.class, InterB.class, InterC.class));
             assertEquals(spec.proxyHandler(), proxyHandler);
             assertNotNull(spec.proxyClass());
             InterA a = spec.newInstance();
-            assertSame(a.aa("11", 11), result);
-            assertEquals(counter.get(), 1);
+            assertSame(result, a.aa("11", 11));
+            assertEquals(1, counter.get());
             InterB b = spec.newInstance();
-            assertSame(b.bb("11", 11), result);
-            assertEquals(counter.get(), 2);
+            assertSame(result, b.bb("11", 11));
+            assertEquals(2, counter.get());
             InterC c = spec.newInstance();
-            assertSame(c.cc("11", 11), result);
-            assertEquals(counter.get(), 3);
+            assertSame(result, c.cc("11", 11));
+            assertEquals(3, counter.get());
             counter.clear();
         }
         {
@@ -140,7 +140,7 @@ public class JdkProxyTest {
             assertEquals(paA.filteredA(), cls.filteredA());
             assertEquals(paB.filteredB(), cls.filteredB());
             assertEquals(paC.filteredC(), cls.filteredC());
-            assertEquals(counter.get(), 0);
+            assertEquals(0, counter.get());
             counter.clear();
         }
         {
@@ -167,7 +167,7 @@ public class JdkProxyTest {
             );
             InterOverpass1 po = spec.newInstance();
             assertNull(po.ooi("11", 11));
-            assertEquals(counter.get(), 1);
+            assertEquals(1, counter.get());
             counter.clear();
         }
     }
@@ -206,9 +206,9 @@ public class JdkProxyTest {
         );
         SuperInter psi = pc.newInstance();
         assertEquals(psi.si1(), si.si1());
-        assertEquals(counter.get(), 1);
+        assertEquals(1, counter.get());
         assertThrows(AbstractMethodError.class, psi::si2);
-        assertEquals(counter.get(), 2);
+        assertEquals(2, counter.get());
         counter.clear();
     }
 
@@ -258,21 +258,21 @@ public class JdkProxyTest {
                 }
             }
         );
-        assertEquals(counter.get(), 0);
+        assertEquals(0, counter.get());
         SameMethodA sa = pc.newInstance();
         if (isA.get()) {
-            assertEquals(sa.ss(66), 66 * 2);
+            assertEquals(66 * 2, sa.ss(66));
         } else {
-            assertEquals(sa.ss(66), 66 * 4);
+            assertEquals(66 * 4, sa.ss(66));
         }
-        assertEquals(counter.get(), 1);
+        assertEquals(1, counter.get());
         SameMethodA sb = pc.newInstance();
         if (isA.get()) {
-            assertEquals(sb.ss(66), 66 * 2);
+            assertEquals(66 * 2, sb.ss(66));
         } else {
-            assertEquals(sb.ss(66), 66 * 4);
+            assertEquals(66 * 4, sb.ss(66));
         }
-        assertEquals(counter.get(), 2);
+        assertEquals(2, counter.get());
         counter.clear();
     }
 

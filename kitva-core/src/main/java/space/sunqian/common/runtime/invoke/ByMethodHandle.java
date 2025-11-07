@@ -609,4 +609,7 @@ final class ByMethodHandle {
     //     }
     //     sb.append(");");
     // }
+
+    private ByMethodHandle() {
+    }
 }

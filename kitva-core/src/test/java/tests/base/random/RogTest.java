@@ -30,7 +30,7 @@ public class RogTest implements AssertTest, PrintTest {
                 .weight(10, "b")
                 .build();
             for (int i = 0; i < 100; i++) {
-                assertEquals(rog.next(), "a");
+                assertEquals("a", rog.next());
             }
         }
 
@@ -69,7 +69,7 @@ public class RogTest implements AssertTest, PrintTest {
                 x++;
             }
         }
-        assertEquals(x, 0);
+        assertEquals(0, x);
         showProbability(size, ac, bc, cc);
 
         // exception:

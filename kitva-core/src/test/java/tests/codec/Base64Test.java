@@ -47,22 +47,22 @@ public class Base64Test implements DataTest {
             Base64Kit.Base64Exception e;
             String err1 = "+/%==";
             e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err1));
-            assertEquals(e.position(), 2);
+            assertEquals(2, e.position());
             String err2 = "+/+/=";
             e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err2));
-            assertEquals(e.position(), 4);
+            assertEquals(4, e.position());
             String err3 = "+/==0";
             e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err3));
-            assertEquals(e.position(), 4);
+            assertEquals(4, e.position());
             String err4 = "+/=0=";
             e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err4));
-            assertEquals(e.position(), 3);
+            assertEquals(3, e.position());
             String err5 = "+/=";
             e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err5));
-            assertEquals(e.position(), 2);
+            assertEquals(2, e.position());
             String err6 = "+/h==";
             e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err6));
-            assertEquals(e.position(), 4);
+            assertEquals(4, e.position());
         }
     }
 
@@ -131,34 +131,34 @@ public class Base64Test implements DataTest {
         e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception();
         });
-        assertEquals(e.position(), -1);
+        assertEquals(-1, e.position());
         e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception("");
         });
-        assertEquals(e.position(), -1);
+        assertEquals(-1, e.position());
         e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception("", new RuntimeException());
         });
-        assertEquals(e.position(), -1);
+        assertEquals(-1, e.position());
         e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception(new RuntimeException());
         });
-        assertEquals(e.position(), -1);
+        assertEquals(-1, e.position());
         e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception(66);
         });
-        assertEquals(e.position(), 66);
+        assertEquals(66, e.position());
         e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception(66, "");
         });
-        assertEquals(e.position(), 66);
+        assertEquals(66, e.position());
         e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception(66, "", new RuntimeException());
         });
-        assertEquals(e.position(), 66);
+        assertEquals(66, e.position());
         e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception(66, new RuntimeException());
         });
-        assertEquals(e.position(), 66);
+        assertEquals(66, e.position());
     }
 }

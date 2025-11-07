@@ -442,4 +442,7 @@ final class NameFormatterBack {
             dst.append(originalName, span.startIndex(), span.endIndex());
         }
     }
+
+    private NameFormatterBack() {
+    }
 }

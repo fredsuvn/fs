@@ -249,12 +249,9 @@ public class TcpServerBuilder {
 
         @Override
         public void await() throws NetException {
-            try {
-                mainThread.join();
-                for (WorkerImpl worker : workers) {
-                    worker.thread.join();
-                }
-            } catch (InterruptedException ignored) {
+            Kit.ignoreException(mainThread::join);
+            for (WorkerImpl worker : workers) {
+                Kit.ignoreException(worker.thread::join);
             }
         }
 

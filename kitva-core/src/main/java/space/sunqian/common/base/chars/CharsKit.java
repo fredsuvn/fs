@@ -151,4 +151,7 @@ public class CharsKit {
             return null;
         }
     }
+
+    private CharsKit() {
+    }
 }

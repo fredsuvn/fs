@@ -251,8 +251,8 @@ public class RngTest implements AssertTest, PrintTest {
             byte[] array2 = new byte[size + 10];
             rng.nextBytes(array2, 5, size);
             printFor("nextBytes", Arrays.toString(array2));
-            assertArrayEquals(Arrays.copyOfRange(array2, 0, 5), new byte[]{0, 0, 0, 0, 0,});
-            assertArrayEquals(Arrays.copyOfRange(array2, array2.length - 5, array2.length), new byte[]{0, 0, 0, 0, 0,});
+            assertArrayEquals(new byte[]{0, 0, 0, 0, 0,}, Arrays.copyOfRange(array2, 0, 5));
+            assertArrayEquals(new byte[]{0, 0, 0, 0, 0,}, Arrays.copyOfRange(array2, array2.length - 5, array2.length));
             assertThrows(IndexOutOfBoundsException.class, () -> rng.nextBytes(array, -1, size));
             assertThrows(IndexOutOfBoundsException.class, () -> rng.nextBytes(array, 0, size + 1));
             assertThrows(IndexOutOfBoundsException.class, () -> rng.nextBytes(array, 0, -1));

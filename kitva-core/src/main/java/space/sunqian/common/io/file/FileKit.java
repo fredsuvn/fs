@@ -112,4 +112,7 @@ public class FileKit {
             throw new IORuntimeException(e);
         }
     }
+
+    private FileKit() {
+    }
 }

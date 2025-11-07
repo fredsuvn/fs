@@ -49,7 +49,7 @@ public interface CharReader extends Closeable {
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
     static @Nonnull CharReader from(@Nonnull Reader src, int bufferSize) throws IllegalArgumentException {
-        return CharReaderImpl.of(src, bufferSize);
+        return CharReaderBack.of(src, bufferSize);
     }
 
     /**
@@ -93,7 +93,7 @@ public interface CharReader extends Closeable {
      * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     static @Nonnull CharReader from(char @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
-        return CharReaderImpl.of(src, off, len);
+        return CharReaderBack.of(src, off, len);
     }
 
     /**
@@ -137,7 +137,7 @@ public interface CharReader extends Closeable {
      * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     static @Nonnull CharReader from(@Nonnull CharSequence src, int start, int end) throws IndexOutOfBoundsException {
-        return CharReaderImpl.of(src, start, end);
+        return CharReaderBack.of(src, start, end);
     }
 
     /**
@@ -157,7 +157,7 @@ public interface CharReader extends Closeable {
      * @return the given buffer as a new {@link CharReader}
      */
     static @Nonnull CharReader from(@Nonnull CharBuffer src) {
-        return CharReaderImpl.of(src);
+        return CharReaderBack.of(src);
     }
 
     /**
@@ -496,7 +496,7 @@ public interface CharReader extends Closeable {
      * @throws IllegalArgumentException if the limit argument is negative
      */
     default @Nonnull CharReader limit(long limit) throws IllegalArgumentException {
-        return CharReaderImpl.limit(this, limit);
+        return CharReaderBack.limit(this, limit);
     }
 
     /**
@@ -512,6 +512,6 @@ public interface CharReader extends Closeable {
      * @return a {@link Reader} represents this reader. Its content and status are shared with this reader
      */
     default @Nonnull Reader asReader() {
-        return CharReaderImpl.asReader(this);
+        return CharReaderBack.asReader(this);
     }
 }

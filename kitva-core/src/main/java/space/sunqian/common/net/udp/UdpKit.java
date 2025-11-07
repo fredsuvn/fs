@@ -24,4 +24,7 @@ public class UdpKit {
             handler.exceptionCaught(channel, e);
         }
     }
+
+    private UdpKit() {
+    }
 }

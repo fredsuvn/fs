@@ -39,7 +39,7 @@ public class ThreadTest {
     public void testUntil() {
         int[] i = {0};
         ThreadKit.until(() -> i[0]++ >= 10);
-        assertEquals(i[0], 11);
+        assertEquals(11, i[0]);
         RuntimeException cause = new RuntimeException();
         try {
             ThreadKit.until(() -> {

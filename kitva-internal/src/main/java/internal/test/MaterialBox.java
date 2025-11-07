@@ -239,4 +239,7 @@ public class MaterialBox {
             throw new IllegalStateException(e);
         }
     }
+
+    private MaterialBox() {
+    }
 }

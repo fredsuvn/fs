@@ -43,4 +43,7 @@ public class NetKit {
             .findFirst()
             .orElse(InetAddress.getByName("255.255.255.255"));
     }
+
+    private NetKit() {
+    }
 }

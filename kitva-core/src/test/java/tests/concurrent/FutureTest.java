@@ -19,9 +19,9 @@ public class FutureTest {
         ExecutorService service = Executors.newCachedThreadPool();
         {
             Future<String> future = service.submit(() -> "hello");
-            assertEquals(FutureKit.get(future), "hello");
-            assertEquals(FutureKit.get(future, 100), "hello");
-            assertEquals(FutureKit.get(future, Duration.ofMillis(100)), "hello");
+            assertEquals("hello", FutureKit.get(future));
+            assertEquals("hello", FutureKit.get(future, 100));
+            assertEquals("hello", FutureKit.get(future, Duration.ofMillis(100)));
         }
         {
             Future<String> future = service.submit(() -> {
@@ -35,9 +35,15 @@ public class FutureTest {
             Future<String> future = service.submit(() -> {
                 throw new Exception("hello");
             });
-            assertEquals(FutureKit.get(future, "world"), "world");
-            assertEquals(FutureKit.get(future, 100, "world"), "world");
-            assertEquals(FutureKit.get(future, Duration.ofMillis(100), "world"), "world");
+            assertEquals("world", FutureKit.get(future, "world"));
+            assertEquals("world", FutureKit.get(future, 100, "world"));
+            assertEquals("world", FutureKit.get(future, Duration.ofMillis(100), "world"));
+        }
+        {
+            Future<String> future = service.submit(() -> "hello");
+            assertEquals("hello", FutureKit.get(future, "world"));
+            assertEquals("hello", FutureKit.get(future, 100, "world"));
+            assertEquals("hello", FutureKit.get(future, Duration.ofMillis(100), "world"));
         }
     }
 }

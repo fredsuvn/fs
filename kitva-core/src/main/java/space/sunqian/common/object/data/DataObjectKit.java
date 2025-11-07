@@ -148,4 +148,7 @@ public class DataObjectKit {
     public static @Nonnull String toString(@Nonnull MapSchema mapSchema) {
         return mapSchema.type().getTypeName();
     }
+
+    private DataObjectKit() {
+    }
 }

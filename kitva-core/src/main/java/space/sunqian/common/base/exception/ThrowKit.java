@@ -26,4 +26,7 @@ public class ThrowKit {
         pw.flush();
         return sw.toString();
     }
+
+    private ThrowKit() {
+    }
 }

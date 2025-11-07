@@ -21,7 +21,7 @@ public class TraceTest implements PrintTest {
         if (!elements.isEmpty()) {
             StackTraceElement first = elements.get(0);
             assertEquals(first.getClassName(), TraceTest.class.getName());
-            assertEquals(first.getMethodName(), "testTrace");
+            assertEquals("testTrace", first.getMethodName());
         }
         Method method = TraceKit.class.getDeclaredMethod("parseStackTrace", StackTraceElement[].class);
         method.setAccessible(true);
@@ -39,12 +39,12 @@ public class TraceTest implements PrintTest {
     @Test
     public void testContext() {
         TraceKit.set("1", "1");
-        assertEquals(TraceKit.get("1"), "1");
-        assertEquals(TraceKit.set("1", "2"), "1");
-        assertEquals(TraceKit.get("1"), "2");
+        assertEquals("1", TraceKit.get("1"));
+        assertEquals("1", TraceKit.set("1", "2"));
+        assertEquals("2", TraceKit.get("1"));
         assertNull(TraceKit.get("2"));
-        assertEquals(TraceKit.get("2", k -> "2"), "2");
-        assertEquals(TraceKit.get("2", k -> "3"), "2");
+        assertEquals("2", TraceKit.get("2", k -> "2"));
+        assertEquals("2", TraceKit.get("2", k -> "3"));
         assertEquals(TraceKit.contextMap(), MapKit.map("1", "2", "2", "2"));
         assertNull(TraceKit.get("3", k -> null));
         assertNull(TraceKit.get("3"));

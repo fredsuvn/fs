@@ -160,4 +160,7 @@ public class CollectKit {
             }
         };
     }
+
+    private CollectKit() {
+    }
 }

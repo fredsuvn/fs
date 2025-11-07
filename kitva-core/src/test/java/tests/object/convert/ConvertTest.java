@@ -60,12 +60,12 @@ public class ConvertTest implements PrintTest {
 
     private void testObjectConverter(ObjectConverter converter) throws Exception {
         A a = new A("1", "2", "3");
-        assertEquals(converter.convert(a, B.class), new B(1L, 2L, 3L));
-        assertEquals(converter.convert(a, A.class, B.class), new B(1L, 2L, 3L));
+        assertEquals(new B(1L, 2L, 3L), converter.convert(a, B.class));
+        assertEquals(new B(1L, 2L, 3L), converter.convert(a, A.class, B.class));
         assertThrows(UnsupportedObjectConvertException.class, () -> converter.convert(null, B.class));
         ObjectConverter converter2 = ObjectConverter.newConverter(converter.asHandler());
-        assertEquals(converter2.convert(a, B.class), new B(1L, 2L, 3L));
-        assertEquals(converter2.convert(a, A.class, B.class), new B(1L, 2L, 3L));
+        assertEquals(new B(1L, 2L, 3L), converter2.convert(a, B.class));
+        assertEquals(new B(1L, 2L, 3L), converter2.convert(a, A.class, B.class));
         assertThrows(UnsupportedObjectConvertException.class, () -> converter2.convert(null, B.class));
         {
             // error during handler
@@ -86,8 +86,8 @@ public class ConvertTest implements PrintTest {
             UnsupportedObjectConvertException e = assertThrows(UnsupportedObjectConvertException.class, () ->
                 cvt.convert(a, B.class, ConvertOption.IGNORE_NULL));
             assertEquals(e.sourceObject(), a);
-            assertEquals(e.sourceObjectType(), A.class);
-            assertEquals(e.targetType(), B.class);
+            assertEquals(A.class, e.sourceObjectType());
+            assertEquals(B.class, e.targetType());
             assertSame(e.converter(), cvt);
             assertArrayEquals(e.options(), ArrayKit.array(ConvertOption.IGNORE_NULL));
         }
@@ -106,7 +106,7 @@ public class ConvertTest implements PrintTest {
             // assignable
             String hello = "hello";
             CharSequence cs = converter.convert(hello, CharSequence.class);
-            assertSame(cs, hello);
+            assertSame(hello, cs);
         }
         {
             // strict type
@@ -134,7 +134,7 @@ public class ConvertTest implements PrintTest {
         A a = new A("1", "2", "3");
         ObjectConverter converter = ObjectConverter.defaultConverter();
         // to enum
-        assertEquals(converter.convert("A", E.class), E.A);
+        assertEquals(E.A, converter.convert("A", E.class));
         assertNull(converter.convert("B", E.class));
         // to map
         Map<String, String> map1 = converter.convert(a, new TypeRef<Map<String, String>>() {});
@@ -157,23 +157,23 @@ public class ConvertTest implements PrintTest {
             Date now = new Date();
             String nowDate = TimeKit.format(now);
             Charset c8859 = StandardCharsets.ISO_8859_1;
-            assertEquals(converter.convert("123".toCharArray(), String.class), "123");
-            assertEquals(converter.convert(new BigDecimal("123.456"), String.class), "123.456");
+            assertEquals("123", converter.convert("123".toCharArray(), String.class));
+            assertEquals("123.456", converter.convert(new BigDecimal("123.456"), String.class));
             assertEquals(converter.convert(now, String.class), nowDate);
             assertEquals(converter.convert(now.toInstant(), String.class), nowDate);
-            assertEquals(converter.convert("123".getBytes(c8859), String.class, ConvertOption.charset(c8859)), "123");
-            assertEquals(converter.convert(ByteBuffer.wrap("123".getBytes(c8859)), String.class), "123");
+            assertEquals("123", converter.convert("123".getBytes(c8859), String.class, ConvertOption.charset(c8859)));
+            assertEquals("123", converter.convert(ByteBuffer.wrap("123".getBytes(c8859)), String.class));
             ByteArrayInputStream in = new ByteArrayInputStream("123".getBytes(c8859));
-            assertEquals(converter.convert(in, String.class), "123");
+            assertEquals("123", converter.convert(in, String.class));
             in.reset();
-            assertEquals(converter.convert(in, String.class), "123");
+            assertEquals("123", converter.convert(in, String.class));
             in.reset();
             assertEquals(
-                converter.convert(Channels.newChannel(in), String.class),
-                "123"
+                "123",
+                converter.convert(Channels.newChannel(in), String.class)
             );
             CharArrayReader reader = new CharArrayReader("123".toCharArray());
-            assertEquals(converter.convert(reader, String.class), "123");
+            assertEquals("123", converter.convert(reader, String.class));
             Object x = new Object();
             assertEquals(converter.convert(x, String.class), x.toString());
         }
@@ -201,14 +201,14 @@ public class ConvertTest implements PrintTest {
         {
             // to Number
             Date now = new Date();
-            assertEquals(converter.convert("123", int.class), 123);
-            assertEquals(converter.convert("123", long.class), 123L);
-            assertEquals(converter.convert("123", Long.class), 123L);
+            assertEquals(123, converter.convert("123", int.class));
+            assertEquals(123L, converter.convert("123", long.class));
+            assertEquals(123L, converter.convert("123", Long.class));
             assertEquals(converter.convert(now, long.class), now.getTime());
             assertEquals(converter.convert(now.toInstant(), Long.class), now.getTime());
-            assertEquals(converter.convert(123, long.class), 123L);
-            assertEquals(converter.convert(123, Long.class), 123L);
-            assertEquals(converter.convert(123, BigDecimal.class), new BigDecimal("123"));
+            assertEquals(123L, converter.convert(123, long.class));
+            assertEquals(123L, converter.convert(123, Long.class));
+            assertEquals(new BigDecimal("123"), converter.convert(123, BigDecimal.class));
             assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(new X<String>(), nonClass, long.class));
             assertThrows(UnsupportedObjectConvertException.class, () ->
@@ -216,13 +216,13 @@ public class ConvertTest implements PrintTest {
         }
         {
             // to boolean
-            assertEquals(converter.convert(true, boolean.class), true);
-            assertEquals(converter.convert(false, boolean.class), false);
-            assertEquals(converter.convert("true", Boolean.class), true);
-            assertEquals(converter.convert("true0", Boolean.class), false);
-            assertEquals(converter.convert(0, boolean.class), false);
-            assertEquals(converter.convert(1, boolean.class), true);
-            assertEquals(converter.convert(-1, boolean.class), true);
+            assertEquals(true, converter.convert(true, boolean.class));
+            assertEquals(false, converter.convert(false, boolean.class));
+            assertEquals(true, converter.convert("true", Boolean.class));
+            assertEquals(false, converter.convert("true0", Boolean.class));
+            assertEquals(false, converter.convert(0, boolean.class));
+            assertEquals(true, converter.convert(1, boolean.class));
+            assertEquals(true, converter.convert(-1, boolean.class));
             assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(a, boolean.class));
         }
@@ -248,19 +248,19 @@ public class ConvertTest implements PrintTest {
         {
             // to array
             String[] strArray = new String[]{"1", "2", "3"};
-            assertArrayEquals(converter.convert(strArray, int[].class), new int[]{1, 2, 3});
+            assertArrayEquals(new int[]{1, 2, 3}, converter.convert(strArray, int[].class));
             List<String> strList = ListKit.list("1", "2", "3");
-            assertArrayEquals(converter.convert(strList, int[].class), new int[]{1, 2, 3});
+            assertArrayEquals(new int[]{1, 2, 3}, converter.convert(strList, int[].class));
             assertArrayEquals(
-                converter.convert(strList, new TypeRef<List<String>>() {}.type(), int[].class),
-                new int[]{1, 2, 3}
+                new int[]{1, 2, 3},
+                converter.convert(strList, new TypeRef<List<String>>() {}.type(), int[].class)
             );
-            assertArrayEquals(converter.convert(new Iterable<String>() {
+            assertArrayEquals(new int[]{1, 2, 3}, converter.convert(new Iterable<String>() {
                 @Override
                 public @Nonnull Iterator<String> iterator() {
                     return strList.iterator();
                 }
-            }, int[].class), new int[]{1, 2, 3});
+            }, int[].class));
             // with options
             Date[] dateArray = new Date[]{now, now, now};
             assertArrayEquals(
@@ -291,20 +291,20 @@ public class ConvertTest implements PrintTest {
             // to generic array
             String[] strArray = new String[]{"1", "2", "3"};
             GenericArrayType intsType = TypeKit.arrayType(Integer.class);
-            assertArrayEquals((Integer[]) converter.convert(strArray, intsType), new Integer[]{1, 2, 3});
+            assertArrayEquals(new Integer[]{1, 2, 3}, (Integer[]) converter.convert(strArray, intsType));
             List<String> strList = ListKit.list("1", "2", "3");
-            assertArrayEquals((Integer[]) converter.convert(strList, intsType), new Integer[]{1, 2, 3});
+            assertArrayEquals(new Integer[]{1, 2, 3}, (Integer[]) converter.convert(strList, intsType));
             assertArrayEquals(
-                (Integer[]) converter.convert(strList, new TypeRef<List<String>>() {}.type(), intsType),
-                new Integer[]{1, 2, 3}
+                new Integer[]{1, 2, 3},
+                (Integer[]) converter.convert(strList, new TypeRef<List<String>>() {}.type(), intsType)
             );
-            assertArrayEquals((Integer[]) converter.convert(new Iterable<String>() {
+            assertArrayEquals(new Integer[]{1, 2, 3}, (Integer[]) converter.convert(new Iterable<String>() {
 
                 @Override
                 public @Nonnull Iterator<String> iterator() {
                     return strList.iterator();
                 }
-            }, intsType), new Integer[]{1, 2, 3});
+            }, intsType));
             // with options
             GenericArrayType stringsType = TypeKit.arrayType(String.class);
             Date[] dateArray = new Date[]{now, now, now};

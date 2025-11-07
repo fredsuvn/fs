@@ -1,5 +1,6 @@
 package tests.net;
 
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
@@ -9,7 +10,6 @@ import space.sunqian.common.net.NetException;
 import space.sunqian.common.net.udp.UdpSender;
 import space.sunqian.common.net.udp.UdpServer;
 import space.sunqian.common.net.udp.UdpServerHandler;
-import internal.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.net.DatagramPacket;
@@ -23,8 +23,8 @@ import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UdpTest implements PrintTest {
 
@@ -49,7 +49,7 @@ public class UdpTest implements PrintTest {
                 ) throws Exception {
                     String msg = new String(data, CharsKit.defaultCharset());
                     printFor("udp read", msg);
-                    assertEquals(msg, sentData);
+                    assertEquals(sentData, msg);
                     throw new XException();
                 }
 
@@ -106,7 +106,7 @@ public class UdpTest implements PrintTest {
                 new InetSocketAddress(InetAddress.getLocalHost(), server.localAddress().getPort());
             sender.sendString("hello world", address);
             assertFalse(server.isClosed());
-            assertEquals(server.workers().size(), 0);
+            assertEquals(0, server.workers().size());
             latch.await();
             sender.close();
             server.close();
@@ -149,7 +149,7 @@ public class UdpTest implements PrintTest {
                 ) throws Exception {
                     String msg = new String(data, CharsKit.defaultCharset());
                     printFor("udp read", address, ": ", msg);
-                    assertEquals(msg, sentData);
+                    assertEquals(sentData, msg);
                     readLatch.countDown();
                 }
 
@@ -167,6 +167,7 @@ public class UdpTest implements PrintTest {
         sender.close();
         UdpSender nSender = UdpSender.newSender();
         assertThrows(NetException.class, nSender::broadcastAddress);
+        assertThrows(NetException.class, nSender::refreshBroadcastAddress);
         assertThrows(NetException.class, () -> nSender.sendBroadcast(sentData, server.localAddress().getPort()));
         server.close();
         server.await();

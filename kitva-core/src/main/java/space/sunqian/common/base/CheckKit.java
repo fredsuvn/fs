@@ -349,4 +349,7 @@ public class CheckKit {
             );
         }
     }
+
+    private CheckKit() {
+    }
 }

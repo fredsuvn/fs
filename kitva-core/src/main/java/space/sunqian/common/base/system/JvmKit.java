@@ -527,4 +527,7 @@ public class JvmKit {
         }
         throw new JvmException("Unknown array type: " + type + ".");
     }
+
+    private JvmKit() {
+    }
 }

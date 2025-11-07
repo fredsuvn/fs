@@ -166,4 +166,7 @@ public class BytesKit {
             (byte) value
         };
     }
+
+    private BytesKit() {
+    }
 }

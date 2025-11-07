@@ -75,7 +75,7 @@ public class CommunicateTest implements DataTest {
         Object attachment = new Object();
         ic.attach(attachment);
         assertTrue(ic.channel().isOpen());
-        assertEquals(ic.availableString(), "hello world");
+        assertEquals("hello world", ic.availableString());
         assertTrue(ic.channel().isOpen());
         assertNull(ic.availableString());
         reader.clear();
@@ -85,7 +85,7 @@ public class CommunicateTest implements DataTest {
         assertEquals(ic.availableBuffer(), ByteBuffer.wrap(data));
         assertNull(ic.availableBytes());
         ic.writeString("hello world");
-        assertEquals(writer.toString(), "hello world");
+        assertEquals("hello world", writer.toString());
         assertNull(ic.availableString());
         assertTrue(ic.channel().isOpen());
         ic.channel().close();

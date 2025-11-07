@@ -170,4 +170,7 @@ final class ByAsm {
             AsmKit.convertObjectTo(visitor, parameter.getType());
         }
     }
+
+    private ByAsm() {
+    }
 }

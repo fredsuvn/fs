@@ -76,12 +76,12 @@ public class IOImplsTest implements DataTest {
         {
             // limited
             assertEquals(
-                IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read(),
-                -1
+                -1,
+                IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read()
             );
             assertEquals(
-                IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read(new byte[100]),
-                -1
+                -1,
+                IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read(new byte[100])
             );
         }
         {
@@ -191,10 +191,10 @@ public class IOImplsTest implements DataTest {
         InputStream in, byte[] data, boolean available, boolean close, boolean resetFirst
     ) throws Exception {
 
-        assertEquals(in.read(new byte[10], 0, 0), 0);
-        assertEquals(in.read(new byte[0]), 0);
-        assertEquals(in.skip(0), 0);
-        assertEquals(in.skip(-1), 0);
+        assertEquals(0, in.read(new byte[10], 0, 0));
+        assertEquals(0, in.read(new byte[0]));
+        assertEquals(0, in.skip(0));
+        assertEquals(0, in.skip(-1));
         assertThrows(IndexOutOfBoundsException.class, () -> in.read(new byte[10], 2, -1));
         assertThrows(IndexOutOfBoundsException.class, () -> in.read(new byte[10], -2, 1));
         assertThrows(IndexOutOfBoundsException.class, () -> in.read(new byte[1], 0, 2));
@@ -271,7 +271,7 @@ public class IOImplsTest implements DataTest {
             int readSize = 6;
             byte[] dst = new byte[readSize + 4];
             in.mark(readSize);
-            assertEquals(in.read(dst, 2, readSize), readSize);
+            assertEquals(readSize, in.read(dst, 2, readSize));
             assertArrayEquals(
                 Arrays.copyOfRange(dst, 2, 2 + readSize),
                 Arrays.copyOfRange(data, hasRead, hasRead + readSize)
@@ -279,7 +279,7 @@ public class IOImplsTest implements DataTest {
             if (in.markSupported()) {
                 in.reset();
                 dst = new byte[readSize + 4];
-                assertEquals(in.read(dst, 2, readSize), readSize);
+                assertEquals(readSize, in.read(dst, 2, readSize));
                 assertArrayEquals(
                     Arrays.copyOfRange(dst, 2, 2 + readSize),
                     Arrays.copyOfRange(data, hasRead, hasRead + readSize)
@@ -296,14 +296,14 @@ public class IOImplsTest implements DataTest {
             }
             int skip = 11;
             in.mark(skip);
-            assertEquals(in.skip(0), 0);
-            assertEquals(in.skip(-1), 0);
-            assertEquals(in.skip(skip), skip);
+            assertEquals(0, in.skip(0));
+            assertEquals(0, in.skip(-1));
+            assertEquals(skip, in.skip(skip));
             if (in.markSupported()) {
                 in.reset();
-                assertEquals(in.skip(0), 0);
-                assertEquals(in.skip(-1), 0);
-                assertEquals(in.skip(skip), skip);
+                assertEquals(0, in.skip(0));
+                assertEquals(0, in.skip(-1));
+                assertEquals(skip, in.skip(skip));
             }
             hasRead += skip;
         }
@@ -318,7 +318,7 @@ public class IOImplsTest implements DataTest {
             int remainingSize = data.length - hasRead;
             byte[] remaining = new byte[remainingSize * 2];
             assertEquals(in.read(remaining), remainingSize);
-            assertEquals(in.read(), -1);
+            assertEquals(-1, in.read());
             assertArrayEquals(
                 Arrays.copyOf(remaining, remainingSize),
                 Arrays.copyOfRange(data, hasRead, data.length)
@@ -327,7 +327,7 @@ public class IOImplsTest implements DataTest {
                 in.reset();
                 byte[] remaining2 = new byte[remainingSize * 2];
                 assertEquals(in.read(remaining2), remainingSize);
-                assertEquals(in.read(), -1);
+                assertEquals(-1, in.read());
                 assertArrayEquals(
                     Arrays.copyOf(remaining2, remainingSize),
                     Arrays.copyOfRange(data, hasRead, data.length)
@@ -355,13 +355,13 @@ public class IOImplsTest implements DataTest {
     }
 
     private static void testEndInputStream(InputStream in) throws Exception {
-        assertEquals(in.available(), 0);
-        assertEquals(in.read(), -1);
-        assertEquals(in.read(new byte[10]), -1);
-        assertEquals(in.read(new byte[10], 0, 1), -1);
-        assertEquals(in.skip(999), 0);
-        assertEquals(in.skip(0), 0);
-        assertEquals(in.skip(-1), 0);
+        assertEquals(0, in.available());
+        assertEquals(-1, in.read());
+        assertEquals(-1, in.read(new byte[10]));
+        assertEquals(-1, in.read(new byte[10], 0, 1));
+        assertEquals(0, in.skip(999));
+        assertEquals(0, in.skip(0));
+        assertEquals(0, in.skip(-1));
     }
 
     @Test
@@ -377,12 +377,12 @@ public class IOImplsTest implements DataTest {
         {
             // limited
             assertEquals(
-                IOKit.limitedReader(new CharArrayReader(new char[100]), 0).read(),
-                -1
+                -1,
+                IOKit.limitedReader(new CharArrayReader(new char[100]), 0).read()
             );
             assertEquals(
-                IOKit.limitedReader(new CharArrayReader(new char[100]), 0).read(new char[100]),
-                -1
+                -1,
+                IOKit.limitedReader(new CharArrayReader(new char[100]), 0).read(new char[100])
             );
         }
         {
@@ -507,12 +507,12 @@ public class IOImplsTest implements DataTest {
         Reader in, char[] data, boolean ready, boolean close, boolean resetFirst
     ) throws Exception {
 
-        assertEquals(in.read(new char[10], 0, 0), 0);
-        assertEquals(in.read(new char[0]), 0);
+        assertEquals(0, in.read(new char[10], 0, 0));
+        assertEquals(0, in.read(new char[0]));
         if (data.length > 0) {
-            assertEquals(in.read(CharBuffer.allocate(0)), 0);
+            assertEquals(0, in.read(CharBuffer.allocate(0)));
         }
-        assertEquals(in.skip(0), 0);
+        assertEquals(0, in.skip(0));
         assertThrows(IllegalArgumentException.class, () -> in.skip(-1));
         // assertEquals(in.skip(-1), 0);
         assertThrows(IndexOutOfBoundsException.class, () -> in.read(new char[10], 2, -1));
@@ -590,7 +590,7 @@ public class IOImplsTest implements DataTest {
             if (in.markSupported()) {
                 in.mark(readSize);
             }
-            assertEquals(in.read(dst, 2, readSize), readSize);
+            assertEquals(readSize, in.read(dst, 2, readSize));
             assertArrayEquals(
                 Arrays.copyOfRange(dst, 2, 2 + readSize),
                 Arrays.copyOfRange(data, hasRead, hasRead + readSize)
@@ -598,7 +598,7 @@ public class IOImplsTest implements DataTest {
             if (in.markSupported()) {
                 in.reset();
                 dst = new char[readSize + 4];
-                assertEquals(in.read(dst, 2, readSize), readSize);
+                assertEquals(readSize, in.read(dst, 2, readSize));
                 assertArrayEquals(
                     Arrays.copyOfRange(dst, 2, 2 + readSize),
                     Arrays.copyOfRange(data, hasRead, hasRead + readSize)
@@ -630,16 +630,16 @@ public class IOImplsTest implements DataTest {
             if (in.markSupported()) {
                 in.mark(skip);
             }
-            assertEquals(in.skip(0), 0);
+            assertEquals(0, in.skip(0));
             assertThrows(IllegalArgumentException.class, () -> in.skip(-1));
             // assertEquals(in.skip(-1), 0);
-            assertEquals(in.skip(skip), skip);
+            assertEquals(skip, in.skip(skip));
             if (in.markSupported()) {
                 in.reset();
-                assertEquals(in.skip(0), 0);
+                assertEquals(0, in.skip(0));
                 assertThrows(IllegalArgumentException.class, () -> in.skip(-1));
                 // assertEquals(in.skip(-1), 0);
-                assertEquals(in.skip(skip), skip);
+                assertEquals(skip, in.skip(skip));
             }
             hasRead += skip;
         }
@@ -651,7 +651,7 @@ public class IOImplsTest implements DataTest {
             int remainingSize = data.length - hasRead;
             char[] remaining = new char[remainingSize * 2];
             assertEquals(in.read(remaining), remainingSize);
-            assertEquals(in.read(), -1);
+            assertEquals(-1, in.read());
             assertArrayEquals(
                 Arrays.copyOf(remaining, remainingSize),
                 Arrays.copyOfRange(data, hasRead, data.length)
@@ -660,7 +660,7 @@ public class IOImplsTest implements DataTest {
                 in.reset();
                 char[] remaining2 = new char[remainingSize * 2];
                 assertEquals(in.read(remaining2), remainingSize);
-                assertEquals(in.read(), -1);
+                assertEquals(-1, in.read());
                 assertArrayEquals(
                     Arrays.copyOf(remaining2, remainingSize),
                     Arrays.copyOfRange(data, hasRead, data.length)
@@ -688,12 +688,12 @@ public class IOImplsTest implements DataTest {
     }
 
     private static void testEndReader(Reader in) throws Exception {
-        assertEquals(in.read(), -1);
-        assertEquals(in.read(new char[10]), -1);
-        assertEquals(in.read(new char[10], 0, 1), -1);
-        assertEquals(in.read(CharBuffer.allocate(1)), -1);
-        assertEquals(in.skip(999), 0);
-        assertEquals(in.skip(0), 0);
+        assertEquals(-1, in.read());
+        assertEquals(-1, in.read(new char[10]));
+        assertEquals(-1, in.read(new char[10], 0, 1));
+        assertEquals(-1, in.read(CharBuffer.allocate(1)));
+        assertEquals(0, in.skip(999));
+        assertEquals(0, in.skip(0));
         assertThrows(IllegalArgumentException.class, () -> in.skip(-1));
         // assertEquals(in.skip(-1), 0);
     }
@@ -1056,8 +1056,8 @@ public class IOImplsTest implements DataTest {
                     return 0;
                 }
             }
-            assertEquals(new In().read(new byte[1]), 8);
-            assertEquals(new In().read(new byte[1], 0, 1), 8);
+            assertEquals(8, new In().read(new byte[1]));
+            assertEquals(8, new In().read(new byte[1], 0, 1));
             assertThrows(IndexOutOfBoundsException.class, () -> new In().read(new byte[1], 0, -1));
             assertThrows(IndexOutOfBoundsException.class, () -> new In().read(new byte[1], -1, 1));
             assertThrows(IndexOutOfBoundsException.class, () -> new In().read(new byte[1], 0, 2));
@@ -1079,8 +1079,8 @@ public class IOImplsTest implements DataTest {
                 public void close() {
                 }
             }
-            assertEquals(new In().read(new char[1]), 8);
-            assertEquals(new In().read(new char[1], 0, 1), 8);
+            assertEquals(8, new In().read(new char[1]));
+            assertEquals(8, new In().read(new char[1], 0, 1));
             assertThrows(IndexOutOfBoundsException.class, () -> new In().read(new char[1], 0, -1));
             assertThrows(IndexOutOfBoundsException.class, () -> new In().read(new char[1], -1, 1));
             assertThrows(IndexOutOfBoundsException.class, () -> new In().read(new char[1], 0, 2));
@@ -1099,10 +1099,10 @@ public class IOImplsTest implements DataTest {
                 }
             }
             new Out().write(new byte[1]);
-            assertEquals(v.get(), 8);
+            assertEquals(8, v.get());
             v.clear();
             new Out().write(new byte[1], 0, 1);
-            assertEquals(v.get(), 8);
+            assertEquals(8, v.get());
             assertThrows(IndexOutOfBoundsException.class, () -> new Out().write(new byte[1], 0, -1));
             assertThrows(IndexOutOfBoundsException.class, () -> new Out().write(new byte[1], -1, 1));
             assertThrows(IndexOutOfBoundsException.class, () -> new Out().write(new byte[1], 0, 2));
@@ -1134,19 +1134,19 @@ public class IOImplsTest implements DataTest {
                 }
             }
             new Out().write(new char[1]);
-            assertEquals(v.get(), 8);
+            assertEquals(8, v.get());
             v.clear();
             new Out().write(new char[1], 0, 1);
-            assertEquals(v.get(), 8);
+            assertEquals(8, v.get());
             assertThrows(IndexOutOfBoundsException.class, () -> new Out().write(new char[1], 0, -1));
             assertThrows(IndexOutOfBoundsException.class, () -> new Out().write(new char[1], -1, 1));
             assertThrows(IndexOutOfBoundsException.class, () -> new Out().write(new char[1], 0, 2));
             v.clear();
             new Out().write("1");
-            assertEquals(v.get(), 8);
+            assertEquals(8, v.get());
             v.clear();
             new Out().write("1", 0, 1);
-            assertEquals(v.get(), 8);
+            assertEquals(8, v.get());
             assertThrows(IndexOutOfBoundsException.class, () -> new Out().write("1", 0, -1));
             assertThrows(IndexOutOfBoundsException.class, () -> new Out().write("1", -1, 1));
             assertThrows(IndexOutOfBoundsException.class, () -> new Out().write("1", 0, 2));

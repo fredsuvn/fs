@@ -80,11 +80,11 @@ public class CollectTest {
             Iterator<Integer> intIt = Arrays.asList(1, 2, 3).iterator();
             Enumeration<Integer> intEnum = CollectKit.asEnumeration(intIt);
             assertTrue(intEnum.hasMoreElements());
-            assertEquals(intEnum.nextElement(), 1);
+            assertEquals(1, intEnum.nextElement());
             assertTrue(intEnum.hasMoreElements());
-            assertEquals(intEnum.nextElement(), 2);
+            assertEquals(2, intEnum.nextElement());
             assertTrue(intEnum.hasMoreElements());
-            assertEquals(intEnum.nextElement(), 3);
+            assertEquals(3, intEnum.nextElement());
             assertFalse(intEnum.hasMoreElements());
             assertThrows(NoSuchElementException.class, intEnum::nextElement);
         }
@@ -97,11 +97,11 @@ public class CollectTest {
             Enumeration<Integer> intEnum = vector.elements();
             Iterator<Integer> intIt = CollectKit.asIterator(intEnum);
             assertTrue(intIt.hasNext());
-            assertEquals(intIt.next(), 1);
+            assertEquals(1, intIt.next());
             assertTrue(intIt.hasNext());
-            assertEquals(intIt.next(), 2);
+            assertEquals(2, intIt.next());
             assertTrue(intIt.hasNext());
-            assertEquals(intIt.next(), 3);
+            assertEquals(3, intIt.next());
             assertFalse(intIt.hasNext());
             assertThrows(NoSuchElementException.class, intIt::next);
         }

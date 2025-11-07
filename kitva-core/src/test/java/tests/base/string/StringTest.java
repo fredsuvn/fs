@@ -27,7 +27,7 @@ public class StringTest implements DataTest, PrintTest {
         testIndexOf("123", "123");
         testIndexOf(StringView.of("123"), "123");
         testIndexOf(StringView.of("123"), "1234");
-        assertEquals(StringKit.indexOf(StringView.of("123"), "", 100), 3);
+        assertEquals(3, StringKit.indexOf(StringView.of("123"), "", 100));
         assertEquals(StringKit.indexOf("123", StringView.of("2")), "123".indexOf("2"));
         assertEquals(StringKit.lastIndexOf("123", StringView.of("2")), "123".lastIndexOf("2"));
     }
@@ -227,6 +227,10 @@ public class StringTest implements DataTest, PrintTest {
 
     @Test
     public void testEmptyAndBlank() {
+        assertTrue(StringKit.isEmpty(""));
+        assertTrue(StringKit.isEmpty(null));
+        assertFalse(StringKit.isNonEmpty(""));
+        assertFalse(StringKit.isNonEmpty(null));
         assertTrue(StringKit.isBlank(""));
         assertTrue(StringKit.isBlank(" "));
         assertTrue(StringKit.isBlank(null));
@@ -265,25 +269,25 @@ public class StringTest implements DataTest, PrintTest {
         assertFalse(StringKit.allLowerCase("ABc"));
         assertFalse(StringKit.allLowerCase("ab中"));
         assertTrue(StringKit.allLowerCase(""));
-        assertEquals(StringKit.upperCase("abc"), "ABC");
-        assertEquals(StringKit.upperCase("aBc"), "ABC");
-        assertEquals(StringKit.upperCase("abc中"), "ABC中");
-        assertEquals(StringKit.upperCase(""), "");
-        assertEquals(StringKit.lowerCase("ABC"), "abc");
-        assertEquals(StringKit.lowerCase("aBc"), "abc");
-        assertEquals(StringKit.lowerCase("aBc中"), "abc中");
-        assertEquals(StringKit.lowerCase(""), "");
+        assertEquals("ABC", StringKit.upperCase("abc"));
+        assertEquals("ABC", StringKit.upperCase("aBc"));
+        assertEquals("ABC中", StringKit.upperCase("abc中"));
+        assertEquals("", StringKit.upperCase(""));
+        assertEquals("abc", StringKit.lowerCase("ABC"));
+        assertEquals("abc", StringKit.lowerCase("aBc"));
+        assertEquals("abc中", StringKit.lowerCase("aBc中"));
+        assertEquals("", StringKit.lowerCase(""));
         // capitalize
-        assertEquals(StringKit.capitalize("abc"), "Abc");
-        assertEquals(StringKit.capitalize("a"), "A");
-        assertEquals(StringKit.capitalize("A"), "A");
-        assertEquals(StringKit.capitalize(""), "");
-        assertEquals(StringKit.capitalize("ABc"), "ABc");
-        assertEquals(StringKit.uncapitalize("Abc"), "abc");
-        assertEquals(StringKit.uncapitalize("A"), "a");
-        assertEquals(StringKit.uncapitalize("a"), "a");
-        assertEquals(StringKit.uncapitalize(""), "");
-        assertEquals(StringKit.uncapitalize("ABc"), "aBc");
-        assertEquals(StringKit.uncapitalize("ABC"), "ABC");
+        assertEquals("Abc", StringKit.capitalize("abc"));
+        assertEquals("A", StringKit.capitalize("a"));
+        assertEquals("A", StringKit.capitalize("A"));
+        assertEquals("", StringKit.capitalize(""));
+        assertEquals("ABc", StringKit.capitalize("ABc"));
+        assertEquals("abc", StringKit.uncapitalize("Abc"));
+        assertEquals("a", StringKit.uncapitalize("A"));
+        assertEquals("a", StringKit.uncapitalize("a"));
+        assertEquals("", StringKit.uncapitalize(""));
+        assertEquals("aBc", StringKit.uncapitalize("ABc"));
+        assertEquals("ABC", StringKit.uncapitalize("ABC"));
     }
 }

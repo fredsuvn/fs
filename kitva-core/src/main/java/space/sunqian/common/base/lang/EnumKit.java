@@ -45,4 +45,7 @@ public class EnumKit {
         }
         return enums[index];
     }
+
+    private EnumKit() {
+    }
 }

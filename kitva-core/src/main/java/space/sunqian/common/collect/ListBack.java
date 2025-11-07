@@ -554,4 +554,7 @@ final class ListBack {
             return size;
         }
     }
+
+    private ListBack() {
+    }
 }

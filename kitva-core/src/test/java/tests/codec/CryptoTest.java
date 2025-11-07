@@ -1,9 +1,9 @@
 package tests.codec;
 
+import internal.test.DataTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.codec.CryptoKit;
 import space.sunqian.common.io.ByteProcessor;
-import internal.test.DataTest;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -14,7 +14,6 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CryptoTest implements DataTest {
 

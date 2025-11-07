@@ -317,4 +317,7 @@ public class SystemKit {
             new LinkedHashMap<>(System.getProperties())
         );
     }
+
+    private SystemKit() {
+    }
 }

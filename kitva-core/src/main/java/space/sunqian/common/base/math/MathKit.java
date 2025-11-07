@@ -209,4 +209,7 @@ public class MathKit {
         }
         return value;
     }
+
+    private MathKit() {
+    }
 }

@@ -86,7 +86,7 @@ public class DITest implements PrintTest {
         List<InjectedResource> app2Resources = app2.resources();
         assertEquals(app2Resources.size(), appResources.size() + 3);
         List<InjectedResource> app2LocalResources = app2.localResources();
-        assertEquals(app2LocalResources.size(), 3);
+        assertEquals(3, app2LocalResources.size());
         for (InjectedResource app2Resource : app2Resources) {
             if (app2Resource.type().equals(SubService.class)) {
                 assertTrue(app2Resource.isLocal());
@@ -103,7 +103,7 @@ public class DITest implements PrintTest {
         SubService2 subService2 = app2.getResource(SubService2.class);
         assertEquals(subService2.subService2(), subService.subService() + "[" + AspectHandler2.class.getName() + "]");
         ServiceAaa serviceAaa = app2.getResource(ServiceAaa.class);
-        assertEquals(serviceAaa.getLocalName(), "A");
+        assertEquals("A", serviceAaa.getLocalName());
         assertEquals(app2.parentApps(), ListKit.list(app));
         preList.clear();
         app2.shutdown();
@@ -134,15 +134,15 @@ public class DITest implements PrintTest {
         // common resource
         ServiceAaa serviceAaa = app.getResource(ServiceAaa.class);
         assertSame(serviceAaa, app.getResource(ServiceAaa.class));
-        assertEquals(serviceAaa.getLocalName(), "A");
-        assertEquals(serviceAaa.getRemoteName(), "B");
+        assertEquals("A", serviceAaa.getLocalName());
+        assertEquals("B", serviceAaa.getRemoteName());
         ServiceBbb serviceBbb = app.getResource(ServiceBbb.class);
         assertSame(serviceBbb, app.getResource(ServiceBbb.class));
-        assertEquals(serviceBbb.getLocalName(), "B");
-        assertEquals(serviceBbb.getRemoteName(), "A");
+        assertEquals("B", serviceBbb.getLocalName());
+        assertEquals("A", serviceBbb.getRemoteName());
         InterService interService = app.getResource(InterService.class);
         assertEquals(interService.interService(), InterServiceImpl.class.getName());
-        assertEquals(starter.getNames(), "AB");
+        assertEquals("AB", starter.getNames());
         assertEquals(starter.interService(), interService.interService());
         // aspect
         assertEquals(
@@ -157,16 +157,16 @@ public class DITest implements PrintTest {
         Generic<String> stringGeneric = app.getResource(new TypeRef<Generic<String>>() {});
         Generic<Integer> integerGeneric = app.getResource(new TypeRef<Generic<Integer>>() {});
         assertNotSame(stringGeneric, integerGeneric);
-        assertEquals(stringGeneric.generic("X"), "X");
-        assertEquals(integerGeneric.generic(100), 100);
-        assertEquals(starter.generic("X"), "X");
-        assertEquals(starter.generic(100), 100);
+        assertEquals("X", stringGeneric.generic("X"));
+        assertEquals(100, integerGeneric.generic(100));
+        assertEquals("X", starter.generic("X"));
+        assertEquals(100, starter.generic(100));
         GenericInter<String> stringGenericInter = app.getResource(new TypeRef<GenericInter<String>>() {});
         GenericInter<Integer> integerGenericInter = app.getResource(new TypeRef<GenericInter<Integer>>() {});
         assertSame(stringGenericInter, stringGeneric);
         assertSame(integerGenericInter, integerGeneric);
-        assertEquals(starter.genericInter("X"), "X");
-        assertEquals(starter.genericInter(100), 100);
+        assertEquals("X", starter.genericInter("X"));
+        assertEquals(100, starter.genericInter(100));
     }
 
     public static class Starter {
@@ -681,7 +681,7 @@ public class DITest implements PrintTest {
                     .resourceTypes(Dep8.class, Dep9.class, ConstructErr.class, Dep10.class)
                     .build();
             });
-            assertEquals(startErr.failedResource().type(), ConstructErr.class);
+            assertEquals(ConstructErr.class, startErr.failedResource().type());
             for (InjectedResource initializedResource : startErr.initializedResources()) {
                 assertTrue(initializedResource.isInitialized());
             }
@@ -705,7 +705,7 @@ public class DITest implements PrintTest {
                     .build()
                     .shutdown();
             });
-            assertEquals(shutErr.failedResource().type(), DestroyErr.class);
+            assertEquals(DestroyErr.class, shutErr.failedResource().type());
             for (InjectedResource destroyedResource : shutErr.destroyedResources()) {
                 assertTrue(destroyedResource.isDestroyed());
             }

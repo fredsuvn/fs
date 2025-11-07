@@ -176,4 +176,7 @@ final class ValBack {
             return value;
         }
     }
+
+    private ValBack() {
+    }
 }

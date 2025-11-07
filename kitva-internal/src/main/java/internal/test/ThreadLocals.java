@@ -27,10 +27,12 @@ final class ThreadLocals {
         localMap.get().remove(key);
     }
 
+    private ThreadLocals() {
+    }
+
     enum Key {
 
         PRINTER,
-
         ;
     }
 }

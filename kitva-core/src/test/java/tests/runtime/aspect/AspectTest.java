@@ -41,9 +41,9 @@ public class AspectTest {
             @Override
             public @Nullable Object afterReturning(@Nullable Object result, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
                 if (replace.get()) {
-                    assertEquals(args[0], "b");
+                    assertEquals("b", args[0]);
                 } else {
-                    assertEquals(args[0], "a");
+                    assertEquals("a", args[0]);
                 }
                 count.getAndIncrement();
                 return result;
@@ -52,9 +52,9 @@ public class AspectTest {
             @Override
             public @Nullable Object afterThrowing(@Nonnull Throwable ex, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) {
                 if (replace.get()) {
-                    assertEquals(args[0], "b");
+                    assertEquals("b", args[0]);
                 } else {
-                    assertEquals(args[0], "a");
+                    assertEquals("a", args[0]);
                 }
                 count.getAndIncrement();
                 Object[] result = (Object[]) args[args.length - 1];
@@ -72,18 +72,18 @@ public class AspectTest {
             // String
             AspectSpec spec = AspectMaker.byAsm().make(cls, handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                "atrue234567.08.0"
+                "atrue234567.08.0",
+                sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             replace.set(true);
             assertEquals(
-                sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                "btrue234567.08.0"
+                "btrue234567.08.0",
+                sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
             // test AspectSpec
@@ -95,22 +95,22 @@ public class AspectTest {
             // void
             AspectSpec spec = AspectMaker.byAsm().make(cls, handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             Object[] result = new Object[1];
             sc.getVoid("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result);
             assertEquals(
-                result[0],
-                "atrue234567.08.0"
+                "atrue234567.08.0",
+                result[0]
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             replace.set(true);
             result[0] = null;
             sc.getVoid("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result);
             assertEquals(
-                result[0],
-                "btrue234567.08.0"
+                "btrue234567.08.0",
+                result[0]
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -118,17 +118,17 @@ public class AspectTest {
             // boolean
             AspectSpec spec = AspectMaker.byAsm().make(cls, handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getBoolean("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                true
+                true,
+                sc.getBoolean("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getBoolean("a", false, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                false
+                false,
+                sc.getBoolean("a", false, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -136,17 +136,17 @@ public class AspectTest {
             // byte
             AspectSpec spec = AspectMaker.byAsm().make(cls, handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getByte("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                2
+                2,
+                sc.getByte("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getByte("a", true, (byte) 20, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                20
+                20,
+                sc.getByte("a", true, (byte) 20, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -154,17 +154,17 @@ public class AspectTest {
             // char
             AspectSpec spec = AspectMaker.byAsm().make(cls, handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getChar("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                '3'
+                '3',
+                sc.getChar("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getChar("a", true, (byte) 2, '6', (short) 4, 5, 6L, 7.0f, 8.0d),
-                '6'
+                '6',
+                sc.getChar("a", true, (byte) 2, '6', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -172,17 +172,17 @@ public class AspectTest {
             // short
             AspectSpec spec = AspectMaker.byAsm().make(cls, handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getShort("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                4
+                4,
+                sc.getShort("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getShort("a", true, (byte) 2, '3', (short) 40, 5, 6L, 7.0f, 8.0d),
-                40
+                40,
+                sc.getShort("a", true, (byte) 2, '3', (short) 40, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -190,17 +190,17 @@ public class AspectTest {
             // int
             AspectSpec spec = AspectMaker.byAsm().make(cls, handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getInt("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                5
+                5,
+                sc.getInt("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getInt("a", true, (byte) 2, '3', (short) 4, 50, 6L, 7.0f, 8.0d),
-                50
+                50,
+                sc.getInt("a", true, (byte) 2, '3', (short) 4, 50, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -208,17 +208,17 @@ public class AspectTest {
             // long
             AspectSpec spec = AspectMaker.byAsm().make(cls, handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                6L
+                6L,
+                sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 60L, 7.0f, 8.0d),
-                60L
+                60L,
+                sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 60L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -226,17 +226,17 @@ public class AspectTest {
             // float
             AspectSpec spec = AspectMaker.byAsm().make(cls, handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                7.0f
+                7.0f,
+                sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 70.0f, 8.0d),
-                70.0f
+                70.0f,
+                sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 70.0f, 8.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -244,17 +244,17 @@ public class AspectTest {
             // double
             AspectSpec spec = AspectMaker.byAsm().make(cls, handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             assertEquals(
-                sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d),
-                8.0
+                8.0,
+                sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             assertEquals(
-                sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 80.0d),
-                80.0
+                80.0,
+                sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 80.0d)
             );
-            assertEquals(count.get(), 4);
+            assertEquals(4, count.get());
             count.clear();
             replace.clear();
         }
@@ -262,17 +262,17 @@ public class AspectTest {
             // throw
             AspectSpec spec = AspectMaker.byAsm().make(cls, handler);
             SimpleCls sc = spec.newInstance();
-            assertEquals(count.get(), 0);
+            assertEquals(0, count.get());
             Object[] result = new Object[1];
             assertEquals(
-                sc.throwDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result),
-                8.0
+                8.0,
+                sc.throwDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result)
             );
             assertEquals(
-                result[0],
-                8.0
+                8.0,
+                result[0]
             );
-            assertEquals(count.get(), 2);
+            assertEquals(2, count.get());
             count.clear();
             replace.clear();
             // direct throw
@@ -342,19 +342,19 @@ public class AspectTest {
             // inter
             AspectSpec spec = AspectMaker.byAsm().make(ComplexCls.class, handler);
             ComplexCls cc = spec.newInstance();
-            assertEquals(count.get(), 0);
-            assertEquals(cc.inter1(), "inter1");
-            assertEquals(count.get(), 2);
-            assertEquals(cc.inter2(11L), 11L);
-            assertEquals(count.get(), 4);
-            assertEquals(cc.inter2(11L, 11L), "1111");
-            assertEquals(count.get(), 6);
-            assertEquals(cc.inter2("22L", 11L), "22L11");
-            assertEquals(count.get(), 8);
-            assertEquals(cc.inter3(888), 888);
-            assertEquals(count.get(), 10);
-            assertEquals(cc.inter3(888, 1L), "8881");
-            assertEquals(count.get(), 12);
+            assertEquals(0, count.get());
+            assertEquals("inter1", cc.inter1());
+            assertEquals(2, count.get());
+            assertEquals(11L, cc.inter2(11L));
+            assertEquals(4, count.get());
+            assertEquals("1111", cc.inter2(11L, 11L));
+            assertEquals(6, count.get());
+            assertEquals("22L11", cc.inter2("22L", 11L));
+            assertEquals(8, count.get());
+            assertEquals(888, cc.inter3(888));
+            assertEquals(10, count.get());
+            assertEquals("8881", cc.inter3(888, 1L));
+            assertEquals(12, count.get());
         }
     }
 
@@ -385,11 +385,11 @@ public class AspectTest {
         };
         AspectSpec spec = AspectMaker.byAsm().make(SimpleGeneric.class, handler);
         SimpleGeneric<String> strSg = spec.newInstance();
-        assertEquals(strSg.generic("sss"), "sss");
-        assertEquals(arg.get(), "sss");
+        assertEquals("sss", strSg.generic("sss"));
+        assertEquals("sss", arg.get());
         SimpleGeneric<Integer> intSg = spec.newInstance();
-        assertEquals(intSg.generic(888), 888);
-        assertEquals(arg.get(), 888);
+        assertEquals(888, intSg.generic(888));
+        assertEquals(888, arg.get());
     }
 
     public static class SimpleCls {
