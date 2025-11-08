@@ -10,6 +10,7 @@ import space.sunqian.common.io.IOKit;
 
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -74,15 +75,19 @@ public class ProcessTest implements PrintTest {
             assertSame(process.destroyForcibly(), process);
             assertEquals(1, process.waitFor());
         }
-        // {
-        //     VirtualProcess process = new VirtualProcess();
-        //     Thread _this = Thread.currentThread();
-        //     Thread thread = new Thread(() -> {
-        //         Utils.awaitUntilExecuteTo(_this, VirtualProcess.class.getName(), "isAlive");
-        //         process.alive(false);
-        //     });
-        //     thread.start();
-        //     assertEquals(0, process.waitFor());
-        // }
+        {
+            class ChProcess extends VirtualProcess {
+
+                private final AtomicInteger count = new AtomicInteger();
+
+                @Override
+                public synchronized boolean isAlive() {
+                    int c = count.incrementAndGet();
+                    return c < 3;
+                }
+            }
+            VirtualProcess process = new ChProcess();
+            assertEquals(0, process.waitFor());
+        }
     }
 }

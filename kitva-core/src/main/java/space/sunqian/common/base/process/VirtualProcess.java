@@ -126,7 +126,7 @@ public class VirtualProcess extends Process {
 
     @Override
     public int exitValue() throws IllegalThreadStateException {
-        if (alive) {
+        if (isAlive()) {
             throw new IllegalThreadStateException();
         }
         return normal ? 0 : 1;
