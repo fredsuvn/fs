@@ -19,16 +19,14 @@ public class ThreadKit {
      *
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
-    @SuppressWarnings({"InfiniteLoopStatement", "BusyWait"})
+    @SuppressWarnings({
+        "InfiniteLoopStatement",
+        //"BusyWait"
+    })
     public static void sleep() throws AwaitingException {
-        Kit.uncheck(
-            () -> {
-                while (true) {
-                    Thread.sleep(Integer.MAX_VALUE);
-                }
-            },
-            AwaitingException::new
-        );
+        while (true) {
+            Kit.uncheck(() -> Thread.sleep(Integer.MAX_VALUE), AwaitingException::new);
+        }
     }
 
     /**

@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ThreadTest {
 
     @Test
-    public void testSleep() {
+    public void testSleep() throws Exception {
         {
             long t1 = System.currentTimeMillis();
             ThreadKit.sleep(10);
@@ -28,17 +28,21 @@ public class ThreadTest {
             assertTrue(t2 - t1 >= 10);
         }
         {
-            Thread _this = Thread.currentThread();
-            Thread thread = new Thread(() -> {
-                Utils.awaitUntilExecuteTo(_this, Thread.class.getName(), "sleep");
-                _this.interrupt();
+            Thread sleep = new Thread(() -> {
+                try {
+                    ThreadKit.sleep();
+                } catch (AwaitingException e) {
+                    assertTrue(e.isCausedByInterruption());
+                }
             });
-            thread.start();
-            try {
-                ThreadKit.sleep();
-            } catch (AwaitingException e) {
-                assertTrue(e.isCausedByInterruption());
-            }
+            Thread awake = new Thread(() -> {
+                Utils.awaitUntilExecuteTo(sleep, Thread.class.getName(), "sleep");
+                sleep.interrupt();
+            });
+            sleep.start();
+            awake.start();
+            sleep.join();
+            awake.join();
         }
     }
 
