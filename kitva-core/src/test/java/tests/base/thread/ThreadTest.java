@@ -8,8 +8,6 @@ import tests.utils.Utils;
 
 import java.time.Duration;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ThreadTest {
@@ -66,21 +64,6 @@ public class ThreadTest {
             awake.start();
             sleep.join();
             awake.join();
-        }
-    }
-
-    @Test
-    public void testUntil() {
-        int[] i = {0};
-        ThreadKit.until(() -> i[0]++ >= 10);
-        assertEquals(11, i[0]);
-        RuntimeException cause = new RuntimeException();
-        try {
-            ThreadKit.until(() -> {
-                throw cause;
-            });
-        } catch (AwaitingException e) {
-            assertSame(e.getCause(), cause);
         }
     }
 }

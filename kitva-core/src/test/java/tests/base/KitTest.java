@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.base.exception.AwaitingException;
 import space.sunqian.common.base.exception.UnknownArrayTypeException;
 import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.base.system.OSKit;
@@ -101,6 +102,21 @@ public class KitTest implements AssertTest, PrintTest {
 
     private int throwEx(Exception cause) throws Exception {
         throw cause;
+    }
+
+    @Test
+    public void testUntil() {
+        int[] i = {0};
+        Kit.until(() -> i[0]++ >= 10);
+        assertEquals(11, i[0]);
+        RuntimeException cause = new RuntimeException();
+        try {
+            Kit.until(() -> {
+                throw cause;
+            });
+        } catch (AwaitingException e) {
+            assertSame(e.getCause(), cause);
+        }
     }
 
     @Test

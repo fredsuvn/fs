@@ -257,6 +257,40 @@ public class Kit {
     }
 
     /**
+     * Executes the given task until it returns {@code true} or throws an exception. The original exception will be
+     * wrapped by {@link AwaitingException} then thrown, using {@link AwaitingException#getCause()} can get the original
+     * exception. The logic of this method is as follows:
+     * <pre>{@code
+     * try {
+     *     while (true) {
+     *         if (task.call()) {
+     *             return;
+     *         }
+     *     }
+     * } catch (Exception e) {
+     *     throw new AwaitingException(e);
+     * }
+     * }</pre>
+     * <p>
+     * Note this method may cause high CPU usage. When the task determines to return {@code false}, consider adding some
+     * measures (such as sleep the current thread in a very short time) to avoid it.
+     *
+     * @param task the given task to be executed
+     * @throws AwaitingException if an error occurs while awaiting
+     */
+    public static void until(@Nonnull BooleanCallable task) throws AwaitingException {
+        try {
+            while (true) {
+                if (task.call()) {
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            throw new AwaitingException(e);
+        }
+    }
+
+    /**
      * Returns whether the given objects are equal. If the given objects are arrays, uses {@code Arrays.equals} or
      * {@link Arrays#deepEquals(Object[], Object[])} if necessary.
      * <p>
@@ -933,35 +967,6 @@ public class Kit {
      */
     public static void sleep(@Nonnull Duration duration) throws AwaitingException {
         ThreadKit.sleep(duration);
-    }
-
-    /**
-     * Executes the given task until it returns {@code true} or throws an exception. The original exception will be
-     * wrapped by {@link AwaitingException} then thrown, using {@link AwaitingException#getCause()} can get the original
-     * exception. The logic of this method is as follows:
-     * <pre>{@code
-     * try {
-     *     while (true) {
-     *         if (task.call()) {
-     *             return;
-     *         }
-     *     }
-     * } catch (Exception e) {
-     *     throw new AwaitingException(e);
-     * }
-     * }</pre>
-     * <p>
-     * Note this method may cause high CPU usage. When the task determines to return {@code false}, consider adding some
-     * measures (such as sleep the current thread in a very short time) to avoid it.
-     * <p>
-     * This method is a shortcut to the {@link ThreadKit#until(BooleanCallable)}.
-     *
-     * @param task the given task to be executed
-     * @throws AwaitingException if an error occurs while awaiting
-     * @see ThreadKit
-     */
-    public static void until(@Nonnull BooleanCallable task) throws AwaitingException {
-        ThreadKit.until(task);
     }
 
     //---------------- Thread End ----------------//
