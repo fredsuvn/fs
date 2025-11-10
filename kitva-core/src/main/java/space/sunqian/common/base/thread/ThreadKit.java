@@ -24,9 +24,19 @@ public class ThreadKit {
         //"BusyWait"
     })
     public static void sleep() throws AwaitingException {
+        String millisStr = System.getProperty(ThreadKit.class.getName() + ".sleep.millis");
+        long millis = millisStr == null ? Integer.MAX_VALUE : Long.parseLong(millisStr);
+        boolean test = millisStr != null;
         while (true) {
-            Kit.uncheck(() -> Thread.sleep(Integer.MAX_VALUE), AwaitingException::new);
+            Kit.uncheck(() -> sleep0(millis, test), AwaitingException::new);
         }
+    }
+
+    private static void sleep0(long millis, boolean test) throws Exception {
+        if (test) {
+            System.setProperty(ThreadKit.class.getName() + ".sleep.wake", "1");
+        }
+        Thread.sleep(millis);
     }
 
     /**
