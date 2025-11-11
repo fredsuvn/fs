@@ -10,6 +10,7 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Network utilities.
@@ -33,10 +34,10 @@ public class NetKit {
         return StreamKit.stream(() -> CollectKit.asIterator(interfaces))
             .filter(networkInterface ->
                 Kit.uncheck(networkInterface::isUp, NetException::new))
-            .filter(networkInterface ->
-                Kit.uncheck(() -> !networkInterface.isLoopback(), NetException::new))
-            .filter(networkInterface ->
-                Kit.uncheck(() -> !networkInterface.isPointToPoint(), NetException::new))
+            .filter(((Predicate<NetworkInterface>) networkInterface ->
+                Kit.uncheck(networkInterface::isLoopback, NetException::new)).negate())
+            .filter(((Predicate<NetworkInterface>) networkInterface ->
+                Kit.uncheck(networkInterface::isPointToPoint, NetException::new)).negate())
             .flatMap(networkInterface -> networkInterface.getInterfaceAddresses().stream())
             .map(InterfaceAddress::getBroadcast)
             .filter(Objects::nonNull)
