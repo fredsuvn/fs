@@ -1,7 +1,7 @@
 package space.sunqian.common.base.process;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.io.IOKit;
 
 import java.io.InputStream;

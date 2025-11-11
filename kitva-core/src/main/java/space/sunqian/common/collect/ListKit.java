@@ -3,7 +3,7 @@ package space.sunqian.common.collect;
 import space.sunqian.annotations.Immutable;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.RetainedParam;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 
 import java.util.ArrayList;
 import java.util.Arrays;

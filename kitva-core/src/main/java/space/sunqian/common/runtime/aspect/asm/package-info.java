@@ -1,5 +1,5 @@
 /**
- * Provides aspect maker implementations by ASM, using code similar to the following:
+ * Provides aspect maker implementations by ASM, using codes similar to the following:
  * <pre>{@code
  * AspectSpec spec = AspectMaker.byAsm().make(cls, handler);
  * AdvisedClass ac = spec.newInstance();

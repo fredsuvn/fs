@@ -1,5 +1,5 @@
 /**
- * Provides proxy maker implementations by JDK, using code similar to the following:
+ * Provides proxy maker implementations by JDK, using codes similar to the following:
  * <pre>{@code
  * ProxySpec spec = ProxyMaker.byJdk().make(cls, interfaces, handler);
  * ProxyClass ac = spec.newInstance();

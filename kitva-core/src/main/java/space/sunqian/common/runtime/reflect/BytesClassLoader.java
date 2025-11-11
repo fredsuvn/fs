@@ -2,7 +2,7 @@ package space.sunqian.common.runtime.reflect;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.base.system.JvmException;
 
 import java.nio.ByteBuffer;

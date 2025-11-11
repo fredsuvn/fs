@@ -2,7 +2,7 @@ package space.sunqian.common.base.res;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.collect.CollectKit;
 import space.sunqian.common.collect.SetKit;
 import space.sunqian.common.io.IORuntimeException;

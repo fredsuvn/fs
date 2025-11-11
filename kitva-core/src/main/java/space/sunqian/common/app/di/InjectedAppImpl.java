@@ -3,7 +3,7 @@ package space.sunqian.common.app.di;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.OutParam;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.collect.ArrayKit;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.runtime.aspect.AspectMaker;

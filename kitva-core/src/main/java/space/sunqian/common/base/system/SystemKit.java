@@ -3,7 +3,7 @@ package space.sunqian.common.base.system;
 import space.sunqian.annotations.Immutable;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

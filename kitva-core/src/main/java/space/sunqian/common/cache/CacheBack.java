@@ -2,7 +2,7 @@ package space.sunqian.common.cache;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 
 import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;

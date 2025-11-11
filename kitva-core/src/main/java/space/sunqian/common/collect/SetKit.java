@@ -2,7 +2,7 @@ package space.sunqian.common.collect;
 
 import space.sunqian.annotations.Immutable;
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 
 import java.util.Arrays;
 import java.util.Collection;

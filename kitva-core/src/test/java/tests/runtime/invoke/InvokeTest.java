@@ -2,7 +2,7 @@ package tests.runtime.invoke;
 
 import org.junit.jupiter.api.Test;
 import tests.utils.LotsOfMethods;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.runtime.invoke.Invocable;
 import space.sunqian.common.runtime.invoke.InvocationException;
 import space.sunqian.common.runtime.invoke.InvocationMode;

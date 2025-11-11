@@ -1,5 +1,5 @@
 /**
- * Provides proxy maker implementations by ASM, using code similar to the following:
+ * Provides proxy maker implementations by ASM, using codes similar to the following:
  * <pre>{@code
  * ProxySpec spec = ProxyMaker.byAsm().make(cls, interfaces, handler);
  * ProxyClass ac = spec.newInstance();

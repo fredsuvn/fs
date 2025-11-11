@@ -2,7 +2,7 @@ package space.sunqian.common.base.value;
 
 import space.sunqian.annotations.Immutable;
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 
 /**
  * This interface represents an immutable container holding a value, similar to a {@code final} variable.

@@ -1,7 +1,7 @@
 package space.sunqian.common.base.chars;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.CheckKit;
+import space.sunqian.common.Check;
 import space.sunqian.common.io.BufferKit;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IORuntimeException;
@@ -99,7 +99,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @throws IndexOutOfBoundsException if the offset or number is out of bounds
      */
     public void write(char @Nonnull [] cbuf, int off, int len) throws IndexOutOfBoundsException {
-        CheckKit.checkOffLen(off, len, cbuf.length);
+        Check.checkOffLen(off, len, cbuf.length);
         ensureCapacity(count + len);
         System.arraycopy(cbuf, off, buf, count, len);
         count += len;

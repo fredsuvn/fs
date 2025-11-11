@@ -1,5 +1,5 @@
 /**
- * Provides builders to rapidly build TCP server and client with minimal effort, using code similar to the following:
+ * Provides builders to rapidly build TCP server and client with minimal effort, using codes similar to the following:
  * <pre>{@code
  * TcpServer server = TcpServer.newBuilder()
  *     .handler(handler)

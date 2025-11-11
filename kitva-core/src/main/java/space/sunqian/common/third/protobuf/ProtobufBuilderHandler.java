@@ -3,7 +3,7 @@ package space.sunqian.common.third.protobuf;
 import com.google.protobuf.Message;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.object.data.DataObjectException;
 import space.sunqian.common.object.data.ObjectBuilder;
 import space.sunqian.common.object.data.ObjectBuilderProvider;

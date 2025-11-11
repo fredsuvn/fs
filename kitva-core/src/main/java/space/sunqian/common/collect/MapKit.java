@@ -4,7 +4,7 @@ import space.sunqian.annotations.Immutable;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.OutParam;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 
 import java.util.Collections;
 import java.util.HashMap;

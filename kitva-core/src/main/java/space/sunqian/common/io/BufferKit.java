@@ -2,7 +2,7 @@ package space.sunqian.common.io;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.base.bytes.BytesKit;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.math.MathKit;

@@ -3,7 +3,7 @@ package tests.runtime.reflect;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.runtime.reflect.ReflectionException;
 import space.sunqian.common.runtime.reflect.TypeKit;
 import space.sunqian.common.runtime.reflect.TypeRef;

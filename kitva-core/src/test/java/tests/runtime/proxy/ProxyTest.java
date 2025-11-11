@@ -3,7 +3,7 @@ package tests.runtime.proxy;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.runtime.proxy.ProxyHandler;
 import space.sunqian.common.runtime.proxy.ProxyInvoker;
 import space.sunqian.common.runtime.proxy.ProxyMaker;

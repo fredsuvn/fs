@@ -1,8 +1,8 @@
 package tests.base.lang;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.Kit;
-import space.sunqian.common.base.lang.EnumKit;
+import space.sunqian.common.Kit;
+import space.sunqian.common.base.enums.EnumKit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;

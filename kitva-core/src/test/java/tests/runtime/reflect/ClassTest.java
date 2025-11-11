@@ -3,7 +3,7 @@ package tests.runtime.reflect;
 import internal.test.AssertTest;
 import internal.test.J17Also;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.runtime.reflect.ClassKit;

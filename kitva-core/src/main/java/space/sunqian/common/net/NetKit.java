@@ -1,7 +1,7 @@
 package space.sunqian.common.net;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.collect.CollectKit;
 import space.sunqian.common.collect.StreamKit;
 

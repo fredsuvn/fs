@@ -2,10 +2,10 @@ package space.sunqian.common.net.tcp;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.CheckKit;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Check;
+import space.sunqian.common.Kit;
 import space.sunqian.common.collect.ListKit;
-import space.sunqian.common.function.callable.VoidCallable;
+import space.sunqian.common.base.function.callable.VoidCallable;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.communicate.AbstractChannelContext;
 import space.sunqian.common.net.NetException;
@@ -93,7 +93,7 @@ public class TcpServerBuilder {
      * @see #workerThreadFactory(ThreadFactory)
      */
     public @Nonnull TcpServerBuilder workerThreadNum(int workThreadNum) throws IllegalArgumentException {
-        CheckKit.checkArgument(workThreadNum >= 1, "workThreadNum must >= 1");
+        Check.checkArgument(workThreadNum >= 1, "workThreadNum must >= 1");
         this.workerThreadNum = workThreadNum;
         return this;
     }
@@ -107,7 +107,7 @@ public class TcpServerBuilder {
      * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
      */
     public @Nonnull TcpServerBuilder bufferSize(int bufSize) throws IllegalArgumentException {
-        CheckKit.checkArgument(bufSize > 0, "bufSize must be positive");
+        Check.checkArgument(bufSize > 0, "bufSize must be positive");
         this.bufSize = bufSize;
         return this;
     }
@@ -139,7 +139,7 @@ public class TcpServerBuilder {
      * @throws IllegalArgumentException if the timeout is negative
      */
     public @Nonnull TcpServerBuilder selectTimeout(long selectTimeout) throws IllegalArgumentException {
-        CheckKit.checkArgument(selectTimeout >= 0, "selectTimeout must >= 0");
+        Check.checkArgument(selectTimeout >= 0, "selectTimeout must >= 0");
         this.selectTimeout = selectTimeout;
         return this;
     }

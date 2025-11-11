@@ -1,7 +1,7 @@
 package space.sunqian.common.base.number;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

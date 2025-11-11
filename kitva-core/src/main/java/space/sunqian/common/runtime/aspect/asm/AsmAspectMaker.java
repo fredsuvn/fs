@@ -8,7 +8,7 @@ import org.objectweb.asm.Opcodes;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.ThreadSafe;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.base.system.JvmKit;
 import space.sunqian.common.runtime.aspect.AspectException;
 import space.sunqian.common.runtime.aspect.AspectHandler;

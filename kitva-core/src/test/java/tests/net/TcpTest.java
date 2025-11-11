@@ -7,7 +7,7 @@ import space.sunqian.common.base.bytes.BytesBuilder;
 import space.sunqian.common.base.exception.ThrowKit;
 import space.sunqian.common.base.thread.ThreadGate;
 import space.sunqian.common.base.value.IntVar;
-import space.sunqian.common.function.callable.VoidCallable;
+import space.sunqian.common.base.function.callable.VoidCallable;
 import space.sunqian.common.net.NetException;
 import space.sunqian.common.net.NetServer;
 import space.sunqian.common.net.tcp.TcpClient;

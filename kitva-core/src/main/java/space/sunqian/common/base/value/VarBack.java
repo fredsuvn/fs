@@ -1,7 +1,7 @@
 package space.sunqian.common.base.value;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 
 final class VarBack {
 

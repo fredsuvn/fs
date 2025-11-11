@@ -1,7 +1,7 @@
 package tests.collect;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.collect.ArrayKit;
 import space.sunqian.common.collect.ArrayOperator;
 

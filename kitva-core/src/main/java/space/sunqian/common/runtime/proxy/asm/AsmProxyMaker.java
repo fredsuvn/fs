@@ -9,7 +9,7 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.RetainedParam;
 import space.sunqian.annotations.ThreadSafe;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.base.system.JvmKit;
 import space.sunqian.common.base.value.IntVar;
 import space.sunqian.common.runtime.proxy.ProxyException;

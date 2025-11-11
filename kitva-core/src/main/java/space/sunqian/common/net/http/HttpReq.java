@@ -2,8 +2,8 @@ package space.sunqian.common.net.http;
 
 import org.springframework.lang.Nullable;
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.CheckKit;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Check;
+import space.sunqian.common.Kit;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.io.IOKit;
 
@@ -211,7 +211,7 @@ public interface HttpReq {
          * @throws IllegalArgumentException if there exists invalid arguments
          */
         public @Nonnull HttpReq build() throws IllegalArgumentException {
-            CheckKit.checkArgument(url != null, "The url can not be null.");
+            Check.checkArgument(url != null, "The url can not be null.");
             // CheckKit.checkArgument(method != null, "The method can not be null.");
             return new HttpReqImpl(
                 url,

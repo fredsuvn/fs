@@ -3,7 +3,7 @@ package space.sunqian.common.app.di;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.app.SimpleApp;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.collect.CollectKit;
 import space.sunqian.common.runtime.reflect.TypeRef;
 

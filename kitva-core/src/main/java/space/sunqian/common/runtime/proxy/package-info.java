@@ -1,5 +1,5 @@
 /**
- * Provides makers to rapidly create proxy class with minimal effort, using code similar to the following:
+ * Provides makers to rapidly create proxy class with minimal effort, using codes similar to the following:
  * <pre>{@code
  * ProxySpec spec = ProxyMaker.byAsm().make(cls, interfaces, handler);
  * ProxyClass ac = spec.newInstance();

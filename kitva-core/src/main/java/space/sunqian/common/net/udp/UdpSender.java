@@ -1,7 +1,7 @@
 package space.sunqian.common.net.udp;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.net.NetException;
 

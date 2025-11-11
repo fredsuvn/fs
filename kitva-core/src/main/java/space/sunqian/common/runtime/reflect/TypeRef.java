@@ -1,7 +1,7 @@
 package space.sunqian.common.runtime.reflect;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

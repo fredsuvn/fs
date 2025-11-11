@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.collect.MapKit;
 import space.sunqian.common.object.convert.ConvertOption;

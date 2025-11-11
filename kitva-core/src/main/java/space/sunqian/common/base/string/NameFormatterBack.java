@@ -1,7 +1,7 @@
 package space.sunqian.common.base.string;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.CheckKit;
+import space.sunqian.common.Check;
 import space.sunqian.common.base.value.Span;
 import space.sunqian.common.collect.ArrayKit;
 
@@ -236,7 +236,7 @@ final class NameFormatterBack {
         private DelimiterCase(
             @Nonnull CharSequence delimiter, @Nonnull NameFormatter.Appender appender
         ) throws IllegalArgumentException {
-            CheckKit.checkArgument(delimiter.length() > 0, "The delimiter must not be empty.");
+            Check.checkArgument(delimiter.length() > 0, "The delimiter must not be empty.");
             this.delimiter = delimiter;
             this.appender = appender;
         }

@@ -1,7 +1,7 @@
 package space.sunqian.common.base.time;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 
 import java.time.DateTimeException;
 import java.time.Instant;

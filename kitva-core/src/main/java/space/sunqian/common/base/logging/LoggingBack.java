@@ -2,7 +2,7 @@ package space.sunqian.common.base.logging;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.base.time.TimeKit;
 
 import java.util.Date;

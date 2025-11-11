@@ -4,7 +4,7 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.RetainedParam;
 import space.sunqian.annotations.ThreadSafe;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.base.value.Var;
 import space.sunqian.common.runtime.invoke.Invocable;
 import space.sunqian.common.runtime.proxy.ProxyException;

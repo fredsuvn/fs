@@ -1,5 +1,5 @@
 /**
- * Provides http utilities and interfaces to request http server with minimal effort, using code similar to the
+ * Provides http utilities and interfaces to request http server with minimal effort, using codes similar to the
  * following:
  * <pre>{@code
  * HttpResp resp = HttpKit.request(

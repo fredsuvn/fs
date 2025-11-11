@@ -1,7 +1,7 @@
 /**
  * Package for object conversion and data mapping.
  * <p>
- * Supports copying object properties, including instances of {@link java.util.Map} and non-map objects, using code
+ * Supports copying object properties, including instances of {@link java.util.Map} and non-map objects, using codes
  * similar to the following:
  * <pre>{@code
  * DataMapper dataMapper = DataMapper.defaultMapper();
@@ -12,7 +12,7 @@
  *     <li>{@link space.sunqian.common.object.convert.DataMapper}</li>
  * </ul>
  * <p>
- * Supports object type conversion, using code similar to the following:
+ * Supports object type conversion, using codes similar to the following:
  * <pre>{@code
  * ObjectConverter converter = ObjectConverter.defaultConverter();
  * converter.convert(src, target, options);

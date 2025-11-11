@@ -56,7 +56,7 @@ public interface ObjectSchemaParser {
      * Parses the given type to an instance of {@link ObjectSchema}, and returns the parsed {@link ObjectSchema}.
      * <p>
      * The parsing logic of the implementations must be: invokes the {@link Handler#parse(ObjectSchemaParser.Context)}
-     * in the order of {@link #handlers()} until one of the handlers returns {@code false}. The code is similar to:
+     * in the order of {@link #handlers()} until one of the handlers returns {@code false}. The codes are similar to:
      * <pre>{@code
      * for (Handler handler : handlers()) {
      *     if (!handler.parse(context)) {

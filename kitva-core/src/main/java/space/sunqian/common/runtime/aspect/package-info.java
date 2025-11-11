@@ -1,5 +1,5 @@
 /**
- * Provides makers to rapidly create aspect class with minimal effort, using code similar to the following:
+ * Provides makers to rapidly create aspect class with minimal effort, using codes similar to the following:
  * <pre>{@code
  * AspectSpec spec = AspectMaker.byAsm().make(cls, handler);
  * AdvisedClass ac = spec.newInstance();

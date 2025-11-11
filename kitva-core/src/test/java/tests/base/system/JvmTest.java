@@ -7,7 +7,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.junit.jupiter.api.Test;
 import tests.runtime.reflect.TypeTest;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import space.sunqian.common.base.system.JvmException;
 import space.sunqian.common.base.system.JvmKit;

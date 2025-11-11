@@ -2,7 +2,7 @@ package space.sunqian.common.cache;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.Kit;
+import space.sunqian.common.Kit;
 import space.sunqian.common.base.value.Val;
 import space.sunqian.common.base.value.Var;
 

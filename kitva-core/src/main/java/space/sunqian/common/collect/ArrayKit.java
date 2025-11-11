@@ -4,11 +4,11 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.OutParam;
 import space.sunqian.annotations.RetainedParam;
-import space.sunqian.common.base.Kit;
-import space.sunqian.common.function.predicate.IndexedDoublePredicate;
-import space.sunqian.common.function.predicate.IndexedIntPredicate;
-import space.sunqian.common.function.predicate.IndexedLongPredicate;
-import space.sunqian.common.function.predicate.IndexedPredicate;
+import space.sunqian.common.Kit;
+import space.sunqian.common.base.function.predicate.IndexedDoublePredicate;
+import space.sunqian.common.base.function.predicate.IndexedIntPredicate;
+import space.sunqian.common.base.function.predicate.IndexedLongPredicate;
+import space.sunqian.common.base.function.predicate.IndexedPredicate;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
