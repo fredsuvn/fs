@@ -59,4 +59,10 @@ public abstract class TypeRef<T> {
     public @Nonnull ParameterizedType asParameterized() {
         return (ParameterizedType) type;
     }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    protected final void finalize() throws Throwable {
+        super.finalize();
+    }
 }

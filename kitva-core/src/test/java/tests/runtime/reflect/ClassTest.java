@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.common.Kit;
 import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import space.sunqian.common.collect.ListKit;
+import space.sunqian.common.runtime.reflect.BytesClassLoader;
 import space.sunqian.common.runtime.reflect.ClassKit;
 import tests.utils.ErrorConstructor;
 
@@ -18,6 +19,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -165,6 +167,7 @@ public class ClassTest implements AssertTest {
         assertFalse(ClassKit.classExists("123"));
         assertNull(ClassKit.classForName("123", null));
         assertNull(ClassKit.classForName("123", Thread.currentThread().getContextClassLoader()));
+        assertInstanceOf(BytesClassLoader.class, ClassKit.newClassLoader());
     }
 
     @Test

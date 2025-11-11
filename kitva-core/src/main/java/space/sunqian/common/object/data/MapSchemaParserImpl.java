@@ -1,6 +1,7 @@
 package space.sunqian.common.object.data;
 
 import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
 import space.sunqian.common.runtime.reflect.ReflectionException;
 import space.sunqian.common.runtime.reflect.TypeKit;
 
@@ -67,7 +68,7 @@ enum MapSchemaParserImpl implements MapSchemaParser {
 
         @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             return DataObjectKit.equals(this, o);
         }
 

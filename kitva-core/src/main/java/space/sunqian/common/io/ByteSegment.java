@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
  *
  * @author sunqian
  */
-public interface ByteSegment {
+public interface ByteSegment extends Cloneable {
 
     /**
      * Returns a new {@link ByteSegment} with the given data and end flag.

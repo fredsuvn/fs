@@ -26,7 +26,7 @@ import java.util.function.Function;
  */
 public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
 
-    private static final @Nonnull Object NULL_VAL = "You can't see me!";
+    private static final @Nonnull Object NULL_VAL = "(╯‵□′)╯︵┻━┻";
 
     /**
      * The underlying cache map, which is used to store the cache value.
@@ -128,7 +128,8 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
             return generate(key, maskValue(nv));
         });
         @Nullable Object v = value.get();
-        if (v == NULL_VAL) {
+        // if (v == NULL_VAL) {
+        if (NULL_VAL.equals(v)) {
             return null;
         }
         return Val.of(Kit.as(v));

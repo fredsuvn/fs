@@ -31,7 +31,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      */
     static @Nonnull Rng newRng() {
         Random random = new Random();
-        random.setSeed(System.nanoTime());
+        // random.setSeed(System.nanoTime());
         return newRng(random);
     }
 
@@ -42,8 +42,8 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @return a {@link Rng} instance with the specified seed
      */
     static @Nonnull Rng newRng(long seed) {
-        Random random = new Random();
-        random.setSeed(seed);
+        Random random = new Random(seed);
+        // random.setSeed(seed);
         return newRng(random);
     }
 

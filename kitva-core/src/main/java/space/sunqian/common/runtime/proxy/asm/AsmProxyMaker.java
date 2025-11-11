@@ -138,7 +138,7 @@ public class AsmProxyMaker implements ProxyMaker {
             byte[] proxyClassBytes = generateProxyClass(pcInfo);
             byte[] invokerClassBytes = generateInvokerClass(pcInfo);
             // using new class loader to help collect unused classes
-            BytesClassLoader loader = new BytesClassLoader();
+            BytesClassLoader loader = ClassKit.newClassLoader();
             Class<?> proxyClass = loader.loadClass(null, proxyClassBytes);
             loader.loadClass(null, invokerClassBytes);
             return new AsmProxySpec(

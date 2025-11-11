@@ -465,6 +465,15 @@ public class ClassKit {
     }
 
     /**
+     * Returns a new {@link BytesClassLoader} instance.
+     *
+     * @return a new {@link BytesClassLoader} instance
+     */
+    public static @Nonnull BytesClassLoader newClassLoader() {
+        return new BytesClassLoader();
+    }
+
+    /**
      * Returns whether the given member is static.
      *
      * @param member the given member

@@ -42,7 +42,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @param initialCapacity the specified initial capacity in chars
      * @throws IllegalArgumentException if size is negative
      */
-    public CharsBuilder(int initialCapacity) {
+    public CharsBuilder(int initialCapacity) throws IllegalArgumentException {
         this(initialCapacity, MAX_ARRAY_SIZE);
     }
 
@@ -54,7 +54,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @throws IllegalArgumentException if the {@code initialCapacity < 0} or {@code maxCapacity < 0} or
      *                                  {@code initialCapacity > maxCapacity}
      */
-    public CharsBuilder(int initialCapacity, int maxCapacity) {
+    public CharsBuilder(int initialCapacity, int maxCapacity) throws IllegalArgumentException {
         if (initialCapacity < 0) {
             throw new IllegalArgumentException("Negative initial capacity: " + initialCapacity + ".");
         }
@@ -368,5 +368,11 @@ public class CharsBuilder extends Writer implements CharSequence {
             return maxSize;
         }
         return Math.max(newCapacity, minCapacity);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    protected final void finalize() throws Throwable {
+        super.finalize();
     }
 }

@@ -56,4 +56,10 @@ public abstract class AbstractChannelContext<C extends ByteChannel> implements C
     public @Nonnull C channel() {
         return channel;
     }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    protected final void finalize() throws Throwable {
+        super.finalize();
+    }
 }

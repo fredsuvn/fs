@@ -70,7 +70,7 @@ final class ObjectSchemaBuilder implements ObjectSchemaParser.Context {
 
         @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             return DataObjectKit.equals(this, o);
         }
 
@@ -146,7 +146,7 @@ final class ObjectSchemaBuilder implements ObjectSchemaParser.Context {
 
             @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
             @Override
-            public boolean equals(Object o) {
+            public boolean equals(@Nullable Object o) {
                 return DataObjectKit.equals(this, o);
             }
 

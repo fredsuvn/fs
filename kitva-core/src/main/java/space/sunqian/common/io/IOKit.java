@@ -1429,10 +1429,10 @@ public class IOKit {
     static byte @Nullable [] read0(
         @Nonnull InputStream src, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
+        BytesBuilder builder = null;
         try {
             int available = src.available();
             byte[] buf = new byte[available > 0 ? available : bufSize];
-            BytesBuilder builder = null;
             int off = 0;
             while (true) {
                 int readSize = src.read(buf, off, buf.length - off);
@@ -1465,6 +1465,10 @@ public class IOKit {
             }
         } catch (IOException e) {
             throw new IORuntimeException(e);
+        } finally {
+            if (builder != null) {
+                builder.close();
+            }
         }
     }
 
@@ -1498,8 +1502,8 @@ public class IOKit {
     static @Nullable ByteBuffer read0(
         @Nonnull ReadableByteChannel src, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
+        BytesBuilder builder = null;
         try {
-            BytesBuilder builder = null;
             ByteBuffer dst = ByteBuffer.allocate(bufSize);
             int readSize;
             while (true) {
@@ -1545,6 +1549,10 @@ public class IOKit {
             }
         } catch (IOException e) {
             throw new IORuntimeException(e);
+        } finally {
+            if (builder != null) {
+                builder.close();
+            }
         }
     }
 
@@ -1883,9 +1891,9 @@ public class IOKit {
     static char @Nullable [] read0(
         @Nonnull Reader src, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
+        CharsBuilder builder = null;
         try {
             char[] buf = new char[bufSize];
-            CharsBuilder builder = null;
             int off = 0;
             while (true) {
                 int readSize = src.read(buf, off, buf.length - off);
@@ -1918,6 +1926,10 @@ public class IOKit {
             }
         } catch (IOException e) {
             throw new IORuntimeException(e);
+        } finally {
+            if (builder != null) {
+                builder.close();
+            }
         }
     }
 

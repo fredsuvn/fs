@@ -16,6 +16,7 @@ import space.sunqian.common.runtime.aspect.AspectMaker;
 import space.sunqian.common.runtime.aspect.AspectSpec;
 import space.sunqian.common.runtime.proxy.ProxyKit;
 import space.sunqian.common.runtime.reflect.BytesClassLoader;
+import space.sunqian.common.runtime.reflect.ClassKit;
 import space.sunqian.common.third.asm.AsmKit;
 
 import java.lang.reflect.Constructor;
@@ -108,7 +109,7 @@ public class AsmAspectMaker implements AspectMaker {
             );
             byte[] aspectClassBytes = generateAspectClass(acInfo);
             // using new class loader to help collect unused classes
-            BytesClassLoader loader = new BytesClassLoader();
+            BytesClassLoader loader = ClassKit.newClassLoader();
             Class<?> aspectClass = loader.loadClass(null, aspectClassBytes);
             return new AsmAspectSpec(
                 aspectClass,

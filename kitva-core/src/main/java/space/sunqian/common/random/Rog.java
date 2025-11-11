@@ -163,7 +163,8 @@ public interface Rog<T> {
                 int left = 0;
                 int right = nodes.length - 1;
                 while (left <= right) {
-                    int mid = (left + right) / 2;
+                    // int mid = (left + right) / 2;
+                    int mid = (left + right) >>> 1;
                     WeightNode<T> weight = nodes[mid];
                     long compare = compare(score, weight);
                     if (compare == 0) {

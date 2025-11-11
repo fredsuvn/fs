@@ -53,6 +53,11 @@ final class UdpSenderBack {
             return channel;
         }
 
+        @SuppressWarnings("deprecation")
+        @Override
+        protected final void finalize() throws Throwable {
+            super.finalize();
+        }
     }
 
     private static final class CommonUdpSender extends AbsUdpSender {

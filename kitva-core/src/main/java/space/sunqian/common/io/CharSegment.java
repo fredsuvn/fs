@@ -10,7 +10,7 @@ import java.nio.CharBuffer;
  *
  * @author sunqian
  */
-public interface CharSegment {
+public interface CharSegment extends Cloneable {
 
     /**
      * Returns a new {@link CharSegment} with the given data and end flag.

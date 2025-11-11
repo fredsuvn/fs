@@ -2,6 +2,7 @@ package space.sunqian.common.base.bytes;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.Check;
+import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.io.BufferKit;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IORuntimeException;
@@ -44,7 +45,7 @@ public class BytesBuilder extends OutputStream {
      * @param initialCapacity the specified initial capacity in bytes
      * @throws IllegalArgumentException if size is negative
      */
-    public BytesBuilder(int initialCapacity) {
+    public BytesBuilder(int initialCapacity) throws IllegalArgumentException {
         this(initialCapacity, MAX_ARRAY_SIZE);
     }
 
@@ -56,7 +57,7 @@ public class BytesBuilder extends OutputStream {
      * @throws IllegalArgumentException if the {@code initialCapacity < 0} or {@code maxCapacity < 0} or
      *                                  {@code initialCapacity > maxCapacity}
      */
-    public BytesBuilder(int initialCapacity, int maxCapacity) {
+    public BytesBuilder(int initialCapacity, int maxCapacity) throws IllegalArgumentException {
         if (initialCapacity < 0) {
             throw new IllegalArgumentException("Negative initial capacity: " + initialCapacity + ".");
         }
@@ -185,15 +186,15 @@ public class BytesBuilder extends OutputStream {
     }
 
     /**
-     * Returns a string decoded from the appended data using the <b>platform's default charset</b>. This is a compatible
-     * method of {@link ByteArrayOutputStream#toString()}.
+     * Returns a string decoded from the appended data using {@link CharsKit#defaultCharset()}. Note that the behavior
+     * of this method is <b>different</b> from {@link ByteArrayOutputStream#toString()}
      *
-     * @return a string decoded from the appended data using the <b>platform's default charset</b>
+     * @return a string decoded from the appended data using {@link CharsKit#defaultCharset()}
      * @see ByteArrayOutputStream#toString()
      */
     @Override
     public @Nonnull String toString() {
-        return new String(buf, 0, count);
+        return toString(CharsKit.defaultCharset());
     }
 
     /**
@@ -372,5 +373,11 @@ public class BytesBuilder extends OutputStream {
             return maxSize;
         }
         return Math.max(newCapacity, minCapacity);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    protected final void finalize() throws Throwable {
+        super.finalize();
     }
 }
