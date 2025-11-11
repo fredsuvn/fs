@@ -2,7 +2,6 @@ package space.sunqian.common.object.data;
 
 import space.sunqian.annotations.Immutable;
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
@@ -85,7 +84,7 @@ public interface MapSchema extends DataSchema {
      * @param other the other {@link MapSchema}
      * @return whether this {@link MapSchema} is equal to the other {@link MapSchema}
      */
-    boolean equals(@Nullable Object other);
+    boolean equals(Object other);
 
     /**
      * Returns the hash code of this {@link MapSchema}. The hash code is generated via {@link #type()} and

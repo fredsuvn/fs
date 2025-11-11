@@ -81,7 +81,7 @@ public interface ObjectSchema extends DataSchema {
      * @param other the other {@link ObjectSchema}
      * @return whether this {@link ObjectSchema} is equal to the other {@link ObjectSchema}
      */
-    boolean equals(@Nullable Object other);
+    boolean equals(Object other);
 
     /**
      * Returns the hash code of this {@link ObjectSchema}. The hash code is generated via {@link #type()} and

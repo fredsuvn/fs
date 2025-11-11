@@ -79,7 +79,7 @@ public interface ObjectProperty extends ObjectPropertyBase {
      * @param other the other {@link ObjectProperty}
      * @return whether this {@link ObjectProperty} is equal to the other {@link ObjectProperty}
      */
-    boolean equals(@Nullable Object other);
+    boolean equals(Object other);
 
     /**
      * Returns the hash code of this {@link ObjectProperty}. The hash code is generated via {@link #name()} and

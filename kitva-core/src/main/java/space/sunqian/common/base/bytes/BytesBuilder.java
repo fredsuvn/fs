@@ -374,10 +374,4 @@ public class BytesBuilder extends OutputStream {
         }
         return Math.max(newCapacity, minCapacity);
     }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    protected final void finalize() throws Throwable {
-        super.finalize();
-    }
 }

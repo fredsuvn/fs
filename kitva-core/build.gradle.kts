@@ -1,12 +1,10 @@
-import com.github.spotbugs.snom.SpotBugsTask
-
 plugins {
   `java-library`
   jacoco
   `maven-publish`
   signing
   id("com.google.protobuf")
-  id("com.github.spotbugs")
+  //id("com.github.spotbugs")
   id("kitva")
 }
 
@@ -307,6 +305,7 @@ jacoco {
   toolVersion = jacocoToolVersion
 }
 
+/*
 spotbugs {
   val spotbugsToolVersion: String by project
   toolVersion = spotbugsToolVersion
@@ -320,3 +319,4 @@ tasks.withType<SpotBugsTask>().configureEach {
     setStylesheet("fancy-hist.xsl")
   }
 }
+ */

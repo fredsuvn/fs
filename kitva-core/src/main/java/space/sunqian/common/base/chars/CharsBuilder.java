@@ -369,10 +369,4 @@ public class CharsBuilder extends Writer implements CharSequence {
         }
         return Math.max(newCapacity, minCapacity);
     }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    protected final void finalize() throws Throwable {
-        super.finalize();
-    }
 }

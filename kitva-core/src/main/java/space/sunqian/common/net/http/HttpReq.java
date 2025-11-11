@@ -2,6 +2,7 @@ package space.sunqian.common.net.http;
 
 import org.springframework.lang.Nullable;
 import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.RetainedParam;
 import space.sunqian.common.Check;
 import space.sunqian.common.Kit;
 import space.sunqian.common.base.chars.CharsKit;
@@ -62,7 +63,7 @@ public interface HttpReq {
      * @return the headers of the request
      */
     @Nonnull
-    Map<String, List<String>> headers();
+    Map<@Nonnull String, @Nonnull List<@Nonnull String>> headers();
 
     /**
      * Returns the body of the request, or {@code null} if no body data.
@@ -130,7 +131,9 @@ public interface HttpReq {
          * @param headers the headers of the request
          * @return this builder
          */
-        public @Nonnull Builder headers(@Nonnull Map<String, List<String>> headers) {
+        public @Nonnull Builder headers(
+            @Nonnull @RetainedParam Map<@Nonnull String, @Nonnull List<@Nonnull String>> headers
+        ) {
             this.headers = headers;
             return this;
         }

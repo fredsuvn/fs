@@ -2,6 +2,7 @@ package space.sunqian.common.object.convert;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
+import space.sunqian.annotations.RetainedParam;
 import space.sunqian.common.base.option.Option;
 
 import java.lang.reflect.Type;
@@ -40,7 +41,7 @@ public class UnsupportedObjectConvertException extends ObjectConvertException {
         @Nonnull Type srcType,
         @Nonnull Type target,
         @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull [] options
+        @Nonnull Option<?, ?> @Nonnull @RetainedParam [] options
     ) {
         super(toMessage(srcType, target));
         this.src = src;

@@ -13,8 +13,8 @@ pluginManagement {
   plugins {
     val protobufPluginVersion: String by settings
     id("com.google.protobuf") version protobufPluginVersion
-    val spotbugsPluginVersion: String by settings
-    id("com.github.spotbugs") version spotbugsPluginVersion
+    //val spotbugsPluginVersion: String by settings
+    //id("com.github.spotbugs") version spotbugsPluginVersion
   }
 }
 
