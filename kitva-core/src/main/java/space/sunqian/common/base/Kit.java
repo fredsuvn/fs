@@ -932,18 +932,6 @@ public class Kit {
     //---------------- Thread Begin ----------------//
 
     /**
-     * Sleeps the current thread until it is interrupted.
-     * <p>
-     * This method is a shortcut to the {@link ThreadKit#sleep()}.
-     *
-     * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
-     * @see ThreadKit
-     */
-    public static void sleep() throws AwaitingException {
-        ThreadKit.sleep();
-    }
-
-    /**
      * Sleeps the current thread for the specified milliseconds.
      * <p>
      * This method is a shortcut to the {@link ThreadKit#sleep(long)}.

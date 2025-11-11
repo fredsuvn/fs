@@ -4,6 +4,7 @@
  * Utilities:
  * <ul>
  *     <li>{@link space.sunqian.common.base.thread.ThreadKit}</li>
+ *     <li>{@link space.sunqian.common.base.thread.LocalKit}</li>
  *     <li>{@link space.sunqian.common.base.thread.TraceKit}</li>
  * </ul>
  * Interfaces:

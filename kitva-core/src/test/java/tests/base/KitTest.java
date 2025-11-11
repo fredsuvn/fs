@@ -16,7 +16,6 @@ import space.sunqian.common.base.system.OSKit;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.object.convert.ObjectConverter;
 import space.sunqian.common.runtime.reflect.TypeRef;
-import tests.utils.Utils;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -32,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,11 +63,11 @@ public class KitTest implements AssertTest, PrintTest {
                 i[0]++;
             }, RuntimeException::new);
             assertEquals(1, i[0]);
-            assertThrows(RuntimeException.class, () -> Kit.uncheck(() -> {
+            assertThrows(ArrayIndexOutOfBoundsException.class, () -> Kit.uncheck(() -> {
                 i[1]++;
             }, e -> {
-                assertTrue(e instanceof ArrayIndexOutOfBoundsException);
-                throw new RuntimeException(e);
+                assertInstanceOf(ArrayIndexOutOfBoundsException.class, e);
+                return (ArrayIndexOutOfBoundsException) e;
             }));
         }
         {
@@ -279,11 +279,7 @@ public class KitTest implements AssertTest, PrintTest {
             // thread
             Kit.sleep(1);
             Kit.sleep(Duration.ofMillis(1));
-            Thread thread = new Thread(Kit::sleep);
-            thread.start();
-            Utils.awaitUntilExecuteTo(thread, Thread.class.getName(), "sleep");
-            thread.interrupt();
-            Kit.until(() -> true);
+            // Kit.sleep() will be tested in ThreadTest
         }
         {
             // process

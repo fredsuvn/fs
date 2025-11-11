@@ -1,16 +1,14 @@
 package tests.base.thread;
 
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.thread.TraceKit;
-import space.sunqian.common.collect.MapKit;
-import internal.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class TraceTest implements PrintTest {
 
@@ -34,20 +32,5 @@ public class TraceTest implements PrintTest {
                 new StackTraceElement(TraceKit.class.getName(), "b", "c", 1)}),
             Collections.emptyList()
         );
-    }
-
-    @Test
-    public void testContext() {
-        TraceKit.set("1", "1");
-        assertEquals("1", TraceKit.get("1"));
-        assertEquals("1", TraceKit.set("1", "2"));
-        assertEquals("2", TraceKit.get("1"));
-        assertNull(TraceKit.get("2"));
-        assertEquals("2", TraceKit.get("2", k -> "2"));
-        assertEquals("2", TraceKit.get("2", k -> "3"));
-        assertEquals(TraceKit.contextMap(), MapKit.map("1", "2", "2", "2"));
-        assertNull(TraceKit.get("3", k -> null));
-        assertNull(TraceKit.get("3"));
-        assertEquals(TraceKit.contextMap(), MapKit.map("1", "2", "2", "2"));
     }
 }
