@@ -1,8 +1,8 @@
 plugins {
-  id("kitva")
+  id("fs")
 }
 
-description = "Root project of KitVa."
+description = "Root project of fs."
 
 rootProject.group = "space.sunqian.common"
 
@@ -11,7 +11,7 @@ val projectVersion: String by project
 val projectInfo by extra(
   ProjectInfo(
     version = projectVersion,
-    url = "https://github.com/fredsuvn/kitva",
+    url = "https://github.com/fredsuvn/fs",
     inceptionYear = "2020",
     licenses = listOf(
       License(
@@ -28,9 +28,9 @@ val projectInfo by extra(
       )
     ),
     scm = Scm(
-      connection = "scm:git:https://github.com/fredsuvn/kitva.git",
-      developerConnection = "scm:git:https://github.com/fredsuvn/kitva.git",
-      url = "https://github.com/fredsuvn/kitva"
+      connection = "scm:git:https://github.com/fredsuvn/fs.git",
+      developerConnection = "scm:git:https://github.com/fredsuvn/fs.git",
+      url = "https://github.com/fredsuvn/fs"
     )
   )
 )

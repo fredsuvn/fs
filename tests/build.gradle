@@ -1,21 +1,21 @@
 plugins {
-  id 'kitva'
+  id 'fs'
   id 'java-library'
 }
 
 description = 'Jieva tests.'
 
 dependencies {
-  implementation platform(project(':kitva-dependencies'))
+  implementation platform(project(':fs-dependencies'))
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
   implementation("org.openjdk.jmh:jmh-core")
-  annotationProcessor platform(project(":kitva-dependencies"))
+  annotationProcessor platform(project(":fs-dependencies"))
   annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess")
-  implementation project(':kitva-annotations')
-  implementation project(':kitva-core')
+  implementation project(':fs-annotations')
+  implementation project(':fs-core')
   implementation 'cglib:cglib'
   //  implementation project(':gek-kotlin')
-  implementation project(":kitva-internal")
+  implementation project(":fs-internal")
 }
 
 //tasks.register('benchmark') {

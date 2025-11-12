@@ -1,24 +1,24 @@
 import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
-  id 'kitva'
+  id 'fs'
   //id 'org.jetbrains.kotlin.jvm'
   id 'org.jetbrains.kotlin.jvm' version '1.9.23'
   id 'org.jetbrains.dokka' version '1.9.0'
-  id 'kitva-publish'
+  id 'fs-publish'
 }
 
 description = 'Kotlin support of Gek.'
 
 dependencies {
 
-  implementation platform(project(':kitva-dependencies'))
+  implementation platform(project(':fs-dependencies'))
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-  api project(':kitva-annotations')
-  api project(':kitva-core')
+  api project(':fs-annotations')
+  api project(':fs-core')
 
-  testImplementation project(":kitva-internal")
-  testAnnotationProcessor platform(project(":kitva-dependencies"))
+  testImplementation project(":fs-internal")
+  testAnnotationProcessor platform(project(":fs-dependencies"))
   testAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess"
 }
 

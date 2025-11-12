@@ -27,7 +27,7 @@ dependencies {
 gradlePlugin {
   plugins {
     create("pLogger") {
-      id = "kitva.build.pLogger"
+      id = "fs.build.pLogger"
       implementationClass = "PluginLogger"
     }
   }

@@ -18,11 +18,11 @@ pluginManagement {
   }
 }
 
-rootProject.name = "KitVa"
+rootProject.name = "fs"
 
 file(rootDir).listFiles()
   ?.filter { it.isDirectory }
-  ?.filter { it.name.matches(Regex("kitva-(?!(recycle|draft)).*")) }
+  ?.filter { it.name.matches(Regex("fs-(?!(recycle|draft)).*")) }
   ?.forEach { include(":${it.name}") }
 // include ":docs"
 // include ":tests"
