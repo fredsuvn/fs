@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JMH Visualizer - Local Version</title>
+  <link rel="stylesheet" href="jmh-visualizer.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/6.0.0/echarts.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>JMH Visualizer</h1>
+    <p>Java Microbenchmark Harness Results Visualization Tool - Local Version</p>
+  </header>
+
+<!--  <section class="upload-section">-->
+<!--    <div class="upload-area" id="uploadArea">-->
+<!--      <div class="upload-icon">📊</div>-->
+<!--      <h3>Upload JMH Benchmark Results</h3>-->
+<!--      <p>Drag and drop JMH JSON result file here, or click to select file</p>-->
+<!--      <button class="btn" id="uploadBtn">Select JSON File</button>-->
+<!--      <input type="file" id="fileInput" accept=".json">-->
+<!--    </div>-->
+
+<!--    <div class="error-message" id="errorMessage"></div>-->
+<!--    <div class="file-info" id="fileInfo"></div>-->
+<!--  </section>-->
+
+  <section class="chart-section" id="chartSection">
+    <div class="no-data" id="noDataMessage">
+      <h3>Charts will be displayed here</h3>
+      <p>Please upload JMH JSON result file to generate visualizations</p>
+    </div>
+    <div id="chartsContainer"></div>
+  </section>
+
+  <footer>
+    <p>JMH Visualizer Local Version | Created by <a href="https://chat.deepseek.com/">DeepSeek</a></p>
+  </footer>
+</div>
+
+<script src="jmh-visualizer.js"></script>
+</body>
+</html>

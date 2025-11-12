@@ -1,9 +1,0 @@
-Benchmark                 Mode  Cnt      Score      Error   Units
-CaseJmh.fsCamel          thrpt    3   1161.875 ±  484.919  ops/ms
-CaseJmh.fsMix            thrpt    3    312.861 ± 3960.086  ops/ms
-CaseJmh.fsMix2           thrpt    3   2781.187 ±  831.809  ops/ms
-CaseJmh.fsUnderscore     thrpt    3    944.667 ±  205.959  ops/ms
-CaseJmh.guavaCamel       thrpt    3   1373.854 ±  786.461  ops/ms
-CaseJmh.guavaMix         thrpt    3   1003.487 ± 7963.509  ops/ms
-CaseJmh.guavaMix2        thrpt    3  12309.981 ± 3170.393  ops/ms
-CaseJmh.guavaUnderscore  thrpt    3  12128.156 ± 6121.494  ops/ms
