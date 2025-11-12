@@ -4,7 +4,6 @@ plugins {
   `maven-publish`
   signing
   id("com.google.protobuf")
-  //id("com.github.spotbugs")
   id("fs")
 }
 
@@ -40,8 +39,6 @@ dependencies {
   testImplementation("org.eclipse.jetty:jetty-server")
   testImplementation("org.eclipse.jetty:jetty-servlet")
   testImplementation("javax.servlet:javax.servlet-api")
-
-  //spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0")
 }
 
 java {
@@ -201,6 +198,7 @@ val testJava17 by tasks.registering(Test::class) {
     languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
   }
 }
+
 tasks.check.get().dependsOn(tasks.test, testJava17)
 
 tasks.named<Javadoc>("javadoc") {
@@ -214,6 +212,57 @@ tasks.named<Javadoc>("javadoc") {
   javadocTool = javaToolchains.javadocToolFor {
     languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
   }
+}
+
+jacoco {
+  val jacocoToolVersion: String by project
+  toolVersion = jacocoToolVersion
+}
+
+tasks.jacocoTestReport {
+  dependsOn(tasks.test)
+  reports {
+    html.required = false
+    xml.required = false
+    csv.required = false
+  }
+}
+
+protobuf {
+  //generatedFilesBaseDir = protoPath
+  protoc {
+    val protocToolVersion: String by project
+    artifact = "com.google.protobuf:protoc:${protocToolVersion}"
+    // generatedFilesBaseDir = protoPath
+  }
+  plugins {
+    //grpc { artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion" }
+    //grpckt { artifact = "io.grpc:protoc-gen-grpc-kotlin:$grpcKotlinVersion" }
+  }
+  generateProtoTasks {
+    ofSourceSet("test").forEach { task ->
+      task.plugins {
+        //create("java") { outputSubDir = "proto222" }
+        //grpc { outputDir = file("$buildDir/proto22/test/java") }
+      }
+    }
+  }
+}
+
+tasks.register("cleanProto") {
+  doLast {
+    deleteProtoGeneratedFiles()
+  }
+}
+
+tasks.clean {
+  doLast {
+    deleteProtoGeneratedFiles()
+  }
+}
+
+fun deleteProtoGeneratedFiles() {
+  delete(protobuf.generatedFilesBaseDir)
 }
 
 publishing {
@@ -260,63 +309,3 @@ publishing {
 
 signing {
 }
-
-
-
-protobuf {
-  //generatedFilesBaseDir = protoPath
-  protoc {
-    val protocToolVersion: String by project
-    artifact = "com.google.protobuf:protoc:${protocToolVersion}"
-    // generatedFilesBaseDir = protoPath
-  }
-  plugins {
-    //grpc { artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion" }
-    //grpckt { artifact = "io.grpc:protoc-gen-grpc-kotlin:$grpcKotlinVersion" }
-  }
-  generateProtoTasks {
-    ofSourceSet("test").forEach { task ->
-      task.plugins {
-        //create("java") { outputSubDir = "proto222" }
-        //grpc { outputDir = file("$buildDir/proto22/test/java") }
-      }
-    }
-  }
-}
-
-tasks.register("cleanProto") {
-  doLast {
-    deleteProtoGeneratedFiles()
-  }
-}
-
-tasks.clean {
-  doLast {
-    deleteProtoGeneratedFiles()
-  }
-}
-
-fun deleteProtoGeneratedFiles() {
-  delete(protobuf.generatedFilesBaseDir)
-}
-
-jacoco {
-  val jacocoToolVersion: String by project
-  toolVersion = jacocoToolVersion
-}
-
-/*
-spotbugs {
-  val spotbugsToolVersion: String by project
-  toolVersion = spotbugsToolVersion
-  ignoreFailures = true
-}
-
-tasks.withType<SpotBugsTask>().configureEach {
-  reports.create("html") {
-    required = true
-    outputLocation = file(layout.buildDirectory.dir("reports/spotbugs/spotbugs.html"))
-    setStylesheet("fancy-hist.xsl")
-  }
-}
- */
