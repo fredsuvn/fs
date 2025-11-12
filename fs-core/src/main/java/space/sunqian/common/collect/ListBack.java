@@ -304,8 +304,6 @@ final class ListBack {
     private static final class ImmutableList<T>
         extends AbstractList<T> implements RandomAccess, Serializable {
 
-        private static final long serialVersionUID = 0L;
-
         private final T[] array;
 
         private ImmutableList(T[] array) {
@@ -326,8 +324,6 @@ final class ListBack {
     @Immutable
     private static final class BooleanImmutableList
         extends AbstractList<Boolean> implements RandomAccess, Serializable {
-
-        private static final long serialVersionUID = 0L;
 
         private final boolean[] array;
 
@@ -350,8 +346,6 @@ final class ListBack {
     private static final class ByteImmutableList
         extends AbstractList<Byte> implements RandomAccess, Serializable {
 
-        private static final long serialVersionUID = 0L;
-
         private final byte[] array;
 
         private ByteImmutableList(byte[] array) {
@@ -372,8 +366,6 @@ final class ListBack {
     @Immutable
     private static final class ShortImmutableList
         extends AbstractList<Short> implements RandomAccess, Serializable {
-
-        private static final long serialVersionUID = 0L;
 
         private final short[] array;
 
@@ -396,8 +388,6 @@ final class ListBack {
     private static final class CharImmutableList
         extends AbstractList<Character> implements RandomAccess, Serializable {
 
-        private static final long serialVersionUID = 0L;
-
         private final char[] array;
 
         private CharImmutableList(char[] array) {
@@ -418,8 +408,6 @@ final class ListBack {
     @Immutable
     private static final class IntImmutableList
         extends AbstractList<Integer> implements RandomAccess, Serializable {
-
-        private static final long serialVersionUID = 0L;
 
         private final int[] array;
 
@@ -442,8 +430,6 @@ final class ListBack {
     private static final class LongImmutableList
         extends AbstractList<Long> implements RandomAccess, Serializable {
 
-        private static final long serialVersionUID = 0L;
-
         private final long[] array;
 
         private LongImmutableList(long[] array) {
@@ -465,8 +451,6 @@ final class ListBack {
     private static final class FloatImmutableList
         extends AbstractList<Float> implements RandomAccess, Serializable {
 
-        private static final long serialVersionUID = 0L;
-
         private final float[] array;
 
         private FloatImmutableList(float[] array) {
@@ -487,8 +471,6 @@ final class ListBack {
     @Immutable
     private static final class DoubleImmutableList
         extends AbstractList<Double> implements RandomAccess, Serializable {
-
-        private static final long serialVersionUID = 0L;
 
         private final double[] array;
 

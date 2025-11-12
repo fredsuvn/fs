@@ -89,7 +89,7 @@ public interface AssertTest {
         } catch (Exception e) {
             throw new AssertionError(e);
         }
-        assertEquals(actual, expected);
+        assertEquals(expected, actual);
     }
 
     /**

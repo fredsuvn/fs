@@ -235,6 +235,7 @@ public class SystemKit {
      *
      * @return system property of {@link SystemKeys#FILE_SEPARATOR}
      */
+    @SuppressWarnings("SystemGetProperty")
     public static @Nonnull String getFileSeparator() {
         return System.getProperty(SystemKeys.FILE_SEPARATOR);
     }
@@ -244,6 +245,7 @@ public class SystemKit {
      *
      * @return system property of {@link SystemKeys#PATH_SEPARATOR}
      */
+    @SuppressWarnings("SystemGetProperty")
     public static @Nonnull String getPathSeparator() {
         return System.getProperty(SystemKeys.PATH_SEPARATOR);
     }
@@ -253,6 +255,7 @@ public class SystemKit {
      *
      * @return system property of {@link SystemKeys#LINE_SEPARATOR}
      */
+    @SuppressWarnings("SystemGetProperty")
     public static @Nonnull String getLineSeparator() {
         return System.getProperty(SystemKeys.LINE_SEPARATOR);
     }
@@ -303,6 +306,7 @@ public class SystemKit {
      *
      * @return system property of {@link SystemKeys#FILE_ENCODING}
      */
+    @SuppressWarnings("SystemGetProperty")
     public static @Nullable String getFileEncoding() {
         return System.getProperty(SystemKeys.FILE_ENCODING);
     }
