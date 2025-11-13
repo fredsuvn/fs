@@ -449,17 +449,29 @@ public class ClassKit {
     }
 
     /**
+     * Returns the {@link Class} object whose name is the given name. This method is equivalent to
+     * {@code classForName(name, null)}.
+     *
+     * @param name the given name of the class or interface
+     * @return the {@link Class} object whose name is the given name, or {@code null} if loading fails
+     * @see #classForName(String, ClassLoader)
+     */
+    public static @Nullable Class<?> classForName(@Nonnull String name) {
+        return classForName(name, null);
+    }
+
+    /**
      * Returns the {@link Class} object whose name is the given name. This method calls {@link Class#forName(String)} if
      * the given class loader is {@code null}, or {@link Class#forName(String, boolean, ClassLoader)} if not.
      *
      * @param name   the given name of the class or interface
      * @param loader the given class loader, may be {@code null}
-     * @return the {@link Class} object whose name is the given name
+     * @return the {@link Class} object whose name is the given name, or {@code null} if loading fails
      */
     public static @Nullable Class<?> classForName(@Nonnull String name, @Nullable ClassLoader loader) {
         try {
             return loader == null ? Class.forName(name) : Class.forName(name, true, loader);
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             return null;
         }
     }

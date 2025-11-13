@@ -4,6 +4,7 @@ import com.google.protobuf.Message;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.Fs;
+import space.sunqian.common.base.exception.UnsupportedEnvException;
 import space.sunqian.common.object.data.DataObjectException;
 import space.sunqian.common.object.data.ObjectBuilder;
 import space.sunqian.common.object.data.ObjectBuilderProvider;
@@ -26,6 +27,16 @@ import java.lang.reflect.Type;
  * @author sunqian
  */
 public class ProtobufBuilderHandler implements ObjectBuilderProvider.Handler {
+
+    /**
+     * Constructs a new handler instance. This constructor will check whether the protobuf package is available in the
+     * current environment.
+     *
+     * @throws UnsupportedEnvException if the protobuf package is not available in the current environment.
+     */
+    public ProtobufBuilderHandler() throws UnsupportedEnvException {
+        Fs.uncheck(() -> Class.forName("com.google.protobuf.Message"), UnsupportedEnvException::new);
+    }
 
     @Override
     public @Nullable ObjectBuilder newBuilder(@Nonnull Type target) throws Exception {

@@ -165,7 +165,7 @@ public class ClassTest implements AssertTest {
     public void testClassExists() {
         assertTrue(ClassKit.classExists(String.class.getName()));
         assertFalse(ClassKit.classExists("123"));
-        assertNull(ClassKit.classForName("123", null));
+        assertNull(ClassKit.classForName("123"));
         assertNull(ClassKit.classForName("123", Thread.currentThread().getContextClassLoader()));
         assertInstanceOf(BytesClassLoader.class, ClassKit.newClassLoader());
     }

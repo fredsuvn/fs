@@ -9,6 +9,7 @@ import space.sunqian.common.base.exception.UnknownArrayTypeException;
 import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import space.sunqian.common.base.exception.UnknownTypeException;
 import space.sunqian.common.base.exception.UnreachablePointException;
+import space.sunqian.common.base.exception.UnsupportedEnvException;
 import space.sunqian.common.base.exception.WrappedException;
 
 import java.io.PrintWriter;
@@ -125,6 +126,21 @@ public class ExceptionTest {
         {
             // WrappedException
             assertSame(new WrappedException(cause).getCause(), cause);
+        }
+        {
+            // UnsupportedEnvException
+            assertThrows(UnsupportedEnvException.class, () -> {
+                throw new UnsupportedEnvException();
+            });
+            assertThrows(UnsupportedEnvException.class, () -> {
+                throw new UnsupportedEnvException("");
+            });
+            assertThrows(UnsupportedEnvException.class, () -> {
+                throw new UnsupportedEnvException("", new RuntimeException());
+            });
+            assertThrows(UnsupportedEnvException.class, () -> {
+                throw new UnsupportedEnvException(new RuntimeException());
+            });
         }
     }
 

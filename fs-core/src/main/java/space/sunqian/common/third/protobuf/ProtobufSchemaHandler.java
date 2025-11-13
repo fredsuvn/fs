@@ -5,6 +5,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+import space.sunqian.common.base.exception.UnsupportedEnvException;
 import space.sunqian.common.base.string.StringKit;
 import space.sunqian.common.object.data.ObjectProperty;
 import space.sunqian.common.object.data.ObjectPropertyBase;
@@ -52,6 +54,16 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
 
     static final class StringListTypeRef extends TypeRef<List<String>> {
         static final @Nonnull StringListTypeRef SINGLETON = new StringListTypeRef();
+    }
+
+    /**
+     * Constructs a new handler instance. This constructor will check whether the protobuf package is available in the
+     * current environment.
+     *
+     * @throws UnsupportedEnvException if the protobuf package is not available in the current environment.
+     */
+    public ProtobufSchemaHandler() throws UnsupportedEnvException {
+        Fs.uncheck(() -> Class.forName("com.google.protobuf.Message"), UnsupportedEnvException::new);
     }
 
     @Override
