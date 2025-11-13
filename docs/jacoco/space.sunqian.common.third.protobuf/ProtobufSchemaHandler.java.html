@@ -5,6 +5,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+import space.sunqian.common.base.exception.UnsupportedEnvException;
 import space.sunqian.common.base.string.StringKit;
 import space.sunqian.common.object.data.ObjectProperty;
 import space.sunqian.common.object.data.ObjectPropertyBase;
@@ -48,38 +50,48 @@ import java.util.Objects;
  *
  * @author sunqian
  */
-<span class="fc" id="L51">public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {</span>
+public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
 
-<span class="fc" id="L53">    static final class StringListTypeRef extends TypeRef&lt;List&lt;String&gt;&gt; {</span>
-<span class="fc" id="L54">        static final @Nonnull StringListTypeRef SINGLETON = new StringListTypeRef();</span>
+<span class="fc" id="L55">    static final class StringListTypeRef extends TypeRef&lt;List&lt;String&gt;&gt; {</span>
+<span class="fc" id="L56">        static final @Nonnull StringListTypeRef SINGLETON = new StringListTypeRef();</span>
     }
+
+    /**
+     * Constructs a new handler instance. This constructor will check whether the protobuf package is available in the
+     * current environment.
+     *
+     * @throws UnsupportedEnvException if the protobuf package is not available in the current environment.
+     */
+<span class="fc" id="L65">    public ProtobufSchemaHandler() throws UnsupportedEnvException {</span>
+<span class="fc" id="L66">        Fs.uncheck(() -&gt; Class.forName(&quot;com.google.protobuf.Message&quot;), UnsupportedEnvException::new);</span>
+<span class="fc" id="L67">    }</span>
 
     @Override
     public boolean parse(@Nonnull ObjectSchemaParser.Context context) throws Exception {
-<span class="fc" id="L59">        Class&lt;?&gt; rawType = TypeKit.getRawClass(context.dataType());</span>
-<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (rawType == null) {</span>
-<span class="fc" id="L61">            return true;</span>
+<span class="fc" id="L71">        Class&lt;?&gt; rawType = TypeKit.getRawClass(context.dataType());</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (rawType == null) {</span>
+<span class="fc" id="L73">            return true;</span>
         }
         // Check whether it is a protobuf object
-<span class="fc" id="L64">        boolean isProtobuf = false;</span>
-<span class="fc" id="L65">        boolean isBuilder = false;</span>
-<span class="fc bfc" id="L66" title="All 2 branches covered.">        if (Message.class.isAssignableFrom(rawType)) {</span>
-<span class="fc" id="L67">            isProtobuf = true;</span>
+<span class="fc" id="L76">        boolean isProtobuf = false;</span>
+<span class="fc" id="L77">        boolean isBuilder = false;</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        if (Message.class.isAssignableFrom(rawType)) {</span>
+<span class="fc" id="L79">            isProtobuf = true;</span>
         }
-<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (Message.Builder.class.isAssignableFrom(rawType)) {</span>
-<span class="fc" id="L70">            isProtobuf = true;</span>
-<span class="fc" id="L71">            isBuilder = true;</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (Message.Builder.class.isAssignableFrom(rawType)) {</span>
+<span class="fc" id="L82">            isProtobuf = true;</span>
+<span class="fc" id="L83">            isBuilder = true;</span>
         }
-<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (!isProtobuf) {</span>
-<span class="fc" id="L74">            return true;</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        if (!isProtobuf) {</span>
+<span class="fc" id="L86">            return true;</span>
         }
-<span class="fc" id="L76">        Method getDescriptorMethod = rawType.getMethod(&quot;getDescriptor&quot;);</span>
-<span class="fc" id="L77">        Descriptors.Descriptor descriptor = (Descriptors.Descriptor) getDescriptorMethod.invoke(null);</span>
-<span class="fc bfc" id="L78" title="All 2 branches covered.">        for (Descriptors.FieldDescriptor field : descriptor.getFields()) {</span>
-<span class="fc" id="L79">            ObjectPropertyBase objectPropertyBase = buildProperty(field, rawType, isBuilder);</span>
-<span class="fc" id="L80">            context.propertyBaseMap().put(objectPropertyBase.name(), objectPropertyBase);</span>
-<span class="fc" id="L81">        }</span>
-<span class="fc" id="L82">        return false;</span>
+<span class="fc" id="L88">        Method getDescriptorMethod = rawType.getMethod(&quot;getDescriptor&quot;);</span>
+<span class="fc" id="L89">        Descriptors.Descriptor descriptor = (Descriptors.Descriptor) getDescriptorMethod.invoke(null);</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        for (Descriptors.FieldDescriptor field : descriptor.getFields()) {</span>
+<span class="fc" id="L91">            ObjectPropertyBase objectPropertyBase = buildProperty(field, rawType, isBuilder);</span>
+<span class="fc" id="L92">            context.propertyBaseMap().put(objectPropertyBase.name(), objectPropertyBase);</span>
+<span class="fc" id="L93">        }</span>
+<span class="fc" id="L94">        return false;</span>
     }
 
     private @Nonnull ObjectPropertyBase buildProperty(
@@ -88,22 +100,22 @@ import java.util.Objects;
         boolean isBuilder
     ) throws Exception {
 
-<span class="fc" id="L91">        String rawName = field.getName();</span>
+<span class="fc" id="L103">        String rawName = field.getName();</span>
 
         // map
-<span class="fc bfc" id="L94" title="All 2 branches covered.">        if (field.isMapField()) {</span>
-<span class="fc" id="L95">            String name = rawName + &quot;Map&quot;;</span>
-<span class="fc" id="L96">            Method getterMethod = rawClass.getMethod(&quot;get&quot; + StringKit.capitalize(name));</span>
-<span class="fc" id="L97">            Invocable getter = Invocable.of(getterMethod);</span>
-<span class="fc" id="L98">            Invocable setter = null;</span>
-<span class="fc bfc" id="L99" title="All 2 branches covered.">            if (isBuilder) {</span>
-<span class="fc" id="L100">                Method clearMethod = rawClass.getMethod(&quot;clear&quot; + StringKit.capitalize(rawName));</span>
-<span class="fc" id="L101">                Method putAllMethod = rawClass.getMethod(&quot;putAll&quot; + StringKit.capitalize(rawName), Map.class);</span>
-<span class="fc" id="L102">                setter = new MapSetter(clearMethod, putAllMethod);</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        if (field.isMapField()) {</span>
+<span class="fc" id="L107">            String name = rawName + &quot;Map&quot;;</span>
+<span class="fc" id="L108">            Method getterMethod = rawClass.getMethod(&quot;get&quot; + StringKit.capitalize(name));</span>
+<span class="fc" id="L109">            Invocable getter = Invocable.of(getterMethod);</span>
+<span class="fc" id="L110">            Invocable setter = null;</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">            if (isBuilder) {</span>
+<span class="fc" id="L112">                Method clearMethod = rawClass.getMethod(&quot;clear&quot; + StringKit.capitalize(rawName));</span>
+<span class="fc" id="L113">                Method putAllMethod = rawClass.getMethod(&quot;putAll&quot; + StringKit.capitalize(rawName), Map.class);</span>
+<span class="fc" id="L114">                setter = new MapSetter(clearMethod, putAllMethod);</span>
             }
-<span class="fc" id="L104">            return new PropertyBaseImpl(</span>
+<span class="fc" id="L116">            return new PropertyBaseImpl(</span>
                 rawName,
-<span class="fc" id="L106">                getterMethod.getGenericReturnType(),</span>
+<span class="fc" id="L118">                getterMethod.getGenericReturnType(),</span>
                 getterMethod,
                 null,
                 getter,
@@ -112,21 +124,21 @@ import java.util.Objects;
         }
 
         // repeated
-<span class="fc bfc" id="L115" title="All 2 branches covered.">        if (field.isRepeated()) {</span>
-<span class="fc" id="L116">            String name = rawName + &quot;List&quot;;</span>
-<span class="fc" id="L117">            Method getterMethod = rawClass.getMethod(&quot;get&quot; + StringKit.capitalize(name));</span>
-<span class="fc" id="L118">            Type type = getterMethod.getGenericReturnType();</span>
-<span class="fc bfc" id="L119" title="All 2 branches covered.">            if (Objects.equals(type, ProtocolStringList.class)) {</span>
-<span class="fc" id="L120">                type = StringListTypeRef.SINGLETON.type();</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (field.isRepeated()) {</span>
+<span class="fc" id="L128">            String name = rawName + &quot;List&quot;;</span>
+<span class="fc" id="L129">            Method getterMethod = rawClass.getMethod(&quot;get&quot; + StringKit.capitalize(name));</span>
+<span class="fc" id="L130">            Type type = getterMethod.getGenericReturnType();</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">            if (Objects.equals(type, ProtocolStringList.class)) {</span>
+<span class="fc" id="L132">                type = StringListTypeRef.SINGLETON.type();</span>
             }
-<span class="fc" id="L122">            Invocable getter = Invocable.of(getterMethod);</span>
-<span class="fc" id="L123">            Invocable setter = null;</span>
-<span class="fc bfc" id="L124" title="All 2 branches covered.">            if (isBuilder) {</span>
-<span class="fc" id="L125">                Method clearMethod = rawClass.getMethod(&quot;clear&quot; + StringKit.capitalize(rawName));</span>
-<span class="fc" id="L126">                Method addAllMethod = rawClass.getMethod(&quot;addAll&quot; + StringKit.capitalize(rawName), Iterable.class);</span>
-<span class="fc" id="L127">                setter = new ListSetter(clearMethod, addAllMethod);</span>
+<span class="fc" id="L134">            Invocable getter = Invocable.of(getterMethod);</span>
+<span class="fc" id="L135">            Invocable setter = null;</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">            if (isBuilder) {</span>
+<span class="fc" id="L137">                Method clearMethod = rawClass.getMethod(&quot;clear&quot; + StringKit.capitalize(rawName));</span>
+<span class="fc" id="L138">                Method addAllMethod = rawClass.getMethod(&quot;addAll&quot; + StringKit.capitalize(rawName), Iterable.class);</span>
+<span class="fc" id="L139">                setter = new ListSetter(clearMethod, addAllMethod);</span>
             }
-<span class="fc" id="L129">            return new PropertyBaseImpl(</span>
+<span class="fc" id="L141">            return new PropertyBaseImpl(</span>
                 rawName,
                 type,
                 getterMethod,
@@ -137,16 +149,16 @@ import java.util.Objects;
         }
 
         // Simple object
-<span class="fc" id="L140">        Method getterMethod = rawClass.getMethod(&quot;get&quot; + StringKit.capitalize(rawName));</span>
-<span class="fc" id="L141">        Type type = getterMethod.getGenericReturnType();</span>
-<span class="fc" id="L142">        Invocable getter = Invocable.of(getterMethod);</span>
-<span class="fc" id="L143">        Method setterMethod = null;</span>
-<span class="fc" id="L144">        Invocable setter = null;</span>
-<span class="fc bfc" id="L145" title="All 2 branches covered.">        if (isBuilder) {</span>
-<span class="fc" id="L146">            setterMethod = rawClass.getMethod(&quot;set&quot; + StringKit.capitalize(rawName), TypeKit.getRawClass(type));</span>
-<span class="fc" id="L147">            setter = Invocable.of(setterMethod);</span>
+<span class="fc" id="L152">        Method getterMethod = rawClass.getMethod(&quot;get&quot; + StringKit.capitalize(rawName));</span>
+<span class="fc" id="L153">        Type type = getterMethod.getGenericReturnType();</span>
+<span class="fc" id="L154">        Invocable getter = Invocable.of(getterMethod);</span>
+<span class="fc" id="L155">        Method setterMethod = null;</span>
+<span class="fc" id="L156">        Invocable setter = null;</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        if (isBuilder) {</span>
+<span class="fc" id="L158">            setterMethod = rawClass.getMethod(&quot;set&quot; + StringKit.capitalize(rawName), TypeKit.getRawClass(type));</span>
+<span class="fc" id="L159">            setter = Invocable.of(setterMethod);</span>
         }
-<span class="fc" id="L149">        return new PropertyBaseImpl(</span>
+<span class="fc" id="L161">        return new PropertyBaseImpl(</span>
             rawName,
             type,
             getterMethod,
@@ -161,22 +173,22 @@ import java.util.Objects;
         private final @Nonnull MethodHandle clearHandle;
         private final @Nonnull MethodHandle putAllHandle;
 
-<span class="fc" id="L164">        private MapSetter(@Nonnull Method clearMethod, @Nonnull Method putAllMethod) throws Exception {</span>
+<span class="fc" id="L176">        private MapSetter(@Nonnull Method clearMethod, @Nonnull Method putAllMethod) throws Exception {</span>
             // setter = (inst, args) -&gt; {
             //     clearMethod.invoke(inst);
             //     return putAllMethod.invoke(inst, args);
             // };
-<span class="fc" id="L169">            this.clearHandle = MethodHandles.lookup().unreflect(clearMethod);</span>
-<span class="fc" id="L170">            this.putAllHandle = MethodHandles.lookup().unreflect(putAllMethod);</span>
-<span class="fc" id="L171">        }</span>
+<span class="fc" id="L181">            this.clearHandle = MethodHandles.lookup().unreflect(clearMethod);</span>
+<span class="fc" id="L182">            this.putAllHandle = MethodHandles.lookup().unreflect(putAllMethod);</span>
+<span class="fc" id="L183">        }</span>
 
         @Override
         public @Nullable Object invokeChecked(
             @Nullable Object inst, @Nullable Object @Nonnull ... args
         ) throws Throwable {
-<span class="fc" id="L177">            clearHandle.invoke(inst);</span>
-<span class="fc" id="L178">            putAllHandle.invoke(inst, args[0]);</span>
-<span class="fc" id="L179">            return null;</span>
+<span class="fc" id="L189">            clearHandle.invoke(inst);</span>
+<span class="fc" id="L190">            putAllHandle.invoke(inst, args[0]);</span>
+<span class="fc" id="L191">            return null;</span>
         }
     }
 
@@ -185,22 +197,22 @@ import java.util.Objects;
         private final @Nonnull MethodHandle clearHandle;
         private final @Nonnull MethodHandle addAllMethod;
 
-<span class="fc" id="L188">        private ListSetter(@Nonnull Method clearMethod, @Nonnull Method addAllMethod) throws Exception {</span>
+<span class="fc" id="L200">        private ListSetter(@Nonnull Method clearMethod, @Nonnull Method addAllMethod) throws Exception {</span>
             // setter = (inst, args) -&gt; {
             //     clearMethod.invoke(inst);
             //     return addAllMethod.invoke(inst, args);
             // };
-<span class="fc" id="L193">            this.clearHandle = MethodHandles.lookup().unreflect(clearMethod);</span>
-<span class="fc" id="L194">            this.addAllMethod = MethodHandles.lookup().unreflect(addAllMethod);</span>
-<span class="fc" id="L195">        }</span>
+<span class="fc" id="L205">            this.clearHandle = MethodHandles.lookup().unreflect(clearMethod);</span>
+<span class="fc" id="L206">            this.addAllMethod = MethodHandles.lookup().unreflect(addAllMethod);</span>
+<span class="fc" id="L207">        }</span>
 
         @Override
         public @Nullable Object invokeChecked(
             @Nullable Object inst, @Nullable Object @Nonnull ... args
         ) throws Throwable {
-<span class="fc" id="L201">            clearHandle.invoke(inst);</span>
-<span class="fc" id="L202">            addAllMethod.invoke(inst, args[0]);</span>
-<span class="fc" id="L203">            return null;</span>
+<span class="fc" id="L213">            clearHandle.invoke(inst);</span>
+<span class="fc" id="L214">            addAllMethod.invoke(inst, args[0]);</span>
+<span class="fc" id="L215">            return null;</span>
         }
     }
 
@@ -220,48 +232,48 @@ import java.util.Objects;
             @Nullable Method setterMethod,
             @Nonnull Invocable getter,
             @Nullable Invocable setter
-<span class="fc" id="L223">        ) {</span>
-<span class="fc" id="L224">            this.name = name;</span>
-<span class="fc" id="L225">            this.type = type;</span>
-<span class="fc" id="L226">            this.getterMethod = getterMethod;</span>
-<span class="fc" id="L227">            this.setterMethod = setterMethod;</span>
-<span class="fc" id="L228">            this.getter = getter;</span>
-<span class="fc" id="L229">            this.setter = setter;</span>
-<span class="fc" id="L230">        }</span>
+<span class="fc" id="L235">        ) {</span>
+<span class="fc" id="L236">            this.name = name;</span>
+<span class="fc" id="L237">            this.type = type;</span>
+<span class="fc" id="L238">            this.getterMethod = getterMethod;</span>
+<span class="fc" id="L239">            this.setterMethod = setterMethod;</span>
+<span class="fc" id="L240">            this.getter = getter;</span>
+<span class="fc" id="L241">            this.setter = setter;</span>
+<span class="fc" id="L242">        }</span>
 
         @Override
         public @Nonnull String name() {
-<span class="fc" id="L234">            return name;</span>
+<span class="fc" id="L246">            return name;</span>
         }
 
         @Override
         public @Nonnull Type type() {
-<span class="fc" id="L239">            return type;</span>
+<span class="fc" id="L251">            return type;</span>
         }
 
         @Override
         public @Nullable Method getterMethod() {
-<span class="fc" id="L244">            return getterMethod;</span>
+<span class="fc" id="L256">            return getterMethod;</span>
         }
 
         @Override
         public @Nullable Method setterMethod() {
-<span class="fc" id="L249">            return setterMethod;</span>
+<span class="fc" id="L261">            return setterMethod;</span>
         }
 
         @Override
         public @Nullable Field field() {
-<span class="fc" id="L254">            return null;</span>
+<span class="fc" id="L266">            return null;</span>
         }
 
         @Override
         public @Nonnull Invocable getter() {
-<span class="fc" id="L259">            return getter;</span>
+<span class="fc" id="L271">            return getter;</span>
         }
 
         @Override
         public @Nullable Invocable setter() {
-<span class="fc" id="L264">            return setter;</span>
+<span class="fc" id="L276">            return setter;</span>
         }
     }
 }

@@ -2,8 +2,8 @@
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.exception.UnknownTypeException;
 import space.sunqian.common.base.enums.EnumKit;
+import space.sunqian.common.base.exception.UnknownTypeException;
 import space.sunqian.common.base.system.JvmKit;
 import space.sunqian.common.runtime.reflect.ClassKit;
 
@@ -46,7 +46,7 @@ public class FsLoader {
     }
 
     private static &lt;T&gt; @Nullable T loadImplByJvm(String classImplName) throws UnknownTypeException {
-<span class="fc" id="L49">        Class&lt;?&gt; cls = ClassKit.classForName(classImplName, null);</span>
+<span class="fc" id="L49">        Class&lt;?&gt; cls = ClassKit.classForName(classImplName);</span>
 <span class="fc" id="L50">        Enum&lt;?&gt; enumObj = EnumKit.findEnum(Fs.as(cls), &quot;INST&quot;);</span>
 <span class="fc" id="L51">        return Fs.as(enumObj);</span>
     }
