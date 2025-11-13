@@ -106,7 +106,9 @@ implements <a href="../../object/convert/ObjectConverter.Handler.html" title="in
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">ProtobufConvertHandler</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Constructs a new handler instance.</div>
+</div>
 </div>
 </section>
 </li>
@@ -150,7 +152,14 @@ implements <a href="../../object/convert/ObjectConverter.Handler.html" title="in
 <li>
 <section class="detail" id="&lt;init&gt;()">
 <h3>ProtobufConvertHandler</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ProtobufConvertHandler</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ProtobufConvertHandler</span>()
+                       throws <span class="exceptions"><a href="../../base/exception/UnsupportedEnvException.html" title="class in space.sunqian.common.base.exception">UnsupportedEnvException</a></span></div>
+<div class="block">Constructs a new handler instance. This constructor will check whether the protobuf package is available in the
+ current environment.</div>
+<dl class="notes">
+<dt>Throws:</dt>
+<dd><code><a href="../../base/exception/UnsupportedEnvException.html" title="class in space.sunqian.common.base.exception">UnsupportedEnvException</a></code> - if the protobuf package is not available in the current environment.</dd>
+</dl>
 </section>
 </li>
 </ul>
