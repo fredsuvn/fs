@@ -3,6 +3,7 @@ package internal.tests.benchmarks;
 import internal.tests.common.ProxyApi;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -21,11 +22,12 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @BenchmarkMode({Mode.Throughput})
-// @Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
-// @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
-@Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
-//@Fork(1)
+@Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
+@Fork(1)
+// @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
+// @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
+// @Fork(5)
 public class ProxyBenchmark {
 
     @Param({

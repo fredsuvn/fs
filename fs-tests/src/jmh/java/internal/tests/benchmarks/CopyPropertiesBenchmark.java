@@ -1,6 +1,7 @@
 package internal.tests.benchmarks;
 
-import internal.tests.common.Invoker;
+import internal.tests.common.CommonData;
+import internal.tests.common.PropertiesCopier;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -15,8 +16,8 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
+import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
@@ -27,32 +28,43 @@ import java.util.function.Supplier;
 // @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 // @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 // @Fork(5)
-public class InvokerBenchmark {
+public class CopyPropertiesBenchmark {
 
     @Param({
-        "reflect",
-        "asm",
-        "method_handle",
-        "original",
+        "fs",
+        "apache",
+        "hutool",
     })
-    private String invokeType;
+    private String copierType;
 
-    @Param({
-        "static",
-        "instance",
-    })
-    private String methodType;
+    private PropertiesCopier copier;
 
-    private Supplier<Object> action;
+    private final CommonData data = new CommonData();
+
+    {
+        data.setI1(1);
+        data.setL1(2L);
+        data.setStr1("hello");
+        data.setIi1(3);
+        data.setLl1(4L);
+        data.setBb1(new BigDecimal("5.0"));
+        data.setI2(1);
+        data.setL2(2L);
+        data.setStr2("hello");
+        data.setIi2(3);
+        data.setLl2(4L);
+        data.setBb2(new BigDecimal("5.0"));
+    }
 
     @Setup(Level.Trial)
     public void setup() {
-        this.action = Invoker.createAction(invokeType, methodType);
+        this.copier = PropertiesCopier.createCopier(copierType);
     }
 
     @Benchmark
-    public void invoke(Blackhole blackhole) throws Exception {
-        Object value = action.get();
-        blackhole.consume(value);
+    public void copyProperties(Blackhole blackhole) throws Exception {
+        CommonData copy = new CommonData();
+        copier.copyProperties(data, copy);
+        blackhole.consume(copy);
     }
 }

@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AspectsTest {
+public class AspectTest {
 
     @Test
-    public void testAspects() throws Exception {
+    public void testAspect() throws Exception {
         testAspect("original");
         testAspect("asm");
     }

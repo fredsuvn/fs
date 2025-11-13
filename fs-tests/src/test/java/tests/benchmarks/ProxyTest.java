@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ProxiesTest {
+public class ProxyTest {
 
     @Test
-    public void testProxies() throws Exception {
+    public void testProxy() throws Exception {
         testProxy("original");
         testProxy("jdk");
         testProxy("asm");

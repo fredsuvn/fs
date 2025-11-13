@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CachesTest {
+public class CacheTest {
 
     @Test
-    public void testCaches() throws Exception {
+    public void testCache() throws Exception {
         testCache("simpleWeak");
         testCache("simpleSoft");
         testCache("caffeineWeak");

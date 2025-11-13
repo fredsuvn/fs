@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 public class InvokerTest {
 
     @Test
-    public void testInvokers() throws Exception {
+    public void testInvoker() throws Exception {
         testInvoker("reflect");
         testInvoker("asm");
         testInvoker("method_handle");

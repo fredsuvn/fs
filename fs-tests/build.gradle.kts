@@ -4,9 +4,12 @@ plugins {
   id("fs")
 }
 
-description = "Tests for fs."
+description = "Tests and benchmarks for fs."
 
 dependencies {
+  annotationProcessor(platform(project(":fs-dependencies")))
+  annotationProcessor("org.projectlombok:lombok")
+
   implementation(platform(project(":fs-dependencies")))
   implementation(project(":fs-annotations"))
   implementation(project(":fs-core"))
