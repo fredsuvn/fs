@@ -15,6 +15,7 @@ public class PropertiesCopierTest {
         testCopier("fs");
         testCopier("apache");
         testCopier("hutool");
+        testCopier("original");
     }
 
     public void testCopier(String copierType) throws Exception {
@@ -32,7 +33,8 @@ public class PropertiesCopierTest {
         data.setLl2(4L);
         data.setBb2(new BigDecimal("5.0"));
         CommonData copy = new CommonData();
-        PropertiesCopier.createCopier(copierType).copyProperties(data, copy);
+        PropertiesCopier copier = PropertiesCopier.createCopier(copierType);
+        copier.copyProperties(data, copy);
         assertEquals(data, copy);
     }
 }

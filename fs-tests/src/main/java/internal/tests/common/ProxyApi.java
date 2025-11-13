@@ -65,7 +65,7 @@ public interface ProxyApi {
                     return ProxyApi.super.withoutPrimitive(i, l, str) + "[proxy]";
                 }
             };
-            default -> throw new IllegalArgumentException("proxyType is not support");
+            default -> throw new IllegalArgumentException();
         };
     }
 

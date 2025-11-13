@@ -50,7 +50,7 @@ public interface CacheApi<K, V> {
                 ConcurrentHashMap<K, V> cache = new ConcurrentHashMap<>();
                 yield cache::computeIfAbsent;
             }
-            default -> throw new IllegalArgumentException("cacheType is not support");
+            default -> throw new IllegalArgumentException();
         };
     }
 

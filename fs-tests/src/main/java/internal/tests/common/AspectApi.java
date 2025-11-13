@@ -52,7 +52,7 @@ public class AspectApi {
                     return super.withoutPrimitive(i + 1, l, str);
                 }
             };
-            default -> throw new IllegalArgumentException("proxyType is not support");
+            default -> throw new IllegalArgumentException();
         };
     }
 
