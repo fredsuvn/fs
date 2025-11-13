@@ -1,6 +1,6 @@
 package internal.tests.benchmarks;
 
-import internal.tests.common.Invoker;
+import internal.tests.common.AspectApi;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -15,8 +15,9 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
@@ -24,32 +25,34 @@ import java.util.function.Supplier;
 @Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-public class InvokerBenchmark {
+public class AspectBenchmark {
 
     @Param({
-        "reflect",
         "asm",
-        "method_handle",
         "original",
     })
-    private String invokeType;
+    private String aspectType;
 
     @Param({
-        "static",
-        "instance",
+        "true",
+        "false",
     })
-    private String methodType;
+    private String withPrimitive;
 
-    private Supplier<Object> action;
+    private AspectApi aspect;
 
     @Setup(Level.Trial)
     public void setup() {
-        this.action = Invoker.createAction(invokeType, methodType);
+        this.aspect = AspectApi.createAspect(aspectType);
     }
 
     @Benchmark
-    public void invoke(Blackhole blackhole) throws Exception {
-        Object value = action.get();
+    public void aspect(Blackhole blackhole) throws Exception {
+        Random random = ThreadLocalRandom.current();
+        String value = "true".equals(withPrimitive) ?
+            aspect.withPrimitive(random.nextInt(), random.nextLong(), "hello")
+            :
+            aspect.withoutPrimitive(random.nextInt(), random.nextLong(), "hello");
         blackhole.consume(value);
     }
 }

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JMH Visualizer - Local Version</title>
   <link rel="stylesheet" href="jmh-visualizer.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/6.0.0/echarts.min.js"></script>
+  <script src="../js/echarts.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -45,6 +45,13 @@
       <div class="error-message" id="errorMessage"></div>
       <div class="file-info" id="fileInfo"></div>
     </div>
+  </section>
+
+  <section class="environment-section" id="environmentSection" style="display: none;">
+    <div class="environment-header">
+      <h3>Environment Information</h3>
+    </div>
+    <div class="environment-content" id="environmentContent"></div>
   </section>
 
   <section class="chart-section" id="chartSection">

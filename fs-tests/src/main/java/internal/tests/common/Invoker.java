@@ -22,7 +22,7 @@ public class Invoker {
         }
     }
 
-    public static Invocable createInvocable(String invokeType, String methodType) {
+    private static Invocable createInvocable(String invokeType, String methodType) {
         if ("static".equals(methodType)) {
             if ("reflect".equals(invokeType)) {
                 return Invocable.of(INVOKE_STATIC, InvocationMode.REFLECTION);

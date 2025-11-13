@@ -220,6 +220,77 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
+     * Create environment information HTML for a class
+     */
+    function createEnvironmentInfo(classData) {
+        // Get the first item from the first method to extract environment info
+        const firstMethodName = Object.keys(classData)[0];
+        const firstItem = classData[firstMethodName][0];
+
+        if (!firstItem) return null;
+
+        let envHTML = '<div class="environment-info"><table class="environment-table">';
+
+        // JMH version
+        if (firstItem.jmhVersion) {
+            envHTML += `<tr><th>JMH Version</th><td>${firstItem.jmhVersion}</td></tr>`;
+        }
+
+        // JDK version
+        if (firstItem.jdkVersion) {
+            envHTML += `<tr><th>JDK Version</th><td>${firstItem.jdkVersion}</td></tr>`;
+        }
+
+        // VM Name
+        if (firstItem.vmName) {
+            envHTML += `<tr><th>VM Name</th><td>${firstItem.vmName}</td></tr>`;
+        }
+
+        // VM version
+        if (firstItem.vmVersion) {
+            envHTML += `<tr><th>VM Version</th><td>${firstItem.vmVersion}</td></tr>`;
+        }
+
+        // Benchmark configuration
+        if (firstItem.mode) {
+            envHTML += `<tr><th>Benchmark Mode</th><td>${firstItem.mode}</td></tr>`;
+        }
+
+        if (firstItem.forks) {
+            envHTML += `<tr><th>Forks</th><td>${firstItem.forks}</td></tr>`;
+        }
+
+        if (firstItem.measurementIterations) {
+            envHTML += `<tr><th>Measurement Iterations</th><td>${firstItem.measurementIterations}</td></tr>`;
+        }
+
+        if (firstItem.measurementTime) {
+            envHTML += `<tr><th>Measurement Time</th><td>${firstItem.measurementTime}</td></tr>`;
+        }
+
+        if (firstItem.warmupIterations) {
+            envHTML += `<tr><th>Warmup Iterations</th><td>${firstItem.warmupIterations}</td></tr>`;
+        }
+
+        if (firstItem.warmupTime) {
+            envHTML += `<tr><th>Warmup Time</th><td>${firstItem.warmupTime}</td></tr>`;
+        }
+
+        if (firstItem.threads) {
+            envHTML += `<tr><th>Threads</th><td>${firstItem.threads}</td></tr>`;
+        }
+
+        // Primary metric unit
+        if (firstItem.primaryMetric && firstItem.primaryMetric.scoreUnit) {
+            envHTML += `<tr><th>Score Unit</th><td>${firstItem.primaryMetric.scoreUnit}</td></tr>`;
+        }
+
+        envHTML += '</table></div>';
+
+        return envHTML;
+    }
+
+    /**
      * Create a class group with methods
      */
     function createClassGroup(classData, className) {
@@ -249,6 +320,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const classContent = document.createElement('div');
         classContent.className = 'class-content';
         classGroup.appendChild(classContent);
+
+        // Add environment information for this class
+        const envInfo = createEnvironmentInfo(classData);
+        if (envInfo) {
+            const envSection = document.createElement('div');
+            envSection.className = 'class-environment';
+            envSection.innerHTML = envInfo;
+            classContent.appendChild(envSection);
+        }
 
         chartsContainer.appendChild(classGroup);
 
@@ -330,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function() {
         metricGroup.appendChild(metricSelect);
         methodControls.appendChild(metricGroup);
 
-        // Sort controls
+        // Sort controls - 修正箭头方向
         const sortGroup = document.createElement('div');
         sortGroup.className = 'control-group';
 
@@ -342,10 +422,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const sortSelect = document.createElement('select');
         sortSelect.className = 'control-select';
         sortSelect.innerHTML = `
-            <option value="score-desc" selected>Score ↓</option>
-            <option value="score-asc">Score ↑</option>
-            <option value="param-asc">Parameter ↑</option>
-            <option value="param-desc">Parameter ↓</option>
+            <option value="score-desc" selected>Score desc ↓</option>
+            <option value="score-asc">Score asc ↑</option>
+            <option value="param-desc">Parameter desc ↓</option>
+            <option value="param-asc">Parameter asc ↑</option>
         `;
         sortGroup.appendChild(sortSelect);
         methodControls.appendChild(sortGroup);
@@ -422,7 +502,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Sort data based on sort type
+     * Sort data based on sort type - 修正排序逻辑
      */
     function sortData(data, sortType, metric) {
         if (sortType === 'original') {
@@ -433,12 +513,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         switch(sortType) {
             case 'score-asc':
+                // 分数升序：从小到大
                 sortedData.sort((a, b) => getMetricValue(a, metric) - getMetricValue(b, metric));
                 break;
             case 'score-desc':
+                // 分数降序：从大到小
                 sortedData.sort((a, b) => getMetricValue(b, metric) - getMetricValue(a, metric));
                 break;
             case 'param-asc':
+                // 参数升序：A-Z
                 sortedData.sort((a, b) => {
                     const aName = getParamDisplayName(a);
                     const bName = getParamDisplayName(b);
@@ -446,6 +529,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 break;
             case 'param-desc':
+                // 参数降序：Z-A
                 sortedData.sort((a, b) => {
                     const aName = getParamDisplayName(a);
                     const bName = getParamDisplayName(b);
