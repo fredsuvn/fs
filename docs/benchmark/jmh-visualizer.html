@@ -11,21 +11,41 @@
 <div class="container">
   <header>
     <h1>JMH Visualizer</h1>
-    <p>Java Microbenchmark Harness Results Visualization Tool - Local Version</p>
+    <p>Java Microbenchmark Harness Results Visualization Tool</p>
   </header>
 
-<!--  <section class="upload-section">-->
-<!--    <div class="upload-area" id="uploadArea">-->
-<!--      <div class="upload-icon">📊</div>-->
-<!--      <h3>Upload JMH Benchmark Results</h3>-->
-<!--      <p>Drag and drop JMH JSON result file here, or click to select file</p>-->
-<!--      <button class="btn" id="uploadBtn">Select JSON File</button>-->
-<!--      <input type="file" id="fileInput" accept=".json">-->
-<!--    </div>-->
+  <section class="global-controls">
+    <div class="control-group">
+      <span class="control-label">Global Sort:</span>
+      <select class="control-select" id="globalSortSelect">
+        <option value="score-desc">Score ↓</option>
+        <option value="score-asc">Score ↑</option>
+        <option value="param-asc">Parameter ↑</option>
+        <option value="param-desc">Parameter ↓</option>
+      </select>
+    </div>
+  </section>
 
-<!--    <div class="error-message" id="errorMessage"></div>-->
-<!--    <div class="file-info" id="fileInfo"></div>-->
-<!--  </section>-->
+  <section class="upload-section collapsible">
+    <div class="collapsible-header">
+      <div class="header-title">
+        <span class="collapse-icon">▼</span>
+        <h3>Upload JMH Benchmark Results</h3>
+        <span class="collapse-hint">(Click to expand)</span>
+      </div>
+    </div>
+    <div class="collapsible-content" style="display: none;">
+      <div class="upload-area" id="uploadArea">
+        <div class="upload-icon">📊</div>
+        <p>Drag and drop JMH JSON result file here, or click to select file</p>
+        <button class="btn" id="uploadBtn">Select JSON File</button>
+        <input type="file" id="fileInput" accept=".json">
+      </div>
+
+      <div class="error-message" id="errorMessage"></div>
+      <div class="file-info" id="fileInfo"></div>
+    </div>
+  </section>
 
   <section class="chart-section" id="chartSection">
     <div class="no-data" id="noDataMessage">
@@ -36,7 +56,7 @@
   </section>
 
   <footer>
-    <p>JMH Visualizer Local Version | Created by <a href="https://chat.deepseek.com/">DeepSeek</a></p>
+    <p>Created by <a href="https://www.deepseek.com" target="_blank">DeepSeek</a></p>
   </footer>
 </div>
 

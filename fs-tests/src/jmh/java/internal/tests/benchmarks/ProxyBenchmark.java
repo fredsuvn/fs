@@ -1,6 +1,6 @@
 package internal.tests.benchmarks;
 
-import internal.tests.common.CacheApi;
+import internal.tests.common.ProxyApi;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -12,7 +12,6 @@ import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
@@ -26,49 +25,35 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-public class CacheBenchmark {
-
-    private static final int DATA_SIZE = 100000;
-    private static final KeyValue[] DATA = new KeyValue[DATA_SIZE];
-
-    static {
-        Random random = new Random();
-        for (int i = 0; i < DATA.length; i++) {
-            String key = String.valueOf(random.nextDouble());
-            String value = String.valueOf(random.nextDouble() * random.nextDouble());
-            DATA[i] = new KeyValue(key, value);
-        }
-    }
+public class ProxyBenchmark {
 
     @Param({
-        "simpleWeak",
-        "simpleSoft",
-        "caffeineWeak",
-        "caffeineSoft",
-        "caffeine",
-        "guavaWeak",
-        "guavaSoft",
-        "guava",
-        "concurrentHashMap",
+        "asm",
+        "jdk",
+        "original",
     })
-    private String cacheType;
+    private String proxyType;
 
-    private CacheApi<String, String> cache;
+    @Param({
+        "true",
+        "false",
+    })
+    private String withPrimitive;
+
+    private ProxyApi proxy;
 
     @Setup(Level.Trial)
     public void setup() {
-        this.cache = CacheApi.createCache(cacheType);
+        this.proxy = ProxyApi.createProxy(proxyType);
     }
 
     @Benchmark
-    @Threads(8)
-    public void computeIfAbsent(Blackhole blackhole) throws Exception {
+    public void proxy(Blackhole blackhole) throws Exception {
         Random random = ThreadLocalRandom.current();
-        KeyValue data = DATA[random.nextInt(DATA_SIZE)];
-        String value = cache.get(data.key, k -> data.value);
+        String value = "true".equals(withPrimitive) ?
+            proxy.withPrimitive(random.nextInt(), random.nextLong(), "hello")
+            :
+            proxy.withoutPrimitive(random.nextInt(), random.nextLong(), "hello");
         blackhole.consume(value);
     }
-
-
-    private record KeyValue(String key, String value) {}
 }

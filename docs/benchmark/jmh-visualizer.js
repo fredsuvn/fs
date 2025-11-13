@@ -12,32 +12,97 @@ document.addEventListener('DOMContentLoaded', function() {
     const noDataMessage = document.getElementById('noDataMessage');
     const errorMessage = document.getElementById('errorMessage');
     const fileInfo = document.getElementById('fileInfo');
+    const uploadSection = document.querySelector('.upload-section');
+    const globalSortSelect = document.getElementById('globalSortSelect');
 
     // Application state
     let chartData = null;
+    let chartGroups = [];
 
-//    // Event listeners
-//    uploadBtn.addEventListener('click', () => fileInput.click());
-//    fileInput.addEventListener('change', handleFileSelect);
-//
-//    // Drag and drop events
-//    uploadArea.addEventListener('dragover', (e) => {
-//        e.preventDefault();
-//        uploadArea.classList.add('highlight');
-//    });
-//
-//    uploadArea.addEventListener('dragleave', () => {
-//        uploadArea.classList.remove('highlight');
-//    });
-//
-//    uploadArea.addEventListener('drop', (e) => {
-//        e.preventDefault();
-//        uploadArea.classList.remove('highlight');
-//
-//        if (e.dataTransfer.files.length) {
-//            handleFile(e.dataTransfer.files[0]);
-//        }
-//    });
+    // Initialize the application
+    init();
+
+    function init() {
+        // Set up event listeners
+        uploadBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Set up drag and drop events
+        setupDragAndDrop();
+
+        // Set up collapsible sections
+        setupCollapsibleSections();
+
+        // Set up global sort
+        globalSortSelect.addEventListener('change', applyGlobalSort);
+
+        // Try to load results.json from the same directory
+        loadDefaultResults();
+    }
+
+    /**
+     * Set up drag and drop functionality
+     */
+    function setupDragAndDrop() {
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('highlight');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('highlight');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('highlight');
+
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    /**
+     * Set up collapsible sections
+     */
+    function setupCollapsibleSections() {
+        // Upload section
+        const uploadHeader = uploadSection.querySelector('.collapsible-header');
+        const uploadContent = uploadSection.querySelector('.collapsible-content');
+
+        uploadHeader.addEventListener('click', () => {
+            const isVisible = uploadContent.style.display !== 'none';
+            uploadContent.style.display = isVisible ? 'none' : 'block';
+            uploadHeader.classList.toggle('collapsed', isVisible);
+        });
+
+        // Initially collapse upload section
+        uploadContent.style.display = 'none';
+        uploadHeader.classList.add('collapsed');
+    }
+
+    /**
+     * Try to load results.json from the same directory
+     */
+    function loadDefaultResults() {
+        fetch('results.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('results.json not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                fileInfo.innerHTML = 'Loaded default file: <strong>results.json</strong>';
+                fileInfo.style.display = 'block';
+                processJMHData(data);
+            })
+            .catch(error => {
+                console.log('Could not load results.json:', error.message);
+                // Don't show error, just continue without default file
+            });
+    }
 
     /**
      * Handle file selection from input
@@ -99,46 +164,55 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Render all charts grouped by benchmark method
+     * Render all charts grouped by class and method
      */
     function renderAllCharts(data) {
-        // Group data by benchmark method
-        const groupedData = groupByBenchmark(data);
+        // Group data by class and method
+        const groupedData = groupByClassAndMethod(data);
 
         // Clear container
         chartsContainer.innerHTML = '';
         noDataMessage.style.display = 'none';
+        chartGroups = [];
 
         if (Object.keys(groupedData).length === 0) {
             noDataMessage.style.display = 'block';
             return;
         }
 
-        // Create chart for each benchmark method
-        Object.keys(groupedData).forEach(benchmark => {
-            createChartGroup(groupedData[benchmark], benchmark);
+        // Create class groups
+        Object.keys(groupedData).forEach(className => {
+            createClassGroup(groupedData[className], className);
         });
+
+        // Apply global sort if set
+        if (globalSortSelect.value !== 'score-desc') {
+            applyGlobalSort();
+        }
     }
 
     /**
-     * Group benchmark data by method name
+     * Group benchmark data by class and method
      */
-    function groupByBenchmark(data) {
+    function groupByClassAndMethod(data) {
         const groups = {};
 
         data.forEach(item => {
             if (item.benchmark && item.primaryMetric) {
-                // Extract class name (without package) and method name
+                // Extract class name and method name
                 const parts = item.benchmark.split('.');
                 const className = parts[parts.length - 2]; // Second last part is class name
                 const methodName = parts[parts.length - 1]; // Last part is method name
-                const benchmarkKey = `${className}.${methodName}`;
 
-                if (!groups[benchmarkKey]) {
-                    groups[benchmarkKey] = [];
+                if (!groups[className]) {
+                    groups[className] = {};
                 }
 
-                groups[benchmarkKey].push(item);
+                if (!groups[className][methodName]) {
+                    groups[className][methodName] = [];
+                }
+
+                groups[className][methodName].push(item);
             }
         });
 
@@ -146,138 +220,211 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Create a chart group with title and controls
+     * Create a class group with methods
      */
-    function createChartGroup(data, benchmarkName) {
-        const chartGroup = document.createElement('div');
-        chartGroup.className = 'chart-group';
+    function createClassGroup(classData, className) {
+        const classGroup = document.createElement('div');
+        classGroup.className = 'class-group';
 
-        // Create header with title and controls
-        const headerDiv = document.createElement('div');
-        headerDiv.className = 'chart-header';
+        // Create class header
+        const classHeader = document.createElement('div');
+        classHeader.className = 'class-header';
 
-        // Title
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'chart-title';
-        titleDiv.textContent = benchmarkName;
-        headerDiv.appendChild(titleDiv);
+        const classTitle = document.createElement('div');
+        classTitle.className = 'class-title';
+
+        const collapseIcon = document.createElement('span');
+        collapseIcon.className = 'collapse-icon';
+        collapseIcon.textContent = '▼';
+        classTitle.appendChild(collapseIcon);
+
+        const titleText = document.createElement('span');
+        titleText.textContent = className;
+        classTitle.appendChild(titleText);
+
+        classHeader.appendChild(classTitle);
+        classGroup.appendChild(classHeader);
+
+        // Create class content
+        const classContent = document.createElement('div');
+        classContent.className = 'class-content';
+        classGroup.appendChild(classContent);
+
+        chartsContainer.appendChild(classGroup);
+
+        // Set up collapsible functionality for class group
+        classHeader.addEventListener('click', () => {
+            const isVisible = classContent.style.display !== 'none';
+            classContent.style.display = isVisible ? 'none' : 'block';
+            classHeader.classList.toggle('collapsed', isVisible);
+        });
+
+        // Create method groups for this class
+        Object.keys(classData).forEach(methodName => {
+            createMethodGroup(classData[methodName], className, methodName, classContent);
+        });
+    }
+
+    /**
+     * Create a method group with chart and controls
+     */
+    function createMethodGroup(data, className, methodName, classContent) {
+        const methodGroup = document.createElement('div');
+        methodGroup.className = 'method-group';
+
+        // Create method header
+        const methodHeader = document.createElement('div');
+        methodHeader.className = 'method-header';
+
+        const methodTitle = document.createElement('div');
+        methodTitle.className = 'method-title';
+
+        const collapseIcon = document.createElement('span');
+        collapseIcon.className = 'collapse-icon';
+        collapseIcon.textContent = '▼';
+        methodTitle.appendChild(collapseIcon);
+
+        const titleText = document.createElement('span');
+        titleText.textContent = methodName;
+        methodTitle.appendChild(titleText);
+
+        methodHeader.appendChild(methodTitle);
 
         // Controls
-        const controlsDiv = document.createElement('div');
-        controlsDiv.className = 'chart-controls';
+        const methodControls = document.createElement('div');
+        methodControls.className = 'method-controls';
 
         // Chart type controls
         const chartTypeGroup = document.createElement('div');
-        chartTypeGroup.className = 'chart-control-group';
+        chartTypeGroup.className = 'control-group';
 
         const chartTypeLabel = document.createElement('span');
-        chartTypeLabel.className = 'chart-control-label';
+        chartTypeLabel.className = 'control-label';
         chartTypeLabel.textContent = 'Chart:';
         chartTypeGroup.appendChild(chartTypeLabel);
 
-        const horizontalBtn = document.createElement('button');
-        horizontalBtn.className = 'chart-control-btn active';
-        horizontalBtn.textContent = 'Horizontal';
-        horizontalBtn.dataset.chartType = 'horizontal';
+        const chartTypeSelect = document.createElement('select');
+        chartTypeSelect.className = 'control-select';
+        chartTypeSelect.innerHTML = `
+            <option value="horizontal">Horizontal Bar</option>
+            <option value="vertical">Vertical Bar</option>
+        `;
+        chartTypeGroup.appendChild(chartTypeSelect);
+        methodControls.appendChild(chartTypeGroup);
 
-        const verticalBtn = document.createElement('button');
-        verticalBtn.className = 'chart-control-btn';
-        verticalBtn.textContent = 'Vertical';
-        verticalBtn.dataset.chartType = 'vertical';
+        // Metric controls
+        const metricGroup = document.createElement('div');
+        metricGroup.className = 'control-group';
 
-        chartTypeGroup.appendChild(horizontalBtn);
-        chartTypeGroup.appendChild(verticalBtn);
-        controlsDiv.appendChild(chartTypeGroup);
+        const metricLabel = document.createElement('span');
+        metricLabel.className = 'control-label';
+        metricLabel.textContent = 'Metric:';
+        metricGroup.appendChild(metricLabel);
+
+        const metricSelect = document.createElement('select');
+        metricSelect.className = 'control-select';
+        metricSelect.innerHTML = `
+            <option value="score">Score</option>
+            <option value="throughput">Throughput</option>
+        `;
+        metricGroup.appendChild(metricSelect);
+        methodControls.appendChild(metricGroup);
 
         // Sort controls
         const sortGroup = document.createElement('div');
-        sortGroup.className = 'chart-control-group';
+        sortGroup.className = 'control-group';
 
         const sortLabel = document.createElement('span');
-        sortLabel.className = 'chart-control-label';
+        sortLabel.className = 'control-label';
         sortLabel.textContent = 'Sort:';
         sortGroup.appendChild(sortLabel);
 
-        const scoreAscBtn = document.createElement('button');
-        scoreAscBtn.className = 'chart-control-btn';
-        scoreAscBtn.textContent = 'Score ↑';
-        scoreAscBtn.dataset.sortType = 'score-asc';
+        const sortSelect = document.createElement('select');
+        sortSelect.className = 'control-select';
+        sortSelect.innerHTML = `
+            <option value="score-desc" selected>Score ↓</option>
+            <option value="score-asc">Score ↑</option>
+            <option value="param-asc">Parameter ↑</option>
+            <option value="param-desc">Parameter ↓</option>
+        `;
+        sortGroup.appendChild(sortSelect);
+        methodControls.appendChild(sortGroup);
 
-        const scoreDescBtn = document.createElement('button');
-        scoreDescBtn.className = 'chart-control-btn';
-        scoreDescBtn.textContent = 'Score ↓';
-        scoreDescBtn.dataset.sortType = 'score-desc';
+        methodHeader.appendChild(methodControls);
+        methodGroup.appendChild(methodHeader);
 
-        const nameAscBtn = document.createElement('button');
-        nameAscBtn.className = 'chart-control-btn';
-        nameAscBtn.textContent = 'Name ↑';
-        nameAscBtn.dataset.sortType = 'name-asc';
+        // Create method container
+        const methodContainer = document.createElement('div');
+        methodContainer.className = 'method-container';
+        methodGroup.appendChild(methodContainer);
 
-        const nameDescBtn = document.createElement('button');
-        nameDescBtn.className = 'chart-control-btn';
-        nameDescBtn.textContent = 'Name ↓';
-        nameDescBtn.dataset.sortType = 'name-desc';
+        classContent.appendChild(methodGroup);
 
-        sortGroup.appendChild(scoreAscBtn);
-        sortGroup.appendChild(scoreDescBtn);
-        sortGroup.appendChild(nameAscBtn);
-        sortGroup.appendChild(nameDescBtn);
-        controlsDiv.appendChild(sortGroup);
+        // Set up collapsible functionality for method group
+        methodHeader.addEventListener('click', (e) => {
+            // Don't collapse if clicking on controls
+            if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') {
+                return;
+            }
 
-        headerDiv.appendChild(controlsDiv);
-        chartGroup.appendChild(headerDiv);
-
-        // Create chart container
-        const chartDiv = document.createElement('div');
-        chartDiv.className = 'chart-container';
-        chartGroup.appendChild(chartDiv);
-
-        chartsContainer.appendChild(chartGroup);
+            const isVisible = methodContainer.style.display !== 'none';
+            methodContainer.style.display = isVisible ? 'none' : 'block';
+            methodHeader.classList.toggle('collapsed', isVisible);
+        });
 
         // Store current state for this chart
         const chartState = {
             data: data,
             chartType: 'horizontal',
-            sortType: 'original'
+            metric: 'score',
+            sortType: 'score-desc',
+            methodContainer: methodContainer,
+            chartTypeSelect: chartTypeSelect,
+            metricSelect: metricSelect,
+            sortSelect: sortSelect
         };
 
-        // Render initial chart (horizontal by default)
-        renderChart(data, chartDiv, chartState);
+        // Save to chart groups array
+        chartGroups.push(chartState);
 
-        // Add event listeners to chart type buttons
-        horizontalBtn.addEventListener('click', function() {
-            horizontalBtn.classList.add('active');
-            verticalBtn.classList.remove('active');
-            chartState.chartType = 'horizontal';
-            renderChart(data, chartDiv, chartState);
+        // Render initial chart
+        renderChart(chartState);
+
+        // Add event listeners to controls
+        chartTypeSelect.addEventListener('change', function() {
+            chartState.chartType = this.value;
+            renderChart(chartState);
         });
 
-        verticalBtn.addEventListener('click', function() {
-            verticalBtn.classList.add('active');
-            horizontalBtn.classList.remove('active');
-            chartState.chartType = 'vertical';
-            renderChart(data, chartDiv, chartState);
+        metricSelect.addEventListener('change', function() {
+            chartState.metric = this.value;
+            renderChart(chartState);
         });
 
-        // Add event listeners to sort buttons
-        const sortButtons = [scoreAscBtn, scoreDescBtn, nameAscBtn, nameDescBtn];
-        sortButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Remove active class from all sort buttons
-                sortButtons.forEach(b => b.classList.remove('active'));
-                // Add active class to clicked button
-                this.classList.add('active');
+        sortSelect.addEventListener('change', function() {
+            chartState.sortType = this.value;
+            renderChart(chartState);
+        });
+    }
 
-                chartState.sortType = this.dataset.sortType;
-                renderChart(data, chartDiv, chartState);
-            });
+    /**
+     * Apply global sort to all charts
+     */
+    function applyGlobalSort() {
+        const globalSortType = globalSortSelect.value;
+
+        chartGroups.forEach(chartState => {
+            // Update the individual sort select to match global
+            chartState.sortSelect.value = globalSortType;
+            chartState.sortType = globalSortType;
+            renderChart(chartState);
         });
     }
 
     /**
      * Sort data based on sort type
      */
-    function sortData(data, sortType) {
+    function sortData(data, sortType, metric) {
         if (sortType === 'original') {
             return data;
         }
@@ -286,19 +433,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
         switch(sortType) {
             case 'score-asc':
-                sortedData.sort((a, b) => a.primaryMetric.score - b.primaryMetric.score);
+                sortedData.sort((a, b) => getMetricValue(a, metric) - getMetricValue(b, metric));
                 break;
             case 'score-desc':
-                sortedData.sort((a, b) => b.primaryMetric.score - a.primaryMetric.score);
+                sortedData.sort((a, b) => getMetricValue(b, metric) - getMetricValue(a, metric));
                 break;
-            case 'name-asc':
+            case 'param-asc':
                 sortedData.sort((a, b) => {
                     const aName = getParamDisplayName(a);
                     const bName = getParamDisplayName(b);
                     return aName.localeCompare(bName);
                 });
                 break;
-            case 'name-desc':
+            case 'param-desc':
                 sortedData.sort((a, b) => {
                     const aName = getParamDisplayName(a);
                     const bName = getParamDisplayName(b);
@@ -311,80 +458,93 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
+     * Get metric value based on selected metric type
+     */
+    function getMetricValue(item, metric) {
+        if (metric === 'throughput') {
+            // Check if throughput metric exists in secondaryMetrics
+            if (item.secondaryMetrics && item.secondaryMetrics.thrpt) {
+                return item.secondaryMetrics.thrpt.score;
+            }
+            // Fall back to primary metric score if throughput not available
+            return item.primaryMetric.score;
+        }
+
+        // Default to score
+        return item.primaryMetric.score;
+    }
+
+    /**
+     * Get metric error based on selected metric type
+     */
+    function getMetricError(item, metric) {
+        if (metric === 'throughput') {
+            // Check if throughput metric exists in secondaryMetrics
+            if (item.secondaryMetrics && item.secondaryMetrics.thrpt) {
+                return item.secondaryMetrics.thrpt.scoreError || 0;
+            }
+            // Fall back to primary metric error if throughput not available
+            return item.primaryMetric.scoreError || 0;
+        }
+
+        // Default to score error
+        return item.primaryMetric.scoreError || 0;
+    }
+
+    /**
+     * Get metric unit based on selected metric type
+     */
+    function getMetricUnit(item, metric) {
+        if (metric === 'throughput') {
+            // Check if throughput metric exists in secondaryMetrics
+            if (item.secondaryMetrics && item.secondaryMetrics.thrpt) {
+                return item.secondaryMetrics.thrpt.scoreUnit || 'ops/s';
+            }
+            // Fall back to primary metric unit if throughput not available
+            return item.primaryMetric.scoreUnit || 'ops/ms';
+        }
+
+        // Default to score unit
+        return item.primaryMetric.scoreUnit || 'ops/ms';
+    }
+
+    /**
      * Get parameter display name with aligned formatting
      */
-    function getParamDisplayName(item, allParamKeys, maxKeyLengths) {
+    function getParamDisplayName(item) {
         if (!item.params || Object.keys(item.params).length === 0) {
             return 'Default';
         }
 
-        const paramParts = allParamKeys.map(key => {
-            const value = item.params[key] || '-';
-            const keyLength = maxKeyLengths[key] || key.length;
-            const paddedKey = key.padEnd(keyLength, ' ');
-            return `${paddedKey} = ${value}`;
+        const paramParts = Object.entries(item.params).map(([key, value]) => {
+            return `${key} = ${value}`;
         });
 
         return paramParts.join(', ');
     }
 
     /**
-     * Calculate maximum key lengths for alignment
-     */
-    function calculateMaxKeyLengths(data) {
-        const maxKeyLengths = {};
-
-        data.forEach(item => {
-            if (item.params) {
-                Object.keys(item.params).forEach(key => {
-                    if (!maxKeyLengths[key] || key.length > maxKeyLengths[key]) {
-                        maxKeyLengths[key] = key.length;
-                    }
-                });
-            }
-        });
-
-        return maxKeyLengths;
-    }
-
-    /**
      * Render a single chart with the given data and type
      */
-    function renderChart(data, chartDom, chartState) {
+    function renderChart(chartState) {
+        const { data, chartType, metric, sortType, methodContainer } = chartState;
+
         // Sort data if needed
-        const sortedData = sortData(data, chartState.sortType);
-
-        // Find all parameter keys to ensure consistent formatting
-        const allParamKeys = [];
-        sortedData.forEach(item => {
-            if (item.params) {
-                Object.keys(item.params).forEach(key => {
-                    if (!allParamKeys.includes(key)) {
-                        allParamKeys.push(key);
-                    }
-                });
-            }
-        });
-
-        // Sort parameter keys for consistent display
-        allParamKeys.sort();
-
-        // Calculate maximum key lengths for alignment
-        const maxKeyLengths = calculateMaxKeyLengths(sortedData);
+        const sortedData = sortData(data, sortType, metric);
 
         // Prepare chart data
         const paramNames = [];
-        const scores = [];
+        const values = [];
         const errors = [];
         const paramsList = [];
 
         sortedData.forEach(item => {
-            // Generate parameter display name with aligned formatting
-            const paramName = getParamDisplayName(item, allParamKeys, maxKeyLengths);
+            // Generate parameter display name
+            const paramName = getParamDisplayName(item);
 
             paramNames.push(paramName);
-            scores.push(item.primaryMetric.score);
-            errors.push(item.primaryMetric.scoreError || 0);
+            values.push(getMetricValue(item, metric));
+            errors.push(getMetricError(item, metric));
             paramsList.push(item.params || {});
         });
 
@@ -392,12 +552,16 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Get metric unit for axis labels
+        const metricUnit = getMetricUnit(sortedData[0], metric);
+        const metricName = metric === 'throughput' ? 'Throughput' : 'Score';
+
         // Initialize ECharts instance
-        const chart = echarts.init(chartDom);
+        const chart = echarts.init(methodContainer);
 
         let option;
 
-        if (chartState.chartType === 'vertical') {
+        if (chartType === 'vertical') {
             // Vertical bar chart
             option = {
                 tooltip: {
@@ -410,17 +574,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         let paramsText = 'No parameters';
 
                         if (paramsList[data.dataIndex] && Object.keys(paramsList[data.dataIndex]).length > 0) {
-                            paramsText = allParamKeys.map(key => {
-                                const value = paramsList[data.dataIndex][key] || '-';
-                                const keyLength = maxKeyLengths[key] || key.length;
-                                const paddedKey = key.padEnd(keyLength, ' ');
-                                return `<div style="font-family: monospace; margin: 2px 0;">${paddedKey} = ${value}</div>`;
-                            }).join('');
+                            paramsText = Object.entries(paramsList[data.dataIndex])
+                                .map(([key, value]) => {
+                                    return `<div style="margin: 2px 0;">${key} = ${value}</div>`;
+                                }).join('');
                         }
 
                         return `
                             <div style="font-weight: bold; margin-bottom: 5px;">${data.name}</div>
-                            <div>Score: <b>${data.value}</b></div>
+                            <div>${metricName}: <b>${data.value}</b> ${metricUnit}</div>
                             <div>Error: ±${errors[data.dataIndex]}</div>
                             <div style="margin-top: 5px;">Parameters:</div>
                             ${paramsText}
@@ -439,19 +601,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     axisLabel: {
                         interval: 0,
                         rotate: 30,
-                        fontSize: 12,
-                        fontFamily: 'monospace'
+                        fontSize: 12
                     }
                 },
                 yAxis: {
                     type: 'value',
-                    name: 'Score'
+                    name: `${metricName} (${metricUnit})`
                 },
                 series: [
                     {
-                        name: 'Score',
+                        name: metricName,
                         type: 'bar',
-                        data: scores,
+                        data: values,
                         itemStyle: {
                             color: function(params) {
                                 const colorList = [
@@ -482,17 +643,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         let paramsText = 'No parameters';
 
                         if (paramsList[data.dataIndex] && Object.keys(paramsList[data.dataIndex]).length > 0) {
-                            paramsText = allParamKeys.map(key => {
-                                const value = paramsList[data.dataIndex][key] || '-';
-                                const keyLength = maxKeyLengths[key] || key.length;
-                                const paddedKey = key.padEnd(keyLength, ' ');
-                                return `<div style="font-family: monospace; margin: 2px 0;">${paddedKey} = ${value}</div>`;
-                            }).join('');
+                            paramsText = Object.entries(paramsList[data.dataIndex])
+                                .map(([key, value]) => {
+                                    return `<div style="margin: 2px 0;">${key} = ${value}</div>`;
+                                }).join('');
                         }
 
                         return `
                             <div style="font-weight: bold; margin-bottom: 5px;">${data.name}</div>
-                            <div>Score: <b>${data.value}</b></div>
+                            <div>${metricName}: <b>${data.value}</b> ${metricUnit}</div>
                             <div>Error: ±${errors[data.dataIndex]}</div>
                             <div style="margin-top: 5px;">Parameters:</div>
                             ${paramsText}
@@ -507,7 +666,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 xAxis: {
                     type: 'value',
-                    name: 'Score',
+                    name: `${metricName} (${metricUnit})`,
                     nameLocation: 'middle',
                     nameGap: 30
                 },
@@ -517,15 +676,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     axisLabel: {
                         interval: 0,
                         rotate: 0,
-                        fontSize: 12,
-                        fontFamily: 'monospace'
+                        fontSize: 12
                     }
                 },
                 series: [
                     {
-                        name: 'Score',
+                        name: metricName,
                         type: 'bar',
-                        data: scores,
+                        data: values,
                         itemStyle: {
                             color: function(params) {
                                 const colorList = [
@@ -572,15 +730,4 @@ document.addEventListener('DOMContentLoaded', function() {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
-
-    // read results.json
-    fetch('results.json')
-          .then(response => response.json())
-          .then(data => {
-          processJMHData(data)
-            //console.log('JSON 内容：', data);
-            // 可以在这里操作数据（如渲染到页面）
-            //document.body.innerHTML = `<h1>${data.name}</h1>`;
-          })
-          .catch(error => alert('错误：', error));
 });

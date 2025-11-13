@@ -65,14 +65,9 @@ sourceSets {
 val implByJvm = "ImplByJ"
 val maxJvmVersion = 17
 
-tasks.compileJava {
-  group = "compile"
-  enabled = false
-}
-
 val compileJava8 by tasks.registering(JavaCompile::class) {
   group = "compile"
-  dependsOn(tasks.compileJava)
+  //dependsOn(tasks.compileJava)
   source = sourceSets.main.get().allJava
   classpath = sourceSets.main.get().compileClasspath
   exclude("**/*${implByJvm}*.java")
@@ -87,9 +82,10 @@ val compileJava8 by tasks.registering(JavaCompile::class) {
   val taskName = "compileJava$jvmVersion"
   tasks.register(taskName, JavaCompile::class) {
     group = "compile"
-    dependsOn(tasks.named("compileJava${jvmVersion - 1}"))
+    val lastCompileTask = tasks.named<JavaCompile>("compileJava${jvmVersion - 1}")
+    dependsOn(lastCompileTask)
     source = sourceSets.main.get().allJava
-    classpath = sourceSets.main.get().compileClasspath + files(tasks.compileJava.get().destinationDirectory)
+    classpath = sourceSets.main.get().compileClasspath + files(lastCompileTask.get().destinationDirectory)
     //    (8..<jvmVersion).forEach { jv ->
     //      dependsOn += tasks.named("compileJava$jv")
     //      classpath += files(tasks.named<JavaCompile>("compileJava$jv").get().destinationDirectory)
@@ -105,6 +101,12 @@ val compileJava8 by tasks.registering(JavaCompile::class) {
 }
 
 val compileJavaMax = tasks.named<JavaCompile>("compileJava$maxJvmVersion")
+
+tasks.compileJava {
+  group = "compile"
+  enabled = false
+  dependsOn(compileJavaMax)
+}
 
 tasks.named("classes") {
   dependsOn(compileJavaMax)
@@ -164,15 +166,15 @@ tasks.named<Jar>("sourcesJar") {
 tasks.test {
   include("**/*Test.class", "**/*TestKt.class")
   exclude("**/*${implByJvm}*Test.class")
-  useJUnitPlatform() {
+  useJUnitPlatform {
     excludeTags("J17Only")
+  }
+  javaLauncher = javaToolchains.launcherFor {
+    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
   }
   failOnNoDiscoveredTests = false
   reports {
     html.required = false
-  }
-  javaLauncher = javaToolchains.launcherFor {
-    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
   }
 }
 
@@ -187,15 +189,15 @@ val testJava17 by tasks.registering(Test::class) {
   }
   //include("**/*${j17Suffix}Test.class")
   //include("**/*MultiJvmTest.class")
-  useJUnitPlatform() {
+  useJUnitPlatform {
     includeTags("J17Also", "J17Only")
+  }
+  javaLauncher = javaToolchains.launcherFor {
+    languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
   }
   failOnNoDiscoveredTests = false
   reports {
     html.required = false
-  }
-  javaLauncher = javaToolchains.launcherFor {
-    languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
   }
 }
 
