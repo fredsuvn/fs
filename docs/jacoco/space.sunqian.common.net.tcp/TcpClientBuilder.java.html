@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TcpClientBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.net.tcp</a> &gt; <span class="el_source">TcpClientBuilder.java</span></div><h1>TcpClientBuilder.java</h1><pre class="source lang-java linenums">package space.sunqian.common.net.tcp;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Check;
+import space.sunqian.common.Fs;
+import space.sunqian.common.io.IOKit;
+import space.sunqian.common.io.IOOperator;
+import space.sunqian.common.io.IORuntimeException;
+import space.sunqian.common.net.NetException;
+
+import java.net.InetSocketAddress;
+import java.net.SocketOption;
+import java.net.StandardSocketOptions;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Builder for building new instances of {@link TcpClient} by {@link SocketChannel}.
+ *
+ * @author sunqian
+ */
+<span class="fc" id="L29">public class TcpClientBuilder {</span>
+
+    private @Nullable InetSocketAddress localAddress;
+<span class="fc" id="L32">    private int bufSize = IOKit.bufferSize();</span>
+<span class="fc" id="L33">    private final @Nonnull Map&lt;SocketOption&lt;?&gt;, Object&gt; socketOptions = new LinkedHashMap&lt;&gt;();</span>
+
+    /**
+     * Sets the buffer size for advanced IO operations. Note this buffer size is not the kernel network buffer size, it
+     * is an I/O advanced operations buffer size.
+     *
+     * @param bufSize the buffer size for advanced IO operations
+     * @return this builder
+     * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
+     */
+    public @Nonnull TcpClientBuilder bufferSize(int bufSize) throws IllegalArgumentException {
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        Check.checkArgument(bufSize &gt; 0, &quot;bufSize must be positive&quot;);</span>
+<span class="fc" id="L45">        this.bufSize = bufSize;</span>
+<span class="fc" id="L46">        return this;</span>
+    }
+
+    /**
+     * Sets a socket option. This method can be invoked multiple times to set different socket options.
+     *
+     * @param &lt;T&gt;   the type of the socket option value
+     * @param name  the socket option
+     * @param value the value of the socket option, a value of {@code null} may be a valid value for some socket
+     *              options.
+     * @return this builder
+     * @throws NetException If an error occurs
+     * @see StandardSocketOptions
+     */
+    public &lt;T&gt; @Nonnull TcpClientBuilder socketOption(@Nonnull SocketOption&lt;T&gt; name, T value) throws NetException {
+<span class="fc" id="L61">        socketOptions.put(name, value);</span>
+<span class="fc" id="L62">        return this;</span>
+    }
+
+    /**
+     * Binds the client's socket to the specified local address.
+     *
+     * @param localAddress the local address the client is bound to, may be {@code null} to bind to the automatically
+     *                     assigned address
+     * @return this builder
+     * @throws NetException If an error occurs
+     */
+    public @Nonnull TcpClientBuilder bind(@Nullable InetSocketAddress localAddress) {
+<span class="fc" id="L74">        this.localAddress = localAddress;</span>
+<span class="fc" id="L75">        return this;</span>
+    }
+
+    /**
+     * Connects this client's socket to the specified remote address and configures the socket to listen for
+     * connections. And a new {@link TcpClient} instance is returned.
+     *
+     * @param remoteAddress the remote address the client connects to
+     * @return a new {@link TcpClient} with the configurations
+     * @throws NetException If an error occurs
+     */
+    public @Nonnull TcpClient connect(@Nonnull InetSocketAddress remoteAddress) throws NetException {
+<span class="fc" id="L87">        return Fs.uncheck(() -&gt; new TcpClientImpl(</span>
+                localAddress,
+                remoteAddress,
+                socketOptions,
+                bufSize
+            ),
+            NetException::new
+        );
+    }
+
+    private static final class TcpClientImpl implements TcpClient {
+
+        private final @Nonnull SocketChannel client;
+        private final @Nonnull InetSocketAddress localAddress;
+        private final @Nonnull InetSocketAddress remoteAddress;
+        private final @Nonnull Selector selector;
+        private final @Nonnull IOOperator ioOperator;
+
+<span class="fc" id="L105">        private volatile boolean closed = false;</span>
+
+        @SuppressWarnings(&quot;resource&quot;)
+        private TcpClientImpl(
+            @Nullable InetSocketAddress localAddress,
+            @Nonnull InetSocketAddress remoteAddress,
+            @Nonnull Map&lt;SocketOption&lt;?&gt;, Object&gt; socketOptions,
+            int bufSize
+<span class="fc" id="L113">        ) throws Exception {</span>
+<span class="fc" id="L114">            this.client = SocketChannel.open();</span>
+<span class="fc" id="L115">            this.remoteAddress = remoteAddress;</span>
+<span class="fc" id="L116">            socketOptions.forEach((name, value) -&gt;</span>
+<span class="fc" id="L117">                Fs.uncheck(() -&gt; client.setOption(Fs.as(name), value), NetException::new));</span>
+<span class="fc" id="L118">            this.selector = Selector.open();</span>
+<span class="fc" id="L119">            client.bind(localAddress);</span>
+<span class="fc" id="L120">            this.localAddress = (InetSocketAddress) client.getLocalAddress();</span>
+<span class="fc" id="L121">            client.configureBlocking(true);</span>
+<span class="fc" id="L122">            client.connect(remoteAddress);</span>
+<span class="fc" id="L123">            client.configureBlocking(false);</span>
+<span class="fc" id="L124">            client.register(selector, SelectionKey.OP_READ);</span>
+<span class="fc" id="L125">            this.ioOperator = IOOperator.get(bufSize);</span>
+<span class="fc" id="L126">        }</span>
+
+        @Override
+        public synchronized void close() throws NetException {
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            if (closed) {</span>
+<span class="fc" id="L131">                return;</span>
+            }
+<span class="fc" id="L133">            Fs.uncheck(() -&gt; {</span>
+<span class="fc" id="L134">                client.close();</span>
+<span class="fc" id="L135">                client.keyFor(selector).cancel();</span>
+<span class="fc" id="L136">                selector.close();</span>
+<span class="fc" id="L137">            }, NetException::new);</span>
+<span class="fc" id="L138">            closed = true;</span>
+<span class="fc" id="L139">        }</span>
+
+        @Override
+        public @Nonnull InetSocketAddress remoteAddress() {
+<span class="fc" id="L143">            return remoteAddress;</span>
+        }
+
+        @Override
+        public @Nonnull InetSocketAddress localAddress() {
+<span class="fc" id="L148">            return localAddress;</span>
+        }
+
+        @Override
+        public boolean isConnected() {
+<span class="fc" id="L153">            return client.isConnected();</span>
+        }
+
+        @Override
+        public boolean isClosed() {
+<span class="fc" id="L158">            return closed;</span>
+        }
+
+        @Override
+        public @Nonnull SocketChannel channel() {
+<span class="fc" id="L163">            return client;</span>
+        }
+
+        @Override
+        public byte @Nullable [] availableBytes() throws IORuntimeException {
+<span class="fc" id="L168">            return ioOperator.availableBytes(client);</span>
+        }
+
+        @Override
+        public @Nullable ByteBuffer availableBuffer() throws IORuntimeException {
+<span class="fc" id="L173">            return ioOperator.available(client);</span>
+        }
+
+        @Override
+        public void awaitReadable() {
+<span class="fc" id="L178">            Fs.uncheck(() -&gt; {</span>
+<span class="fc" id="L179">                selector.select();</span>
+<span class="fc" id="L180">                Set&lt;SelectionKey&gt; selectedKeys = selector.selectedKeys();</span>
+<span class="fc" id="L181">                Iterator&lt;SelectionKey&gt; keys = selectedKeys.iterator();</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">                while (keys.hasNext()) {</span>
+                    // SelectionKey key = keys.next();
+<span class="fc" id="L184">                    keys.next();</span>
+                    // ignored
+<span class="fc" id="L186">                    keys.remove();</span>
+                }
+<span class="fc" id="L188">            }, NetException::new);</span>
+<span class="fc" id="L189">        }</span>
+
+        @Override
+        public void wakeUpReadable() {
+<span class="fc" id="L193">            selector.wakeup();</span>
+<span class="fc" id="L194">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

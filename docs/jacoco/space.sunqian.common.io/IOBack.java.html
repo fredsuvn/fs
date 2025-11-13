@@ -1,0 +1,1653 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IOBack.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.io</a> &gt; <span class="el_source">IOBack.java</span></div><h1>IOBack.java</h1><pre class="source lang-java linenums">package space.sunqian.common.io;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.math.MathKit;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CoderResult;
+import java.nio.charset.CodingErrorAction;
+
+final class IOBack {
+
+    private static final @Nonnull String MARK_NOT_SET = &quot;Mark has not been set.&quot;;
+    private static final @Nonnull String STREAM_CLOSED = &quot;Stream closed.&quot;;
+    private static final int CHARS_BUFFER_SIZE = 64;
+    private static final int BYTES_BUFFER_SIZE = 64;
+
+    private static @Nonnull String insufficientRemainingSpace(int len, int remaining) {
+<span class="fc" id="L29">        return &quot;Insufficient remaining space: &quot; + len + &quot; to &quot; + remaining + &quot;.&quot;;</span>
+    }
+
+    private static @Nonnull String insufficientRemainingSpace(int len, long remaining) {
+<span class="fc" id="L33">        return &quot;Insufficient remaining space: &quot; + len + &quot; to &quot; + remaining + &quot;.&quot;;</span>
+    }
+
+    private static @Nonnull String encodingFailed(CoderResult result) {
+<span class="fc" id="L37">        return &quot;Chars encoding failed: &quot; + result + &quot;.&quot;;</span>
+    }
+
+    private static @Nonnull String decodingFailed(CoderResult result) {
+<span class="fc" id="L41">        return &quot;Bytes decoding failed: &quot; + result + &quot;.&quot;;</span>
+    }
+
+    static @Nonnull InputStream inputStream(byte @Nonnull [] array) {
+<span class="fc" id="L45">        return new BytesInputStream(array, 0, array.length);</span>
+    }
+
+    static @Nonnull InputStream inputStream(
+        byte @Nonnull [] array, int off, int len
+    ) throws IndexOutOfBoundsException {
+<span class="fc" id="L51">        IOChecker.checkOffLen(off, len, array.length);</span>
+<span class="fc" id="L52">        return new BytesInputStream(array, off, len);</span>
+    }
+
+    static @Nonnull InputStream inputStream(@Nonnull ByteBuffer buffer) {
+<span class="fc" id="L56">        return new BufferInputStream(buffer);</span>
+    }
+
+    static @Nonnull InputStream inputStream(
+        @Nonnull RandomAccessFile raf, long seek
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L62">        IOChecker.checkSeek(seek);</span>
+        try {
+<span class="fc" id="L64">            return new RafInputStream(raf, seek);</span>
+<span class="fc" id="L65">        } catch (IOException e) {</span>
+<span class="fc" id="L66">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static @Nonnull InputStream inputStream(@Nonnull Reader reader, @Nonnull Charset charset) {
+<span class="fc" id="L71">        return new CharsInputStream(reader, charset);</span>
+    }
+
+    static @Nonnull InputStream inputStream(@Nonnull InputStream in, long limit) throws IllegalArgumentException {
+<span class="fc" id="L75">        IOChecker.checkLimit(limit);</span>
+<span class="fc" id="L76">        return new LimitedInputStream(in, limit);</span>
+    }
+
+    static @Nonnull InputStream emptyInputStream() {
+<span class="fc" id="L80">        return EmptyInputStream.SINGLETON;</span>
+    }
+
+    static @Nonnull Reader reader(char @Nonnull [] array) {
+<span class="fc" id="L84">        return new CharsReader(array, 0, array.length);</span>
+    }
+
+    static @Nonnull Reader reader(char @Nonnull [] array, int off, int len) throws IndexOutOfBoundsException {
+<span class="fc" id="L88">        IOChecker.checkOffLen(off, len, array.length);</span>
+<span class="fc" id="L89">        return new CharsReader(array, off, len);</span>
+    }
+
+    static @Nonnull Reader reader(@Nonnull CharSequence chars) {
+<span class="fc" id="L93">        return new BufferReader(CharBuffer.wrap(chars));</span>
+    }
+
+    static @Nonnull Reader reader(@Nonnull CharSequence chars, int start, int end) throws IndexOutOfBoundsException {
+<span class="fc" id="L97">        IOChecker.checkStartEnd(start, end, chars.length());</span>
+<span class="fc" id="L98">        return new BufferReader(CharBuffer.wrap(chars, start, end));</span>
+    }
+
+    static @Nonnull Reader reader(@Nonnull CharBuffer buffer) {
+<span class="fc" id="L102">        return new BufferReader(buffer);</span>
+    }
+
+    static @Nonnull Reader reader(@Nonnull InputStream inputStream, @Nonnull Charset charset) {
+<span class="fc" id="L106">        return new BytesReader(inputStream, charset);</span>
+    }
+
+    static @Nonnull Reader reader(@Nonnull Reader in, long limit) throws IllegalArgumentException {
+<span class="fc" id="L110">        IOChecker.checkLimit(limit);</span>
+<span class="fc" id="L111">        return new LimitedReader(in, limit);</span>
+    }
+
+    static @Nonnull Reader emptyReader() {
+<span class="fc" id="L115">        return EmptyReader.SINGLETON;</span>
+    }
+
+    static @Nonnull OutputStream outputStream(byte @Nonnull [] array) {
+<span class="fc" id="L119">        return new BytesOutputStream(array, 0, array.length);</span>
+    }
+
+    static @Nonnull OutputStream outputStream(
+        byte @Nonnull [] array, int off, int len
+    ) throws IndexOutOfBoundsException {
+<span class="fc" id="L125">        IOChecker.checkOffLen(off, len, array.length);</span>
+<span class="fc" id="L126">        return new BytesOutputStream(array, off, len);</span>
+    }
+
+    static @Nonnull OutputStream outputStream(@Nonnull ByteBuffer buffer) {
+<span class="fc" id="L130">        return new BufferOutputStream(buffer);</span>
+    }
+
+    static @Nonnull OutputStream outputStream(
+        @Nonnull RandomAccessFile raf, long seek
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L136">        IOChecker.checkSeek(seek);</span>
+        try {
+<span class="fc" id="L138">            return new RafOutputStream(raf, seek);</span>
+<span class="fc" id="L139">        } catch (IOException e) {</span>
+<span class="fc" id="L140">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static @Nonnull OutputStream outputStream(@Nonnull Appendable appender, @Nonnull Charset charset) {
+<span class="fc" id="L145">        return new AppenderOutputStream(appender, charset);</span>
+    }
+
+    static @Nonnull OutputStream outputStream(@Nonnull OutputStream in, long limit) throws IllegalArgumentException {
+<span class="fc" id="L149">        IOChecker.checkLimit(limit);</span>
+<span class="fc" id="L150">        return new LimitedOutputStream(in, limit);</span>
+    }
+
+    static @Nonnull OutputStream nullOutputStream() {
+<span class="fc" id="L154">        return NullOutputStream.SINGLETON;</span>
+    }
+
+    static @Nonnull Writer writer(char @Nonnull [] array) {
+<span class="fc" id="L158">        return new CharsWriter(array, 0, array.length);</span>
+    }
+
+    static @Nonnull Writer writer(char @Nonnull [] array, int off, int len) throws IndexOutOfBoundsException {
+<span class="fc" id="L162">        IOChecker.checkOffLen(off, len, array.length);</span>
+<span class="fc" id="L163">        return new CharsWriter(array, off, len);</span>
+    }
+
+    static @Nonnull Writer writer(@Nonnull CharBuffer buffer) {
+<span class="fc" id="L167">        return new BufferWriter(buffer);</span>
+    }
+
+    static @Nonnull Writer writer(@Nonnull OutputStream outputStream, Charset charset) {
+<span class="fc" id="L171">        return new BytesWriter(outputStream, charset);</span>
+    }
+
+    static @Nonnull Writer writer(@Nonnull Writer in, long limit) throws IllegalArgumentException {
+<span class="fc" id="L175">        IOChecker.checkLimit(limit);</span>
+<span class="fc" id="L176">        return new LimitedWriter(in, limit);</span>
+    }
+
+    static @Nonnull Writer nullWriter() {
+<span class="fc" id="L180">        return NullWriter.SINGLETON;</span>
+    }
+
+    private static final class BytesInputStream extends DoReadStream {
+
+        private final byte @Nonnull [] buf;
+        private int pos;
+        private final int end;
+<span class="fc" id="L188">        private int mark = -1;</span>
+
+<span class="fc" id="L190">        private BytesInputStream(byte @Nonnull [] buf, int off, int len) {</span>
+<span class="fc" id="L191">            this.buf = buf;</span>
+<span class="fc" id="L192">            this.pos = off;</span>
+<span class="fc" id="L193">            this.end = off + len;</span>
+<span class="fc" id="L194">        }</span>
+
+        @Override
+        public int read() {
+<span class="fc bfc" id="L198" title="All 2 branches covered.">            return (pos &lt; end) ? (buf[pos++] &amp; 0xff) : -1;</span>
+        }
+
+        @Override
+        protected int doRead(byte @Nonnull [] b, int off, int len) {
+<span class="fc bfc" id="L203" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L204">                return 0;</span>
+            }
+<span class="fc bfc" id="L206" title="All 2 branches covered.">            if (pos &gt;= end) {</span>
+<span class="fc" id="L207">                return -1;</span>
+            }
+<span class="fc" id="L209">            int avail = end - pos;</span>
+<span class="fc" id="L210">            avail = Math.min(len, avail);</span>
+<span class="fc" id="L211">            System.arraycopy(buf, pos, b, off, avail);</span>
+<span class="fc" id="L212">            pos += avail;</span>
+<span class="fc" id="L213">            return avail;</span>
+        }
+
+        @Override
+        public long skip(long n) {
+<span class="fc bfc" id="L218" title="All 2 branches covered.">            if (n &lt;= 0) {</span>
+<span class="fc" id="L219">                return 0;</span>
+            }
+<span class="fc" id="L221">            int avail = end - pos;</span>
+<span class="fc" id="L222">            avail = (int) Math.min(n, avail);</span>
+<span class="fc bfc" id="L223" title="All 2 branches covered.">            if (avail &lt;= 0) {</span>
+<span class="fc" id="L224">                return 0;</span>
+            }
+<span class="fc" id="L226">            pos += avail;</span>
+<span class="fc" id="L227">            return avail;</span>
+        }
+
+        @Override
+        public int available() {
+<span class="fc" id="L232">            return end - pos;</span>
+        }
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L237">            return true;</span>
+        }
+
+        @Override
+        public void mark(int readAheadLimit) {
+<span class="fc" id="L242">            mark = pos;</span>
+<span class="fc" id="L243">        }</span>
+
+        @Override
+        public void reset() throws IOException {
+<span class="fc bfc" id="L247" title="All 2 branches covered.">            if (mark &lt; 0) {</span>
+<span class="fc" id="L248">                throw new IOException(MARK_NOT_SET);</span>
+            }
+<span class="fc" id="L250">            pos = mark;</span>
+<span class="fc" id="L251">        }</span>
+    }
+
+    private static final class BufferInputStream extends DoReadStream {
+
+        private final @Nonnull ByteBuffer buffer;
+
+<span class="fc" id="L258">        private BufferInputStream(@Nonnull ByteBuffer buffer) {</span>
+<span class="fc" id="L259">            this.buffer = buffer;</span>
+<span class="fc" id="L260">        }</span>
+
+        @Override
+        public int read() {
+<span class="fc bfc" id="L264" title="All 2 branches covered.">            if (!buffer.hasRemaining()) {</span>
+<span class="fc" id="L265">                return -1;</span>
+            }
+<span class="fc" id="L267">            return buffer.get() &amp; 0xff;</span>
+        }
+
+        @Override
+        protected int doRead(byte @Nonnull [] b, int off, int len) {
+<span class="fc bfc" id="L272" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L273">                return 0;</span>
+            }
+<span class="fc bfc" id="L275" title="All 2 branches covered.">            if (!buffer.hasRemaining()) {</span>
+<span class="fc" id="L276">                return -1;</span>
+            }
+<span class="fc" id="L278">            int avail = Math.min(buffer.remaining(), len);</span>
+<span class="fc" id="L279">            buffer.get(b, off, avail);</span>
+<span class="fc" id="L280">            return avail;</span>
+        }
+
+        @Override
+        public long skip(long n) {
+<span class="fc bfc" id="L285" title="All 2 branches covered.">            if (n &lt;= 0) {</span>
+<span class="fc" id="L286">                return 0;</span>
+            }
+<span class="fc" id="L288">            int avail = (int) Math.min(buffer.remaining(), n);</span>
+<span class="fc bfc" id="L289" title="All 2 branches covered.">            if (avail &lt;= 0) {</span>
+<span class="fc" id="L290">                return 0;</span>
+            }
+<span class="fc" id="L292">            buffer.position(buffer.position() + avail);</span>
+<span class="fc" id="L293">            return avail;</span>
+        }
+
+        @Override
+        public int available() {
+<span class="fc" id="L298">            return buffer.remaining();</span>
+        }
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L303">            return true;</span>
+        }
+
+        @Override
+        public void mark(int readlimit) {
+<span class="fc" id="L308">            buffer.mark();</span>
+<span class="fc" id="L309">        }</span>
+
+        @Override
+        public void reset() throws IOException {
+            try {
+<span class="fc" id="L314">                buffer.reset();</span>
+<span class="fc" id="L315">            } catch (Exception e) {</span>
+<span class="fc" id="L316">                throw new IOException(e);</span>
+<span class="fc" id="L317">            }</span>
+<span class="fc" id="L318">        }</span>
+    }
+
+    private static final class RafInputStream extends DoReadStream {
+
+        private final @Nonnull RandomAccessFile raf;
+<span class="fc" id="L324">        private long mark = -1;</span>
+
+<span class="fc" id="L326">        private RafInputStream(@Nonnull RandomAccessFile raf, long seek) throws IOException {</span>
+<span class="fc" id="L327">            this.raf = raf;</span>
+<span class="fc" id="L328">            this.raf.seek(seek);</span>
+<span class="fc" id="L329">        }</span>
+
+        @Override
+        public int read() throws IOException {
+<span class="fc" id="L333">            return raf.read();</span>
+        }
+
+        @Override
+        protected int doRead(byte @Nonnull [] b, int off, int len) throws IOException {
+<span class="fc bfc" id="L338" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L339">                return 0;</span>
+            }
+<span class="fc" id="L341">            return raf.read(b, off, len);</span>
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+<span class="fc bfc" id="L346" title="All 2 branches covered.">            if (n &lt;= 0) {</span>
+<span class="fc" id="L347">                return 0;</span>
+            }
+<span class="fc" id="L349">            return raf.skipBytes(MathKit.intValue(n));</span>
+        }
+
+        @Override
+        public int available() throws IOException {
+<span class="fc" id="L354">            return MathKit.intValue(raf.length() - raf.getFilePointer());</span>
+        }
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L359">            return true;</span>
+        }
+
+        @Override
+        public void mark(int readlimit) {
+            try {
+<span class="fc" id="L365">                this.mark = raf.getFilePointer();</span>
+<span class="fc" id="L366">            } catch (IOException ignored) {</span>
+<span class="fc" id="L367">            }</span>
+<span class="fc" id="L368">        }</span>
+
+        @Override
+        public void reset() throws IOException {
+<span class="fc bfc" id="L372" title="All 2 branches covered.">            if (mark &lt; 0) {</span>
+<span class="fc" id="L373">                throw new IOException(MARK_NOT_SET);</span>
+            }
+<span class="fc" id="L375">            raf.seek(mark);</span>
+<span class="fc" id="L376">        }</span>
+
+        @Override
+        public void close() throws IOException {
+<span class="fc" id="L380">            raf.close();</span>
+<span class="fc" id="L381">        }</span>
+    }
+
+    private static final class CharsInputStream extends DoReadStream {
+
+        private final @Nonnull Reader reader;
+        private final @Nonnull CharsetEncoder encoder;
+        private @Nonnull CharBuffer inBuffer;
+        private @Nonnull ByteBuffer outBuffer;
+<span class="fc" id="L390">        private boolean endOfInput = false;</span>
+<span class="fc" id="L391">        private boolean closed = false;</span>
+<span class="fc" id="L392">        private final byte @Nonnull [] buf = {0};</span>
+
+        // snapshot for mark/reset
+        private CharBuffer inCopy;
+        private ByteBuffer outCopy;
+        private boolean endCopy;
+
+        private CharsInputStream(
+            @Nonnull Reader reader,
+            @Nonnull CharsetEncoder encoder,
+            int inBufferSize, int outBufferSize
+<span class="fc" id="L403">        ) {</span>
+<span class="fc" id="L404">            this.reader = reader;</span>
+<span class="fc" id="L405">            this.encoder = encoder;</span>
+<span class="fc" id="L406">            this.inBuffer = CharBuffer.allocate(inBufferSize);</span>
+<span class="fc" id="L407">            this.inBuffer.flip();</span>
+<span class="fc" id="L408">            this.outBuffer = ByteBuffer.allocate(outBufferSize);</span>
+<span class="fc" id="L409">            this.outBuffer.flip();</span>
+<span class="fc" id="L410">        }</span>
+
+        private CharsInputStream(
+            @Nonnull Reader reader,
+            @Nonnull Charset charset,
+            int inBufferSize, int outBufferSize
+        ) {
+<span class="fc" id="L417">            this(</span>
+                reader,
+<span class="fc" id="L419">                charset.newEncoder()</span>
+<span class="fc" id="L420">                    .onMalformedInput(CodingErrorAction.REPORT)</span>
+<span class="fc" id="L421">                    .onUnmappableCharacter(CodingErrorAction.REPORT),</span>
+                inBufferSize,
+                outBufferSize
+            );
+<span class="fc" id="L425">        }</span>
+
+        private CharsInputStream(@Nonnull Reader reader, @Nonnull Charset charset) {
+<span class="fc" id="L428">            this(reader, charset, CHARS_BUFFER_SIZE, BYTES_BUFFER_SIZE);</span>
+<span class="fc" id="L429">        }</span>
+
+        @Override
+        public int read() throws IOException {
+<span class="fc" id="L433">            int readNum = read(buf, 0, 1);</span>
+<span class="fc bfc" id="L434" title="All 2 branches covered.">            return readNum &lt; 0 ? -1 : (buf[0] &amp; 0xff);</span>
+        }
+
+        @Override
+        protected int doRead(byte @Nonnull [] b, int off, int len) throws IOException {
+<span class="fc" id="L439">            checkClosed();</span>
+<span class="fc bfc" id="L440" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L441">                return 0;</span>
+            }
+<span class="fc" id="L443">            int readNum = (int) read0(b, off, len);</span>
+<span class="fc bfc" id="L444" title="All 2 branches covered.">            return readNum == 0 ? -1 : readNum;</span>
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+<span class="fc" id="L449">            checkClosed();</span>
+<span class="fc bfc" id="L450" title="All 2 branches covered.">            if (n &lt;= 0) {</span>
+<span class="fc" id="L451">                return 0;</span>
+            }
+<span class="fc" id="L453">            return read0(null, 0, n);</span>
+        }
+
+        @Override
+        public int available() {
+<span class="fc" id="L458">            return outBuffer.remaining();</span>
+        }
+
+        @Override
+        public void close() throws IOException {
+<span class="fc" id="L463">            reader.close();</span>
+<span class="fc" id="L464">            closed = true;</span>
+<span class="fc" id="L465">        }</span>
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L469">            return reader.markSupported();</span>
+        }
+
+        @Override
+        public void mark(int readlimit) {
+            try {
+<span class="fc" id="L475">                reader.mark(readlimit);</span>
+<span class="fc" id="L476">            } catch (IOException ignored) {</span>
+<span class="fc" id="L477">            }</span>
+<span class="fc" id="L478">            inCopy = BufferKit.copy(inBuffer);</span>
+<span class="fc" id="L479">            outCopy = BufferKit.copy(outBuffer);</span>
+<span class="fc" id="L480">            endCopy = endOfInput;</span>
+<span class="fc" id="L481">        }</span>
+
+        @Override
+        public void reset() throws IOException {
+<span class="fc bfc" id="L485" title="All 2 branches covered.">            if (inCopy == null) {</span>
+<span class="fc" id="L486">                throw new IOException(MARK_NOT_SET);</span>
+            }
+<span class="fc" id="L488">            reader.reset();</span>
+<span class="fc" id="L489">            inBuffer = inCopy;</span>
+<span class="fc" id="L490">            outBuffer = outCopy;</span>
+<span class="fc" id="L491">            endOfInput = endCopy;</span>
+<span class="fc" id="L492">            encoder.reset();</span>
+<span class="fc" id="L493">            inCopy = null;</span>
+<span class="fc" id="L494">            outCopy = null;</span>
+<span class="fc" id="L495">        }</span>
+
+        private long read0(byte @Nullable [] b, int off, long len) throws IOException {
+<span class="fc" id="L498">            long count = 0;</span>
+<span class="fc bfc" id="L499" title="All 2 branches covered.">            while (count &lt; len) {</span>
+<span class="fc bfc" id="L500" title="All 2 branches covered.">                if (outBuffer.hasRemaining()) {</span>
+<span class="fc" id="L501">                    int avail = (int) Math.min(outBuffer.remaining(), len - count);</span>
+<span class="fc bfc" id="L502" title="All 2 branches covered.">                    if (b != null) {</span>
+<span class="fc" id="L503">                        outBuffer.get(b, (int) (off + count), avail);</span>
+                    } else {
+<span class="fc" id="L505">                        outBuffer.position(outBuffer.position() + avail);</span>
+                    }
+<span class="fc" id="L507">                    count += avail;</span>
+<span class="fc bfc" id="L508" title="All 2 branches covered.">                } else if (endOfInput) {</span>
+<span class="fc bfc" id="L509" title="All 2 branches covered.">                    if (inBuffer.hasRemaining()) {</span>
+<span class="fc" id="L510">                        flushOutBuffer();</span>
+                    } else {
+                        break;
+                    }
+                } else {
+<span class="fc" id="L515">                    readToInBuffer();</span>
+                }
+            }
+<span class="fc" id="L518">            return count;</span>
+        }
+
+        private void readToInBuffer() throws IOException {
+<span class="fc" id="L522">            flushInBuffer();</span>
+<span class="fc" id="L523">            flushOutBuffer();</span>
+<span class="fc" id="L524">        }</span>
+
+        private void flushInBuffer() throws IOException {
+<span class="fc" id="L527">            inBuffer.compact();</span>
+<span class="fc" id="L528">            int readSize = reader.read(inBuffer);</span>
+<span class="fc bfc" id="L529" title="All 2 branches covered.">            if (readSize &lt; 0) {</span>
+<span class="fc" id="L530">                endOfInput = true;</span>
+            }
+<span class="fc" id="L532">            inBuffer.flip();</span>
+<span class="fc" id="L533">        }</span>
+
+        private void flushOutBuffer() throws IOException {
+<span class="fc" id="L536">            outBuffer.compact();</span>
+<span class="fc" id="L537">            CoderResult coderResult = encoder.encode(inBuffer, outBuffer, endOfInput);</span>
+<span class="fc bfc" id="L538" title="All 4 branches covered.">            if (coderResult.isUnderflow() || coderResult.isOverflow()) {</span>
+<span class="fc" id="L539">                outBuffer.flip();</span>
+<span class="fc" id="L540">                return;</span>
+            }
+<span class="fc" id="L542">            throw new IOException(encodingFailed(coderResult));</span>
+        }
+
+        private void checkClosed() throws IOException {
+<span class="fc bfc" id="L546" title="All 2 branches covered.">            if (closed) {</span>
+<span class="fc" id="L547">                throw new IOException(STREAM_CLOSED);</span>
+            }
+<span class="fc" id="L549">        }</span>
+    }
+
+    private static final class LimitedInputStream extends DoReadStream {
+
+        private final @Nonnull InputStream in;
+        private final long limit;
+
+<span class="fc" id="L557">        private long pos = 0;</span>
+<span class="fc" id="L558">        private long mark = 0;</span>
+
+<span class="fc" id="L560">        private LimitedInputStream(@Nonnull InputStream in, long limit) {</span>
+<span class="fc" id="L561">            this.in = in;</span>
+<span class="fc" id="L562">            this.limit = limit;</span>
+<span class="fc" id="L563">        }</span>
+
+        @Override
+        public int read() throws IOException {
+<span class="fc bfc" id="L567" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L568">                return -1;</span>
+            }
+<span class="fc" id="L570">            int ret = in.read();</span>
+<span class="fc bfc" id="L571" title="All 2 branches covered.">            if (ret == -1) {</span>
+<span class="fc" id="L572">                return -1;</span>
+            }
+<span class="fc" id="L574">            pos++;</span>
+<span class="fc" id="L575">            return ret;</span>
+        }
+
+        @Override
+        protected int doRead(byte @Nonnull [] b, int off, int len) throws IOException {
+<span class="fc bfc" id="L580" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L581">                return -1;</span>
+            }
+<span class="fc" id="L583">            int ret = in.read(b, off, (int) Math.min(limit - pos, len));</span>
+<span class="fc bfc" id="L584" title="All 2 branches covered.">            if (ret &lt; 0) {</span>
+<span class="fc" id="L585">                return -1;</span>
+            }
+<span class="fc" id="L587">            pos += ret;</span>
+<span class="fc" id="L588">            return ret;</span>
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+<span class="fc" id="L593">            long remaining = limit - pos;</span>
+<span class="fc" id="L594">            long ret = in.skip(Math.min(n, remaining));</span>
+<span class="fc" id="L595">            pos += ret;</span>
+<span class="fc" id="L596">            return ret;</span>
+        }
+
+        @Override
+        public int available() throws IOException {
+<span class="fc" id="L601">            return Math.min(in.available(), MathKit.intValue(limit - pos));</span>
+        }
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L606">            return in.markSupported();</span>
+        }
+
+        @Override
+        public void mark(int readAheadLimit) {
+<span class="fc" id="L611">            in.mark(readAheadLimit);</span>
+<span class="fc" id="L612">            mark = pos;</span>
+<span class="fc" id="L613">        }</span>
+
+        @Override
+        public void reset() throws IOException {
+<span class="fc" id="L617">            in.reset();</span>
+<span class="fc" id="L618">            pos = mark;</span>
+<span class="fc" id="L619">        }</span>
+
+        @Override
+        public void close() throws IOException {
+<span class="fc" id="L623">            in.close();</span>
+<span class="fc" id="L624">        }</span>
+    }
+
+    private static final class EmptyInputStream extends DoReadStream {
+
+<span class="fc" id="L629">        private static final @Nonnull EmptyInputStream SINGLETON = new EmptyInputStream();</span>
+
+        @Override
+        public int read() {
+<span class="fc" id="L633">            return -1;</span>
+        }
+
+        @Override
+        protected int doRead(byte @Nonnull [] b, int off, int len) {
+<span class="fc bfc" id="L638" title="All 2 branches covered.">            return len == 0 ? 0 : -1;</span>
+        }
+
+        @Override
+        public long skip(long n) {
+<span class="fc" id="L643">            return 0;</span>
+        }
+    }
+
+    private static final class CharsReader extends DoReadReader {
+
+        private final char @Nonnull [] buf;
+        private int pos;
+        private final int end;
+<span class="fc" id="L652">        private int mark = -1;</span>
+
+<span class="fc" id="L654">        private CharsReader(char @Nonnull [] buf, int off, int len) {</span>
+<span class="fc" id="L655">            this.buf = buf;</span>
+<span class="fc" id="L656">            this.pos = off;</span>
+<span class="fc" id="L657">            this.end = off + len;</span>
+<span class="fc" id="L658">        }</span>
+
+        @Override
+        public int read() {
+<span class="fc bfc" id="L662" title="All 2 branches covered.">            return (pos &lt; end) ? buf[pos++] : -1;</span>
+        }
+
+        @Override
+        protected int doRead(char @Nonnull [] b, int off, int len) {
+<span class="fc bfc" id="L667" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L668">                return 0;</span>
+            }
+<span class="fc bfc" id="L670" title="All 2 branches covered.">            if (pos &gt;= end) {</span>
+<span class="fc" id="L671">                return -1;</span>
+            }
+<span class="fc" id="L673">            int avail = end - pos;</span>
+<span class="fc" id="L674">            avail = Math.min(len, avail);</span>
+<span class="fc" id="L675">            System.arraycopy(buf, pos, b, off, avail);</span>
+<span class="fc" id="L676">            pos += avail;</span>
+<span class="fc" id="L677">            return avail;</span>
+        }
+
+        @Override
+        public int read(@Nonnull CharBuffer target) {
+<span class="fc bfc" id="L682" title="All 2 branches covered.">            if (pos &gt;= end) {</span>
+<span class="fc" id="L683">                return -1;</span>
+            }
+<span class="fc" id="L685">            int avail = end - pos;</span>
+<span class="fc" id="L686">            avail = Math.min(target.remaining(), avail);</span>
+<span class="fc" id="L687">            target.put(buf, pos, avail);</span>
+<span class="fc" id="L688">            pos += avail;</span>
+<span class="fc" id="L689">            return avail;</span>
+        }
+
+        @Override
+        public long skip(long n) throws IllegalArgumentException {
+<span class="fc" id="L694">            IOChecker.checkSkip(n);</span>
+<span class="fc bfc" id="L695" title="All 2 branches covered.">            if (n == 0) {</span>
+<span class="fc" id="L696">                return 0;</span>
+            }
+<span class="fc" id="L698">            int avail = end - pos;</span>
+<span class="fc" id="L699">            avail = (int) Math.min(n, avail);</span>
+<span class="fc bfc" id="L700" title="All 2 branches covered.">            if (avail &lt;= 0) {</span>
+<span class="fc" id="L701">                return 0;</span>
+            }
+<span class="fc" id="L703">            pos += avail;</span>
+<span class="fc" id="L704">            return avail;</span>
+        }
+
+        @Override
+        public boolean ready() {
+<span class="fc" id="L709">            return true;</span>
+        }
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L714">            return true;</span>
+        }
+
+        @Override
+        public void mark(int readAheadLimit) {
+<span class="fc" id="L719">            mark = pos;</span>
+<span class="fc" id="L720">        }</span>
+
+        @Override
+        public void reset() throws IOException {
+<span class="fc bfc" id="L724" title="All 2 branches covered.">            if (mark &lt; 0) {</span>
+<span class="fc" id="L725">                throw new IOException(MARK_NOT_SET);</span>
+            }
+<span class="fc" id="L727">            pos = mark;</span>
+<span class="fc" id="L728">        }</span>
+
+        @Override
+        public void close() {
+<span class="fc" id="L732">        }</span>
+    }
+
+    private static final class BufferReader extends DoReadReader {
+
+        private final @Nonnull CharBuffer buffer;
+
+<span class="fc" id="L739">        private BufferReader(@Nonnull CharBuffer buffer) {</span>
+<span class="fc" id="L740">            this.buffer = buffer;</span>
+<span class="fc" id="L741">        }</span>
+
+        @Override
+        public int read() {
+<span class="fc bfc" id="L745" title="All 2 branches covered.">            if (buffer.remaining() &lt;= 0) {</span>
+<span class="fc" id="L746">                return -1;</span>
+            }
+<span class="fc" id="L748">            return buffer.get();</span>
+        }
+
+        @Override
+        protected int doRead(char @Nonnull [] c, int off, int len) {
+<span class="fc bfc" id="L753" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L754">                return 0;</span>
+            }
+<span class="fc bfc" id="L756" title="All 2 branches covered.">            if (!buffer.hasRemaining()) {</span>
+<span class="fc" id="L757">                return -1;</span>
+            }
+<span class="fc" id="L759">            int avail = Math.min(buffer.remaining(), len);</span>
+<span class="fc" id="L760">            buffer.get(c, off, avail);</span>
+<span class="fc" id="L761">            return avail;</span>
+        }
+
+        @Override
+        public int read(@Nonnull CharBuffer target) throws IOException {
+<span class="fc" id="L766">            return buffer.read(target);</span>
+        }
+
+        @Override
+        public long skip(long n) throws IllegalArgumentException {
+<span class="fc" id="L771">            IOChecker.checkSkip(n);</span>
+<span class="fc bfc" id="L772" title="All 2 branches covered.">            if (n == 0) {</span>
+<span class="fc" id="L773">                return 0;</span>
+            }
+<span class="fc" id="L775">            int avail = (int) Math.min(buffer.remaining(), n);</span>
+<span class="fc bfc" id="L776" title="All 2 branches covered.">            if (avail &lt;= 0) {</span>
+<span class="fc" id="L777">                return 0;</span>
+            }
+<span class="fc" id="L779">            buffer.position(buffer.position() + avail);</span>
+<span class="fc" id="L780">            return avail;</span>
+        }
+
+        @Override
+        public boolean ready() {
+<span class="fc" id="L785">            return true;</span>
+        }
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L790">            return true;</span>
+        }
+
+        @Override
+        public void mark(int readlimit) {
+<span class="fc" id="L795">            buffer.mark();</span>
+<span class="fc" id="L796">        }</span>
+
+        @Override
+        public void reset() throws IOException {
+            try {
+<span class="fc" id="L801">                buffer.reset();</span>
+<span class="fc" id="L802">            } catch (Exception e) {</span>
+<span class="fc" id="L803">                throw new IOException(e);</span>
+<span class="fc" id="L804">            }</span>
+<span class="fc" id="L805">        }</span>
+
+        @Override
+        public void close() {
+<span class="fc" id="L809">        }</span>
+    }
+
+    private static final class BytesReader extends DoReadReader {
+
+        private final @Nonnull InputStream inputStream;
+        private final @Nonnull CharsetDecoder decoder;
+        private ByteBuffer inBuffer;
+        private CharBuffer outBuffer;
+<span class="fc" id="L818">        private boolean endOfInput = false;</span>
+<span class="fc" id="L819">        private boolean closed = false;</span>
+<span class="fc" id="L820">        private final char @Nonnull [] cbuf = {0};</span>
+
+        // snapshot for mark/reset
+        private ByteBuffer inCopy;
+        private CharBuffer outCopy;
+        private boolean endCopy;
+
+        private BytesReader(
+            @Nonnull InputStream inputStream,
+            @Nonnull CharsetDecoder decoder,
+            int inBufferSize, int outBufferSize
+<span class="fc" id="L831">        ) {</span>
+<span class="fc" id="L832">            this.inputStream = inputStream;</span>
+<span class="fc" id="L833">            this.decoder = decoder;</span>
+<span class="fc" id="L834">            this.inBuffer = ByteBuffer.allocate(inBufferSize);</span>
+<span class="fc" id="L835">            this.inBuffer.flip();</span>
+<span class="fc" id="L836">            this.outBuffer = CharBuffer.allocate(outBufferSize);</span>
+<span class="fc" id="L837">            this.outBuffer.flip();</span>
+<span class="fc" id="L838">        }</span>
+
+        private BytesReader(
+            @Nonnull InputStream inputStream,
+            @Nonnull Charset charset,
+            int inBufferSize, int outBufferSize
+        ) {
+<span class="fc" id="L845">            this(</span>
+                inputStream,
+<span class="fc" id="L847">                charset.newDecoder()</span>
+<span class="fc" id="L848">                    .onMalformedInput(CodingErrorAction.REPORT)</span>
+<span class="fc" id="L849">                    .onUnmappableCharacter(CodingErrorAction.REPORT),</span>
+                inBufferSize,
+                outBufferSize
+            );
+<span class="fc" id="L853">        }</span>
+
+        private BytesReader(@Nonnull InputStream inputStream, @Nonnull Charset charset) {
+<span class="fc" id="L856">            this(inputStream, charset, BYTES_BUFFER_SIZE, CHARS_BUFFER_SIZE);</span>
+<span class="fc" id="L857">        }</span>
+
+        @Override
+        public int read() throws IOException {
+<span class="fc" id="L861">            int readNum = read(cbuf, 0, 1);</span>
+<span class="fc bfc" id="L862" title="All 2 branches covered.">            return readNum &lt; 0 ? -1 : cbuf[0];</span>
+        }
+
+        @Override
+        protected int doRead(char @Nonnull [] c, int off, int len) throws IOException {
+<span class="fc" id="L867">            checkClosed();</span>
+<span class="fc bfc" id="L868" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L869">                return 0;</span>
+            }
+<span class="fc" id="L871">            int readNum = (int) read0(c, off, len);</span>
+<span class="fc bfc" id="L872" title="All 2 branches covered.">            return readNum == 0 ? -1 : readNum;</span>
+        }
+
+        @Override
+        public long skip(long n) throws IllegalArgumentException, IOException {
+<span class="fc" id="L877">            IOChecker.checkSkip(n);</span>
+<span class="fc" id="L878">            checkClosed();</span>
+<span class="fc bfc" id="L879" title="All 2 branches covered.">            if (n == 0) {</span>
+<span class="fc" id="L880">                return 0;</span>
+            }
+<span class="fc" id="L882">            return read0(null, 0, n);</span>
+        }
+
+        @Override
+        public boolean ready() {
+<span class="fc" id="L887">            return outBuffer.hasRemaining();</span>
+        }
+
+        @Override
+        public void close() throws IOException {
+<span class="fc" id="L892">            inputStream.close();</span>
+<span class="fc" id="L893">            closed = true;</span>
+<span class="fc" id="L894">        }</span>
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L898">            return inputStream.markSupported();</span>
+        }
+
+        @Override
+        public void mark(int readAheadLimit) {
+<span class="fc" id="L903">            inputStream.mark(readAheadLimit);</span>
+<span class="fc" id="L904">            inCopy = BufferKit.copy(inBuffer);</span>
+<span class="fc" id="L905">            outCopy = BufferKit.copy(outBuffer);</span>
+<span class="fc" id="L906">            endCopy = endOfInput;</span>
+<span class="fc" id="L907">        }</span>
+
+        @Override
+        public void reset() throws IOException {
+<span class="fc bfc" id="L911" title="All 2 branches covered.">            if (inCopy == null) {</span>
+<span class="fc" id="L912">                throw new IOException(MARK_NOT_SET);</span>
+            }
+<span class="fc" id="L914">            inputStream.reset();</span>
+<span class="fc" id="L915">            inBuffer = inCopy;</span>
+<span class="fc" id="L916">            outBuffer = outCopy;</span>
+<span class="fc" id="L917">            endOfInput = endCopy;</span>
+<span class="fc" id="L918">            decoder.reset();</span>
+<span class="fc" id="L919">            inCopy = null;</span>
+<span class="fc" id="L920">            outCopy = null;</span>
+<span class="fc" id="L921">        }</span>
+
+        private long read0(char @Nullable [] b, int off, long len) throws IOException {
+<span class="fc" id="L924">            long count = 0;</span>
+<span class="fc bfc" id="L925" title="All 2 branches covered.">            while (count &lt; len) {</span>
+<span class="fc bfc" id="L926" title="All 2 branches covered.">                if (outBuffer.hasRemaining()) {</span>
+<span class="fc" id="L927">                    int avail = (int) Math.min(outBuffer.remaining(), len - count);</span>
+<span class="fc bfc" id="L928" title="All 2 branches covered.">                    if (b != null) {</span>
+<span class="fc" id="L929">                        outBuffer.get(b, (int) (off + count), avail);</span>
+                    } else {
+<span class="fc" id="L931">                        outBuffer.position(outBuffer.position() + avail);</span>
+                    }
+<span class="fc" id="L933">                    count += avail;</span>
+<span class="fc bfc" id="L934" title="All 2 branches covered.">                } else if (endOfInput) {</span>
+<span class="fc bfc" id="L935" title="All 2 branches covered.">                    if (inBuffer.hasRemaining()) {</span>
+<span class="fc" id="L936">                        flushOutBuffer();</span>
+                    } else {
+                        break;
+                    }
+                } else {
+<span class="fc" id="L941">                    flushBuffer();</span>
+                }
+            }
+<span class="fc" id="L944">            return count;</span>
+        }
+
+        private void flushBuffer() throws IOException {
+<span class="fc" id="L948">            flushInBuffer();</span>
+<span class="fc" id="L949">            flushOutBuffer();</span>
+<span class="fc" id="L950">        }</span>
+
+        private void flushInBuffer() throws IOException {
+<span class="fc" id="L953">            inBuffer.compact();</span>
+<span class="fc" id="L954">            int readSize = inputStream.read(inBuffer.array(), inBuffer.position(), inBuffer.remaining());</span>
+<span class="fc bfc" id="L955" title="All 2 branches covered.">            if (readSize &lt; 0) {</span>
+<span class="fc" id="L956">                endOfInput = true;</span>
+            }
+<span class="fc bfc" id="L958" title="All 2 branches covered.">            if (readSize &gt; 0) {</span>
+<span class="fc" id="L959">                inBuffer.position(inBuffer.position() + readSize);</span>
+            }
+<span class="fc" id="L961">            inBuffer.flip();</span>
+<span class="fc" id="L962">        }</span>
+
+        private void flushOutBuffer() throws IOException {
+<span class="fc" id="L965">            outBuffer.compact();</span>
+<span class="fc" id="L966">            CoderResult coderResult = decoder.decode(inBuffer, outBuffer, endOfInput);</span>
+<span class="fc bfc" id="L967" title="All 4 branches covered.">            if (coderResult.isUnderflow() || coderResult.isOverflow()) {</span>
+<span class="fc" id="L968">                outBuffer.flip();</span>
+<span class="fc" id="L969">                return;</span>
+            }
+<span class="fc" id="L971">            throw new IOException(decodingFailed(coderResult));</span>
+        }
+
+        private void checkClosed() throws IOException {
+<span class="fc bfc" id="L975" title="All 2 branches covered.">            if (closed) {</span>
+<span class="fc" id="L976">                throw new IOException(STREAM_CLOSED);</span>
+            }
+<span class="fc" id="L978">        }</span>
+    }
+
+    private static final class LimitedReader extends DoReadReader {
+
+        private final @Nonnull Reader in;
+        private final long limit;
+
+<span class="fc" id="L986">        private long pos = 0;</span>
+<span class="fc" id="L987">        private long mark = 0;</span>
+
+<span class="fc" id="L989">        private LimitedReader(@Nonnull Reader in, long limit) {</span>
+<span class="fc" id="L990">            this.in = in;</span>
+<span class="fc" id="L991">            this.limit = limit;</span>
+<span class="fc" id="L992">        }</span>
+
+        @Override
+        public int read() throws IOException {
+<span class="fc bfc" id="L996" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L997">                return -1;</span>
+            }
+<span class="fc" id="L999">            int ret = in.read();</span>
+<span class="fc bfc" id="L1000" title="All 2 branches covered.">            if (ret == -1) {</span>
+<span class="fc" id="L1001">                return -1;</span>
+            }
+<span class="fc" id="L1003">            pos++;</span>
+<span class="fc" id="L1004">            return ret;</span>
+        }
+
+        @Override
+        protected int doRead(char @Nonnull [] b, int off, int len) throws IOException {
+<span class="fc bfc" id="L1009" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1010">                return -1;</span>
+            }
+<span class="fc" id="L1012">            int ret = in.read(b, off, (int) Math.min(limit - pos, len));</span>
+<span class="fc bfc" id="L1013" title="All 2 branches covered.">            if (ret &lt; 0) {</span>
+<span class="fc" id="L1014">                return -1;</span>
+            }
+<span class="fc" id="L1016">            pos += ret;</span>
+<span class="fc" id="L1017">            return ret;</span>
+        }
+
+        @Override
+        public long skip(long n) throws IllegalArgumentException, IOException {
+<span class="fc" id="L1022">            IOChecker.checkSkip(n);</span>
+<span class="fc" id="L1023">            long remaining = limit - pos;</span>
+<span class="fc" id="L1024">            long ret = in.skip(Math.min(n, remaining));</span>
+<span class="fc" id="L1025">            pos += ret;</span>
+<span class="fc" id="L1026">            return ret;</span>
+        }
+
+        @Override
+        public boolean ready() throws IOException {
+<span class="fc" id="L1031">            return in.ready();</span>
+        }
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L1036">            return in.markSupported();</span>
+        }
+
+        @Override
+        public void mark(int readAheadLimit) throws IOException {
+<span class="fc" id="L1041">            in.mark(readAheadLimit);</span>
+<span class="fc" id="L1042">            mark = pos;</span>
+<span class="fc" id="L1043">        }</span>
+
+        @Override
+        public void reset() throws IOException {
+<span class="fc" id="L1047">            in.reset();</span>
+<span class="fc" id="L1048">            pos = mark;</span>
+<span class="fc" id="L1049">        }</span>
+
+        @Override
+        public void close() throws IOException {
+<span class="fc" id="L1053">            in.close();</span>
+<span class="fc" id="L1054">        }</span>
+    }
+
+    private static final class EmptyReader extends DoReadReader {
+
+<span class="fc" id="L1059">        private static final @Nonnull EmptyReader SINGLETON = new EmptyReader();</span>
+
+        @Override
+        public int read(@Nonnull CharBuffer target) {
+<span class="fc" id="L1063">            return -1;</span>
+        }
+
+        @Override
+        public int read() {
+<span class="fc" id="L1068">            return -1;</span>
+        }
+
+        @Override
+        protected int doRead(char @Nonnull [] cbuf, int off, int len) {
+<span class="fc bfc" id="L1073" title="All 2 branches covered.">            return len == 0 ? 0 : -1;</span>
+        }
+
+        @Override
+        public long skip(long n) throws IllegalArgumentException {
+<span class="fc" id="L1078">            IOChecker.checkSkip(n);</span>
+<span class="fc" id="L1079">            return 0;</span>
+        }
+
+        @Override
+        public boolean ready() {
+<span class="fc" id="L1084">            return true;</span>
+        }
+
+        @Override
+        public void close() {
+<span class="fc" id="L1089">        }</span>
+    }
+
+    private static final class BytesOutputStream extends DoWriteStream {
+
+        private final byte @Nonnull [] buf;
+        private int pos;
+        private final int end;
+
+<span class="fc" id="L1098">        private BytesOutputStream(byte @Nonnull [] buf, int off, int len) {</span>
+<span class="fc" id="L1099">            this.buf = buf;</span>
+<span class="fc" id="L1100">            this.pos = off;</span>
+<span class="fc" id="L1101">            this.end = off + len;</span>
+<span class="fc" id="L1102">        }</span>
+
+        @Override
+        public void write(int b) throws IOException {
+<span class="fc" id="L1106">            int remaining = end - pos;</span>
+<span class="fc bfc" id="L1107" title="All 2 branches covered.">            if (remaining &lt; 1) {</span>
+<span class="fc" id="L1108">                throw new IOException(insufficientRemainingSpace(1, 0));</span>
+            }
+<span class="fc" id="L1110">            buf[pos] = (byte) b;</span>
+<span class="fc" id="L1111">            pos++;</span>
+<span class="fc" id="L1112">        }</span>
+
+        @Override
+        protected void doWrite(byte @Nonnull [] b, int off, int len) throws IOException {
+<span class="fc bfc" id="L1116" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1117">                return;</span>
+            }
+<span class="fc" id="L1119">            int remaining = end - pos;</span>
+<span class="fc bfc" id="L1120" title="All 2 branches covered.">            if (remaining &lt; len) {</span>
+<span class="fc" id="L1121">                throw new IOException(insufficientRemainingSpace(len, remaining));</span>
+            }
+<span class="fc" id="L1123">            System.arraycopy(b, off, buf, pos, len);</span>
+<span class="fc" id="L1124">            pos += len;</span>
+<span class="fc" id="L1125">        }</span>
+    }
+
+    private static final class BufferOutputStream extends DoWriteStream {
+
+        private final @Nonnull ByteBuffer buffer;
+
+<span class="fc" id="L1132">        private BufferOutputStream(@Nonnull ByteBuffer buffer) {</span>
+<span class="fc" id="L1133">            this.buffer = buffer;</span>
+<span class="fc" id="L1134">        }</span>
+
+        @Override
+        public void write(int b) throws IOException {
+            try {
+<span class="fc" id="L1139">                buffer.put((byte) b);</span>
+<span class="fc" id="L1140">            } catch (Exception e) {</span>
+<span class="fc" id="L1141">                throw new IOException(e);</span>
+<span class="fc" id="L1142">            }</span>
+<span class="fc" id="L1143">        }</span>
+
+        @Override
+        protected void doWrite(byte @Nonnull [] b, int off, int len) throws IOException {
+<span class="fc bfc" id="L1147" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1148">                return;</span>
+            }
+            try {
+<span class="fc" id="L1151">                buffer.put(b, off, len);</span>
+<span class="fc" id="L1152">            } catch (Exception e) {</span>
+<span class="fc" id="L1153">                throw new IOException(e);</span>
+<span class="fc" id="L1154">            }</span>
+<span class="fc" id="L1155">        }</span>
+    }
+
+    private static final class RafOutputStream extends DoWriteStream {
+
+        private final @Nonnull RandomAccessFile raf;
+
+<span class="fc" id="L1162">        private RafOutputStream(@Nonnull RandomAccessFile raf, long seek) throws IOException {</span>
+<span class="fc" id="L1163">            this.raf = raf;</span>
+<span class="fc" id="L1164">            this.raf.seek(seek);</span>
+<span class="fc" id="L1165">        }</span>
+
+        @Override
+        public void write(int b) throws IOException {
+<span class="fc" id="L1169">            raf.write(b);</span>
+<span class="fc" id="L1170">        }</span>
+
+        @Override
+        protected void doWrite(byte @Nonnull [] b, int off, int len) throws IOException {
+<span class="fc bfc" id="L1174" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1175">                return;</span>
+            }
+<span class="fc" id="L1177">            raf.write(b, off, len);</span>
+<span class="fc" id="L1178">        }</span>
+
+        @Override
+        public void flush() throws IOException {
+<span class="fc" id="L1182">            raf.getFD().sync();</span>
+<span class="fc" id="L1183">        }</span>
+
+        @Override
+        public void close() throws IOException {
+<span class="fc" id="L1187">            raf.close();</span>
+<span class="fc" id="L1188">        }</span>
+    }
+
+    private static final class AppenderOutputStream extends DoWriteStream {
+
+        private final @Nonnull Appendable appender;
+        private final @Nonnull CharsetDecoder decoder;
+        private final @Nonnull ByteBuffer inBuffer;
+        private final @Nonnull CharBuffer outBuffer;
+
+<span class="fc" id="L1198">        private boolean closed = false;</span>
+        private byte @Nullable [] writeOneBuf;
+
+        private AppenderOutputStream(
+            @Nonnull Appendable appender,
+            @Nonnull CharsetDecoder decoder,
+            int inBufferSize,
+            int outBufferSize
+<span class="fc" id="L1206">        ) {</span>
+<span class="fc" id="L1207">            this.appender = appender;</span>
+<span class="fc" id="L1208">            this.decoder = decoder;</span>
+<span class="fc" id="L1209">            this.inBuffer = ByteBuffer.allocate(inBufferSize);</span>
+<span class="fc" id="L1210">            this.outBuffer = CharBuffer.allocate(outBufferSize);</span>
+<span class="fc" id="L1211">        }</span>
+
+        private AppenderOutputStream(
+            @Nonnull Appendable appender,
+            @Nonnull Charset charset,
+            int inBufferSize,
+            int outBufferSize
+        ) {
+<span class="fc" id="L1219">            this(</span>
+                appender,
+<span class="fc" id="L1221">                charset.newDecoder()</span>
+<span class="fc" id="L1222">                    .onMalformedInput(CodingErrorAction.REPORT)</span>
+<span class="fc" id="L1223">                    .onUnmappableCharacter(CodingErrorAction.REPORT),</span>
+                inBufferSize,
+                outBufferSize
+            );
+<span class="fc" id="L1227">        }</span>
+
+        private AppenderOutputStream(@Nonnull Appendable appender, @Nonnull Charset charset) {
+<span class="fc" id="L1230">            this(appender, charset, BYTES_BUFFER_SIZE, CHARS_BUFFER_SIZE);</span>
+<span class="fc" id="L1231">        }</span>
+
+        @Override
+        public void write(int b) throws IOException {
+<span class="fc bfc" id="L1235" title="All 2 branches covered.">            if (writeOneBuf == null) {</span>
+<span class="fc" id="L1236">                writeOneBuf = new byte[1];</span>
+            }
+<span class="fc" id="L1238">            writeOneBuf[0] = (byte) b;</span>
+<span class="fc" id="L1239">            write(writeOneBuf, 0, 1);</span>
+<span class="fc" id="L1240">        }</span>
+
+        @Override
+        protected void doWrite(byte @Nonnull [] b, int off, int len) throws IOException {
+<span class="fc" id="L1244">            checkClosed();</span>
+<span class="fc bfc" id="L1245" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1246">                return;</span>
+            }
+<span class="fc" id="L1248">            int count = 0;</span>
+<span class="fc bfc" id="L1249" title="All 2 branches covered.">            while (count &lt; len) {</span>
+<span class="fc" id="L1250">                int actualLen = Math.min(inBuffer.remaining(), len - count);</span>
+<span class="fc" id="L1251">                inBuffer.put(b, off + count, actualLen);</span>
+<span class="fc" id="L1252">                inBuffer.flip();</span>
+                while (true) {
+<span class="fc" id="L1254">                    CoderResult coderResult = decoder.decode(inBuffer, outBuffer, false);</span>
+<span class="fc bfc" id="L1255" title="All 2 branches covered.">                    if (coderResult.isOverflow()) {</span>
+<span class="fc" id="L1256">                        outBuffer.flip();</span>
+<span class="fc" id="L1257">                        appender.append(outBuffer);</span>
+<span class="fc" id="L1258">                        outBuffer.clear();</span>
+<span class="fc bfc" id="L1259" title="All 2 branches covered.">                    } else if (coderResult.isUnderflow()) {</span>
+<span class="fc" id="L1260">                        outBuffer.flip();</span>
+<span class="fc" id="L1261">                        appender.append(outBuffer);</span>
+<span class="fc" id="L1262">                        outBuffer.clear();</span>
+<span class="fc" id="L1263">                        break;</span>
+                    } else {
+<span class="fc" id="L1265">                        throw new IOException(decodingFailed(coderResult));</span>
+                    }
+<span class="fc" id="L1267">                }</span>
+<span class="fc" id="L1268">                count += actualLen;</span>
+<span class="fc" id="L1269">                inBuffer.compact();</span>
+<span class="fc" id="L1270">            }</span>
+<span class="fc" id="L1271">        }</span>
+
+        @Override
+        public void flush() throws IOException {
+<span class="fc" id="L1275">            checkClosed();</span>
+<span class="fc" id="L1276">            IOKit.flush(appender);</span>
+<span class="fc" id="L1277">        }</span>
+
+        @Override
+        public void close() throws IOException {
+<span class="fc bfc" id="L1281" title="All 2 branches covered.">            if (closed) {</span>
+<span class="fc" id="L1282">                return;</span>
+            }
+<span class="fc" id="L1284">            IOKit.close(appender);</span>
+<span class="fc" id="L1285">            closed = true;</span>
+<span class="fc" id="L1286">        }</span>
+
+        private void checkClosed() throws IOException {
+<span class="fc bfc" id="L1289" title="All 2 branches covered.">            if (closed) {</span>
+<span class="fc" id="L1290">                throw new IOException(STREAM_CLOSED);</span>
+            }
+<span class="fc" id="L1292">        }</span>
+    }
+
+    private static final class LimitedOutputStream extends DoWriteStream {
+
+        private final @Nonnull OutputStream out;
+        private final long limit;
+
+        private long pos;
+
+<span class="fc" id="L1302">        private LimitedOutputStream(@Nonnull OutputStream out, long limit) {</span>
+<span class="fc" id="L1303">            this.out = out;</span>
+<span class="fc" id="L1304">            this.limit = limit;</span>
+<span class="fc" id="L1305">        }</span>
+
+        @Override
+        public void write(int b) throws IOException {
+<span class="fc bfc" id="L1309" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1310">                throw new IOException(insufficientRemainingSpace(1, 0));</span>
+            }
+<span class="fc" id="L1312">            out.write(b);</span>
+<span class="fc" id="L1313">            pos++;</span>
+<span class="fc" id="L1314">        }</span>
+
+        @Override
+        protected void doWrite(byte @Nonnull [] b, int off, int len) throws IOException {
+<span class="fc" id="L1318">            long remaining = limit - pos;</span>
+<span class="fc bfc" id="L1319" title="All 2 branches covered.">            if (remaining &lt; len) {</span>
+<span class="fc" id="L1320">                throw new IOException(insufficientRemainingSpace(len, remaining));</span>
+            }
+<span class="fc" id="L1322">            out.write(b, off, len);</span>
+<span class="fc" id="L1323">            pos += len;</span>
+<span class="fc" id="L1324">        }</span>
+
+        @Override
+        public void flush() throws IOException {
+<span class="fc" id="L1328">            out.flush();</span>
+<span class="fc" id="L1329">        }</span>
+
+        @Override
+        public void close() throws IOException {
+<span class="fc" id="L1333">            out.close();</span>
+<span class="fc" id="L1334">        }</span>
+    }
+
+    private static final class NullOutputStream extends DoWriteStream {
+
+<span class="fc" id="L1339">        private static final @Nonnull NullOutputStream SINGLETON = new NullOutputStream();</span>
+
+        @Override
+        public void write(int b) {
+<span class="fc" id="L1343">        }</span>
+
+        @Override
+        protected void doWrite(byte @Nonnull [] b, int off, int len) {
+<span class="fc" id="L1347">        }</span>
+    }
+
+    private static final class CharsWriter extends DoWriteWriter {
+
+        private final char @Nonnull [] buf;
+        private int pos;
+        private final int end;
+
+<span class="fc" id="L1356">        private CharsWriter(char @Nonnull [] buf, int off, int len) {</span>
+<span class="fc" id="L1357">            this.buf = buf;</span>
+<span class="fc" id="L1358">            this.pos = off;</span>
+<span class="fc" id="L1359">            this.end = off + len;</span>
+<span class="fc" id="L1360">        }</span>
+
+        @Override
+        public void write(int c) throws IOException {
+<span class="fc" id="L1364">            int remaining = end - pos;</span>
+<span class="fc bfc" id="L1365" title="All 2 branches covered.">            if (remaining &lt; 1) {</span>
+<span class="fc" id="L1366">                throw new IOException(insufficientRemainingSpace(1, remaining));</span>
+            }
+<span class="fc" id="L1368">            buf[pos] = (char) c;</span>
+<span class="fc" id="L1369">            pos++;</span>
+<span class="fc" id="L1370">        }</span>
+
+        @Override
+        protected void doWrite(char @Nonnull [] cbuf, int off, int len) throws IOException {
+<span class="fc bfc" id="L1374" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1375">                return;</span>
+            }
+<span class="fc" id="L1377">            int remaining = end - pos;</span>
+<span class="fc bfc" id="L1378" title="All 2 branches covered.">            if (remaining &lt; len) {</span>
+<span class="fc" id="L1379">                throw new IOException(insufficientRemainingSpace(len, remaining));</span>
+            }
+<span class="fc" id="L1381">            System.arraycopy(cbuf, off, buf, pos, len);</span>
+<span class="fc" id="L1382">            pos += len;</span>
+<span class="fc" id="L1383">        }</span>
+
+        @Override
+        protected void doWrite(@Nonnull String str, int off, int len) throws IOException {
+<span class="fc bfc" id="L1387" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1388">                return;</span>
+            }
+<span class="fc" id="L1390">            int remaining = end - pos;</span>
+<span class="fc bfc" id="L1391" title="All 2 branches covered.">            if (remaining &lt; len) {</span>
+<span class="fc" id="L1392">                throw new IOException(insufficientRemainingSpace(len, remaining));</span>
+            }
+<span class="fc" id="L1394">            str.getChars(off, off + len, buf, pos);</span>
+<span class="fc" id="L1395">            pos += len;</span>
+<span class="fc" id="L1396">        }</span>
+
+        @Override
+        public void flush() {
+<span class="fc" id="L1400">        }</span>
+
+        @Override
+        public void close() {
+<span class="fc" id="L1404">        }</span>
+    }
+
+    private static final class BufferWriter extends DoWriteWriter {
+
+        private final CharBuffer buffer;
+
+<span class="fc" id="L1411">        private BufferWriter(@Nonnull CharBuffer buffer) {</span>
+<span class="fc" id="L1412">            this.buffer = buffer;</span>
+<span class="fc" id="L1413">        }</span>
+
+        @Override
+        public void write(int c) throws IOException {
+            try {
+<span class="fc" id="L1418">                buffer.put((char) c);</span>
+<span class="fc" id="L1419">            } catch (Exception e) {</span>
+<span class="fc" id="L1420">                throw new IOException(e);</span>
+<span class="fc" id="L1421">            }</span>
+<span class="fc" id="L1422">        }</span>
+
+        @Override
+        protected void doWrite(char @Nonnull [] c, int off, int len) throws IOException {
+            try {
+<span class="fc" id="L1427">                buffer.put(c, off, len);</span>
+<span class="fc" id="L1428">            } catch (Exception e) {</span>
+<span class="fc" id="L1429">                throw new IOException(e);</span>
+<span class="fc" id="L1430">            }</span>
+<span class="fc" id="L1431">        }</span>
+
+        @Override
+        protected void doWrite(@Nonnull String str, int off, int len) throws IOException {
+            try {
+<span class="fc" id="L1436">                buffer.put(str, off, off + len);</span>
+<span class="fc" id="L1437">            } catch (Exception e) {</span>
+<span class="fc" id="L1438">                throw new IOException(e);</span>
+<span class="fc" id="L1439">            }</span>
+<span class="fc" id="L1440">        }</span>
+
+        @Override
+        public void flush() {
+<span class="fc" id="L1444">        }</span>
+
+        @Override
+        public void close() {
+<span class="fc" id="L1448">        }</span>
+    }
+
+    private static final class BytesWriter extends DoWriteWriter {
+
+        private final @Nonnull OutputStream outputStream;
+        private final @Nonnull CharsetEncoder encoder;
+        private final @Nonnull CharBuffer inBuffer;
+        private final @Nonnull ByteBuffer outBuffer;
+
+<span class="fc" id="L1458">        private boolean closed = false;</span>
+        private char @Nullable [] writeOneBuf;
+
+<span class="fc" id="L1461">        private BytesWriter(@Nonnull OutputStream outputStream, @Nonnull CharsetEncoder encoder, int inBufferSize, int outBufferSize) {</span>
+<span class="fc" id="L1462">            this.outputStream = outputStream;</span>
+<span class="fc" id="L1463">            this.encoder = encoder;</span>
+<span class="fc" id="L1464">            this.inBuffer = CharBuffer.allocate(inBufferSize);</span>
+<span class="fc" id="L1465">            this.inBuffer.flip();</span>
+<span class="fc" id="L1466">            this.outBuffer = ByteBuffer.allocate(outBufferSize);</span>
+<span class="fc" id="L1467">            this.outBuffer.flip();</span>
+<span class="fc" id="L1468">        }</span>
+
+        private BytesWriter(@Nonnull OutputStream outputStream, @Nonnull Charset charset, int inBufferSize, int outBufferSize) {
+<span class="fc" id="L1471">            this(</span>
+                outputStream,
+<span class="fc" id="L1473">                charset.newEncoder()</span>
+<span class="fc" id="L1474">                    .onMalformedInput(CodingErrorAction.REPORT)</span>
+<span class="fc" id="L1475">                    .onUnmappableCharacter(CodingErrorAction.REPORT),</span>
+                inBufferSize,
+                outBufferSize
+            );
+<span class="fc" id="L1479">        }</span>
+
+        private BytesWriter(@Nonnull OutputStream outputStream, @Nonnull Charset charset) {
+<span class="fc" id="L1482">            this(outputStream, charset, 64, 64);</span>
+<span class="fc" id="L1483">        }</span>
+
+        @Override
+        public void write(int c) throws IOException {
+<span class="fc bfc" id="L1487" title="All 2 branches covered.">            if (writeOneBuf == null) {</span>
+<span class="fc" id="L1488">                writeOneBuf = new char[1];</span>
+            }
+<span class="fc" id="L1490">            writeOneBuf[0] = (char) c;</span>
+<span class="fc" id="L1491">            write(writeOneBuf, 0, 1);</span>
+<span class="fc" id="L1492">        }</span>
+
+        @Override
+        protected void doWrite(char @Nonnull [] cbuf, int off, int len) throws IOException {
+<span class="fc" id="L1496">            doWrite0(cbuf, off, len);</span>
+<span class="fc" id="L1497">        }</span>
+
+        @Override
+        protected void doWrite(@Nonnull String str, int off, int len) throws IOException {
+<span class="fc" id="L1501">            doWrite0(str, off, len);</span>
+<span class="fc" id="L1502">        }</span>
+
+        private void doWrite0(@Nonnull Object cbuf, int off, int len) throws IOException {
+<span class="fc" id="L1505">            checkClosed();</span>
+<span class="fc bfc" id="L1506" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1507">                return;</span>
+            }
+<span class="fc" id="L1509">            int count = 0;</span>
+<span class="fc bfc" id="L1510" title="All 2 branches covered.">            while (count &lt; len) {</span>
+<span class="fc" id="L1511">                int actualLen = Math.min(inBuffer.remaining(), len - count);</span>
+<span class="fc bfc" id="L1512" title="All 2 branches covered.">                if (cbuf instanceof char[]) {</span>
+<span class="fc" id="L1513">                    inBuffer.put((char[]) cbuf, off + count, actualLen);</span>
+                } else {
+<span class="fc" id="L1515">                    inBuffer.put((String) cbuf, off + count, off + count + actualLen);</span>
+                }
+<span class="fc" id="L1517">                inBuffer.flip();</span>
+                while (true) {
+<span class="fc" id="L1519">                    CoderResult coderResult = encoder.encode(inBuffer, outBuffer, false);</span>
+<span class="fc bfc" id="L1520" title="All 2 branches covered.">                    if (coderResult.isOverflow()) {</span>
+<span class="fc" id="L1521">                        outBuffer.flip();</span>
+<span class="fc" id="L1522">                        BufferKit.readTo(outBuffer, outputStream);</span>
+                        // outputStream.append(outBuffer);
+<span class="fc" id="L1524">                        outBuffer.clear();</span>
+<span class="fc bfc" id="L1525" title="All 2 branches covered.">                    } else if (coderResult.isUnderflow()) {</span>
+<span class="fc" id="L1526">                        outBuffer.flip();</span>
+<span class="fc" id="L1527">                        BufferKit.readTo(outBuffer, outputStream);</span>
+                        // appender.append(outBuffer);
+<span class="fc" id="L1529">                        outBuffer.clear();</span>
+<span class="fc" id="L1530">                        break;</span>
+                    } else {
+<span class="fc" id="L1532">                        throw new IOException(decodingFailed(coderResult));</span>
+                    }
+<span class="fc" id="L1534">                }</span>
+<span class="fc" id="L1535">                count += actualLen;</span>
+<span class="fc" id="L1536">                inBuffer.compact();</span>
+<span class="fc" id="L1537">            }</span>
+<span class="fc" id="L1538">        }</span>
+
+        @Override
+        public void flush() throws IOException {
+<span class="fc" id="L1542">            checkClosed();</span>
+<span class="fc" id="L1543">            outputStream.flush();</span>
+<span class="fc" id="L1544">        }</span>
+
+        @Override
+        public void close() throws IOException {
+<span class="fc bfc" id="L1548" title="All 2 branches covered.">            if (closed) {</span>
+<span class="fc" id="L1549">                return;</span>
+            }
+<span class="fc" id="L1551">            outputStream.close();</span>
+<span class="fc" id="L1552">            closed = true;</span>
+<span class="fc" id="L1553">        }</span>
+
+        private void checkClosed() throws IOException {
+<span class="fc bfc" id="L1556" title="All 2 branches covered.">            if (closed) {</span>
+<span class="fc" id="L1557">                throw new IOException(STREAM_CLOSED);</span>
+            }
+<span class="fc" id="L1559">        }</span>
+    }
+
+    private static final class LimitedWriter extends DoWriteWriter {
+
+        private final @Nonnull Writer out;
+        private final long limit;
+
+        private long pos;
+
+<span class="fc" id="L1569">        private LimitedWriter(@Nonnull Writer out, long limit) {</span>
+<span class="fc" id="L1570">            this.out = out;</span>
+<span class="fc" id="L1571">            this.limit = limit;</span>
+<span class="fc" id="L1572">        }</span>
+
+        @Override
+        public void write(int c) throws IOException {
+<span class="fc bfc" id="L1576" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1577">                throw new IOException(insufficientRemainingSpace(1, 0));</span>
+            }
+<span class="fc" id="L1579">            out.write(c);</span>
+<span class="fc" id="L1580">            pos++;</span>
+<span class="fc" id="L1581">        }</span>
+
+        @Override
+        protected void doWrite(char @Nonnull [] cbuf, int off, int len) throws IOException {
+<span class="fc" id="L1585">            long remaining = limit - pos;</span>
+<span class="fc bfc" id="L1586" title="All 2 branches covered.">            if (remaining &lt; len) {</span>
+<span class="fc" id="L1587">                throw new IOException(insufficientRemainingSpace(len, remaining));</span>
+            }
+<span class="fc" id="L1589">            out.write(cbuf, off, len);</span>
+<span class="fc" id="L1590">            pos += len;</span>
+<span class="fc" id="L1591">        }</span>
+
+        @Override
+        protected void doWrite(@Nonnull String str, int off, int len) throws IOException {
+<span class="fc" id="L1595">            long remaining = limit - pos;</span>
+<span class="fc bfc" id="L1596" title="All 2 branches covered.">            if (remaining &lt; len) {</span>
+<span class="fc" id="L1597">                throw new IOException(insufficientRemainingSpace(len, remaining));</span>
+            }
+<span class="fc" id="L1599">            out.write(str, off, len);</span>
+<span class="fc" id="L1600">            pos += len;</span>
+<span class="fc" id="L1601">        }</span>
+
+        @Override
+        public void flush() throws IOException {
+<span class="fc" id="L1605">            out.flush();</span>
+<span class="fc" id="L1606">        }</span>
+
+        @Override
+        public void close() throws IOException {
+<span class="fc" id="L1610">            out.close();</span>
+<span class="fc" id="L1611">        }</span>
+    }
+
+    private static final class NullWriter extends DoWriteWriter {
+
+<span class="fc" id="L1616">        private static final @Nonnull NullWriter SINGLETON = new NullWriter();</span>
+
+        @Override
+        public void write(int c) {
+<span class="fc" id="L1620">        }</span>
+
+        @Override
+        protected void doWrite(char @Nonnull [] cbuf, int off, int len) {
+<span class="fc" id="L1624">        }</span>
+
+        @Override
+        protected void doWrite(@Nonnull String str, int off, int len) {
+<span class="fc" id="L1628">        }</span>
+
+        @Override
+        public Writer append(CharSequence csq) {
+<span class="fc" id="L1632">            return this;</span>
+        }
+
+        @Override
+        public Writer append(CharSequence csq, int start, int end) {
+<span class="fc" id="L1637">            IOChecker.checkOffLen(start, end - start, csq.length());</span>
+<span class="fc" id="L1638">            return this;</span>
+        }
+
+        @Override
+        public void flush() {
+<span class="fc" id="L1643">        }</span>
+
+        @Override
+        public void close() {
+<span class="fc" id="L1647">        }</span>
+    }
+
+    private IOBack() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

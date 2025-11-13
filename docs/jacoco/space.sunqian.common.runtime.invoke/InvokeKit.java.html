@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InvokeKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.runtime.invoke</a> &gt; <span class="el_source">InvokeKit.java</span></div><h1>InvokeKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.runtime.invoke;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+
+import java.lang.invoke.MethodHandle;
+
+/**
+ * Utilities for {@link Invocable}, {@link MethodHandle} and other invocation related.
+ *
+ * @author sunqian
+ */
+public class InvokeKit {
+
+    /**
+     * Invokes the {@link MethodHandle} as an instance method, with the specified instance and invocation arguments.
+     *
+     * @param handle the {@link MethodHandle} to be invoked
+     * @param inst   the specified instance
+     * @param args   the invocation arguments
+     * @return the invocation result
+     * @throws Throwable for anything thrown by the underlying method
+     */
+    public static @Nullable Object invokeInstance(
+        @Nonnull MethodHandle handle, Object inst, @Nullable Object... args
+    ) throws Throwable {
+<span class="fc" id="L27">        return ByOthers.invokeInstance(handle, inst, args);</span>
+    }
+
+    /**
+     * Invokes the {@link MethodHandle} as a static method or constructor, with the invocation arguments.
+     *
+     * @param handle the {@link MethodHandle} to be invoked
+     * @param args   the invocation arguments
+     * @return the invocation result
+     * @throws Throwable for anything thrown by the underlying method
+     */
+    public static @Nullable Object invokeStatic(
+        @Nonnull MethodHandle handle, @Nullable Object... args
+    ) throws Throwable {
+<span class="fc" id="L41">        return ByOthers.invokeStatic(handle, args);</span>
+    }
+
+    static @Nullable Object @Nonnull [] toInstanceArgs(
+        @Nullable Object inst, @Nullable Object @Nonnull ... args
+    ) {
+<span class="fc" id="L47">        Object[] instanceArgs = new Object[args.length + 1];</span>
+<span class="fc" id="L48">        instanceArgs[0] = inst;</span>
+<span class="fc" id="L49">        System.arraycopy(args, 0, instanceArgs, 1, args.length);</span>
+<span class="fc" id="L50">        return instanceArgs;</span>
+    }
+
+    private InvokeKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

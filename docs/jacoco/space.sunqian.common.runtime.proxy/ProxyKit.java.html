@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProxyKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.runtime.proxy</a> &gt; <span class="el_source">ProxyKit.java</span></div><h1>ProxyKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.runtime.proxy;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.annotations.OutParam;
+import space.sunqian.common.base.system.JvmKit;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Proxy utilities.
+ *
+ * @author sunqian
+ */
+public class ProxyKit {
+
+    /**
+     * Returns a map that contains all proxiable methods of the given class and interfaces. Its keys are the specified
+     * proxied types, and the values are the proxiable methods under that type. A proxiable method is public or
+     * protected, and non-static and non-final. If there are methods with the same name and same JVM descriptor, only
+     * the first one encountered is added into the map.
+     * &lt;p&gt;
+     * This method is a helpful method for the {@link ProxyMaker} implementations.
+     *
+     * @param proxiedClass the class to be proxied, may be {@code null} if it is {@link Object}
+     * @param interfaces   the interfaces to be proxied
+     * @param proxyHandler the proxy handler
+     * @return a map that contains all proxiable methods of the given class and interfaces
+     */
+    public static @Nonnull Map&lt;Class&lt;?&gt;, List&lt;Method&gt;&gt; getProxiableMethods(
+        @Nullable Class&lt;?&gt; proxiedClass,
+        @Nonnull List&lt;@Nonnull Class&lt;?&gt;&gt; interfaces,
+        @Nonnull ProxyHandler proxyHandler
+    ) {
+<span class="fc" id="L42">        Map&lt;Class&lt;?&gt;, List&lt;Method&gt;&gt; result = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L43">        Set&lt;String&gt; ids = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        Class&lt;?&gt; superclass = proxiedClass == null ? Object.class : proxiedClass;</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        for (Method method : superclass.getMethods()) {</span>
+<span class="fc" id="L46">            putProxiableMethod(method, proxyHandler, ids, superclass, result);</span>
+        }
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        for (Method method : superclass.getDeclaredMethods()) {</span>
+<span class="fc" id="L49">            putProxiableMethod(method, proxyHandler, ids, superclass, result);</span>
+        }
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        for (Class&lt;?&gt; anInterface : interfaces) {</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">            for (Method method : anInterface.getMethods()) {</span>
+<span class="fc" id="L53">                putProxiableMethod(method, proxyHandler, ids, anInterface, result);</span>
+            }
+<span class="fc" id="L55">        }</span>
+<span class="fc" id="L56">        return result;</span>
+    }
+
+    private static boolean isProxiable(@Nonnull Method method, @Nonnull ProxyHandler handler) {
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (!isProxiable(method)) {</span>
+<span class="fc" id="L61">            return false;</span>
+        }
+<span class="fc" id="L63">        return handler.needsProxy(method);</span>
+    }
+
+    /**
+     * Returns whether the given method is proxiable. A proxiable method cannot be static, final, or synthetic, and
+     * should be public or protected.
+     *
+     * @param method the method to be checked
+     * @return whether the given method is proxiable
+     */
+    public static boolean isProxiable(@Nonnull Method method) {
+<span class="fc bfc" id="L74" title="All 2 branches covered.">        if (method.isSynthetic()) {</span>
+<span class="fc" id="L75">            return false;</span>
+        }
+<span class="fc" id="L77">        int mod = method.getModifiers();</span>
+<span class="fc bfc" id="L78" title="All 4 branches covered.">        if (Modifier.isStatic(mod) || Modifier.isFinal(mod)) {</span>
+<span class="fc" id="L79">            return false;</span>
+        }
+<span class="fc bfc" id="L81" title="All 4 branches covered.">        return Modifier.isPublic(mod) || Modifier.isProtected(mod);</span>
+    }
+
+    private static void putProxiableMethod(
+        @Nonnull Method method,
+        @Nonnull ProxyHandler handler,
+        @Nonnull Set&lt;String&gt; ids,
+        @Nonnull Class&lt;?&gt; type,
+        @Nonnull @OutParam Map&lt;Class&lt;?&gt;, List&lt;Method&gt;&gt; result
+    ) {
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (isProxiable(method, handler)) {</span>
+<span class="fc" id="L92">            String methodId = buildMethodId(method);</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">            if (!ids.contains(methodId)) {</span>
+<span class="fc" id="L94">                ids.add(methodId);</span>
+<span class="fc" id="L95">                result.compute(type, (k, v) -&gt; {</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">                    if (v == null) {</span>
+<span class="fc" id="L97">                        v = new ArrayList&lt;&gt;();</span>
+                    }
+<span class="fc" id="L99">                    v.add(method);</span>
+<span class="fc" id="L100">                    return v;</span>
+                });
+            }
+        }
+<span class="fc" id="L104">    }</span>
+
+    private static @Nonnull String buildMethodId(@Nonnull Method method) {
+<span class="fc" id="L107">        return method.getName() + &quot;:&quot; + JvmKit.toDescriptor(method);</span>
+    }
+
+    private ProxyKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

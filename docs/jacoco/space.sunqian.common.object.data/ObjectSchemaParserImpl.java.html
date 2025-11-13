@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ObjectSchemaParserImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.object.data</a> &gt; <span class="el_source">ObjectSchemaParserImpl.java</span></div><h1>ObjectSchemaParserImpl.java</h1><pre class="source lang-java linenums">package space.sunqian.common.object.data;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.RetainedParam;
+import space.sunqian.common.object.data.handlers.SimpleBeanSchemaHandler;
+import space.sunqian.common.runtime.reflect.ClassKit;
+
+import java.util.List;
+
+final class ObjectSchemaParserImpl implements ObjectSchemaParser, ObjectSchemaParser.Handler {
+
+<span class="fc" id="L12">    static @Nonnull ObjectSchemaParserImpl DEFAULT = new ObjectSchemaParserImpl(ClassKit.runtimeInstances(</span>
+        &quot;space.sunqian.common.third.protobuf.ProtobufSchemaHandler&quot;,
+<span class="fc" id="L14">        SimpleBeanSchemaHandler.class.getName()</span>
+    ));
+
+    private final @Nonnull List&lt;ObjectSchemaParser.@Nonnull Handler&gt; handlers;
+
+<span class="fc" id="L19">    ObjectSchemaParserImpl(@RetainedParam List&lt;ObjectSchemaParser.@Nonnull Handler&gt; handlers) {</span>
+<span class="fc" id="L20">        this.handlers = handlers;</span>
+<span class="fc" id="L21">    }</span>
+
+    @Override
+    public @Nonnull List&lt;@Nonnull Handler&gt; handlers() {
+<span class="fc" id="L25">        return handlers;</span>
+    }
+
+    @Override
+    public @Nonnull Handler asHandler() {
+<span class="fc" id="L30">        return this;</span>
+    }
+
+    @Override
+    public boolean parse(@Nonnull Context context) throws Exception {
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        for (Handler handler : handlers) {</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">            if (!handler.parse(context)) {</span>
+<span class="fc" id="L37">                return false;</span>
+            }
+<span class="fc" id="L39">        }</span>
+<span class="fc" id="L40">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

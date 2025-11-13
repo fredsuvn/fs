@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Nonnull.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">javax.annotation</a> &gt; <span class="el_source">Nonnull.java</span></div><h1>Nonnull.java</h1><pre class="source lang-java linenums">package javax.annotation;
+
+import javax.annotation.meta.TypeQualifier;
+import javax.annotation.meta.TypeQualifierValidator;
+import javax.annotation.meta.When;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+/**
+ * The annotated element must not be null.
+ * &lt;p&gt;
+ * Annotated fields must not be null after construction has completed.
+ * &lt;p&gt;
+ * When this annotation is applied to a method it applies to the method return value.
+ */
+@Documented
+@TypeQualifier
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Nonnull {
+
+    /**
+     * The contexts that this annotation is applicable to.
+     *
+     * @return the contexts that this annotation is applicable to
+     */
+    When when() default When.ALWAYS;
+
+    /**
+     * A validator for {@link Nonnull} annotations.
+     */
+<span class="fc" id="L32">    class Checker implements TypeQualifierValidator&lt;Nonnull&gt; {</span>
+
+        /**
+         * Checks whether the given value is valid for the given qualifier.
+         *
+         * @param qualifierArgument the qualifier to check
+         * @param value             the value to check
+         * @return the validity of the value
+         */
+        public @Nonnull When forConstantValue(@Nonnull Nonnull qualifierArgument, Object value) {
+<span class="fc bfc" id="L42" title="All 2 branches covered.">            if (value == null)</span>
+<span class="fc" id="L43">                return When.NEVER;</span>
+<span class="fc" id="L44">            return When.ALWAYS;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

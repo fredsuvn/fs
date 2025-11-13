@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.res</a> &gt; <span class="el_source">ResKit.java</span></div><h1>ResKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.res;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+import space.sunqian.common.collect.CollectKit;
+import space.sunqian.common.collect.SetKit;
+import space.sunqian.common.io.IORuntimeException;
+
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.Set;
+
+/**
+ * Utilities for resource.
+ *
+ * @author sunqian
+ */
+public class ResKit {
+
+    /**
+     * Returns the resource url of the given resource path. This method searches the resource in the classpath, and
+     * doesn't expect the given path to start with &quot;/&quot;.
+     *
+     * @param path the given resource path
+     * @return the resource url of the given resource path, or {@code null} if not found
+     */
+    public static @Nullable URL findResource(@Nonnull String path) {
+<span class="fc" id="L29">        ClassLoader classLoader = ClassLoader.getSystemClassLoader();</span>
+<span class="fc" id="L30">        return classLoader.getResource(path);</span>
+    }
+
+    /**
+     * Returns all resource urls of the given resource path in . This method searches the resource in all classpath and
+     * libs, and doesn't expect the given path to start with &quot;/&quot;.
+     *
+     * @param path the given resource path
+     * @return all resource urls of the given resource path, may be empty if not found
+     */
+    public static @Nonnull Set&lt;@Nonnull URL&gt; findResources(@Nonnull String path) throws IORuntimeException {
+<span class="fc" id="L41">        ClassLoader classLoader = ClassLoader.getSystemClassLoader();</span>
+<span class="fc" id="L42">        Enumeration&lt;URL&gt; urls = Fs.uncheck(() -&gt; classLoader.getResources(path), IORuntimeException::new);</span>
+<span class="fc" id="L43">        return SetKit.toSet(() -&gt; CollectKit.asIterator(urls));</span>
+    }
+
+    private ResKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

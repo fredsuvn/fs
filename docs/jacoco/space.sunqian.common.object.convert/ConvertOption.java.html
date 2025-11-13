@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConvertOption.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.object.convert</a> &gt; <span class="el_source">ConvertOption.java</span></div><h1>ConvertOption.java</h1><pre class="source lang-java linenums">package space.sunqian.common.object.convert;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.base.option.Option;
+import space.sunqian.common.base.date.DateFormatter;
+import space.sunqian.common.io.IOOperator;
+import space.sunqian.common.object.data.MapSchemaParser;
+import space.sunqian.common.object.data.ObjectBuilderProvider;
+import space.sunqian.common.object.data.ObjectSchemaParser;
+
+import java.nio.charset.Charset;
+
+/**
+ * Option for object conversion and data mapping.
+ *
+ * @author sunqian
+ */
+<span class="fc" id="L20">public enum ConvertOption implements Option&lt;ConvertOption, Object&gt; {</span>
+
+    /**
+     * Option to enable strict type mode. In strict type mode, the target type for wildcard and type variables will be
+     * strictly converted.
+     * &lt;p&gt;
+     * This option is disabled by default, in this case, the target type for wildcard and type variables will be
+     * converted as their bounds type. For example, the target type of {@code ? extends String} will be treated as
+     * {@code String}.
+     */
+<span class="fc" id="L30">    STRICT_TYPE_MODE,</span>
+
+    /**
+     * Key of {@link #schemaParser(ObjectSchemaParser)}.
+     */
+<span class="fc" id="L35">    OBJECT_SCHEMA_PARSER,</span>
+
+    /**
+     * Key of {@link #schemaParser(MapSchemaParser)}.
+     */
+<span class="fc" id="L40">    MAP_SCHEMA_PARSER,</span>
+
+    /**
+     * Key of {@link #propertyMapper(DataMapper.PropertyMapper)}.
+     */
+<span class="fc" id="L45">    PROPERTY_MAPPER,</span>
+
+    /**
+     * Key of {@link #exceptionHandler(DataMapper.ExceptionHandler)}.
+     */
+<span class="fc" id="L50">    EXCEPTION_HANDLER,</span>
+
+    /**
+     * Option to ignore copy properties with {@code null} values. If a {@link #PROPERTY_MAPPER} is set, this option
+     * becomes invalid. This option is disabled by default.
+     */
+<span class="fc" id="L56">    IGNORE_NULL,</span>
+
+    /**
+     * Key of {@link #ignoreProperties(Object...)}.
+     */
+<span class="fc" id="L61">    IGNORE_PROPERTIES,</span>
+
+    /**
+     * Key of {@link #dataMapper(DataMapper)}.
+     */
+<span class="fc" id="L66">    DATA_MAPPER,</span>
+
+    /**
+     * Key of {@link #builderProvider(ObjectBuilderProvider)}.
+     */
+<span class="fc" id="L71">    BUILDER_PROVIDER,</span>
+
+    /**
+     * Key of {@link #ioOperator(IOOperator)}.
+     */
+<span class="fc" id="L76">    IO_OPERATOR,</span>
+
+    /**
+     * Key of {@link #charset(Charset)}.
+     */
+<span class="fc" id="L81">    CHARSET,</span>
+
+    /**
+     * Key of {@link #timeFormatter(DateFormatter)}.
+     */
+<span class="fc" id="L86">    TIME_FORMATTER,</span>
+    ;
+
+    /**
+     * Returns an option to specify the object schema parser.
+     * &lt;p&gt;
+     * By default, {@link ObjectSchemaParser#defaultParser()} is used.
+     *
+     * @param schemaParser the specified object schema parser
+     * @return an option to specify the object schema parser
+     */
+    public static @Nonnull Option&lt;@Nonnull ConvertOption, @Nonnull ObjectSchemaParser&gt; schemaParser(
+        @Nonnull ObjectSchemaParser schemaParser
+    ) {
+<span class="fc" id="L100">        return Option.of(OBJECT_SCHEMA_PARSER, schemaParser);</span>
+    }
+
+    /**
+     * Returns an option to specify the map schema parser.
+     * &lt;p&gt;
+     * By default, {@link MapSchemaParser#defaultParser()} is used.
+     *
+     * @param schemaParser the specified map schema parser
+     * @return an option to specify the map schema parser
+     */
+    public static @Nonnull Option&lt;@Nonnull ConvertOption, @Nonnull MapSchemaParser&gt; schemaParser(
+        @Nonnull MapSchemaParser schemaParser
+    ) {
+<span class="fc" id="L114">        return Option.of(MAP_SCHEMA_PARSER, schemaParser);</span>
+    }
+
+    /**
+     * Returns an option to specify the {@link DataMapper.PropertyMapper}.
+     * &lt;p&gt;
+     * By default, all properties which is both readable and writable will be copied with their original names.
+     *
+     * @param propertyMapper the {@link DataMapper.PropertyMapper} to be specified
+     * @return an option to specify the {@link DataMapper.PropertyMapper}
+     */
+    public static @Nonnull Option&lt;@Nonnull ConvertOption, DataMapper.@Nonnull PropertyMapper&gt; propertyMapper(
+        @Nonnull DataMapper.PropertyMapper propertyMapper
+    ) {
+<span class="fc" id="L128">        return Option.of(PROPERTY_MAPPER, propertyMapper);</span>
+    }
+
+    /**
+     * Returns an option to specify the {@link DataMapper.ExceptionHandler}.
+     * &lt;p&gt;
+     * By default, the exception will be thrown directly.
+     *
+     * @param exceptionHandler the {@link DataMapper.ExceptionHandler} to be specified
+     * @return an option to specify the {@link DataMapper.ExceptionHandler}
+     */
+    public static @Nonnull Option&lt;@Nonnull ConvertOption, DataMapper.@Nonnull ExceptionHandler&gt; exceptionHandler(
+        @Nonnull DataMapper.ExceptionHandler exceptionHandler
+    ) {
+<span class="fc" id="L142">        return Option.of(EXCEPTION_HANDLER, exceptionHandler);</span>
+    }
+
+    /**
+     * Returns an option to ignore copy properties with the specified property names (or key for map).
+     * &lt;p&gt;
+     * By default, all readable properties will be attempted to be copied.
+     *
+     * @param ignoredProperties the names (or key) of ignored properties
+     * @return an option to ignore copy properties with the specified property names (or key for map)
+     */
+    public static @Nonnull Option&lt;@Nonnull ConvertOption, @Nonnull Object @Nonnull []&gt; ignoreProperties(
+        @Nonnull Object @Nonnull ... ignoredProperties
+    ) {
+<span class="fc" id="L156">        return Option.of(IGNORE_PROPERTIES, ignoredProperties);</span>
+    }
+
+    /**
+     * Returns an option to specify the {@link DataMapper}.
+     * &lt;p&gt;
+     * By default, the {@link DataMapper#defaultMapper()} is used.
+     *
+     * @param dataMapper the {@link DataMapper} to be specified
+     * @return an option to specify the {@link DataMapper}
+     */
+    public static @Nonnull Option&lt;@Nonnull ConvertOption, @Nonnull DataMapper&gt; dataMapper(
+        @Nonnull DataMapper dataMapper
+    ) {
+<span class="fc" id="L170">        return Option.of(DATA_MAPPER, dataMapper);</span>
+    }
+
+    /**
+     * Returns an option to specify the {@link ObjectBuilderProvider} to generate data object during the conversion.
+     * &lt;p&gt;
+     * By default, the {@link ObjectBuilderProvider#defaultProvider()} is used.
+     *
+     * @param builderFactory the {@link ObjectBuilderProvider} to be specified
+     * @return an option to specify the {@link ObjectBuilderProvider} to generate data object during the conversion
+     */
+    public static @Nonnull Option&lt;@Nonnull ConvertOption, @Nonnull ObjectBuilderProvider&gt; builderProvider(
+        @Nonnull ObjectBuilderProvider builderFactory
+    ) {
+<span class="fc" id="L184">        return Option.of(BUILDER_PROVIDER, builderFactory);</span>
+    }
+
+    /**
+     * Returns an option to specify the {@link IOOperator} if needed.
+     * &lt;p&gt;
+     * By default, the {@link IOOperator#defaultOperator()} is used.
+     *
+     * @param ioOperator the {@link IOOperator} to be specified
+     * @return an option to specify the {@link IOOperator} if needed
+     */
+    public static @Nonnull Option&lt;@Nonnull ConvertOption, @Nonnull IOOperator&gt; ioOperator(
+        @Nonnull IOOperator ioOperator
+    ) {
+<span class="fc" id="L198">        return Option.of(IO_OPERATOR, ioOperator);</span>
+    }
+
+    /**
+     * Returns an option to specify the {@link Charset} if needed.
+     * &lt;p&gt;
+     * By default, the {@link CharsKit#defaultCharset()} is used.
+     *
+     * @param charset the {@link Charset} to be specified
+     * @return an option to specify the {@link Charset} if needed
+     */
+    public static @Nonnull Option&lt;@Nonnull ConvertOption, @Nonnull Charset&gt; charset(
+        @Nonnull Charset charset
+    ) {
+<span class="fc" id="L212">        return Option.of(CHARSET, charset);</span>
+    }
+
+    /**
+     * Returns an option to specify the {@link DateFormatter} if needed.
+     * &lt;p&gt;
+     * By default, the {@link DateFormatter#defaultFormatter()} is used.
+     *
+     * @param dateFormatter the {@link DateFormatter} to be specified
+     * @return an option to specify the {@link DateFormatter} if needed
+     */
+    public static @Nonnull Option&lt;@Nonnull ConvertOption, @Nonnull DateFormatter&gt; timeFormatter(
+        @Nonnull DateFormatter dateFormatter
+    ) {
+<span class="fc" id="L226">        return Option.of(TIME_FORMATTER, dateFormatter);</span>
+    }
+
+    @Override
+    public @Nonnull ConvertOption key() {
+<span class="fc" id="L231">        return this;</span>
+    }
+
+    @Override
+    public @Nullable Object value() {
+<span class="fc" id="L236">        return null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InjectedApp.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.app.di</a> &gt; <span class="el_source">InjectedApp.java</span></div><h1>InjectedApp.java</h1><pre class="source lang-java linenums">package space.sunqian.common.app.di;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.app.SimpleApp;
+import space.sunqian.common.Fs;
+import space.sunqian.common.collect.CollectKit;
+import space.sunqian.common.runtime.reflect.TypeRef;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * A dependency injection-based sub-interface of {@link SimpleApp}, built via {@link #newBuilder()}. See
+ * {@linkplain space.sunqian.common.app.di DI package documentation} for more information.
+ *
+ * @author sunqian
+ */
+public interface InjectedApp extends SimpleApp {
+
+    /**
+     * Returns a new builder for {@link InjectedApp}.
+     *
+     * @return a new builder for {@link InjectedApp}
+     */
+    static @Nonnull Builder newBuilder() {
+<span class="fc" id="L33">        return new Builder();</span>
+    }
+
+    /**
+     * Shuts down this app.
+     * &lt;p&gt;
+     * All {@code pre-destroy} methods in this app's resources are executed sequentially according to their dependency
+     * relationships. If an exception occurs during the execution, an {@link InjectedResourceDestructionException} will
+     * be thrown and the shutdown process will terminate immediately, and the remaining {@code pre-destroy} methods will
+     * not be executed. See {@linkplain space.sunqian.common.app.di DI package documentation} for more information.
+     * &lt;p&gt;
+     * Once this app is shut down, it becomes invalid and cannot be restarted. However, its sub-apps are not
+     * automatically shut down along with it. Sub-apps that depend on resources from this app will generally continue to
+     * function normally, as long as those resources haven't been destroyed (by {@code pre-destroy} methods) during this
+     * shutdown process.
+     * &lt;p&gt;
+     * This method blocks current thread until the shutdown operation is completed.
+     *
+     * @throws InjectedResourceDestructionException if any error occurs during resource destruction
+     * @throws InjectedAppException                 if any other error occurs during shutdown operation
+     */
+    void shutdown() throws InjectedResourceDestructionException, InjectedAppException;
+
+    /**
+     * Returns all parent apps of this app.
+     *
+     * @return all parent apps of this app
+     */
+    @Nonnull
+    List&lt;@Nonnull InjectedApp&gt; parentApps();
+
+    /**
+     * Returns the resources that are directly owned by this app, excluding the resources inherited from parent apps.
+     *
+     * @return the resources that are directly owned by this app, excluding the resources inherited from parent apps
+     */
+    @Nonnull
+    List&lt;@Nonnull InjectedResource&gt; localResources();
+
+    /**
+     * Returns all resources that constitute this app, including the resources inherited from parent apps.
+     *
+     * @return all resources that constitute this app, including the resources inherited from parent apps
+     */
+    @Nonnull
+    List&lt;@Nonnull InjectedResource&gt; resources();
+
+    /**
+     * Returns a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
+     * exists.
+     * &lt;p&gt;
+     * This method first attempts to find a resource whose type exactly matches the specified type using
+     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource instance that can
+     * be assigned to the specified type from all resources that constitute this app.
+     *
+     * @param &lt;T&gt;  the specified type
+     * @param type the specified type
+     * @return a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
+     * exists
+     */
+    default &lt;T&gt; @Nullable T getResource(@Nonnull Class&lt;T&gt; type) {
+<span class="fc" id="L94">        return Fs.as(getResource((Type) type));</span>
+    }
+
+    /**
+     * Returns a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
+     * exists.
+     * &lt;p&gt;
+     * This method first attempts to find a resource whose type exactly matches the specified type using
+     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource instance that can
+     * be assigned to the specified type from all resources that constitute this app.
+     *
+     * @param &lt;T&gt;  the specified type
+     * @param type the {@link TypeRef} for the specified type
+     * @return a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
+     * exists
+     */
+    default &lt;T&gt; @Nullable T getResource(@Nonnull TypeRef&lt;T&gt; type) {
+<span class="fc" id="L111">        return Fs.as(getResource(type.type()));</span>
+    }
+
+    /**
+     * Returns a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
+     * exists.
+     * &lt;p&gt;
+     * This method first attempts to find a resource whose type exactly matches the specified type using
+     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource instance that can
+     * be assigned to the specified type from all resources that constitute this app.
+     *
+     * @param type the specified type
+     * @return a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
+     * exists
+     */
+    @Nullable
+    Object getResource(@Nonnull Type type);
+
+    /**
+     * Builder for {@link InjectedApp}.
+     */
+<span class="fc" id="L132">    class Builder {</span>
+
+<span class="fc" id="L134">        private static final @Nonnull String @Nonnull [] RESOURCE_ANNOTATIONS =</span>
+            {&quot;javax.annotation.Resource&quot;, &quot;jakarta.annotation.Resource&quot;};
+<span class="fc" id="L136">        private static final @Nonnull String @Nonnull [] POST_CONSTRUCT_ANNOTATIONS =</span>
+            {&quot;javax.annotation.PostConstruct&quot;, &quot;jakarta.annotation.PostConstruct&quot;};
+<span class="fc" id="L138">        private static final @Nonnull String @Nonnull [] PRE_DESTROY_ANNOTATIONS =</span>
+            {&quot;javax.annotation.PreDestroy&quot;, &quot;jakarta.annotation.PreDestroy&quot;};
+
+<span class="fc" id="L141">        private final @Nonnull Set&lt;Type&gt; resourceTypes = new LinkedHashSet&lt;&gt;();</span>
+<span class="fc" id="L142">        private final @Nonnull Set&lt;@Nonnull InjectedApp&gt; parentApps = new LinkedHashSet&lt;&gt;();</span>
+<span class="fc" id="L143">        private final @Nonnull Set&lt;@Nonnull String&gt; resourceAnnotations = new LinkedHashSet&lt;&gt;();</span>
+<span class="fc" id="L144">        private final @Nonnull Set&lt;@Nonnull String&gt; postConstructAnnotations = new LinkedHashSet&lt;&gt;();</span>
+<span class="fc" id="L145">        private final @Nonnull Set&lt;@Nonnull String&gt; preDestroyAnnotations = new LinkedHashSet&lt;&gt;();</span>
+
+        /**
+         * Adds a resource annotation type that indicates a {@link Field} references a resource from the app.
+         * &lt;p&gt;
+         * Multiple resource annotation types can be specified, and any of them will be recognized as marking a resource
+         * dependency. If no resource annotation types are explicitly specified, the default annotations used are:
+         * {@code javax.annotation.Resource} and {@code jakarta.annotation.Resource}.
+         *
+         * @param resourceAnnotation a resource annotation type that marks a field as referencing an app resource
+         * @return this builder
+         */
+        public @Nonnull Builder resourceAnnotation(@Nonnull Class&lt;? extends Annotation&gt; resourceAnnotation) {
+<span class="fc" id="L158">            this.resourceAnnotations.add(resourceAnnotation.getName());</span>
+<span class="fc" id="L159">            return this;</span>
+        }
+
+        /**
+         * Adds a post-construct annotation type that indicates a {@link Method} will be executed after its resource
+         * construction is completed.
+         * &lt;p&gt;
+         * Multiple post-construct annotation types can be specified, and any of them will be recognized as marking a
+         * post-construct method. If no post-construct annotation types are explicitly specified, the default
+         * annotations used are: {@code javax.annotation.PostConstruct} and {@code jakarta.annotation.PostConstruct}.
+         *
+         * @param postConstructAnnotation a post-construct annotation type that marks a method to be executed after its
+         *                                resource construction is completed
+         * @return this builder
+         */
+        public @Nonnull Builder postConstructAnnotation(@Nonnull Class&lt;? extends Annotation&gt; postConstructAnnotation) {
+<span class="fc" id="L175">            this.postConstructAnnotations.add(postConstructAnnotation.getName());</span>
+<span class="fc" id="L176">            return this;</span>
+        }
+
+        /**
+         * Adds a pre-destroy annotation type that indicates a {@link Method} will be executed before its resource is
+         * destroyed.
+         * &lt;p&gt;
+         * Multiple pre-destroy annotation types can be specified, and any of them will be recognized as marking a
+         * pre-destroy method. If no pre-destroy annotation types are explicitly specified, the default annotations used
+         * are: {@code javax.annotation.PreDestroy} and {@code jakarta.annotation.PreDestroy}.
+         *
+         * @param preDestroyAnnotation a pre-destroy annotation type that marks a method to be executed before its
+         *                             resource is destroyed
+         * @return this builder
+         */
+        public @Nonnull Builder preDestroyAnnotation(@Nonnull Class&lt;? extends Annotation&gt; preDestroyAnnotation) {
+<span class="fc" id="L192">            this.preDestroyAnnotations.add(preDestroyAnnotation.getName());</span>
+<span class="fc" id="L193">            return this;</span>
+        }
+
+        /**
+         * Adds root resource types to this builder, each type should be a {@link Class} or {@link ParameterizedType}.
+         * And previously added types will be ignored.
+         * &lt;p&gt;
+         * These types serve as root types for dependency injection. The dependency resolver will recursively analyze
+         * {@link Field}s of these types to build the complete dependency graph. Note each type only generates singleton
+         * resource instance.
+         *
+         * @param resourceTypes the resource types to be added
+         * @return this builder
+         */
+        public @Nonnull Builder resourceTypes(@Nonnull Type @Nonnull ... resourceTypes) {
+<span class="fc" id="L208">            CollectKit.addAll(this.resourceTypes, resourceTypes);</span>
+<span class="fc" id="L209">            return this;</span>
+        }
+
+        /**
+         * Adds root resource types to this builder, each type should be a {@link Class} or {@link ParameterizedType}.
+         * And previously added types will be ignored.
+         * &lt;p&gt;
+         * These types serve as root types for dependency injection. The dependency resolver will recursively analyze
+         * {@link Field}s of these types to build the complete dependency graph. Note each type only generates singleton
+         * resource instance.
+         *
+         * @param resourceTypes the resource types to be added
+         * @return this builder
+         */
+        public @Nonnull Builder resourceTypes(@Nonnull Iterable&lt;@Nonnull Type&gt; resourceTypes) {
+<span class="fc" id="L224">            CollectKit.addAll(this.resourceTypes, resourceTypes);</span>
+<span class="fc" id="L225">            return this;</span>
+        }
+
+        /**
+         * Adds parent apps to inherit and share its resources. If a resource type already exists in the parent app, the
+         * sub-app will not generate another instance of that type.
+         * &lt;p&gt;
+         * Once a parent app is shut down, its sub-apps are not automatically shut down along with it. The inherited
+         * resources will still be held by the sub-apps, but theirs pre-destroy methods will be executed.
+         *
+         * @param parentApps the parent apps
+         * @return this builder
+         */
+        public @Nonnull Builder parentApps(@Nullable InjectedApp @Nonnull ... parentApps) {
+<span class="fc" id="L239">            CollectKit.addAll(this.parentApps, parentApps);</span>
+<span class="fc" id="L240">            return this;</span>
+        }
+
+        /**
+         * Adds parent apps to inherit and share its resources. If a resource type already exists in the parent app, the
+         * sub-app will not generate another instance of that type.
+         * &lt;p&gt;
+         * Once a parent app is shut down, its sub-apps are not automatically shut down along with it. The inherited
+         * resources will still be held by the sub-apps, but theirs pre-destroy methods will be executed.
+         *
+         * @param parentApps the parent apps
+         * @return this builder
+         */
+        public @Nonnull Builder parentApps(@Nonnull Iterable&lt;@Nonnull InjectedApp&gt; parentApps) {
+<span class="fc" id="L254">            CollectKit.addAll(this.parentApps, parentApps);</span>
+<span class="fc" id="L255">            return this;</span>
+        }
+
+        /**
+         * Builds and starts a new app instance. The startup process performs the following operations in sequence:
+         * &lt;ol&gt;
+         *   &lt;li&gt;Generating instances for all resource types with singleton mode;&lt;/li&gt;
+         *   &lt;li&gt;Dependency injection for all resource instances;&lt;/li&gt;
+         *   &lt;li&gt;AOP processing if {@link InjectedAspect} instances exist in resource instances;&lt;/li&gt;
+         *   &lt;li&gt;Re-injection of dependencies for resource instances affected by AOP processing;&lt;/li&gt;
+         *   &lt;li&gt;Executing all {@code post-construct} methods of resource instances in dependency order&lt;/li&gt;
+         * &lt;/ol&gt;
+         * If any {@code post-construct} method fails, an {@link InjectedResourceInitializationException} is thrown
+         * immediately. Resources that have already successfully executed {@code post-construct} methods will not be
+         * rolled back. See {@linkplain space.sunqian.common.app.di DI package documentation} for more information.
+         * &lt;p&gt;
+         * This method blocks current thread until the startup operation is completed.
+         *
+         * @return the newly built and started app instance
+         * @throws InjectedResourceInitializationException if any {@code post-construct} method execution fails
+         * @throws InjectedAppException                    if any other error occurs during app construction or startup
+         */
+        public @Nonnull InjectedApp build()
+            throws InjectedResourceInitializationException, InjectedAppException {
+<span class="fc" id="L279">            return new InjectedAppImpl(</span>
+                resourceTypes,
+<span class="fc bfc" id="L281" title="All 2 branches covered.">                parentApps.isEmpty() ? new InjectedApp[0] : parentApps.toArray(new InjectedApp[0]),</span>
+<span class="fc bfc" id="L282" title="All 2 branches covered.">                resourceAnnotations.isEmpty() ? RESOURCE_ANNOTATIONS : resourceAnnotations.toArray(new String[0]),</span>
+<span class="fc bfc" id="L283" title="All 2 branches covered.">                postConstructAnnotations.isEmpty() ? POST_CONSTRUCT_ANNOTATIONS : postConstructAnnotations.toArray(new String[0]),</span>
+<span class="fc bfc" id="L284" title="All 2 branches covered.">                preDestroyAnnotations.isEmpty() ? PRE_DESTROY_ANNOTATIONS : preDestroyAnnotations.toArray(new String[0])</span>
+            );
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

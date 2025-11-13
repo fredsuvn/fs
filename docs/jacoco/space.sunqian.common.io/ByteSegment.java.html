@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ByteSegment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.io</a> &gt; <span class="el_source">ByteSegment.java</span></div><h1>ByteSegment.java</h1><pre class="source lang-java linenums">package space.sunqian.common.io;
+
+import space.sunqian.annotations.Nonnull;
+
+import java.nio.ByteBuffer;
+
+/**
+ * This interface represents a segment of byte data in the data source. It includes the {@link #data()}, which is the
+ * content of this segment, and the {@link #end()}, which indicates whether this segment is the end of the data.
+ *
+ * @author sunqian
+ */
+public interface ByteSegment extends Cloneable {
+
+    /**
+     * Returns a new {@link ByteSegment} with the given data and end flag.
+     *
+     * @param data the given data
+     * @param end  the end flag
+     * @return a new {@link ByteSegment} with the given data and end flag
+     */
+    static @Nonnull ByteSegment of(@Nonnull ByteBuffer data, boolean end) {
+<span class="fc" id="L23">        return ByteReaderBack.newSeg(data, end);</span>
+    }
+
+    /**
+     * Returns an empty singleton {@link ByteSegment} with the end flag.
+     *
+     * @param end the end flag
+     * @return an empty singleton {@link ByteSegment} with the end flag
+     */
+    static @Nonnull ByteSegment empty(boolean end) {
+<span class="fc" id="L33">        return ByteReaderBack.emptySeg(end);</span>
+    }
+
+    /**
+     * Returns the data content of this segment. This method never returns {@code null}, but can return an empty
+     * buffer.
+     *
+     * @return the data content of this segment
+     */
+    @Nonnull
+    ByteBuffer data();
+
+    /**
+     * Returns whether this segment is the end of the data source.
+     *
+     * @return whether this segment is the end of the data source
+     */
+    boolean end();
+
+    /**
+     * Returns the remaining data as a new byte array from the {@link #data()}. This method never returns {@code null},
+     * but can return an empty array.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @return the remaining data as a new byte array from the {@link #data()}
+     */
+    default byte @Nonnull [] array() {
+<span class="fc" id="L61">        byte[] ret = BufferKit.read(data());</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        return ret == null ? new byte[0] : ret;</span>
+    }
+
+    /**
+     * Returns a new array copied from the remaining content of the {@link #data()}. Position of the {@link #data()}
+     * will not be changed.
+     *
+     * @return a new array copied from the remaining content of the {@link #data()}
+     */
+    default byte @Nonnull [] copyArray() {
+<span class="fc" id="L72">        return BufferKit.copyContent(data());</span>
+    }
+
+    /**
+     * Returns a clone of this segment. The {@link #data()} of the returned clone is an independent copy, not be shared
+     * with the {@link #data()} of this segment.
+     *
+     * @return a clone of this segment
+     */
+    @Nonnull
+    ByteSegment clone();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OSKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.system</a> &gt; <span class="el_source">OSKit.java</span></div><h1>OSKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.system;
+
+import space.sunqian.annotations.Nonnull;
+
+/**
+ * Utilities for OS.
+ *
+ * @author sunqian
+ */
+public class OSKit {
+
+    /**
+     * Returns whether the current OS is {@code Windows}.
+     *
+     * @return whether the current OS is {@code Windows}
+     */
+    public static boolean isWindows() {
+<span class="fc" id="L18">        return getOsName().startsWith(&quot;Windows&quot;);</span>
+    }
+
+    /**
+     * Returns whether the current OS is {@code Linux}.
+     *
+     * @return whether the current OS is {@code Linux}
+     */
+    public static boolean isLinux() {
+<span class="fc" id="L27">        return getOsName().toLowerCase().contains(&quot;linux&quot;);</span>
+    }
+
+    /**
+     * Returns whether the current OS is {@code macOS}.
+     *
+     * @return whether the current OS is {@code macOS}
+     */
+    public static boolean isMac() {
+<span class="fc" id="L36">        return getOsName().toLowerCase().startsWith(&quot;mac&quot;);</span>
+    }
+
+    /**
+     * Returns whether the current OS is {@code AIX}.
+     *
+     * @return whether the current OS is {@code AIX}
+     */
+    public static boolean isAix() {
+<span class="fc" id="L45">        return getOsName().contains(&quot;AIX&quot;);</span>
+    }
+
+    /**
+     * Returns whether the current OS is {@code HP-UX}.
+     *
+     * @return whether the current OS is {@code HP-UX}
+     */
+    public static boolean isHpUx() {
+<span class="fc" id="L54">        return getOsName().contains(&quot;HP-UX&quot;);</span>
+    }
+
+    /**
+     * Returns whether the current OS is {@code Solaris}.
+     *
+     * @return whether the current OS is {@code Solaris}
+     */
+    public static boolean isSolaris() {
+<span class="fc" id="L63">        return getOsName().contains(&quot;SunOS&quot;);</span>
+    }
+
+    /**
+     * Returns whether the current OS is {@code FreeBSD}.
+     *
+     * @return whether the current OS is {@code FreeBSD}
+     */
+    public static boolean isFreeBSD() {
+<span class="fc" id="L72">        return getOsName().contains(&quot;FreeBSD&quot;);</span>
+    }
+
+    /**
+     * Returns whether the current OS is {@code OpenBSD}.
+     *
+     * @return whether the current OS is {@code OpenBSD}
+     */
+    public static boolean isOpenBSD() {
+<span class="fc" id="L81">        return getOsName().contains(&quot;OpenBSD&quot;);</span>
+    }
+
+    /**
+     * Returns whether the current OS is {@code NetBSD}.
+     *
+     * @return whether the current OS is {@code NetBSD}
+     */
+    public static boolean isNetBSD() {
+<span class="fc" id="L90">        return getOsName().contains(&quot;NetBSD&quot;);</span>
+    }
+
+    /**
+     * Returns whether the current OS is {@code z/OS}.
+     *
+     * @return whether the current OS is {@code z/OS}
+     */
+    public static boolean isZOS() {
+<span class="fc" id="L99">        return getOsName().contains(&quot;z/OS&quot;);</span>
+    }
+
+    private static @Nonnull String getOsName() {
+<span class="fc" id="L103">        return SystemKit.getOsName();</span>
+    }
+
+    private OSKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

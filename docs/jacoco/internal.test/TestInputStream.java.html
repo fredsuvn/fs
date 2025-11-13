@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TestInputStream.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">internal.test</a> &gt; <span class="el_source">TestInputStream.java</span></div><h1>TestInputStream.java</h1><pre class="source lang-java linenums">package internal.test;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
+
+/**
+ * This is a testing input stream. It wraps a normal stream, then provides the {@link #setNextOperation(ReadOps)} to set
+ * behavior for next read operation.
+ *
+ * @author sunqian
+ */
+public class TestInputStream extends InputStream {
+
+    private final @Nonnull InputStream in;
+<span class="fc" id="L19">    private @Nonnull ReadOps readOps = ReadOps.READ_NORMAL;</span>
+<span class="fc" id="L20">    private int times = 0;</span>
+<span class="fc" id="L21">    private @Nullable Boolean markSupported = null;</span>
+
+    /**
+     * Constructs with the specified wrapped input stream.
+     *
+     * @param in the specified wrapped input stream
+     */
+<span class="fc" id="L28">    public TestInputStream(@Nonnull InputStream in) {</span>
+<span class="fc" id="L29">        this.in = in;</span>
+<span class="fc" id="L30">    }</span>
+
+    /**
+     * Sets the behavior for the next I/O operation. This method is equivalent to:
+     * &lt;pre&gt;{@code
+     *     setNextOperations(readOps, 1);
+     * }&lt;/pre&gt;
+     *
+     * @param readOps the behavior for the next I/O operation
+     * @see #setNextOperation(ReadOps, int)
+     */
+    public void setNextOperation(@Nonnull ReadOps readOps) {
+<span class="fc" id="L42">        setNextOperation(readOps, 1);</span>
+<span class="fc" id="L43">    }</span>
+
+    /**
+     * Set the behaviors for the next specified number of I/O operations. After executing the specified number of times,
+     * the behaviors will be reset to normal.
+     *
+     * @param readOps the behaviors for the next specified number of I/O operations
+     * @param times   the number of I/O operations
+     */
+    public void setNextOperation(@Nonnull ReadOps readOps, int times) {
+<span class="fc" id="L53">        this.readOps = readOps;</span>
+<span class="fc" id="L54">        this.times = times;</span>
+<span class="fc" id="L55">    }</span>
+
+    @Override
+    public int read() throws IOException {
+<span class="fc bfc" id="L59" title="All 3 branches covered.">        switch (readOps) {</span>
+            case READ_NORMAL:
+<span class="fc" id="L61">                return in.read();</span>
+            case READ_ZERO:
+            case REACH_END: {
+<span class="fc" id="L64">                reduceTimes();</span>
+<span class="fc" id="L65">                return -1;</span>
+            }
+            default: {
+<span class="fc" id="L68">                reduceTimes();</span>
+<span class="fc" id="L69">                throw new IOException();</span>
+            }
+        }
+    }
+
+    @Override
+    public int read(byte @Nonnull [] b) throws IOException {
+<span class="fc" id="L76">        return read(b, 0, b.length);</span>
+    }
+
+    @Override
+    public int read(byte @Nonnull [] b, int off, int len) throws IOException {
+<span class="fc bfc" id="L81" title="All 4 branches covered.">        switch (readOps) {</span>
+            case READ_NORMAL:
+<span class="fc" id="L83">                return in.read(b, off, len);</span>
+            case READ_ZERO: {
+<span class="fc" id="L85">                reduceTimes();</span>
+<span class="fc" id="L86">                return 0;</span>
+            }
+            case REACH_END: {
+<span class="fc" id="L89">                reduceTimes();</span>
+<span class="fc" id="L90">                return -1;</span>
+            }
+            default: {
+<span class="fc" id="L93">                reduceTimes();</span>
+<span class="fc" id="L94">                throw new IOException();</span>
+            }
+        }
+    }
+
+    @Override
+    public long skip(long n) throws IOException {
+<span class="fc bfc" id="L101" title="All 3 branches covered.">        switch (readOps) {</span>
+            case READ_NORMAL:
+<span class="fc" id="L103">                return in.skip(n);</span>
+            case READ_ZERO:
+            case REACH_END: {
+<span class="fc" id="L106">                reduceTimes();</span>
+<span class="fc" id="L107">                return 0;</span>
+            }
+            default: {
+<span class="fc" id="L110">                reduceTimes();</span>
+<span class="fc" id="L111">                throw new IOException();</span>
+            }
+        }
+    }
+
+    @Override
+    public int available() throws IOException {
+<span class="fc bfc" id="L118" title="All 3 branches covered.">        switch (readOps) {</span>
+            case READ_NORMAL:
+<span class="fc" id="L120">                return in.available();</span>
+            case READ_ZERO:
+            case REACH_END: {
+<span class="fc" id="L123">                reduceTimes();</span>
+<span class="fc" id="L124">                return 0;</span>
+            }
+            default: {
+<span class="fc" id="L127">                reduceTimes();</span>
+<span class="fc" id="L128">                throw new IOException();</span>
+            }
+        }
+    }
+
+    /**
+     * Sets the mark-supported for this {@link InputStream}. If the {@code markSupported} is null, this
+     * {@link InputStream} will directly use the mark-supported flag of wrapped source.
+     *
+     * @param markSupported the mark-supported flag, can be null
+     */
+    public void markSupported(@Nullable Boolean markSupported) {
+<span class="fc" id="L140">        this.markSupported = markSupported;</span>
+<span class="fc" id="L141">    }</span>
+
+    @Override
+    public boolean markSupported() {
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        if (markSupported == null) {</span>
+<span class="fc" id="L146">            return in.markSupported();</span>
+        }
+<span class="fc" id="L148">        return markSupported;</span>
+    }
+
+    @Override
+    public synchronized void mark(int readlimit) {
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        if (Objects.equals(readOps, ReadOps.THROW)) {</span>
+<span class="fc" id="L154">            reduceTimes();</span>
+<span class="fc" id="L155">            throw new TestIOException();</span>
+        } else {
+<span class="fc" id="L157">            in.mark(readlimit);</span>
+        }
+<span class="fc" id="L159">    }</span>
+
+    @Override
+    public synchronized void reset() throws IOException {
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        if (Objects.equals(readOps, ReadOps.THROW)) {</span>
+<span class="fc" id="L164">            reduceTimes();</span>
+<span class="fc" id="L165">            throw new IOException();</span>
+        } else {
+<span class="fc" id="L167">            in.reset();</span>
+        }
+<span class="fc" id="L169">    }</span>
+
+    @Override
+    public void close() throws IOException {
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        if (Objects.equals(readOps, ReadOps.THROW)) {</span>
+<span class="fc" id="L174">            reduceTimes();</span>
+<span class="fc" id="L175">            throw new IOException();</span>
+        } else {
+<span class="fc" id="L177">            in.close();</span>
+        }
+<span class="fc" id="L179">    }</span>
+
+    private void reduceTimes() {
+<span class="fc" id="L182">        times--;</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        if (times &lt;= 0) {</span>
+<span class="fc" id="L184">            times = 0;</span>
+<span class="fc" id="L185">            readOps = ReadOps.READ_NORMAL;</span>
+        }
+<span class="fc" id="L187">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

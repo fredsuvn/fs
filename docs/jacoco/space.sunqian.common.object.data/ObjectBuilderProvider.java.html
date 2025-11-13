@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ObjectBuilderProvider.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.object.data</a> &gt; <span class="el_source">ObjectBuilderProvider.java</span></div><h1>ObjectBuilderProvider.java</h1><pre class="source lang-java linenums">package space.sunqian.common.object.data;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.annotations.RetainedParam;
+import space.sunqian.annotations.ThreadSafe;
+import space.sunqian.common.collect.ListKit;
+import space.sunqian.common.runtime.invoke.Invocable;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+
+/**
+ * Provider for getting {@link ObjectBuilder}.
+ * &lt;p&gt;
+ * It contains and uses a list of {@link Handler}s to sequentially attempt get the instance of {@link ObjectBuilder}.
+ * The thread safety of the methods in this interface is determined by its dependent {@link BuilderCache}. By default,
+ * they are thread-safe.
+ */
+public interface ObjectBuilderProvider {
+
+    /**
+     * Returns the default {@link ObjectBuilderProvider}.
+     * &lt;p&gt;
+     * The default {@link ObjectBuilderProvider} will cache the {@link ObjectBuilder}s, which are created by its
+     * handlers, into a cache based on a {@link ConcurrentHashMap} (so it is thread-safe). And it has only one handler,
+     * which uses {@link Invocable#of(Constructor)} with the empty constructor of the target class (if it has) to
+     * implement {@link ObjectBuilder#newBuilder()} and directly returns the builder object itself on
+     * {@link ObjectBuilder#build(Object)}.
+     *
+     * @return the default {@link ObjectBuilderProvider}
+     */
+    static @Nonnull ObjectBuilderProvider defaultProvider() {
+<span class="fc" id="L38">        return ObjectBuilderProviderImpl.DEFAULT;</span>
+    }
+
+    /**
+     * Creates and returns a new {@link ObjectBuilderProvider} with the given handlers. The returned
+     * {@link ObjectBuilderProvider} has a {@link BuilderCache} based on a {@link ConcurrentHashMap}, so it is
+     * thread-safe.
+     *
+     * @param handlers the given handlers
+     * @return a new {@link ObjectBuilderProvider} with the given builder cache and handlers
+     */
+    static @Nonnull ObjectBuilderProvider newProvider(
+        @Nonnull @RetainedParam Handler @Nonnull ... handlers
+    ) {
+<span class="fc" id="L52">        return newProvider(newBuilderCache(new ConcurrentHashMap&lt;&gt;()), ListKit.list(handlers));</span>
+    }
+
+    /**
+     * Creates and returns a new {@link ObjectBuilderProvider} with the given builder cache and handlers.
+     *
+     * @param cache    the given builder cache
+     * @param handlers the given handlers
+     * @return a new {@link ObjectBuilderProvider} with the given builder cache and handlers
+     */
+    static @Nonnull ObjectBuilderProvider newProvider(
+        @Nonnull BuilderCache cache,
+        @Nonnull @RetainedParam Handler @Nonnull ... handlers
+    ) {
+<span class="fc" id="L66">        return newProvider(cache, ListKit.list(handlers));</span>
+    }
+
+    /**
+     * Creates and returns a new {@link ObjectBuilderProvider} with the given builder cache and handlers.
+     *
+     * @param cache    the given builder cache
+     * @param handlers the given handlers
+     * @return a new {@link ObjectBuilderProvider} with the given builder cache and handlers
+     */
+    static @Nonnull ObjectBuilderProvider newProvider(
+        @Nonnull BuilderCache cache,
+        @Nonnull @RetainedParam List&lt;@Nonnull Handler&gt; handlers
+    ) {
+<span class="fc" id="L80">        return new ObjectBuilderProviderImpl(cache, handlers);</span>
+    }
+
+    /**
+     * Returns a new builder cache with the given map. The thread safety is determined by the given map.
+     *
+     * @param map the given map
+     * @return a new builder cache with the given map
+     */
+    static @Nonnull BuilderCache newBuilderCache(
+        @Nonnull Map&lt;@Nonnull Type, @Nonnull ObjectBuilder&gt; map
+    ) {
+<span class="fc" id="L92">        return new ObjectBuilderProviderImpl.BuilderCacheImpl(map);</span>
+    }
+
+    /**
+     * Returns an instance of {@link ObjectBuilder}, or {@code null} if the target type is unsupported.
+     *
+     * @param target the target type
+     * @return an instance of {@link ObjectBuilder}, or {@code null} if the target type is unsupported
+     * @throws DataObjectException if an error occurs
+     */
+    @Nullable
+    ObjectBuilder builder(@Nonnull Type target) throws DataObjectException;
+
+    /**
+     * Returns all handlers of this builder provider.
+     *
+     * @return all handlers of this builder provider
+     */
+    @Nonnull
+    List&lt;@Nonnull Handler&gt; handlers();
+
+    /**
+     * Returns a new {@link ObjectBuilderProvider} of which handler list consists of the given handler as the first
+     * element, followed by {@link #handlers()} of the current builder provider.
+     * &lt;p&gt;
+     * The builder cache will be shared with the current builder provider.
+     *
+     * @param handler the given handler
+     * @return a new {@link ObjectBuilderProvider} of which handler list consists of the given handler as the first
+     * element, followed by {@link #handlers()} of the current builder provider
+     */
+    @Nonnull
+    ObjectBuilderProvider withFirstHandler(@Nonnull Handler handler);
+
+    /**
+     * Returns a new {@link ObjectBuilderProvider} of which handler list consists of {@link #handlers()} of the current
+     * builder provider, followed by the given handler as the last element.
+     * &lt;p&gt;
+     * The builder cache will be shared with the current builder provider.
+     *
+     * @param handler the given handler
+     * @return a {@link ObjectBuilderProvider} of which handler list consists of {@link #handlers()} of the current
+     * builder provider, followed by the given handler as the last element
+     */
+    @Nonnull
+    ObjectBuilderProvider withLastHandler(@Nonnull Handler handler);
+
+    /**
+     * Returns this builder provider as a {@link Handler}.
+     *
+     * @return this builder provider as a {@link Handler}
+     */
+    @Nonnull
+    Handler asHandler();
+
+    /**
+     * Cache of {@link ObjectBuilder} for an instance of {@link ObjectBuilderProvider}.
+     */
+    interface BuilderCache {
+
+        /**
+         * Returns the {@link ObjectBuilder} for the target type. If the {@link ObjectBuilder} is not cached, it will be
+         * loaded by the given loader. The semantics of this method are the same as
+         * {@link Map#computeIfAbsent(Object, Function)}.
+         *
+         * @param target the target type
+         * @param loader the loader for loading new {@link ObjectBuilder}
+         * @return the {@link ObjectBuilder} for the target type, or {@code null} if no mapping and no loading for the
+         * target type
+         * @throws DataObjectException if an error occurs during loading
+         */
+        @Nullable
+        ObjectBuilder get(
+            @Nonnull Type target,
+            @Nonnull Function&lt;? super @Nonnull Type, ? extends @Nullable ObjectBuilder&gt; loader
+        ) throws DataObjectException;
+    }
+
+    /**
+     * Handler for {@link ObjectBuilderProvider}, provides the specific builder generating logic.
+     *
+     * @author sunqian
+     */
+    @ThreadSafe
+    interface Handler {
+
+        /**
+         * Creates and returns a new {@link ObjectBuilder}, or {@code null} if the target type is unsupported.
+         *
+         * @param target the target type
+         * @return a new {@link ObjectBuilder}, or {@code null} if the target type is unsupported
+         * @throws Exception if an error occurs
+         */
+        @Nullable
+        ObjectBuilder newBuilder(@Nonnull Type target) throws Exception;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

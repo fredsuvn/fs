@@ -502,7 +502,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Sort data based on sort type - 修正排序逻辑
+     * Sort data based on sort type
      */
     function sortData(data, sortType, metric) {
         if (sortType === 'original') {
@@ -514,11 +514,11 @@ document.addEventListener('DOMContentLoaded', function() {
         switch(sortType) {
             case 'score-asc':
                 // 分数升序：从小到大
-                sortedData.sort((a, b) => getMetricValue(a, metric) - getMetricValue(b, metric));
+                sortedData.sort((a, b) => getMetricValue(b, metric) - getMetricValue(a, metric));
                 break;
             case 'score-desc':
                 // 分数降序：从大到小
-                sortedData.sort((a, b) => getMetricValue(b, metric) - getMetricValue(a, metric));
+                sortedData.sort((a, b) => getMetricValue(a, metric) - getMetricValue(b, metric));
                 break;
             case 'param-asc':
                 // 参数升序：A-Z

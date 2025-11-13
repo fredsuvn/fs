@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Var.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.value</a> &gt; <span class="el_source">Var.java</span></div><h1>Var.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.value;
+
+import space.sunqian.annotations.Nonnull;
+
+/**
+ * This interface represents a mutable container holding a value, typically used for sharing values across scope
+ * boundaries (e.g., lambda expressions).
+ * &lt;p&gt;
+ * There are also primitive type versions: {@link BooleanVar}, {@link ByteVar}, {@link CharVar}, {@link ShortVar},
+ * {@link IntVar}, {@link LongVar}, {@link DoubleVar} and {@link FloatVar}.
+ *
+ * @param &lt;T&gt; type of the held value
+ * @author sunqian
+ */
+public interface Var&lt;T&gt; extends Val&lt;T&gt; {
+
+    /**
+     * Returns a {@link Var} initialized with the specified value.
+     *
+     * @param value the specified value
+     * @param &lt;T&gt;   type of the held value
+     * @return a {@link Var} initialized with the specified value
+     */
+    static &lt;T&gt; @Nonnull Var&lt;T&gt; of(T value) {
+<span class="fc" id="L25">        return VarBack.of(value);</span>
+    }
+
+    /**
+     * Sets the held value to the specified value, and returns this {@link Var} itself.
+     *
+     * @param value the specified value
+     * @return this {@link Var} itself
+     */
+    @Nonnull
+    Var&lt;T&gt; set(T value);
+
+    /**
+     * Clears the value to {@code null}.
+     *
+     * @return this {@link Var} itself
+     */
+    default Var&lt;T&gt; clear() {
+<span class="fc" id="L43">        return set(null);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

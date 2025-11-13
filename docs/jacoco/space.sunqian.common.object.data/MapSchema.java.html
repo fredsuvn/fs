@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MapSchema.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.object.data</a> &gt; <span class="el_source">MapSchema.java</span></div><h1>MapSchema.java</h1><pre class="source lang-java linenums">package space.sunqian.common.object.data;
+
+import space.sunqian.annotations.Immutable;
+import space.sunqian.annotations.Nonnull;
+
+import java.lang.reflect.Type;
+
+/**
+ * This interface represents the schema of map, provides information about the map's entries.
+ * &lt;p&gt;
+ * Two {@link MapSchema}s are considered equal if, and only if both types of maps and both parsers from
+ * {@link #parser()} are equal.
+ *
+ * @author sunqian
+ */
+@Immutable
+public interface MapSchema extends DataSchema {
+
+    /**
+     * Parse the given type to {@link MapSchema} using {@link MapSchemaParser#defaultParser()}.
+     * &lt;p&gt;
+     * Note that this method does not cache the results and will generate new instances every invocation.
+     *
+     * @param type the given type
+     * @return the {@link MapSchema} parsed from the given type using {@link MapSchemaParser#defaultParser()}
+     */
+    static @Nonnull MapSchema parse(@Nonnull Type type) {
+<span class="fc" id="L28">        return MapSchemaParser.defaultParser().parse(type);</span>
+    }
+
+    /**
+     * Parse the given type to {@link MapSchema} using {@link MapSchemaParser#defaultParser()}, with the specified key
+     * type and value type.
+     * &lt;p&gt;
+     * Note that this method does not cache the results and will generate new instances every invocation.
+     *
+     * @param type      the given type
+     * @param keyType   the specified key type
+     * @param valueType the specified value type
+     * @return the {@link MapSchema} parsed from the given type using {@link MapSchemaParser#defaultParser()}
+     */
+    static @Nonnull MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) {
+<span class="fc" id="L43">        return MapSchemaParser.defaultParser().parse(type, keyType, valueType);</span>
+    }
+
+    /**
+     * Returns the {@link MapSchemaParser} of this {@link MapSchema}.
+     *
+     * @return the {@link MapSchemaParser} of this {@link MapSchema}
+     */
+    @Nonnull
+    MapSchemaParser parser();
+
+    /**
+     * Returns the key type of this map type.
+     *
+     * @return the key type of this map type
+     */
+    @Nonnull
+    Type keyType();
+
+    /**
+     * Returns the value type of this map type.
+     *
+     * @return the value type of this map type
+     */
+    @Nonnull
+    Type valueType();
+
+    @Override
+    default boolean isMapSchema() {
+<span class="fc" id="L72">        return true;</span>
+    }
+
+    @Override
+    default boolean isObjectSchema() {
+<span class="fc" id="L77">        return false;</span>
+    }
+
+    /**
+     * Returns whether this {@link MapSchema} is equal to the other {@link MapSchema}. They are considered equal if, and
+     * only if both types of maps and both parsers from {@link #parser()} are equal.
+     *
+     * @param other the other {@link MapSchema}
+     * @return whether this {@link MapSchema} is equal to the other {@link MapSchema}
+     */
+    boolean equals(Object other);
+
+    /**
+     * Returns the hash code of this {@link MapSchema}. The hash code is generated via {@link #type()} and
+     * {@link #parser()} like following codes:
+     * &lt;pre&gt;{@code
+     * int result = 1;
+     * result = 31 * result + type().hashCode();
+     * result = 31 * result + parser().hashCode();
+     * return result;
+     * }&lt;/pre&gt;
+     *
+     * @return the hash code of this {@link MapSchema}
+     */
+    int hashCode();
+
+    /**
+     * Returns a string representation of this {@link MapSchema}. The string is generated like following codes:
+     * &lt;pre&gt;{@code
+     * return type().getTypeName();
+     * }&lt;/pre&gt;
+     *
+     * @return a string representation of this {@link MapSchema}
+     */
+    @Nonnull
+    String toString();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

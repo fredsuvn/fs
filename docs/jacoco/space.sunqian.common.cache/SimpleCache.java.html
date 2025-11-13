@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SimpleCache.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.cache</a> &gt; <span class="el_source">SimpleCache.java</span></div><h1>SimpleCache.java</h1><pre class="source lang-java linenums">package space.sunqian.common.cache;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.annotations.ThreadSafe;
+import space.sunqian.common.base.value.Val;
+
+import java.lang.ref.PhantomReference;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
+import java.util.Map;
+import java.util.function.Function;
+
+/**
+ * This interface is a simplified key-value pair cache interface (implementations must be thread-safe). It only provides
+ * get, put, remove and clean operations, and supports null value but does not allow null key. It is suitable for
+ * scenarios that require simple cache operations and do not care about the cache lifecycle.
+ * &lt;p&gt;
+ * It is recommended to use the skeletal implementation: {@link AbstractSimpleCache}.
+ *
+ * @param &lt;K&gt; the key type
+ * @param &lt;V&gt; the value type
+ * @author sunqian
+ * @see AbstractSimpleCache
+ */
+@ThreadSafe
+public interface SimpleCache&lt;K, V&gt; {
+
+    /**
+     * Returns a new {@link SimpleCache} based on {@link WeakReference}. The values of the returned cache will be
+     * automatically collected by the garbage collection based on the characteristics of {@link WeakReference}. Its
+     * {@link #clean()} method releases all entries of which values are collected, and this method is automatically
+     * invoked once every time another method is executed.
+     *
+     * @param &lt;K&gt; the key type
+     * @param &lt;V&gt; the value type
+     * @return a new {@link SimpleCache} based on {@link WeakReference}
+     */
+    static &lt;K, V&gt; @Nonnull SimpleCache&lt;K, V&gt; ofWeak() {
+<span class="fc" id="L40">        return CacheBack.ofWeak();</span>
+    }
+
+    /**
+     * Returns a new {@link SimpleCache} based on {@link SoftReference}. The values of the returned cache will be
+     * automatically collected by the garbage collection based on the characteristics of {@link SoftReference}. Its
+     * {@link #clean()} method releases all entries of which values are collected, and this method is automatically
+     * invoked once every time another method is executed.
+     *
+     * @param &lt;K&gt; the key type
+     * @param &lt;V&gt; the value type
+     * @return a new {@link SimpleCache} based on {@link SoftReference}
+     */
+    static &lt;K, V&gt; @Nonnull SimpleCache&lt;K, V&gt; ofSoft() {
+<span class="fc" id="L54">        return CacheBack.ofSoft();</span>
+    }
+
+    /**
+     * Returns a new {@link SimpleCache} based on {@link PhantomReference}. The values of the returned cache will be
+     * automatically collected by the garbage collection based on the characteristics of {@link PhantomReference}. Its
+     * {@link #clean()} method releases all entries of which values are collected, and this method is automatically
+     * invoked once every time another method is executed.
+     *
+     * @param &lt;K&gt; the key type
+     * @param &lt;V&gt; the value type
+     * @return a new {@link SimpleCache} based on {@link PhantomReference}
+     */
+    static &lt;K, V&gt; @Nonnull SimpleCache&lt;K, V&gt; ofPhantom() {
+<span class="fc" id="L68">        return CacheBack.ofPhantom();</span>
+    }
+
+    /**
+     * Returns a new {@link SimpleCache} based on strong reference. The values of the returned cache will never
+     * automatically be invalid, and its {@link #clean()} method does nothing. The behavior of the returned cache is
+     * just like a regular {@link Map}.
+     *
+     * @param &lt;K&gt; the key type
+     * @param &lt;V&gt; the value type
+     * @return a new {@link SimpleCache} based on strong reference
+     */
+    static &lt;K, V&gt; @Nonnull SimpleCache&lt;K, V&gt; ofStrong() {
+<span class="fc" id="L81">        return CacheBack.ofStrong();</span>
+    }
+
+    /**
+     * Returns the value for the specified key, or {@code null} if the value is invalid or is {@code null} itself. Use
+     * {@link #getVal(Object)} to distinguish between these cases.
+     *
+     * @param key the specified key
+     * @return the value for the specified key, or {@code null} if the value is invalid or is {@code null} itself
+     */
+    @Nullable
+    V get(@Nonnull K key);
+
+    /**
+     * Returns the value wrapped by {@link Val} for the specified key, or {@code null} if the value is invalid.
+     *
+     * @param key the specified key
+     * @return the value wrapped by {@link Val} for the specified key, or {@code null} if the value is invalid
+     */
+    @Nullable
+    Val&lt;@Nullable V&gt; getVal(@Nonnull K key);
+
+    /**
+     * Returns the value for the specified key. If the value is invalid, the {@code producer} will be called to generate
+     * a new value, and the new value will be cached and returned. If an exception is thrown during the generation, the
+     * exception will be thrown directly. This operation is atomic.
+     * &lt;p&gt;
+     * Any value, including {@code null}, generated by the {@code producer} will be cached. To distinguish between
+     * {@code null} value or no-cached, try {@link #getVal(Object, Function)}.
+     *
+     * @param key      the specified key
+     * @param producer the producer to generate new value
+     * @return the value for the specified key, including {@code null}
+     */
+    V get(@Nonnull K key, @Nonnull Function&lt;? super @Nonnull K, ? extends @Nullable V&gt; producer);
+
+    /**
+     * Returns the value wrapped by {@link Val} for the specified key. If the value is invalid, the {@code producer}
+     * will be called to generate a new value wrapped by {@link Val}, and the new value will be cached and returned. If
+     * an exception is thrown during the generation, the exception will be thrown directly. This operation is atomic.
+     * &lt;p&gt;
+     * If the {@code producer} generates a {@code null}, no value will be cached, and this method will return null.
+     *
+     * @param key      the specified key
+     * @param producer the producer to generate new value wrapped by {@link Val}
+     * @return the value wrapped by {@link Val} for the specified key, or {@code null} if the {@code producer} generates
+     * a {@code null}
+     */
+    @Nullable
+    Val&lt;@Nullable V&gt; getVal(
+        @Nonnull K key,
+        @Nonnull Function&lt;? super @Nonnull K, ? extends @Nullable Val&lt;? extends @Nullable V&gt;&gt; producer
+    );
+
+    /**
+     * Puts the key mapping the value into this cache.
+     *
+     * @param key   the key
+     * @param value the value
+     */
+    void put(@Nonnull K key, @Nullable V value);
+
+    /**
+     * Removes the value mapped by the key from this cache.
+     *
+     * @param key the key
+     */
+    void remove(@Nonnull K key);
+
+    /**
+     * Returns the current size of this cache.
+     *
+     * @return the current size of this cache
+     */
+    int size();
+
+    /**
+     * Removes all entries from this cache.
+     */
+    void clear();
+
+    /**
+     * Tries to release invalid entries from this cache.
+     */
+    void clean();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

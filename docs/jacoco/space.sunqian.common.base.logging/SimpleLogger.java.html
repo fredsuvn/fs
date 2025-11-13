@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SimpleLogger.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.logging</a> &gt; <span class="el_source">SimpleLogger.java</span></div><h1>SimpleLogger.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.logging;
+
+import space.sunqian.annotations.Nonnull;
+
+/**
+ * A very simple logger interface, using {@link Level} to determine which messages can be output: only messages with
+ * higher or the same log level can be output.
+ *
+ * @author sunqian
+ */
+public interface SimpleLogger {
+
+    /**
+     * Returns a system default logger with level of {@link Level#INFO} and appender of {@link System#out}.
+     *
+     * @return a system default logger with level of {@link Level#INFO} and appender of {@link System#out}
+     */
+    static @Nonnull SimpleLogger system() {
+<span class="fc" id="L19">        return LoggingBack.SYSTEM;</span>
+    }
+
+    /**
+     * Returns a new logger with the given log level and appender.
+     *
+     * @param level      the given log level
+     * @param appendable the given appender
+     * @return a new logger with the given log level and appender
+     */
+    static @Nonnull SimpleLogger newLogger(@Nonnull SimpleLogger.Level level, @Nonnull Appendable appendable) {
+<span class="fc" id="L30">        return LoggingBack.newLogger(level, appendable);</span>
+    }
+
+    /**
+     * Logs the given message with {@link Level#FATAL} level. The message will be output on a single line in the order
+     * of the array, just like they are joined into one string. Using {@link Object#toString()} to convert the message
+     * object to string.
+     *
+     * @param message the given message
+     */
+    void fatal(Object... message);
+
+    /**
+     * Logs the given message with {@link Level#ERROR} level. The message will be output on a single line in the order
+     * of the array, just like they are joined into one string. Using {@link Object#toString()} to convert the message
+     * object to string.
+     *
+     * @param message the given message
+     */
+    void error(Object... message);
+
+    /**
+     * Logs the given message with {@link Level#WARN} level. The message will be output on a single line in the order of
+     * the array, just like they are joined into one string. Using {@link Object#toString()} to convert the message
+     * object to string.
+     *
+     * @param message the given message
+     */
+    void warn(Object... message);
+
+    /**
+     * Logs the given message with {@link Level#INFO} level. The message will be output on a single line in the order of
+     * the array, just like they are joined into one string. Using {@link Object#toString()} to convert the message
+     * object to string.
+     *
+     * @param message the given message
+     */
+    void info(Object... message);
+
+    /**
+     * Logs the given message with {@link Level#DEBUG} level. The message will be output on a single line in the order
+     * of the array, just like they are joined into one string. Using {@link Object#toString()} to convert the message
+     * object to string.
+     *
+     * @param message the given message
+     */
+    void debug(Object... message);
+
+    /**
+     * Logs the given message with {@link Level#TRACE} level. The message will be output on a single line in the order
+     * of the array, just like they are joined into one string. Using {@link Object#toString()} to convert the message
+     * object to string.
+     *
+     * @param message the given message
+     */
+    void trace(Object... message);
+
+    /**
+     * Returns the level of this logger.
+     *
+     * @return the level of this logger
+     */
+    @Nonnull
+    Level level();
+
+    /**
+     * Level of {@link SimpleLogger}, contains a {@code value}, which is used to compare, and a {@code name}.
+     * &lt;p&gt;
+     * From high to low, it is: {@link #FATAL}, {@link #ERROR}, {@link #WARN}, {@link #INFO}, {@link #DEBUG}, and
+     * {@link #TRACE}.
+     */
+<span class="fc" id="L101">    enum Level {</span>
+
+        /**
+         * The highest level for fatal error.
+         */
+<span class="fc" id="L106">        FATAL(5, &quot;FATAL&quot;),</span>
+
+        /**
+         * The level for error.
+         */
+<span class="fc" id="L111">        ERROR(4, &quot;ERROR&quot;),</span>
+
+        /**
+         * The level for warning.
+         */
+<span class="fc" id="L116">        WARN(3, &quot;WARN&quot;),</span>
+
+        /**
+         * The middle level.
+         */
+<span class="fc" id="L121">        INFO(2, &quot;INFO&quot;),</span>
+
+        /**
+         * The level for debug.
+         */
+<span class="fc" id="L126">        DEBUG(1, &quot;DEBUG&quot;),</span>
+
+        /**
+         * The lowest level for tracing.
+         */
+<span class="fc" id="L131">        TRACE(0, &quot;TRACE&quot;);;</span>
+
+        private final int value;
+        private final String name;
+
+<span class="fc" id="L136">        Level(int value, String name) {</span>
+<span class="fc" id="L137">            this.value = value;</span>
+<span class="fc" id="L138">            this.name = name;</span>
+<span class="fc" id="L139">        }</span>
+
+        /**
+         * Returns the value of this level.
+         *
+         * @return the value of this level
+         */
+        public int levelValue() {
+<span class="fc" id="L147">            return value;</span>
+        }
+
+        /**
+         * Returns the name of this level.
+         *
+         * @return the name of this level
+         */
+        public String levelName() {
+<span class="fc" id="L156">            return name;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TcpClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.net.tcp</a> &gt; <span class="el_source">TcpClient.java</span></div><h1>TcpClient.java</h1><pre class="source lang-java linenums">package space.sunqian.common.net.tcp;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.common.io.communicate.ChannelReader;
+import space.sunqian.common.io.communicate.ChannelWriter;
+import space.sunqian.common.net.NetClient;
+
+import java.net.InetSocketAddress;
+import java.nio.channels.SocketChannel;
+
+/**
+ * Represents a TCP client based on an underlying {@link SocketChannel}, can be built with {@link #newBuilder()}.
+ *
+ * @author sunqian
+ */
+public interface TcpClient extends
+    NetClient&lt;InetSocketAddress, SocketChannel&gt;,
+    ChannelReader&lt;SocketChannel&gt;,
+    ChannelWriter&lt;SocketChannel&gt; {
+
+    /**
+     * Returns a new builder for building {@link TcpClient}.
+     *
+     * @return a new builder for building {@link TcpClient}
+     */
+    static @Nonnull TcpClientBuilder newBuilder() {
+<span class="fc" id="L27">        return new TcpClientBuilder();</span>
+    }
+
+    /**
+     * Blocks current thread and waits for the client to be readable.
+     */
+    void awaitReadable();
+
+    /**
+     * Wakes up the thread blocked in {@link #awaitReadable()}.
+     */
+    void wakeUpReadable();
+
+    /**
+     * Returns the underlying socket channel that supports this client.
+     * &lt;p&gt;
+     * If the read method of the channel returns {@code -1}, it means the channel can no longer be read (usually because
+     * the peer sent a {@code FIN} and entered the half-closed state). In this case, the channel can be closed. If it
+     * returns {@code 0}, it indicates that all available data from the current read event has been read, but the
+     * channel remains alive.
+     *
+     * @return the underlying socket channel that supports this client
+     */
+    @Override
+    @Nonnull
+    SocketChannel channel();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

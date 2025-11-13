@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InjectedResourceDestructionException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.app.di</a> &gt; <span class="el_source">InjectedResourceDestructionException.java</span></div><h1>InjectedResourceDestructionException.java</h1><pre class="source lang-java linenums">package space.sunqian.common.app.di;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.annotations.RetainedParam;
+import space.sunqian.common.base.exception.FsRuntimeException;
+
+import java.util.List;
+
+/**
+ * Exception for failing to destroy resources during {@link InjectedApp} shutdown.
+ *
+ * @author sunqian
+ */
+public class InjectedResourceDestructionException extends FsRuntimeException {
+
+    private final @Nonnull InjectedResource failedResource;
+    private final @Nonnull List&lt;@Nonnull InjectedResource&gt; destroyedResources;
+    private final @Nonnull List&lt;@Nonnull InjectedResource&gt; undestroyedResources;
+
+    /**
+     * Constructs an exception with detailed context about the resource destroy failure. This exception provides
+     * complete information about the resource that caused the failure, resources that were successfully destroyed
+     * before the failure, and resources that remained undestroyed due to the failure.
+     * &lt;p&gt;
+     * Note the resources have already been sorted according to their dependency relationships.
+     *
+     * @param failedResource       the resource that failed during destruction, causing the shutdown to abort
+     * @param cause                the exception that occurred during the failed resource's destruction
+     * @param destroyedResources   the resources that were successfully destroyed before the failure occurred
+     * @param undestroyedResources the resources that were not destroyed due to the abortive termination
+     */
+    public InjectedResourceDestructionException(
+        @Nonnull InjectedResource failedResource,
+        @Nullable Throwable cause,
+        @Nonnull @RetainedParam List&lt;@Nonnull InjectedResource&gt; destroyedResources,
+        @Nonnull @RetainedParam List&lt;@Nonnull InjectedResource&gt; undestroyedResources
+    ) {
+<span class="fc" id="L39">        super(cause);</span>
+<span class="fc" id="L40">        this.failedResource = failedResource;</span>
+<span class="fc" id="L41">        this.destroyedResources = destroyedResources;</span>
+<span class="fc" id="L42">        this.undestroyedResources = undestroyedResources;</span>
+<span class="fc" id="L43">    }</span>
+
+    /**
+     * Returns the resource that failed during destruction, causing the shutdown to abort.
+     *
+     * @return the resource that failed during destruction, causing the shutdown to abort
+     */
+    public @Nonnull InjectedResource failedResource() {
+<span class="fc" id="L51">        return failedResource;</span>
+    }
+
+    /**
+     * Returns the resources that were successfully destroyed before the failure occurred.
+     *
+     * @return the resources that were successfully destroyed before the failure occurred
+     */
+    public @Nonnull List&lt;@Nonnull InjectedResource&gt; destroyedResources() {
+<span class="fc" id="L60">        return destroyedResources;</span>
+    }
+
+    /**
+     * Returns the resources that were not destroyed due to the failure.
+     *
+     * @return the resources that were not destroyed due to the failure
+     */
+    public @Nonnull List&lt;@Nonnull InjectedResource&gt; undestroyedResources() {
+<span class="fc" id="L69">        return undestroyedResources;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

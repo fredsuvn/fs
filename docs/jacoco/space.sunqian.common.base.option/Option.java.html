@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Option.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.option</a> &gt; <span class="el_source">Option.java</span></div><h1>Option.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.option;
+
+import space.sunqian.annotations.Immutable;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+import space.sunqian.common.collect.ArrayKit;
+
+/**
+ * This interface represents an option with a key and value. For example:
+ * &lt;pre&gt;{@code
+ *     //declaration:
+ *     public void start(Option&lt;?, ?&gt;... options){...}
+ *
+ *     //usage:
+ *     start(
+ *         Option.of(&quot;server&quot;, null),
+ *         Option.of(&quot;Xms&quot;, &quot;1G&quot;),
+ *         Option.of(&quot;Xmx&quot;, &quot;2G&quot;)
+ *     );
+ * }&lt;/pre&gt;
+ *
+ * @param &lt;K&gt; the key type
+ * @param &lt;V&gt; the value type
+ * @author sunqian
+ */
+@Immutable
+public interface Option&lt;K, V&gt; {
+
+    /**
+     * Returns an {@link Option} with the specified key and value.
+     *
+     * @param key   the specified key
+     * @param value the specified value
+     * @param &lt;K&gt;   the key type
+     * @param &lt;V&gt;   the value type
+     * @return an {@link Option} with the specified key and value
+     */
+    static &lt;K, V&gt; @Nonnull Option&lt;K, V&gt; of(@Nonnull K key, @Nullable V value) {
+<span class="fc" id="L40">        return OptionImpl.of(key, value);</span>
+    }
+
+    /**
+     * Returns an empty {@link Option} array;
+     *
+     * @param &lt;K&gt; the key type
+     * @param &lt;V&gt; the value type
+     * @return an empty {@link Option} array
+     */
+    static &lt;K, V&gt; @Nonnull Option&lt;K, V&gt;[] emptyOptions() {
+<span class="fc" id="L51">        return Fs.as(OptionImpl.EMPTY_OPTIONS);</span>
+    }
+
+    /**
+     * Finds and returns the first option whose key equals the specified key from the given options, or null if not
+     * found. This method will cast returned option to the specified type {@code O}.
+     *
+     * @param key     the specified key
+     * @param options the given options
+     * @param &lt;K&gt;     the key type
+     * @param &lt;V&gt;     the value type
+     * @param &lt;O&gt;     the returned option type
+     * @return the first option whose key equals the specified key from the given options, or null if not found
+     */
+    static &lt;K, V, O extends Option&lt;K, V&gt;&gt; @Nullable O findOption(
+        @Nonnull K key,
+        @Nonnull Option&lt;?, ?&gt; @Nonnull ... options
+    ) {
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (ArrayKit.isEmpty(options)) {</span>
+<span class="fc" id="L70">            return null;</span>
+        }
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        for (Option&lt;?, ?&gt; option : options) {</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">            if (Fs.equals(option.key(), key)) {</span>
+<span class="fc" id="L74">                return Fs.as(option);</span>
+            }
+        }
+<span class="fc" id="L77">        return null;</span>
+    }
+
+    /**
+     * Finds the first option whose key equals the specified key from the given options. Returns the value of the found
+     * option, or null if not found. This method will cast returned value to the specified type {@code V}.
+     *
+     * @param key     the specified key
+     * @param options the given options
+     * @param &lt;V&gt;     the value type
+     * @return the value of the found option, or null if not found
+     */
+    static &lt;V&gt; V findValue(@Nonnull Object key, @Nonnull Option&lt;?, ?&gt; @Nonnull ... options) {
+<span class="fc" id="L90">        @Nullable Option&lt;?, V&gt; option = findOption(key, options);</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        return option == null ? null : option.value();</span>
+    }
+
+    /**
+     * Returns whether the given options contain an option whose key equals the specified key.
+     *
+     * @param key     the specified key
+     * @param options the given options
+     * @return {@code true} if given options contain an option whose key equals the specified key, otherwise
+     * {@code false}
+     */
+    static boolean containsKey(@Nonnull Object key, @Nonnull Option&lt;?, ?&gt; @Nonnull ... options) {
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        return findOption(key, options) != null;</span>
+    }
+
+    /**
+     * Returns the key of this option.
+     *
+     * @return the key of this option
+     */
+    @Nonnull
+    K key();
+
+    /**
+     * Returns the value of this option.
+     *
+     * @return the value of this option.
+     */
+    @Nullable
+    V value();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

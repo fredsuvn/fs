@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HexKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.codec</a> &gt; <span class="el_source">HexKit.java</span></div><h1>HexKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.codec;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.exception.FsRuntimeException;
+import space.sunqian.common.io.BufferKit;
+import space.sunqian.common.io.ByteArrayOperator;
+import space.sunqian.common.io.IORuntimeException;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+/**
+ * Utilities for Hex.
+ *
+ * @author sunqian
+ */
+public class HexKit {
+
+    /**
+     * Returns a {@code hex} encoder encoding in upper case. This method is equivalent to {@code encoder(true)}.
+     *
+     * @return a {@code hex} encoder encoding in upper case
+     */
+    public static Encoder encoder() {
+<span class="fc" id="L27">        return encoder(true);</span>
+    }
+
+    /**
+     * Returns a {@code hex} encoder. The {@code upper} parameter specifies whether the encoder uses upper case for
+     * encoding ({@code true} for {@code A-F} and {@code false} for {@code a-f}).
+     *
+     * @param upper {@code true} for upper case, otherwise {@code false}
+     * @return a {@code hex} encoder
+     */
+    public static Encoder encoder(boolean upper) {
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        return upper ? EncoderImpl.UPPER : EncoderImpl.LOWER;</span>
+    }
+
+    /**
+     * Returns a {@code hex} decoder with the strict mode. This method is equivalent to {@code decoder(true)}.
+     *
+     * @return a {@code hex} decoder with the strict mod
+     */
+    public static Decoder decoder() {
+<span class="fc" id="L47">        return decoder(true);</span>
+    }
+
+    /**
+     * Returns a {@code hex} decoder. The {@code strict} parameter specifies whether the decoder is strict or not, a
+     * strict decoder will throw an exception if it encounters an invalid hex character, and an un-strict decoder will
+     * ignore the invalid hex characters.
+     *
+     * @param strict {@code true} for strict, otherwise {@code false}
+     * @return a {@code hex} decoder with the specified mod
+     */
+    public static Decoder decoder(boolean strict) {
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        return strict ? DecoderImpl.STRICT : DecoderImpl.LOOSE;</span>
+    }
+
+    private static final class EncoderImpl implements Encoder, ByteArrayOperator {
+
+<span class="fc" id="L64">        private static final @Nonnull EncoderImpl UPPER = new EncoderImpl(true);</span>
+<span class="fc" id="L65">        private static final @Nonnull EncoderImpl LOWER = new EncoderImpl(false);</span>
+
+<span class="fc" id="L67">        private static final char @Nonnull [] UPPER_DICT = {</span>
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+        };
+
+<span class="fc" id="L71">        private static final char @Nonnull [] LOWER_DICT = {</span>
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+        };
+
+        private final boolean upper;
+
+<span class="fc" id="L77">        private EncoderImpl(boolean upper) {</span>
+<span class="fc" id="L78">            this.upper = upper;</span>
+<span class="fc" id="L79">        }</span>
+
+        @Override
+        public byte @Nonnull [] encode(byte @Nonnull [] bytes) throws HexException {
+<span class="fc" id="L83">            byte[] dst = new byte[bytes.length * 2];</span>
+<span class="fc" id="L84">            process(bytes, 0, dst, 0, bytes.length);</span>
+<span class="fc" id="L85">            return dst;</span>
+        }
+
+        @Override
+        public byte @Nonnull [] encode(@Nonnull ByteBuffer buffer) throws HexException {
+<span class="fc" id="L90">            byte[] dst = new byte[buffer.remaining() * 2];</span>
+<span class="fc" id="L91">            ByteBuffer dstBuf = ByteBuffer.wrap(dst);</span>
+<span class="fc" id="L92">            BufferKit.process(buffer, dstBuf, this);</span>
+<span class="fc" id="L93">            return dst;</span>
+        }
+
+        @Override
+        public int process(byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len) {
+<span class="fc bfc" id="L98" title="All 2 branches covered.">            char[] dict = upper ? UPPER_DICT : LOWER_DICT;</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">            for (int i = srcOff, j = dstOff; i &lt; srcOff + len; ) {</span>
+<span class="fc" id="L100">                int bits = src[i++];</span>
+<span class="fc" id="L101">                dst[j++] = (byte) dict[((bits &gt;&gt; 4) &amp; 0x0f)];</span>
+<span class="fc" id="L102">                dst[j++] = (byte) dict[(bits &amp; 0x0f)];</span>
+<span class="fc" id="L103">            }</span>
+<span class="fc" id="L104">            return len * 2;</span>
+        }
+    }
+
+    private static final class DecoderImpl implements Decoder, ByteArrayOperator {
+
+<span class="fc" id="L110">        private static final @Nonnull DecoderImpl STRICT = new DecoderImpl(true);</span>
+<span class="fc" id="L111">        private static final @Nonnull DecoderImpl LOOSE = new DecoderImpl(false);</span>
+
+        private final boolean strict;
+
+<span class="fc" id="L115">        private DecoderImpl(boolean strict) {</span>
+<span class="fc" id="L116">            this.strict = strict;</span>
+<span class="fc" id="L117">        }</span>
+
+        @Override
+        public byte @Nonnull [] decode(byte @Nonnull [] bytes) throws HexException {
+<span class="fc" id="L121">            checkLen(bytes.length);</span>
+<span class="fc" id="L122">            byte[] dst = new byte[bytes.length / 2];</span>
+<span class="fc" id="L123">            int actualLen = process(bytes, 0, dst, 0, bytes.length);</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">            return actualLen == dst.length ? dst : Arrays.copyOfRange(dst, 0, actualLen);</span>
+        }
+
+        @Override
+        public byte @Nonnull [] decode(@Nonnull ByteBuffer buffer) throws HexException {
+<span class="fc" id="L129">            checkLen(buffer.remaining());</span>
+<span class="fc" id="L130">            byte[] dst = new byte[buffer.remaining() / 2];</span>
+<span class="fc" id="L131">            ByteBuffer dstBuf = ByteBuffer.wrap(dst);</span>
+            try {
+<span class="fc" id="L133">                int actualLen = BufferKit.process(buffer, dstBuf, this);</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">                return actualLen == dst.length ? dst : Arrays.copyOfRange(dst, 0, actualLen);</span>
+<span class="fc" id="L135">            } catch (IORuntimeException e) {</span>
+<span class="fc" id="L136">                throw (HexException) e.getCause();</span>
+            }
+        }
+
+        @Override
+        public int process(
+            byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len
+        ) throws HexException {
+<span class="fc bfc" id="L144" title="All 2 branches covered.">            if (strict) {</span>
+<span class="fc" id="L145">                return processStrict(src, srcOff, dst, dstOff, len);</span>
+            } else {
+<span class="fc" id="L147">                return processLoose(src, srcOff, dst, dstOff, len);</span>
+            }
+        }
+
+        private int processStrict(
+            byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len
+        ) throws HexException {
+<span class="fc bfc" id="L154" title="All 2 branches covered.">            for (int i = 0, j = dstOff; i &lt; len; ) {</span>
+<span class="fc" id="L155">                int bits1 = toDigit((char) src[i + srcOff]);</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">                if (bits1 &lt; 0) {</span>
+<span class="fc" id="L157">                    throw new HexException(i, &quot;The hex string contains invalid character at position: &quot; + i + &quot;.&quot;);</span>
+                }
+<span class="fc" id="L159">                i++;</span>
+<span class="fc" id="L160">                int bits2 = toDigit((char) src[i + srcOff]);</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">                if (bits2 &lt; 0) {</span>
+<span class="fc" id="L162">                    throw new HexException(i, &quot;The hex string contains invalid character at position: &quot; + i + &quot;.&quot;);</span>
+                }
+<span class="fc" id="L164">                i++;</span>
+<span class="fc" id="L165">                int bits = ((bits1 &lt;&lt; 4) | bits2);</span>
+<span class="fc" id="L166">                dst[j++] = (byte) bits;</span>
+<span class="fc" id="L167">            }</span>
+<span class="fc" id="L168">            return len / 2;</span>
+        }
+
+        public int processLoose(
+            byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len
+        ) throws HexException {
+<span class="fc" id="L174">            int i = 0, j = dstOff, count = 0;</span>
+<span class="fc" id="L175">            int bits1 = -1;</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">            while (i &lt; len) {</span>
+<span class="fc" id="L177">                int bits = toDigit((char) src[i + srcOff]);</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">                if (bits &lt; 0) {</span>
+<span class="fc" id="L179">                    i++;</span>
+<span class="fc" id="L180">                    continue;</span>
+                }
+<span class="fc bfc" id="L182" title="All 2 branches covered.">                if (bits1 &lt; 0) {</span>
+<span class="fc" id="L183">                    bits1 = bits;</span>
+                } else {
+<span class="fc" id="L185">                    int c = ((bits1 &lt;&lt; 4) | bits);</span>
+<span class="fc" id="L186">                    dst[j++] = (byte) c;</span>
+<span class="fc" id="L187">                    count++;</span>
+<span class="fc" id="L188">                    bits1 = -1;</span>
+                }
+<span class="fc" id="L190">                i++;</span>
+<span class="fc" id="L191">            }</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">            if (bits1 &gt;= 0) {</span>
+<span class="fc" id="L193">                throw new HexException(&quot;The valid hex string is not a multiple of 2.&quot;);</span>
+            }
+<span class="fc" id="L195">            return count;</span>
+        }
+
+        private int toDigit(char c) {
+<span class="fc bfc" id="L199" title="All 4 branches covered.">            if (c &gt;= '0' &amp;&amp; c &lt;= '9') {</span>
+<span class="fc" id="L200">                return c - '0';</span>
+            }
+<span class="fc bfc" id="L202" title="All 4 branches covered.">            if (c &gt;= 'a' &amp;&amp; c &lt;= 'f') {</span>
+<span class="fc" id="L203">                return c - 'a' + 10;</span>
+            }
+<span class="fc bfc" id="L205" title="All 4 branches covered.">            if (c &gt;= 'A' &amp;&amp; c &lt;= 'F') {</span>
+<span class="fc" id="L206">                return c - 'A' + 10;</span>
+            }
+<span class="fc" id="L208">            return -1;</span>
+        }
+
+        private void checkLen(int len) throws HexException {
+<span class="fc bfc" id="L212" title="All 2 branches covered.">            if (strict) {</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">                if (len % 2 != 0) {</span>
+<span class="fc" id="L214">                    throw new HexException(&quot;The length of hex string is not a multiple of 2.&quot;);</span>
+                }
+            }
+<span class="fc" id="L217">        }</span>
+    }
+
+    /**
+     * Encoder for Hex. The implementation should be immutable and thread-safe.
+     */
+    public interface Encoder {
+
+        /**
+         * Encodes the given bytes to hex string as byte array.
+         *
+         * @param bytes the given bytes to encode
+         * @return the hex string as byte array
+         * @throws HexException if any error occurs
+         */
+        byte @Nonnull [] encode(byte @Nonnull [] bytes) throws HexException;
+
+        /**
+         * Encodes the given buffer to hex string as byte array. The position of the given buffer will increment to its
+         * limit.
+         *
+         * @param buffer the given buffer to encode
+         * @return the hex string as byte array
+         * @throws HexException if any error occurs
+         */
+        byte @Nonnull [] encode(@Nonnull ByteBuffer buffer) throws HexException;
+
+        /**
+         * Encodes the given bytes to hex string.
+         *
+         * @param bytes the given bytes to encode
+         * @return the hex string
+         * @throws HexException if any error occurs
+         */
+        default @Nonnull String encodeToString(byte @Nonnull [] bytes) throws HexException {
+<span class="fc" id="L252">            byte[] dst = encode(bytes);</span>
+<span class="fc" id="L253">            return new String(dst, StandardCharsets.ISO_8859_1);</span>
+        }
+
+        /**
+         * Encodes the given buffer to hex string. The position of the given buffer will increment to its limit.
+         *
+         * @param buffer the given buffer to encode
+         * @return the hex string
+         * @throws HexException if any error occurs
+         */
+        default @Nonnull String encodeToString(@Nonnull ByteBuffer buffer) throws HexException {
+<span class="fc" id="L264">            byte[] dst = encode(buffer);</span>
+<span class="fc" id="L265">            return new String(dst, StandardCharsets.ISO_8859_1);</span>
+        }
+    }
+
+    /**
+     * Decoder for Hex. The implementation should be immutable and thread-safe.
+     */
+    public interface Decoder {
+
+        /**
+         * Decodes the given bytes of hex string to the original bytes.
+         *
+         * @param bytes the given bytes of hex string
+         * @return the original bytes
+         * @throws HexException if any error occurs
+         */
+        byte @Nonnull [] decode(byte @Nonnull [] bytes) throws HexException;
+
+        /**
+         * Decodes the given buffer of hex string to the original bytes. The position of the given buffer will increment
+         * to its limit.
+         *
+         * @param buffer the given buffer of hex string
+         * @return the original bytes
+         * @throws HexException if any error occurs
+         */
+        byte @Nonnull [] decode(@Nonnull ByteBuffer buffer) throws HexException;
+
+        /**
+         * Decodes the given hex string to the original bytes.
+         *
+         * @param hex the given hex string
+         * @return the original bytes
+         * @throws HexException if any error occurs
+         */
+        default byte @Nonnull [] decode(@Nonnull String hex) throws HexException {
+<span class="fc" id="L301">            byte[] src = hex.getBytes(StandardCharsets.ISO_8859_1);</span>
+<span class="fc" id="L302">            return decode(src);</span>
+        }
+    }
+
+    /**
+     * Exception for hex encoding/decoding. The {@link #position()} returns the position where this exception occurs.
+     *
+     * @author sunqian
+     */
+    public static class HexException extends FsRuntimeException {
+
+        private final long position;
+
+        /**
+         * Empty constructor.
+         */
+        public HexException() {
+<span class="fc" id="L319">            super();</span>
+<span class="fc" id="L320">            this.position = -1;</span>
+<span class="fc" id="L321">        }</span>
+
+        /**
+         * Constructs with the message.
+         *
+         * @param message the message
+         */
+        public HexException(@Nullable String message) {
+<span class="fc" id="L329">            super(message);</span>
+<span class="fc" id="L330">            this.position = -1;</span>
+<span class="fc" id="L331">        }</span>
+
+        /**
+         * Constructs with the message and cause.
+         *
+         * @param message the message
+         * @param cause   the cause
+         */
+        public HexException(@Nullable String message, @Nullable Throwable cause) {
+<span class="fc" id="L340">            super(message, cause);</span>
+<span class="fc" id="L341">            this.position = -1;</span>
+<span class="fc" id="L342">        }</span>
+
+        /**
+         * Constructs with the cause.
+         *
+         * @param cause the cause
+         */
+        public HexException(@Nullable Throwable cause) {
+<span class="fc" id="L350">            super(cause);</span>
+<span class="fc" id="L351">            this.position = -1;</span>
+<span class="fc" id="L352">        }</span>
+
+        /**
+         * Empty with the position.
+         *
+         * @param position the position where this exception occurs
+         */
+        public HexException(long position) {
+<span class="fc" id="L360">            super();</span>
+<span class="fc" id="L361">            this.position = position;</span>
+<span class="fc" id="L362">        }</span>
+
+        /**
+         * Constructs with the position and message.
+         *
+         * @param position the position where this exception occurs
+         * @param message  the message
+         */
+        public HexException(long position, @Nullable String message) {
+<span class="fc" id="L371">            super(message);</span>
+<span class="fc" id="L372">            this.position = position;</span>
+<span class="fc" id="L373">        }</span>
+
+        /**
+         * Constructs with the position, message and cause.
+         *
+         * @param position the position where this exception occurs
+         * @param message  the message
+         * @param cause    the cause
+         */
+        public HexException(long position, @Nullable String message, @Nullable Throwable cause) {
+<span class="fc" id="L383">            super(message, cause);</span>
+<span class="fc" id="L384">            this.position = position;</span>
+<span class="fc" id="L385">        }</span>
+
+        /**
+         * Constructs with the position and cause.
+         *
+         * @param position the position where this exception occurs
+         * @param cause    the cause
+         */
+        public HexException(long position, @Nullable Throwable cause) {
+<span class="fc" id="L394">            super(cause);</span>
+<span class="fc" id="L395">            this.position = position;</span>
+<span class="fc" id="L396">        }</span>
+
+        /**
+         * Returns the position where this exception occurs, may be {@code -1} if the position is unknown.
+         *
+         * @return the position where this exception occurs, may be {@code -1} if the position is unknown
+         */
+        public long position() {
+<span class="fc" id="L404">            return position;</span>
+        }
+    }
+
+    private HexKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

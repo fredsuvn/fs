@@ -1,0 +1,734 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StringKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.string</a> &gt; <span class="el_source">StringKit.java</span></div><h1>StringKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.string;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Check;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.base.exception.UnknownArrayTypeException;
+
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Objects;
+
+/**
+ * Utilities kit for string related.
+ *
+ * @author sunqian
+ */
+public class StringKit {
+
+    /**
+     * Returns whether the given string is {@code null} or empty.
+     *
+     * @param str the given string
+     * @return whether the given string is {@code null} or empty
+     */
+    public static boolean isEmpty(@Nullable CharSequence str) {
+<span class="fc bfc" id="L27" title="All 4 branches covered.">        return str == null || str.length() == 0;</span>
+    }
+
+    /**
+     * Returns whether the given string is not {@code null} nor empty.
+     *
+     * @param str the given string
+     * @return whether the given string is not {@code null} nor empty
+     */
+    public static boolean isNonEmpty(@Nullable CharSequence str) {
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        return !isEmpty(str);</span>
+    }
+
+    /**
+     * Returns whether the given string is blank ({@code null}, empty or whitespace).
+     *
+     * @param str the given string
+     * @return whether the given string is blank
+     */
+    public static boolean isBlank(@Nullable CharSequence str) {
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (isEmpty(str)) {</span>
+<span class="fc" id="L48">            return true;</span>
+        }
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        for (int i = 0; i &lt; str.length(); i++) {</span>
+<span class="fc" id="L51">            char c = str.charAt(i);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">            if (!Character.isWhitespace(c)) {</span>
+<span class="fc" id="L53">                return false;</span>
+            }
+        }
+<span class="fc" id="L56">        return true;</span>
+    }
+
+    /**
+     * Returns whether the given string is not blank ({@code null} nor empty nor whitespace).
+     *
+     * @param str the given string
+     * @return whether the given string is not blank
+     */
+    public static boolean isNonBlank(@Nullable CharSequence str) {
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        return !isBlank(str);</span>
+    }
+
+    /**
+     * Returns {@code true} if any of the given strings is {@code null} or empty, otherwise {@code false}.
+     *
+     * @param strings the given strings
+     * @return {@code true} if any of the given strings is {@code null} or empty, otherwise {@code false}
+     */
+    public static boolean anyEmpty(@Nullable CharSequence @Nonnull ... strings) {
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        for (CharSequence str : strings) {</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">            if (isEmpty(str)) {</span>
+<span class="fc" id="L78">                return true;</span>
+            }
+        }
+<span class="fc" id="L81">        return false;</span>
+    }
+
+    /**
+     * Returns {@code true} if all the given strings are {@code null} or empty, otherwise {@code false}.
+     *
+     * @param strings the given strings
+     * @return {@code true} if all the given strings are {@code null} or empty, otherwise {@code false}
+     */
+    public static boolean allEmpty(@Nullable CharSequence @Nonnull ... strings) {
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        for (CharSequence str : strings) {</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">            if (!isEmpty(str)) {</span>
+<span class="fc" id="L93">                return false;</span>
+            }
+        }
+<span class="fc" id="L96">        return true;</span>
+    }
+
+    /**
+     * Returns {@code true} if any of the given strings is blank, otherwise {@code false}. This method uses
+     * {@link #isBlank(CharSequence)} to check whether a string is blank.
+     *
+     * @param strings the given strings
+     * @return {@code true} if any of the given strings is blank, otherwise {@code false}
+     */
+    public static boolean anyBlank(@Nullable CharSequence @Nonnull ... strings) {
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        for (CharSequence str : strings) {</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            if (isBlank(str)) {</span>
+<span class="fc" id="L109">                return true;</span>
+            }
+        }
+<span class="fc" id="L112">        return false;</span>
+    }
+
+    /**
+     * Returns {@code true} if all the given strings are blank, otherwise {@code false}. This method uses
+     * {@link #isBlank(CharSequence)} to check whether a string is blank.
+     *
+     * @param strings the given strings
+     * @return {@code true} if all the given strings are blank, otherwise {@code false}
+     */
+    public static boolean allBlank(@Nullable CharSequence @Nonnull ... strings) {
+<span class="fc bfc" id="L123" title="All 2 branches covered.">        for (CharSequence str : strings) {</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">            if (!isBlank(str)) {</span>
+<span class="fc" id="L125">                return false;</span>
+            }
+        }
+<span class="fc" id="L128">        return true;</span>
+    }
+
+    /**
+     * Encodes the given char array into a new byte array using {@link CharsKit#defaultCharset()}.
+     *
+     * @param chars the given char array
+     * @return a new byte array contains the encoded bytes
+     */
+    public static byte @Nonnull [] toBytes(char @Nonnull [] chars) {
+<span class="fc" id="L138">        return toBytes(chars, CharsKit.defaultCharset());</span>
+    }
+
+    /**
+     * Encodes the given char array into a new byte array using the specified charset.
+     *
+     * @param chars   the given char array
+     * @param charset the specified charset
+     * @return a new byte array contains the encoded bytes
+     */
+    public static byte @Nonnull [] toBytes(char @Nonnull [] chars, Charset charset) {
+<span class="fc" id="L149">        return new String(chars).getBytes(charset);</span>
+    }
+
+    /**
+     * Encodes the given char sequence into a new byte array using {@link CharsKit#defaultCharset()}.
+     *
+     * @param chars the given char sequence
+     * @return a new byte array contains the encoded bytes
+     */
+    public static byte @Nonnull [] toBytes(@Nonnull CharSequence chars) {
+<span class="fc" id="L159">        return toBytes(chars, CharsKit.defaultCharset());</span>
+    }
+
+    /**
+     * Encodes the given char sequence into a new byte array using the specified charset.
+     *
+     * @param chars   the given char sequence
+     * @param charset the specified charset
+     * @return a new byte array contains the encoded bytes
+     */
+    public static byte @Nonnull [] toBytes(@Nonnull CharSequence chars, Charset charset) {
+<span class="fc" id="L170">        return chars.toString().getBytes(charset);</span>
+    }
+
+    /**
+     * Returns whether all chars of the given string are upper case. Note if the string is empty, returns {@code true}.
+     *
+     * @param str the given string
+     * @return whether all chars of the given string are upper case
+     */
+    public static boolean allUpperCase(@Nonnull CharSequence str) {
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        for (int i = 0; i &lt; str.length(); i++) {</span>
+<span class="fc" id="L181">            char c = str.charAt(i);</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">            if (!Character.isUpperCase(c)) {</span>
+<span class="fc" id="L183">                return false;</span>
+            }
+        }
+<span class="fc" id="L186">        return true;</span>
+    }
+
+    /**
+     * Returns whether all chars of the given string are lower case. Note if the string is empty, returns {@code true}.
+     *
+     * @param str the given string
+     * @return whether all chars of the given string are lower case
+     */
+    public static boolean allLowerCase(@Nonnull CharSequence str) {
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        for (int i = 0; i &lt; str.length(); i++) {</span>
+<span class="fc" id="L197">            char c = str.charAt(i);</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">            if (!Character.isLowerCase(c)) {</span>
+<span class="fc" id="L199">                return false;</span>
+            }
+        }
+<span class="fc" id="L202">        return true;</span>
+    }
+
+    /**
+     * Capitalizes the given string.
+     *
+     * @param str the given string
+     * @return the capitalized string
+     */
+    public static @Nonnull String capitalize(@Nonnull CharSequence str) {
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        if (str.length() == 0) {</span>
+<span class="fc" id="L213">            return str.toString();</span>
+        }
+<span class="fc bfc" id="L215" title="All 2 branches covered.">        if (str.length() == 1) {</span>
+<span class="fc" id="L216">            char c = str.charAt(0);</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">            if (Character.isLowerCase(c)) {</span>
+<span class="fc" id="L218">                return String.valueOf(Character.toUpperCase(c));</span>
+            }
+        }
+<span class="fc" id="L221">        char c = str.charAt(0);</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        if (Character.isLowerCase(c)) {</span>
+<span class="fc" id="L223">            StringBuilder sb = new StringBuilder(str.length());</span>
+<span class="fc" id="L224">            sb.append(Character.toUpperCase(c));</span>
+<span class="fc" id="L225">            sb.append(str, 1, str.length());</span>
+<span class="fc" id="L226">            return sb.toString();</span>
+        }
+<span class="fc" id="L228">        return str.toString();</span>
+    }
+
+    /**
+     * Uncapitalizes the given string. Specifically, if the given string's length {@code &gt;= 2} and its chars are all
+     * upper case, the original string is also returned.
+     *
+     * @param str the given string
+     * @return the uncapitalized string
+     */
+    public static @Nonnull String uncapitalize(@Nonnull CharSequence str) {
+<span class="fc bfc" id="L239" title="All 2 branches covered.">        if (str.length() == 1) {</span>
+<span class="fc" id="L240">            char c = str.charAt(0);</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">            if (Character.isUpperCase(c)) {</span>
+<span class="fc" id="L242">                return String.valueOf(Character.toLowerCase(c));</span>
+            }
+        }
+<span class="fc bfc" id="L245" title="All 2 branches covered.">        if (allUpperCase(str)) {</span>
+<span class="fc" id="L246">            return str.toString();</span>
+        }
+<span class="fc" id="L248">        char c = str.charAt(0);</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">        if (Character.isUpperCase(c)) {</span>
+<span class="fc" id="L250">            StringBuilder sb = new StringBuilder(str.length());</span>
+<span class="fc" id="L251">            sb.append(Character.toLowerCase(c));</span>
+<span class="fc" id="L252">            sb.append(str, 1, str.length());</span>
+<span class="fc" id="L253">            return sb.toString();</span>
+        }
+<span class="fc" id="L255">        return str.toString();</span>
+    }
+
+    /**
+     * Returns a String of which content is upper case of the given string.
+     *
+     * @param str the given string
+     * @return the converted string
+     */
+    public static @Nonnull String upperCase(@Nonnull CharSequence str) {
+<span class="fc bfc" id="L265" title="All 2 branches covered.">        if (str.length() == 0) {</span>
+<span class="fc" id="L266">            return str.toString();</span>
+        }
+<span class="fc" id="L268">        char[] cs = new char[str.length()];</span>
+<span class="fc bfc" id="L269" title="All 2 branches covered.">        for (int i = 0; i &lt; str.length(); i++) {</span>
+<span class="fc" id="L270">            cs[i] = Character.toUpperCase(str.charAt(i));</span>
+        }
+<span class="fc" id="L272">        return new String(cs);</span>
+    }
+
+    /**
+     * Returns a String of which content is lower case of the given string.
+     *
+     * @param str the given string
+     * @return the converted string
+     */
+    public static @Nonnull String lowerCase(@Nonnull CharSequence str) {
+<span class="fc bfc" id="L282" title="All 2 branches covered.">        if (str.length() == 0) {</span>
+<span class="fc" id="L283">            return str.toString();</span>
+        }
+<span class="fc" id="L285">        char[] cs = new char[str.length()];</span>
+<span class="fc bfc" id="L286" title="All 2 branches covered.">        for (int i = 0; i &lt; str.length(); i++) {</span>
+<span class="fc" id="L287">            cs[i] = Character.toLowerCase(str.charAt(i));</span>
+        }
+<span class="fc" id="L289">        return new String(cs);</span>
+    }
+
+    /**
+     * Returns the first index of the specified char in the specified string. The returned value is the smallest value
+     * {@code k} such that:
+     * &lt;pre&gt;{@code
+     * (str.charAt(k) == ch) &amp;&amp; (k &gt;= 0)
+     * }&lt;/pre&gt;
+     * If no such {@code k} is found, returns {@code -1}.
+     *
+     * @param str the specified string
+     * @param c   the specified char
+     * @return the first index of the specified char in the specified string, or {@code -1} if not found
+     */
+    public static int indexOf(CharSequence str, char c) {
+<span class="fc" id="L305">        return indexOf(str, c, 0);</span>
+    }
+
+    /**
+     * Returns the first index of the specified char in the specified string, starting at the specified index. The
+     * returned value is the smallest value {@code k} such that:
+     * &lt;pre&gt;{@code
+     * (str.charAt(k) == ch) &amp;&amp; (k &gt;= index)
+     * }&lt;/pre&gt;
+     * If no such {@code k} is found, returns {@code -1}.
+     * &lt;p&gt;
+     * There is no restriction on the {@code index}. If it is negative, it has the same effect as if it were {@code 0};
+     * if it is greater than {@code str.length()}, it has the same effect as if it were {@code str.length()} ({@code -1}
+     * is returned).
+     *
+     * @param str   the specified string
+     * @param c     the specified char
+     * @param index the specified index
+     * @return the first index of the specified char in the specified string, starting at the specified index, or
+     * {@code -1} if not found
+     */
+    public static int indexOf(CharSequence str, char c, int index) {
+<span class="fc bfc" id="L327" title="All 2 branches covered.">        if (str instanceof String) {</span>
+<span class="fc" id="L328">            return ((String) str).indexOf(c, index);</span>
+        }
+<span class="fc bfc" id="L330" title="All 2 branches covered.">        if (index &gt;= str.length()) {</span>
+<span class="fc" id="L331">            return -1;</span>
+        }
+<span class="fc" id="L333">        int s = Math.max(0, index);</span>
+<span class="fc bfc" id="L334" title="All 2 branches covered.">        for (int i = s; i &lt; str.length(); i++) {</span>
+<span class="fc bfc" id="L335" title="All 2 branches covered.">            if (str.charAt(i) == c) {</span>
+<span class="fc" id="L336">                return i;</span>
+            }
+        }
+<span class="fc" id="L339">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the specified char in the specified string, searching backward. The returned value is
+     * the largest value {@code k} such that:
+     * &lt;pre&gt;{@code
+     * (str.charAt(k) == ch) &amp;&amp; (k &lt;= str.length() - 1)
+     * }&lt;/pre&gt;
+     * If no such {@code k} is found, returns {@code -1}.
+     *
+     * @param str the specified string
+     * @param c   the specified char
+     * @return the last index of the specified char in the specified string, searching backward, or {@code -1} if not
+     * found
+     */
+    public static int lastIndexOf(CharSequence str, char c) {
+<span class="fc" id="L356">        return lastIndexOf(str, c, str.length() - 1);</span>
+    }
+
+    /**
+     * Returns the last index of the specified char in the specified string, searching backward starting at the
+     * specified index. The returned value is the largest value {@code k} such that:
+     * &lt;pre&gt;{@code
+     * (str.charAt(k) == ch) &amp;&amp; (k &lt;= index)
+     * }&lt;/pre&gt;
+     * If no such {@code k} is found, returns {@code -1}.
+     * &lt;p&gt;
+     * There is no restriction on the {@code index}. If it is negative, it has the same effect as if it were {@code -1}
+     * ({@code -1} is returned); if it is greater than or equal to {@code str.length()}, it has the same effect as if it
+     * were {@code str.length() - 1}.
+     *
+     * @param str   the specified string
+     * @param c     the specified char
+     * @param index the specified index
+     * @return the last index of the specified char in the specified string, searching backward starting at the
+     * specified index, or {@code -1} if not found
+     */
+    public static int lastIndexOf(CharSequence str, char c, int index) {
+<span class="fc bfc" id="L378" title="All 2 branches covered.">        if (str instanceof String) {</span>
+<span class="fc" id="L379">            return ((String) str).lastIndexOf(c, index);</span>
+        }
+<span class="fc bfc" id="L381" title="All 2 branches covered.">        if (index &lt; 0) {</span>
+<span class="fc" id="L382">            return -1;</span>
+        }
+<span class="fc" id="L384">        int s = Math.min(str.length() - 1, index);</span>
+<span class="fc bfc" id="L385" title="All 2 branches covered.">        for (int i = s; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L386" title="All 2 branches covered.">            if (str.charAt(i) == c) {</span>
+<span class="fc" id="L387">                return i;</span>
+            }
+        }
+<span class="fc" id="L390">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the specified substring in the specified string. The returned value is the smallest
+     * value {@code k} for which:
+     * &lt;pre&gt;{@code
+     * (k &gt;= 0) &amp;&amp; str.startsWith(sub, k)
+     * }&lt;/pre&gt;
+     * If no such {@code k} is found, returns {@code -1}.
+     * &lt;p&gt;
+     * The behavior of this method is the same as {@link String#indexOf(String)}.
+     *
+     * @param str the specified string
+     * @param sub the specified substring
+     * @return the first index of the specified substring in the specified string, or {@code -1} if not found
+     */
+    public static int indexOf(CharSequence str, CharSequence sub) {
+<span class="fc" id="L408">        return indexOf(str, sub, 0);</span>
+    }
+
+    /**
+     * Returns the first index of the specified substring in the specified string, starting at the specified index. The
+     * returned value is the smallest value {@code k} for which:
+     * &lt;pre&gt;{@code
+     * (k &gt;= index) &amp;&amp; str.startsWith(sub, k)
+     * }&lt;/pre&gt;
+     * If no such {@code k} is found, returns {@code -1}.
+     * &lt;p&gt;
+     * The behavior of this method is the same as {@link String#indexOf(String, int)}.
+     *
+     * @param str   the specified string
+     * @param sub   the specified substring
+     * @param index the specified index
+     * @return the first index of the specified substring in the specified string, starting at the specified index, or
+     * {@code -1} if not found
+     */
+    public static int indexOf(CharSequence str, CharSequence sub, int index) {
+<span class="fc bfc" id="L428" title="All 4 branches covered.">        if ((str instanceof String) &amp;&amp; (sub instanceof String)) {</span>
+<span class="fc" id="L429">            return ((String) str).indexOf((String) sub, index);</span>
+        }
+<span class="fc" id="L431">        int maxIndex = str.length() - sub.length();</span>
+<span class="fc bfc" id="L432" title="All 2 branches covered.">        if (index &gt; maxIndex) {</span>
+<span class="fc bfc" id="L433" title="All 2 branches covered.">            return (sub.length() == 0 ? str.length() : -1);</span>
+        }
+<span class="fc" id="L435">        int s = Math.max(index, 0);</span>
+<span class="fc bfc" id="L436" title="All 2 branches covered.">        if (sub.length() == 0) {</span>
+<span class="fc" id="L437">            return s;</span>
+        }
+<span class="fc bfc" id="L439" title="All 2 branches covered.">        for (int i = s; i &lt;= maxIndex; i++) {</span>
+<span class="fc bfc" id="L440" title="All 2 branches covered.">            if (startsWith(str, sub, i)) {</span>
+<span class="fc" id="L441">                return i;</span>
+            }
+        }
+<span class="fc" id="L444">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the specified substring in the specified string, searching backward. The returned value
+     * is the smallest value {@code k} for which:
+     * &lt;pre&gt;{@code
+     * (k &lt;= str.length() - 1) &amp;&amp; str.startsWith(sub, k)
+     * }&lt;/pre&gt;
+     * If no such {@code k} is found, returns {@code -1}.
+     * &lt;p&gt;
+     * The behavior of this method is the same as {@link String#lastIndexOf(String)}.
+     *
+     * @param str the specified string
+     * @param sub the specified substring
+     * @return the last index of the specified substring in the specified string, searching backward, or {@code -1} if
+     * not found
+     */
+    public static int lastIndexOf(CharSequence str, CharSequence sub) {
+<span class="fc" id="L463">        return lastIndexOf(str, sub, str.length());</span>
+    }
+
+    /**
+     * Returns the last index of the specified substring in the specified string, searching backward starting at the
+     * specified index. The returned value is the largest value {@code k} for which:
+     * &lt;pre&gt;{@code
+     * (k &lt;= index) &amp;&amp; str.startsWith(sub, k)
+     * }&lt;/pre&gt;
+     * If no such {@code k} is found, returns {@code -1}.
+     * &lt;p&gt;
+     * The behavior of this method is the same as {@link String#lastIndexOf(String, int)}.
+     *
+     * @param str   the specified string
+     * @param sub   the specified substring
+     * @param index the specified index
+     * @return the last index of the specified substring in the specified string, searching backward starting at the
+     * specified index, or {@code -1} if not found
+     */
+    public static int lastIndexOf(CharSequence str, CharSequence sub, int index) {
+<span class="fc bfc" id="L483" title="All 4 branches covered.">        if ((str instanceof String) &amp;&amp; (sub instanceof String)) {</span>
+<span class="fc" id="L484">            return ((String) str).lastIndexOf((String) sub, index);</span>
+        }
+<span class="fc bfc" id="L486" title="All 2 branches covered.">        if (index &lt; 0) {</span>
+<span class="fc" id="L487">            return -1;</span>
+        }
+<span class="fc" id="L489">        int maxIndex = str.length() - sub.length();</span>
+<span class="fc" id="L490">        int s = Math.min(index, maxIndex);</span>
+<span class="fc bfc" id="L491" title="All 2 branches covered.">        if (sub.length() == 0) {</span>
+<span class="fc" id="L492">            return s;</span>
+        }
+<span class="fc bfc" id="L494" title="All 2 branches covered.">        for (int i = s; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L495" title="All 2 branches covered.">            if (startsWith(str, sub, i)) {</span>
+<span class="fc" id="L496">                return i;</span>
+            }
+        }
+<span class="fc" id="L499">        return -1;</span>
+    }
+
+    /**
+     * Returns whether the specified string is starts with the specified substring.
+     * &lt;p&gt;
+     * The behavior of this method is the same as {@link String#startsWith(String)}.
+     *
+     * @param str the specified string
+     * @param sub the specified substring
+     * @return whether the specified string is starts with the specified substring
+     */
+    public static boolean startsWith(@Nonnull CharSequence str, @Nonnull CharSequence sub) {
+<span class="fc" id="L512">        return startsWith(str, sub, 0);</span>
+    }
+
+    /**
+     * Returns whether the specified string is starts with the specified substring, the comparing starting at the
+     * specified index.
+     * &lt;p&gt;
+     * The behavior of this method is the same as {@link String#startsWith(String, int)}.
+     *
+     * @param str   the specified string
+     * @param sub   the specified substring
+     * @param index the specified index
+     * @return whether the specified string is starts with the specified substring
+     */
+    public static boolean startsWith(@Nonnull CharSequence str, @Nonnull CharSequence sub, int index) {
+<span class="fc" id="L527">        int strLen = str.length();</span>
+<span class="fc" id="L528">        int subLen = sub.length();</span>
+<span class="fc bfc" id="L529" title="All 4 branches covered.">        if (index &lt; 0 || index &gt; strLen - subLen) {</span>
+<span class="fc" id="L530">            return false;</span>
+        }
+<span class="fc" id="L532">        int l = subLen + index;</span>
+<span class="fc bfc" id="L533" title="All 2 branches covered.">        for (int i = index, j = 0; i &lt; l; i++, j++) {</span>
+<span class="fc bfc" id="L534" title="All 2 branches covered.">            if (str.charAt(i) != sub.charAt(j)) {</span>
+<span class="fc" id="L535">                return false;</span>
+            }
+        }
+<span class="fc" id="L538">        return true;</span>
+    }
+
+    /**
+     * Returns whether the specified string is ends with the specified substring.
+     * &lt;p&gt;
+     * The behavior of this method is the same as {@link String#endsWith(String)}.
+     *
+     * @param str the specified string
+     * @param sub the specified substring
+     * @return whether the specified string is ends with the specified substring
+     */
+    public static boolean endsWith(@Nonnull CharSequence str, @Nonnull CharSequence sub) {
+<span class="fc" id="L551">        return startsWith(str, sub, str.length() - sub.length());</span>
+    }
+
+    /**
+     * Returns the {@code toString} of the given object. If the given object is array, uses {@code Arrays.toString} or
+     * {@link Arrays#deepToString(Object[])} if necessary.
+     * &lt;p&gt;
+     * This method is equivalent to ({@link #toStringWith(Object, boolean, boolean)}):
+     * {@code toStringWith(obj, true, true)}.
+     *
+     * @param obj the given object
+     * @return the {@code toString} of the given object
+     */
+    public static @Nonnull String toString(@Nullable Object obj) {
+<span class="fc" id="L565">        return toStringWith(obj, true, true);</span>
+    }
+
+    /**
+     * Returns the {@code toString} of the given objects via {@link Arrays#deepToString(Object[])}.
+     *
+     * @param objs the given objects
+     * @return the {@code toString} of the given objects via {@link Arrays#deepToString(Object[])}
+     */
+    public static @Nonnull String toStringAll(@Nullable Object @Nonnull ... objs) {
+<span class="fc" id="L575">        return Arrays.deepToString(objs);</span>
+    }
+
+    /**
+     * Returns the {@code toString} of the given object. This method follows the following logic:
+     * &lt;ul&gt;
+     *     &lt;li&gt;
+     *         If the given object is not an array, returns {@link Objects#toString(Object)}.
+     *     &lt;/li&gt;
+     *     &lt;li&gt;
+     *         If the {@code arrayToString} is {@code true}:
+     *         &lt;ul&gt;
+     *             &lt;li&gt;
+     *                 If the {@code deep} is {@code true}, uses {@link Arrays#deepToString(Object[])} for them.
+     *                 Otherwise, uses {@code Arrays.toString}.
+     *             &lt;/li&gt;
+     *         &lt;/ul&gt;
+     *     &lt;/li&gt;
+     *     &lt;li&gt;
+     *         Returns {@link Objects#toString(Object)} otherwise.
+     *     &lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param obj           the given object
+     * @param arrayToString the arrayToString option
+     * @param deep          the deep option
+     * @return the {@code toString} of the given object
+     */
+    public static @Nonnull String toStringWith(@Nullable Object obj, boolean arrayToString, boolean deep) {
+<span class="fc bfc" id="L604" title="All 4 branches covered.">        if (obj == null || !arrayToString) {</span>
+<span class="fc" id="L605">            return Objects.toString(obj);</span>
+        }
+<span class="fc" id="L607">        Class&lt;?&gt; cls = obj.getClass();</span>
+<span class="fc bfc" id="L608" title="All 2 branches covered.">        if (cls.isArray()) {</span>
+<span class="fc" id="L609">            return toStringArray(obj, deep);</span>
+        }
+<span class="fc" id="L611">        return obj.toString();</span>
+    }
+
+    private static @Nonnull String toStringArray(@Nonnull Object obj, boolean deep) {
+<span class="fc bfc" id="L615" title="All 2 branches covered.">        if (obj instanceof Object[]) {</span>
+<span class="fc bfc" id="L616" title="All 2 branches covered.">            return deep ? Arrays.deepToString((Object[]) obj) : Arrays.toString((Object[]) obj);</span>
+        }
+<span class="fc bfc" id="L618" title="All 2 branches covered.">        if (obj instanceof boolean[]) {</span>
+<span class="fc" id="L619">            return Arrays.toString((boolean[]) obj);</span>
+        }
+<span class="fc bfc" id="L621" title="All 2 branches covered.">        if (obj instanceof byte[]) {</span>
+<span class="fc" id="L622">            return Arrays.toString((byte[]) obj);</span>
+        }
+<span class="fc bfc" id="L624" title="All 2 branches covered.">        if (obj instanceof short[]) {</span>
+<span class="fc" id="L625">            return Arrays.toString((short[]) obj);</span>
+        }
+<span class="fc bfc" id="L627" title="All 2 branches covered.">        if (obj instanceof char[]) {</span>
+<span class="fc" id="L628">            return Arrays.toString((char[]) obj);</span>
+        }
+<span class="fc bfc" id="L630" title="All 2 branches covered.">        if (obj instanceof int[]) {</span>
+<span class="fc" id="L631">            return Arrays.toString((int[]) obj);</span>
+        }
+<span class="fc bfc" id="L633" title="All 2 branches covered.">        if (obj instanceof long[]) {</span>
+<span class="fc" id="L634">            return Arrays.toString((long[]) obj);</span>
+        }
+<span class="fc bfc" id="L636" title="All 2 branches covered.">        if (obj instanceof float[]) {</span>
+<span class="fc" id="L637">            return Arrays.toString((float[]) obj);</span>
+        }
+<span class="fc bfc" id="L639" title="All 2 branches covered.">        if (obj instanceof double[]) {</span>
+<span class="fc" id="L640">            return Arrays.toString((double[]) obj);</span>
+        }
+<span class="fc" id="L642">        throw new UnknownArrayTypeException(obj.getClass());</span>
+    }
+
+    /**
+     * Compares the given two {@link CharSequence} instances, returns {@code true} if they have same length and two
+     * chars at the same index in two sequences are equal, otherwise {@code false}.
+     *
+     * @param cs1 the first {@link CharSequence} to compare
+     * @param cs2 the second {@link CharSequence} to compare
+     * @return {@code true} if they have same length and two chars at the same index in two sequences are equal,
+     * otherwise {@code false}
+     */
+    public static boolean charEquals(CharSequence cs1, CharSequence cs2) {
+<span class="fc bfc" id="L655" title="All 2 branches covered.">        if (cs1.length() != cs2.length()) {</span>
+<span class="fc" id="L656">            return false;</span>
+        }
+<span class="fc bfc" id="L658" title="All 2 branches covered.">        for (int i = 0; i &lt; cs1.length(); i++) {</span>
+<span class="fc bfc" id="L659" title="All 2 branches covered.">            if (cs1.charAt(i) != cs2.charAt(i)) {</span>
+<span class="fc" id="L660">                return false;</span>
+            }
+        }
+<span class="fc" id="L663">        return true;</span>
+    }
+
+    /**
+     * Copies chars from the given string into the specified destination char array. The chars copied starting at the
+     * specified start index inclusive, and ending at the specified end index exclusive. The destination array receives
+     * starting at the specified offset.
+     * &lt;p&gt;
+     * The behavior of this method is the same as {@link String#getChars(int, int, char[], int)}.
+     *
+     * @param str   the given string of which chars will be copied
+     * @param start the specified start index, inclusive
+     * @param end   the specified end index, exclusive
+     * @param dst   the specified destination char array
+     * @param off   the specified offset
+     * @throws IndexOutOfBoundsException if there exists an arguments is out of bounds
+     */
+    public static void charsCopy(
+        @Nonnull CharSequence str, int start, int end, char @Nonnull [] dst, int off
+    ) throws IndexOutOfBoundsException {
+<span class="fc bfc" id="L683" title="All 2 branches covered.">        if (str instanceof String) {</span>
+<span class="fc" id="L684">            ((String) str).getChars(start, end, dst, off);</span>
+        } else {
+<span class="fc" id="L686">            Check.checkInBounds(start, end, 0, str.length());</span>
+<span class="fc" id="L687">            Check.checkInBounds(off, off + end - start, 0, dst.length);</span>
+<span class="fc bfc" id="L688" title="All 2 branches covered.">            if (start == end) {</span>
+<span class="fc" id="L689">                return;</span>
+            }
+<span class="fc bfc" id="L691" title="All 2 branches covered.">            for (int i = 0; i &lt; end - start; i++) {</span>
+<span class="fc" id="L692">                dst[off + i] = str.charAt(start + i);</span>
+            }
+        }
+<span class="fc" id="L695">    }</span>
+
+    /**
+     * Copies the specified length of chars from the given source, starting at the specified source offset, to the given
+     * destination array, starting at the specified destination offset.
+     * &lt;p&gt;
+     * The behavior of this method is the same as {@link System#arraycopy(Object, int, Object, int, int)}.
+     *
+     * @param src    the given source
+     * @param srcOff the specified source offset
+     * @param dst    the given destination array
+     * @param dstOff the specified destination offset
+     * @param len    the specified copy length
+     * @throws IndexOutOfBoundsException if there exists an arguments is out of bounds
+     */
+    public static void charsCopy(
+        @Nonnull CharSequence src,
+        int srcOff,
+        char @Nonnull [] dst,
+        int dstOff,
+        int len
+    ) throws IndexOutOfBoundsException {
+<span class="fc bfc" id="L717" title="All 2 branches covered.">        if (src instanceof String) {</span>
+<span class="fc" id="L718">            ((String) src).getChars(srcOff, srcOff + len, dst, dstOff);</span>
+        } else {
+<span class="fc" id="L720">            Check.checkOffLen(srcOff, len, src.length());</span>
+<span class="fc" id="L721">            Check.checkOffLen(dstOff, len, dst.length);</span>
+<span class="fc bfc" id="L722" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L723">                return;</span>
+            }
+<span class="fc bfc" id="L725" title="All 2 branches covered.">            for (int i = 0; i &lt; len; i++) {</span>
+<span class="fc" id="L726">                dst[dstOff + i] = src.charAt(srcOff + i);</span>
+            }
+        }
+<span class="fc" id="L729">    }</span>
+
+    private StringKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

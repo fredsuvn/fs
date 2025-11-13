@@ -1,0 +1,1405 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ByteReaderBack.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.io</a> &gt; <span class="el_source">ByteReaderBack.java</span></div><h1>ByteReaderBack.java</h1><pre class="source lang-java linenums">package space.sunqian.common.io;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+import space.sunqian.common.base.bytes.BytesKit;
+import space.sunqian.common.base.math.MathKit;
+import space.sunqian.common.io.IOChecker.ReadChecker;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
+
+final class ByteReaderBack {
+
+    static @Nonnull ByteReader of(@Nonnull InputStream src, int bufSize) throws IllegalArgumentException {
+<span class="fc" id="L21">        IOChecker.checkBufSize(bufSize);</span>
+<span class="fc" id="L22">        return new ByteStreamReader(src, bufSize);</span>
+    }
+
+    static @Nonnull ByteReader of(@Nonnull ReadableByteChannel src, int bufSize) throws IllegalArgumentException {
+<span class="fc" id="L26">        IOChecker.checkBufSize(bufSize);</span>
+<span class="fc" id="L27">        return new ByteChannelReader(src, bufSize);</span>
+    }
+
+    static @Nonnull ByteReader of(byte @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
+<span class="fc" id="L31">        IOChecker.checkOffLen(off, len, src.length);</span>
+<span class="fc" id="L32">        return new ByteArrayReader(src, off, len);</span>
+    }
+
+    static @Nonnull ByteReader of(@Nonnull ByteBuffer src) {
+<span class="fc" id="L36">        return new ByteBufferReader(src);</span>
+    }
+
+    static @Nonnull ByteReader limit(@Nonnull ByteReader reader, long limit) throws IllegalArgumentException {
+<span class="fc" id="L40">        IOChecker.checkLimit(limit);</span>
+<span class="fc" id="L41">        return new LimitedReader(reader, limit);</span>
+    }
+
+    static @Nonnull ByteSegment newSeg(@Nonnull ByteBuffer data, boolean end) {
+<span class="fc" id="L45">        return new ByteSegmentImpl(data, end);</span>
+    }
+
+    static @Nonnull ByteSegment emptySeg(boolean end) {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        return end ? ByteSegmentImpl.EMPTY_END : ByteSegmentImpl.EMPTY_SEG;</span>
+    }
+
+    static @Nonnull InputStream asInputStream(@Nonnull ByteReader reader) {
+<span class="fc" id="L53">        return new AsInputStream(reader);</span>
+    }
+
+    private static final class ByteSegmentImpl implements ByteSegment {
+
+<span class="fc" id="L58">        private static final @Nonnull ByteSegmentImpl EMPTY_END = new ByteSegmentImpl(BytesKit.emptyBuffer(), true);</span>
+<span class="fc" id="L59">        private static final @Nonnull ByteSegmentImpl EMPTY_SEG = new ByteSegmentImpl(BytesKit.emptyBuffer(), false);</span>
+
+        private final @Nonnull ByteBuffer data;
+        private final boolean end;
+
+<span class="fc" id="L64">        private ByteSegmentImpl(@Nonnull ByteBuffer data, boolean end) {</span>
+<span class="fc" id="L65">            this.data = data;</span>
+<span class="fc" id="L66">            this.end = end;</span>
+<span class="fc" id="L67">        }</span>
+
+        @Override
+        public @Nonnull ByteBuffer data() {
+<span class="fc" id="L71">            return data;</span>
+        }
+
+        @Override
+        public boolean end() {
+<span class="fc" id="L76">            return end;</span>
+        }
+
+        @SuppressWarnings(&quot;MethodDoesntCallSuperMethod&quot;)
+        @Override
+        public @Nonnull ByteSegment clone() {
+<span class="fc" id="L82">            ByteBuffer copy = ByteBuffer.allocate(data.remaining());</span>
+<span class="fc" id="L83">            int pos = data.position();</span>
+<span class="fc" id="L84">            int limit = data.limit();</span>
+<span class="fc" id="L85">            copy.put(data);</span>
+<span class="fc" id="L86">            data.position(pos);</span>
+<span class="fc" id="L87">            data.limit(limit);</span>
+<span class="fc" id="L88">            copy.flip();</span>
+<span class="fc" id="L89">            return new ByteSegmentImpl(copy, end);</span>
+        }
+    }
+
+    private static final class ByteStreamReader implements ByteReader {
+
+        private final @Nonnull InputStream src;
+        private final int bufSize;
+
+<span class="fc" id="L98">        private ByteStreamReader(@Nonnull InputStream src, int bufSize) {</span>
+<span class="fc" id="L99">            this.src = src;</span>
+<span class="fc" id="L100">            this.bufSize = bufSize;</span>
+<span class="fc" id="L101">        }</span>
+
+        @Override
+        public int ready() throws IORuntimeException {
+            try {
+<span class="fc" id="L106">                return src.available();</span>
+<span class="fc" id="L107">            } catch (IOException e) {</span>
+<span class="fc" id="L108">                throw new IORuntimeException(e);</span>
+            }
+        }
+
+        @Override
+        public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L114">            IOChecker.checkLen(len);</span>
+<span class="fc" id="L115">            byte[] data = IOKit.read0(src, len, bufSize, IOChecker.endChecker());</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">            if (data == null) {</span>
+<span class="fc" id="L117">                return ByteSegment.empty(true);</span>
+            }
+<span class="fc bfc" id="L119" title="All 2 branches covered.">            return ByteSegment.of(ByteBuffer.wrap(data), data.length &lt; len);</span>
+        }
+
+        @Override
+        public @Nullable ByteBuffer read() throws IORuntimeException {
+<span class="fc" id="L124">            byte[] buf = IOKit.read0(src, bufSize, IOChecker.endChecker());</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">            if (buf == null) {</span>
+<span class="fc" id="L126">                return null;</span>
+            }
+<span class="fc" id="L128">            return ByteBuffer.wrap(buf);</span>
+        }
+
+        @Override
+        public long skip(long len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L133">            IOChecker.checkSkip(len);</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L135">                return 0;</span>
+            }
+            try {
+<span class="fc" id="L138">                return skip0(len);</span>
+<span class="fc" id="L139">            } catch (Exception e) {</span>
+<span class="fc" id="L140">                throw new IORuntimeException(e);</span>
+            }
+        }
+
+        private long skip0(long len) throws IOException {
+<span class="fc" id="L145">            long hasRead = 0;</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">            while (hasRead &lt; len) {</span>
+<span class="fc" id="L147">                long onceSize = src.skip(len - hasRead);</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">                if (onceSize == 0) {</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">                    if (src.read() == -1) {</span>
+<span class="fc" id="L150">                        break;</span>
+                    } else {
+<span class="fc" id="L152">                        hasRead++;</span>
+                    }
+                }
+<span class="fc" id="L155">                hasRead += onceSize;</span>
+<span class="fc" id="L156">            }</span>
+<span class="fc" id="L157">            return hasRead;</span>
+        }
+
+        @Override
+        public long readTo(@Nonnull OutputStream dst) throws IORuntimeException {
+<span class="fc" id="L162">            return readTo(dst, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L167">            return readTo(dst, len, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public long readTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+<span class="fc" id="L172">            return readTo(dst, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public long readTo(
+            @Nonnull WritableByteChannel dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L179">            return readTo(dst, len, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public int readTo(byte @Nonnull [] dst) throws IORuntimeException {
+<span class="fc" id="L184">            return readTo(dst, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L189">            return readTo(dst, off, len, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public int readTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+<span class="fc" id="L194">            return readTo(dst, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L199">            return readTo(dst, len, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public @Nonnull ByteSegment available(int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L204">            IOChecker.checkLen(len);</span>
+<span class="fc" id="L205">            byte[] data = IOKit.read0(src, len, bufSize, IOChecker.availableChecker());</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">            if (data == null) {</span>
+<span class="fc" id="L207">                return ByteSegment.empty(true);</span>
+            }
+<span class="fc" id="L209">            return ByteSegment.of(ByteBuffer.wrap(data), false);</span>
+        }
+
+        @Override
+        public @Nonnull ByteSegment available() throws IORuntimeException {
+<span class="fc" id="L214">            byte[] data = IOKit.read0(src, bufSize, IOChecker.availableChecker());</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">            if (data == null) {</span>
+<span class="fc" id="L216">                return ByteSegment.empty(true);</span>
+            }
+<span class="fc" id="L218">            return ByteSegment.of(ByteBuffer.wrap(data), false);</span>
+        }
+
+        @Override
+        public long availableTo(@Nonnull OutputStream dst) throws IORuntimeException {
+<span class="fc" id="L223">            return readTo(dst, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public long availableTo(
+            @Nonnull OutputStream dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L230">            return readTo(dst, len, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public long availableTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+<span class="fc" id="L235">            return readTo(dst, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public long availableTo(
+            @Nonnull WritableByteChannel dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L242">            return readTo(dst, len, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public int availableTo(byte @Nonnull [] dst) throws IORuntimeException {
+<span class="fc" id="L247">            return readTo(dst, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public int availableTo(
+            byte @Nonnull [] dst, int off, int len
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L254">            return readTo(dst, off, len, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+<span class="fc" id="L259">            return readTo(dst, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L264">            return readTo(dst, len, IOChecker.availableChecker());</span>
+        }
+
+        private long readTo(@Nonnull OutputStream dst, ReadChecker readChecker) throws IORuntimeException {
+<span class="fc" id="L268">            return IOKit.readTo0(src, dst, bufSize, readChecker);</span>
+        }
+
+        private long readTo(
+            @Nonnull OutputStream dst, long len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L274">            IOChecker.checkLen(len);</span>
+<span class="fc" id="L275">            return IOKit.readTo0(src, dst, len, bufSize, readChecker);</span>
+        }
+
+        private long readTo(@Nonnull WritableByteChannel dst, ReadChecker readChecker) throws IORuntimeException {
+<span class="fc" id="L279">            return IOKit.readTo0(src, dst, bufSize, readChecker);</span>
+        }
+
+        private long readTo(
+            @Nonnull WritableByteChannel dst, long len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L285">            IOChecker.checkLen(len);</span>
+<span class="fc" id="L286">            return IOKit.readTo0(src, dst, len, bufSize, readChecker);</span>
+        }
+
+        private int readTo(
+            byte @Nonnull [] dst, ReadChecker readChecker
+        ) throws IORuntimeException {
+<span class="fc" id="L292">            return IOKit.readTo0(src, dst, 0, dst.length, readChecker);</span>
+        }
+
+        private int readTo(
+            byte @Nonnull [] dst, int off, int len, ReadChecker readChecker
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L298">            IOChecker.checkOffLen(off, len, dst.length);</span>
+<span class="fc" id="L299">            return IOKit.readTo0(src, dst, off, len, readChecker);</span>
+        }
+
+        private int readTo(
+            @Nonnull ByteBuffer dst, ReadChecker readChecker
+        ) throws IORuntimeException {
+<span class="fc" id="L305">            return IOKit.readTo0(src, dst, dst.remaining(), readChecker);</span>
+        }
+
+        private int readTo(
+            @Nonnull ByteBuffer dst, int len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L311">            IOChecker.checkLen(len);</span>
+<span class="fc" id="L312">            return IOKit.readTo0(src, dst, len, readChecker);</span>
+        }
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L317">            return src.markSupported();</span>
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+            try {
+<span class="fc" id="L323">                src.mark(Integer.MAX_VALUE);</span>
+<span class="fc" id="L324">            } catch (Exception e) {</span>
+<span class="fc" id="L325">                throw new IORuntimeException(e);</span>
+<span class="fc" id="L326">            }</span>
+<span class="fc" id="L327">        }</span>
+
+        @Override
+        public void reset() throws IORuntimeException {
+            try {
+<span class="fc" id="L332">                src.reset();</span>
+<span class="fc" id="L333">            } catch (Exception e) {</span>
+<span class="fc" id="L334">                throw new IORuntimeException(e);</span>
+<span class="fc" id="L335">            }</span>
+<span class="fc" id="L336">        }</span>
+
+        @Override
+        public void close() throws IORuntimeException {
+            try {
+<span class="fc" id="L341">                src.close();</span>
+<span class="fc" id="L342">            } catch (Exception e) {</span>
+<span class="fc" id="L343">                throw new IORuntimeException(e);</span>
+<span class="fc" id="L344">            }</span>
+<span class="fc" id="L345">        }</span>
+
+        @Override
+        public @Nonnull InputStream asInputStream() {
+<span class="fc" id="L349">            return src;</span>
+        }
+    }
+
+    private static final class ByteChannelReader implements ByteReader {
+
+        private final @Nonnull ReadableByteChannel src;
+        private final int bufSize;
+
+<span class="fc" id="L358">        private ByteChannelReader(@Nonnull ReadableByteChannel src, int bufSize) {</span>
+<span class="fc" id="L359">            this.src = src;</span>
+<span class="fc" id="L360">            this.bufSize = bufSize;</span>
+<span class="fc" id="L361">        }</span>
+
+        @Override
+        public int ready() {
+<span class="fc" id="L365">            return 0;</span>
+        }
+
+        @Override
+        public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L370">            IOChecker.checkLen(len);</span>
+<span class="fc" id="L371">            ByteBuffer data = IOKit.read0(src, len, bufSize, IOChecker.endChecker());</span>
+<span class="fc bfc" id="L372" title="All 2 branches covered.">            if (data == null) {</span>
+<span class="fc" id="L373">                return ByteSegment.empty(true);</span>
+            }
+<span class="fc bfc" id="L375" title="All 2 branches covered.">            return ByteSegment.of(data, data.remaining() &lt; len);</span>
+        }
+
+        @Override
+        public @Nullable ByteBuffer read() throws IORuntimeException {
+<span class="fc" id="L380">            return IOKit.read0(src, bufSize, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public long skip(long len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L385">            IOChecker.checkSkip(len);</span>
+<span class="fc bfc" id="L386" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L387">                return 0;</span>
+            }
+<span class="fc" id="L389">            return skip0(len);</span>
+        }
+
+        private long skip0(long len) {
+<span class="fc" id="L393">            long hasRead = 0;</span>
+<span class="fc" id="L394">            int onceBufSize = (int) Math.min(len, bufSize);</span>
+<span class="fc" id="L395">            ByteBuffer buf = ByteBuffer.allocate(onceBufSize);</span>
+<span class="fc bfc" id="L396" title="All 2 branches covered.">            while (hasRead &lt; len) {</span>
+<span class="fc" id="L397">                int onceSize = IOKit.readTo0(src, buf, (int) Math.min(onceBufSize, len - hasRead), IOChecker.endChecker());</span>
+<span class="fc bfc" id="L398" title="All 2 branches covered.">                if (onceSize &lt; 0) {</span>
+<span class="fc" id="L399">                    return hasRead;</span>
+                }
+<span class="fc" id="L401">                hasRead += onceSize;</span>
+<span class="fc" id="L402">            }</span>
+<span class="fc" id="L403">            return hasRead;</span>
+        }
+
+        @Override
+        public long readTo(@Nonnull OutputStream dst) throws IORuntimeException {
+<span class="fc" id="L408">            return readTo(dst, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L413">            return readTo(dst, len, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public long readTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+<span class="fc" id="L418">            return readTo(dst, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public long readTo(
+            @Nonnull WritableByteChannel dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L425">            return readTo(dst, len, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public int readTo(byte @Nonnull [] dst) throws IORuntimeException {
+<span class="fc" id="L430">            return readTo(dst, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L435">            return readTo(dst, off, len, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public int readTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+<span class="fc" id="L440">            return readTo(dst, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L445">            return readTo(dst, len, IOChecker.endChecker());</span>
+        }
+
+        @Override
+        public @Nonnull ByteSegment available(int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L450">            IOChecker.checkLen(len);</span>
+<span class="fc" id="L451">            ByteBuffer data = IOKit.read0(src, len, bufSize, IOChecker.availableChecker());</span>
+<span class="fc bfc" id="L452" title="All 2 branches covered.">            if (data == null) {</span>
+<span class="fc" id="L453">                return ByteSegment.empty(true);</span>
+            }
+<span class="fc" id="L455">            return ByteSegment.of(data, false);</span>
+        }
+
+        @Override
+        public @Nonnull ByteSegment available() throws IORuntimeException {
+<span class="fc" id="L460">            ByteBuffer data = IOKit.read0(src, bufSize, IOChecker.availableChecker());</span>
+<span class="fc bfc" id="L461" title="All 2 branches covered.">            if (data == null) {</span>
+<span class="fc" id="L462">                return ByteSegment.empty(true);</span>
+            }
+<span class="fc" id="L464">            return ByteSegment.of(data, false);</span>
+        }
+
+        @Override
+        public long availableTo(@Nonnull OutputStream dst) throws IORuntimeException {
+<span class="fc" id="L469">            return readTo(dst, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public long availableTo(
+            @Nonnull OutputStream dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L476">            return readTo(dst, len, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public long availableTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+<span class="fc" id="L481">            return readTo(dst, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public long availableTo(
+            @Nonnull WritableByteChannel dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L488">            return readTo(dst, len, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public int availableTo(byte @Nonnull [] dst) throws IORuntimeException {
+<span class="fc" id="L493">            return readTo(dst, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public int availableTo(
+            byte @Nonnull [] dst, int off, int len
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L500">            return readTo(dst, off, len, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+<span class="fc" id="L505">            return readTo(dst, IOChecker.availableChecker());</span>
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L510">            return readTo(dst, len, IOChecker.availableChecker());</span>
+        }
+
+        private long readTo(@Nonnull OutputStream dst, ReadChecker readChecker) throws IORuntimeException {
+<span class="fc" id="L514">            return IOKit.readTo0(src, dst, bufSize, readChecker);</span>
+        }
+
+        private long readTo(
+            @Nonnull OutputStream dst, long len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L520">            IOChecker.checkLen(len);</span>
+<span class="fc" id="L521">            return IOKit.readTo0(src, dst, len, bufSize, readChecker);</span>
+        }
+
+        private long readTo(@Nonnull WritableByteChannel dst, ReadChecker readChecker) throws IORuntimeException {
+<span class="fc" id="L525">            return IOKit.readTo0(src, dst, bufSize, readChecker);</span>
+        }
+
+        private long readTo(
+            @Nonnull WritableByteChannel dst, long len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L531">            IOChecker.checkLen(len);</span>
+<span class="fc" id="L532">            return IOKit.readTo0(src, dst, len, bufSize, readChecker);</span>
+        }
+
+        private int readTo(
+            byte @Nonnull [] dst, ReadChecker readChecker
+        ) throws IORuntimeException {
+<span class="fc" id="L538">            return IOKit.readTo0(src, ByteBuffer.wrap(dst, 0, dst.length), readChecker);</span>
+        }
+
+        private int readTo(
+            byte @Nonnull [] dst, int off, int len, ReadChecker readChecker
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L544">            return IOKit.readTo0(src, ByteBuffer.wrap(dst, off, len), readChecker);</span>
+        }
+
+        private int readTo(
+            @Nonnull ByteBuffer dst, ReadChecker readChecker
+        ) throws IORuntimeException {
+<span class="fc" id="L550">            return IOKit.readTo0(src, dst, dst.remaining(), readChecker);</span>
+        }
+
+        private int readTo(
+            @Nonnull ByteBuffer dst, int len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L556">            IOChecker.checkLen(len);</span>
+<span class="fc" id="L557">            return IOKit.readTo0(src, dst, len, readChecker);</span>
+        }
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L562">            return false;</span>
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+<span class="fc" id="L567">            throw new IORuntimeException(&quot;Mark/Reset is unsupported.&quot;);</span>
+        }
+
+        @Override
+        public void reset() throws IORuntimeException {
+<span class="fc" id="L572">            throw new IORuntimeException(&quot;Mark/Reset is unsupported.&quot;);</span>
+        }
+
+        @Override
+        public void close() throws IORuntimeException {
+            try {
+<span class="fc" id="L578">                src.close();</span>
+<span class="fc" id="L579">            } catch (Exception e) {</span>
+<span class="fc" id="L580">                throw new IORuntimeException(e);</span>
+<span class="fc" id="L581">            }</span>
+<span class="fc" id="L582">        }</span>
+
+        @Override
+        public @Nonnull InputStream asInputStream() {
+<span class="fc" id="L586">            return Channels.newInputStream(src);</span>
+        }
+    }
+
+    private static abstract class InMemoryReader implements ByteReader {
+
+        @Override
+        public @Nonnull ByteSegment available(int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L594">            return read(len);</span>
+        }
+
+        @Override
+        public long availableTo(@Nonnull OutputStream dst) throws IORuntimeException {
+<span class="fc" id="L599">            return readTo(dst);</span>
+        }
+
+        @Override
+        public long availableTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L604">            return readTo(dst, len);</span>
+        }
+
+        @Override
+        public long availableTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+<span class="fc" id="L609">            return readTo(dst);</span>
+        }
+
+        @Override
+        public long availableTo(@Nonnull WritableByteChannel dst, long len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L614">            return readTo(dst, len);</span>
+        }
+
+        @Override
+        public int availableTo(byte @Nonnull [] dst) throws IORuntimeException {
+<span class="fc" id="L619">            return readTo(dst);</span>
+        }
+
+        @Override
+        public int availableTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L624">            return readTo(dst, off, len);</span>
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+<span class="fc" id="L629">            return readTo(dst);</span>
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L634">            return readTo(dst, len);</span>
+        }
+    }
+
+    private static final class ByteArrayReader extends InMemoryReader {
+
+        private final byte @Nonnull [] src;
+        private int pos;
+        private final int end;
+        private int mark;
+
+<span class="fc" id="L645">        private ByteArrayReader(byte @Nonnull [] src, int off, int len) {</span>
+<span class="fc" id="L646">            this.src = src;</span>
+<span class="fc" id="L647">            this.pos = off;</span>
+<span class="fc" id="L648">            this.end = off + len;</span>
+<span class="fc" id="L649">            this.mark = pos;</span>
+<span class="fc" id="L650">        }</span>
+
+        @Override
+        public int ready() {
+<span class="fc" id="L654">            return end - pos;</span>
+        }
+
+        @Override
+        public @Nonnull ByteSegment read(int len) throws IllegalArgumentException {
+<span class="fc" id="L659">            IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L660" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L661">                return ByteSegment.empty(false);</span>
+            }
+<span class="fc bfc" id="L663" title="All 2 branches covered.">            if (pos == end) {</span>
+<span class="fc" id="L664">                return ByteSegment.empty(true);</span>
+            }
+<span class="fc" id="L666">            int remaining = end - pos;</span>
+<span class="fc" id="L667">            int actualLen = Math.min(remaining, len);</span>
+<span class="fc" id="L668">            ByteBuffer data = ByteBuffer.wrap(src, pos, actualLen).slice();</span>
+<span class="fc" id="L669">            pos += actualLen;</span>
+<span class="fc bfc" id="L670" title="All 2 branches covered.">            return ByteSegment.of(data, remaining &lt;= len);</span>
+        }
+
+        @Override
+        public @Nullable ByteBuffer read() throws IORuntimeException {
+<span class="fc bfc" id="L675" title="All 2 branches covered.">            if (pos &gt;= end) {</span>
+<span class="fc" id="L676">                return null;</span>
+            }
+<span class="fc" id="L678">            ByteBuffer ret = ByteBuffer.wrap(src, pos, end - pos);</span>
+<span class="fc" id="L679">            pos = end;</span>
+<span class="fc" id="L680">            return ret;</span>
+        }
+
+        @Override
+        public long skip(long len) throws IllegalArgumentException {
+<span class="fc" id="L685">            IOChecker.checkSkip(len);</span>
+<span class="fc" id="L686">            return skip0(len);</span>
+        }
+
+        private long skip0(long len) {
+<span class="fc bfc" id="L690" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L691">                return 0;</span>
+            }
+<span class="fc bfc" id="L693" title="All 2 branches covered.">            if (pos == end) {</span>
+<span class="fc" id="L694">                return 0;</span>
+            }
+<span class="fc" id="L696">            int remaining = end - pos;</span>
+<span class="fc" id="L697">            int skipped = (int) Math.min(remaining, len);</span>
+<span class="fc" id="L698">            pos += skipped;</span>
+<span class="fc" id="L699">            return skipped;</span>
+        }
+
+        @Override
+        public long readTo(@Nonnull OutputStream dst) throws IORuntimeException {
+<span class="fc bfc" id="L704" title="All 2 branches covered.">            if (pos == end) {</span>
+<span class="fc" id="L705">                return -1;</span>
+            }
+            try {
+<span class="fc" id="L708">                int remaining = end - pos;</span>
+<span class="fc" id="L709">                dst.write(src, pos, remaining);</span>
+<span class="fc" id="L710">                pos += remaining;</span>
+<span class="fc" id="L711">                return remaining;</span>
+<span class="fc" id="L712">            } catch (IOException e) {</span>
+<span class="fc" id="L713">                throw new IORuntimeException(e);</span>
+            }
+        }
+
+        @Override
+        public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L719">            IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L720" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L721">                return 0;</span>
+            }
+<span class="fc bfc" id="L723" title="All 2 branches covered.">            if (pos == end) {</span>
+<span class="fc" id="L724">                return -1;</span>
+            }
+            try {
+<span class="fc" id="L727">                int remaining = end - pos;</span>
+<span class="fc" id="L728">                int actualLen = (int) Math.min(remaining, len);</span>
+<span class="fc" id="L729">                dst.write(src, pos, actualLen);</span>
+<span class="fc" id="L730">                pos += actualLen;</span>
+<span class="fc" id="L731">                return actualLen;</span>
+<span class="fc" id="L732">            } catch (IOException e) {</span>
+<span class="fc" id="L733">                throw new IORuntimeException(e);</span>
+            }
+        }
+
+        @Override
+        public long readTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+<span class="fc bfc" id="L739" title="All 2 branches covered.">            if (pos == end) {</span>
+<span class="fc" id="L740">                return -1;</span>
+            }
+<span class="fc" id="L742">            int remaining = end - pos;</span>
+<span class="fc" id="L743">            ByteBuffer buf = ByteBuffer.wrap(src, pos, remaining);</span>
+<span class="fc" id="L744">            int ret = BufferKit.readTo(buf, dst);</span>
+<span class="fc" id="L745">            pos += ret;</span>
+<span class="fc" id="L746">            return ret;</span>
+        }
+
+        @Override
+        public long readTo(
+            @Nonnull WritableByteChannel dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L753">            IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L754" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L755">                return 0;</span>
+            }
+<span class="fc bfc" id="L757" title="All 2 branches covered.">            if (pos == end) {</span>
+<span class="fc" id="L758">                return -1;</span>
+            }
+<span class="fc" id="L760">            int remaining = end - pos;</span>
+<span class="fc" id="L761">            int actualLen = (int) Math.min(remaining, len);</span>
+<span class="fc" id="L762">            ByteBuffer buf = ByteBuffer.wrap(src, pos, actualLen);</span>
+<span class="fc" id="L763">            int ret = BufferKit.readTo(buf, dst);</span>
+<span class="fc" id="L764">            pos += ret;</span>
+<span class="fc" id="L765">            return ret;</span>
+        }
+
+        @Override
+        public int readTo(byte @Nonnull [] dst) {
+<span class="fc" id="L770">            return readTo0(dst, 0, dst.length);</span>
+        }
+
+        @Override
+        public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException {
+<span class="fc" id="L775">            IOChecker.checkOffLen(off, len, dst.length);</span>
+<span class="fc" id="L776">            return readTo0(dst, off, len);</span>
+        }
+
+        private int readTo0(byte @Nonnull [] dst, int off, int len) {
+<span class="fc bfc" id="L780" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L781">                return 0;</span>
+            }
+<span class="fc bfc" id="L783" title="All 2 branches covered.">            if (pos == end) {</span>
+<span class="fc" id="L784">                return -1;</span>
+            }
+<span class="fc" id="L786">            int remaining = end - pos;</span>
+<span class="fc" id="L787">            int copySize = Math.min(remaining, len);</span>
+<span class="fc" id="L788">            System.arraycopy(src, pos, dst, off, copySize);</span>
+<span class="fc" id="L789">            pos += copySize;</span>
+<span class="fc" id="L790">            return copySize;</span>
+        }
+
+        @Override
+        public int readTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+<span class="fc bfc" id="L795" title="All 2 branches covered.">            if (dst.remaining() == 0) {</span>
+<span class="fc" id="L796">                return 0;</span>
+            }
+<span class="fc bfc" id="L798" title="All 2 branches covered.">            if (pos == end) {</span>
+<span class="fc" id="L799">                return -1;</span>
+            }
+<span class="fc" id="L801">            int remaining = end - pos;</span>
+<span class="fc" id="L802">            int putSize = Math.min(remaining, dst.remaining());</span>
+<span class="fc" id="L803">            return putTo0(dst, putSize);</span>
+        }
+
+        @Override
+        public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L808">            IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L809" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L810">                return 0;</span>
+            }
+<span class="fc bfc" id="L812" title="All 2 branches covered.">            if (dst.remaining() == 0) {</span>
+<span class="fc" id="L813">                return 0;</span>
+            }
+<span class="fc bfc" id="L815" title="All 2 branches covered.">            if (pos == end) {</span>
+<span class="fc" id="L816">                return -1;</span>
+            }
+<span class="fc" id="L818">            int remaining = end - pos;</span>
+<span class="fc" id="L819">            int putSize = MathKit.min(remaining, dst.remaining(), len);</span>
+<span class="fc" id="L820">            return putTo0(dst, putSize);</span>
+        }
+
+        private int putTo0(@Nonnull ByteBuffer dst, int putSize) throws IORuntimeException {
+            try {
+<span class="fc" id="L825">                dst.put(src, pos, putSize);</span>
+<span class="fc" id="L826">                pos += putSize;</span>
+<span class="fc" id="L827">                return putSize;</span>
+<span class="fc" id="L828">            } catch (Exception e) {</span>
+<span class="fc" id="L829">                throw new IORuntimeException(e);</span>
+            }
+        }
+
+        @Override
+        public @Nonnull ByteSegment available() throws IORuntimeException {
+<span class="fc" id="L835">            return read(end - pos);</span>
+        }
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L840">            return true;</span>
+        }
+
+        @Override
+        public void mark() {
+<span class="fc" id="L845">            mark = pos;</span>
+<span class="fc" id="L846">        }</span>
+
+        @Override
+        public void reset() {
+<span class="fc" id="L850">            pos = mark;</span>
+<span class="fc" id="L851">        }</span>
+
+        @Override
+        public void close() {
+<span class="fc" id="L855">        }</span>
+    }
+
+    private static final class ByteBufferReader extends InMemoryReader {
+
+        private final @Nonnull ByteBuffer src;
+
+<span class="fc" id="L862">        private ByteBufferReader(@Nonnull ByteBuffer src) {</span>
+<span class="fc" id="L863">            this.src = src;</span>
+<span class="fc" id="L864">        }</span>
+
+        @Override
+        public int ready() {
+<span class="fc" id="L868">            return src.remaining();</span>
+        }
+
+        @Override
+        public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L873">            IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L874" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L875">                return ByteSegment.empty(false);</span>
+            }
+<span class="fc bfc" id="L877" title="All 2 branches covered.">            if (!src.hasRemaining()) {</span>
+<span class="fc" id="L878">                return ByteSegment.empty(true);</span>
+            }
+<span class="fc" id="L880">            int pos = src.position();</span>
+<span class="fc" id="L881">            int limit = src.limit();</span>
+<span class="fc" id="L882">            int newPos = Math.min(pos + len, limit);</span>
+<span class="fc" id="L883">            src.limit(newPos);</span>
+<span class="fc" id="L884">            ByteBuffer data = src.slice();</span>
+<span class="fc" id="L885">            src.position(newPos);</span>
+<span class="fc" id="L886">            src.limit(limit);</span>
+<span class="fc bfc" id="L887" title="All 2 branches covered.">            return ByteSegment.of(data, newPos &gt;= limit);</span>
+        }
+
+        @Override
+        public @Nullable ByteBuffer read() throws IORuntimeException {
+<span class="fc bfc" id="L892" title="All 2 branches covered.">            if (!src.hasRemaining()) {</span>
+<span class="fc" id="L893">                return null;</span>
+            }
+<span class="fc" id="L895">            ByteBuffer ret = src.slice();</span>
+<span class="fc" id="L896">            src.position(src.limit());</span>
+<span class="fc" id="L897">            return ret;</span>
+        }
+
+        @Override
+        public long skip(long len) throws IllegalArgumentException {
+<span class="fc" id="L902">            IOChecker.checkSkip(len);</span>
+<span class="fc" id="L903">            return skip0(len);</span>
+        }
+
+        private long skip0(long len) {
+<span class="fc bfc" id="L907" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L908">                return 0;</span>
+            }
+<span class="fc bfc" id="L910" title="All 2 branches covered.">            if (!src.hasRemaining()) {</span>
+<span class="fc" id="L911">                return 0;</span>
+            }
+<span class="fc" id="L913">            int pos = src.position();</span>
+<span class="fc" id="L914">            int newPos = (int) Math.min(pos + len, src.limit());</span>
+<span class="fc" id="L915">            src.position(newPos);</span>
+<span class="fc" id="L916">            return newPos - pos;</span>
+        }
+
+        @Override
+        public long readTo(@Nonnull OutputStream dst) throws IORuntimeException {
+<span class="fc" id="L921">            return BufferKit.readTo(src, dst);</span>
+        }
+
+        @Override
+        public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L926">            IOChecker.checkLen(len);</span>
+<span class="fc" id="L927">            int actualLen = (int) Math.min(Integer.MAX_VALUE, len);</span>
+<span class="fc" id="L928">            return BufferKit.readTo0(src, dst, actualLen);</span>
+        }
+
+        @Override
+        public long readTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+<span class="fc" id="L933">            return BufferKit.readTo(src, dst);</span>
+        }
+
+        @Override
+        public long readTo(
+            @Nonnull WritableByteChannel dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L940">            IOChecker.checkLen(len);</span>
+<span class="fc" id="L941">            int actualLen = (int) Math.min(Integer.MAX_VALUE, len);</span>
+<span class="fc" id="L942">            return BufferKit.readTo0(src, dst, actualLen);</span>
+        }
+
+        @Override
+        public int readTo(byte @Nonnull [] dst) {
+<span class="fc" id="L947">            return BufferKit.readTo(src, dst);</span>
+        }
+
+        @Override
+        public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException {
+<span class="fc" id="L952">            return BufferKit.readTo(src, dst, off, len);</span>
+        }
+
+        @Override
+        public int readTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+<span class="fc" id="L957">            return BufferKit.readTo(src, dst);</span>
+        }
+
+        @Override
+        public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L962">            return BufferKit.readTo(src, dst, len);</span>
+        }
+
+        @Override
+        public @Nonnull ByteSegment available() throws IORuntimeException {
+<span class="fc" id="L967">            return read(src.remaining());</span>
+        }
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L972">            return true;</span>
+        }
+
+        @Override
+        public void mark() {
+<span class="fc" id="L977">            src.mark();</span>
+<span class="fc" id="L978">        }</span>
+
+        @Override
+        public void reset() throws IORuntimeException {
+            try {
+<span class="fc" id="L983">                src.reset();</span>
+<span class="fc" id="L984">            } catch (Exception e) {</span>
+<span class="fc" id="L985">                throw new IORuntimeException(e);</span>
+<span class="fc" id="L986">            }</span>
+<span class="fc" id="L987">        }</span>
+
+        @Override
+        public void close() {
+<span class="fc" id="L991">        }</span>
+    }
+
+    private static final class LimitedReader implements ByteReader {
+
+        private final @Nonnull ByteReader src;
+        private final long limit;
+
+<span class="fc" id="L999">        private long pos = 0;</span>
+<span class="fc" id="L1000">        private long mark = 0;</span>
+
+<span class="fc" id="L1002">        private LimitedReader(@Nonnull ByteReader src, long limit) {</span>
+<span class="fc" id="L1003">            this.src = src;</span>
+<span class="fc" id="L1004">            this.limit = limit;</span>
+<span class="fc" id="L1005">        }</span>
+
+        @Override
+        public int ready() throws IORuntimeException {
+<span class="fc" id="L1009">            return Math.min(src.ready(), MathKit.intValue(limit - pos));</span>
+        }
+
+        @Override
+        public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1014">            return read(len, false);</span>
+        }
+
+        @Override
+        public @Nullable ByteBuffer read() throws IORuntimeException {
+<span class="fc bfc" id="L1019" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1020">                return null;</span>
+            }
+<span class="fc" id="L1022">            int len = MathKit.intValue(limit - pos);</span>
+<span class="fc" id="L1023">            return read(len).data();</span>
+        }
+
+        @Override
+        public long skip(long len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1028">            IOChecker.checkSkip(len);</span>
+<span class="fc bfc" id="L1029" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1030">                return 0;</span>
+            }
+<span class="fc bfc" id="L1032" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1033">                return 0;</span>
+            }
+<span class="fc" id="L1035">            int actualLen = (int) Math.min(len, limit - pos);</span>
+<span class="fc" id="L1036">            long skipped = src.skip(actualLen);</span>
+<span class="fc" id="L1037">            pos += skipped;</span>
+<span class="fc" id="L1038">            return skipped;</span>
+        }
+
+        @Override
+        public long readTo(@Nonnull OutputStream dst) throws IORuntimeException {
+<span class="fc bfc" id="L1043" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1044">                return -1;</span>
+            }
+<span class="fc" id="L1046">            long readSize = src.readTo(dst, limit - pos);</span>
+<span class="fc bfc" id="L1047" title="All 2 branches covered.">            if (readSize &lt; 0) {</span>
+<span class="fc" id="L1048">                return readSize;</span>
+            }
+<span class="fc" id="L1050">            pos += readSize;</span>
+<span class="fc" id="L1051">            return readSize;</span>
+        }
+
+        @Override
+        public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1056">            IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L1057" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1058">                return 0;</span>
+            }
+<span class="fc bfc" id="L1060" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1061">                return -1;</span>
+            }
+<span class="fc" id="L1063">            int actualLen = (int) Math.min(len, limit - pos);</span>
+<span class="fc" id="L1064">            long readSize = src.readTo(dst, actualLen);</span>
+<span class="fc bfc" id="L1065" title="All 2 branches covered.">            if (readSize &lt; 0) {</span>
+<span class="fc" id="L1066">                return readSize;</span>
+            }
+<span class="fc" id="L1068">            pos += readSize;</span>
+<span class="fc" id="L1069">            return readSize;</span>
+        }
+
+        @Override
+        public long readTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+<span class="fc bfc" id="L1074" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1075">                return -1;</span>
+            }
+<span class="fc" id="L1077">            long readSize = src.readTo(dst, limit - pos);</span>
+<span class="fc bfc" id="L1078" title="All 2 branches covered.">            if (readSize &lt; 0) {</span>
+<span class="fc" id="L1079">                return readSize;</span>
+            }
+<span class="fc" id="L1081">            pos += readSize;</span>
+<span class="fc" id="L1082">            return readSize;</span>
+        }
+
+        @Override
+        public long readTo(
+            @Nonnull WritableByteChannel dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1089">            IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L1090" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1091">                return 0;</span>
+            }
+<span class="fc bfc" id="L1093" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1094">                return -1;</span>
+            }
+<span class="fc" id="L1096">            int actualLen = (int) Math.min(len, limit - pos);</span>
+<span class="fc" id="L1097">            long readSize = src.readTo(dst, actualLen);</span>
+<span class="fc bfc" id="L1098" title="All 2 branches covered.">            if (readSize &lt; 0) {</span>
+<span class="fc" id="L1099">                return readSize;</span>
+            }
+<span class="fc" id="L1101">            pos += readSize;</span>
+<span class="fc" id="L1102">            return readSize;</span>
+        }
+
+        @Override
+        public int readTo(byte @Nonnull [] dst) throws IORuntimeException {
+<span class="fc" id="L1107">            return readTo(dst, 0, dst.length);</span>
+        }
+
+        @Override
+        public int readTo(
+            byte @Nonnull [] dst, int off, int len
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L1114">            IOChecker.checkOffLen(off, len, dst.length);</span>
+<span class="fc bfc" id="L1115" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1116">                return 0;</span>
+            }
+<span class="fc bfc" id="L1118" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1119">                return -1;</span>
+            }
+<span class="fc" id="L1121">            int actualLen = (int) Math.min(len, limit - pos);</span>
+<span class="fc" id="L1122">            int readSize = src.readTo(dst, off, actualLen);</span>
+<span class="fc bfc" id="L1123" title="All 2 branches covered.">            if (readSize &lt; 0) {</span>
+<span class="fc" id="L1124">                return readSize;</span>
+            }
+<span class="fc" id="L1126">            pos += readSize;</span>
+<span class="fc" id="L1127">            return readSize;</span>
+        }
+
+        @Override
+        public int readTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+<span class="fc" id="L1132">            return readTo(dst, dst.remaining());</span>
+        }
+
+        @Override
+        public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1137">            IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L1138" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1139">                return 0;</span>
+            }
+<span class="fc bfc" id="L1141" title="All 2 branches covered.">            if (!dst.hasRemaining()) {</span>
+<span class="fc" id="L1142">                return 0;</span>
+            }
+<span class="fc bfc" id="L1144" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1145">                return -1;</span>
+            }
+<span class="fc" id="L1147">            int actualLen = (int) MathKit.min(len, limit - pos, dst.remaining());</span>
+<span class="fc" id="L1148">            int readSize = src.readTo(dst, actualLen);</span>
+<span class="fc bfc" id="L1149" title="All 2 branches covered.">            if (readSize &lt; 0) {</span>
+<span class="fc" id="L1150">                return readSize;</span>
+            }
+<span class="fc" id="L1152">            pos += readSize;</span>
+<span class="fc" id="L1153">            return readSize;</span>
+        }
+
+        @Override
+        public @Nonnull ByteSegment available(int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1158">            return read(len, true);</span>
+        }
+
+        @Override
+        public @Nonnull ByteSegment available() throws IORuntimeException {
+<span class="fc" id="L1163">            return available(MathKit.intValue(limit - pos));</span>
+        }
+
+        @Override
+        public long availableTo(@Nonnull OutputStream dst) throws IORuntimeException {
+<span class="fc bfc" id="L1168" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1169">                return -1;</span>
+            }
+<span class="fc" id="L1171">            long readSize = src.availableTo(dst, limit - pos);</span>
+<span class="fc bfc" id="L1172" title="All 2 branches covered.">            if (readSize &lt;= 0) {</span>
+<span class="fc" id="L1173">                return readSize;</span>
+            }
+<span class="fc" id="L1175">            pos += readSize;</span>
+<span class="fc" id="L1176">            return readSize;</span>
+        }
+
+        @Override
+        public long availableTo(
+            @Nonnull OutputStream dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1183">            IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L1184" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1185">                return 0;</span>
+            }
+<span class="fc bfc" id="L1187" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1188">                return -1;</span>
+            }
+<span class="fc" id="L1190">            int actualLen = (int) Math.min(len, limit - pos);</span>
+<span class="fc" id="L1191">            long readSize = src.availableTo(dst, actualLen);</span>
+<span class="fc bfc" id="L1192" title="All 2 branches covered.">            if (readSize &lt;= 0) {</span>
+<span class="fc" id="L1193">                return readSize;</span>
+            }
+<span class="fc" id="L1195">            pos += readSize;</span>
+<span class="fc" id="L1196">            return readSize;</span>
+        }
+
+        @Override
+        public long availableTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+<span class="fc bfc" id="L1201" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1202">                return -1;</span>
+            }
+<span class="fc" id="L1204">            long readSize = src.availableTo(dst, limit - pos);</span>
+<span class="fc bfc" id="L1205" title="All 2 branches covered.">            if (readSize &lt;= 0) {</span>
+<span class="fc" id="L1206">                return readSize;</span>
+            }
+<span class="fc" id="L1208">            pos += readSize;</span>
+<span class="fc" id="L1209">            return readSize;</span>
+        }
+
+        @Override
+        public long availableTo(
+            @Nonnull WritableByteChannel dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1216">            IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L1217" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1218">                return 0;</span>
+            }
+<span class="fc bfc" id="L1220" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1221">                return -1;</span>
+            }
+<span class="fc" id="L1223">            int actualLen = (int) Math.min(len, limit - pos);</span>
+<span class="fc" id="L1224">            long readSize = src.availableTo(dst, actualLen);</span>
+<span class="fc bfc" id="L1225" title="All 2 branches covered.">            if (readSize &lt;= 0) {</span>
+<span class="fc" id="L1226">                return readSize;</span>
+            }
+<span class="fc" id="L1228">            pos += readSize;</span>
+<span class="fc" id="L1229">            return readSize;</span>
+        }
+
+        @Override
+        public int availableTo(byte @Nonnull [] dst) throws IORuntimeException {
+<span class="fc" id="L1234">            return availableTo(dst, 0, dst.length);</span>
+        }
+
+        @Override
+        public int availableTo(
+            byte @Nonnull [] dst, int off, int len
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L1241">            IOChecker.checkOffLen(off, len, dst.length);</span>
+<span class="fc bfc" id="L1242" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1243">                return 0;</span>
+            }
+<span class="fc bfc" id="L1245" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1246">                return -1;</span>
+            }
+<span class="fc" id="L1248">            int actualLen = (int) Math.min(len, limit - pos);</span>
+<span class="fc" id="L1249">            int readSize = src.availableTo(dst, off, actualLen);</span>
+<span class="fc bfc" id="L1250" title="All 2 branches covered.">            if (readSize &lt;= 0) {</span>
+<span class="fc" id="L1251">                return readSize;</span>
+            }
+<span class="fc" id="L1253">            pos += readSize;</span>
+<span class="fc" id="L1254">            return readSize;</span>
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+<span class="fc" id="L1259">            return availableTo(dst, dst.remaining());</span>
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1264">            IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L1265" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1266">                return 0;</span>
+            }
+<span class="fc bfc" id="L1268" title="All 2 branches covered.">            if (!dst.hasRemaining()) {</span>
+<span class="fc" id="L1269">                return 0;</span>
+            }
+<span class="fc bfc" id="L1271" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1272">                return -1;</span>
+            }
+<span class="fc" id="L1274">            int actualLen = (int) MathKit.min(len, limit - pos, dst.remaining());</span>
+<span class="fc" id="L1275">            int readSize = src.availableTo(dst, actualLen);</span>
+<span class="fc bfc" id="L1276" title="All 2 branches covered.">            if (readSize &lt;= 0) {</span>
+<span class="fc" id="L1277">                return readSize;</span>
+            }
+<span class="fc" id="L1279">            pos += readSize;</span>
+<span class="fc" id="L1280">            return readSize;</span>
+        }
+
+        private @Nonnull ByteSegment read(int len, boolean available) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1284">            IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L1285" title="All 2 branches covered.">            if (len == 0) {</span>
+<span class="fc" id="L1286">                return ByteSegment.empty(false);</span>
+            }
+<span class="fc bfc" id="L1288" title="All 2 branches covered.">            if (pos &gt;= limit) {</span>
+<span class="fc" id="L1289">                return ByteSegment.empty(true);</span>
+            }
+<span class="fc" id="L1291">            int maxLen = (int) Math.min(len, limit - pos);</span>
+<span class="fc bfc" id="L1292" title="All 2 branches covered.">            ByteSegment segment = available ? src.available(maxLen) : src.read(maxLen);</span>
+<span class="fc" id="L1293">            pos += segment.data().remaining();</span>
+<span class="fc bfc" id="L1294" title="All 2 branches covered.">            if (!segment.end()) {</span>
+<span class="fc bfc" id="L1295" title="All 2 branches covered.">                if (pos &gt;= limit) {</span>
+<span class="fc" id="L1296">                    return newSeg(segment.data(), true);</span>
+                }
+            }
+<span class="fc" id="L1299">            return segment;</span>
+        }
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L1304">            return src.markSupported();</span>
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+<span class="fc" id="L1309">            src.mark();</span>
+<span class="fc" id="L1310">            mark = pos;</span>
+<span class="fc" id="L1311">        }</span>
+
+        @Override
+        public void reset() throws IORuntimeException {
+<span class="fc" id="L1315">            src.reset();</span>
+<span class="fc" id="L1316">            pos = mark;</span>
+<span class="fc" id="L1317">        }</span>
+
+        @Override
+        public void close() throws IORuntimeException {
+<span class="fc" id="L1321">            src.close();</span>
+<span class="fc" id="L1322">        }</span>
+    }
+
+    private static final class AsInputStream extends DoReadStream {
+
+        private final @Nonnull ByteReader in;
+        private byte[] oneByte;
+
+<span class="fc" id="L1330">        private AsInputStream(@Nonnull ByteReader in) {</span>
+<span class="fc" id="L1331">            this.in = in;</span>
+<span class="fc" id="L1332">        }</span>
+
+        @Override
+        public int read() throws IOException {
+            try {
+<span class="fc bfc" id="L1337" title="All 2 branches covered.">                if (oneByte == null) {</span>
+<span class="fc" id="L1338">                    oneByte = new byte[1];</span>
+                }
+<span class="fc" id="L1340">                int ret = in.readTo(oneByte);</span>
+<span class="fc bfc" id="L1341" title="All 2 branches covered.">                return ret &lt; 0 ? -1 : oneByte[0] &amp; 0xFF;</span>
+<span class="fc" id="L1342">            } catch (Exception e) {</span>
+<span class="fc" id="L1343">                throw new IOException(e);</span>
+            }
+        }
+
+        @Override
+        protected int doRead(byte @Nonnull [] b, int off, int len) throws IOException {
+            try {
+<span class="fc" id="L1350">                return in.readTo(b, off, len);</span>
+<span class="fc" id="L1351">            } catch (Exception e) {</span>
+<span class="fc" id="L1352">                throw new IOException(e);</span>
+            }
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+<span class="fc bfc" id="L1358" title="All 2 branches covered.">            if (n &lt;= 0) {</span>
+<span class="fc" id="L1359">                return 0;</span>
+            }
+            try {
+<span class="fc" id="L1362">                return in.skip(n);</span>
+<span class="fc" id="L1363">            } catch (Exception e) {</span>
+<span class="fc" id="L1364">                throw new IOException(e);</span>
+            }
+        }
+
+        @Override
+        public boolean markSupported() {
+<span class="fc" id="L1370">            return in.markSupported();</span>
+        }
+
+        @Override
+        public void mark(int readAheadLimit) {
+<span class="fc" id="L1375">            Fs.ignoreException(in::mark);</span>
+<span class="fc" id="L1376">        }</span>
+
+        @Override
+        public void reset() throws IOException {
+            try {
+<span class="fc" id="L1381">                in.reset();</span>
+<span class="fc" id="L1382">            } catch (Exception e) {</span>
+<span class="fc" id="L1383">                throw new IOException(e);</span>
+<span class="fc" id="L1384">            }</span>
+<span class="fc" id="L1385">        }</span>
+
+        @Override
+        public void close() throws IOException {
+            try {
+<span class="fc" id="L1390">                in.close();</span>
+<span class="fc" id="L1391">            } catch (Exception e) {</span>
+<span class="fc" id="L1392">                throw new IOException(e);</span>
+<span class="fc" id="L1393">            }</span>
+<span class="fc" id="L1394">        }</span>
+
+        @Override
+        public int available() {
+<span class="fc" id="L1398">            return in.ready();</span>
+        }
+    }
+
+    private ByteReaderBack() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

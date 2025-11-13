@@ -1,0 +1,1336 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ArrayKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.collect</a> &gt; <span class="el_source">ArrayKit.java</span></div><h1>ArrayKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.collect;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.annotations.OutParam;
+import space.sunqian.annotations.RetainedParam;
+import space.sunqian.common.Fs;
+import space.sunqian.common.base.function.predicate.IndexedDoublePredicate;
+import space.sunqian.common.base.function.predicate.IndexedIntPredicate;
+import space.sunqian.common.base.function.predicate.IndexedLongPredicate;
+import space.sunqian.common.base.function.predicate.IndexedPredicate;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.List;
+import java.util.RandomAccess;
+import java.util.function.Function;
+
+/**
+ * Utilities for array.
+ *
+ * @author sunqian
+ */
+public class ArrayKit {
+
+    /**
+     * Returns whether the given array is null or empty.
+     *
+     * @param array the given array
+     * @param &lt;T&gt;   the component type of the given array
+     * @return whether the given array is null or empty
+     */
+    public static &lt;T&gt; boolean isEmpty(T @Nullable [] array) {
+<span class="fc bfc" id="L34" title="All 4 branches covered.">        return array == null || array.length == 0;</span>
+    }
+
+    /**
+     * Returns whether the given array is null or empty.
+     *
+     * @param array the given array
+     * @return whether the given array is null or empty
+     */
+    public static boolean isEmpty(boolean @Nullable [] array) {
+<span class="fc bfc" id="L44" title="All 4 branches covered.">        return array == null || array.length == 0;</span>
+    }
+
+    /**
+     * Returns whether the given array is null or empty.
+     *
+     * @param array the given array
+     * @return whether the given array is null or empty
+     */
+    public static boolean isEmpty(byte @Nullable [] array) {
+<span class="fc bfc" id="L54" title="All 4 branches covered.">        return array == null || array.length == 0;</span>
+    }
+
+    /**
+     * Returns whether the given array is null or empty.
+     *
+     * @param array the given array
+     * @return whether the given array is null or empty
+     */
+    public static boolean isEmpty(short @Nullable [] array) {
+<span class="fc bfc" id="L64" title="All 4 branches covered.">        return array == null || array.length == 0;</span>
+    }
+
+    /**
+     * Returns whether the given array is null or empty.
+     *
+     * @param array the given array
+     * @return whether the given array is null or empty
+     */
+    public static boolean isEmpty(char @Nullable [] array) {
+<span class="fc bfc" id="L74" title="All 4 branches covered.">        return array == null || array.length == 0;</span>
+    }
+
+    /**
+     * Returns whether the given array is null or empty.
+     *
+     * @param array the given array
+     * @return whether the given array is null or empty
+     */
+    public static boolean isEmpty(int @Nullable [] array) {
+<span class="fc bfc" id="L84" title="All 4 branches covered.">        return array == null || array.length == 0;</span>
+    }
+
+    /**
+     * Returns whether the given array is null or empty.
+     *
+     * @param array the given array
+     * @return whether the given array is null or empty
+     */
+    public static boolean isEmpty(long @Nullable [] array) {
+<span class="fc bfc" id="L94" title="All 4 branches covered.">        return array == null || array.length == 0;</span>
+    }
+
+    /**
+     * Returns whether the given array is null or empty.
+     *
+     * @param array the given array
+     * @return whether the given array is null or empty
+     */
+    public static boolean isEmpty(float @Nullable [] array) {
+<span class="fc bfc" id="L104" title="All 4 branches covered.">        return array == null || array.length == 0;</span>
+    }
+
+    /**
+     * Returns whether the given array is null or empty.
+     *
+     * @param array the given array
+     * @return whether the given array is null or empty
+     */
+    public static boolean isEmpty(double @Nullable [] array) {
+<span class="fc bfc" id="L114" title="All 4 branches covered.">        return array == null || array.length == 0;</span>
+    }
+
+    /**
+     * Returns whether the given array is not null and empty.
+     *
+     * @param array the given array
+     * @param &lt;T&gt;   the component type of the given array
+     * @return whether the given array is not null and empty
+     */
+    public static &lt;T&gt; boolean isNotEmpty(T @Nullable [] array) {
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        return !isEmpty(array);</span>
+    }
+
+    /**
+     * Returns whether the given array is not null and empty.
+     *
+     * @param array the given array
+     * @return whether the given array is not null and empty
+     */
+    public static boolean isNotEmpty(boolean @Nullable [] array) {
+<span class="fc bfc" id="L135" title="All 2 branches covered.">        return !isEmpty(array);</span>
+    }
+
+    /**
+     * Returns whether the given array is not null and empty.
+     *
+     * @param array the given array
+     * @return whether the given array is not null and empty
+     */
+    public static boolean isNotEmpty(byte @Nullable [] array) {
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        return !isEmpty(array);</span>
+    }
+
+    /**
+     * Returns whether the given array is not null and empty.
+     *
+     * @param array the given array
+     * @return whether the given array is not null and empty
+     */
+    public static boolean isNotEmpty(short @Nullable [] array) {
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        return !isEmpty(array);</span>
+    }
+
+    /**
+     * Returns whether the given array is not null and empty.
+     *
+     * @param array the given array
+     * @return whether the given array is not null and empty
+     */
+    public static boolean isNotEmpty(char @Nullable [] array) {
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        return !isEmpty(array);</span>
+    }
+
+    /**
+     * Returns whether the given array is not null and empty.
+     *
+     * @param array the given array
+     * @return whether the given array is not null and empty
+     */
+    public static boolean isNotEmpty(int @Nullable [] array) {
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        return !isEmpty(array);</span>
+    }
+
+    /**
+     * Returns whether the given array is not null and empty.
+     *
+     * @param array the given array
+     * @return whether the given array is not null and empty
+     */
+    public static boolean isNotEmpty(long @Nullable [] array) {
+<span class="fc bfc" id="L185" title="All 2 branches covered.">        return !isEmpty(array);</span>
+    }
+
+    /**
+     * Returns whether the given array is not null and empty.
+     *
+     * @param array the given array
+     * @return whether the given array is not null and empty
+     */
+    public static boolean isNotEmpty(float @Nullable [] array) {
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        return !isEmpty(array);</span>
+    }
+
+    /**
+     * Returns whether the given array is not null and empty.
+     *
+     * @param array the given array
+     * @return whether the given array is not null and empty
+     */
+    public static boolean isNotEmpty(double @Nullable [] array) {
+<span class="fc bfc" id="L205" title="All 2 branches covered.">        return !isEmpty(array);</span>
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @param &lt;T&gt;   the component type of the given array
+     * @return the given array
+     */
+    public static &lt;T&gt; T @Nonnull [] fill(T @Nonnull @OutParam [] array, T value) {
+<span class="fc" id="L217">        Arrays.fill(array, value);</span>
+<span class="fc" id="L218">        return array;</span>
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static boolean @Nonnull [] fill(boolean @Nonnull @OutParam [] array, boolean value) {
+<span class="fc" id="L229">        Arrays.fill(array, value);</span>
+<span class="fc" id="L230">        return array;</span>
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static byte @Nonnull [] fill(byte @Nonnull @OutParam [] array, byte value) {
+<span class="fc" id="L241">        Arrays.fill(array, value);</span>
+<span class="fc" id="L242">        return array;</span>
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static short @Nonnull [] fill(short @Nonnull @OutParam [] array, short value) {
+<span class="fc" id="L253">        Arrays.fill(array, value);</span>
+<span class="fc" id="L254">        return array;</span>
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static char @Nonnull [] fill(char @Nonnull @OutParam [] array, char value) {
+<span class="fc" id="L265">        Arrays.fill(array, value);</span>
+<span class="fc" id="L266">        return array;</span>
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static int @Nonnull [] fill(int @Nonnull @OutParam [] array, int value) {
+<span class="fc" id="L277">        Arrays.fill(array, value);</span>
+<span class="fc" id="L278">        return array;</span>
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static long @Nonnull [] fill(long @Nonnull @OutParam [] array, long value) {
+<span class="fc" id="L289">        Arrays.fill(array, value);</span>
+<span class="fc" id="L290">        return array;</span>
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static float @Nonnull [] fill(float @Nonnull @OutParam [] array, float value) {
+<span class="fc" id="L301">        Arrays.fill(array, value);</span>
+<span class="fc" id="L302">        return array;</span>
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static double @Nonnull [] fill(double @Nonnull @OutParam [] array, double value) {
+<span class="fc" id="L313">        Arrays.fill(array, value);</span>
+<span class="fc" id="L314">        return array;</span>
+    }
+
+    /**
+     * Maps the source array to the dest array by specified mapper.
+     * &lt;p&gt;
+     * If the dest array's length equals to the source array's length, the dest array will be returned. Otherwise, a new
+     * array with same length of the source array will be created and returned.
+     * &lt;p&gt;
+     * Each element of the source array will be mapped to a new element by the specified mapper, then be set into the
+     * result array at corresponding index.
+     *
+     * @param source the source array
+     * @param dest   the dest array
+     * @param mapper the specified mapper
+     * @param &lt;T&gt;    the component type of the source array
+     * @param &lt;R&gt;    the component type of the dest array
+     * @return the given dest or a new result array
+     */
+    public static &lt;T, R&gt; R @Nonnull [] map(
+        T @Nonnull [] source,
+        R @Nonnull @OutParam [] dest,
+        @Nonnull Function&lt;? super T, ? extends R&gt; mapper
+    ) {
+        R[] result;
+<span class="fc bfc" id="L339" title="All 2 branches covered.">        if (dest.length == source.length) {</span>
+<span class="fc" id="L340">            result = dest;</span>
+        } else {
+<span class="fc" id="L342">            result = newArray(dest.getClass().getComponentType(), source.length);</span>
+        }
+<span class="fc" id="L344">        map0(source, result, 0, mapper);</span>
+<span class="fc" id="L345">        return result;</span>
+    }
+
+    /**
+     * Maps the source array to the dest array by the specified mapper.
+     * &lt;p&gt;
+     * This method tries to create a new array to receive the mapping result and return. Each element of the source
+     * array will be mapped to a new element by the specified mapper, then be set into the created new array at
+     * corresponding index. The component type of the new array is the type of the first nonnull new element. If all new
+     * elements are null, an {@link UnsupportedOperationException} will be thrown.
+     *
+     * @param source the source array
+     * @param mapper the specified mapper
+     * @param &lt;T&gt;    the component type of the source array
+     * @param &lt;R&gt;    the component type of the dest array
+     * @return a new result array
+     * @throws UnsupportedOperationException if all new elements are null
+     */
+    public static &lt;T, R&gt; R @Nonnull [] map(
+        T @Nonnull [] source,
+        @Nonnull Function&lt;? super T, ? extends R&gt; mapper
+    ) throws UnsupportedOperationException {
+<span class="fc bfc" id="L367" title="All 2 branches covered.">        for (int i = 0; i &lt; source.length; i++) {</span>
+<span class="fc" id="L368">            R r = mapper.apply(source[i]);</span>
+<span class="fc bfc" id="L369" title="All 2 branches covered.">            if (r != null) {</span>
+<span class="fc" id="L370">                R[] dest = newArray(r.getClass(), source.length);</span>
+<span class="fc" id="L371">                map0(source, dest, i, mapper);</span>
+<span class="fc" id="L372">                return dest;</span>
+            }
+        }
+<span class="fc" id="L375">        throw new UnsupportedOperationException(&quot;Can not resolve the component type.&quot;);</span>
+    }
+
+    private static &lt;T, R&gt; void map0(
+        T @Nonnull [] source,
+        R @Nonnull @OutParam [] dest,
+        int start,
+        @Nonnull Function&lt;? super T, ? extends R&gt; mapper
+    ) {
+<span class="fc bfc" id="L384" title="All 2 branches covered.">        for (int i = start; i &lt; source.length; i++) {</span>
+<span class="fc" id="L385">            T t = source[i];</span>
+<span class="fc" id="L386">            R r = mapper.apply(t);</span>
+<span class="fc" id="L387">            dest[i] = r;</span>
+        }
+<span class="fc" id="L389">    }</span>
+
+    /**
+     * Creates a new empty array with the specified component type and length.
+     *
+     * @param componentType the specified component type
+     * @param length        the specified length
+     * @param &lt;A&gt;           the type of created array, not the component type
+     * @return the created array
+     */
+    public static &lt;A&gt; @Nonnull A newArray(@Nonnull Class&lt;?&gt; componentType, int length) {
+<span class="fc" id="L400">        return Fs.as(Array.newInstance(componentType, length));</span>
+    }
+
+    /**
+     * Returns the value from the given array at the specified index. If the array or the value is null, or the index is
+     * out of bounds, returns the default value.
+     *
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @param &lt;T&gt;          the component type
+     * @return the value from the given array at the specified index
+     */
+    public static &lt;T&gt; T get(T @Nullable [] array, int index, T defaultValue) {
+<span class="fc bfc" id="L414" title="All 6 branches covered.">        if (array == null || index &lt; 0 || index &gt;= array.length) {</span>
+<span class="fc" id="L415">            return defaultValue;</span>
+        }
+<span class="fc" id="L417">        T value = array[index];</span>
+<span class="fc bfc" id="L418" title="All 2 branches covered.">        return value == null ? defaultValue : value;</span>
+    }
+
+    /**
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
+     *
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
+     */
+    public static boolean get(boolean @Nullable [] array, int index, boolean defaultValue) {
+<span class="fc bfc" id="L431" title="All 6 branches covered.">        if (array == null || index &lt; 0 || index &gt;= array.length) {</span>
+<span class="fc" id="L432">            return defaultValue;</span>
+        }
+<span class="fc" id="L434">        return array[index];</span>
+    }
+
+    /**
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
+     *
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
+     */
+    public static byte get(byte @Nullable [] array, int index, byte defaultValue) {
+<span class="fc bfc" id="L447" title="All 6 branches covered.">        if (array == null || index &lt; 0 || index &gt;= array.length) {</span>
+<span class="fc" id="L448">            return defaultValue;</span>
+        }
+<span class="fc" id="L450">        return array[index];</span>
+    }
+
+    /**
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
+     *
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
+     */
+    public static short get(short @Nullable [] array, int index, short defaultValue) {
+<span class="fc bfc" id="L463" title="All 6 branches covered.">        if (array == null || index &lt; 0 || index &gt;= array.length) {</span>
+<span class="fc" id="L464">            return defaultValue;</span>
+        }
+<span class="fc" id="L466">        return array[index];</span>
+    }
+
+    /**
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
+     *
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
+     */
+    public static char get(char @Nullable [] array, int index, char defaultValue) {
+<span class="fc bfc" id="L479" title="All 6 branches covered.">        if (array == null || index &lt; 0 || index &gt;= array.length) {</span>
+<span class="fc" id="L480">            return defaultValue;</span>
+        }
+<span class="fc" id="L482">        return array[index];</span>
+    }
+
+    /**
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
+     *
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
+     */
+    public static int get(int @Nullable [] array, int index, int defaultValue) {
+<span class="fc bfc" id="L495" title="All 6 branches covered.">        if (array == null || index &lt; 0 || index &gt;= array.length) {</span>
+<span class="fc" id="L496">            return defaultValue;</span>
+        }
+<span class="fc" id="L498">        return array[index];</span>
+    }
+
+    /**
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
+     *
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
+     */
+    public static long get(long @Nullable [] array, int index, long defaultValue) {
+<span class="fc bfc" id="L511" title="All 6 branches covered.">        if (array == null || index &lt; 0 || index &gt;= array.length) {</span>
+<span class="fc" id="L512">            return defaultValue;</span>
+        }
+<span class="fc" id="L514">        return array[index];</span>
+    }
+
+    /**
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
+     *
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
+     */
+    public static float get(float @Nullable [] array, int index, float defaultValue) {
+<span class="fc bfc" id="L527" title="All 6 branches covered.">        if (array == null || index &lt; 0 || index &gt;= array.length) {</span>
+<span class="fc" id="L528">            return defaultValue;</span>
+        }
+<span class="fc" id="L530">        return array[index];</span>
+    }
+
+    /**
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
+     *
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
+     */
+    public static double get(double @Nullable [] array, int index, double defaultValue) {
+<span class="fc bfc" id="L543" title="All 6 branches covered.">        if (array == null || index &lt; 0 || index &gt;= array.length) {</span>
+<span class="fc" id="L544">            return defaultValue;</span>
+        }
+<span class="fc" id="L546">        return array[index];</span>
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value via {@link Fs#equals(Object, Object)} at
+     * the given array. If none of the elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @param &lt;T&gt;   the component type
+     * @return the first index of the element which equals the specified value via {@link Fs#equals(Object, Object)} at
+     * the given array
+     */
+    public static &lt;T&gt; int indexOf(T @Nonnull [] array, T value) {
+<span class="fc bfc" id="L560" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc bfc" id="L561" title="All 2 branches covered.">            if (Fs.equals(array[i], value)) {</span>
+<span class="fc" id="L562">                return i;</span>
+            }
+        }
+<span class="fc" id="L565">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. If the element is
+     * {@code true}, the passed argument is 1, otherwise 0. If none of the elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(boolean @Nonnull [] array, boolean value) {
+<span class="fc bfc" id="L577" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc bfc" id="L578" title="All 2 branches covered.">            if (Fs.equals(array[i], value)) {</span>
+<span class="fc" id="L579">                return i;</span>
+            }
+        }
+<span class="fc" id="L582">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code int}. If none of the elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(byte @Nonnull [] array, byte value) {
+<span class="fc bfc" id="L594" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc bfc" id="L595" title="All 2 branches covered.">            if (Fs.equals(array[i], value)) {</span>
+<span class="fc" id="L596">                return i;</span>
+            }
+        }
+<span class="fc" id="L599">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code int}. If none of the elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(short @Nonnull [] array, short value) {
+<span class="fc bfc" id="L611" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc bfc" id="L612" title="All 2 branches covered.">            if (Fs.equals(array[i], value)) {</span>
+<span class="fc" id="L613">                return i;</span>
+            }
+        }
+<span class="fc" id="L616">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code int}. If none of the elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(char @Nonnull [] array, char value) {
+<span class="fc bfc" id="L628" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc bfc" id="L629" title="All 2 branches covered.">            if (Fs.equals(array[i], value)) {</span>
+<span class="fc" id="L630">                return i;</span>
+            }
+        }
+<span class="fc" id="L633">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. If none of the
+     * elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(int @Nonnull [] array, int value) {
+<span class="fc bfc" id="L645" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc bfc" id="L646" title="All 2 branches covered.">            if (Fs.equals(array[i], value)) {</span>
+<span class="fc" id="L647">                return i;</span>
+            }
+        }
+<span class="fc" id="L650">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. If none of the
+     * elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(long @Nonnull [] array, long value) {
+<span class="fc bfc" id="L662" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc bfc" id="L663" title="All 2 branches covered.">            if (Fs.equals(array[i], value)) {</span>
+<span class="fc" id="L664">                return i;</span>
+            }
+        }
+<span class="fc" id="L667">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code double}. If none of the elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(float @Nonnull [] array, float value) {
+<span class="fc bfc" id="L679" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc bfc" id="L680" title="All 2 branches covered.">            if (Fs.equals(array[i], value)) {</span>
+<span class="fc" id="L681">                return i;</span>
+            }
+        }
+<span class="fc" id="L684">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. If none of the
+     * elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(double @Nonnull [] array, double value) {
+<span class="fc bfc" id="L696" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc bfc" id="L697" title="All 2 branches covered.">            if (Fs.equals(array[i], value)) {</span>
+<span class="fc" id="L698">                return i;</span>
+            }
+        }
+<span class="fc" id="L701">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @param &lt;T&gt;       the component type
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static &lt;T&gt; int indexOf(T @Nonnull [] array, @Nonnull IndexedPredicate&lt;T&gt; predicate) {
+<span class="fc bfc" id="L714" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc bfc" id="L715" title="All 2 branches covered.">            if (predicate.test(i, array[i])) {</span>
+<span class="fc" id="L716">                return i;</span>
+            }
+        }
+<span class="fc" id="L719">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * If the element is {@code true}, the passed argument is 1, otherwise 0. If none of the elements pass the
+     * predication, returns -1.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int indexOf(boolean @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
+<span class="fc bfc" id="L732" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc bfc" id="L733" title="All 2 branches covered.">            int v = array[i] ? 1 : 0;</span>
+<span class="fc bfc" id="L734" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L735">                return i;</span>
+            }
+        }
+<span class="fc" id="L738">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code int}. If none of the elements pass the predication, returns -1.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int indexOf(byte @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
+<span class="fc bfc" id="L750" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc" id="L751">            int v = array[i];</span>
+<span class="fc bfc" id="L752" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L753">                return i;</span>
+            }
+        }
+<span class="fc" id="L756">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code int}. If none of the elements pass the predication, returns -1.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int indexOf(short @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
+<span class="fc bfc" id="L768" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc" id="L769">            int v = array[i];</span>
+<span class="fc bfc" id="L770" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L771">                return i;</span>
+            }
+        }
+<span class="fc" id="L774">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code int}. If none of the elements pass the predication, returns -1.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int indexOf(char @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
+<span class="fc bfc" id="L786" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc" id="L787">            int v = array[i];</span>
+<span class="fc bfc" id="L788" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L789">                return i;</span>
+            }
+        }
+<span class="fc" id="L792">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int indexOf(int @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
+<span class="fc bfc" id="L804" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc" id="L805">            int v = array[i];</span>
+<span class="fc bfc" id="L806" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L807">                return i;</span>
+            }
+        }
+<span class="fc" id="L810">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int indexOf(long @Nonnull [] array, @Nonnull IndexedLongPredicate predicate) {
+<span class="fc bfc" id="L822" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc" id="L823">            long v = array[i];</span>
+<span class="fc bfc" id="L824" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L825">                return i;</span>
+            }
+        }
+<span class="fc" id="L828">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code double}. If none of the elements pass the predication, returns -1.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int indexOf(float @Nonnull [] array, @Nonnull IndexedDoublePredicate predicate) {
+<span class="fc bfc" id="L840" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc" id="L841">            double v = array[i];</span>
+<span class="fc bfc" id="L842" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L843">                return i;</span>
+            }
+        }
+<span class="fc" id="L846">        return -1;</span>
+    }
+
+    /**
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int indexOf(double @Nonnull [] array, @Nonnull IndexedDoublePredicate predicate) {
+<span class="fc bfc" id="L858" title="All 2 branches covered.">        for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="fc" id="L859">            double v = array[i];</span>
+<span class="fc bfc" id="L860" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L861">                return i;</span>
+            }
+        }
+<span class="fc" id="L864">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value via {@link Fs#equals(Object, Object)} at
+     * the given array. If none of the elements found, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(Object[], Object)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @param &lt;T&gt;   the component type
+     * @return the last index of the element which equals the specified value via {@link Fs#equals(Object, Object)} at
+     * the given array
+     */
+    public static &lt;T&gt; int lastIndexOf(T @Nonnull [] array, T value) {
+<span class="fc bfc" id="L880" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L881" title="All 2 branches covered.">            if (Fs.equals(array[i], value)) {</span>
+<span class="fc" id="L882">                return i;</span>
+            }
+        }
+<span class="fc" id="L885">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. If the element is
+     * {@code true}, the passed argument is 1, otherwise 0. If none of the elements found, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(boolean[], boolean)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(boolean @Nonnull [] array, boolean value) {
+<span class="fc bfc" id="L899" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L900" title="All 2 branches covered.">            if (array[i] == value) {</span>
+<span class="fc" id="L901">                return i;</span>
+            }
+        }
+<span class="fc" id="L904">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code int}. If none of the elements found, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(byte[], byte)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(byte @Nonnull [] array, byte value) {
+<span class="fc bfc" id="L918" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L919" title="All 2 branches covered.">            if (array[i] == value) {</span>
+<span class="fc" id="L920">                return i;</span>
+            }
+        }
+<span class="fc" id="L923">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code int}. If none of the elements found, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(short[], short)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(short @Nonnull [] array, short value) {
+<span class="fc bfc" id="L937" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L938" title="All 2 branches covered.">            if (array[i] == value) {</span>
+<span class="fc" id="L939">                return i;</span>
+            }
+        }
+<span class="fc" id="L942">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code int}. If none of the elements found, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(char[], char)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(char @Nonnull [] array, char value) {
+<span class="fc bfc" id="L956" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L957" title="All 2 branches covered.">            if (array[i] == value) {</span>
+<span class="fc" id="L958">                return i;</span>
+            }
+        }
+<span class="fc" id="L961">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. If none of the
+     * elements found, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(int[], int)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(int @Nonnull [] array, int value) {
+<span class="fc bfc" id="L975" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L976" title="All 2 branches covered.">            if (array[i] == value) {</span>
+<span class="fc" id="L977">                return i;</span>
+            }
+        }
+<span class="fc" id="L980">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. If none of the
+     * elements found, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(long[], long)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(long @Nonnull [] array, long value) {
+<span class="fc bfc" id="L994" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L995" title="All 2 branches covered.">            if (array[i] == value) {</span>
+<span class="fc" id="L996">                return i;</span>
+            }
+        }
+<span class="fc" id="L999">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code double}. If none of the elements found, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(float[], float)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(float @Nonnull [] array, float value) {
+<span class="fc bfc" id="L1013" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L1014" title="All 2 branches covered.">            if (array[i] == value) {</span>
+<span class="fc" id="L1015">                return i;</span>
+            }
+        }
+<span class="fc" id="L1018">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. If none of the
+     * elements found, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(double[], double)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(double @Nonnull [] array, double value) {
+<span class="fc bfc" id="L1032" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L1033" title="All 2 branches covered.">            if (array[i] == value) {</span>
+<span class="fc" id="L1034">                return i;</span>
+            }
+        }
+<span class="fc" id="L1037">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(Object[], IndexedPredicate)}.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @param &lt;T&gt;       the component type
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static &lt;T&gt; int lastIndexOf(T @Nonnull [] array, @Nonnull IndexedPredicate&lt;T&gt; predicate) {
+<span class="fc bfc" id="L1052" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L1053" title="All 2 branches covered.">            if (predicate.test(i, array[i])) {</span>
+<span class="fc" id="L1054">                return i;</span>
+            }
+        }
+<span class="fc" id="L1057">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * If the element is {@code true}, the passed argument is 1, otherwise 0. If none of the elements pass the
+     * predication, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(boolean[], IndexedIntPredicate)}.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int lastIndexOf(boolean @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
+<span class="fc bfc" id="L1072" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L1073" title="All 2 branches covered.">            int v = array[i] ? 1 : 0;</span>
+<span class="fc bfc" id="L1074" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L1075">                return i;</span>
+            }
+        }
+<span class="fc" id="L1078">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code int}. If none of the elements pass the predication, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(byte[], IndexedIntPredicate)}.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int lastIndexOf(byte @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
+<span class="fc bfc" id="L1092" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc" id="L1093">            int v = array[i];</span>
+<span class="fc bfc" id="L1094" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L1095">                return i;</span>
+            }
+        }
+<span class="fc" id="L1098">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code int}. If none of the elements pass the predication, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(short[], IndexedIntPredicate)}.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int lastIndexOf(short @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
+<span class="fc bfc" id="L1112" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc" id="L1113">            int v = array[i];</span>
+<span class="fc bfc" id="L1114" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L1115">                return i;</span>
+            }
+        }
+<span class="fc" id="L1118">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code int}. If none of the elements pass the predication, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(char[], IndexedIntPredicate)}.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int lastIndexOf(char @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
+<span class="fc bfc" id="L1132" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc" id="L1133">            int v = array[i];</span>
+<span class="fc bfc" id="L1134" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L1135">                return i;</span>
+            }
+        }
+<span class="fc" id="L1138">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(int[], IndexedIntPredicate)}.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int lastIndexOf(int @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
+<span class="fc bfc" id="L1152" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc" id="L1153">            int v = array[i];</span>
+<span class="fc bfc" id="L1154" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L1155">                return i;</span>
+            }
+        }
+<span class="fc" id="L1158">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(long[], IndexedLongPredicate)}.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int lastIndexOf(long @Nonnull [] array, @Nonnull IndexedLongPredicate predicate) {
+<span class="fc bfc" id="L1172" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc" id="L1173">            long v = array[i];</span>
+<span class="fc bfc" id="L1174" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L1175">                return i;</span>
+            }
+        }
+<span class="fc" id="L1178">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code double}. If none of the elements pass the predication, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(float[], IndexedDoublePredicate)}.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int lastIndexOf(float @Nonnull [] array, @Nonnull IndexedDoublePredicate predicate) {
+<span class="fc bfc" id="L1192" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc" id="L1193">            double v = array[i];</span>
+<span class="fc bfc" id="L1194" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L1195">                return i;</span>
+            }
+        }
+<span class="fc" id="L1198">        return -1;</span>
+    }
+
+    /**
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
+     * &lt;p&gt;
+     * It is the reverse order method of the {@link #indexOf(double[], IndexedDoublePredicate)}.
+     *
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
+     */
+    public static int lastIndexOf(double @Nonnull [] array, @Nonnull IndexedDoublePredicate predicate) {
+<span class="fc bfc" id="L1212" title="All 2 branches covered.">        for (int i = array.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc" id="L1213">            double v = array[i];</span>
+<span class="fc bfc" id="L1214" title="All 2 branches covered.">            if (predicate.test(i, v)) {</span>
+<span class="fc" id="L1215">                return i;</span>
+            }
+        }
+<span class="fc" id="L1218">        return -1;</span>
+    }
+
+    /**
+     * Directly returns the given variable arguments as an array.
+     *
+     * @param elements the given variable arguments
+     * @param &lt;T&gt;      the component type
+     * @return the given variable arguments as an array
+     */
+    @SafeVarargs
+    public static &lt;T&gt; T @Nonnull [] array(T @Nonnull @RetainedParam ... elements) {
+<span class="fc" id="L1230">        return elements;</span>
+    }
+
+    /**
+     * Returns a fixed-size list backed by the given array. Changes to the returned list &quot;write through&quot; to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @param &lt;T&gt;   the component type
+     * @return a fixed-size list backed by the given array
+     */
+    public static &lt;T&gt; @Nonnull List&lt;T&gt; asList(T @Nonnull @RetainedParam [] array) {
+<span class="fc" id="L1242">        return Arrays.asList(array);</span>
+    }
+
+    /**
+     * Returns a fixed-size list backed by the given array. Changes to the returned list &quot;write through&quot; to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
+     */
+    public static @Nonnull List&lt;@Nonnull Boolean&gt; asList(boolean @Nonnull @RetainedParam [] array) {
+<span class="fc" id="L1253">        return ListBack.asList(array);</span>
+    }
+
+    /**
+     * Returns a fixed-size list backed by the given array. Changes to the returned list &quot;write through&quot; to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
+     */
+    public static @Nonnull List&lt;@Nonnull Byte&gt; asList(byte @Nonnull @RetainedParam [] array) {
+<span class="fc" id="L1264">        return ListBack.asList(array);</span>
+    }
+
+    /**
+     * Returns a fixed-size list backed by the given array. Changes to the returned list &quot;write through&quot; to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
+     */
+    public static @Nonnull List&lt;@Nonnull Short&gt; asList(short @Nonnull @RetainedParam [] array) {
+<span class="fc" id="L1275">        return ListBack.asList(array);</span>
+    }
+
+    /**
+     * Returns a fixed-size list backed by the given array. Changes to the returned list &quot;write through&quot; to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
+     */
+    public static @Nonnull List&lt;@Nonnull Character&gt; asList(char @Nonnull @RetainedParam [] array) {
+<span class="fc" id="L1286">        return ListBack.asList(array);</span>
+    }
+
+    /**
+     * Returns a fixed-size list backed by the given array. Changes to the returned list &quot;write through&quot; to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
+     */
+    public static @Nonnull List&lt;@Nonnull Integer&gt; asList(int @Nonnull @RetainedParam [] array) {
+<span class="fc" id="L1297">        return ListBack.asList(array);</span>
+    }
+
+    /**
+     * Returns a fixed-size list backed by the given array. Changes to the returned list &quot;write through&quot; to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
+     */
+    public static @Nonnull List&lt;@Nonnull Long&gt; asList(long @Nonnull @RetainedParam [] array) {
+<span class="fc" id="L1308">        return ListBack.asList(array);</span>
+    }
+
+    /**
+     * Returns a fixed-size list backed by the given array. Changes to the returned list &quot;write through&quot; to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
+     */
+    public static @Nonnull List&lt;@Nonnull Float&gt; asList(float @Nonnull @RetainedParam [] array) {
+<span class="fc" id="L1319">        return ListBack.asList(array);</span>
+    }
+
+    /**
+     * Returns a fixed-size list backed by the given array. Changes to the returned list &quot;write through&quot; to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
+     */
+    public static @Nonnull List&lt;@Nonnull Double&gt; asList(double @Nonnull @RetainedParam [] array) {
+<span class="fc" id="L1330">        return ListBack.asList(array);</span>
+    }
+
+    private ArrayKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

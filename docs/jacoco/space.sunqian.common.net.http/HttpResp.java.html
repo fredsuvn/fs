@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HttpResp.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.net.http</a> &gt; <span class="el_source">HttpResp.java</span></div><h1>HttpResp.java</h1><pre class="source lang-java linenums">package space.sunqian.common.net.http;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.io.IOKit;
+
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Http response info.
+ *
+ * @author sunqian
+ */
+public interface HttpResp {
+
+    /**
+     * Returns the protocol version of the response, such as {@code HTTP/1.1} or {@code HTTP/2}.
+     *
+     * @return the protocol version of the response
+     */
+    @Nonnull
+    String protocolVersion();
+
+    /**
+     * Returns the status code of the response, such as {@code 200}, {@code 404}, {@code 500}, etc.
+     *
+     * @return the status code of the response
+     */
+    @Nonnull
+    String statusCode();
+
+    /**
+     * Returns the status text of the response, such as {@code OK}, {@code Not Found}, {@code Internal Server Error},
+     * etc.
+     *
+     * @return the status text of the response
+     */
+    @Nonnull
+    String statusText();
+
+    /**
+     * Returns the headers of the response.
+     *
+     * @return the headers of the response
+     */
+    @Nonnull
+    Map&lt;String, List&lt;String&gt;&gt; headers();
+
+    /**
+     * Returns the body of the response.
+     *
+     * @return the body of the response
+     */
+    @Nonnull
+    InputStream body();
+
+    /**
+     * Returns the content type of the response, may be {@code null} if the content type is not specified.
+     *
+     * @return the content type of the response, may be {@code null} if the content type is not specified
+     */
+    @Nullable
+    String contentType();
+
+    /**
+     * Returns the charset of the response, parsed from the content type, may be {@code null} if the charset is not
+     * specified.
+     *
+     * @return the charset of the response, parsed from the content type, may be {@code null} if the charset is not
+     * specified
+     */
+    default @Nullable Charset bodyCharset() {
+<span class="fc" id="L78">        String contentType = contentType();</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if (contentType == null) {</span>
+<span class="fc" id="L80">            return null;</span>
+        }
+<span class="fc" id="L82">        return HttpKit.contentCharset(contentType);</span>
+    }
+
+    /**
+     * Returns the body of the response as a string. The charset of the string is determined by the content type, and if
+     * the content type is not specified, {@link CharsKit#defaultCharset()} will be used. Using {@link #bodyCharset()}
+     * can get the charset this method uses, if the returned charset is not {@code null}.
+     *
+     * @return the body of the response as a string, may be {@code null} if the response body is empty
+     */
+    default @Nullable String bodyString() {
+<span class="fc" id="L93">        Charset charset = Fs.nonnull(bodyCharset(), CharsKit.defaultCharset());</span>
+<span class="fc" id="L94">        return IOKit.string(body(), charset);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

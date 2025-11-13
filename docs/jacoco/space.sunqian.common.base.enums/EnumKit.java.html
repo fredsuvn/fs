@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EnumKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.enums</a> &gt; <span class="el_source">EnumKit.java</span></div><h1>EnumKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.enums;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+
+/**
+ * Utilities for enum.
+ *
+ * @author sunqian
+ */
+public class EnumKit {
+
+    /**
+     * Returns the enum constant of the specified enum type with the specified name, or {@code null} if the constant
+     * does not exist.
+     *
+     * @param enumType the specified enum type
+     * @param name     the specified name
+     * @param &lt;T&gt;      the type of enum
+     * @return the enum constant of the specified enum type with the specified name, or {@code null} if the constant
+     * does not exist
+     */
+    public static &lt;T extends Enum&lt;T&gt;&gt; @Nullable T findEnum(@Nonnull Class&lt;T&gt; enumType, @Nonnull String name) {
+        try {
+<span class="fc" id="L25">            return Enum.valueOf(enumType, name);</span>
+<span class="fc" id="L26">        } catch (Exception e) {</span>
+<span class="fc" id="L27">            return null;</span>
+        }
+    }
+
+    /**
+     * Returns the enum constant of the specified enum type at the specified index where the constant is declared,
+     * starting at {@code 0}, or {@code null} if the index is out of bounds.
+     *
+     * @param enumType the specified enum type
+     * @param index    the specified index
+     * @param &lt;T&gt;      the type of enum
+     * @return the enum constant of the specified enum type with the specified name, or {@code null} if the index is out
+     * of bounds
+     */
+    public static &lt;T extends Enum&lt;T&gt;&gt; @Nullable T findEnum(@Nonnull Class&lt;T&gt; enumType, int index) {
+<span class="fc" id="L42">        T[] enums = enumType.getEnumConstants();</span>
+<span class="fc bfc" id="L43" title="All 6 branches covered.">        if (enums == null || index &lt; 0 || index &gt;= enums.length) {</span>
+<span class="fc" id="L44">            return null;</span>
+        }
+<span class="fc" id="L46">        return enums[index];</span>
+    }
+
+    private EnumKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

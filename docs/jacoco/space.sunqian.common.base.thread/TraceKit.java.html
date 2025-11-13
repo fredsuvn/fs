@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TraceKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.thread</a> &gt; <span class="el_source">TraceKit.java</span></div><h1>TraceKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.thread;
+
+import space.sunqian.annotations.Nonnull;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Utilities for tracing in the thread.
+ *
+ * @author sunqian
+ */
+public class TraceKit {
+
+    /**
+     * Returns the stack trace list of the current thread, starting at the method that invokes this method
+     * ({@code TraceKit.stackTrace()}).
+     * &lt;p&gt;
+     * The list is a snapshot of the stack trace at the time of invocation. The first element at index {@code 0}
+     * represents the &lt;i&gt;caller&lt;/i&gt; of this method (the most recent method invocation). The last element of the list
+     * represents the bottom of the stack, which is the least recent method invocation, typically is the {@code main()}
+     * or {@link Thread#run()}.
+     * &lt;p&gt;
+     * The original stack trace info is come from {@link Thread#getStackTrace()}.
+     *
+     * @return the stack trace list of the current thread
+     */
+    public static @Nonnull List&lt;@Nonnull StackTraceElement&gt; stackTrace() {
+<span class="fc" id="L30">        return stackTrace(Thread.currentThread());</span>
+    }
+
+    /**
+     * Returns the stack trace list of the specified thread, starting at the method that invokes this method
+     * ({@code TraceKit.stackTrace()}).
+     * &lt;p&gt;
+     * The list is a snapshot of the stack trace at the time of invocation. The first element at index {@code 0}
+     * represents the &lt;i&gt;caller&lt;/i&gt; of this method (the most recent method invocation). The last element of the list
+     * represents the bottom of the stack, which is the least recent method invocation, typically is the {@code main()}
+     * or {@link Thread#run()}.
+     * &lt;p&gt;
+     * The original stack trace info is come from {@link Thread#getStackTrace()}.
+     *
+     * @param thread the specified thread
+     * @return the stack trace list of the specified thread
+     */
+    public static @Nonnull List&lt;@Nonnull StackTraceElement&gt; stackTrace(@Nonnull Thread thread) {
+<span class="fc" id="L48">        StackTraceElement[] elements = thread.getStackTrace();</span>
+<span class="fc" id="L49">        return parseStackTrace(elements);</span>
+    }
+
+    private static @Nonnull List&lt;@Nonnull StackTraceElement&gt; parseStackTrace(
+        @Nonnull StackTraceElement @Nonnull [] elements
+    ) {
+<span class="fc" id="L55">        int preIndex = -1;</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        for (int i = 0; i &lt; elements.length; i++) {</span>
+<span class="fc" id="L57">            StackTraceElement element = elements[i];</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">            if (TraceKit.class.getName().equals(element.getClassName())</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">                &amp;&amp; &quot;stackTrace&quot;.equals(element.getMethodName())) {</span>
+<span class="fc" id="L60">                preIndex = i;</span>
+            }
+        }
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (preIndex &lt; 0) {</span>
+<span class="fc" id="L64">            return Collections.emptyList();</span>
+        }
+<span class="fc" id="L66">        StackTraceElement[] actualElements = new StackTraceElement[elements.length - preIndex - 1];</span>
+<span class="fc" id="L67">        System.arraycopy(elements, preIndex + 1, actualElements, 0, actualElements.length);</span>
+<span class="fc" id="L68">        return Arrays.asList(actualElements);</span>
+    }
+
+    private TraceKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

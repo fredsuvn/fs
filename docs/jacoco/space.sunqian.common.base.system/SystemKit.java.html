@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SystemKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.system</a> &gt; <span class="el_source">SystemKit.java</span></div><h1>SystemKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.system;
+
+import space.sunqian.annotations.Immutable;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * Utilities for system.
+ *
+ * @author sunqian
+ */
+public class SystemKit {
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_VERSION}: Java Runtime Environment version.
+     *
+     * @return system property of {@link SystemKeys#JAVA_VERSION}
+     */
+    public static @Nonnull String getJavaVersion() {
+<span class="fc" id="L24">        return System.getProperty(SystemKeys.JAVA_VERSION);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_VENDOR}: Java Runtime Environment vendor.
+     *
+     * @return system property of {@link SystemKeys#JAVA_VENDOR}
+     */
+    public static @Nonnull String getJavaVendor() {
+<span class="fc" id="L33">        return System.getProperty(SystemKeys.JAVA_VENDOR);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_VENDOR_URL}: Java vendor URL.
+     *
+     * @return system property of {@link SystemKeys#JAVA_VENDOR_URL}
+     */
+    public static @Nonnull String getJavaVendorUrl() {
+<span class="fc" id="L42">        return System.getProperty(SystemKeys.JAVA_VENDOR_URL);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_HOME}: Java installation directory.
+     *
+     * @return system property of {@link SystemKeys#JAVA_HOME}
+     */
+    public static @Nonnull String getJavaHome() {
+<span class="fc" id="L51">        return System.getProperty(SystemKeys.JAVA_HOME);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_VM_SPECIFICATION_VERSION}: Java Virtual Machine specification
+     * version.
+     *
+     * @return system property of {@link SystemKeys#JAVA_VM_SPECIFICATION_VERSION}
+     */
+    public static @Nonnull String getJavaVmSpecificationVersion() {
+<span class="fc" id="L61">        return System.getProperty(SystemKeys.JAVA_VM_SPECIFICATION_VERSION);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_SPECIFICATION_MAINTENANCE_VERSION}: Java Runtime Environment
+     * specification maintenance version.
+     *
+     * @return system property of {@link SystemKeys#JAVA_SPECIFICATION_MAINTENANCE_VERSION}
+     */
+    public static @Nonnull String getJavaSpecificationMaintenanceVersion() {
+<span class="fc" id="L71">        return System.getProperty(SystemKeys.JAVA_SPECIFICATION_MAINTENANCE_VERSION);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_VM_SPECIFICATION_VENDOR}: Java Virtual Machine specification
+     * vendor.
+     *
+     * @return system property of {@link SystemKeys#JAVA_VM_SPECIFICATION_VENDOR}
+     */
+    public static @Nonnull String getJavaVmSpecificationVendor() {
+<span class="fc" id="L81">        return System.getProperty(SystemKeys.JAVA_VM_SPECIFICATION_VENDOR);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_VM_SPECIFICATION_NAME}: Java Virtual Machine specification
+     * name.
+     *
+     * @return system property of {@link SystemKeys#JAVA_VM_SPECIFICATION_NAME}
+     */
+    public static @Nonnull String getJavaVmSpecificationName() {
+<span class="fc" id="L91">        return System.getProperty(SystemKeys.JAVA_VM_SPECIFICATION_NAME);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_VM_VERSION}: Java Virtual Machine implementation version.
+     *
+     * @return system property of {@link SystemKeys#JAVA_VM_VERSION}
+     */
+    public static @Nonnull String getJavaVmVersion() {
+<span class="fc" id="L100">        return System.getProperty(SystemKeys.JAVA_VM_VERSION);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_VM_VENDOR}: Java Virtual Machine implementation vendor.
+     *
+     * @return system property of {@link SystemKeys#JAVA_VM_VENDOR}
+     */
+    public static @Nonnull String getJavaVmVendor() {
+<span class="fc" id="L109">        return System.getProperty(SystemKeys.JAVA_VM_VENDOR);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_VM_NAME}: Java Virtual Machine implementation name.
+     *
+     * @return system property of {@link SystemKeys#JAVA_VM_NAME}
+     */
+    public static @Nonnull String getJavaVmName() {
+<span class="fc" id="L118">        return System.getProperty(SystemKeys.JAVA_VM_NAME);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_SPECIFICATION_VERSION}: Java Runtime Environment specification
+     * version.
+     *
+     * @return system property of {@link SystemKeys#JAVA_SPECIFICATION_VERSION}
+     */
+    public static @Nonnull String getJavaSpecificationVersion() {
+<span class="fc" id="L128">        return System.getProperty(SystemKeys.JAVA_SPECIFICATION_VERSION);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_SPECIFICATION_VENDOR}: Java Runtime Environment specification
+     * vendor.
+     *
+     * @return system property of {@link SystemKeys#JAVA_SPECIFICATION_VENDOR}
+     */
+    public static @Nonnull String getJavaSpecificationVendor() {
+<span class="fc" id="L138">        return System.getProperty(SystemKeys.JAVA_SPECIFICATION_VENDOR);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_SPECIFICATION_NAME}: Java Runtime Environment specification
+     * name.
+     *
+     * @return system property of {@link SystemKeys#JAVA_SPECIFICATION_NAME}
+     */
+    public static @Nonnull String getJavaSpecificationName() {
+<span class="fc" id="L148">        return System.getProperty(SystemKeys.JAVA_SPECIFICATION_NAME);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_CLASS_VERSION}: Java class format version number.
+     *
+     * @return system property of {@link SystemKeys#JAVA_CLASS_VERSION}
+     */
+    public static @Nonnull String getJavaClassVersion() {
+<span class="fc" id="L157">        return System.getProperty(SystemKeys.JAVA_CLASS_VERSION);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_CLASS_PATH}: Java class path.
+     *
+     * @return system property of {@link SystemKeys#JAVA_CLASS_PATH}
+     */
+    public static @Nonnull String getJavaClassPath() {
+<span class="fc" id="L166">        return System.getProperty(SystemKeys.JAVA_CLASS_PATH);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_LIBRARY_PATH}: List of paths to search when loading libraries.
+     *
+     * @return system property of {@link SystemKeys#JAVA_LIBRARY_PATH}
+     */
+    public static @Nonnull String getJavaLibraryPath() {
+<span class="fc" id="L175">        return System.getProperty(SystemKeys.JAVA_LIBRARY_PATH);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_IO_TMPDIR}: Default temp file path.
+     *
+     * @return system property of {@link SystemKeys#JAVA_IO_TMPDIR}
+     */
+    public static @Nonnull String getJavaIOTmpdir() {
+<span class="fc" id="L184">        return System.getProperty(SystemKeys.JAVA_IO_TMPDIR);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_COMPILER}: Name of JIT compiler to use.
+     *
+     * @return system property of {@link SystemKeys#JAVA_COMPILER}
+     */
+    public static @Nonnull String getJavaCompiler() {
+<span class="fc" id="L193">        return System.getProperty(SystemKeys.JAVA_COMPILER);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#JAVA_EXT_DIRS}: Path of extension directory or directories
+     * Deprecated. This property, and the mechanism which implements it, may be removed in a future release.
+     *
+     * @return system property of {@link SystemKeys#JAVA_EXT_DIRS}
+     */
+    public static @Nonnull String getJavaExtDirs() {
+<span class="fc" id="L203">        return System.getProperty(SystemKeys.JAVA_EXT_DIRS);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#OS_NAME}: Operating system name.
+     *
+     * @return system property of {@link SystemKeys#OS_NAME}
+     */
+    public static @Nonnull String getOsName() {
+<span class="fc" id="L212">        return System.getProperty(SystemKeys.OS_NAME);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#OS_ARCH}: Operating system architecture.
+     *
+     * @return system property of {@link SystemKeys#OS_ARCH}
+     */
+    public static @Nonnull String getOsArch() {
+<span class="fc" id="L221">        return System.getProperty(SystemKeys.OS_ARCH);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#OS_VERSION}: Operating system version.
+     *
+     * @return system property of {@link SystemKeys#OS_VERSION}
+     */
+    public static @Nonnull String getOsVersion() {
+<span class="fc" id="L230">        return System.getProperty(SystemKeys.OS_VERSION);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#FILE_SEPARATOR}: File separator (&quot;/&quot; on UNIX).
+     *
+     * @return system property of {@link SystemKeys#FILE_SEPARATOR}
+     */
+    @SuppressWarnings(&quot;SystemGetProperty&quot;)
+    public static @Nonnull String getFileSeparator() {
+<span class="fc" id="L240">        return System.getProperty(SystemKeys.FILE_SEPARATOR);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#PATH_SEPARATOR}: Path separator (&quot;:&quot; on UNIX).
+     *
+     * @return system property of {@link SystemKeys#PATH_SEPARATOR}
+     */
+    @SuppressWarnings(&quot;SystemGetProperty&quot;)
+    public static @Nonnull String getPathSeparator() {
+<span class="fc" id="L250">        return System.getProperty(SystemKeys.PATH_SEPARATOR);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#LINE_SEPARATOR}: Line separator (&quot;\n&quot; on UNIX).
+     *
+     * @return system property of {@link SystemKeys#LINE_SEPARATOR}
+     */
+    @SuppressWarnings(&quot;SystemGetProperty&quot;)
+    public static @Nonnull String getLineSeparator() {
+<span class="fc" id="L260">        return System.getProperty(SystemKeys.LINE_SEPARATOR);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#USER_NAME}: User's account name.
+     *
+     * @return system property of {@link SystemKeys#USER_NAME}
+     */
+    public static @Nonnull String getUserName() {
+<span class="fc" id="L269">        return System.getProperty(SystemKeys.USER_NAME);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#USER_HOME}: User's home directory.
+     *
+     * @return system property of {@link SystemKeys#USER_HOME}
+     */
+    public static @Nonnull String getUserHome() {
+<span class="fc" id="L278">        return System.getProperty(SystemKeys.USER_HOME);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#USER_DIR}: User's current working directory.
+     *
+     * @return system property of {@link SystemKeys#USER_DIR}
+     */
+    public static @Nonnull String getUserDir() {
+<span class="fc" id="L287">        return System.getProperty(SystemKeys.USER_DIR);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#NATIVE_ENCODING}: Character encoding name derived from the host
+     * environment and/or the user's settings.
+     * &lt;p&gt;
+     * Note this property is only available on {@code JDK17+}.
+     *
+     * @return system property of {@link SystemKeys#NATIVE_ENCODING}
+     */
+    public static @Nullable String getNativeEncoding() {
+<span class="fc" id="L299">        return System.getProperty(SystemKeys.NATIVE_ENCODING);</span>
+    }
+
+    /**
+     * Returns system property of {@link SystemKeys#FILE_ENCODING}: JVM default encoding.
+     * &lt;p&gt;
+     * This is not a standard property.
+     *
+     * @return system property of {@link SystemKeys#FILE_ENCODING}
+     */
+    @SuppressWarnings(&quot;SystemGetProperty&quot;)
+    public static @Nullable String getFileEncoding() {
+<span class="fc" id="L311">        return System.getProperty(SystemKeys.FILE_ENCODING);</span>
+    }
+
+    /**
+     * Returns an immutable copy of {@link System#getProperties()}.
+     *
+     * @return an immutable copy of {@link System#getProperties()}
+     */
+    public static @Nonnull @Immutable Map&lt;String, String&gt; getProperties() {
+<span class="fc" id="L320">        return Fs.as(</span>
+<span class="fc" id="L321">            new LinkedHashMap&lt;&gt;(System.getProperties())</span>
+        );
+    }
+
+    private SystemKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

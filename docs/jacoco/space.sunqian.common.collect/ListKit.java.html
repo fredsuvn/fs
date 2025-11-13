@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ListKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.collect</a> &gt; <span class="el_source">ListKit.java</span></div><h1>ListKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.collect;
+
+import space.sunqian.annotations.Immutable;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.RetainedParam;
+import space.sunqian.common.Fs;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.RandomAccess;
+
+/**
+ * Utilities for {@link List}.
+ *
+ * @author sunqian
+ */
+public class ListKit {
+
+    /**
+     * Returns an immutable list backed by the given array. The returned list is immutable but the backing array is not,
+     * changes to the backing array &quot;write through&quot; to the returned list. The returned list is serializable and
+     * implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @param &lt;T&gt;   the component type
+     * @return an immutable list backed by the given array
+     */
+    @SafeVarargs
+    public static &lt;T&gt; @Nonnull @Immutable List&lt;T&gt; list(T @Nonnull @RetainedParam ... array) {
+<span class="fc" id="L33">        return ListBack.immutableList(array);</span>
+    }
+
+    /**
+     * Returns an immutable list backed by the given array. The returned list is immutable but the backing array is not,
+     * changes to the backing array &quot;write through&quot; to the returned list. The returned list is serializable and
+     * implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return an immutable list backed by the given array
+     */
+    public static @Nonnull @Immutable List&lt;@Nonnull Boolean&gt; booleanList(boolean @Nonnull @RetainedParam ... array) {
+<span class="fc" id="L45">        return ListBack.immutableList(array);</span>
+    }
+
+    /**
+     * Returns an immutable list backed by the given array. The returned list is immutable but the backing array is not,
+     * changes to the backing array &quot;write through&quot; to the returned list. The returned list is serializable and
+     * implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return an immutable list backed by the given array
+     */
+    public static @Nonnull @Immutable List&lt;@Nonnull Byte&gt; byteList(byte @Nonnull @RetainedParam ... array) {
+<span class="fc" id="L57">        return ListBack.immutableList(array);</span>
+    }
+
+    /**
+     * Returns an immutable list backed by the given array. The returned list is immutable but the backing array is not,
+     * changes to the backing array &quot;write through&quot; to the returned list. The returned list is serializable and
+     * implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return an immutable list backed by the given array
+     */
+    public static @Nonnull @Immutable List&lt;@Nonnull Short&gt; shortList(short @Nonnull @RetainedParam ... array) {
+<span class="fc" id="L69">        return ListBack.immutableList(array);</span>
+    }
+
+    /**
+     * Returns an immutable list backed by the given array. The returned list is immutable but the backing array is not,
+     * changes to the backing array &quot;write through&quot; to the returned list. The returned list is serializable and
+     * implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return an immutable list backed by the given array
+     */
+    public static @Nonnull @Immutable List&lt;@Nonnull Character&gt; charList(char @Nonnull @RetainedParam ... array) {
+<span class="fc" id="L81">        return ListBack.immutableList(array);</span>
+    }
+
+    /**
+     * Returns an immutable list backed by the given array. The returned list is immutable but the backing array is not,
+     * changes to the backing array &quot;write through&quot; to the returned list. The returned list is serializable and
+     * implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return an immutable list backed by the given array
+     */
+    public static @Nonnull @Immutable List&lt;@Nonnull Integer&gt; intList(int @Nonnull @RetainedParam ... array) {
+<span class="fc" id="L93">        return ListBack.immutableList(array);</span>
+    }
+
+    /**
+     * Returns an immutable list backed by the given array. The returned list is immutable but the backing array is not,
+     * changes to the backing array &quot;write through&quot; to the returned list. The returned list is serializable and
+     * implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return an immutable list backed by the given array
+     */
+    public static @Nonnull @Immutable List&lt;@Nonnull Long&gt; longList(long @Nonnull @RetainedParam ... array) {
+<span class="fc" id="L105">        return ListBack.immutableList(array);</span>
+    }
+
+    /**
+     * Returns an immutable list backed by the given array. The returned list is immutable but the backing array is not,
+     * changes to the backing array &quot;write through&quot; to the returned list. The returned list is serializable and
+     * implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return an immutable list backed by the given array
+     */
+    public static @Nonnull @Immutable List&lt;@Nonnull Float&gt; floatList(float @Nonnull @RetainedParam ... array) {
+<span class="fc" id="L117">        return ListBack.immutableList(array);</span>
+    }
+
+    /**
+     * Returns an immutable list backed by the given array. The returned list is immutable but the backing array is not,
+     * changes to the backing array &quot;write through&quot; to the returned list. The returned list is serializable and
+     * implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @return an immutable list backed by the given array
+     */
+    public static @Nonnull @Immutable List&lt;@Nonnull Double&gt; doubleList(double @Nonnull @RetainedParam ... array) {
+<span class="fc" id="L129">        return ListBack.immutableList(array);</span>
+    }
+
+    /**
+     * Returns a new {@link ArrayList} initialing with the given array.
+     *
+     * @param array the given array
+     * @param &lt;T&gt;   the component type
+     * @return a new {@link ArrayList} initialing with the given array
+     */
+    @SafeVarargs
+    public static &lt;T&gt; @Nonnull ArrayList&lt;T&gt; arrayList(T @Nonnull ... array) {
+<span class="fc" id="L141">        return new ArrayList&lt;&gt;(Arrays.asList(array));</span>
+    }
+
+    /**
+     * Returns a new {@link LinkedList} initialing with the given array.
+     *
+     * @param array the given array
+     * @param &lt;T&gt;   the component type
+     * @return a new {@link LinkedList} initialing with the given array
+     */
+    @SafeVarargs
+    public static &lt;T&gt; @Nonnull LinkedList&lt;T&gt; linkedList(T @Nonnull ... array) {
+<span class="fc" id="L153">        return new LinkedList&lt;&gt;(Arrays.asList(array));</span>
+    }
+
+    /**
+     * Returns a new immutable list of which content is added from the given iterable. The content of the iterable is
+     * added in its order.
+     *
+     * @param it  the given iterable
+     * @param &lt;T&gt; the component type
+     * @return a new immutable list of which content is added from the given iterable
+     */
+    public static &lt;T&gt; @Nonnull @Immutable List&lt;T&gt; toList(@Nonnull Iterable&lt;? extends T&gt; it) {
+<span class="fc" id="L165">        Object[] array = CollectKit.toArray(it);</span>
+<span class="fc" id="L166">        List&lt;Object&gt; list = list(array);</span>
+<span class="fc" id="L167">        return Fs.as(list);</span>
+    }
+
+    /**
+     * Returns a new {@link ArrayList} initialing with the given iterable.
+     *
+     * @param it  the given iterable
+     * @param &lt;T&gt; the component type
+     * @return a new {@link ArrayList} initialing with the given iterable
+     */
+    public static &lt;T&gt; @Nonnull ArrayList&lt;T&gt; toArrayList(@Nonnull Iterable&lt;T&gt; it) {
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        if (it instanceof Collection) {</span>
+<span class="fc" id="L179">            return new ArrayList&lt;&gt;((Collection&lt;T&gt;) it);</span>
+        }
+<span class="fc" id="L181">        return CollectKit.addAll(new ArrayList&lt;&gt;(), it);</span>
+    }
+
+    /**
+     * Returns a new {@link LinkedList} initialing with the given iterable.
+     *
+     * @param it  the given iterable
+     * @param &lt;T&gt; the component type
+     * @return a new {@link LinkedList} initialing with the given iterable
+     */
+    public static &lt;T&gt; @Nonnull LinkedList&lt;T&gt; toLinkedList(@Nonnull Iterable&lt;T&gt; it) {
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        if (it instanceof Collection) {</span>
+<span class="fc" id="L193">            return new LinkedList&lt;&gt;((Collection&lt;T&gt;) it);</span>
+        }
+<span class="fc" id="L195">        return CollectKit.addAll(new LinkedList&lt;&gt;(), it);</span>
+    }
+
+    /**
+     * Returns a composite view of multiple lists as a single list. The returned list provides a unified view of all
+     * elements from the provided lists, in the order they are specified. Changes to the underlying lists will be
+     * reflected in the composite view.
+     * &lt;p&gt;
+     * The returned list is un-variable-size, serializable and implements {@link RandomAccess}, and is mutable if the
+     * corresponding underlying list is mutable.
+     *
+     * @param lists the lists to be composited as a view
+     * @param &lt;T&gt;   the component type
+     * @return a composite view of multiple lists
+     */
+    @SafeVarargs
+    public static &lt;T&gt; @Nonnull List&lt;T&gt; compositeView(@Nonnull List&lt;T&gt; @Nonnull ... lists) {
+<span class="fc" id="L212">        return ListBack.compositeList(lists);</span>
+    }
+
+    private ListKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

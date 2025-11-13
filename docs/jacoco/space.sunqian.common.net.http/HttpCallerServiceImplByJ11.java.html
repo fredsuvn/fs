@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HttpCallerServiceImplByJ11.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.net.http</a> &gt; <span class="el_source">HttpCallerServiceImplByJ11.java</span></div><h1>HttpCallerServiceImplByJ11.java</h1><pre class="source lang-java linenums">package space.sunqian.common.net.http;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+import space.sunqian.common.io.IOKit;
+
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+<span class="fc" id="L20">enum HttpCallerServiceImplByJ11 implements HttpCallerService {</span>
+<span class="fc" id="L21">    INST;</span>
+
+    @Override
+    public @Nonnull HttpCaller newCaller(int bufSize, @Nonnull Proxy proxy) throws HttpNetException {
+<span class="fc" id="L25">        return new CallerImpl(proxy);</span>
+    }
+
+    private static final class CallerImpl implements HttpCaller {
+
+        private final @Nonnull HttpClient httpClient;
+
+<span class="fc" id="L32">        CallerImpl(@Nonnull Proxy proxy) throws HttpNetException {</span>
+<span class="fc" id="L33">            this.httpClient = Fs.uncheck(() -&gt;</span>
+<span class="fc" id="L34">                    HttpClient.newBuilder().proxy(ProxySelector.of((InetSocketAddress) proxy.address())).build(),</span>
+                HttpNetException::new);
+<span class="fc" id="L36">        }</span>
+
+        @Override
+        public @Nonnull HttpResp request(@Nonnull HttpReq req) throws HttpNetException {
+<span class="fc" id="L40">            return Fs.uncheck(() -&gt; request0(req), HttpNetException::new);</span>
+        }
+
+        @SuppressWarnings(&quot;resource&quot;)
+        private @Nonnull HttpResp request0(@Nonnull HttpReq req) throws Exception {
+<span class="fc" id="L45">            HttpRequest request = HttpRequest.newBuilder()</span>
+<span class="fc" id="L46">                .uri(req.url().toURI())</span>
+<span class="fc" id="L47">                .headers(</span>
+<span class="fc" id="L48">                    req.headers().entrySet().stream().flatMap(entry -&gt; {</span>
+<span class="fc" id="L49">                            List&lt;String&gt; values = entry.getValue();</span>
+<span class="fc" id="L50">                            String[] kvs = new String[values.size() * 2];</span>
+<span class="fc" id="L51">                            int i = 0;</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">                            for (String value : values) {</span>
+<span class="fc" id="L53">                                kvs[i++] = entry.getKey();</span>
+<span class="fc" id="L54">                                kvs[i++] = value;</span>
+<span class="fc" id="L55">                            }</span>
+<span class="fc" id="L56">                            return Arrays.stream(kvs);</span>
+                        }
+<span class="fc" id="L58">                    ).toArray(String[]::new)</span>
+                )
+<span class="fc bfc" id="L60" title="All 2 branches covered.">                .method(req.method(), req.body() == null ?</span>
+<span class="fc" id="L61">                    HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofInputStream(req::body))</span>
+<span class="fc" id="L62">                .timeout(req.timeout())</span>
+<span class="fc" id="L63">                .build();</span>
+<span class="fc" id="L64">            HttpResponse&lt;InputStream&gt; response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());</span>
+<span class="fc" id="L65">            return new HttpResp() {</span>
+
+                @Override
+                public @Nonnull String protocolVersion() {
+<span class="fc" id="L69">                    return findString(response.version(), 0);</span>
+                }
+
+                @Override
+                public @Nonnull String statusCode() {
+<span class="fc" id="L74">                    return Integer.toString(response.statusCode());</span>
+                }
+
+                @Override
+                public @Nonnull String statusText() {
+<span class="fc" id="L79">                    return findString(response.statusCode(), 4);</span>
+                }
+
+                @Override
+                public @Nonnull Map&lt;String, List&lt;String&gt;&gt; headers() {
+<span class="fc" id="L84">                    return response.headers().map();</span>
+                }
+
+                @Override
+                public @Nonnull InputStream body() {
+<span class="fc" id="L89">                    return Fs.nonnull(response.body(), IOKit.emptyInputStream());</span>
+                }
+
+                @Override
+                public @Nullable String contentType() {
+<span class="fc" id="L94">                    return response.headers().firstValue(&quot;Content-Type&quot;).orElse(null);</span>
+                }
+            };
+        }
+
+<span class="fc" id="L99">        private static final @Nonnull Object @Nonnull [] TABLE = {</span>
+            HttpClient.Version.HTTP_1_1, &quot;HTTP/1.1&quot;,
+            HttpClient.Version.HTTP_2, &quot;HTTP/2&quot;,
+<span class="fc" id="L102">            200, &quot;OK&quot;,</span>
+<span class="fc" id="L103">            201, &quot;Created&quot;,</span>
+<span class="fc" id="L104">            204, &quot;No Content&quot;,</span>
+<span class="fc" id="L105">            301, &quot;Moved Permanently&quot;,</span>
+<span class="fc" id="L106">            302, &quot;Found&quot;,</span>
+<span class="fc" id="L107">            304, &quot;Not Modified&quot;,</span>
+<span class="fc" id="L108">            400, &quot;Bad Request&quot;,</span>
+<span class="fc" id="L109">            401, &quot;Unauthorized&quot;,</span>
+<span class="fc" id="L110">            403, &quot;Forbidden&quot;,</span>
+<span class="fc" id="L111">            404, &quot;Not Found&quot;,</span>
+<span class="fc" id="L112">            405, &quot;Method Not Allowed&quot;,</span>
+<span class="fc" id="L113">            500, &quot;Internal Server Error&quot;,</span>
+<span class="fc" id="L114">            502, &quot;Bad Gateway&quot;,</span>
+<span class="fc" id="L115">            503, &quot;Service Unavailable&quot;,</span>
+<span class="fc" id="L116">            504, &quot;Gateway Timeout&quot;</span>
+        };
+
+        private String findString(@Nonnull Object key, int start) {
+<span class="fc bfc" id="L120" title="All 2 branches covered.">            for (int i = start; i &lt; TABLE.length; i++) {</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">                if (Objects.equals(TABLE[i], key)) {</span>
+<span class="fc" id="L122">                    return TABLE[i + 1].toString();</span>
+                }
+            }
+<span class="fc" id="L125">            return &quot;Unknown&quot;;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

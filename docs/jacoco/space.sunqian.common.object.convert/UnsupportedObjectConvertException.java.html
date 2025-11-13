@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UnsupportedObjectConvertException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.object.convert</a> &gt; <span class="el_source">UnsupportedObjectConvertException.java</span></div><h1>UnsupportedObjectConvertException.java</h1><pre class="source lang-java linenums">package space.sunqian.common.object.convert;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.annotations.RetainedParam;
+import space.sunqian.common.base.option.Option;
+
+import java.lang.reflect.Type;
+
+/**
+ * This exception is thrown when an object conversion is unsupported.
+ *
+ * @author sunqian
+ */
+public class UnsupportedObjectConvertException extends ObjectConvertException {
+
+    private static @Nonnull String toMessage(
+        @Nonnull Type srcType,
+        @Nonnull Type target
+    ) {
+<span class="fc" id="L21">        return &quot;Unsupported object conversion from &quot; + srcType + &quot; to &quot; + target + &quot;.&quot;;</span>
+    }
+
+    private final @Nullable Object src;
+    private final @Nonnull Type srcType;
+    private final @Nonnull Type target;
+    private final @Nonnull ObjectConverter converter;
+    private final @Nonnull Option&lt;?, ?&gt; @Nonnull [] options;
+
+    /**
+     * Constructs with the specified conversion parameters.
+     *
+     * @param src       the source object to be converted
+     * @param srcType   the specified type of the source object
+     * @param target    the target type to convert to
+     * @param converter the converter object where this exception throws from
+     * @param options   the options used in the conversion
+     */
+    public UnsupportedObjectConvertException(
+        @Nullable Object src,
+        @Nonnull Type srcType,
+        @Nonnull Type target,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option&lt;?, ?&gt; @Nonnull @RetainedParam [] options
+    ) {
+<span class="fc" id="L46">        super(toMessage(srcType, target));</span>
+<span class="fc" id="L47">        this.src = src;</span>
+<span class="fc" id="L48">        this.srcType = srcType;</span>
+<span class="fc" id="L49">        this.target = target;</span>
+<span class="fc" id="L50">        this.converter = converter;</span>
+<span class="fc" id="L51">        this.options = options;</span>
+<span class="fc" id="L52">    }</span>
+
+    /**
+     * Returns the source object to be converted.
+     *
+     * @return the source object to be converted
+     */
+    public @Nullable Object sourceObject() {
+<span class="fc" id="L60">        return src;</span>
+    }
+
+    /**
+     * Returns the specified type of the source object.
+     *
+     * @return the specified type of the source object
+     */
+    public @Nonnull Type sourceObjectType() {
+<span class="fc" id="L69">        return srcType;</span>
+    }
+
+    /**
+     * Returns the target type to convert to.
+     *
+     * @return the target type to convert to
+     */
+    public @Nonnull Type targetType() {
+<span class="fc" id="L78">        return target;</span>
+    }
+
+    /**
+     * Returns the converter object where this exception throws from.
+     *
+     * @return the converter object where this exception throws from
+     */
+    public @Nonnull ObjectConverter converter() {
+<span class="fc" id="L87">        return converter;</span>
+    }
+
+    /**
+     * Returns the options used in the conversion.
+     *
+     * @return the options used in the conversion
+     */
+    public @Nonnull Option&lt;?, ?&gt; @Nonnull [] options() {
+<span class="fc" id="L96">        return options;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

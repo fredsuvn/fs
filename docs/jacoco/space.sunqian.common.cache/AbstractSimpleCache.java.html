@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractSimpleCache.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.cache</a> &gt; <span class="el_source">AbstractSimpleCache.java</span></div><h1>AbstractSimpleCache.java</h1><pre class="source lang-java linenums">package space.sunqian.common.cache;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+import space.sunqian.common.base.value.Val;
+import space.sunqian.common.base.value.Var;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+
+/**
+ * This is a skeletal implementation of the {@link SimpleCache} to minimize the effort required to implement the
+ * interface. To implement a cache, just need to override the {@link #generate(Object, Object)} and {@link #clean()}.
+ * &lt;p&gt;
+ * This implementation is based on an underlying {@link ConcurrentMap}, which is a protected field: {@link #cacheMap}.
+ * The type of {@link #cacheMap}'s value is {@link Value}, which wraps the actual value to be cached. Every time this
+ * cache is invoked, {@link #clean()} is executed to clear expired values. Therefore, it is necessary to correctly
+ * implement the storage and invalidation behavior of cached data in {@link #generate(Object, Object)} and
+ * {@link #clean()}.
+ *
+ * @param &lt;K&gt; the key type
+ * @param &lt;V&gt; the value type
+ * @author sunqian
+ */
+<span class="fc" id="L27">public abstract class AbstractSimpleCache&lt;K, V&gt; implements SimpleCache&lt;K, V&gt; {</span>
+
+<span class="fc" id="L29">    private static final @Nonnull Object NULL_VAL = &quot;(╯‵□′)╯︵┻━┻&quot;;</span>
+
+    /**
+     * The underlying cache map, which is used to store the cache value.
+     */
+<span class="fc" id="L34">    protected final @Nonnull ConcurrentMap&lt;K, Value&lt;K&gt;&gt; cacheMap = new ConcurrentHashMap&lt;&gt;();</span>
+
+    /**
+     * Generates a cache value wrapper with the given cache key and cache value. Note the value is masked and non-null.
+     *
+     * @param key   the given cache key
+     * @param value the given cache value which is masked and non-null
+     * @return the cache value wrapper
+     */
+    protected abstract @Nonnull Value&lt;K&gt; generate(@Nonnull K key, @Nonnull Object value);
+
+    @Override
+    public @Nullable V get(@Nonnull K key) {
+<span class="fc" id="L47">        clean();</span>
+<span class="fc" id="L48">        @Nullable Value&lt;K&gt; cv = cacheMap.get(key);</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (cv == null) {</span>
+<span class="fc" id="L50">            return null;</span>
+        }
+<span class="fc" id="L52">        @Nullable Object raw = cv.refValue();</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (raw == null) {</span>
+<span class="fc" id="L54">            return null;</span>
+        }
+<span class="fc" id="L56">        return unmaskRawValue(raw);</span>
+    }
+
+    @Override
+    public @Nullable Val&lt;@Nullable V&gt; getVal(@Nonnull K key) {
+<span class="fc" id="L61">        clean();</span>
+<span class="fc" id="L62">        @Nullable Value&lt;K&gt; cv = cacheMap.get(key);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (cv == null) {</span>
+<span class="fc" id="L64">            return null;</span>
+        }
+<span class="fc" id="L66">        @Nullable Object raw = cv.refValue();</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (raw == null) {</span>
+<span class="fc" id="L68">            return null;</span>
+        }
+<span class="fc" id="L70">        return Val.of(unmaskRawValue(raw));</span>
+    }
+
+    @Override
+    public @Nullable V get(@Nonnull K key, @Nonnull Function&lt;? super @Nonnull K, ? extends @Nullable V&gt; producer) {
+<span class="fc" id="L75">        clean();</span>
+<span class="fc" id="L76">        @Nullable Value&lt;K&gt; cv = cacheMap.get(key);</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        if (cv != null) {</span>
+<span class="fc" id="L78">            @Nullable Object raw = cv.refValue();</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">            if (raw != null) {</span>
+<span class="fc" id="L80">                return unmaskRawValue(raw);</span>
+            }
+        }
+<span class="fc" id="L83">        Var&lt;V&gt; value = Var.of(null);</span>
+<span class="fc" id="L84">        cacheMap.compute(key, (k, old) -&gt; {</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">            if (old != null) {</span>
+<span class="fc" id="L86">                @Nullable Object raw = old.refValue();</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">                if (raw != null) {</span>
+<span class="fc" id="L88">                    value.set(unmaskRawValue(raw));</span>
+<span class="fc" id="L89">                    return old;</span>
+                }
+            }
+<span class="fc" id="L92">            @Nullable V newV = producer.apply(key);</span>
+<span class="fc" id="L93">            value.set(newV);</span>
+<span class="fc" id="L94">            return generate(key, maskValue(newV));</span>
+        });
+<span class="fc" id="L96">        return Fs.as(value.get());</span>
+    }
+
+    @Override
+    public @Nullable Val&lt;V&gt; getVal(
+        @Nonnull K key,
+        @Nonnull Function&lt;? super @Nonnull K, ? extends @Nullable Val&lt;? extends @Nullable V&gt;&gt; producer
+    ) {
+<span class="fc" id="L104">        clean();</span>
+<span class="fc" id="L105">        @Nullable Value&lt;K&gt; cv = cacheMap.get(key);</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        if (cv != null) {</span>
+<span class="fc" id="L107">            @Nullable Object raw = cv.refValue();</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            if (raw != null) {</span>
+<span class="fc" id="L109">                return Val.of(unmaskRawValue(raw));</span>
+            }
+        }
+<span class="fc" id="L112">        Var&lt;Object&gt; value = Var.of(null);</span>
+<span class="fc" id="L113">        cacheMap.compute(key, (k, old) -&gt; {</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">            if (old != null) {</span>
+<span class="fc" id="L115">                @Nullable Object raw = old.refValue();</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">                if (raw != null) {</span>
+<span class="fc" id="L117">                    value.set(unmaskRawValue(raw));</span>
+<span class="fc" id="L118">                    return old;</span>
+                }
+            }
+<span class="fc" id="L121">            @Nullable Val&lt;? extends V&gt; newV = producer.apply(key);</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">            if (newV == null) {</span>
+<span class="fc" id="L123">                value.set(NULL_VAL);</span>
+<span class="fc" id="L124">                return null;</span>
+            }
+<span class="fc" id="L126">            @Nullable V nv = newV.get();</span>
+<span class="fc" id="L127">            value.set(nv);</span>
+<span class="fc" id="L128">            return generate(key, maskValue(nv));</span>
+        });
+<span class="fc" id="L130">        @Nullable Object v = value.get();</span>
+        // if (v == NULL_VAL) {
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        if (NULL_VAL.equals(v)) {</span>
+<span class="fc" id="L133">            return null;</span>
+        }
+<span class="fc" id="L135">        return Val.of(Fs.as(v));</span>
+    }
+
+    @Override
+    public void put(@Nonnull K key, @Nullable V value) {
+<span class="fc" id="L140">        clean();</span>
+<span class="fc" id="L141">        Value&lt;K&gt; newValue = generate(key, maskValue(value));</span>
+<span class="fc" id="L142">        @Nullable Value&lt;K&gt; old = cacheMap.put(key, newValue);</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        if (old != null) {</span>
+<span class="fc" id="L144">            old.invalid();</span>
+        }
+<span class="fc" id="L146">    }</span>
+
+    @Override
+    public void remove(@Nonnull K key) {
+<span class="fc" id="L150">        clean();</span>
+<span class="fc" id="L151">        @Nullable Value&lt;K&gt; old = cacheMap.remove(key);</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        if (old != null) {</span>
+<span class="fc" id="L153">            old.invalid();</span>
+        }
+<span class="fc" id="L155">    }</span>
+
+    @Override
+    public int size() {
+<span class="fc" id="L159">        clean();</span>
+<span class="fc" id="L160">        return cacheMap.size();</span>
+    }
+
+    @Override
+    public void clear() {
+<span class="fc" id="L165">        cacheMap.forEach((k, v) -&gt; {</span>
+<span class="fc" id="L166">            v.invalid();</span>
+<span class="fc" id="L167">        });</span>
+<span class="fc" id="L168">        clean();</span>
+<span class="fc" id="L169">    }</span>
+
+    private @Nonnull Object maskValue(@Nullable V value) {
+<span class="fc bfc" id="L172" title="All 2 branches covered.">        return value == null ? new Null() : value;</span>
+    }
+
+    private @Nullable V unmaskRawValue(@Nonnull Object raw) {
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        if (raw instanceof Null) {</span>
+<span class="fc" id="L177">            return null;</span>
+        }
+<span class="fc" id="L179">        return Fs.as(raw);</span>
+    }
+
+    private static final class Null {
+        private Null() {
+        }
+    }
+
+    /**
+     * This interface represents the cache value, which is used to wrap the actual value to be cached.
+     *
+     * @param &lt;K&gt; the key type
+     */
+    public interface Value&lt;K&gt; {
+
+        /**
+         * Returns the cache key.
+         *
+         * @return the cache key
+         */
+        @Nonnull
+        K key();
+
+        /**
+         * Returns the actual value to be cached, may be {@code null} if the value is invalid.
+         *
+         * @return the actual value to be cached, may be {@code null} if the value is invalid
+         */
+        @Nullable
+        Object refValue();
+
+        /**
+         * Invalidates the cache value, the actual cached value should be cleared.
+         */
+        void invalid();
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

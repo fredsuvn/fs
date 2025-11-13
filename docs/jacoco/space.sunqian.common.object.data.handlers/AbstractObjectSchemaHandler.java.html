@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractObjectSchemaHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.object.data.handlers</a> &gt; <span class="el_source">AbstractObjectSchemaHandler.java</span></div><h1>AbstractObjectSchemaHandler.java</h1><pre class="source lang-java linenums">package space.sunqian.common.object.data.handlers;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+import space.sunqian.common.collect.MapKit;
+import space.sunqian.common.object.data.ObjectPropertyBase;
+import space.sunqian.common.object.data.ObjectSchemaParser;
+import space.sunqian.common.runtime.invoke.Invocable;
+import space.sunqian.common.runtime.reflect.TypeKit;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * This is a skeletal implementation of the {@link ObjectSchemaParser.Handler} to minimize the effort required to
+ * implement the interface.
+ * &lt;p&gt;
+ * This class uses {@link Class#getMethods()} to find out all methods (the synthetic method will be filtered out), then
+ * passes each of them to {@link #resolveAccessor(Method)} to resolve property accessor infos. This class will perform
+ * subsequent parsing based on those property accessor infos, the subclasses only needs to implement the
+ * {@link #resolveAccessor(Method)}.
+ *
+ * @author sunqian
+ */
+<span class="fc" id="L32">public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.Handler {</span>
+
+    private static @Nonnull Type findActualType(
+        @Nonnull Type type,
+        @Nonnull Map&lt;@Nonnull TypeVariable&lt;?&gt;, @Nonnull Type&gt; typeParameterMapping,
+        @Nonnull Set&lt;@Nonnull Type&gt; stack
+    ) {
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (type instanceof Class) {</span>
+<span class="fc" id="L40">            return type;</span>
+        }
+<span class="fc" id="L42">        stack.clear();</span>
+<span class="fc" id="L43">        Type result = MapKit.resolveChain(typeParameterMapping, type, stack);</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (result != null) {</span>
+<span class="fc" id="L45">            return result;</span>
+        }
+<span class="fc" id="L47">        return type;</span>
+    }
+
+    private static @Nullable Field findField(@Nonnull String name, @Nonnull Class&lt;?&gt; type) {
+        try {
+<span class="fc" id="L52">            return type.getField(name);</span>
+<span class="fc" id="L53">        } catch (NoSuchFieldException e) {</span>
+<span class="fc" id="L54">            Class&lt;?&gt; cur = type;</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">            while (cur != null) {</span>
+                try {
+<span class="fc" id="L57">                    return cur.getDeclaredField(name);</span>
+<span class="fc" id="L58">                } catch (NoSuchFieldException ex) {</span>
+<span class="fc" id="L59">                    cur = cur.getSuperclass();</span>
+<span class="fc" id="L60">                }</span>
+            }
+        }
+<span class="fc" id="L63">        return null;</span>
+    }
+
+    @Override
+    public boolean parse(@Nonnull ObjectSchemaParser.Context context) throws Exception {
+<span class="fc" id="L68">        Type type = context.dataType();</span>
+<span class="fc" id="L69">        Class&lt;?&gt; rawType = TypeKit.getRawClass(type);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (rawType == null) {</span>
+<span class="fc" id="L71">            throw new UnsupportedOperationException(&quot;Not a Class or ParameterizedType: &quot; + type + &quot;.&quot;);</span>
+        }
+<span class="fc" id="L73">        Method[] methods = rawType.getMethods();</span>
+<span class="fc" id="L74">        Map&lt;String, PropertyInfo&gt; propertyInfoMap = new LinkedHashMap&lt;&gt;();</span>
+
+        // Builds property info for each method.
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        for (Method method : methods) {</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">            if (method.isSynthetic()) {</span>
+<span class="fc" id="L79">                continue;</span>
+            }
+<span class="fc" id="L81">            AccessorInfo accessorInfo = resolveAccessor(method);</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">            if (accessorInfo == null) {</span>
+<span class="fc" id="L83">                continue;</span>
+            }
+<span class="fc" id="L85">            String propertyName = accessorInfo.propertyName();</span>
+<span class="fc" id="L86">            PropertyInfo propertyInfo = propertyInfoMap.computeIfAbsent(propertyName, PropertyInfo::new);</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">            if (accessorInfo.isGetter()) {</span>
+<span class="fc" id="L88">                propertyInfo.getterMethod = method;</span>
+<span class="fc" id="L89">                propertyInfo.getter = accessorInfo.accessor();</span>
+            } else {
+<span class="fc" id="L91">                propertyInfo.setterMethod = method;</span>
+<span class="fc" id="L92">                propertyInfo.setter = accessorInfo.accessor();</span>
+            }
+        }
+
+        // Builds property base for each property info.
+<span class="fc" id="L97">        Map&lt;TypeVariable&lt;?&gt;, Type&gt; typeParameterMapping = TypeKit.typeParametersMapping(context.dataType());</span>
+<span class="fc" id="L98">        Set&lt;Type&gt; stack = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L99">        propertyInfoMap.forEach((propertyName, propertyInfo) -&gt; {</span>
+<span class="fc" id="L100">            Method getterMethod = propertyInfo.getterMethod;</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">            Type propertyType = getterMethod == null ? null :</span>
+<span class="fc" id="L102">                findActualType(getterMethod.getGenericReturnType(), typeParameterMapping, stack);</span>
+<span class="fc" id="L103">            Method setterMethod = propertyInfo.setterMethod;</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">            if (propertyType == null) {</span>
+<span class="fc" id="L105">                propertyType = findActualType(</span>
+<span class="fc" id="L106">                    Fs.asNonnull(setterMethod).getGenericParameterTypes()[0], typeParameterMapping, stack);</span>
+            }
+            /*
+            The property's type is the return type of getter or the parameter type of setter.
+            If the getter's return type and the setter's parameter type are not equal, the getter's return type is used,
+            and the setter method will no longer be considered as the setter for this property.
+             */
+<span class="fc" id="L113">            Field field = findField(propertyName, rawType);</span>
+<span class="fc" id="L114">            propertyInfo.type = propertyType;</span>
+<span class="fc" id="L115">            propertyInfo.field = field;</span>
+<span class="fc" id="L116">            context.propertyBaseMap().put(propertyName, propertyInfo);</span>
+<span class="fc" id="L117">        });</span>
+<span class="fc" id="L118">        return true;</span>
+    }
+
+    /**
+     * Resolves and returns the given method to an accessor info, or {@code null} if the given method is not a data
+     * property.
+     *
+     * @param method the given method
+     * @return the accessor info resolved from the given method, or {@code null} if the given method is not a data
+     * property
+     */
+    protected abstract @Nullable AccessorInfo resolveAccessor(@Nonnull Method method);
+
+    /**
+     * Property accessor info, resolved from the specified {@link Method}.
+     *
+     * @author sunqian
+     */
+    public interface AccessorInfo {
+
+        /**
+         * Returns the property name.
+         *
+         * @return the property name
+         */
+        @Nonnull
+        String propertyName();
+
+        /**
+         * Returns the accessor for the specified {@link Method}.
+         *
+         * @return the accessor for the specified {@link Method}
+         */
+        @Nonnull
+        Invocable accessor();
+
+        /**
+         * Returns {@code true} if the specified {@link Method} is a getter method, {@code false} for setter.
+         *
+         * @return {@code true} if the specified {@link Method} is a getter method, {@code false} for setter.
+         */
+        boolean isGetter();
+    }
+
+    private static final class PropertyInfo implements ObjectPropertyBase {
+
+        private final @Nonnull String name;
+<span class="fc" id="L165">        private @Nonnull Type type = Object.class;</span>
+        private @Nullable Field field;
+
+        private @Nullable Method getterMethod;
+        private @Nullable Invocable getter;
+        private @Nullable Method setterMethod;
+        private @Nullable Invocable setter;
+
+<span class="fc" id="L173">        private PropertyInfo(@Nonnull String name) {</span>
+<span class="fc" id="L174">            this.name = name;</span>
+<span class="fc" id="L175">        }</span>
+
+        @Override
+        public @Nonnull String name() {
+<span class="fc" id="L179">            return name;</span>
+        }
+
+        @Override
+        public @Nonnull Type type() {
+<span class="fc" id="L184">            return type;</span>
+        }
+
+        @Override
+        public @Nullable Method getterMethod() {
+<span class="fc" id="L189">            return getterMethod;</span>
+        }
+
+        @Override
+        public @Nullable Method setterMethod() {
+<span class="fc" id="L194">            return setterMethod;</span>
+        }
+
+        @Override
+        public @Nullable Field field() {
+<span class="fc" id="L199">            return field;</span>
+        }
+
+        @Override
+        public @Nullable Invocable getter() {
+<span class="fc" id="L204">            return getter;</span>
+        }
+
+        @Override
+        public @Nullable Invocable setter() {
+<span class="fc" id="L209">            return setter;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

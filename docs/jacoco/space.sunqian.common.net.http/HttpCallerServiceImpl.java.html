@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HttpCallerServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.net.http</a> &gt; <span class="el_source">HttpCallerServiceImpl.java</span></div><h1>HttpCallerServiceImpl.java</h1><pre class="source lang-java linenums">package space.sunqian.common.net.http;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+import space.sunqian.common.base.math.MathKit;
+import space.sunqian.common.io.IOOperator;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.Proxy;
+import java.util.List;
+import java.util.Map;
+
+<span class="fc" id="L16">enum HttpCallerServiceImpl implements HttpCallerService {</span>
+<span class="fc" id="L17">    INST;</span>
+
+    @Override
+    public @Nonnull HttpCaller newCaller(int bufSize, @Nonnull Proxy proxy) throws HttpNetException {
+<span class="fc" id="L21">        return new CallerImpl(bufSize, proxy);</span>
+    }
+
+    private static final class CallerImpl implements HttpCaller {
+
+        private final @Nonnull IOOperator io;
+        private final @Nonnull Proxy proxy;
+
+<span class="fc" id="L29">        CallerImpl(int bufSize, @Nonnull Proxy proxy) throws HttpNetException {</span>
+<span class="fc" id="L30">            this.io = Fs.uncheck(() -&gt; IOOperator.get(bufSize), HttpNetException::new);</span>
+<span class="fc" id="L31">            this.proxy = proxy;</span>
+<span class="fc" id="L32">        }</span>
+
+        @Override
+        public @Nonnull HttpResp request(@Nonnull HttpReq req) throws HttpNetException {
+<span class="fc" id="L36">            return Fs.uncheck(() -&gt; request0(req), HttpNetException::new);</span>
+        }
+
+        private @Nonnull HttpResp request0(@Nonnull HttpReq req) throws Exception {
+<span class="fc" id="L40">            HttpURLConnection connection = (HttpURLConnection) req.url().openConnection(proxy);</span>
+<span class="fc" id="L41">            connection.setConnectTimeout(MathKit.intValue(req.timeout().toMillis()));</span>
+<span class="fc" id="L42">            connection.setReadTimeout(MathKit.intValue(req.timeout().toMillis()));</span>
+<span class="fc" id="L43">            req.headers().forEach((k, list) -&gt; {</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">                for (String s : list) {</span>
+<span class="fc" id="L45">                    connection.addRequestProperty(k, s);</span>
+<span class="fc" id="L46">                }</span>
+<span class="fc" id="L47">            });</span>
+            // connection.setDoInput(true);
+<span class="fc" id="L49">            connection.setRequestMethod(req.method());</span>
+<span class="fc" id="L50">            InputStream in = req.body();</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">            if (in != null) {</span>
+<span class="fc" id="L52">                int firstByte = in.read();</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">                if (firstByte != -1) {</span>
+<span class="fc" id="L54">                    connection.setDoOutput(true);</span>
+<span class="fc" id="L55">                    OutputStream out = connection.getOutputStream();</span>
+<span class="fc" id="L56">                    out.write(firstByte);</span>
+<span class="fc" id="L57">                    io.readTo(in, out);</span>
+                }
+            }
+<span class="fc" id="L60">            int respCode = connection.getResponseCode();</span>
+<span class="fc" id="L61">            String respMsg = connection.getResponseMessage();</span>
+<span class="fc" id="L62">            String firstLine = Fs.nonnull(connection.getHeaderField(null), &quot;&quot;);</span>
+<span class="fc" id="L63">            String protocol = firstLine.substring(0, Math.max(firstLine.indexOf(' '), 0));</span>
+<span class="fc" id="L64">            Map&lt;String, List&lt;String&gt;&gt; respHeaders = connection.getHeaderFields();</span>
+<span class="fc" id="L65">            String respContentType = connection.getContentType();</span>
+<span class="fc" id="L66">            InputStream errBody = connection.getErrorStream();</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            InputStream respBody = errBody != null ? errBody : connection.getInputStream();</span>
+<span class="fc" id="L68">            return new HttpResp() {</span>
+
+                @Override
+                public @Nonnull String protocolVersion() {
+<span class="fc" id="L72">                    return protocol;</span>
+                }
+
+                @Override
+                public @Nonnull String statusCode() {
+<span class="fc" id="L77">                    return Integer.toString(respCode);</span>
+                }
+
+                @Override
+                public @Nonnull String statusText() {
+<span class="fc" id="L82">                    return respMsg;</span>
+                }
+
+                @Override
+                public @Nonnull Map&lt;String, List&lt;String&gt;&gt; headers() {
+<span class="fc" id="L87">                    return respHeaders;</span>
+                }
+
+                @Override
+                public @Nonnull InputStream body() {
+<span class="fc" id="L92">                    return respBody;</span>
+                }
+
+                @Override
+                public @Nullable String contentType() {
+<span class="fc" id="L97">                    return respContentType;</span>
+                }
+            };
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

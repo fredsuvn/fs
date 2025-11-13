@@ -1,0 +1,616 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ByMethodHandle.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.runtime.invoke</a> &gt; <span class="el_source">ByMethodHandle.java</span></div><h1>ByMethodHandle.java</h1><pre class="source lang-java linenums">package space.sunqian.common.runtime.invoke;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.runtime.reflect.ClassKit;
+
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
+final class ByMethodHandle {
+
+    static final int MAX_STATIC_ARGS_NUM = 16;
+    static final int MAX_INST_ARGS_NUM = 15;
+
+    static @Nonnull Invocable newInvocable(@Nonnull Method method) {
+<span class="fc" id="L18">        MethodHandle handle = methodHandle(method);</span>
+<span class="fc" id="L19">        boolean isStatic = ClassKit.isStatic(method);</span>
+<span class="fc" id="L20">        return newInvocable(handle, isStatic);</span>
+    }
+
+    private static @Nonnull MethodHandle methodHandle(@Nonnull Method method) throws InvocationException {
+        try {
+<span class="fc" id="L25">            return MethodHandles.lookup()</span>
+<span class="fc" id="L26">                .unreflect(method)</span>
+                // .findVirtual(
+                //     method.getDeclaringClass(),
+                //     method.getName(),
+                //     MethodType.methodType(method.getReturnType(), method.getParameterTypes())
+                // )
+                //.asType(buildMethodType(method))
+                ;
+<span class="fc" id="L34">        } catch (Exception e) {</span>
+<span class="fc" id="L35">            throw new InvocationException(e);</span>
+        }
+    }
+
+    static @Nonnull Invocable newInvocable(@Nonnull Constructor&lt;?&gt; constructor) {
+<span class="fc" id="L40">        MethodHandle handle = constructorHandle(constructor);</span>
+<span class="fc" id="L41">        return newInvocable(handle, true);</span>
+    }
+
+    private static @Nonnull MethodHandle constructorHandle(@Nonnull Constructor&lt;?&gt; constructor) throws InvocationException {
+        try {
+<span class="fc" id="L46">            return MethodHandles.lookup()</span>
+<span class="fc" id="L47">                .unreflectConstructor(constructor)</span>
+                // .findConstructor(
+                //     constructor.getDeclaringClass(),
+                //     MethodType.methodType(void.class, constructor.getParameterTypes())
+                // );
+                //.asType(buildMethodType(constructor))
+                ;
+<span class="fc" id="L54">        } catch (Exception e) {</span>
+<span class="fc" id="L55">            throw new InvocationException(e);</span>
+        }
+    }
+
+    static @Nonnull Invocable newInvocable(@Nonnull MethodHandle handle, boolean isStatic) {
+<span class="fc bfc" id="L60" title="All 18 branches covered.">        switch (handle.type().parameterCount()) {</span>
+            case 0:
+<span class="fc" id="L62">                return new StaticInvoker0(handle);</span>
+            case 1:
+<span class="fc bfc" id="L64" title="All 2 branches covered.">                return isStatic ? new StaticInvoker1(handle) : new InstanceInvoker0(handle);</span>
+            case 2:
+<span class="fc bfc" id="L66" title="All 2 branches covered.">                return isStatic ? new StaticInvoker2(handle) : new InstanceInvoker1(handle);</span>
+            case 3:
+<span class="fc bfc" id="L68" title="All 2 branches covered.">                return isStatic ? new StaticInvoker3(handle) : new InstanceInvoker2(handle);</span>
+            case 4:
+<span class="fc bfc" id="L70" title="All 2 branches covered.">                return isStatic ? new StaticInvoker4(handle) : new InstanceInvoker3(handle);</span>
+            case 5:
+<span class="fc bfc" id="L72" title="All 2 branches covered.">                return isStatic ? new StaticInvoker5(handle) : new InstanceInvoker4(handle);</span>
+            case 6:
+<span class="fc bfc" id="L74" title="All 2 branches covered.">                return isStatic ? new StaticInvoker6(handle) : new InstanceInvoker5(handle);</span>
+            case 7:
+<span class="fc bfc" id="L76" title="All 2 branches covered.">                return isStatic ? new StaticInvoker7(handle) : new InstanceInvoker6(handle);</span>
+            case 8:
+<span class="fc bfc" id="L78" title="All 2 branches covered.">                return isStatic ? new StaticInvoker8(handle) : new InstanceInvoker7(handle);</span>
+            case 9:
+<span class="fc bfc" id="L80" title="All 2 branches covered.">                return isStatic ? new StaticInvoker9(handle) : new InstanceInvoker8(handle);</span>
+            case 10:
+<span class="fc bfc" id="L82" title="All 2 branches covered.">                return isStatic ? new StaticInvoker10(handle) : new InstanceInvoker9(handle);</span>
+            case 11:
+<span class="fc bfc" id="L84" title="All 2 branches covered.">                return isStatic ? new StaticInvoker11(handle) : new InstanceInvoker10(handle);</span>
+            case 12:
+<span class="fc bfc" id="L86" title="All 2 branches covered.">                return isStatic ? new StaticInvoker12(handle) : new InstanceInvoker11(handle);</span>
+            case 13:
+<span class="fc bfc" id="L88" title="All 2 branches covered.">                return isStatic ? new StaticInvoker13(handle) : new InstanceInvoker12(handle);</span>
+            case 14:
+<span class="fc bfc" id="L90" title="All 2 branches covered.">                return isStatic ? new StaticInvoker14(handle) : new InstanceInvoker13(handle);</span>
+            case 15:
+<span class="fc bfc" id="L92" title="All 2 branches covered.">                return isStatic ? new StaticInvoker15(handle) : new InstanceInvoker14(handle);</span>
+            case 16:
+<span class="fc bfc" id="L94" title="All 2 branches covered.">                return isStatic ? new StaticInvoker16(handle) : new InstanceInvoker15(handle);</span>
+            default:
+<span class="fc" id="L96">                return forHandle(handle, isStatic);</span>
+        }
+    }
+
+    private static @Nonnull Invocable forHandle(@Nonnull MethodHandle methodHandle, boolean isStatic) {
+<span class="fc bfc" id="L101" title="All 2 branches covered.">        return isStatic ? new StaticInvoker(methodHandle) : new InstanceInvoker(methodHandle);</span>
+    }
+
+    // public static void main(String[] args) {
+    //     StringBuilder sb = new StringBuilder();
+    //     for (int i = 1; i &lt; 17; i++) {
+    //         sb.append(&quot;case &quot;).append(i).append(&quot;: &quot;).append(&quot;return isStatic ? new StaticInvoker&quot;);
+    //         sb.append(i).append(&quot;(handle) : new InstanceInvoker&quot;).append(i - 1).append(&quot;(handle);&quot;);
+    //         sb.append(System.lineSeparator());
+    //     }
+    //     System.out.println(sb);
+    // }
+
+    private static final class StaticInvoker implements Invocable {
+
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L118">        private StaticInvoker(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L119">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L120">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L124">            return methodHandle.invokeWithArguments(args);</span>
+        }
+    }
+
+    private static final class InstanceInvoker implements Invocable {
+
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L132">        private InstanceInvoker(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L133">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L134">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L138">            return methodHandle.invokeWithArguments(InvokeKit.toInstanceArgs(inst, args));</span>
+        }
+    }
+
+    private static final class StaticInvoker0 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L145">        private StaticInvoker0(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L146">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L147">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L151">            return methodHandle.invoke();</span>
+        }
+    }
+
+    private static final class StaticInvoker1 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L158">        private StaticInvoker1(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L159">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L160">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L164">            return methodHandle.invoke(args[0]);</span>
+        }
+    }
+
+    private static final class StaticInvoker2 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L171">        private StaticInvoker2(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L172">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L173">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L177">            return methodHandle.invoke(args[0], args[1]);</span>
+        }
+    }
+
+    private static final class StaticInvoker3 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L184">        private StaticInvoker3(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L185">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L186">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L190">            return methodHandle.invoke(args[0], args[1], args[2]);</span>
+        }
+    }
+
+    private static final class StaticInvoker4 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L197">        private StaticInvoker4(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L198">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L199">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L203">            return methodHandle.invoke(args[0], args[1], args[2], args[3]);</span>
+        }
+    }
+
+    private static final class StaticInvoker5 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L210">        private StaticInvoker5(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L211">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L212">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L216">            return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4]);</span>
+        }
+    }
+
+    private static final class StaticInvoker6 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L223">        private StaticInvoker6(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L224">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L225">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L229">            return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5]);</span>
+        }
+    }
+
+    private static final class StaticInvoker7 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L236">        private StaticInvoker7(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L237">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L238">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L242">            return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);</span>
+        }
+    }
+
+    private static final class StaticInvoker8 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L249">        private StaticInvoker8(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L250">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L251">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L255">            return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);</span>
+        }
+    }
+
+    private static final class StaticInvoker9 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L262">        private StaticInvoker9(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L263">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L264">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L268">            return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);</span>
+        }
+    }
+
+    private static final class StaticInvoker10 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L275">        private StaticInvoker10(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L276">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L277">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L281">            return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);</span>
+        }
+    }
+
+    private static final class StaticInvoker11 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L288">        private StaticInvoker11(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L289">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L290">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L294">            return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10]);</span>
+        }
+    }
+
+    private static final class StaticInvoker12 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L301">        private StaticInvoker12(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L302">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L303">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L307">            return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11]);</span>
+        }
+    }
+
+    private static final class StaticInvoker13 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L314">        private StaticInvoker13(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L315">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L316">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L320">            return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12]);</span>
+        }
+    }
+
+    private static final class StaticInvoker14 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L327">        private StaticInvoker14(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L328">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L329">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L333">            return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13]);</span>
+        }
+    }
+
+    private static final class StaticInvoker15 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L340">        private StaticInvoker15(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L341">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L342">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L346">            return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], args[14]);</span>
+        }
+    }
+
+    private static final class StaticInvoker16 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L353">        private StaticInvoker16(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L354">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L355">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L359">            return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], args[14], args[15]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker0 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L366">        private InstanceInvoker0(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L367">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L368">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L372">            return methodHandle.invoke(inst);</span>
+        }
+    }
+
+    private static final class InstanceInvoker1 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L379">        private InstanceInvoker1(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L380">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L381">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L385">            return methodHandle.invoke(inst, args[0]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker2 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L392">        private InstanceInvoker2(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L393">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L394">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L398">            return methodHandle.invoke(inst, args[0], args[1]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker3 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L405">        private InstanceInvoker3(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L406">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L407">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L411">            return methodHandle.invoke(inst, args[0], args[1], args[2]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker4 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L418">        private InstanceInvoker4(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L419">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L420">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L424">            return methodHandle.invoke(inst, args[0], args[1], args[2], args[3]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker5 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L431">        private InstanceInvoker5(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L432">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L433">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L437">            return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker6 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L444">        private InstanceInvoker6(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L445">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L446">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L450">            return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker7 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L457">        private InstanceInvoker7(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L458">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L459">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L463">            return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker8 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L470">        private InstanceInvoker8(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L471">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L472">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L476">            return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker9 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L483">        private InstanceInvoker9(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L484">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L485">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L489">            return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker10 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L496">        private InstanceInvoker10(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L497">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L498">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L502">            return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker11 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L509">        private InstanceInvoker11(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L510">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L511">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L515">            return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker12 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L522">        private InstanceInvoker12(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L523">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L524">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L528">            return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker13 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L535">        private InstanceInvoker13(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L536">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L537">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L541">            return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker14 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L548">        private InstanceInvoker14(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L549">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L550">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L554">            return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13]);</span>
+        }
+    }
+
+    private static final class InstanceInvoker15 implements Invocable {
+        private final @Nonnull MethodHandle methodHandle;
+
+<span class="fc" id="L561">        private InstanceInvoker15(@Nonnull MethodHandle methodHandle) {</span>
+<span class="fc" id="L562">            this.methodHandle = methodHandle;</span>
+<span class="fc" id="L563">        }</span>
+
+        @Override
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+<span class="fc" id="L567">            return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], args[14]);</span>
+        }
+    }
+
+    // public static void main(String[] args) {
+    //     StringBuilder sb = new StringBuilder();
+    //     appendImpl(sb, 17, true);
+    //     appendImpl(sb, 16, false);
+    //     System.out.println(sb);
+    // }
+    //
+    // private static void appendImpl(StringBuilder sb, int count, boolean isStatic) {
+    //     String className = (isStatic ? &quot;Static&quot; : &quot;Instance&quot;) + &quot;Invoker&quot;;
+    //     for (int i = 0; i &lt; count; i++) {
+    //         sb.append(&quot;private static final class &quot;).append(className).append(i).append(&quot; implements Invocable {&quot;);
+    //         sb.append(System.lineSeparator());
+    //         sb.append(&quot;private final @Nonnull MethodHandle methodHandle;&quot;);
+    //         sb.append(System.lineSeparator());
+    //         sb.append(&quot;private &quot;).append(className).append(i).append(&quot;(@Nonnull MethodHandle methodHandle) {this.methodHandle = methodHandle;}&quot;);
+    //         sb.append(System.lineSeparator());
+    //         sb.append(&quot;@Override public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {&quot;);
+    //         sb.append(System.lineSeparator());
+    //         appendCall(sb, i, isStatic);
+    //         sb.append(System.lineSeparator()).append(&quot;}&quot;);
+    //         sb.append(System.lineSeparator()).append(&quot;}&quot;);
+    //     }
+    //     sb.append(System.lineSeparator());
+    // }
+    //
+    // private static void appendCall(StringBuilder sb, int i, boolean isStatic) {
+    //     sb.append(&quot;return methodHandle.invoke(&quot;);
+    //     boolean isFirst = true;
+    //     if (!isStatic) {
+    //         sb.append(&quot;inst&quot;);
+    //         isFirst = false;
+    //     }
+    //     for (int j = 0; j &lt; i; j++) {
+    //         if (!isFirst) {
+    //             sb.append(&quot;,&quot;);
+    //         }
+    //         sb.append(&quot;args[&quot;).append(j).append(&quot;]&quot;);
+    //         isFirst = false;
+    //     }
+    //     sb.append(&quot;);&quot;);
+    // }
+
+    private ByMethodHandle() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

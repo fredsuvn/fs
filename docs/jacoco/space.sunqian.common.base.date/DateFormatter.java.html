@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DateFormatter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.date</a> &gt; <span class="el_source">DateFormatter.java</span></div><h1>DateFormatter.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.date;
+
+import space.sunqian.annotations.Immutable;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.Date;
+
+/**
+ * Formatter for time and date. This formatter has a default zone information ({@link #zoneId()}), which will be used
+ * when the object to be operated does not contain zone information. The implementation of this interface is immutable
+ * and thread-safe.
+ *
+ * @author sunqian
+ */
+@Immutable
+public interface DateFormatter {
+
+    /**
+     * Returns the default {@link DateFormatter} of which pattern is {@link DateKit#DEFAULT_PATTERN}, and zone is
+     * {@link ZoneId#systemDefault()}.
+     *
+     * @return the default {@link DateFormatter} of which pattern is {@link DateKit#DEFAULT_PATTERN}
+     */
+    static @Nonnull DateFormatter defaultFormatter() {
+<span class="fc" id="L36">        return DateKit.formatter;</span>
+    }
+
+    /**
+     * Returns a new instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}. The default zone
+     * info of the returned instance is {@link ZoneId#systemDefault()}.
+     * &lt;p&gt;
+     * The returned instance supports {@link Date}, {@link Instant}, {@link LocalDateTime}, {@link ZonedDateTime},
+     * {@link OffsetDateTime}, {@link LocalDate} and {@link LocalTime}. But doesn't support pattern methods.
+     *
+     * @param formatter the given {@link DateTimeFormatter}
+     * @return a new instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}
+     */
+    static @Nonnull DateFormatter ofFormatter(@Nonnull DateTimeFormatter formatter) {
+<span class="fc" id="L50">        return ofFormatter(formatter, ZoneId.systemDefault());</span>
+    }
+
+    /**
+     * Returns a new instance of {@link DateFormatter} based on the given pattern. The default zone info of the returned
+     * instance is {@link ZoneId#systemDefault()}.
+     * &lt;p&gt;
+     * The returned instance supports {@link Date}, {@link Instant}, {@link LocalDateTime}, {@link ZonedDateTime},
+     * {@link OffsetDateTime}, {@link LocalDate} and {@link LocalTime}. And its underlying formatter is from
+     * {@link DateTimeFormatter#ofPattern(String)}.
+     *
+     * @param pattern the given pattern
+     * @return a new instance of {@link DateFormatter} based on the given pattern
+     * @throws DateTimeException if the pattern is invalid
+     */
+    static @Nonnull DateFormatter ofPattern(@Nonnull String pattern) throws DateTimeException {
+<span class="fc" id="L66">        return ofPattern(pattern, ZoneId.systemDefault());</span>
+    }
+
+    /**
+     * Returns a new instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}.
+     * &lt;p&gt;
+     * The returned instance supports {@link Date}, {@link Instant}, {@link LocalDateTime}, {@link ZonedDateTime},
+     * {@link OffsetDateTime}, {@link LocalDate} and {@link LocalTime}. But doesn't support pattern methods.
+     *
+     * @param formatter the given {@link DateTimeFormatter}
+     * @param zoneId    the default zone info of the returned instance
+     * @return a new instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}
+     */
+    static @Nonnull DateFormatter ofFormatter(
+        @Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId
+    ) {
+<span class="fc" id="L82">        return DateBack.ofFormatter(formatter, zoneId);</span>
+    }
+
+    /**
+     * Returns a new instance of {@link DateFormatter} based on the given pattern.
+     * &lt;p&gt;
+     * The returned instance supports {@link Date}, {@link Instant}, {@link LocalDateTime}, {@link ZonedDateTime},
+     * {@link OffsetDateTime}, {@link LocalDate} and {@link LocalTime}. And its underlying formatter is from
+     * {@link DateTimeFormatter#ofPattern(String)}.
+     *
+     * @param pattern the given pattern
+     * @param zoneId  the default zone info of the returned instance
+     * @return a new instance of {@link DateFormatter} based on the given pattern
+     * @throws DateTimeException if the pattern is invalid
+     */
+    static @Nonnull DateFormatter ofPattern(
+        @Nonnull String pattern, @Nonnull ZoneId zoneId
+    ) throws DateTimeException {
+<span class="fc" id="L100">        return DateBack.ofPattern(pattern, zoneId);</span>
+    }
+
+    /**
+     * Returns the zone id of this time formatter.
+     *
+     * @return the zone id of this time formatter
+     */
+    @Nonnull
+    ZoneId zoneId();
+
+    /**
+     * Returns the pattern of this time formatter.
+     *
+     * @return the pattern
+     * @throws DateTimeException if the pattern is invalid
+     */
+    @Nonnull
+    String pattern() throws DateTimeException;
+
+    /**
+     * Returns whether this time formatter has a pattern.
+     *
+     * @return whether this time formatter has a pattern
+     */
+    boolean hasPattern();
+
+    /**
+     * Formats the given date.
+     *
+     * @param date the given date to format
+     * @return the formatted string
+     * @throws DateTimeException if any error occurs
+     */
+    @Nonnull
+    String format(@Nonnull Date date) throws DateTimeException;
+
+    /**
+     * Formats the given date. If the given date is {@code null}, or an exception thrown during formating, returns
+     * {@code null}.
+     *
+     * @param date the given date to format, can be {@code null}
+     * @return the formatted string, or {@code null} if the given date is {@code null} or an exception thrown
+     * @throws DateTimeException if any error occurs
+     */
+    default @Nullable String formatSafe(@Nullable Date date) throws DateTimeException {
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        if (date == null) {</span>
+<span class="fc" id="L147">            return null;</span>
+        }
+        try {
+<span class="fc" id="L150">            return format(date);</span>
+<span class="fc" id="L151">        } catch (Exception e) {</span>
+<span class="fc" id="L152">            return null;</span>
+        }
+    }
+
+    /**
+     * Formats the given time object.
+     *
+     * @param time the given time object to format
+     * @return the formatted string
+     * @throws DateTimeException if any error occurs
+     */
+    @Nonnull
+    String format(@Nonnull TemporalAccessor time) throws DateTimeException;
+
+    /**
+     * Formats the given time object. If the given time object is {@code null}, or an exception thrown during formating,
+     * returns {@code null}.
+     *
+     * @param time the given time object to format, can be {@code null}
+     * @return the formatted string, or {@code null} if the given time object is {@code null} or an exception thrown
+     * @throws DateTimeException if any error occurs
+     */
+    default @Nullable String formatSafe(@Nullable TemporalAccessor time) throws DateTimeException {
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        if (time == null) {</span>
+<span class="fc" id="L176">            return null;</span>
+        }
+        try {
+<span class="fc" id="L179">            return format(time);</span>
+<span class="fc" id="L180">        } catch (Exception e) {</span>
+<span class="fc" id="L181">            return null;</span>
+        }
+    }
+
+    /**
+     * Parses the given date string to an instance of the specified time type.
+     *
+     * @param date     the given date string to parse
+     * @param timeType the specified time type
+     * @param &lt;T&gt;      the time type
+     * @return the parsed time instance
+     * @throws DateTimeException if any error occurs
+     */
+    &lt;T&gt; @Nonnull T parse(@Nonnull CharSequence date, @Nonnull Class&lt;T&gt; timeType) throws DateTimeException;
+
+    /**
+     * Parses the given date string to an instance of the specified time type. If the given date string is {@code null},
+     * or an exception thrown during parsing, returns {@code null}.
+     *
+     * @param date     the given date string to parse, can be {@code null}
+     * @param timeType the specified time type
+     * @param &lt;T&gt;      the time type
+     * @return the parsed time instance, or {@code null} if the given date string is {@code null} or an exception thrown
+     * @throws DateTimeException if any error occurs
+     */
+    default &lt;T&gt; @Nullable T parseSafe(
+        @Nullable CharSequence date, @Nonnull Class&lt;T&gt; timeType
+    ) throws DateTimeException {
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        if (date == null) {</span>
+<span class="fc" id="L210">            return null;</span>
+        }
+        try {
+<span class="fc" id="L213">            return parse(date, timeType);</span>
+<span class="fc" id="L214">        } catch (Exception e) {</span>
+<span class="fc" id="L215">            return null;</span>
+        }
+    }
+
+    /**
+     * Converts the given date to an instance of the specified time type.
+     *
+     * @param date     the given date to parse
+     * @param timeType the specified time type
+     * @param &lt;T&gt;      the time type
+     * @return the converted time instance
+     * @throws DateTimeException if any error occurs
+     */
+    &lt;T&gt; @Nonnull T convert(@Nonnull Date date, @Nonnull Class&lt;T&gt; timeType) throws DateTimeException;
+
+    /**
+     * Converts the given date to an instance of the specified time type. If the given date is {@code null}, or an
+     * exception thrown during parsing, returns {@code null}.
+     *
+     * @param date     the given date to parse, can be {@code null}
+     * @param timeType the specified time type
+     * @param &lt;T&gt;      the time type
+     * @return the converted time instance, or {@code null} if the given date is {@code null} or an exception thrown
+     * @throws DateTimeException if any error occurs
+     */
+    default &lt;T&gt; @Nullable T convertSafe(@Nullable Date date, @Nonnull Class&lt;T&gt; timeType) throws DateTimeException {
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        if (date == null) {</span>
+<span class="fc" id="L242">            return null;</span>
+        }
+        try {
+<span class="fc" id="L245">            return convert(date, timeType);</span>
+<span class="fc" id="L246">        } catch (Exception e) {</span>
+<span class="fc" id="L247">            return null;</span>
+        }
+    }
+
+    /**
+     * Converts the given time object to an instance of the specified time type.
+     *
+     * @param time     the given time object to parse
+     * @param timeType the specified time type
+     * @param &lt;T&gt;      the time type
+     * @return the converted time instance
+     * @throws DateTimeException if any error occurs
+     */
+    &lt;T&gt; @Nonnull T convert(@Nonnull TemporalAccessor time, @Nonnull Class&lt;T&gt; timeType) throws DateTimeException;
+
+    /**
+     * Converts the given time object to an instance of the specified time type. If the given time object is
+     * {@code null}, or an exception thrown during parsing, returns {@code null}.
+     *
+     * @param time     the given time object to parse, can be {@code null}
+     * @param timeType the specified time type
+     * @param &lt;T&gt;      the time type
+     * @return the converted time instance, or {@code null} if the given time object is {@code null} or an exception
+     * thrown
+     * @throws DateTimeException if any error occurs
+     */
+    default &lt;T&gt; @Nullable T convertSafe(
+        @Nullable TemporalAccessor time, @Nonnull Class&lt;T&gt; timeType
+    ) throws DateTimeException {
+<span class="fc bfc" id="L276" title="All 2 branches covered.">        if (time == null) {</span>
+<span class="fc" id="L277">            return null;</span>
+        }
+        try {
+<span class="fc" id="L280">            return convert(time, timeType);</span>
+<span class="fc" id="L281">        } catch (Exception e) {</span>
+<span class="fc" id="L282">            return null;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

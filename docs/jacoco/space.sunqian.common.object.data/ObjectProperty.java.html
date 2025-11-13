@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ObjectProperty.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.object.data</a> &gt; <span class="el_source">ObjectProperty.java</span></div><h1>ObjectProperty.java</h1><pre class="source lang-java linenums">package space.sunqian.common.object.data;
+
+import space.sunqian.annotations.Immutable;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.runtime.invoke.Invocable;
+
+/**
+ * This interface represents the property info of {@link ObjectSchema}. It is very similar to the simple property of
+ * &lt;a href=&quot;https://www.oracle.com/java/technologies/javase/javabeans-spec.html&quot;&gt;JavaBeans&lt;/a&gt;.
+ * &lt;p&gt;
+ * Two {@link ObjectProperty}s are considered equal if, and only if both their names and both their owners are equal.
+ *
+ * @author sunqian
+ */
+@Immutable
+public interface ObjectProperty extends ObjectPropertyBase {
+
+    /**
+     * Returns the owner {@link ObjectSchema} of this property.
+     *
+     * @return the owner {@link ObjectSchema} of this property
+     */
+    @Nonnull
+    ObjectSchema owner();
+
+    /**
+     * Returns whether this property is readable.
+     *
+     * @return whether this property is readable
+     */
+    default boolean isReadable() {
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        return getter() != null;</span>
+    }
+
+    /**
+     * Returns whether this property is writable.
+     *
+     * @return whether this property is writable
+     */
+    default boolean isWritable() {
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        return setter() != null;</span>
+    }
+
+    /**
+     * Returns the property value of the specified instance.
+     *
+     * @param inst the specified instance
+     * @return the property value of the specified instance
+     * @throws DataObjectException if this property is not readable
+     */
+    default @Nullable Object getValue(@Nonnull Object inst) throws DataObjectException {
+<span class="fc" id="L53">        Invocable getter = getter();</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (getter == null) {</span>
+<span class="fc" id="L55">            throw new DataObjectException(&quot;The property is not readable: &quot; + name() + &quot;.&quot;);</span>
+        }
+<span class="fc" id="L57">        return getter.invoke(inst);</span>
+    }
+
+    /**
+     * Sets the property value of the specified instance.
+     *
+     * @param inst  the specified instance
+     * @param value the property value
+     * @throws DataObjectException if this property is not writable
+     */
+    default void setValue(@Nonnull Object inst, @Nullable Object value) throws DataObjectException {
+<span class="fc" id="L68">        Invocable setter = setter();</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (setter == null) {</span>
+<span class="fc" id="L70">            throw new DataObjectException(&quot;The property is not writable: &quot; + name() + &quot;.&quot;);</span>
+        }
+<span class="fc" id="L72">        setter.invoke(inst, value);</span>
+<span class="fc" id="L73">    }</span>
+
+    /**
+     * Returns whether this {@link ObjectProperty} is equal to the other {@link ObjectProperty}. They are considered
+     * equal if, and only if both their names and both their owners are equal.
+     *
+     * @param other the other {@link ObjectProperty}
+     * @return whether this {@link ObjectProperty} is equal to the other {@link ObjectProperty}
+     */
+    boolean equals(Object other);
+
+    /**
+     * Returns the hash code of this {@link ObjectProperty}. The hash code is generated via {@link #name()} and
+     * {@link #owner()} like following codes:
+     * &lt;pre&gt;{@code
+     * int result = 1;
+     * result = 31 * result + name().hashCode();
+     * result = 31 * result + owner().hashCode();
+     * return result;
+     * }&lt;/pre&gt;
+     *
+     * @return the hash code of this {@link ObjectProperty}
+     */
+    int hashCode();
+
+    /**
+     * Returns a string representation of this {@link ObjectProperty}. The string is generated like following codes:
+     * &lt;pre&gt;{@code
+     * return name() + &quot;: &quot; + type().getTypeName();
+     * }&lt;/pre&gt;
+     *
+     * @return a string representation of this {@link ObjectProperty}
+     */
+    @Nonnull
+    String toString();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

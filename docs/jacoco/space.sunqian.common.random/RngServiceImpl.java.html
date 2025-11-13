@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RngServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.random</a> &gt; <span class="el_source">RngServiceImpl.java</span></div><h1>RngServiceImpl.java</h1><pre class="source lang-java linenums">package space.sunqian.common.random;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.common.Check;
+import space.sunqian.common.base.bytes.BytesKit;
+import space.sunqian.common.base.math.MathKit;
+import space.sunqian.common.collect.StreamKit;
+
+import java.security.SecureRandom;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.DoubleSupplier;
+import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+
+<span class="fc" id="L19">enum RngServiceImpl implements RngService {</span>
+<span class="fc" id="L20">    INST;</span>
+
+    @Override
+    public @Nonnull Rng random(@Nonnull Random random) {
+<span class="fc" id="L24">        return new RandomRng(random);</span>
+    }
+
+    @Override
+    public @Nonnull Rng threadLocalRandom() {
+<span class="fc" id="L29">        return ThreadLocalRandomRng.INST;</span>
+    }
+
+    private static final class RandomRng extends AbsRngImpl {
+
+        private final @Nonnull Random random;
+
+<span class="fc" id="L36">        private RandomRng(@Nonnull Random random) {</span>
+<span class="fc" id="L37">            this.random = random;</span>
+<span class="fc" id="L38">        }</span>
+
+        @Override
+        protected @Nonnull Random random() {
+<span class="fc" id="L42">            return random;</span>
+        }
+
+        @Override
+        public void reset(long seed) {
+<span class="fc" id="L47">            random.setSeed(seed);</span>
+<span class="fc" id="L48">        }</span>
+
+        @Override
+        public void reset(byte @Nonnull [] seed) {
+<span class="fc bfc" id="L52" title="All 2 branches covered.">            if (random instanceof SecureRandom) {</span>
+<span class="fc" id="L53">                ((SecureRandom) random).setSeed(seed);</span>
+            } else {
+<span class="fc" id="L55">                random.setSeed(BytesKit.bytesToLong(seed));</span>
+            }
+<span class="fc" id="L57">        }</span>
+
+        @Override
+        public int nextInt() {
+<span class="fc" id="L61">            return random.nextInt();</span>
+        }
+
+        @Override
+        public int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException {
+<span class="fc" id="L66">            return ints(startInclusive, endExclusive).iterator().nextInt();</span>
+        }
+
+        @Override
+        public long nextLong() {
+<span class="fc" id="L71">            return random.nextLong();</span>
+        }
+
+        @Override
+        public long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
+<span class="fc" id="L76">            return longs(startInclusive, endExclusive).iterator().nextLong();</span>
+        }
+
+        @Override
+        public float nextFloat() {
+<span class="fc" id="L81">            double value = nextDouble();</span>
+<span class="fc" id="L82">            return MathKit.makeIn((float) value, 0.0f, 1.0f);</span>
+        }
+
+        @Override
+        public float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
+<span class="fc" id="L87">            double value = nextDouble(startInclusive, endExclusive);</span>
+<span class="fc" id="L88">            return MathKit.makeIn((float) value, startInclusive, endExclusive);</span>
+        }
+
+        @Override
+        public double nextDouble() {
+<span class="fc" id="L93">            return random.nextDouble();</span>
+        }
+
+        @Override
+        public double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
+<span class="fc" id="L98">            return doubles(startInclusive, endExclusive).iterator().nextDouble();</span>
+        }
+    }
+
+<span class="fc" id="L102">    private static final class ThreadLocalRandomRng extends AbsRngImpl {</span>
+
+<span class="fc" id="L104">        private static final @Nonnull ThreadLocalRandomRng INST = new ThreadLocalRandomRng();</span>
+
+        @Override
+        protected @Nonnull ThreadLocalRandom random() {
+<span class="fc" id="L108">            return ThreadLocalRandom.current();</span>
+        }
+
+        @Override
+        public void reset(long seed) {
+<span class="fc" id="L113">        }</span>
+
+        @Override
+        public void reset(byte @Nonnull [] seed) {
+<span class="fc" id="L117">        }</span>
+
+        @Override
+        public int nextInt() {
+<span class="fc" id="L121">            return random().nextInt();</span>
+        }
+
+        @Override
+        public int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException {
+<span class="fc bfc" id="L126" title="All 2 branches covered.">            if (startInclusive == endExclusive) {</span>
+<span class="fc" id="L127">                return startInclusive;</span>
+            }
+<span class="fc" id="L129">            return random().nextInt(startInclusive, endExclusive);</span>
+        }
+
+        @Override
+        public long nextLong() {
+<span class="fc" id="L134">            return random().nextLong();</span>
+        }
+
+        @Override
+        public long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
+<span class="fc bfc" id="L139" title="All 2 branches covered.">            if (startInclusive == endExclusive) {</span>
+<span class="fc" id="L140">                return startInclusive;</span>
+            }
+<span class="fc" id="L142">            return random().nextLong(startInclusive, endExclusive);</span>
+        }
+
+        @Override
+        public float nextFloat() {
+<span class="fc" id="L147">            double value = nextDouble();</span>
+<span class="fc" id="L148">            return MathKit.makeIn((float) value, 0.0f, 1.0f);</span>
+        }
+
+        @Override
+        public float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
+<span class="fc" id="L153">            double value = nextDouble(startInclusive, endExclusive);</span>
+<span class="fc" id="L154">            return MathKit.makeIn((float) value, startInclusive, endExclusive);</span>
+        }
+
+        @Override
+        public double nextDouble() {
+<span class="fc" id="L159">            return random().nextDouble();</span>
+        }
+
+        @Override
+        public double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
+<span class="fc bfc" id="L164" title="All 2 branches covered.">            if (startInclusive == endExclusive) {</span>
+<span class="fc" id="L165">                return startInclusive;</span>
+            }
+<span class="fc" id="L167">            return random().nextDouble(startInclusive, endExclusive);</span>
+        }
+    }
+
+    private static abstract class AbsRngImpl implements Rng {
+
+        protected abstract @Nonnull Random random();
+
+        @Override
+        public void nextBytes(byte @Nonnull [] bytes) {
+<span class="fc" id="L177">            random().nextBytes(bytes);</span>
+<span class="fc" id="L178">        }</span>
+
+        @Override
+        public void nextBytes(byte @Nonnull [] bytes, int off, int len) throws IndexOutOfBoundsException {
+<span class="fc bfc" id="L182" title="All 4 branches covered.">            if (off == 0 &amp;&amp; len == bytes.length) {</span>
+<span class="fc" id="L183">                random().nextBytes(bytes);</span>
+<span class="fc" id="L184">                return;</span>
+            }
+<span class="fc" id="L186">            Check.checkOffLen(off, len, bytes.length);</span>
+<span class="fc" id="L187">            int i = off;</span>
+<span class="fc" id="L188">            int end = off + len;</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">            for (int words = len &gt;&gt; 3; words-- &gt; 0; ) {</span>
+<span class="fc" id="L190">                long rnd = nextLong();</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">                for (int n = 8; n-- &gt; 0; rnd &gt;&gt;&gt;= Byte.SIZE) {</span>
+<span class="fc" id="L192">                    bytes[i++] = (byte) rnd;</span>
+                }
+<span class="fc" id="L194">            }</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">            if (i &lt; end) {</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">                for (long rnd = nextLong(); i &lt; end; rnd &gt;&gt;&gt;= Byte.SIZE) {</span>
+<span class="fc" id="L197">                    bytes[i++] = (byte) rnd;</span>
+                }
+            }
+<span class="fc" id="L200">        }</span>
+
+        @Override
+        public @Nonnull IntStream ints() {
+<span class="fc" id="L204">            return random().ints();</span>
+        }
+
+        @Override
+        public @Nonnull IntStream ints(int startInclusive, int endExclusive) throws IllegalArgumentException {
+<span class="fc bfc" id="L209" title="All 2 branches covered.">            if (startInclusive == endExclusive) {</span>
+<span class="fc" id="L210">                return IntStream.generate(() -&gt; startInclusive);</span>
+            }
+<span class="fc" id="L212">            return random().ints(startInclusive, endExclusive);</span>
+        }
+
+        @Override
+        public @Nonnull IntStream ints(long size) throws IllegalArgumentException {
+<span class="fc" id="L217">            return random().ints(size);</span>
+        }
+
+        @Override
+        public @Nonnull IntStream ints(long size, int startInclusive, int endExclusive) throws IllegalArgumentException {
+<span class="fc bfc" id="L222" title="All 2 branches covered.">            if (startInclusive == endExclusive) {</span>
+<span class="fc" id="L223">                return IntStream.generate(() -&gt; startInclusive).limit(size);</span>
+            }
+<span class="fc" id="L225">            return random().ints(size, startInclusive, endExclusive);</span>
+        }
+
+        @Override
+        public @Nonnull IntSupplier intSupplier(int startInclusive, int endExclusive) throws IllegalArgumentException {
+<span class="fc bfc" id="L230" title="All 2 branches covered.">            if (startInclusive == endExclusive) {</span>
+<span class="fc" id="L231">                return () -&gt; startInclusive;</span>
+            }
+<span class="fc" id="L233">            return StreamKit.toSupplier(random().ints(startInclusive, endExclusive));</span>
+        }
+
+        @Override
+        public @Nonnull LongStream longs() {
+<span class="fc" id="L238">            return random().longs();</span>
+        }
+
+        @Override
+        public @Nonnull LongStream longs(long startInclusive, long endExclusive) throws IllegalArgumentException {
+<span class="fc bfc" id="L243" title="All 2 branches covered.">            if (startInclusive == endExclusive) {</span>
+<span class="fc" id="L244">                return LongStream.generate(() -&gt; startInclusive);</span>
+            }
+<span class="fc" id="L246">            return random().longs(startInclusive, endExclusive);</span>
+        }
+
+        @Override
+        public @Nonnull LongStream longs(long size) throws IllegalArgumentException {
+<span class="fc" id="L251">            return random().longs(size);</span>
+        }
+
+        @Override
+        public @Nonnull LongStream longs(long size, long startInclusive, long endExclusive) throws IllegalArgumentException {
+<span class="fc bfc" id="L256" title="All 2 branches covered.">            if (startInclusive == endExclusive) {</span>
+<span class="fc" id="L257">                return LongStream.generate(() -&gt; startInclusive).limit(size);</span>
+            }
+<span class="fc" id="L259">            return random().longs(size, startInclusive, endExclusive);</span>
+        }
+
+        @Override
+        public @Nonnull LongSupplier longSupplier(long startInclusive, long endExclusive) throws IllegalArgumentException {
+<span class="fc bfc" id="L264" title="All 2 branches covered.">            if (startInclusive == endExclusive) {</span>
+<span class="fc" id="L265">                return () -&gt; startInclusive;</span>
+            }
+<span class="fc" id="L267">            return StreamKit.toSupplier(random().longs(startInclusive, endExclusive));</span>
+        }
+
+        @Override
+        public @Nonnull DoubleStream doubles() {
+<span class="fc" id="L272">            return random().doubles();</span>
+        }
+
+        @Override
+        public @Nonnull DoubleStream doubles(double startInclusive, double endExclusive) throws IllegalArgumentException {
+<span class="fc bfc" id="L277" title="All 2 branches covered.">            if (startInclusive == endExclusive) {</span>
+<span class="fc" id="L278">                return DoubleStream.generate(() -&gt; startInclusive);</span>
+            }
+<span class="fc" id="L280">            return random().doubles(startInclusive, endExclusive);</span>
+        }
+
+        @Override
+        public @Nonnull DoubleStream doubles(long size) throws IllegalArgumentException {
+<span class="fc" id="L285">            return random().doubles(size);</span>
+        }
+
+        @Override
+        public @Nonnull DoubleStream doubles(long size, double startInclusive, double endExclusive) throws IllegalArgumentException {
+<span class="fc bfc" id="L290" title="All 2 branches covered.">            if (startInclusive == endExclusive) {</span>
+<span class="fc" id="L291">                return DoubleStream.generate(() -&gt; startInclusive).limit(size);</span>
+            }
+<span class="fc" id="L293">            return random().doubles(size, startInclusive, endExclusive);</span>
+        }
+
+        @Override
+        public @Nonnull DoubleSupplier doubleSupplier(double startInclusive, double endExclusive) throws IllegalArgumentException {
+<span class="fc bfc" id="L298" title="All 2 branches covered.">            if (startInclusive == endExclusive) {</span>
+<span class="fc" id="L299">                return () -&gt; startInclusive;</span>
+            }
+<span class="fc" id="L301">            return StreamKit.toSupplier(random().doubles(startInclusive, endExclusive));</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

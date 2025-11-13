@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ValBack.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.value</a> &gt; <span class="el_source">ValBack.java</span></div><h1>ValBack.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.value;
+
+import space.sunqian.annotations.Nonnull;
+
+final class ValBack {
+
+<span class="fc" id="L7">    static final @Nonnull Val&lt;?&gt; OF_NULL = of(null);</span>
+<span class="fc" id="L8">    static final @Nonnull BooleanVal OF_TRUE = of(true);</span>
+<span class="fc" id="L9">    static final @Nonnull BooleanVal OF_FALSE = of(false);</span>
+<span class="fc" id="L10">    static final @Nonnull ByteVal OF_ZERO_BYTE = of((byte) 0);</span>
+<span class="fc" id="L11">    static final @Nonnull ShortVal OF_ZERO_SHORT = of((short) 0);</span>
+<span class="fc" id="L12">    static final @Nonnull CharVal OF_ZERO_CHAR = of('0');</span>
+<span class="fc" id="L13">    static final @Nonnull IntVal OF_ZERO_INT = of(0);</span>
+<span class="fc" id="L14">    static final @Nonnull LongVal OF_ZERO_LONG = ValBack.of(0L);</span>
+<span class="fc" id="L15">    static final @Nonnull FloatVal OF_ZERO_FLOAT = ValBack.of(0.0f);</span>
+<span class="fc" id="L16">    static final @Nonnull DoubleVal OF_ZERO_DOUBLE = ValBack.of(0.0);</span>
+
+    static &lt;T&gt; @Nonnull Val&lt;T&gt; of(T value) {
+<span class="fc" id="L19">        return new ValImpl&lt;&gt;(value);</span>
+    }
+
+    static @Nonnull BooleanVal of(boolean value) {
+<span class="fc" id="L23">        return new BooleanValImpl(value);</span>
+    }
+
+    static @Nonnull ByteVal of(byte value) {
+<span class="fc" id="L27">        return new ByteValImpl(value);</span>
+    }
+
+    static @Nonnull ShortVal of(short value) {
+<span class="fc" id="L31">        return new ShortValImpl(value);</span>
+    }
+
+    static @Nonnull CharVal of(char value) {
+<span class="fc" id="L35">        return new CharValImpl(value);</span>
+    }
+
+    static @Nonnull IntVal of(int value) {
+<span class="fc" id="L39">        return new IntValImpl(value);</span>
+    }
+
+    static @Nonnull LongVal of(long value) {
+<span class="fc" id="L43">        return new LongValImpl(value);</span>
+    }
+
+    static @Nonnull FloatVal of(float value) {
+<span class="fc" id="L47">        return new FloatValImpl(value);</span>
+    }
+
+    static @Nonnull DoubleVal of(double value) {
+<span class="fc" id="L51">        return new DoubleValImpl(value);</span>
+    }
+
+    private static final class ValImpl&lt;T&gt; implements Val&lt;T&gt; {
+
+        private final T value;
+
+<span class="fc" id="L58">        private ValImpl(T value) {</span>
+<span class="fc" id="L59">            this.value = value;</span>
+<span class="fc" id="L60">        }</span>
+
+        @Override
+        public T get() {
+<span class="fc" id="L64">            return value;</span>
+        }
+    }
+
+    private static final class BooleanValImpl implements BooleanVal {
+
+        private final boolean value;
+
+<span class="fc" id="L72">        private BooleanValImpl(boolean value) {</span>
+<span class="fc" id="L73">            this.value = value;</span>
+<span class="fc" id="L74">        }</span>
+
+        @Override
+        public boolean get() {
+<span class="fc" id="L78">            return value;</span>
+        }
+    }
+
+    private static final class ByteValImpl implements ByteVal {
+
+        private final byte value;
+
+<span class="fc" id="L86">        private ByteValImpl(byte value) {</span>
+<span class="fc" id="L87">            this.value = value;</span>
+<span class="fc" id="L88">        }</span>
+
+        @Override
+        public byte get() {
+<span class="fc" id="L92">            return value;</span>
+        }
+    }
+
+    private static final class ShortValImpl implements ShortVal {
+
+        private final short value;
+
+<span class="fc" id="L100">        private ShortValImpl(short value) {</span>
+<span class="fc" id="L101">            this.value = value;</span>
+<span class="fc" id="L102">        }</span>
+
+        @Override
+        public short get() {
+<span class="fc" id="L106">            return value;</span>
+        }
+    }
+
+    private static final class CharValImpl implements CharVal {
+
+        private final char value;
+
+<span class="fc" id="L114">        private CharValImpl(char value) {</span>
+<span class="fc" id="L115">            this.value = value;</span>
+<span class="fc" id="L116">        }</span>
+
+        @Override
+        public char get() {
+<span class="fc" id="L120">            return value;</span>
+        }
+    }
+
+    private static final class IntValImpl implements IntVal {
+
+        private final int value;
+
+<span class="fc" id="L128">        private IntValImpl(int value) {</span>
+<span class="fc" id="L129">            this.value = value;</span>
+<span class="fc" id="L130">        }</span>
+
+        @Override
+        public int get() {
+<span class="fc" id="L134">            return value;</span>
+        }
+    }
+
+    private static final class LongValImpl implements LongVal {
+
+        private final long value;
+
+<span class="fc" id="L142">        private LongValImpl(long value) {</span>
+<span class="fc" id="L143">            this.value = value;</span>
+<span class="fc" id="L144">        }</span>
+
+        @Override
+        public long get() {
+<span class="fc" id="L148">            return value;</span>
+        }
+    }
+
+    private static final class FloatValImpl implements FloatVal {
+
+        private final float value;
+
+<span class="fc" id="L156">        private FloatValImpl(float value) {</span>
+<span class="fc" id="L157">            this.value = value;</span>
+<span class="fc" id="L158">        }</span>
+
+        @Override
+        public float get() {
+<span class="fc" id="L162">            return value;</span>
+        }
+    }
+
+    private static final class DoubleValImpl implements DoubleVal {
+
+        private final double value;
+
+<span class="fc" id="L170">        private DoubleValImpl(double value) {</span>
+<span class="fc" id="L171">            this.value = value;</span>
+<span class="fc" id="L172">        }</span>
+
+        @Override
+        public double get() {
+<span class="fc" id="L176">            return value;</span>
+        }
+    }
+
+    private ValBack() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

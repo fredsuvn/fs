@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ObjectSchemaParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.object.data</a> &gt; <span class="el_source">ObjectSchemaParser.java</span></div><h1>ObjectSchemaParser.java</h1><pre class="source lang-java linenums">package space.sunqian.common.object.data;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.RetainedParam;
+import space.sunqian.annotations.ThreadSafe;
+import space.sunqian.common.collect.ListKit;
+import space.sunqian.common.object.data.handlers.AbstractObjectSchemaHandler;
+import space.sunqian.common.object.data.handlers.SimpleBeanSchemaHandler;
+
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * This interface is used to parse {@link Type} to {@link ObjectSchema}. It uses a list of {@link Handler}s to execute
+ * the specific parsing operations, where each {@link Handler} possesses its own specific parsing logic.
+ * &lt;p&gt;
+ * There is a skeletal handler implementation: {@link AbstractObjectSchemaHandler}. And the default parser is based on
+ * {@link SimpleBeanSchemaHandler}.
+ *
+ * @author sunqian
+ */
+@ThreadSafe
+public interface ObjectSchemaParser {
+
+    /**
+     * Returns the default {@link ObjectSchemaParser} with {@link SimpleBeanSchemaHandler} as the only handler.
+     *
+     * @return the default {@link ObjectSchemaParser}
+     */
+    static @Nonnull ObjectSchemaParser defaultParser() {
+<span class="fc" id="L32">        return ObjectSchemaParserImpl.DEFAULT;</span>
+    }
+
+    /**
+     * Creates and returns a new {@link ObjectSchemaParser} with the given handlers.
+     *
+     * @param handlers the given handlers
+     * @return a new {@link ObjectSchemaParser} with the given handlers
+     */
+    static @Nonnull ObjectSchemaParser newParser(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
+<span class="fc" id="L42">        return newParser(ListKit.list(handlers));</span>
+    }
+
+    /**
+     * Creates and returns a new {@link ObjectSchemaParser} with given handlers.
+     *
+     * @param handlers given handlers
+     * @return a new {@link ObjectSchemaParser} with given handlers
+     */
+    static @Nonnull ObjectSchemaParser newParser(@Nonnull @RetainedParam List&lt;@Nonnull Handler&gt; handlers) {
+<span class="fc" id="L52">        return new ObjectSchemaParserImpl(handlers);</span>
+    }
+
+    /**
+     * Parses the given type to an instance of {@link ObjectSchema}, and returns the parsed {@link ObjectSchema}.
+     * &lt;p&gt;
+     * The parsing logic of the implementations must be: invokes the {@link Handler#parse(ObjectSchemaParser.Context)}
+     * in the order of {@link #handlers()} until one of the handlers returns {@code false}. The codes are similar to:
+     * &lt;pre&gt;{@code
+     * for (Handler handler : handlers()) {
+     *     if (!handler.parse(context)) {
+     *         break;
+     *     }
+     * }
+     * }&lt;/pre&gt;
+     * &lt;p&gt;
+     * Note that this method does not cache the results and will generate new instances every invocation.
+     *
+     * @param type the given type
+     * @return the parsed {@link ObjectSchema}
+     * @throws DataObjectException if any problem occurs
+     */
+    default @Nonnull ObjectSchema parse(@Nonnull Type type) throws DataObjectException {
+        try {
+<span class="fc" id="L76">            ObjectSchemaBuilder builder = new ObjectSchemaBuilder(type);</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">            for (Handler handler : handlers()) {</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">                if (!handler.parse(builder)) {</span>
+<span class="fc" id="L79">                    break;</span>
+                }
+<span class="fc" id="L81">            }</span>
+<span class="fc" id="L82">            return builder.build(this);</span>
+<span class="fc" id="L83">        } catch (Exception e) {</span>
+<span class="fc" id="L84">            throw new DataObjectException(type, e);</span>
+        }
+    }
+
+    /**
+     * Returns all handlers of this parser.
+     *
+     * @return all handlers of this parser
+     */
+    @Nonnull
+    List&lt;@Nonnull Handler&gt; handlers();
+
+    /**
+     * Returns a new {@link ObjectSchemaParser} of which handler list consists of the given handler as the first
+     * element, followed by {@link #handlers()} of the current parser.
+     *
+     * @param handler the given handler
+     * @return a new {@link ObjectSchemaParser} of which handler list consists of the given handler as the first
+     * element, followed by {@link #handlers()} of the current parser
+     */
+    default @Nonnull ObjectSchemaParser withFirstHandler(@Nonnull Handler handler) {
+<span class="fc" id="L105">        Handler[] newHandlers = new Handler[handlers().size() + 1];</span>
+<span class="fc" id="L106">        int i = 0;</span>
+<span class="fc" id="L107">        newHandlers[i++] = handler;</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">        for (Handler h : handlers()) {</span>
+<span class="fc" id="L109">            newHandlers[i++] = h;</span>
+<span class="fc" id="L110">        }</span>
+<span class="fc" id="L111">        return newParser(newHandlers);</span>
+    }
+
+    /**
+     * Returns a new {@link ObjectSchemaParser} of which handler list consists of {@link #handlers()} of the current
+     * parser, followed by the given handler as the last element.
+     *
+     * @param handler the given handler
+     * @return a {@link ObjectSchemaParser} of which handler list consists of {@link #handlers()} of the current parser,
+     * followed by the given handler as the last element
+     */
+    default @Nonnull ObjectSchemaParser withLastHandler(@Nonnull Handler handler) {
+<span class="fc" id="L123">        Handler[] newHandlers = new Handler[handlers().size() + 1];</span>
+<span class="fc" id="L124">        int i = 0;</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        for (Handler h : handlers()) {</span>
+<span class="fc" id="L126">            newHandlers[i++] = h;</span>
+<span class="fc" id="L127">        }</span>
+<span class="fc" id="L128">        newHandlers[i] = handler;</span>
+<span class="fc" id="L129">        return newParser(newHandlers);</span>
+    }
+
+    /**
+     * Returns this parser as a {@link Handler}.
+     *
+     * @return this parser as a {@link Handler}
+     */
+    @Nonnull
+    Handler asHandler();
+
+    /**
+     * Handler for {@link ObjectSchemaParser}, provides the specific parsing logic.
+     *
+     * @author sunqian
+     */
+    @ThreadSafe
+    interface Handler {
+
+        /**
+         * Parses {@link Type} to {@link ObjectSchema} with its owner parsing logic. The {@link Type} is specified by
+         * {@link Context#dataType()} of the given context, and the parsed properties should be stored in
+         * {@link Context#propertyBaseMap()}. Returns {@code false} to prevent subsequent handlers to continue to parse,
+         * otherwise returns {@code true}.
+         *
+         * @param context the given context
+         * @return whether to continue to parse
+         * @throws Exception for errors during parsing
+         */
+        boolean parse(@Nonnull Context context) throws Exception;
+    }
+
+    /**
+     * Context for parsing the specified {@link Type} to {@link ObjectSchema}.
+     *
+     * @author sunqian
+     */
+    interface Context {
+
+        /**
+         * Returns the specified type.
+         *
+         * @return the specified type
+         */
+        @Nonnull
+        Type dataType();
+
+        /**
+         * Returns a mutable map for storing property base infos.
+         * &lt;p&gt;
+         * The map through whole parsing process, stores and shares the property base infos for all handlers, and each
+         * handler can add or remove or modify the property base info.
+         *
+         * @return a mutable map for storing property base infos
+         */
+        @Nonnull
+        Map&lt;@Nonnull String, @Nonnull ObjectPropertyBase&gt; propertyBaseMap();
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

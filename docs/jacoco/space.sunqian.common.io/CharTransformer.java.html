@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CharTransformer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.io</a> &gt; <span class="el_source">CharTransformer.java</span></div><h1>CharTransformer.java</h1><pre class="source lang-java linenums">package space.sunqian.common.io;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+
+import java.nio.CharBuffer;
+
+/**
+ * This interface is used to transform the input data, typically used for {@link CharProcessor}, to do the specific data
+ * transformation work.
+ *
+ * @author sunqian
+ */
+public interface CharTransformer {
+
+    /**
+     * Returns a {@link CharTransformer} wrapper that wraps the given transformer to ensure that the size of the data
+     * passed to it is a specified fixed size.
+     * &lt;p&gt;
+     * The wrapper splits the input data into blocks of a specified fixed size and sequentially passes each block to the
+     * given transformer. If any remaining data is insufficient to form a full block, it will be buffered and prepended
+     * to the next input data in subsequent invocations. The combined data will be processed with the same
+     * block-splitting logic.
+     * &lt;p&gt;
+     * Specifically, if the {@code end} flag is {@code true}, even if the remaining data is insufficient to form a full
+     * block, it will still be passed to the given transformer.
+     *
+     * @param transformer the given transformer
+     * @param size        the specified fixed size, must {@code &gt; 0}
+     * @return a {@link CharTransformer} wrapper that wraps the given transformer to ensure that the size of the data
+     * passed to it is a specified fixed size
+     * @throws IllegalArgumentException if the specified fixed size {@code &lt;= 0}
+     */
+    static @Nonnull CharTransformer withFixedSize(
+        @Nonnull CharTransformer transformer, int size
+    ) throws IllegalArgumentException {
+<span class="fc" id="L37">        IOChecker.checkSize(size);</span>
+<span class="fc" id="L38">        return new CharProcessorImpl.FixedSizeHandler(transformer, size);</span>
+    }
+
+    /**
+     * Returns a {@link CharTransformer} wrapper that wraps the given transformer to ensure that the size of the data
+     * passed to it is a multiple of the specified size. The multiple is calculated as the largest multiple of the
+     * specified size not exceeding the input length.
+     * &lt;p&gt;
+     * The wrapper truncates the input data to the calculated multiple length, and passes the truncated data to the
+     * given transformer. If any residual data remains after truncation (shorter than the specified size), it will be
+     * buffered and prepended to the next input data in subsequent invocations. The combined data will be processed with
+     * the same truncation logic.
+     * &lt;p&gt;
+     * Specifically, if the {@code end} flag is {@code true}, even if the residual data is shorter than the specified
+     * size, it will still be passed to the given transformer.
+     *
+     * @param transformer the given transformer
+     * @param size        the specified size, must {@code &gt; 0}
+     * @return a {@link CharTransformer} wrapper that wraps the given transformer to ensure that the size of the data
+     * passed to it is a multiple of the specified size
+     * @throws IllegalArgumentException if the specified size {@code &lt;= 0}
+     */
+    static @Nonnull CharTransformer withMultipleSize(
+        @Nonnull CharTransformer transformer, int size
+    ) throws IllegalArgumentException {
+<span class="fc" id="L63">        IOChecker.checkSize(size);</span>
+<span class="fc" id="L64">        return new CharProcessorImpl.MultipleSizeHandler(transformer, size);</span>
+    }
+
+    /**
+     * Returns a {@link CharTransformer} wrapper that wraps the given transformer to support buffering unconsumed data.
+     * &lt;p&gt;
+     * The wrapper passes input data to the given transformer, after processing, the unconsumed data (if any) will be
+     * buffered and prepended to the next input data in subsequent invocations. The combined data will be processed with
+     * the same buffering logic.
+     * &lt;p&gt;
+     * Specifically, if the {@code end} flag is {@code true}, the unconsumed data (if any) will be discarded.
+     *
+     * @param transformer the given transformer
+     * @return a {@link CharTransformer} wrapper that wraps the given transformer to support buffering unconsumed data
+     */
+    static @Nonnull CharTransformer withBuffered(@Nonnull CharTransformer transformer) {
+<span class="fc" id="L80">        return new CharProcessorImpl.BufferedHandler(transformer);</span>
+    }
+
+    /**
+     * Returns an empty {@link CharTransformer} which does nothing but only returns the input data directly.
+     *
+     * @return an empty {@link CharTransformer} which does nothing but only returns the input data directly
+     */
+    static @Nonnull CharTransformer empty() {
+<span class="fc" id="L89">        return CharProcessorImpl.EmptyHandler.INST;</span>
+    }
+
+    /**
+     * Transforms the input data, and returns the result. The input data will not be {@code null} (but may be empty),
+     * and the return value can be {@code null}.
+     *
+     * @param data the input data
+     * @param end  whether the input data is the last segment and there is no more data
+     * @return the result
+     * @throws Exception if any problem occurs
+     */
+    @Nullable
+    CharBuffer transform(@Nonnull CharBuffer data, boolean end) throws Exception;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

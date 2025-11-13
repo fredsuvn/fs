@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AssertTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">internal.test</a> &gt; <span class="el_source">AssertTest.java</span></div><h1>AssertTest.java</h1><pre class="source lang-java linenums">package internal.test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.function.Executable;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+/**
+ * This interface provides methods for asserting.
+ *
+ * @author sunqian
+ */
+public interface AssertTest {
+
+    /**
+     * Tests the specified method via reflection and {@link Assertions#assertThrows(Class, Executable)}. This method is
+     * equivalent to:
+     * &lt;pre&gt;{@code
+     * method.setAccessible(true);
+     * return assertThrows(exception, () -&gt; {
+     *     try {
+     *         method.invoke(inst, args);
+     *          throw new NoThrows(&quot;No throws for: &quot; + method + &quot;.&quot;);
+     *     } catch (InvocationTargetException e) {
+     *         throw e.getCause();
+     *     }
+     * });
+     * }&lt;/pre&gt;
+     *
+     * @param exception the exception to be expected
+     * @param method    the method to be tested
+     * @param inst      the instance for the method
+     * @param args      the arguments for the method
+     * @param &lt;T&gt;       the type of the expected exception
+     * @return the exception thrown by the method
+     */
+    default &lt;T extends Throwable&gt; @Nonnull T invokeThrows(
+        @Nonnull Class&lt;T&gt; exception,
+        @Nonnull Method method,
+        @Nullable Object inst,
+        @Nullable Object @Nonnull ... args
+    ) {
+<span class="fc" id="L49">        method.setAccessible(true);</span>
+<span class="fc" id="L50">        return assertThrows(exception, () -&gt; {</span>
+            try {
+<span class="fc" id="L52">                method.invoke(inst, args);</span>
+<span class="fc" id="L53">                throw new NoThrows(&quot;No throws for: &quot; + method + &quot;.&quot;);</span>
+<span class="fc" id="L54">            } catch (InvocationTargetException e) {</span>
+<span class="fc" id="L55">                throw e.getCause();</span>
+            }
+        });
+    }
+
+    /**
+     * Tests the specified method via reflection and {@link Assertions#assertEquals(Object, Object)}. This method is
+     * equivalent to:
+     * &lt;pre&gt;{@code
+     * method.setAccessible(true);
+     * Object actual;
+     * try {
+     *     actual = method.invoke(inst, args);
+     * } catch (Exception e) {
+     *     throw new AssertionError(e);
+     * }
+     * assertEquals(expected, actual);
+     * }&lt;/pre&gt;
+     *
+     * @param expected the expected result
+     * @param method   the method to be tested
+     * @param inst     the instance for the method
+     * @param args     the arguments for the method
+     */
+    default void invokeEquals(
+        @Nonnull Object expected,
+        @Nonnull Method method,
+        @Nonnull Object inst,
+        @Nullable Object @Nonnull ... args
+    ) {
+<span class="fc" id="L85">        method.setAccessible(true);</span>
+        Object actual;
+        try {
+<span class="fc" id="L88">            actual = method.invoke(inst, args);</span>
+<span class="fc" id="L89">        } catch (Exception e) {</span>
+<span class="fc" id="L90">            throw new AssertionError(e);</span>
+<span class="fc" id="L91">        }</span>
+<span class="fc" id="L92">        assertEquals(expected, actual);</span>
+<span class="fc" id="L93">    }</span>
+
+    /**
+     * This exception is thrown when the specified run-body does not throw an exception.
+     */
+    final class NoThrows extends RuntimeException {
+
+        private NoThrows(@Nonnull String message) {
+<span class="fc" id="L101">            super(message);</span>
+<span class="fc" id="L102">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

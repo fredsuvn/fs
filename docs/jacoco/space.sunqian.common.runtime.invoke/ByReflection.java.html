@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ByReflection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.runtime.invoke</a> &gt; <span class="el_source">ByReflection.java</span></div><h1>ByReflection.java</h1><pre class="source lang-java linenums">package space.sunqian.common.runtime.invoke;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+final class ByReflection {
+
+    static @Nonnull Invocable newInvocable(@Nonnull Constructor&lt;?&gt; constructor) {
+<span class="fc" id="L13">        return new ForConstructor(constructor);</span>
+    }
+
+    static @Nonnull Invocable newInvocable(@Nonnull Method method) {
+<span class="fc" id="L17">        return new ForMethod(method);</span>
+    }
+
+    private static final class ForConstructor implements Invocable {
+
+        private final @Nonnull Constructor&lt;?&gt; constructor;
+
+<span class="fc" id="L24">        private ForConstructor(@Nonnull Constructor&lt;?&gt; constructor) {</span>
+<span class="fc" id="L25">            this.constructor = constructor;</span>
+<span class="fc" id="L26">        }</span>
+
+        @Override
+        public @Nonnull Object invoke(
+            @Nullable Object inst, @Nullable Object @Nonnull ... args
+        ) throws InvocationException {
+            try {
+<span class="fc" id="L33">                return constructor.newInstance(args);</span>
+<span class="fc" id="L34">            } catch (Throwable e) {</span>
+<span class="fc" id="L35">                throw new InvocationException(e);</span>
+            }
+        }
+
+        @Override
+        public Object invokeChecked(
+            @Nullable Object inst, @Nullable Object @Nonnull ... args
+        ) throws Throwable {
+            try {
+<span class="fc" id="L44">                return constructor.newInstance(args);</span>
+<span class="fc" id="L45">            } catch (InvocationTargetException e) {</span>
+<span class="fc" id="L46">                throw e.getCause();</span>
+            }
+        }
+    }
+
+    private static final class ForMethod implements Invocable {
+
+        private final @Nonnull Method method;
+
+<span class="fc" id="L55">        private ForMethod(@Nonnull Method method) {</span>
+<span class="fc" id="L56">            this.method = method;</span>
+<span class="fc" id="L57">        }</span>
+
+        @Override
+        public @Nullable Object invoke(
+            @Nullable Object inst, @Nullable Object @Nonnull ... args
+        ) throws InvocationException {
+            try {
+<span class="fc" id="L64">                return method.invoke(inst, args);</span>
+<span class="fc" id="L65">            } catch (Throwable e) {</span>
+<span class="fc" id="L66">                throw new InvocationException(e);</span>
+            }
+        }
+
+        @Override
+        public @Nullable Object invokeChecked(
+            @Nullable Object inst, @Nullable Object @Nonnull ... args
+        ) throws Throwable {
+            try {
+<span class="fc" id="L75">                return method.invoke(inst, args);</span>
+<span class="fc" id="L76">            } catch (InvocationTargetException e) {</span>
+<span class="fc" id="L77">                throw e.getCause();</span>
+            }
+        }
+    }
+
+    private ByReflection() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>When.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">javax.annotation.meta</a> &gt; <span class="el_source">When.java</span></div><h1>When.java</h1><pre class="source lang-java linenums">package javax.annotation.meta;
+
+/**
+ * Used to describe the relationship between a qualifier T and the set of values S possible on an annotated element.
+ * &lt;p&gt;
+ * In particular, an issues should be reported if an ALWAYS or MAYBE value is used where a NEVER value is required, or
+ * if a NEVER or MAYBE value is used where an ALWAYS value is required.
+ */
+<span class="fc" id="L9">public enum When {</span>
+    /**
+     * S is a subset of T
+     */
+<span class="fc" id="L13">    ALWAYS,</span>
+    /**
+     * nothing definitive is known about the relation between S and T
+     */
+<span class="fc" id="L17">    UNKNOWN,</span>
+    /**
+     * S intersection T is non-empty and S - T is nonempty
+     */
+<span class="fc" id="L21">    MAYBE,</span>
+    /**
+     * S intersection T is empty
+     */
+<span class="fc" id="L25">    NEVER,</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NumberKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.number</a> &gt; <span class="el_source">NumberKit.java</span></div><h1>NumberKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.number;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.common.Fs;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
+/**
+ * Utilities kit for number related.
+ *
+ * @author sunqian
+ */
+public class NumberKit {
+
+    /**
+     * Converts the given string to the specified number type. Supported number types are:
+     * &lt;ul&gt;
+     *     &lt;li&gt;{@code byte}, {@link Byte}&lt;/li&gt;
+     *     &lt;li&gt;{@code short}, {@link Short}&lt;/li&gt;
+     *     &lt;li&gt;{@code char}, {@link Character} (Converts to {@link Integer} first, then to {@link Character})&lt;/li&gt;
+     *     &lt;li&gt;{@code int}, {@link Integer}&lt;/li&gt;
+     *     &lt;li&gt;{@code long}, {@link Long}&lt;/li&gt;
+     *     &lt;li&gt;{@code float}, {@link Float}&lt;/li&gt;
+     *     &lt;li&gt;{@code double}, {@link Double}&lt;/li&gt;
+     *     &lt;li&gt;{@link BigInteger}&lt;/li&gt;
+     *     &lt;li&gt;{@link BigDecimal}&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param str     the given string
+     * @param numType the specified number type
+     * @param &lt;T&gt;     the number type
+     * @return the converted number object
+     * @throws NumberFormatException         if the given string can't be converted to the specified number type
+     * @throws UnsupportedOperationException if the given number type is not supported
+     */
+    public static &lt;T&gt; @Nonnull T toNumber(
+        @Nonnull CharSequence str, Class&lt;T&gt; numType
+    ) throws NumberFormatException, UnsupportedOperationException {
+<span class="fc bfc" id="L40" title="All 4 branches covered.">        if (byte.class.equals(numType) || Byte.class.equals(numType)) {</span>
+<span class="fc" id="L41">            return Fs.as(Byte.parseByte(str.toString()));</span>
+        }
+<span class="fc bfc" id="L43" title="All 4 branches covered.">        if (short.class.equals(numType) || Short.class.equals(numType)) {</span>
+<span class="fc" id="L44">            return Fs.as(Short.parseShort(str.toString()));</span>
+        }
+<span class="fc bfc" id="L46" title="All 4 branches covered.">        if (char.class.equals(numType) || Character.class.equals(numType)) {</span>
+<span class="fc" id="L47">            int i = Integer.parseInt(str.toString());</span>
+<span class="fc" id="L48">            char c = (char) i;</span>
+<span class="fc" id="L49">            return Fs.as(c);</span>
+        }
+<span class="fc bfc" id="L51" title="All 4 branches covered.">        if (int.class.equals(numType) || Integer.class.equals(numType)) {</span>
+<span class="fc" id="L52">            return Fs.as(Integer.parseInt(str.toString()));</span>
+        }
+<span class="fc bfc" id="L54" title="All 4 branches covered.">        if (long.class.equals(numType) || Long.class.equals(numType)) {</span>
+<span class="fc" id="L55">            return Fs.as(Long.parseLong(str.toString()));</span>
+        }
+<span class="fc bfc" id="L57" title="All 4 branches covered.">        if (float.class.equals(numType) || Float.class.equals(numType)) {</span>
+<span class="fc" id="L58">            return Fs.as(Float.parseFloat(str.toString()));</span>
+        }
+<span class="fc bfc" id="L60" title="All 4 branches covered.">        if (double.class.equals(numType) || Double.class.equals(numType)) {</span>
+<span class="fc" id="L61">            return Fs.as(Double.parseDouble(str.toString()));</span>
+        }
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (BigInteger.class.equals(numType)) {</span>
+<span class="fc" id="L64">            return Fs.as(new BigInteger(str.toString()));</span>
+        }
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        if (BigDecimal.class.equals(numType)) {</span>
+<span class="fc" id="L67">            return Fs.as(new BigDecimal(str.toString()));</span>
+        }
+<span class="fc" id="L69">        throw new UnsupportedOperationException(&quot;Unsupported number type: &quot; + numType);</span>
+    }
+
+    /**
+     * Converts the given number to the specified other number type. Supported other number types are:
+     * &lt;ul&gt;
+     *     &lt;li&gt;{@code byte}, {@link Byte}&lt;/li&gt;
+     *     &lt;li&gt;{@code short}, {@link Short}&lt;/li&gt;
+     *     &lt;li&gt;{@code char}, {@link Character} (Converts to {@link Integer} first, then to {@link Character})&lt;/li&gt;
+     *     &lt;li&gt;{@code int}, {@link Integer}&lt;/li&gt;
+     *     &lt;li&gt;{@code long}, {@link Long}&lt;/li&gt;
+     *     &lt;li&gt;{@code float}, {@link Float}&lt;/li&gt;
+     *     &lt;li&gt;{@code double}, {@link Double}&lt;/li&gt;
+     *     &lt;li&gt;{@link BigInteger}&lt;/li&gt;
+     *     &lt;li&gt;{@link BigDecimal}&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param num     the given number
+     * @param numType the specified other number type
+     * @param &lt;T&gt;     the number type
+     * @return the converted number object
+     * @throws NumberFormatException         if the given number can't be converted to the specified number type
+     * @throws UnsupportedOperationException if the given number type is not supported
+     */
+    public static &lt;T&gt; @Nonnull T toNumber(
+        @Nonnull Number num, Class&lt;T&gt; numType
+    ) throws NumberFormatException, UnsupportedOperationException {
+<span class="fc bfc" id="L96" title="All 4 branches covered.">        if (byte.class.equals(numType) || Byte.class.equals(numType)) {</span>
+<span class="fc" id="L97">            return Fs.as(num.byteValue());</span>
+        }
+<span class="fc bfc" id="L99" title="All 4 branches covered.">        if (short.class.equals(numType) || Short.class.equals(numType)) {</span>
+<span class="fc" id="L100">            return Fs.as(num.shortValue());</span>
+        }
+<span class="fc bfc" id="L102" title="All 4 branches covered.">        if (char.class.equals(numType) || Character.class.equals(numType)) {</span>
+<span class="fc" id="L103">            int i = num.intValue();</span>
+<span class="fc" id="L104">            char c = (char) i;</span>
+<span class="fc" id="L105">            return Fs.as(c);</span>
+        }
+<span class="fc bfc" id="L107" title="All 4 branches covered.">        if (int.class.equals(numType) || Integer.class.equals(numType)) {</span>
+<span class="fc" id="L108">            return Fs.as(num.intValue());</span>
+        }
+<span class="fc bfc" id="L110" title="All 4 branches covered.">        if (long.class.equals(numType) || Long.class.equals(numType)) {</span>
+<span class="fc" id="L111">            return Fs.as(num.longValue());</span>
+        }
+<span class="fc bfc" id="L113" title="All 4 branches covered.">        if (float.class.equals(numType) || Float.class.equals(numType)) {</span>
+<span class="fc" id="L114">            return Fs.as(num.floatValue());</span>
+        }
+<span class="fc bfc" id="L116" title="All 4 branches covered.">        if (double.class.equals(numType) || Double.class.equals(numType)) {</span>
+<span class="fc" id="L117">            return Fs.as(num.doubleValue());</span>
+        }
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        if (BigInteger.class.equals(numType)) {</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">            if (num instanceof BigInteger) {</span>
+<span class="fc" id="L121">                return Fs.as(num);</span>
+            }
+<span class="fc bfc" id="L123" title="All 2 branches covered.">            if (num instanceof BigDecimal) {</span>
+<span class="fc" id="L124">                BigDecimal decimal = (BigDecimal) num;</span>
+<span class="fc" id="L125">                return Fs.as(decimal.toBigInteger());</span>
+            }
+<span class="fc" id="L127">            return Fs.as(new BigInteger(num.toString()));</span>
+        }
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        if (BigDecimal.class.equals(numType)) {</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            if (num instanceof BigDecimal) {</span>
+<span class="fc" id="L131">                return Fs.as(num);</span>
+            }
+<span class="fc bfc" id="L133" title="All 2 branches covered.">            if (num instanceof BigInteger) {</span>
+<span class="fc" id="L134">                BigInteger integer = (BigInteger) num;</span>
+<span class="fc" id="L135">                return Fs.as(new BigDecimal(integer));</span>
+            }
+<span class="fc" id="L137">            return Fs.as(new BigDecimal(num.toString()));</span>
+        }
+<span class="fc" id="L139">        throw new UnsupportedOperationException(&quot;Unsupported number type: &quot; + numType);</span>
+    }
+
+    private NumberKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

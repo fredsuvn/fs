@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AssignableConvertHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.object.convert.handlers</a> &gt; <span class="el_source">AssignableConvertHandler.java</span></div><h1>AssignableConvertHandler.java</h1><pre class="source lang-java linenums">package space.sunqian.common.object.convert.handlers;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.option.Option;
+import space.sunqian.common.object.convert.ConvertOption;
+import space.sunqian.common.object.convert.ObjectConverter;
+import space.sunqian.common.runtime.reflect.TypeKit;
+
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+import java.util.Objects;
+
+/**
+ * The default first {@link ObjectConverter.Handler} of {@link ObjectConverter#defaultConverter()}, mainly used to
+ * determine whether it is possible to return the source object directly without creating a new object. Its conversion
+ * logic is:
+ * &lt;ol&gt;
+ *     &lt;li&gt;
+ *         If the specified source type equals to the target type, returns the source object itself;
+ *     &lt;/li&gt;
+ *     &lt;li&gt;
+ *         If the {@link ConvertOption#STRICT_TYPE_MODE} option is enabled, returns
+ *         {@link ObjectConverter.Status#HANDLER_CONTINUE} for target type of {@link WildcardType};
+ *         Otherwise, recursively convert their bounds type using the {@code converter} parameter;
+ *     &lt;/li&gt;
+ *     &lt;li&gt;
+ *         If the target type is assignable from the specified source type, returns the source object itself;
+ *     &lt;/li&gt;
+ *     &lt;li&gt;
+ *         Otherwise, returns {@link ObjectConverter.Status#HANDLER_CONTINUE}.
+ *     &lt;/li&gt;
+ * &lt;/ol&gt;
+ *
+ * @author sunqian
+ */
+<span class="fc" id="L38">public class AssignableConvertHandler implements ObjectConverter.Handler {</span>
+
+    @Override
+    public Object convert(
+        @Nullable Object src,
+        @Nonnull Type srcType,
+        @Nonnull Type target,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option&lt;?, ?&gt; @Nonnull ... options
+    ) throws Exception {
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if (Objects.equals(target, srcType)) {</span>
+<span class="fc" id="L49">            return src;</span>
+        }
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (Option.containsKey(ConvertOption.STRICT_TYPE_MODE, options)) {</span>
+            // strict mode, wildcard is unsupported
+<span class="fc bfc" id="L53" title="All 2 branches covered.">            if (target instanceof WildcardType) {</span>
+<span class="fc" id="L54">                return ObjectConverter.Status.HANDLER_CONTINUE;</span>
+            }
+        } else {
+            // non-strict mode, wildcard and type variable will be considered as their bounds type
+<span class="fc bfc" id="L58" title="All 2 branches covered.">            if (target instanceof WildcardType) {</span>
+<span class="fc" id="L59">                WildcardType wildcard = (WildcardType) target;</span>
+<span class="fc" id="L60">                Type superType = TypeKit.getLowerBound(wildcard);</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">                if (superType != null) {</span>
+<span class="fc" id="L62">                    return converter.convert(src, srcType, superType, options);</span>
+                }
+<span class="fc" id="L64">                return converter.convert(src, srcType, TypeKit.getUpperBound(wildcard), options);</span>
+            }
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            if (target instanceof TypeVariable&lt;?&gt;) {</span>
+<span class="fc" id="L67">                return converter.convert(src, srcType, ((TypeVariable&lt;?&gt;) target).getBounds()[0], options);</span>
+            }
+        }
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (TypeKit.isAssignable(target, srcType)) {</span>
+<span class="fc" id="L71">            return src;</span>
+        }
+<span class="fc" id="L73">        return ObjectConverter.Status.HANDLER_CONTINUE;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

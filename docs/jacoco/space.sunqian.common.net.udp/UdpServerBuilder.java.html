@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UdpServerBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.net.udp</a> &gt; <span class="el_source">UdpServerBuilder.java</span></div><h1>UdpServerBuilder.java</h1><pre class="source lang-java linenums">package space.sunqian.common.net.udp;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Check;
+import space.sunqian.common.Fs;
+import space.sunqian.common.base.function.callable.VoidCallable;
+import space.sunqian.common.io.BufferKit;
+import space.sunqian.common.io.IOKit;
+import space.sunqian.common.net.NetException;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.SocketOption;
+import java.net.StandardSocketOptions;
+import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ThreadFactory;
+
+/**
+ * Builder for building new instances of {@link UdpServer} by {@link DatagramChannel}.
+ * &lt;p&gt;
+ * The server built by this builder requires a main thread which is responsible for receiving datagram.
+ *
+ * @author sunqian
+ */
+<span class="fc" id="L35">public class UdpServerBuilder {</span>
+
+<span class="fc" id="L37">    private @Nonnull UdpServerHandler handler = UdpServerHandler.nullHandler();</span>
+    private @Nullable ThreadFactory mainThreadFactory;
+<span class="fc" id="L39">    private int maxPacketSize = IOKit.bufferSize();</span>
+<span class="fc" id="L40">    private final @Nonnull Map&lt;SocketOption&lt;?&gt;, Object&gt; socketOptions = new LinkedHashMap&lt;&gt;();</span>
+
+    /**
+     * Sets the handler to handle server events. The default handler is {@link UdpServerHandler#nullHandler()}.
+     *
+     * @param handler the handler to handle server events
+     * @return this builder
+     */
+    public @Nonnull UdpServerBuilder handler(@Nonnull UdpServerHandler handler) {
+<span class="fc" id="L49">        this.handler = handler;</span>
+<span class="fc" id="L50">        return this;</span>
+    }
+
+    /**
+     * Sets the main thread factory to create main thread. The main thread is responsible for accepting new client, and
+     * then the worker thread will take over the already connected clients.
+     * &lt;p&gt;
+     * If the factory is not configured, the server will use {@link Thread#Thread(Runnable)}.
+     *
+     * @param mainThreadFactory the main thread factory
+     * @return this builder
+     */
+    public @Nonnull UdpServerBuilder mainThreadFactory(@Nonnull ThreadFactory mainThreadFactory) {
+<span class="fc" id="L63">        this.mainThreadFactory = mainThreadFactory;</span>
+<span class="fc" id="L64">        return this;</span>
+    }
+
+    /**
+     * Sets the max data packet size this server can receive. The default is {@link IOKit#bufferSize()}.
+     *
+     * @param maxPacketSize the max data packet size
+     * @return this builder
+     * @throws IllegalArgumentException If the max packet size is less than 1
+     */
+    public @Nonnull UdpServerBuilder maxPacketSize(int maxPacketSize) throws IllegalArgumentException {
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        Check.checkArgument(maxPacketSize &gt;= 1, &quot;maxPacketSize must &gt;= 1&quot;);</span>
+<span class="fc" id="L76">        this.maxPacketSize = maxPacketSize;</span>
+<span class="fc" id="L77">        return this;</span>
+    }
+
+    /**
+     * Sets a socket option. This method can be invoked multiple times to set different socket options.
+     *
+     * @param &lt;T&gt;   the type of the socket option value
+     * @param name  the socket option
+     * @param value the value of the socket option, a value of {@code null} may be a valid value for some socket
+     *              options.
+     * @return this builder
+     * @throws NetException If an error occurs
+     * @see StandardSocketOptions
+     */
+    public &lt;T&gt; @Nonnull UdpServerBuilder socketOption(@Nonnull SocketOption&lt;T&gt; name, T value) throws NetException {
+<span class="fc" id="L92">        socketOptions.put(name, value);</span>
+<span class="fc" id="L93">        return this;</span>
+    }
+
+    /**
+     * Binds the server's socket to the automatically assigned address and configures the socket to listen for
+     * connections. And a new {@link UdpServer} instance is returned.
+     *
+     * @return a new {@link UdpServer} instance
+     * @throws NetException If an error occurs
+     */
+    public @Nonnull UdpServer bind() throws NetException {
+<span class="fc" id="L104">        return bind(null);</span>
+    }
+
+    /**
+     * Binds the server's socket to the specified local address and configures the socket to listen for connections. And
+     * a new {@link UdpServer} instance is returned.
+     *
+     * @param localAddress the local address the server is bound to, may be {@code null} to bind to the automatically
+     *                     assigned address
+     * @return a new {@link UdpServer} instance
+     * @throws NetException If an error occurs
+     */
+    public @Nonnull UdpServer bind(@Nullable InetSocketAddress localAddress) throws NetException {
+<span class="fc" id="L117">        return Fs.uncheck(() -&gt; new UdpServerImpl(</span>
+                localAddress,
+                handler,
+                mainThreadFactory,
+                maxPacketSize,
+                socketOptions
+            ),
+            NetException::new
+        );
+    }
+
+    private static final class UdpServerImpl implements UdpServer, Runnable {
+
+        private final @Nonnull DatagramChannel server;
+        private final @Nonnull Selector mainSelector;
+        private final @Nonnull Thread mainThread;
+        private final @Nonnull UdpServerHandler handler;
+        private final @Nonnull InetSocketAddress localAddress;
+        private final @Nonnull ByteBuffer buffer;
+
+<span class="fc" id="L137">        private volatile boolean closed = false;</span>
+
+        @SuppressWarnings(&quot;resource&quot;)
+        private UdpServerImpl(
+            @Nullable InetSocketAddress localAddress,
+            @Nonnull UdpServerHandler handler,
+            @Nullable ThreadFactory mainthreadFactory,
+            int maxPacketSize,
+            Map&lt;SocketOption&lt;?&gt;, Object&gt; socketOptions
+<span class="fc" id="L146">        ) throws Exception {</span>
+<span class="fc" id="L147">            this.server = DatagramChannel.open();</span>
+<span class="fc" id="L148">            this.mainSelector = Selector.open();</span>
+<span class="fc" id="L149">            this.handler = handler;</span>
+<span class="fc" id="L150">            this.mainThread = newThread(mainthreadFactory, this);</span>
+<span class="fc" id="L151">            socketOptions.forEach((name, value) -&gt;</span>
+<span class="fc" id="L152">                Fs.uncheck(() -&gt; server.setOption(Fs.as(name), value), NetException::new));</span>
+<span class="fc" id="L153">            server.configureBlocking(false);</span>
+<span class="fc" id="L154">            server.register(mainSelector, SelectionKey.OP_READ);</span>
+<span class="fc" id="L155">            this.buffer = ByteBuffer.allocate(maxPacketSize);</span>
+<span class="fc" id="L156">            server.bind(localAddress);</span>
+<span class="fc" id="L157">            this.localAddress = (InetSocketAddress) server.getLocalAddress();</span>
+<span class="fc" id="L158">            mainThread.start();</span>
+<span class="fc" id="L159">        }</span>
+
+        private @Nonnull Thread newThread(@Nullable ThreadFactory factory, @Nonnull Runnable runnable) {
+<span class="fc bfc" id="L162" title="All 2 branches covered.">            return factory == null ? new Thread(runnable) : factory.newThread(runnable);</span>
+        }
+
+        @Override
+        public void await() throws NetException {
+<span class="fc" id="L167">            Fs.ignoreException(mainThread::join);</span>
+<span class="fc" id="L168">        }</span>
+
+        @Override
+        public synchronized void close() throws NetException {
+<span class="fc bfc" id="L172" title="All 2 branches covered.">            if (closed) {</span>
+<span class="fc" id="L173">                return;</span>
+            }
+<span class="fc" id="L175">            Fs.uncheck(() -&gt; {</span>
+<span class="fc" id="L176">                    server.close();</span>
+<span class="fc" id="L177">                    mainSelector.close();</span>
+<span class="fc" id="L178">                    mainSelector.wakeup();</span>
+<span class="fc" id="L179">                    mainThread.interrupt();</span>
+<span class="fc" id="L180">                },</span>
+                NetException::new
+            );
+<span class="fc" id="L183">            closed = true;</span>
+<span class="fc" id="L184">        }</span>
+
+        @Override
+        public @Nonnull InetSocketAddress localAddress() throws NetException {
+<span class="fc" id="L188">            return localAddress;</span>
+        }
+
+        @Override
+        public @Nonnull List&lt;@Nonnull Worker&gt; workers() {
+<span class="fc" id="L193">            return Collections.emptyList();</span>
+        }
+
+        @Override
+        public boolean isClosed() {
+<span class="fc" id="L198">            return closed;</span>
+        }
+
+        @Override
+        public void run() {
+<span class="fc bfc" id="L203" title="All 2 branches covered.">            while (!mainThread.isInterrupted()) {</span>
+<span class="fc" id="L204">                doWork(this::doMainWork, closed);</span>
+            }
+<span class="fc" id="L206">            Fs.uncheck(() -&gt; {</span>
+<span class="fc" id="L207">                server.close();</span>
+<span class="fc" id="L208">                mainSelector.close();</span>
+<span class="fc" id="L209">            }, NetException::new);</span>
+<span class="fc" id="L210">        }</span>
+
+        private void doMainWork() throws Exception {
+<span class="fc" id="L213">            mainSelector.select();</span>
+<span class="fc" id="L214">            Set&lt;SelectionKey&gt; selectedKeys = mainSelector.selectedKeys();</span>
+<span class="fc" id="L215">            Iterator&lt;SelectionKey&gt; keys = selectedKeys.iterator();</span>
+<span class="fc bfc" id="L216" title="All 2 branches covered.">            while (keys.hasNext()) {</span>
+<span class="fc" id="L217">                SelectionKey key = keys.next();</span>
+<span class="fc" id="L218">                keys.remove();</span>
+<span class="fc" id="L219">                handleRead(key);</span>
+                // key.cancel();
+<span class="fc" id="L221">            }</span>
+<span class="fc" id="L222">        }</span>
+
+        private void handleRead(SelectionKey key) throws Exception {
+<span class="fc" id="L225">            DatagramChannel channel = (DatagramChannel) key.channel();</span>
+<span class="fc" id="L226">            buffer.clear();</span>
+<span class="fc" id="L227">            SocketAddress address = channel.receive(buffer);</span>
+<span class="fc" id="L228">            buffer.flip();</span>
+<span class="fc" id="L229">            byte[] data = new byte[buffer.remaining()];</span>
+<span class="fc" id="L230">            BufferKit.readTo(buffer, data);</span>
+<span class="fc" id="L231">            UdpKit.channelRead(handler, channel, data, address);</span>
+<span class="fc" id="L232">        }</span>
+
+        private void doWork(VoidCallable callable, boolean closed) {
+<span class="fc bfc" id="L235" title="All 2 branches covered.">            if (closed) {</span>
+<span class="fc" id="L236">                return;</span>
+            }
+            try {
+<span class="fc" id="L239">                callable.call();</span>
+<span class="fc" id="L240">            } catch (Exception e) {</span>
+<span class="fc" id="L241">                handler.exceptionCaught(null, e);</span>
+<span class="fc" id="L242">            }</span>
+<span class="fc" id="L243">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

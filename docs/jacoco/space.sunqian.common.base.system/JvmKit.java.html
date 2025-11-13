@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JvmKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.system</a> &gt; <span class="el_source">JvmKit.java</span></div><h1>JvmKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.system;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
+import space.sunqian.common.runtime.reflect.TypeKit;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+import java.util.Objects;
+
+/**
+ * Utilities for JVM
+ *
+ * @author sunqian
+ */
+public class JvmKit {
+
+    /**
+     * Returns a description of current JVM, in format of: {@code [JVM name]:[JVM version]:[Java version]}.
+     *
+     * @return a description of current JVM
+     */
+    public static @Nonnull String jvmDescription() {
+<span class="fc" id="L33">        return SystemKit.getJavaVmName() + &quot;:&quot; + SystemKit.getJavaVmVersion() + &quot;:&quot; + SystemKit.getJavaVersion();</span>
+    }
+
+    /**
+     * Returns the major version of current Java Runtime Environment version.
+     * &lt;p&gt;
+     * If the version {@code &lt;= 1.8}, returns the second version number (such as {@code 6} for {@code 1.6.x}, {@code 8}
+     * for {@code 1.8.x}). Otherwise, returns the first number (such as {@code 9} for {@code 9.x}, {@code 17} for
+     * {@code 17-ea.x}).
+     * &lt;p&gt;
+     * Returns -1 if obtain failed.
+     *
+     * @return the major version of current Java Runtime Environment version
+     */
+    public static int javaMajorVersion() {
+<span class="fc" id="L48">        return javaMajorVersion(SystemKit.getJavaVersion());</span>
+    }
+
+    /**
+     * Returns the major version of the specified Java Runtime Environment version.
+     * &lt;p&gt;
+     * If the version {@code &lt;= 1.8}, returns the second version number (such as {@code 6} for {@code 1.6.x}, {@code 8}
+     * for {@code 1.8.x}). Otherwise, returns the first number (such as {@code 9} for {@code 9.x}, {@code 17} for
+     * {@code 17-ea.x}).
+     * &lt;p&gt;
+     * Returns -1 if obtain failed.
+     *
+     * @param version the specified Java Runtime Environment version
+     * @return the major version of the specified Java Runtime Environment version
+     */
+    public static int javaMajorVersion(@Nonnull String version) {
+        try {
+<span class="fc" id="L65">            int dot1 = version.indexOf('.');</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            if (dot1 &lt; 0) {</span>
+<span class="fc" id="L67">                return versionToNumber(version);</span>
+            }
+<span class="fc" id="L69">            int firstNum = versionToNumber(version.substring(0, dot1));</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">            if (firstNum &gt;= 9) {</span>
+<span class="fc" id="L71">                return firstNum;</span>
+            }
+<span class="fc" id="L73">            int dot2 = version.indexOf('.', dot1 + 1);</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">            if (dot2 &lt; 0) {</span>
+<span class="fc" id="L75">                return versionToNumber(version.substring(dot1 + 1));</span>
+            }
+<span class="fc" id="L77">            return versionToNumber(version.substring(dot1 + 1, dot2));</span>
+<span class="fc" id="L78">        } catch (Exception e) {</span>
+<span class="fc" id="L79">            return -1;</span>
+        }
+    }
+
+    private static int versionToNumber(@Nonnull String version) {
+<span class="fc" id="L84">        int dashDot = version.indexOf('-');</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        if (dashDot &lt; 0) {</span>
+<span class="fc" id="L86">            return Integer.parseInt(version);</span>
+        }
+<span class="fc" id="L88">        return Integer.parseInt(version.substring(0, dashDot));</span>
+    }
+
+    /**
+     * Returns the internal name of the given class. The internal name of a class is its fully qualified name, as
+     * returned by {@link Class#getName()}, where '.' are replaced by '/'.
+     *
+     * @param cls the given class
+     * @return the internal name of the given class.
+     */
+    public static @Nonnull String toInternalName(@Nonnull Class&lt;?&gt; cls) {
+<span class="fc" id="L99">        return cls.getName().replace('.', '/');</span>
+    }
+
+    /**
+     * Returns the descriptor of the given type. This method supports {@link Class}, {@link ParameterizedType},
+     * {@link GenericArrayType} and {@link TypeVariable}.
+     *
+     * @param type the given type
+     * @return the descriptor of the given type
+     * @throws JvmException if any problem occurs
+     */
+    public static @Nonnull String toDescriptor(@Nonnull Type type) throws JvmException {
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        if (TypeKit.isTypeVariable(type)) {</span>
+<span class="fc" id="L112">            TypeVariable&lt;?&gt; tv = (TypeVariable&lt;?&gt;) type;</span>
+<span class="fc" id="L113">            Type bound = TypeKit.getFirstBound(tv);</span>
+<span class="fc" id="L114">            return toDescriptor(bound);</span>
+        }
+<span class="fc" id="L116">        StringBuilder appender = new StringBuilder();</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        if (TypeKit.isClass(type)) {</span>
+<span class="fc" id="L118">            appendDescriptor((Class&lt;?&gt;) type, appender);</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        } else if (TypeKit.isParameterized(type)) {</span>
+<span class="fc" id="L120">            Class&lt;?&gt; rawClass = toRawClass((ParameterizedType) type);</span>
+<span class="fc" id="L121">            appendDescriptor(rawClass, appender);</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">        } else if (TypeKit.isGenericArray(type)) {</span>
+<span class="fc" id="L123">            appendDescriptor(toRawClass((GenericArrayType) type), appender);</span>
+        } else {
+<span class="fc" id="L125">            throw new JvmException(&quot;Unknown type: &quot; + type + &quot;.&quot;);</span>
+        }
+<span class="fc" id="L127">        return appender.toString();</span>
+    }
+
+    /**
+     * Returns the descriptor of the given method.
+     *
+     * @param method the given method
+     * @return the descriptor of the given method
+     */
+    public static @Nonnull String toDescriptor(@Nonnull Method method) {
+<span class="fc" id="L137">        Class&lt;?&gt; returnType = method.getReturnType();</span>
+<span class="fc" id="L138">        Class&lt;?&gt;[] parameters = method.getParameterTypes();</span>
+<span class="fc bfc" id="L139" title="All 4 branches covered.">        if (Objects.equals(returnType, void.class) &amp;&amp; parameters.length == 0) {</span>
+<span class="fc" id="L140">            return &quot;()V&quot;;</span>
+        }
+<span class="fc" id="L142">        StringBuilder appender = new StringBuilder();</span>
+<span class="fc" id="L143">        appender.append(&quot;(&quot;);</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">        for (Class&lt;?&gt; parameter : parameters) {</span>
+<span class="fc" id="L145">            appendDescriptor(parameter, appender);</span>
+        }
+<span class="fc" id="L147">        appender.append(&quot;)&quot;);</span>
+<span class="fc" id="L148">        appendDescriptor(returnType, appender);</span>
+<span class="fc" id="L149">        return appender.toString();</span>
+    }
+
+    /**
+     * Returns the descriptor of the given constructor.
+     *
+     * @param constructor the given constructor
+     * @return the descriptor of the given constructor
+     */
+    public static @Nonnull String toDescriptor(@Nonnull Constructor&lt;?&gt; constructor) {
+<span class="fc" id="L159">        Class&lt;?&gt;[] parameters = constructor.getParameterTypes();</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if (parameters.length == 0) {</span>
+<span class="fc" id="L161">            return &quot;()V&quot;;</span>
+        }
+<span class="fc" id="L163">        StringBuilder appender = new StringBuilder();</span>
+<span class="fc" id="L164">        appender.append(&quot;(&quot;);</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        for (Class&lt;?&gt; parameter : parameters) {</span>
+<span class="fc" id="L166">            appendDescriptor(parameter, appender);</span>
+        }
+<span class="fc" id="L168">        appender.append(&quot;)V&quot;);</span>
+<span class="fc" id="L169">        return appender.toString();</span>
+    }
+
+    private static void appendDescriptor(@Nonnull Class&lt;?&gt; cls, @Nonnull StringBuilder appender) {
+<span class="fc" id="L173">        Class&lt;?&gt; curCls = cls;</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        while (curCls.isArray()) {</span>
+<span class="fc" id="L175">            appender.append('[');</span>
+<span class="fc" id="L176">            curCls = curCls.getComponentType();</span>
+        }
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        if (curCls.isPrimitive()) {</span>
+<span class="fc" id="L179">            appender.append(toPrimitiveDescriptor(curCls));</span>
+        } else {
+<span class="fc" id="L181">            appender.append('L').append(toInternalName(curCls)).append(';');</span>
+        }
+<span class="fc" id="L183">    }</span>
+
+    private static char toPrimitiveDescriptor(@Nonnull Class&lt;?&gt; cls) {
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        if (Objects.equals(cls, boolean.class)) {</span>
+<span class="fc" id="L187">            return 'Z';</span>
+        }
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        if (Objects.equals(cls, byte.class)) {</span>
+<span class="fc" id="L190">            return 'B';</span>
+        }
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        if (Objects.equals(cls, short.class)) {</span>
+<span class="fc" id="L193">            return 'S';</span>
+        }
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        if (Objects.equals(cls, char.class)) {</span>
+<span class="fc" id="L196">            return 'C';</span>
+        }
+<span class="fc bfc" id="L198" title="All 2 branches covered.">        if (Objects.equals(cls, int.class)) {</span>
+<span class="fc" id="L199">            return 'I';</span>
+        }
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        if (Objects.equals(cls, long.class)) {</span>
+<span class="fc" id="L202">            return 'J';</span>
+        }
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if (Objects.equals(cls, float.class)) {</span>
+<span class="fc" id="L205">            return 'F';</span>
+        }
+<span class="fc bfc" id="L207" title="All 2 branches covered.">        if (Objects.equals(cls, double.class)) {</span>
+<span class="fc" id="L208">            return 'D';</span>
+        }
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        if (Objects.equals(cls, void.class)) {</span>
+<span class="fc" id="L211">            return 'V';</span>
+        }
+<span class="fc" id="L213">        throw new UnknownPrimitiveTypeException(cls);</span>
+    }
+
+    /**
+     * Returns whether the given type need a signature for JVM.
+     * &lt;p&gt;
+     * The {@code declaration} specifies where the signature is used for. When for the declaration, {@code true} should
+     * be passed here. Otherwise, such as signature of a {@link Field}'s type, {@code false}.
+     *
+     * @param type        the given type
+     * @param declaration whether the type is declaring
+     * @return whether the given type need a signature for JVM
+     */
+    public static boolean needSignature(@Nonnull Type type, boolean declaration) {
+<span class="fc bfc" id="L227" title="All 2 branches covered.">        if (!declaration) {</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">            return !TypeKit.isClass(type);</span>
+        }
+<span class="fc bfc" id="L230" title="All 2 branches covered.">        if (!TypeKit.isClass(type)) {</span>
+<span class="fc" id="L231">            return true;</span>
+        }
+<span class="fc" id="L233">        Class&lt;?&gt; cls = (Class&lt;?&gt;) type;</span>
+<span class="fc" id="L234">        TypeVariable&lt;?&gt;[] tv = cls.getTypeParameters();</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">        if (tv.length &gt; 0) {</span>
+<span class="fc" id="L236">            return true;</span>
+        }
+<span class="fc" id="L238">        @Nullable Type superclass = cls.getGenericSuperclass();</span>
+<span class="fc bfc" id="L239" title="All 4 branches covered.">        if (superclass != null &amp;&amp; !TypeKit.isClass(superclass)) {</span>
+<span class="fc" id="L240">            return true;</span>
+        }
+<span class="fc" id="L242">        Type[] interfaces = cls.getGenericInterfaces();</span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">        for (Type anInterface : interfaces) {</span>
+<span class="fc bfc" id="L244" title="All 2 branches covered.">            if (!TypeKit.isClass(anInterface)) {</span>
+<span class="fc" id="L245">                return true;</span>
+            }
+        }
+<span class="fc" id="L248">        return false;</span>
+    }
+
+    /**
+     * Returns whether the given method need a signature for JVM.
+     *
+     * @param method the given method
+     * @return whether the given method need a signature for JVM
+     */
+    public static boolean needSignature(@Nonnull Method method) {
+<span class="fc" id="L258">        Type returnType = method.getGenericReturnType();</span>
+<span class="fc bfc" id="L259" title="All 2 branches covered.">        if (needSignature(returnType, false)) {</span>
+<span class="fc" id="L260">            return true;</span>
+        }
+<span class="fc" id="L262">        return needSignature((Executable) method);</span>
+    }
+
+    /**
+     * Returns whether the given constructor need a signature for JVM.
+     *
+     * @param constructor the given constructor
+     * @return whether the given constructor need a signature for JVM
+     */
+    public static boolean needSignature(@Nonnull Constructor&lt;?&gt; constructor) {
+<span class="fc" id="L272">        return needSignature((Executable) constructor);</span>
+    }
+
+    private static boolean needSignature(@Nonnull Executable executable) {
+<span class="fc" id="L276">        Type[] parameters = executable.getGenericParameterTypes();</span>
+<span class="fc bfc" id="L277" title="All 2 branches covered.">        for (Type parameter : parameters) {</span>
+<span class="fc bfc" id="L278" title="All 2 branches covered.">            if (needSignature(parameter, false)) {</span>
+<span class="fc" id="L279">                return true;</span>
+            }
+        }
+<span class="fc" id="L282">        return false;</span>
+    }
+
+    /**
+     * Returns the signature of the given type.
+     * &lt;p&gt;
+     * The {@code declaration} specifies where the signature is used for. When for the declaration, {@code true} should
+     * be passed here. Otherwise, such as signature of a {@link Field}'s type, {@code false}.
+     *
+     * @param type        the given type
+     * @param declaration whether the type is declaring
+     * @return the signature of the given type
+     */
+    public static @Nullable String toSignature(@Nonnull Type type, boolean declaration) {
+<span class="fc bfc" id="L296" title="All 2 branches covered.">        if (!needSignature(type, declaration)) {</span>
+<span class="fc" id="L297">            return null;</span>
+        }
+<span class="fc" id="L299">        StringBuilder appender = new StringBuilder();</span>
+<span class="fc bfc" id="L300" title="All 2 branches covered.">        if (TypeKit.isClass(type)) {</span>
+<span class="fc" id="L301">            Class&lt;?&gt; cls = (Class&lt;?&gt;) type;</span>
+<span class="fc" id="L302">            appendSignature(cls.getTypeParameters(), appender);</span>
+<span class="fc" id="L303">            @Nullable Type superclass = cls.getGenericSuperclass();</span>
+<span class="fc bfc" id="L304" title="All 2 branches covered.">            if (superclass == null) {</span>
+<span class="fc" id="L305">                appender.append(&quot;Ljava/lang/Object;&quot;);</span>
+            } else {
+<span class="fc" id="L307">                appendSignature(superclass, appender);</span>
+            }
+<span class="fc" id="L309">            Type[] interfaces = cls.getGenericInterfaces();</span>
+<span class="fc bfc" id="L310" title="All 2 branches covered.">            for (Type anInterface : interfaces) {</span>
+<span class="fc" id="L311">                appendSignature(anInterface, appender);</span>
+            }
+<span class="fc" id="L313">        } else {</span>
+<span class="fc" id="L314">            appendSignature(type, appender);</span>
+        }
+<span class="fc" id="L316">        return appender.toString();</span>
+    }
+
+    /**
+     * Returns the given type's signature used for the declaration. This method is equivalent to
+     * ({@link #toSignature(Type, boolean)}): {@code getSignature(type, true)}.
+     *
+     * @param type the given type
+     * @return the given type's signature used for the declaration
+     */
+    public static @Nullable String toSignature(@Nonnull Type type) {
+<span class="fc" id="L327">        return toSignature(type, true);</span>
+    }
+
+    /**
+     * Returns the signature of the given field.
+     *
+     * @param field the given field
+     * @return the signature of the given field
+     */
+    public static @Nullable String toSignature(@Nonnull Field field) {
+<span class="fc" id="L337">        return toSignature(field.getGenericType(), false);</span>
+    }
+
+    /**
+     * Returns the signature of the given method.
+     *
+     * @param method the given method
+     * @return the signature of the given method
+     */
+    public static @Nullable String toSignature(@Nonnull Method method) {
+<span class="fc bfc" id="L347" title="All 2 branches covered.">        if (!needSignature(method)) {</span>
+<span class="fc" id="L348">            return null;</span>
+        }
+<span class="fc" id="L350">        StringBuilder appender = new StringBuilder();</span>
+<span class="fc" id="L351">        appendSignature(method, appender);</span>
+<span class="fc" id="L352">        Type returnType = method.getGenericReturnType();</span>
+<span class="fc" id="L353">        appendSignature(returnType, appender);</span>
+<span class="fc" id="L354">        return appender.toString();</span>
+    }
+
+    /**
+     * Returns the signature of the given constructor.
+     *
+     * @param constructor the given constructor
+     * @return the signature of the given constructor
+     */
+    public static @Nullable String toSignature(@Nonnull Constructor&lt;?&gt; constructor) {
+<span class="fc bfc" id="L364" title="All 2 branches covered.">        if (!needSignature(constructor)) {</span>
+<span class="fc" id="L365">            return null;</span>
+        }
+<span class="fc" id="L367">        StringBuilder appender = new StringBuilder();</span>
+<span class="fc" id="L368">        appendSignature(constructor, appender);</span>
+<span class="fc" id="L369">        appender.append('V');</span>
+<span class="fc" id="L370">        return appender.toString();</span>
+    }
+
+    private static void appendSignature(
+        @Nonnull Executable executable,
+        @Nonnull StringBuilder appender
+    ) {
+<span class="fc" id="L377">        appendSignature(executable.getTypeParameters(), appender);</span>
+<span class="fc" id="L378">        appender.append('(');</span>
+<span class="fc bfc" id="L379" title="All 2 branches covered.">        for (Type parameter : executable.getGenericParameterTypes()) {</span>
+<span class="fc" id="L380">            appendSignature(parameter, appender);</span>
+        }
+<span class="fc" id="L382">        appender.append(')');</span>
+<span class="fc" id="L383">    }</span>
+
+    private static void appendSignature(
+        @Nonnull TypeVariable&lt;?&gt; @Nonnull [] typeVariables,
+        @Nonnull StringBuilder appender
+    ) {
+<span class="fc bfc" id="L389" title="All 2 branches covered.">        if (typeVariables.length &gt; 0) {</span>
+<span class="fc" id="L390">            appender.append('&lt;');</span>
+<span class="fc bfc" id="L391" title="All 2 branches covered.">            for (TypeVariable&lt;?&gt; tv : typeVariables) {</span>
+<span class="fc" id="L392">                appendTypeVariableDeclaringSignature(tv, appender);</span>
+            }
+<span class="fc" id="L394">            appender.append('&gt;');</span>
+        }
+<span class="fc" id="L396">    }</span>
+
+    private static void appendTypeVariableDeclaringSignature(
+        @Nonnull TypeVariable&lt;?&gt; type,
+        @Nonnull StringBuilder appender
+    ) {
+<span class="fc" id="L402">        appender.append(type.getName());</span>
+<span class="fc" id="L403">        Type[] bounds = type.getBounds();</span>
+<span class="fc bfc" id="L404" title="All 2 branches covered.">        for (int i = 0; i &lt; bounds.length; i++) {</span>
+<span class="fc" id="L405">            Type bound = bounds[i];</span>
+<span class="fc" id="L406">            appender.append(':');</span>
+<span class="fc bfc" id="L407" title="All 2 branches covered.">            if (TypeKit.isTypeVariable(bound)) {</span>
+<span class="fc" id="L408">                appender.append('T');</span>
+<span class="fc" id="L409">                appender.append(((TypeVariable&lt;?&gt;) bound).getName());</span>
+<span class="fc" id="L410">                appender.append(';');</span>
+<span class="fc" id="L411">                continue;</span>
+            }
+<span class="fc bfc" id="L413" title="All 2 branches covered.">            if (i == 0) {</span>
+<span class="fc bfc" id="L414" title="All 2 branches covered.">                if (TypeKit.isParameterized(bound)) {</span>
+<span class="fc" id="L415">                    Class&lt;?&gt; rawClass = toRawClass((ParameterizedType) bound);</span>
+<span class="fc bfc" id="L416" title="All 2 branches covered.">                    if (rawClass.isInterface()) {</span>
+<span class="fc" id="L417">                        appender.append(':');</span>
+                    }
+                }
+<span class="fc bfc" id="L420" title="All 2 branches covered.">                if (TypeKit.isClass(bound)) {</span>
+<span class="fc" id="L421">                    Class&lt;?&gt; boundClass = Fs.as(bound);</span>
+<span class="fc bfc" id="L422" title="All 2 branches covered.">                    if (boundClass.isInterface()) {</span>
+<span class="fc" id="L423">                        appender.append(':');</span>
+                    }
+                }
+            }
+<span class="fc" id="L427">            appendSignature(bound, appender);</span>
+        }
+<span class="fc" id="L429">    }</span>
+
+    private static void appendSignature(@Nonnull Type type, @Nonnull StringBuilder appender) {
+<span class="fc bfc" id="L432" title="All 2 branches covered.">        if (TypeKit.isClass(type)) {</span>
+<span class="fc" id="L433">            appendSignature((Class&lt;?&gt;) type, appender);</span>
+<span class="fc" id="L434">            return;</span>
+        }
+<span class="fc bfc" id="L436" title="All 2 branches covered.">        if (TypeKit.isParameterized(type)) {</span>
+<span class="fc" id="L437">            appendSignature((ParameterizedType) type, appender);</span>
+<span class="fc" id="L438">            return;</span>
+        }
+<span class="fc bfc" id="L440" title="All 2 branches covered.">        if (TypeKit.isWildcard(type)) {</span>
+<span class="fc" id="L441">            appendSignature((WildcardType) type, appender);</span>
+<span class="fc" id="L442">            return;</span>
+        }
+<span class="fc bfc" id="L444" title="All 2 branches covered.">        if (TypeKit.isTypeVariable(type)) {</span>
+<span class="fc" id="L445">            appendSignature((TypeVariable&lt;?&gt;) type, appender);</span>
+<span class="fc" id="L446">            return;</span>
+        }
+<span class="fc bfc" id="L448" title="All 2 branches covered.">        if (TypeKit.isGenericArray(type)) {</span>
+<span class="fc" id="L449">            appendSignature((GenericArrayType) type, appender);</span>
+<span class="fc" id="L450">            return;</span>
+        }
+<span class="fc" id="L452">        throw new JvmException(&quot;Unknown type: &quot; + type + &quot;.&quot;);</span>
+    }
+
+    private static void appendSignature(@Nonnull Class&lt;?&gt; type, @Nonnull StringBuilder appender) {
+<span class="fc" id="L456">        appender.append(toDescriptor(type));</span>
+<span class="fc" id="L457">    }</span>
+
+    private static void appendSignature(@Nonnull ParameterizedType type, @Nonnull StringBuilder appender) {
+<span class="fc" id="L460">        Type owner = type.getOwnerType();</span>
+<span class="fc" id="L461">        Class&lt;?&gt; rawClass = toRawClass(type);</span>
+<span class="fc bfc" id="L462" title="All 2 branches covered.">        if (owner != null) {</span>
+<span class="fc" id="L463">            appendSignature(owner, appender);</span>
+            // it must end with a ';'
+<span class="fc" id="L465">            int semicolonIndex = appender.length() - 1;</span>
+<span class="fc bfc" id="L466" title="All 2 branches covered.">            if (TypeKit.isClass(owner)) {</span>
+<span class="fc" id="L467">                appender.setCharAt(semicolonIndex, '$');</span>
+            } else {
+<span class="fc" id="L469">                appender.setCharAt(semicolonIndex, '.');</span>
+            }
+<span class="fc" id="L471">            appender.append(rawClass.getSimpleName());</span>
+<span class="fc" id="L472">        } else {</span>
+            // no primitive
+<span class="fc" id="L474">            appender.append('L');</span>
+<span class="fc" id="L475">            appender.append(toInternalName(rawClass));</span>
+        }
+<span class="fc" id="L477">        appender.append('&lt;');</span>
+<span class="fc bfc" id="L478" title="All 2 branches covered.">        for (Type actualTypeArgument : type.getActualTypeArguments()) {</span>
+<span class="fc" id="L479">            appendSignature(actualTypeArgument, appender);</span>
+        }
+<span class="fc" id="L481">        appender.append(&quot;&gt;;&quot;);</span>
+<span class="fc" id="L482">    }</span>
+
+    private static void appendSignature(@Nonnull WildcardType type, @Nonnull StringBuilder appender) {
+<span class="fc" id="L485">        @Nullable Type lower = TypeKit.getLowerBound(type);</span>
+        Type[] bounds;
+<span class="fc bfc" id="L487" title="All 2 branches covered.">        if (lower != null) {</span>
+            // ? super
+<span class="fc" id="L489">            appender.append('-');</span>
+<span class="fc" id="L490">            bounds = type.getLowerBounds();</span>
+        } else {
+            // '?' and '? extends' are equivalent
+<span class="fc" id="L493">            appender.append('+');</span>
+<span class="fc" id="L494">            bounds = type.getUpperBounds();</span>
+        }
+<span class="fc bfc" id="L496" title="All 2 branches covered.">        for (Type bound : bounds) {</span>
+<span class="fc" id="L497">            appendSignature(bound, appender);</span>
+        }
+<span class="fc" id="L499">    }</span>
+
+    private static void appendSignature(@Nonnull TypeVariable&lt;?&gt; type, @Nonnull StringBuilder appender) {
+<span class="fc" id="L502">        appender.append('T').append(type.getTypeName()).append(';');</span>
+<span class="fc" id="L503">    }</span>
+
+    private static void appendSignature(@Nonnull GenericArrayType type, @Nonnull StringBuilder appender) {
+<span class="fc" id="L506">        @Nonnull Type curType = type;</span>
+<span class="fc bfc" id="L507" title="All 2 branches covered.">        while (TypeKit.isArray(curType)) {</span>
+<span class="fc" id="L508">            appender.append('[');</span>
+            // never null
+<span class="fc" id="L510">            curType = Objects.requireNonNull(TypeKit.getComponentType(curType));</span>
+        }
+<span class="fc" id="L512">        appendSignature(curType, appender);</span>
+<span class="fc" id="L513">    }</span>
+
+    private static @Nonnull Class&lt;?&gt; toRawClass(@Nonnull ParameterizedType type) throws JvmException {
+<span class="fc" id="L516">        Type rawType = type.getRawType();</span>
+<span class="fc bfc" id="L517" title="All 2 branches covered.">        if (TypeKit.isClass(rawType)) {</span>
+<span class="fc" id="L518">            return (Class&lt;?&gt;) rawType;</span>
+        }
+<span class="fc" id="L520">        throw new JvmException(&quot;Unknown raw type: &quot; + rawType + &quot;.&quot;);</span>
+    }
+
+    private static @Nonnull Class&lt;?&gt; toRawClass(@Nonnull GenericArrayType type) throws JvmException {
+<span class="fc" id="L524">        @Nullable Class&lt;?&gt; arrayClass = TypeKit.toRuntimeClass(type);</span>
+<span class="fc bfc" id="L525" title="All 2 branches covered.">        if (arrayClass != null) {</span>
+<span class="fc" id="L526">            return arrayClass;</span>
+        }
+<span class="fc" id="L528">        throw new JvmException(&quot;Unknown array type: &quot; + type + &quot;.&quot;);</span>
+    }
+
+    private JvmKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

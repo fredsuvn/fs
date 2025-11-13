@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CollectKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.collect</a> &gt; <span class="el_source">CollectKit.java</span></div><h1>CollectKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.collect;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.annotations.OutParam;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+
+/**
+ * Utilities for {@link Collection}.
+ *
+ * @author sunqian
+ */
+public class CollectKit {
+
+    /**
+     * Returns whether the given iterable is null or empty.
+     *
+     * @param iterable the given iterable
+     * @return whether the given iterable is null or empty
+     */
+    public static boolean isEmpty(@Nullable Iterable&lt;?&gt; iterable) {
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        if (iterable == null) {</span>
+<span class="fc" id="L29">            return true;</span>
+        }
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        if (iterable instanceof Collection) {</span>
+<span class="fc" id="L32">            return ((Collection&lt;?&gt;) iterable).isEmpty();</span>
+        }
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        return !iterable.iterator().hasNext();</span>
+    }
+
+    /**
+     * Returns whether the given iterable is not null and empty.
+     *
+     * @param iterable the given iterable
+     * @return whether the given iterable is not null and empty
+     */
+    public static boolean isNotEmpty(@Nullable Iterable&lt;?&gt; iterable) {
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        return !isEmpty(iterable);</span>
+    }
+
+    /**
+     * Collects the given iterable to an array.
+     *
+     * @param it the given iterable
+     * @return the array
+     */
+    public static Object @Nonnull [] toArray(@Nonnull Iterable&lt;?&gt; it) {
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (it instanceof Collection) {</span>
+<span class="fc" id="L55">            return ((Collection&lt;?&gt;) it).toArray();</span>
+        }
+<span class="fc" id="L57">        List&lt;?&gt; list = addAll(new ArrayList&lt;&gt;(), it);</span>
+<span class="fc" id="L58">        return list.toArray();</span>
+    }
+
+    /**
+     * Collects the given iterable to an array of the component type.
+     *
+     * @param it            the given iterable
+     * @param componentType the component type
+     * @param &lt;T&gt;           the component type
+     * @return the array
+     */
+    public static &lt;T&gt; T @Nonnull [] toArray(@Nonnull Iterable&lt;?&gt; it, @Nonnull Class&lt;?&gt; componentType) {
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (it instanceof Collection) {</span>
+<span class="fc" id="L71">            Collection&lt;?&gt; collection = (Collection&lt;?&gt;) it;</span>
+<span class="fc" id="L72">            T[] array = ArrayKit.newArray(componentType, collection.size());</span>
+<span class="fc" id="L73">            collection.toArray(array);</span>
+<span class="fc" id="L74">            return array;</span>
+        }
+<span class="fc" id="L76">        List&lt;?&gt; list = addAll(new ArrayList&lt;&gt;(), it);</span>
+<span class="fc" id="L77">        return toArray(list, componentType);</span>
+    }
+
+    /**
+     * Puts all elements from the given array into the given collection and returns the given collection.
+     *
+     * @param collection the given collection
+     * @param array      the given array
+     * @param &lt;T&gt;        the component type
+     * @param &lt;C&gt;        the type of the given collection
+     * @return the given collection
+     */
+    @SafeVarargs
+    public static &lt;T, C extends Collection&lt;? super T&gt;&gt; @Nonnull C addAll(
+        @Nonnull @OutParam C collection,
+        T @Nonnull ... array
+    ) {
+<span class="fc" id="L94">        collection.addAll(Arrays.asList(array));</span>
+<span class="fc" id="L95">        return collection;</span>
+    }
+
+    /**
+     * Puts all elements from the given iterable into the given collection and returns the given collection.
+     *
+     * @param collection the given collection
+     * @param it         the given iterable
+     * @param &lt;T&gt;        the component type
+     * @param &lt;C&gt;        the type of the given collection
+     * @return the given collection
+     */
+    public static &lt;T, C extends Collection&lt;? super T&gt;&gt; @Nonnull C addAll(
+        @Nonnull @OutParam C collection,
+        @Nonnull Iterable&lt;? extends T&gt; it
+    ) {
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        if (it instanceof Collection) {</span>
+<span class="fc" id="L112">            collection.addAll((Collection&lt;? extends T&gt;) it);</span>
+        } else {
+<span class="fc bfc" id="L114" title="All 2 branches covered.">            for (T e : it) {</span>
+<span class="fc" id="L115">                collection.add(e);</span>
+<span class="fc" id="L116">            }</span>
+        }
+<span class="fc" id="L118">        return collection;</span>
+    }
+
+    /**
+     * Returns the given enumeration as an {@link Iterator}.
+     *
+     * @param enumeration the given enumeration
+     * @param &lt;T&gt;         the component type
+     * @return the given enumeration as an {@link Iterator}
+     */
+    public static &lt;T&gt; @Nonnull Iterator&lt;T&gt; asIterator(@Nonnull Enumeration&lt;? extends T&gt; enumeration) {
+<span class="fc" id="L129">        return new Iterator&lt;T&gt;() {</span>
+            @Override
+            public boolean hasNext() {
+<span class="fc" id="L132">                return enumeration.hasMoreElements();</span>
+            }
+
+            @Override
+            public T next() {
+<span class="fc" id="L137">                return enumeration.nextElement();</span>
+            }
+        };
+    }
+
+    /**
+     * Returns the given iterator as an {@link Enumeration}.
+     *
+     * @param iterator the given iterator
+     * @param &lt;T&gt;      the component type
+     * @return the given iterator as an {@link Enumeration}
+     */
+    public static &lt;T&gt; @Nonnull Enumeration&lt;T&gt; asEnumeration(@Nonnull Iterator&lt;? extends T&gt; iterator) {
+<span class="fc" id="L150">        return new Enumeration&lt;T&gt;() {</span>
+            @Override
+            public boolean hasMoreElements() {
+<span class="fc" id="L153">                return iterator.hasNext();</span>
+            }
+
+            @Override
+            public T nextElement() {
+<span class="fc" id="L158">                return iterator.next();</span>
+
+            }
+        };
+    }
+
+    private CollectKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

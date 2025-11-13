@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ThreadGate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.thread</a> &gt; <span class="el_source">ThreadGate.java</span></div><h1>ThreadGate.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.thread;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.ThreadSafe;
+import space.sunqian.common.base.exception.AwaitingException;
+
+import java.time.Duration;
+
+/**
+ * This interface represents a gate that can block or continue the current thread. It has two states: opened and closed.
+ * If it is closed, its {@link #await()} and {@link #await(Duration)} methods block the current thread until the state
+ * becomes opened.
+ * &lt;p&gt;
+ * This interface is thread-safe, and its initialized state is closed.
+ *
+ * @author sunqian
+ */
+@ThreadSafe
+public interface ThreadGate {
+
+    /**
+     * Returns a new {@link ThreadGate}.
+     *
+     * @return a new {@link ThreadGate}
+     */
+    static @Nonnull ThreadGate newThreadGate() {
+<span class="fc" id="L27">        return ThreadGateImpl.newThreadGate();</span>
+    }
+
+    /**
+     * Returns whether this thread gate is opened.
+     *
+     * @return whether this thread gate is opened
+     */
+    boolean isOpened();
+
+    /**
+     * Returns whether this thread gate is closed.
+     *
+     * @return whether this thread gate is closed
+     */
+    boolean isClosed();
+
+    /**
+     * Opens this thread gate.
+     */
+    void open();
+
+    /**
+     * Closes this thread gate.
+     */
+    void close();
+
+    /**
+     * Blocks the current thread until this thread gate is opened.
+     *
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
+     */
+    void await() throws AwaitingException;
+
+    /**
+     * Blocks the current thread until this thread gate is opened, or the specified waiting time elapses. Returns
+     * {@code true} if this thread gate become opened and {@code false} if the waiting time elapsed.
+     *
+     * @param millis the maximum milliseconds to wait
+     * @return {@code true} if this thread gate become opened and {@code false} if the waiting time elapsed
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
+     */
+    boolean await(long millis) throws AwaitingException;
+
+    /**
+     * Blocks the current thread until this thread gate is opened, or the specified waiting time elapses. Returns
+     * {@code true} if this thread gate become opened and {@code false} if the waiting time elapsed.
+     *
+     * @param duration the maximum time to wait
+     * @return {@code true} if this thread gate become opened and {@code false} if the waiting time elapsed
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
+     */
+    boolean await(@Nonnull Duration duration) throws AwaitingException;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

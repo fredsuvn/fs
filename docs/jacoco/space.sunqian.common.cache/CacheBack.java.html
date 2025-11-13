@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CacheBack.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.cache</a> &gt; <span class="el_source">CacheBack.java</span></div><h1>CacheBack.java</h1><pre class="source lang-java linenums">package space.sunqian.common.cache;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+
+import java.lang.ref.PhantomReference;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
+import java.util.Map;
+
+final class CacheBack {
+
+    static &lt;K, V&gt; @Nonnull SimpleCache&lt;K, V&gt; ofWeak() {
+<span class="fc" id="L17">        return new WeakCache&lt;&gt;();</span>
+    }
+
+    static &lt;K, V&gt; @Nonnull SimpleCache&lt;K, V&gt; ofSoft() {
+<span class="fc" id="L21">        return new SoftCache&lt;&gt;();</span>
+    }
+
+    static &lt;K, V&gt; @Nonnull SimpleCache&lt;K, V&gt; ofPhantom() {
+<span class="fc" id="L25">        return new PhantomCache&lt;&gt;();</span>
+    }
+
+    static &lt;K, V&gt; @Nonnull SimpleCache&lt;K, V&gt; ofStrong() {
+<span class="fc" id="L29">        return new StrongCache&lt;&gt;();</span>
+    }
+
+    private static &lt;K, V&gt; void compareAndRemove(@Nonnull Map&lt;K, V&gt; map, K key, V value) {
+<span class="fc" id="L33">        V v = map.get(key);</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (v == value) {</span>
+<span class="fc" id="L35">            map.remove(key);</span>
+        }
+
+        // map.computeIfPresent(key, (k, old) -&gt; {
+        //     if (old == value) {
+        //         return null;
+        //     }
+        //     return old;
+        // });
+<span class="fc" id="L44">    }</span>
+
+<span class="fc" id="L46">    private static abstract class ReferenceCache&lt;K, V&gt; extends AbstractSimpleCache&lt;K, V&gt; {</span>
+
+<span class="fc" id="L48">        protected final @Nonnull ReferenceQueue&lt;Object&gt; queue = new ReferenceQueue&lt;&gt;();</span>
+
+        @Override
+        public void clean() {
+            while (true) {
+<span class="fc" id="L53">                @Nullable Reference&lt;?&gt; reference = queue.poll();</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">                if (reference == null) {</span>
+<span class="fc" id="L55">                    return;</span>
+                }
+<span class="fc" id="L57">                Value&lt;K&gt; rv = Fs.as(reference);</span>
+<span class="fc" id="L58">                compareAndRemove(cacheMap, rv.key(), rv);</span>
+<span class="fc" id="L59">            }</span>
+        }
+    }
+
+<span class="fc" id="L63">    private static final class WeakCache&lt;K, V&gt; extends ReferenceCache&lt;K, V&gt; {</span>
+
+        @Override
+        protected @Nonnull Value&lt;K&gt; generate(@Nonnull K key, @Nonnull Object value) {
+<span class="fc" id="L67">            return new WeakValue(key, value);</span>
+        }
+
+        private final class WeakValue extends WeakReference&lt;Object&gt; implements Value&lt;K&gt; {
+
+            private final @Nonnull K key;
+
+<span class="fc" id="L74">            WeakValue(@Nonnull K key, @Nonnull Object value) {</span>
+<span class="fc" id="L75">                super(value, queue);</span>
+<span class="fc" id="L76">                this.key = key;</span>
+<span class="fc" id="L77">            }</span>
+
+            @Override
+            public @Nonnull K key() {
+<span class="fc" id="L81">                return key;</span>
+            }
+
+            @Override
+            public @Nullable Object refValue() {
+<span class="fc" id="L86">                return get();</span>
+            }
+
+            @Override
+            public void invalid() {
+<span class="fc" id="L91">                enqueue();</span>
+<span class="fc" id="L92">            }</span>
+        }
+    }
+
+<span class="fc" id="L96">    private static final class SoftCache&lt;K, V&gt; extends ReferenceCache&lt;K, V&gt; {</span>
+
+        @Override
+        protected @Nonnull Value&lt;K&gt; generate(@Nonnull K key, @Nonnull Object value) {
+<span class="fc" id="L100">            return new SoftValue(key, value);</span>
+        }
+
+        private final class SoftValue extends SoftReference&lt;Object&gt; implements Value&lt;K&gt; {
+
+            private final @Nonnull K key;
+
+<span class="fc" id="L107">            SoftValue(@Nonnull K key, @Nonnull Object value) {</span>
+<span class="fc" id="L108">                super(value, queue);</span>
+<span class="fc" id="L109">                this.key = key;</span>
+<span class="fc" id="L110">            }</span>
+
+            @Override
+            public @Nonnull K key() {
+<span class="fc" id="L114">                return key;</span>
+            }
+
+            @Override
+            public @Nullable Object refValue() {
+<span class="fc" id="L119">                return get();</span>
+            }
+
+            @Override
+            public void invalid() {
+<span class="fc" id="L124">                enqueue();</span>
+<span class="fc" id="L125">            }</span>
+        }
+    }
+
+<span class="fc" id="L129">    private static final class PhantomCache&lt;K, V&gt; extends ReferenceCache&lt;K, V&gt; {</span>
+
+        @Override
+        protected @Nonnull Value&lt;K&gt; generate(@Nonnull K key, @Nonnull Object value) {
+<span class="fc" id="L133">            return new PhantomValue(key, value);</span>
+        }
+
+        private final class PhantomValue extends PhantomReference&lt;Object&gt; implements Value&lt;K&gt; {
+
+            private final @Nonnull K key;
+
+<span class="fc" id="L140">            PhantomValue(@Nonnull K key, @Nonnull Object value) {</span>
+<span class="fc" id="L141">                super(value, queue);</span>
+<span class="fc" id="L142">                this.key = key;</span>
+<span class="fc" id="L143">            }</span>
+
+            @Override
+            public @Nonnull K key() {
+<span class="fc" id="L147">                return key;</span>
+            }
+
+            @Override
+            public @Nullable Object refValue() {
+<span class="fc" id="L152">                return get();</span>
+            }
+
+            @Override
+            public void invalid() {
+<span class="fc" id="L157">                enqueue();</span>
+<span class="fc" id="L158">            }</span>
+        }
+    }
+
+    private static final class StrongCache&lt;K, V&gt; extends AbstractSimpleCache&lt;K, V&gt; {
+
+        @Override
+        public void clean() {
+<span class="fc" id="L166">        }</span>
+
+        @Override
+        protected @Nonnull Value&lt;K&gt; generate(@Nonnull K key, @Nonnull Object value) {
+<span class="fc" id="L170">            return new StrongValue(key, value);</span>
+        }
+
+        private final class StrongValue implements Value&lt;K&gt; {
+
+            private final @Nonnull K key;
+            private @Nullable Object value;
+
+<span class="fc" id="L178">            StrongValue(@Nonnull K key, @Nonnull Object value) {</span>
+<span class="fc" id="L179">                this.key = key;</span>
+<span class="fc" id="L180">                this.value = value;</span>
+<span class="fc" id="L181">            }</span>
+
+            @Override
+            public @Nonnull K key() {
+<span class="fc" id="L185">                return key;</span>
+            }
+
+            @Override
+            public @Nullable Object refValue() {
+<span class="fc" id="L190">                return value;</span>
+            }
+
+            @Override
+            public void invalid() {
+<span class="fc" id="L195">                value = null;</span>
+<span class="fc" id="L196">                compareAndRemove(cacheMap, key(), StrongValue.this);</span>
+<span class="fc" id="L197">            }</span>
+        }
+    }
+
+    private CacheBack() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

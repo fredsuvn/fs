@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ThreadLocals.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">internal.test</a> &gt; <span class="el_source">ThreadLocals.java</span></div><h1>ThreadLocals.java</h1><pre class="source lang-java linenums">package internal.test;
+
+import space.sunqian.annotations.Nonnull;
+
+import java.util.HashMap;
+import java.util.Map;
+
+final class ThreadLocals {
+
+<span class="fc" id="L10">    private static final @Nonnull ThreadLocal&lt;Map&lt;Key, Object&gt;&gt; localMap = new ThreadLocal&lt;Map&lt;Key, Object&gt;&gt;() {</span>
+        @Override
+        protected @Nonnull Map&lt;Key, Object&gt; initialValue() {
+<span class="fc" id="L13">            return new HashMap&lt;&gt;();</span>
+        }
+    };
+
+    static void set(@Nonnull Key key, @Nonnull Object value) {
+<span class="fc" id="L18">        localMap.get().put(key, value);</span>
+<span class="fc" id="L19">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    static &lt;T&gt; T get(@Nonnull Key key) {
+<span class="fc" id="L23">        return (T) localMap.get().get(key);</span>
+    }
+
+    static void remove(@Nonnull Key key) {
+<span class="fc" id="L27">        localMap.get().remove(key);</span>
+<span class="fc" id="L28">    }</span>
+
+    private ThreadLocals() {
+    }
+
+<span class="fc" id="L33">    enum Key {</span>
+
+<span class="fc" id="L35">        PRINTER,</span>
+        ;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

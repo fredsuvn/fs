@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataSchema.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.object.data</a> &gt; <span class="el_source">DataSchema.java</span></div><h1>DataSchema.java</h1><pre class="source lang-java linenums">package space.sunqian.common.object.data;
+
+import space.sunqian.annotations.Immutable;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.common.Fs;
+import space.sunqian.common.runtime.reflect.TypeKit;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Map;
+
+/**
+ * Top interface of {@link MapSchema} and {@link ObjectSchema}, presents the schema of a data object.
+ * &lt;p&gt;
+ * A data object may be an instance of {@link Map} parsed by {@link MapSchemaParser}, or a non-map object parsed by
+ * {@link ObjectSchemaParser}.
+ *
+ * @author sunqian
+ */
+@Immutable
+public interface DataSchema {
+
+    /**
+     * Returns the type of the data object described by this {@link DataSchema}, typically is an instance of
+     * {@link Class} or {@link ParameterizedType}.
+     *
+     * @return the type of the data object described by this {@link DataSchema}
+     */
+    @Nonnull
+    Type type();
+
+    /**
+     * Returns the raw type of the {@link #type()}. The default implementation is:
+     * &lt;pre&gt;{@code
+     * return Kit.nonnull(TypeKit.getRawClass(type()), Object.class);
+     * }&lt;/pre&gt;
+     *
+     * @return the raw type of the {@link #type()}
+     */
+    default @Nonnull Class&lt;?&gt; rawType() {
+<span class="fc" id="L41">        return Fs.nonnull(TypeKit.getRawClass(type()), Object.class);</span>
+    }
+
+    /**
+     * Returns whether this schema is an instance of {@link MapSchema}.
+     *
+     * @return whether this schema is an instance of {@link MapSchema}.
+     */
+    boolean isMapSchema();
+
+    /**
+     * Returns this instance as an instance of {@link MapSchema}.
+     *
+     * @return this instance as an instance of {@link MapSchema}
+     * @throws ClassCastException if this schema is not an instance of {@link MapSchema}
+     */
+    default @Nonnull MapSchema asMapSchema() throws ClassCastException {
+<span class="fc" id="L58">        return (MapSchema) this;</span>
+    }
+
+    /**
+     * Returns whether this schema is an instance of {@link ObjectSchema}.
+     *
+     * @return whether this schema is an instance of {@link ObjectSchema}.
+     */
+    boolean isObjectSchema();
+
+    /**
+     * Returns this instance as an instance of {@link ObjectSchema}.
+     *
+     * @return this instance as an instance of{@link ObjectSchema}
+     * @throws ClassCastException if this schema is not an instance of {@link ObjectSchema}
+     */
+    default @Nonnull ObjectSchema asObjectSchema() throws ClassCastException {
+<span class="fc" id="L75">        return (ObjectSchema) this;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

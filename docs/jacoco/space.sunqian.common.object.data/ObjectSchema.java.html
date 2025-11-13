@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ObjectSchema.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.object.data</a> &gt; <span class="el_source">ObjectSchema.java</span></div><h1>ObjectSchema.java</h1><pre class="source lang-java linenums">package space.sunqian.common.object.data;
+
+import space.sunqian.annotations.Immutable;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+
+import java.beans.BeanInfo;
+import java.lang.reflect.Type;
+import java.util.Map;
+
+/**
+ * This interface represents the schema of non-map object, parsed by a {@link ObjectSchemaParser}, and provides
+ * information about the object's properties.
+ * &lt;p&gt;
+ * It is very similar to the {@link BeanInfo} used to describe
+ * &lt;a href=&quot;https://www.oracle.com/java/technologies/javase/javabeans-spec.html&quot;&gt;JavaBeans&lt;/a&gt;, but it only includes
+ * simple properties, without indexed properties, events, methods, or other more complex components. And the rules for
+ * parsing properties are defined by the implementation of {@link ObjectSchemaParser}, rather than a public rules.
+ * &lt;p&gt;
+ * Two {@link ObjectSchema}s are considered equal if, and only if both types of objects and both parsers from
+ * {@link #parser()} are equal.
+ *
+ * @author sunqian
+ */
+@Immutable
+public interface ObjectSchema extends DataSchema {
+
+    /**
+     * Parse the given type to {@link ObjectSchema} using {@link ObjectSchemaParser#defaultParser()}.
+     * &lt;p&gt;
+     * Note that this method does not cache the results and will generate new instances every invocation.
+     *
+     * @param type the given type
+     * @return the {@link ObjectSchema} parsed from the given type using {@link ObjectSchemaParser#defaultParser()}
+     */
+    static @Nonnull ObjectSchema parse(@Nonnull Type type) {
+<span class="fc" id="L37">        return ObjectSchemaParser.defaultParser().parse(type);</span>
+    }
+
+    /**
+     * Returns the {@link ObjectSchemaParser} of this {@link ObjectSchema}.
+     *
+     * @return the {@link ObjectSchemaParser} of this {@link ObjectSchema}
+     */
+    @Nonnull
+    ObjectSchemaParser parser();
+
+    /**
+     * Returns a map contains all properties of this {@link ObjectSchema}.
+     *
+     * @return a map contains all properties of this {@link ObjectSchema}
+     */
+    @Immutable
+    @Nonnull
+    Map&lt;@Nonnull String, @Nonnull ObjectProperty&gt; properties();
+
+    /**
+     * Returns the specified property with the specified name in this {@link ObjectSchema}.
+     *
+     * @param name the specified name
+     * @return the specified property with the specified name in this {@link ObjectSchema}
+     */
+    default @Nullable ObjectProperty getProperty(String name) {
+<span class="fc" id="L64">        return properties().get(name);</span>
+    }
+
+    @Override
+    default boolean isMapSchema() {
+<span class="fc" id="L69">        return false;</span>
+    }
+
+    @Override
+    default boolean isObjectSchema() {
+<span class="fc" id="L74">        return true;</span>
+    }
+
+    /**
+     * Returns whether this {@link ObjectSchema} is equal to the other {@link ObjectSchema}. They are considered equal
+     * if, and only if both types of objects and both parsers from {@link #parser()} are equal.
+     *
+     * @param other the other {@link ObjectSchema}
+     * @return whether this {@link ObjectSchema} is equal to the other {@link ObjectSchema}
+     */
+    boolean equals(Object other);
+
+    /**
+     * Returns the hash code of this {@link ObjectSchema}. The hash code is generated via {@link #type()} and
+     * {@link #parser()} like following codes:
+     * &lt;pre&gt;{@code
+     * int result = 1;
+     * result = 31 * result + type().hashCode();
+     * result = 31 * result + parser().hashCode();
+     * return result;
+     * }&lt;/pre&gt;
+     *
+     * @return the hash code of this {@link ObjectSchema}
+     */
+    int hashCode();
+
+    /**
+     * Returns a string representation of this {@link ObjectSchema}. The string is generated like following codes:
+     * &lt;pre&gt;{@code
+     * return type().getTypeName() + &quot;[&quot; +
+     *     properties().values().stream()
+     *         .map(DataProperty::toString)
+     *         .collect(Collectors.joining(&quot;, &quot;))
+     *     + &quot;]&quot;;
+     * }&lt;/pre&gt;
+     *
+     * @return a string representation of this {@link ObjectSchema}
+     */
+    @Nonnull
+    String toString();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

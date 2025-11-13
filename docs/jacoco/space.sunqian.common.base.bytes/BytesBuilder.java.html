@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BytesBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.bytes</a> &gt; <span class="el_source">BytesBuilder.java</span></div><h1>BytesBuilder.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.bytes;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.common.Check;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.io.BufferKit;
+import space.sunqian.common.io.IOKit;
+import space.sunqian.common.io.IORuntimeException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+
+/**
+ * {@code BytesBuilder} is used to build byte arrays and their derived objects by appending byte data. It is similar to
+ * {@link ByteArrayOutputStream}, provides compatible methods, but is not thread-safe. This class also extends the
+ * {@link OutputStream}, but the {@code close()} method has no effect.
+ *
+ * @author sunqian
+ */
+public class BytesBuilder extends OutputStream {
+
+    // Max array size.
+    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
+    private final int maxSize;
+
+    private byte @Nonnull [] buf;
+    private int count;
+
+    /**
+     * Constructs with 32-bytes initial capacity.
+     */
+    public BytesBuilder() {
+<span class="fc" id="L39">        this(32);</span>
+<span class="fc" id="L40">    }</span>
+
+    /**
+     * Constructs with the specified initial capacity in bytes.
+     *
+     * @param initialCapacity the specified initial capacity in bytes
+     * @throws IllegalArgumentException if size is negative
+     */
+    public BytesBuilder(int initialCapacity) throws IllegalArgumentException {
+<span class="fc" id="L49">        this(initialCapacity, MAX_ARRAY_SIZE);</span>
+<span class="fc" id="L50">    }</span>
+
+    /**
+     * Constructs with the specified initial capacity and the max capacity in bytes.
+     *
+     * @param initialCapacity the specified initial capacity in bytes
+     * @param maxCapacity     the max capacity in bytes
+     * @throws IllegalArgumentException if the {@code initialCapacity &lt; 0} or {@code maxCapacity &lt; 0} or
+     *                                  {@code initialCapacity &gt; maxCapacity}
+     */
+<span class="fc" id="L60">    public BytesBuilder(int initialCapacity, int maxCapacity) throws IllegalArgumentException {</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (initialCapacity &lt; 0) {</span>
+<span class="fc" id="L62">            throw new IllegalArgumentException(&quot;Negative initial capacity: &quot; + initialCapacity + &quot;.&quot;);</span>
+        }
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (maxCapacity &lt; 0) {</span>
+<span class="fc" id="L65">            throw new IllegalArgumentException(&quot;Negative max capacity: &quot; + maxCapacity + &quot;.&quot;);</span>
+        }
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (initialCapacity &gt; maxCapacity) {</span>
+<span class="fc" id="L68">            throw new IllegalArgumentException(&quot;Initial capacity must &lt;= max capacity!&quot;);</span>
+        }
+<span class="fc" id="L70">        buf = new byte[initialCapacity];</span>
+<span class="fc" id="L71">        this.maxSize = maxCapacity;</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     * Appends the specified byte to this builder.
+     *
+     * @param b the specified byte
+     */
+    @Override
+    public void write(int b) {
+<span class="fc" id="L81">        ensureCapacity(count + 1);</span>
+<span class="fc" id="L82">        buf[count] = (byte) b;</span>
+<span class="fc" id="L83">        count += 1;</span>
+<span class="fc" id="L84">    }</span>
+
+    /**
+     * Appends all bytes from the given array.
+     *
+     * @param b the given array
+     */
+    @Override
+    public void write(byte @Nonnull [] b) {
+<span class="fc" id="L93">        ensureCapacity(count + b.length);</span>
+<span class="fc" id="L94">        System.arraycopy(b, 0, buf, count, b.length);</span>
+<span class="fc" id="L95">        count += b.length;</span>
+<span class="fc" id="L96">    }</span>
+
+    /**
+     * Appends the specified number of bytes from the given array, starting at the specified offset.
+     *
+     * @param b   the given array
+     * @param off the specified offset
+     * @param len the specified number
+     * @throws IndexOutOfBoundsException if the offset or number is out of bounds
+     */
+    @Override
+    public void write(byte @Nonnull [] b, int off, int len) throws IndexOutOfBoundsException {
+<span class="fc" id="L108">        Check.checkOffLen(off, len, b.length);</span>
+<span class="fc" id="L109">        ensureCapacity(count + len);</span>
+<span class="fc" id="L110">        System.arraycopy(b, off, buf, count, len);</span>
+<span class="fc" id="L111">        count += len;</span>
+<span class="fc" id="L112">    }</span>
+
+    /**
+     * Writes the appended data of this builder to the specified output stream.
+     *
+     * @param out the specified output stream
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public void writeTo(@Nonnull OutputStream out) throws IORuntimeException {
+        try {
+<span class="fc" id="L122">            out.write(buf, 0, count);</span>
+<span class="fc" id="L123">        } catch (Exception e) {</span>
+<span class="fc" id="L124">            throw new IORuntimeException(e);</span>
+<span class="fc" id="L125">        }</span>
+<span class="fc" id="L126">    }</span>
+
+    /**
+     * Writes the appended buffered data of this builder to the specified buffer.
+     *
+     * @param out the specified buffer
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public void writeTo(@Nonnull ByteBuffer out) throws IORuntimeException {
+        try {
+<span class="fc" id="L136">            out.put(buf, 0, count);</span>
+<span class="fc" id="L137">        } catch (Exception e) {</span>
+<span class="fc" id="L138">            throw new IORuntimeException(e);</span>
+<span class="fc" id="L139">        }</span>
+<span class="fc" id="L140">    }</span>
+
+    /**
+     * Resets this builder, the appended data will be discarded.
+     * &lt;p&gt;
+     * This method doesn't guarantee releasing the allocated space for the appended data. To trim and release the unused
+     * space, use {@link #trim()}.
+     */
+    public void reset() {
+<span class="fc" id="L149">        count = 0;</span>
+<span class="fc" id="L150">    }</span>
+
+    /**
+     * Trims and releases the allocated but unused space.
+     */
+    public void trim() {
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if (count &lt; buf.length) {</span>
+<span class="fc" id="L157">            buf = Arrays.copyOf(buf, count);</span>
+        }
+<span class="fc" id="L159">    }</span>
+
+    /**
+     * Returns the size of appended data.
+     *
+     * @return the size of appended data
+     */
+    public int size() {
+<span class="fc" id="L167">        return count;</span>
+    }
+
+    /**
+     * Returns a new array containing a copy of the appended data.
+     *
+     * @return a new array containing a copy of the appended data
+     */
+    public byte @Nonnull [] toByteArray() {
+<span class="fc" id="L176">        return Arrays.copyOf(buf, count);</span>
+    }
+
+    /**
+     * Returns a new buffer containing a copy of the appended data.
+     *
+     * @return a new buffer containing a copy of the appended data
+     */
+    public @Nonnull ByteBuffer toByteBuffer() {
+<span class="fc" id="L185">        return ByteBuffer.wrap(toByteArray());</span>
+    }
+
+    /**
+     * Returns a string decoded from the appended data using {@link CharsKit#defaultCharset()}. Note that the behavior
+     * of this method is &lt;b&gt;different&lt;/b&gt; from {@link ByteArrayOutputStream#toString()}
+     *
+     * @return a string decoded from the appended data using {@link CharsKit#defaultCharset()}
+     * @see ByteArrayOutputStream#toString()
+     */
+    @Override
+    public @Nonnull String toString() {
+<span class="fc" id="L197">        return toString(CharsKit.defaultCharset());</span>
+    }
+
+    /**
+     * Returns a string decoded from the appended data using the specified charset. This is a compatible method of
+     * {@link ByteArrayOutputStream#toString(String)}.
+     *
+     * @param charsetName name of the specified charset
+     * @return a string decoded from the appended data using the specified charset
+     * @throws UnsupportedEncodingException If the named charset is not supported
+     * @see ByteArrayOutputStream#toString(String)
+     */
+    public @Nonnull String toString(@Nonnull String charsetName) throws UnsupportedEncodingException {
+<span class="fc" id="L210">        return new String(buf, 0, count, charsetName);</span>
+    }
+
+    /**
+     * Returns a string decoded from the appended data using the specified charset.
+     *
+     * @param charset the specified charset
+     * @return a string decoded from the appended data using the specified charset
+     */
+    public @Nonnull String toString(@Nonnull Charset charset) {
+<span class="fc" id="L220">        return new String(buf, 0, count, charset);</span>
+    }
+
+    /**
+     * No effect for this builder.
+     */
+    @Override
+    public void close() {
+<span class="fc" id="L228">    }</span>
+
+    /**
+     * Appends the specified byte to this builder.
+     *
+     * @param b the specified byte
+     * @return this builder
+     */
+    public BytesBuilder append(int b) {
+<span class="fc" id="L237">        write(b);</span>
+<span class="fc" id="L238">        return this;</span>
+    }
+
+    /**
+     * Appends the specified byte to this builder.
+     *
+     * @param b the specified byte
+     * @return this builder
+     */
+    public @Nonnull BytesBuilder append(byte b) {
+<span class="fc" id="L248">        write(b);</span>
+<span class="fc" id="L249">        return this;</span>
+    }
+
+    /**
+     * Appends all bytes from the given array.
+     *
+     * @param bytes the given array
+     * @return this builder
+     */
+    public @Nonnull BytesBuilder append(byte @Nonnull [] bytes) {
+<span class="fc" id="L259">        write(bytes);</span>
+<span class="fc" id="L260">        return this;</span>
+    }
+
+    /**
+     * Appends the specified number of bytes from the given array, starting at the specified offset.
+     *
+     * @param bytes  the given array
+     * @param offset the specified offset
+     * @param length the specified number
+     * @return this builder
+     * @throws IndexOutOfBoundsException if the offset or number is out of bounds
+     */
+    public @Nonnull BytesBuilder append(byte @Nonnull [] bytes, int offset, int length) throws IndexOutOfBoundsException {
+<span class="fc" id="L273">        write(bytes, offset, length);</span>
+<span class="fc" id="L274">        return this;</span>
+    }
+
+    /**
+     * Reads and appends all bytes from the given buffer.
+     *
+     * @param bytes the given buffer
+     * @return this builder
+     */
+    public @Nonnull BytesBuilder append(@Nonnull ByteBuffer bytes) {
+<span class="fc" id="L284">        int remaining = bytes.remaining();</span>
+<span class="fc bfc" id="L285" title="All 2 branches covered.">        if (remaining == 0) {</span>
+<span class="fc" id="L286">            return this;</span>
+        }
+<span class="fc bfc" id="L288" title="All 2 branches covered.">        if (bytes.hasArray()) {</span>
+<span class="fc" id="L289">            write(bytes.array(), BufferKit.arrayStartIndex(bytes), bytes.remaining());</span>
+<span class="fc" id="L290">            bytes.position(bytes.position() + bytes.remaining());</span>
+        } else {
+<span class="fc" id="L292">            byte[] data = new byte[remaining];</span>
+<span class="fc" id="L293">            bytes.get(data);</span>
+<span class="fc" id="L294">            write(data);</span>
+        }
+<span class="fc" id="L296">        return this;</span>
+    }
+
+    /**
+     * Reads and appends all bytes from the given stream.
+     *
+     * @param in the given stream
+     * @return this builder
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public @Nonnull BytesBuilder append(@Nonnull InputStream in) throws IORuntimeException {
+<span class="fc" id="L307">        return append(in, IOKit.bufferSize());</span>
+    }
+
+    /**
+     * Reads and appends all bytes from the given stream with the specified buffer size for each reading.
+     *
+     * @param in      the given stream
+     * @param bufSize the specified buffer size for each reading
+     * @return this builder
+     * @throws IllegalArgumentException if the buffer size {@code &lt;=0}
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public @Nonnull BytesBuilder append(
+        @Nonnull InputStream in, int bufSize
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc bfc" id="L322" title="All 2 branches covered.">        if (bufSize &lt;= 0) {</span>
+<span class="fc" id="L323">            throw new IllegalArgumentException(&quot;The buffer size must &gt; 0.&quot;);</span>
+        }
+<span class="fc" id="L325">        byte[] buffer = new byte[bufSize];</span>
+        while (true) {
+            try {
+<span class="fc" id="L328">                int readSize = in.read(buffer);</span>
+<span class="fc bfc" id="L329" title="All 2 branches covered.">                if (readSize &lt; 0) {</span>
+<span class="fc" id="L330">                    return this;</span>
+                }
+<span class="fc" id="L332">                write(buffer, 0, readSize);</span>
+<span class="fc" id="L333">            } catch (Exception e) {</span>
+<span class="fc" id="L334">                throw new IORuntimeException(e);</span>
+<span class="fc" id="L335">            }</span>
+        }
+    }
+
+    /**
+     * Appends all bytes from the given builder.
+     *
+     * @param builder the given builder
+     * @return this builder
+     */
+    public @Nonnull BytesBuilder append(@Nonnull BytesBuilder builder) {
+<span class="fc" id="L346">        write(builder.buf, 0, builder.count);</span>
+<span class="fc" id="L347">        return this;</span>
+    }
+
+    private void ensureCapacity(int minCapacity) {
+<span class="fc bfc" id="L351" title="All 2 branches covered.">        if (buf.length &lt; minCapacity) {</span>
+<span class="fc" id="L352">            grow(minCapacity);</span>
+        }
+<span class="fc" id="L354">    }</span>
+
+    private void grow(int minCapacity) {
+<span class="fc bfc" id="L357" title="All 4 branches covered.">        if (minCapacity &lt; 0 || minCapacity &gt; maxSize) {</span>
+<span class="fc" id="L358">            throw new IllegalStateException(&quot;Buffer out of size: &quot; + minCapacity + &quot;.&quot;);</span>
+        }
+<span class="fc" id="L360">        int oldCapacity = buf.length;</span>
+        int newCapacity;
+<span class="fc bfc" id="L362" title="All 2 branches covered.">        if (oldCapacity == 0) {</span>
+<span class="fc" id="L363">            newCapacity = minCapacity;</span>
+        } else {
+<span class="fc" id="L365">            newCapacity = oldCapacity * 2;</span>
+        }
+<span class="fc" id="L367">        newCapacity = newCapacity(newCapacity, minCapacity);</span>
+<span class="fc" id="L368">        buf = Arrays.copyOf(buf, newCapacity);</span>
+<span class="fc" id="L369">    }</span>
+
+    private int newCapacity(int newCapacity, int minCapacity) {
+<span class="fc bfc" id="L372" title="All 4 branches covered.">        if (newCapacity &lt;= 0 || newCapacity &gt; maxSize) {</span>
+<span class="fc" id="L373">            return maxSize;</span>
+        }
+<span class="fc" id="L375">        return Math.max(newCapacity, minCapacity);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

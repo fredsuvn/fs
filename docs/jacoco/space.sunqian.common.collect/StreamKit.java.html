@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StreamKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.collect</a> &gt; <span class="el_source">StreamKit.java</span></div><h1>StreamKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.collect;
+
+import space.sunqian.annotations.Nonnull;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.PrimitiveIterator;
+import java.util.function.DoubleSupplier;
+import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
+import java.util.function.Supplier;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+/**
+ * Utilities for {@link Stream}.
+ *
+ * @author sunqian
+ */
+public class StreamKit {
+
+    /**
+     * Returns a {@link Stream} from the given elements.
+     *
+     * @param elements the given elements
+     * @param &lt;T&gt;      the component type
+     * @return a {@link Stream} from the given elements
+     */
+    @SafeVarargs
+    public static &lt;T&gt; @Nonnull Stream&lt;T&gt; stream(T @Nonnull ... elements) {
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        if (ArrayKit.isEmpty(elements)) {</span>
+<span class="fc" id="L37">            return Stream.empty();</span>
+        }
+<span class="fc" id="L39">        return Arrays.stream(elements);</span>
+    }
+
+    /**
+     * Returns a {@link Stream} from the given elements.
+     *
+     * @param elements the given elements
+     * @param &lt;T&gt;      the component type
+     * @return a {@link Stream} from the given elements
+     */
+    public static &lt;T&gt; @Nonnull Stream&lt;T&gt; stream(@Nonnull Iterable&lt;T&gt; elements) {
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        if (CollectKit.isEmpty(elements)) {</span>
+<span class="fc" id="L51">            return Stream.empty();</span>
+        }
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (elements instanceof Collection) {</span>
+<span class="fc" id="L54">            return ((Collection&lt;T&gt;) elements).stream();</span>
+        }
+<span class="fc" id="L56">        return StreamSupport.stream(elements.spliterator(), false);</span>
+    }
+
+    /**
+     * Returns a {@link Supplier} whose result is the next element of the given {@link Stream}. Note the supplier will
+     * throw {@link NoSuchElementException} if the stream reaches the end.
+     *
+     * @param stream the given stream
+     * @param &lt;T&gt;    the component type
+     * @return a {@link Supplier} whose result is the next element of the given {@link Stream}
+     */
+    public static &lt;T&gt; @Nonnull Supplier&lt;T&gt; toSupplier(@Nonnull Stream&lt;? extends T&gt; stream) {
+<span class="fc" id="L68">        return new Supplier&lt;T&gt;() {</span>
+
+<span class="fc" id="L70">            private final @Nonnull Iterator&lt;? extends T&gt; iterator = stream.iterator();</span>
+
+            @Override
+            public T get() {
+<span class="fc" id="L74">                return iterator.next();</span>
+            }
+        };
+    }
+
+    /**
+     * Returns a {@link IntSupplier} whose result is the next element of the given {@link IntStream}. Note the supplier
+     * will throw {@link NoSuchElementException} if the stream reaches the end.
+     *
+     * @param stream the given stream
+     * @return a {@link IntSupplier} whose result is the next element of the given {@link IntStream}
+     */
+    public static @Nonnull IntSupplier toSupplier(@Nonnull IntStream stream) {
+<span class="fc" id="L87">        return new IntSupplier() {</span>
+
+<span class="fc" id="L89">            private final @Nonnull PrimitiveIterator.OfInt iterator = stream.iterator();</span>
+
+            @Override
+            public int getAsInt() {
+<span class="fc" id="L93">                return iterator.next();</span>
+            }
+        };
+    }
+
+    /**
+     * Returns a {@link LongSupplier} whose result is the next element of the given {@link LongStream}. Note the
+     * supplier will throw {@link NoSuchElementException} if the stream reaches the end.
+     *
+     * @param stream the given stream
+     * @return a {@link LongSupplier} whose result is the next element of the given {@link LongStream}
+     */
+    public static @Nonnull LongSupplier toSupplier(@Nonnull LongStream stream) {
+<span class="fc" id="L106">        return new LongSupplier() {</span>
+
+<span class="fc" id="L108">            private final @Nonnull PrimitiveIterator.OfLong iterator = stream.iterator();</span>
+
+            @Override
+            public long getAsLong() {
+<span class="fc" id="L112">                return iterator.next();</span>
+            }
+        };
+    }
+
+    /**
+     * Returns a {@link DoubleSupplier} whose result is the next element of the given {@link DoubleStream}. Note the
+     * supplier will throw {@link NoSuchElementException} if the stream reaches the end.
+     *
+     * @param stream the given stream
+     * @return a {@link DoubleSupplier} whose result is the next element of the given {@link DoubleStream}
+     */
+    public static @Nonnull DoubleSupplier toSupplier(@Nonnull DoubleStream stream) {
+<span class="fc" id="L125">        return new DoubleSupplier() {</span>
+
+<span class="fc" id="L127">            private final @Nonnull PrimitiveIterator.OfDouble iterator = stream.iterator();</span>
+
+            @Override
+            public double getAsDouble() {
+<span class="fc" id="L131">                return iterator.next();</span>
+            }
+        };
+    }
+
+    private StreamKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

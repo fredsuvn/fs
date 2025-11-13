@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MapKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.collect</a> &gt; <span class="el_source">MapKit.java</span></div><h1>MapKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.collect;
+
+import space.sunqian.annotations.Immutable;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.annotations.OutParam;
+import space.sunqian.common.Fs;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+/**
+ * Utilities for {@link Map}.
+ *
+ * @author sunqian
+ */
+public class MapKit {
+
+    /**
+     * Returns whether the given map is null or empty.
+     *
+     * @param map the given map
+     * @return whether the given map is null or empty
+     */
+    public static boolean isEmpty(@Nullable Map&lt;?, ?&gt; map) {
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (map == null) {</span>
+<span class="fc" id="L33">            return true;</span>
+        }
+<span class="fc" id="L35">        return map.isEmpty();</span>
+    }
+
+    /**
+     * Returns whether the given map is not null and empty.
+     *
+     * @param map the given map
+     * @return whether the given map is not null and empty
+     */
+    public static boolean isNotEmpty(@Nullable Map&lt;?, ?&gt; map) {
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        return !isEmpty(map);</span>
+    }
+
+    /**
+     * Returns a new immutable map of which content is added from the given array.
+     * &lt;p&gt;
+     * Every two elements of the array form a key-value pair, that means, the {@code array[0]} and {@code array[1]} will
+     * be the first key-value pair, the {@code array[2]} and {@code array[3]} will be the second key-value pair, and so
+     * on. If the length of the array is odd and the last key cannot match the value, then the last pair will be the
+     * key-{@code null} pair to put.
+     * &lt;p&gt;
+     * The behavior of this method is equivalent to:
+     * &lt;pre&gt;{@code
+     *  return Collections.unmodifiableMap(linkedHashMap(array));
+     *  }&lt;/pre&gt;
+     *
+     * @param array the given array
+     * @param &lt;K&gt;   the key type
+     * @param &lt;V&gt;   the value type
+     * @return a new {@link HashMap} initialing with the given array
+     */
+    public static &lt;K, V&gt; @Nonnull @Immutable Map&lt;K, V&gt; map(Object @Nonnull ... array) {
+<span class="fc" id="L67">        return Collections.unmodifiableMap(linkedHashMap(array));</span>
+    }
+
+    /**
+     * Returns a new {@link HashMap} initialing with the given array.
+     * &lt;p&gt;
+     * Every two elements of the array form a key-value pair, that means, the {@code array[0]} and {@code array[1]} will
+     * be the first key-value pair, the {@code array[2]} and {@code array[3]} will be the second key-value pair, and so
+     * on. If the length of the array is odd and the last key cannot match the value, then the last pair will be the
+     * key-{@code null} pair to put.
+     *
+     * @param array the given array
+     * @param &lt;K&gt;   the key type
+     * @param &lt;V&gt;   the value type
+     * @return a new {@link HashMap} initialing with the given array
+     */
+    public static &lt;K, V&gt; @Nonnull HashMap&lt;K, V&gt; hashMap(Object @Nonnull ... array) {
+<span class="fc" id="L84">        return putAll(new HashMap&lt;&gt;(), array);</span>
+    }
+
+    /**
+     * Returns a new {@link LinkedHashMap} initialing with the given array
+     * &lt;p&gt;
+     * Every two elements of the array form a key-value pair, that means, the {@code array[0]} and {@code array[1]} will
+     * be the first key-value pair, the {@code array[2]} and {@code array[3]} will be the second key-value pair, and so
+     * on. If the length of the array is odd and the last key cannot match the value, then the last pair will be the
+     * key-{@code null} pair to put.
+     *
+     * @param array the given array
+     * @param &lt;K&gt;   the key type
+     * @param &lt;V&gt;   the value type
+     * @return a new {@link HashMap} initialing with the given array
+     */
+    public static &lt;K, V&gt; @Nonnull LinkedHashMap&lt;K, V&gt; linkedHashMap(Object @Nonnull ... array) {
+<span class="fc" id="L101">        return putAll(new LinkedHashMap&lt;&gt;(), array);</span>
+    }
+
+    /**
+     * Returns a new immutable map of which content is added from the given iterable.
+     * &lt;p&gt;
+     * Every two elements of the iterable form a key-value pair, that means, the {@code it[0]} and {@code it[1]} will be
+     * the first key-value pair, the {@code it[2]} and {@code it[3]} will be the second key-value pair, and so on. If
+     * the length of the iterable is odd and the last key cannot match the value, then the last pair will be the
+     * key-{@code null} pair to put. This is the iterable version of {@link #map(Object...)}.
+     *
+     * @param it  the given iterable
+     * @param &lt;K&gt; the key type
+     * @param &lt;V&gt; the value type
+     * @return a new {@link HashMap} initialing with the given iterable
+     */
+    public static &lt;K, V&gt; @Nonnull @Immutable Map&lt;K, V&gt; toMap(@Nonnull Iterable&lt;?&gt; it) {
+<span class="fc" id="L118">        Object[] array = CollectKit.toArray(it);</span>
+<span class="fc" id="L119">        return map(array);</span>
+    }
+
+    /**
+     * Returns a new immutable map of which entries are put from the given map, and all key-value pairs are mapped from
+     * the old type to the new type during the put operation. The behavior is equivalent to:
+     * &lt;pre&gt;{@code
+     * return Collections.unmodifiableMap(
+     *     map.entrySet().stream().collect(Collectors.toMap(
+     *         entry -&gt; keyMapper.apply(entry.getKey()),
+     *         entry -&gt; valueMapper.apply(entry.getValue()),
+     *         (v1, v2) -&gt; v2,
+     *         LinkedHashMap::new
+     *     ))
+     * );
+     * }&lt;/pre&gt;
+     *
+     * @param map         the given map
+     * @param keyMapper   the key mapper
+     * @param valueMapper the value mapper
+     * @param &lt;KO&gt;        the old key type
+     * @param &lt;VO&gt;        the old value type
+     * @param &lt;KN&gt;        the new key type
+     * @param &lt;VN&gt;        the new value type
+     * @return a new immutable map of which entries are put from the given map
+     */
+    public static &lt;KO, VO, KN, VN&gt; @Nonnull @Immutable Map&lt;KN, VN&gt; toMap(
+        @Nonnull Map&lt;KO, VO&gt; map,
+        @Nonnull Function&lt;? super KO, ? extends KN&gt; keyMapper,
+        @Nonnull Function&lt;? super VO, ? extends VN&gt; valueMapper
+    ) {
+<span class="fc" id="L150">        return Collections.unmodifiableMap(</span>
+<span class="fc" id="L151">            map.entrySet().stream().collect(Collectors.toMap(</span>
+<span class="fc" id="L152">                entry -&gt; keyMapper.apply(entry.getKey()),</span>
+<span class="fc" id="L153">                entry -&gt; valueMapper.apply(entry.getValue()),</span>
+<span class="fc" id="L154">                (v1, v2) -&gt; v2,</span>
+                LinkedHashMap::new
+            ))
+        );
+    }
+
+    /**
+     * Returns a new {@link HashMap} initialing with the given iterable.
+     * &lt;p&gt;
+     * Every two elements of the iterable form a key-value pair, that means, the {@code it[0]} and {@code it[1]} will be
+     * the first key-value pair, the {@code it[2]} and {@code it[3]} will be the second key-value pair, and so on. If
+     * the length of the iterable is odd and the last key cannot match the value, then the last pair will be the
+     * key-{@code null} pair to put.
+     *
+     * @param it  the given iterable
+     * @param &lt;K&gt; the key type
+     * @param &lt;V&gt; the value type
+     * @return a new {@link HashMap} initialing with the given iterable
+     */
+    public static &lt;K, V&gt; @Nonnull HashMap&lt;K, V&gt; toHashMap(@Nonnull Iterable&lt;?&gt; it) {
+<span class="fc" id="L174">        Object[] array = CollectKit.toArray(it);</span>
+<span class="fc" id="L175">        return hashMap(array);</span>
+    }
+
+    /**
+     * Returns a new {@link LinkedHashMap} initialing with the given iterable.
+     * &lt;p&gt;
+     * Every two elements of the iterable form a key-value pair, that means, the {@code it[0]} and {@code it[1]} will be
+     * the first key-value pair, the {@code it[2]} and {@code it[3]} will be the second key-value pair, and so on. If
+     * the length of the iterable is odd and the last key cannot match the value, then the last pair will be the
+     * key-{@code null} pair to put.
+     *
+     * @param it  the given iterable
+     * @param &lt;K&gt; the key type
+     * @param &lt;V&gt; the value type
+     * @return a new {@link HashMap} initialing with the given iterable
+     */
+    public static &lt;K, V&gt; @Nonnull LinkedHashMap&lt;K, V&gt; toLinkedHashMap(@Nonnull Iterable&lt;?&gt; it) {
+<span class="fc" id="L192">        Object[] array = CollectKit.toArray(it);</span>
+<span class="fc" id="L193">        return linkedHashMap(array);</span>
+    }
+
+    /**
+     * Puts all elements from the given array into the given map and returns the given map.
+     * &lt;p&gt;
+     * Every two elements of the array form a key-value pair, that means, the {@code array[0]} and {@code array[1]} will
+     * be the first key-value pair, the {@code array[2]} and {@code array[3]} will be the second key-value pair, and so
+     * on. If the length of the array is odd and the last key cannot match the value, then the last pair will be the
+     * key-{@code null} pair to put.
+     *
+     * @param map   the given map
+     * @param array the given array
+     * @param &lt;K&gt;   the key type
+     * @param &lt;V&gt;   the value type
+     * @param &lt;M&gt;   the type of the given map
+     * @return the given map
+     */
+    public static &lt;K, V, M extends Map&lt;K, V&gt;&gt; @Nonnull M putAll(
+        @Nonnull @OutParam M map,
+        Object @Nonnull ... array
+    ) {
+<span class="fc" id="L215">        int end = array.length / 2 * 2;</span>
+<span class="fc" id="L216">        int i = 0;</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">        while (i &lt; end) {</span>
+<span class="fc" id="L218">            K key = Fs.as(array[i++]);</span>
+<span class="fc" id="L219">            V value = Fs.as(array[i++]);</span>
+<span class="fc" id="L220">            map.put(key, value);</span>
+<span class="fc" id="L221">        }</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        if (end &lt; array.length) {</span>
+<span class="fc" id="L223">            map.put(Fs.as(array[end]), null);</span>
+        }
+<span class="fc" id="L225">        return map;</span>
+    }
+
+    /**
+     * Puts all elements from the given iterable into the given map and returns the given map.
+     * &lt;p&gt;
+     * Every two elements of the iterable form a key-value pair, that means, the {@code it[0]} and {@code it[1]} will be
+     * the first key-value pair, the {@code it[2]} and {@code it[3]} will be the second key-value pair, and so on. If
+     * the length of the iterable is odd and the last key cannot match the value, then the last pair will be the
+     * key-{@code null} pair to put.
+     *
+     * @param map the given map
+     * @param it  the given iterable
+     * @param &lt;K&gt; the key type
+     * @param &lt;V&gt; the value type
+     * @param &lt;M&gt; the type of the given map
+     * @return the given map
+     */
+    public static &lt;K, V, M extends Map&lt;K, V&gt;&gt; @Nonnull M putAll(
+        @Nonnull @OutParam M map,
+        @Nonnull Iterable&lt;?&gt; it
+    ) {
+<span class="fc" id="L247">        Iterator&lt;?&gt; iterator = it.iterator();</span>
+<span class="fc bfc" id="L248" title="All 2 branches covered.">        while (iterator.hasNext()) {</span>
+<span class="fc" id="L249">            K key = Fs.as(iterator.next());</span>
+<span class="fc bfc" id="L250" title="All 2 branches covered.">            V value = iterator.hasNext() ? Fs.as(iterator.next()) : null;</span>
+<span class="fc" id="L251">            map.put(key, value);</span>
+<span class="fc" id="L252">        }</span>
+<span class="fc" id="L253">        return map;</span>
+    }
+
+    /**
+     * Resolves the final value in a chain. For example, a map contains: [{@code A -&gt; B, B -&gt; C, C -&gt; D}],
+     * {@code resolveChain(map, A, stack)} will return D.
+     * &lt;p&gt;
+     * This method gets the value with the given key by {@link Map#get(Object)}, and then uses that value as the next
+     * key to get the next value. This loop continues until the get method returns null when a value is used as the key,
+     * and that value will be returned. If the given key doesn't map a value, or the loop is infinite, it will return
+     * null.
+     *
+     * @param map   the given map
+     * @param key   the given key
+     * @param stack the stack to check infinite loop
+     * @param &lt;T&gt;   the value type
+     * @return the final value in a chain
+     */
+    public static &lt;T&gt; @Nullable T resolveChain(@Nonnull Map&lt;?, T&gt; map, T key, @Nonnull Set&lt;T&gt; stack) {
+<span class="fc bfc" id="L272" title="All 2 branches covered.">        if (!map.containsKey(key)) {</span>
+<span class="fc" id="L273">            return null;</span>
+        }
+<span class="fc" id="L275">        stack.add(key);</span>
+<span class="fc" id="L276">        T nextKey = map.get(key);</span>
+        while (true) {
+<span class="fc bfc" id="L278" title="All 2 branches covered.">            if (stack.contains(nextKey)) {</span>
+<span class="fc" id="L279">                return null;</span>
+            }
+<span class="fc bfc" id="L281" title="All 2 branches covered.">            if (!map.containsKey(nextKey)) {</span>
+<span class="fc" id="L282">                return nextKey;</span>
+            }
+<span class="fc" id="L284">            stack.add(nextKey);</span>
+<span class="fc" id="L285">            nextKey = map.get(nextKey);</span>
+        }
+    }
+
+    /**
+     * Returns a new immutable {@link Map.Entry} with the given key and value.
+     *
+     * @param key   the given key
+     * @param value the given value
+     * @param &lt;K&gt;   the key type
+     * @param &lt;V&gt;   the value type
+     * @return a new immutable {@link Map.Entry} with the given key and value
+     */
+    public static &lt;K, V&gt; Map.@Nonnull Entry&lt;K, V&gt; entry(K key, V value) {
+<span class="fc" id="L299">        return new Map.Entry&lt;K, V&gt;() {</span>
+            @Override
+            public K getKey() {
+<span class="fc" id="L302">                return key;</span>
+            }
+
+            @Override
+            public V getValue() {
+<span class="fc" id="L307">                return value;</span>
+            }
+
+            @Override
+            public V setValue(V value) {
+<span class="fc" id="L312">                throw new UnsupportedOperationException();</span>
+            }
+        };
+    }
+
+    private MapKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

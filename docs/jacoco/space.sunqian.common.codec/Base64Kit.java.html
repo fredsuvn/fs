@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Base64Kit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.codec</a> &gt; <span class="el_source">Base64Kit.java</span></div><h1>Base64Kit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.codec;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.exception.FsRuntimeException;
+import space.sunqian.common.io.BufferKit;
+import space.sunqian.common.io.ByteArrayOperator;
+import space.sunqian.common.io.IORuntimeException;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+/**
+ * Utilities for Base64.
+ *
+ * @author sunqian
+ */
+public class Base64Kit {
+
+    /**
+     * Returns a {@code base64} encoder with padding mode. This method is equivalent to {@code encoder(false, true)}.
+     *
+     * @return a {@code base64} encoder with padding mode
+     */
+    public static Encoder encoder() {
+<span class="fc" id="L27">        return encoder(false, true);</span>
+    }
+
+    /**
+     * Returns a {@code base64} encoder. The {@code url} parameter specifies whether the encoder is URL-Safe, and the
+     * {@code padding} parameter specifies whether the encoder will add the padding character ('=') at end to align.
+     *
+     * @param url     {@code true} for URL-Safe, otherwise {@code false}
+     * @param padding {@code true} for padding mode, otherwise {@code false}
+     * @return a {@code base64} encoder
+     */
+    public static Encoder encoder(boolean url, boolean padding) {
+<span class="fc bfc" id="L39" title="All 4 branches covered.">        return url ?</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">            (padding ? EncoderImpl.URL_PADDING : EncoderImpl.URL_NO_PADDING)</span>
+<span class="fc" id="L41">            : (padding ? EncoderImpl.BASE_PADDING : EncoderImpl.BASE_NO_PADDING);</span>
+    }
+
+    /**
+     * Returns a {@code base64} decoder with the strict mode. This method is equivalent to {@code decoder(true)}.
+     *
+     * @return a {@code base64} decoder with the strict mod
+     */
+    public static Decoder decoder() {
+<span class="fc" id="L50">        return decoder(true);</span>
+    }
+
+    /**
+     * Returns a {@code base64} decoder. The {@code strict} parameter specifies whether the decoder is strict or not, a
+     * strict decoder will throw an exception if it encounters an invalid base64 character, and an un-strict decoder
+     * will ignore the invalid base64 characters.
+     *
+     * @param strict {@code true} for strict, otherwise {@code false}
+     * @return a {@code base64} decoder with the specified mod
+     */
+    public static Decoder decoder(boolean strict) {
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        return strict ? DecoderImpl.STRICT : DecoderImpl.LOOSE;</span>
+    }
+
+    private static final class EncoderImpl implements Encoder, ByteArrayOperator {
+
+<span class="fc" id="L67">        private static final @Nonnull EncoderImpl BASE_PADDING = new EncoderImpl(false, true);</span>
+<span class="fc" id="L68">        private static final @Nonnull EncoderImpl BASE_NO_PADDING = new EncoderImpl(false, false);</span>
+<span class="fc" id="L69">        private static final @Nonnull EncoderImpl URL_PADDING = new EncoderImpl(true, true);</span>
+<span class="fc" id="L70">        private static final @Nonnull EncoderImpl URL_NO_PADDING = new EncoderImpl(true, false);</span>
+
+<span class="fc" id="L72">        private static final char @Nonnull [] BASE_DICT = {</span>
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+            'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
+        };
+
+<span class="fc" id="L80">        private static final char @Nonnull [] URL_DICT = {</span>
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+            'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '_'
+        };
+
+        private final boolean url;
+        private final boolean padding;
+
+<span class="fc" id="L91">        private EncoderImpl(boolean url, boolean padding) {</span>
+<span class="fc" id="L92">            this.url = url;</span>
+<span class="fc" id="L93">            this.padding = padding;</span>
+<span class="fc" id="L94">        }</span>
+
+        @Override
+        public byte @Nonnull [] encode(byte @Nonnull [] bytes) throws Base64Exception {
+<span class="fc" id="L98">            byte[] dst = new byte[getLength(bytes.length)];</span>
+<span class="fc" id="L99">            process(bytes, 0, dst, 0, bytes.length);</span>
+<span class="fc" id="L100">            return dst;</span>
+        }
+
+        @Override
+        public byte @Nonnull [] encode(@Nonnull ByteBuffer buffer) throws Base64Exception {
+<span class="fc" id="L105">            byte[] dst = new byte[getLength(buffer.remaining())];</span>
+<span class="fc" id="L106">            ByteBuffer dstBuf = ByteBuffer.wrap(dst);</span>
+<span class="fc" id="L107">            BufferKit.process(buffer, dstBuf, this);</span>
+<span class="fc" id="L108">            return dst;</span>
+        }
+
+        @Override
+        public int process(byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len) {
+<span class="fc bfc" id="L113" title="All 2 branches covered.">            char[] dict = url ? URL_DICT : BASE_DICT;</span>
+<span class="fc" id="L114">            int roundLen = len / 3 * 3;</span>
+<span class="fc" id="L115">            int i = srcOff, j = dstOff;</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">            while (i &lt; srcOff + roundLen) {</span>
+<span class="fc" id="L117">                int bits = (src[i++] &amp; 0xff) &lt;&lt; 16 | (src[i++] &amp; 0xff) &lt;&lt; 8 | (src[i++] &amp; 0xff);</span>
+<span class="fc" id="L118">                dst[j++] = (byte) dict[(bits &gt;&gt;&gt; 18) &amp; 0x3f];</span>
+<span class="fc" id="L119">                dst[j++] = (byte) dict[(bits &gt;&gt;&gt; 12) &amp; 0x3f];</span>
+<span class="fc" id="L120">                dst[j++] = (byte) dict[(bits &gt;&gt;&gt; 6) &amp; 0x3f];</span>
+<span class="fc" id="L121">                dst[j++] = (byte) dict[bits &amp; 0x3f];</span>
+<span class="fc" id="L122">            }</span>
+            // 1 or 2 leftover bytes
+<span class="fc bfc" id="L124" title="All 2 branches covered.">            if (roundLen &lt; len) {</span>
+<span class="fc" id="L125">                int b0 = src[i++] &amp; 0xff;</span>
+<span class="fc" id="L126">                dst[j++] = (byte) dict[b0 &gt;&gt; 2];</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">                if (i == srcOff + len) {</span>
+<span class="fc" id="L128">                    dst[j++] = (byte) dict[(b0 &lt;&lt; 4) &amp; 0x3f];</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">                    if (padding) {</span>
+<span class="fc" id="L130">                        dst[j++] = '=';</span>
+<span class="fc" id="L131">                        dst[j++] = '=';</span>
+                    }
+                } else {
+<span class="fc" id="L134">                    int b1 = src[i] &amp; 0xff;</span>
+<span class="fc" id="L135">                    dst[j++] = (byte) dict[(b0 &lt;&lt; 4) &amp; 0x3f | (b1 &gt;&gt; 4)];</span>
+<span class="fc" id="L136">                    dst[j++] = (byte) dict[(b1 &lt;&lt; 2) &amp; 0x3f];</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">                    if (padding) {</span>
+<span class="fc" id="L138">                        dst[j++] = '=';</span>
+                    }
+                }
+            }
+<span class="fc" id="L142">            return j - dstOff;</span>
+        }
+
+        private int getLength(int srcLen) {
+<span class="fc bfc" id="L146" title="All 2 branches covered.">            if (srcLen % 3 == 0) {</span>
+<span class="fc" id="L147">                return srcLen / 3 * 4;</span>
+            }
+<span class="fc bfc" id="L149" title="All 2 branches covered.">            if (padding) {</span>
+<span class="fc" id="L150">                return srcLen / 3 * 4 + 4;</span>
+            }
+<span class="fc" id="L152">            int r = srcLen % 3;</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">            if (r == 2) {</span>
+<span class="fc" id="L154">                return srcLen / 3 * 4 + 3;</span>
+            }
+<span class="fc" id="L156">            return srcLen / 3 * 4 + 2;</span>
+        }
+    }
+
+    private static final class DecoderImpl implements Decoder, ByteArrayOperator {
+
+<span class="fc" id="L162">        private static final @Nonnull DecoderImpl STRICT = new DecoderImpl(true);</span>
+<span class="fc" id="L163">        private static final @Nonnull DecoderImpl LOOSE = new DecoderImpl(false);</span>
+
+<span class="fc" id="L165">        private static final byte[] DICT = new byte[Byte.MAX_VALUE];</span>
+
+        static {
+<span class="fc" id="L168">            Arrays.fill(DICT, (byte) -1);</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">            for (int i = 0; i &lt; EncoderImpl.BASE_DICT.length; i++) {</span>
+<span class="fc" id="L170">                int c = EncoderImpl.BASE_DICT[i];</span>
+<span class="fc" id="L171">                DICT[c &amp; 0xff] = (byte) i;</span>
+            }
+<span class="fc" id="L173">            DICT['-'] = DICT['+'];</span>
+<span class="fc" id="L174">            DICT['_'] = DICT['/'];</span>
+<span class="fc" id="L175">            DICT['='] = -2;</span>
+<span class="fc" id="L176">        }</span>
+
+        private final boolean strict;
+
+<span class="fc" id="L180">        private DecoderImpl(boolean strict) {</span>
+<span class="fc" id="L181">            this.strict = strict;</span>
+<span class="fc" id="L182">        }</span>
+
+        @Override
+        public byte @Nonnull [] decode(byte @Nonnull [] bytes) throws Base64Exception {
+<span class="fc" id="L186">            byte[] dst = new byte[getLength(bytes.length)];</span>
+<span class="fc" id="L187">            int actualLen = process(bytes, 0, dst, 0, bytes.length);</span>
+<span class="fc bfc" id="L188" title="All 2 branches covered.">            return actualLen == dst.length ? dst : Arrays.copyOfRange(dst, 0, actualLen);</span>
+        }
+
+        @Override
+        public byte @Nonnull [] decode(@Nonnull ByteBuffer buffer) throws Base64Exception {
+<span class="fc" id="L193">            byte[] dst = new byte[getLength(buffer.remaining())];</span>
+<span class="fc" id="L194">            ByteBuffer dstBuf = ByteBuffer.wrap(dst);</span>
+            try {
+<span class="fc" id="L196">                int actualLen = BufferKit.process(buffer, dstBuf, this);</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">                return actualLen == dst.length ? dst : Arrays.copyOfRange(dst, 0, actualLen);</span>
+<span class="fc" id="L198">            } catch (IORuntimeException e) {</span>
+<span class="fc" id="L199">                throw (Base64Exception) e.getCause();</span>
+            }
+        }
+
+        @Override
+        public int process(
+            byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len
+        ) throws Base64Exception {
+<span class="fc" id="L207">            int bits = 0;</span>
+<span class="fc" id="L208">            int shiftTo = 18;// must be 18, 12, 6, 0, -6.</span>
+<span class="fc" id="L209">            int i = 0;</span>
+<span class="fc" id="L210">            int j = dstOff;</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">            while (i &lt; len) {</span>
+<span class="fc" id="L212">                int c = src[i + srcOff] &amp; 0xff;</span>
+<span class="fc" id="L213">                int b = DICT[c];</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">                if (b &gt;= 0) {</span>
+                    // base64 char
+<span class="fc" id="L216">                    bits |= (b &lt;&lt; shiftTo);</span>
+<span class="fc" id="L217">                    shiftTo -= 6;</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">                    if (shiftTo &lt; 0) {</span>
+<span class="fc" id="L219">                        dst[j++] = (byte) (bits &gt;&gt; 16);</span>
+<span class="fc" id="L220">                        dst[j++] = (byte) (bits &gt;&gt; 8);</span>
+<span class="fc" id="L221">                        dst[j++] = (byte) (bits);</span>
+<span class="fc" id="L222">                        shiftTo = 18;</span>
+<span class="fc" id="L223">                        bits = 0;</span>
+                    }
+<span class="fc" id="L225">                    i++;</span>
+<span class="fc" id="L226">                    continue;</span>
+                }
+<span class="fc bfc" id="L228" title="All 2 branches covered.">                if (b == -2) {</span>
+                    // end char: '='
+<span class="fc bfc" id="L230" title="All 2 branches covered.">                    if (shiftTo == 6) {</span>
+                        // end with xx==
+<span class="fc" id="L232">                        i++;</span>
+<span class="fc bfc" id="L233" title="All 2 branches covered.">                        if (i &gt;= len) {</span>
+<span class="fc" id="L234">                            throw new Base64Exception(</span>
+                                i - 1, &quot;This base64 string should end with '==' but only one '=' found.&quot;);
+                        }
+<span class="fc" id="L237">                        int cn = src[i + srcOff] &amp; 0xff;</span>
+<span class="fc" id="L238">                        int bn = DICT[cn];</span>
+<span class="fc bfc" id="L239" title="All 2 branches covered.">                        if (bn != -2) {</span>
+<span class="fc" id="L240">                            throw new Base64Exception(</span>
+                                i, &quot;This base64 string should end with '==' but only one '=' found.&quot;);
+                        }
+<span class="fc" id="L243">                        dst[j++] = (byte) (bits &gt;&gt; 16);</span>
+<span class="fc" id="L244">                        i++;</span>
+<span class="fc bfc" id="L245" title="All 2 branches covered.">                        if (i &lt; len) {</span>
+<span class="fc" id="L246">                            throw new Base64Exception(</span>
+                                i, &quot;This base64 string should end with '==' but more character found.&quot;);
+                        }
+<span class="fc" id="L249">                        shiftTo = 18;</span>
+<span class="fc" id="L250">                        break;</span>
+<span class="fc bfc" id="L251" title="All 2 branches covered.">                    } else if (shiftTo == 0) {</span>
+                        // end with xxx=
+<span class="fc" id="L253">                        dst[j++] = (byte) (bits &gt;&gt; 16);</span>
+<span class="fc" id="L254">                        dst[j++] = (byte) (bits &gt;&gt; 8);</span>
+<span class="fc" id="L255">                        i++;</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">                        if (i &lt; len) {</span>
+<span class="fc" id="L257">                            throw new Base64Exception(</span>
+                                i, &quot;This base64 string should end with '=' but more character found.&quot;);
+                        }
+<span class="fc" id="L260">                        shiftTo = 18;</span>
+<span class="fc" id="L261">                        break;</span>
+                    }
+<span class="fc" id="L263">                    throw new Base64Exception(</span>
+                        i, &quot;Base64 character '=' appeared in the wrong position.&quot;);
+                }
+                // Otherwise: -1
+<span class="fc bfc" id="L267" title="All 2 branches covered.">                if (strict) {</span>
+<span class="fc" id="L268">                    throw new Base64Exception(i);</span>
+                }
+<span class="fc" id="L270">                i++;</span>
+<span class="fc" id="L271">            }</span>
+<span class="fc bfc" id="L272" title="All 2 branches covered.">            if (shiftTo == 6) {</span>
+                // xx
+<span class="fc" id="L274">                dst[j++] = (byte) (bits &gt;&gt; 16);</span>
+<span class="fc bfc" id="L275" title="All 2 branches covered.">            } else if (shiftTo == 0) {</span>
+                // xxx
+<span class="fc" id="L277">                dst[j++] = (byte) (bits &gt;&gt; 16);</span>
+<span class="fc" id="L278">                dst[j++] = (byte) (bits &gt;&gt; 8);</span>
+            }
+<span class="fc" id="L280">            return j - dstOff;</span>
+        }
+
+        private int getLength(int srcLen) {
+<span class="fc bfc" id="L284" title="All 2 branches covered.">            if (srcLen % 4 == 0) {</span>
+<span class="fc" id="L285">                return srcLen / 4 * 3;</span>
+            }
+<span class="fc" id="L287">            int r = srcLen % 4;</span>
+<span class="fc bfc" id="L288" title="All 2 branches covered.">            if (r == 3) {</span>
+<span class="fc" id="L289">                return srcLen / 4 * 3 + 2;</span>
+            }
+<span class="fc" id="L291">            return srcLen / 4 * 3 + 1;</span>
+        }
+    }
+
+    /**
+     * Encoder for Base64. The implementation should be immutable and thread-safe.
+     */
+    public interface Encoder {
+
+        /**
+         * Encodes the given bytes to base64 string as byte array.
+         *
+         * @param bytes the given bytes to encode
+         * @return the base64 string as byte array
+         * @throws Base64Exception if any error occurs
+         */
+        byte @Nonnull [] encode(byte @Nonnull [] bytes) throws Base64Exception;
+
+        /**
+         * Encodes the given buffer to base64 string as byte array. The position of the given buffer will increment to
+         * its limit.
+         *
+         * @param buffer the given buffer to encode
+         * @return the base64 string as byte array
+         * @throws Base64Exception if any error occurs
+         */
+        byte @Nonnull [] encode(@Nonnull ByteBuffer buffer) throws Base64Exception;
+
+        /**
+         * Encodes the given bytes to base64 string.
+         *
+         * @param bytes the given bytes to encode
+         * @return the base64 string
+         * @throws Base64Exception if any error occurs
+         */
+        default @Nonnull String encodeToString(byte @Nonnull [] bytes) throws Base64Exception {
+<span class="fc" id="L327">            byte[] dst = encode(bytes);</span>
+<span class="fc" id="L328">            return new String(dst, StandardCharsets.ISO_8859_1);</span>
+        }
+
+        /**
+         * Encodes the given buffer to base64 string. The position of the given buffer will increment to its limit.
+         *
+         * @param buffer the given buffer to encode
+         * @return the base64 string
+         * @throws Base64Exception if any error occurs
+         */
+        default @Nonnull String encodeToString(@Nonnull ByteBuffer buffer) throws Base64Exception {
+<span class="fc" id="L339">            byte[] dst = encode(buffer);</span>
+<span class="fc" id="L340">            return new String(dst, StandardCharsets.ISO_8859_1);</span>
+        }
+    }
+
+    /**
+     * Decoder for Base64. The implementation should be immutable and thread-safe.
+     */
+    public interface Decoder {
+
+        /**
+         * Decodes the given bytes of base64 string to the original bytes.
+         *
+         * @param bytes the given bytes of base64 string
+         * @return the original bytes
+         * @throws Base64Exception if any error occurs
+         */
+        byte @Nonnull [] decode(byte @Nonnull [] bytes) throws Base64Exception;
+
+        /**
+         * Decodes the given buffer of base64 string to the original bytes. The position of the given buffer will
+         * increment to its limit.
+         *
+         * @param buffer the given buffer of base64 string
+         * @return the original bytes
+         * @throws Base64Exception if any error occurs
+         */
+        byte @Nonnull [] decode(@Nonnull ByteBuffer buffer) throws Base64Exception;
+
+        /**
+         * Decodes the given base64 string to the original bytes.
+         *
+         * @param base64 the given base64 string
+         * @return the original bytes
+         * @throws Base64Exception if any error occurs
+         */
+        default byte @Nonnull [] decode(@Nonnull String base64) throws Base64Exception {
+<span class="fc" id="L376">            byte[] src = base64.getBytes(StandardCharsets.ISO_8859_1);</span>
+<span class="fc" id="L377">            return decode(src);</span>
+        }
+    }
+
+    /**
+     * Exception for base64 encoding/decoding. The {@link #position()} returns the position where this exception
+     * occurs.
+     *
+     * @author sunqian
+     */
+    public static class Base64Exception extends FsRuntimeException {
+
+        private final long position;
+
+        /**
+         * Empty constructor.
+         */
+        public Base64Exception() {
+<span class="fc" id="L395">            super();</span>
+<span class="fc" id="L396">            this.position = -1;</span>
+<span class="fc" id="L397">        }</span>
+
+        /**
+         * Constructs with the message.
+         *
+         * @param message the message
+         */
+        public Base64Exception(@Nullable String message) {
+<span class="fc" id="L405">            super(message);</span>
+<span class="fc" id="L406">            this.position = -1;</span>
+<span class="fc" id="L407">        }</span>
+
+        /**
+         * Constructs with the message and cause.
+         *
+         * @param message the message
+         * @param cause   the cause
+         */
+        public Base64Exception(@Nullable String message, @Nullable Throwable cause) {
+<span class="fc" id="L416">            super(message, cause);</span>
+<span class="fc" id="L417">            this.position = -1;</span>
+<span class="fc" id="L418">        }</span>
+
+        /**
+         * Constructs with the cause.
+         *
+         * @param cause the cause
+         */
+        public Base64Exception(@Nullable Throwable cause) {
+<span class="fc" id="L426">            super(cause);</span>
+<span class="fc" id="L427">            this.position = -1;</span>
+<span class="fc" id="L428">        }</span>
+
+        /**
+         * Empty with the position.
+         *
+         * @param position the position where this exception occurs
+         */
+        public Base64Exception(long position) {
+<span class="fc" id="L436">            super();</span>
+<span class="fc" id="L437">            this.position = position;</span>
+<span class="fc" id="L438">        }</span>
+
+        /**
+         * Constructs with the position and message.
+         *
+         * @param position the position where this exception occurs
+         * @param message  the message
+         */
+        public Base64Exception(long position, @Nullable String message) {
+<span class="fc" id="L447">            super(message);</span>
+<span class="fc" id="L448">            this.position = position;</span>
+<span class="fc" id="L449">        }</span>
+
+        /**
+         * Constructs with the position, message and cause.
+         *
+         * @param position the position where this exception occurs
+         * @param message  the message
+         * @param cause    the cause
+         */
+        public Base64Exception(long position, @Nullable String message, @Nullable Throwable cause) {
+<span class="fc" id="L459">            super(message, cause);</span>
+<span class="fc" id="L460">            this.position = position;</span>
+<span class="fc" id="L461">        }</span>
+
+        /**
+         * Constructs with the position and cause.
+         *
+         * @param position the position where this exception occurs
+         * @param cause    the cause
+         */
+        public Base64Exception(long position, @Nullable Throwable cause) {
+<span class="fc" id="L470">            super(cause);</span>
+<span class="fc" id="L471">            this.position = position;</span>
+<span class="fc" id="L472">        }</span>
+
+        /**
+         * Returns the position where this exception occurs, may be {@code -1} if the position is unknown.
+         *
+         * @return the position where this exception occurs, may be {@code -1} if the position is unknown
+         */
+        public long position() {
+<span class="fc" id="L480">            return position;</span>
+        }
+    }
+
+    private Base64Kit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

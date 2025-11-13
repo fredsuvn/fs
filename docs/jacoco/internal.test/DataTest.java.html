@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">internal.test</a> &gt; <span class="el_source">DataTest.java</span></div><h1>DataTest.java</h1><pre class="source lang-java linenums">package internal.test;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+/**
+ * This interface provides methods for generating test data.
+ *
+ * @author sunqian
+ */
+public interface DataTest {
+
+    /**
+     * Returns a new random bytes array of the specified length.
+     *
+     * @param length the specified length
+     * @return a new random bytes array of the specified length
+     * @throws NegativeArraySizeException if the length is negative
+     */
+    default byte[] randomBytes(int length) throws NegativeArraySizeException {
+<span class="fc" id="L20">        return fillRandomBytes(new byte[length]);</span>
+    }
+
+    /**
+     * Returns a new random bytes array of the specified length. The random value will in
+     * {@code [startInclusive, endExclusive)}.
+     *
+     * @param length         the specified length
+     * @param startInclusive the start value inclusive
+     * @param endExclusive   the end value exclusive
+     * @return a new random bytes array of the specified length
+     * @throws NegativeArraySizeException if the length is negative
+     * @throws IllegalArgumentException   if {@code startInclusive &gt;= endExclusive}
+     */
+    default byte[] randomBytes(
+        int length, byte startInclusive, byte endExclusive
+    ) throws NegativeArraySizeException, IllegalArgumentException {
+<span class="fc" id="L37">        return fillRandomBytes(new byte[length], startInclusive, endExclusive);</span>
+    }
+
+    /**
+     * Fills random bytes to the given array, then returns the array.
+     *
+     * @param bytes the given array
+     * @return the array
+     */
+    default byte[] fillRandomBytes(byte[] bytes) {
+<span class="fc" id="L47">        ThreadLocalRandom random = ThreadLocalRandom.current();</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        for (int i = 0; i &lt; bytes.length; i++) {</span>
+<span class="fc" id="L49">            bytes[i] = (byte) random.nextInt();</span>
+        }
+<span class="fc" id="L51">        return bytes;</span>
+    }
+
+    /**
+     * Fills random bytes to the given array, then returns the array. The random value will in
+     * {@code [startInclusive, endExclusive)}.
+     *
+     * @param bytes          the given array
+     * @param startInclusive the start value inclusive
+     * @param endExclusive   the end value exclusive
+     * @return the array
+     * @throws IllegalArgumentException if {@code startInclusive &gt;= endExclusive}
+     */
+    default byte[] fillRandomBytes(
+        byte[] bytes, byte startInclusive, byte endExclusive
+    ) throws IllegalArgumentException {
+<span class="fc" id="L67">        ThreadLocalRandom random = ThreadLocalRandom.current();</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        for (int i = 0; i &lt; bytes.length; i++) {</span>
+<span class="fc" id="L69">            bytes[i] = (byte) random.nextInt(startInclusive, endExclusive);</span>
+        }
+<span class="fc" id="L71">        return bytes;</span>
+    }
+
+    /**
+     * Returns a new random chars array of the specified length.
+     *
+     * @param length the specified length
+     * @return a new random chars array of the specified length
+     * @throws NegativeArraySizeException if the length is negative
+     */
+    default char[] randomChars(int length) throws NegativeArraySizeException {
+<span class="fc" id="L82">        return fillRandomChars(new char[length]);</span>
+    }
+
+    /**
+     * Returns a new random chars array of the specified length. The random value will in
+     * {@code [startInclusive, endExclusive)}.
+     *
+     * @param length         the specified length
+     * @param startInclusive the start value inclusive
+     * @param endExclusive   the end value exclusive
+     * @return a new random chars array of the specified length
+     * @throws NegativeArraySizeException if the length is negative
+     * @throws IllegalArgumentException   if {@code startInclusive &gt;= endExclusive}
+     */
+    default char[] randomChars(
+        int length, char startInclusive, char endExclusive
+    ) throws NegativeArraySizeException, IllegalArgumentException {
+<span class="fc" id="L99">        return fillRandomChars(new char[length], startInclusive, endExclusive);</span>
+    }
+
+    /**
+     * Fills random chars to the given array, then returns the array.
+     *
+     * @param chars the given array
+     * @return the array
+     */
+    default char[] fillRandomChars(char[] chars) {
+<span class="fc" id="L109">        ThreadLocalRandom random = ThreadLocalRandom.current();</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        for (int i = 0; i &lt; chars.length; i++) {</span>
+<span class="fc" id="L111">            chars[i] = (char) random.nextInt();</span>
+        }
+<span class="fc" id="L113">        return chars;</span>
+    }
+
+    /**
+     * Fills random chars to the given array, then returns the array. The random value will in
+     * {@code [startInclusive, endExclusive)}.
+     *
+     * @param chars          the given array
+     * @param startInclusive the start value inclusive
+     * @param endExclusive   the end value exclusive
+     * @return the array
+     * @throws IllegalArgumentException if {@code startInclusive &gt;= endExclusive}
+     */
+    default char[] fillRandomChars(
+        char[] chars, char startInclusive, char endExclusive
+    ) throws IllegalArgumentException {
+<span class="fc" id="L129">        ThreadLocalRandom random = ThreadLocalRandom.current();</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        for (int i = 0; i &lt; chars.length; i++) {</span>
+<span class="fc" id="L131">            chars[i] = (char) random.nextInt(startInclusive &amp; 0xFFFF, endExclusive &amp; 0xFFFF);</span>
+        }
+<span class="fc" id="L133">        return chars;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

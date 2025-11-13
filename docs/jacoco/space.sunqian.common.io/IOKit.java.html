@@ -1,0 +1,2747 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IOKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.io</a> &gt; <span class="el_source">IOKit.java</span></div><h1>IOKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.io;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.bytes.BytesBuilder;
+import space.sunqian.common.base.chars.CharsBuilder;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.io.IOChecker.ReadChecker;
+
+import java.io.Closeable;
+import java.io.Flushable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+
+/**
+ * Utilities for IO related, some methods are provided by a default {@link IOOperator}.
+ *
+ * @author sunqian
+ */
+public class IOKit {
+
+    /**
+     * The default IO buffer size to use in this class: {@code 1024 * 8 = 8192}. And it is also the recommended IO
+     * buffer size.
+     */
+    public static final int BUFFER_SIZE = 1024 * 8;
+
+    // The default io operator.
+<span class="fc" id="L39">    static final @Nonnull IOOperator io = IOOperator.newOperator(BUFFER_SIZE);</span>
+
+    /**
+     * Returns the recommended IO buffer size, typically is 1024 * 8 = 8192.
+     *
+     * @return the recommended IO buffer size
+     */
+    public static int bufferSize() {
+<span class="fc" id="L47">        return BUFFER_SIZE;</span>
+    }
+
+    /**
+     * Returns the default io operator this class uses.
+     *
+     * @return the default io operator this class uses
+     */
+    public static @Nonnull IOOperator ioOperator() {
+<span class="fc" id="L56">        return io;</span>
+    }
+
+    /**
+     * Reads all data from the input stream into a new array, continuing until reaches the end of the input stream, and
+     * returns the array.
+     * &lt;p&gt;
+     * If reaches the end of the input stream and no data is read, returns {@code null}.
+     *
+     * @param src the input stream
+     * @return a new array containing the read data, or {@code null} if reaches the end of the input stream and no data
+     * is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static byte @Nullable [] read(@Nonnull InputStream src) throws IORuntimeException {
+<span class="fc" id="L71">        return io.read(src);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into a new array, and returns the array. If the specified
+     * length is {@code 0}, returns an empty array without reading. Otherwise, this method keeps reading until the read
+     * number reaches the specified length or reaches the end of the input stream.
+     * &lt;p&gt;
+     * If reaches the end of the input stream and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
+     *
+     * @param src the input stream
+     * @param len the specified read length, must {@code &gt;= 0}
+     * @return a new array containing the read data, or {@code null} if reaches the end of the input stream and no data
+     * is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static byte @Nullable [] read(
+        @Nonnull InputStream src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L94">        return io.read(src, len);</span>
+    }
+
+    /**
+     * Reads all data from the source channel into a new buffer, continuing until reaches the end of the source channel,
+     * and returns the buffer. The new buffer's position is {@code 0} and limit equals its capacity.
+     * &lt;p&gt;
+     * If reaches the end of the source channel and no data is read, returns {@code null}.
+     *
+     * @param src the source channel
+     * @return a new buffer containing the read data, or {@code null} if reaches the end of the source channel and no
+     * data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable ByteBuffer read(@Nonnull ReadableByteChannel src) throws IORuntimeException {
+<span class="fc" id="L109">        return io.read(src);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into a new buffer, and returns the buffer. If the
+     * specified length is {@code 0}, returns an empty buffer without reading. Otherwise, this method keeps reading
+     * until the read number reaches the specified length or reaches the end of the source channel. The new buffer's
+     * position is {@code 0} and limit equals its capacity.
+     * &lt;p&gt;
+     * If reaches the end of the source channel and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
+     *
+     * @param src the source channel
+     * @param len the specified read length, must {@code &gt;= 0}
+     * @return a new buffer containing the read data, or {@code null} if reaches the end of the source channel and no
+     * data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static @Nullable ByteBuffer read(
+        @Nonnull ReadableByteChannel src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L133">        return io.read(src, len);</span>
+    }
+
+    /**
+     * Reads all data from the source channel into a new array, continuing until reaches the end of the source channel,
+     * and returns the array.
+     * &lt;p&gt;
+     * If reaches the end of the source channel and no data is read, returns {@code null}.
+     *
+     * @param src the source channel
+     * @return a new array containing the read data, or {@code null} if reaches the end of the source channel and no
+     * data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static byte @Nullable [] readBytes(@Nonnull ReadableByteChannel src) throws IORuntimeException {
+<span class="fc" id="L148">        return io.readBytes(src);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into a new array, and returns the array. If the
+     * specified length is {@code 0}, returns an empty array without reading. Otherwise, this method keeps reading until
+     * the read number reaches the specified length or reaches the end of the source channel.
+     * &lt;p&gt;
+     * If reaches the end of the source channel and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
+     *
+     * @param src the source channel
+     * @param len the specified read length, must {@code &gt;= 0}
+     * @return a new array containing the read data, or {@code null} if reaches the end of the source channel and no
+     * data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static byte @Nullable [] readBytes(
+        @Nonnull ReadableByteChannel src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L171">        return io.readBytes(src, len);</span>
+    }
+
+    /**
+     * Reads data from the input stream into the output stream, until reaches the end of the input stream, and returns
+     * the actual number of bytes read to.
+     * &lt;p&gt;
+     * If reaches the end of the input stream and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output stream
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input stream and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static long readTo(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException {
+<span class="fc" id="L187">        return io.readTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into the output stream, until the read number reaches the
+     * specified length or reaches the end of the input stream, returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input stream
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output stream
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input stream and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull InputStream src, @Nonnull OutputStream dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L208">        return io.readTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads data from the input stream into the output channel, until reaches the end of the input stream, and returns
+     * the actual number of bytes read to.
+     * &lt;p&gt;
+     * If reaches the end of the input stream and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output channel
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input stream and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static long readTo(@Nonnull InputStream src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
+<span class="fc" id="L224">        return io.readTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into the output channel, until the read number reaches the
+     * specified length or reaches the end of the input stream, returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input stream
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output channel
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input stream and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L245">        return io.readTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads data from the input stream into the destination array, until the read number reaches the array's length or
+     * reaches the end of the input stream, and returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the input stream and
+     * no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the destination array
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input stream and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull InputStream src, byte @Nonnull [] dst) throws IORuntimeException {
+<span class="fc" id="L262">        return io.readTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into the destination array, starting at the specified
+     * offset, until the read number reaches the specified length or reaches the end of the input stream, and returns
+     * the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the input stream
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the destination array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input stream and no data is
+     * read
+     * @throws IndexOutOfBoundsException if the arguments are out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L285">        return io.readTo(src, dst, off, len);</span>
+    }
+
+    /**
+     * Reads data from the input stream into the destination buffer, until reaches the end of the stream or buffer, and
+     * returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
+     * input stream and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the input stream
+     * @param dst the destination buffer
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input stream and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException {
+<span class="fc" id="L304">        return io.readTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into the destination buffer, until the read number reaches
+     * the specified length or reaches the end of the stream or buffer, and returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
+     * reaches the end of the input stream and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the input stream
+     * @param dst the specified buffer
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input stream and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L327">        return io.readTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads data from the input channel into the output stream, until reaches the end of the input channel, and returns
+     * the actual number of bytes read to.
+     * &lt;p&gt;
+     * If reaches the end of the input channel and no data is read, returns {@code -1}.
+     *
+     * @param src the input channel
+     * @param dst the output stream
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input channel and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static long readTo(@Nonnull ReadableByteChannel src, @Nonnull OutputStream dst) throws IORuntimeException {
+<span class="fc" id="L343">        return io.readTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the input channel into the output stream, until the read number reaches the
+     * specified length or reaches the end of the input channel, returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input channel
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input channel
+     * @param dst the output stream
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input channel and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L364">        return io.readTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads data from the source channel into the destination channel, until reaches the end of the source channel, and
+     * returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If reaches the end of the source channel and no data is read, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the destination channel
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source channel and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static long readTo(@Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
+<span class="fc" id="L380">        return io.readTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into the destination channel, until the read number
+     * reaches the specified length or reaches the end of the source channel, returns the actual number of bytes read
+     * to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the source channel
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the destination channel
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source channel and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L402">        return io.readTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads data from the source channel into the destination array, until the read number reaches the array's length
+     * or reaches the end of the source channel, and returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source channel
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the destination array
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source channel and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull ReadableByteChannel src, byte @Nonnull [] dst) throws IORuntimeException {
+<span class="fc" id="L419">        return io.readTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into the destination array, starting at the specified
+     * offset, until the read number reaches the specified length or reaches the end of the source channel, and returns
+     * the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source channel
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the destination array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source channel and no data is
+     * read
+     * @throws IndexOutOfBoundsException if the arguments are out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull ReadableByteChannel src, byte @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L442">        return io.readTo(src, dst, off, len);</span>
+    }
+
+    /**
+     * Reads data from the source channel into the destination buffer, until reaches the end of the channel or buffer,
+     * and returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
+     * source channel and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source channel
+     * @param dst the destination buffer
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source channel and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst) throws IORuntimeException {
+<span class="fc" id="L461">        return io.readTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into the destination buffer, until the read number
+     * reaches the specified length or reaches the end of the channel or buffer, and returns the actual number of bytes
+     * read to.
+     * &lt;p&gt;
+     * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
+     * reaches the end of the source channel and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source channel
+     * @param dst the specified buffer
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source channel and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L485">        return io.readTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads all data from the reader into a new array, continuing until reaches the end of the reader, and returns the
+     * array.
+     * &lt;p&gt;
+     * If reaches the end of the reader and no data is read, returns {@code null}.
+     *
+     * @param src the reader
+     * @return a new array containing the read data, or {@code null} if reaches the end of the reader and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static char @Nullable [] read(@Nonnull Reader src) throws IORuntimeException {
+<span class="fc" id="L500">        return io.read(src);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the reader into a new array, and returns the array. If the specified length
+     * is {@code 0}, returns an empty array without reading. Otherwise, this method keeps reading until the read number
+     * reaches the specified length or reaches the end of the reader.
+     * &lt;p&gt;
+     * If reaches the end of the reader and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
+     *
+     * @param src the reader
+     * @param len the specified read length, must {@code &gt;= 0}
+     * @return a new array containing the read data, or {@code null} if reaches the end of the reader and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static char @Nullable [] read(
+        @Nonnull Reader src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L523">        return io.read(src, len);</span>
+    }
+
+    /**
+     * Reads all data from the reader as a string, continuing until reaches the end of the reader, and returns the
+     * string.
+     * &lt;p&gt;
+     * If reaches the end of the reader and no data is read, returns {@code null}.
+     *
+     * @param src the reader
+     * @return a string represents the read data, or {@code null} if reaches the end of the reader and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String string(@Nonnull Reader src) throws IORuntimeException {
+<span class="fc" id="L537">        return io.string(src);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the reader as a string, and returns the string. If the specified length is
+     * {@code 0}, returns an empty string without reading. Otherwise, this method keeps reading until the read number
+     * reaches the specified length or reaches the end of the reader.
+     * &lt;p&gt;
+     * If reaches the end of the reader and no data is read, returns {@code null}.
+     *
+     * @param src the reader
+     * @param len the specified read length, must {@code &gt;= 0}
+     * @return a string represents the read data, or {@code null} if reaches the end of the reader and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static @Nullable String string(
+        @Nonnull Reader src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L556">        return io.string(src, len);</span>
+    }
+
+    /**
+     * Reads all data from the input stream as a string with {@link CharsKit#defaultCharset()}, continuing until reaches
+     * the end of the stream, and returns the string.
+     * &lt;p&gt;
+     * If reaches the end of the stream and no data is read, returns {@code null}.
+     *
+     * @param src the input stream
+     * @return a string with {@link CharsKit#defaultCharset()}, or {@code null} if reaches the end of the stream and no
+     * data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String string(@Nonnull InputStream src) throws IORuntimeException {
+<span class="fc" id="L571">        return io.string(src);</span>
+    }
+
+    /**
+     * Reads all data from the input stream as a string with the specified charset, continuing until reaches the end of
+     * the stream, and returns the string.
+     * &lt;p&gt;
+     * If reaches the end of the stream and no data is read, returns {@code null}.
+     *
+     * @param src     the input stream
+     * @param charset the specified charset
+     * @return a string with the specified charset, or {@code null} if reaches the end of the stream and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String string(
+        @Nonnull InputStream src, @Nonnull Charset charset
+    ) throws IORuntimeException {
+<span class="fc" id="L588">        return io.string(src, charset);</span>
+    }
+
+    /**
+     * Reads all data from the channel as a string with {@link CharsKit#defaultCharset()}, continuing until reaches the
+     * end of the channel, and returns the string.
+     * &lt;p&gt;
+     * If reaches the end of the channel and no data is read, returns {@code null}.
+     *
+     * @param src the channel
+     * @return a string with {@link CharsKit#defaultCharset()}, or {@code null} if reaches the end of the channel and no
+     * data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String string(@Nonnull ReadableByteChannel src) throws IORuntimeException {
+<span class="fc" id="L603">        return io.string(src);</span>
+    }
+
+    /**
+     * Reads all data from the channel as a string with the specified charset, continuing until reaches the end of the
+     * channel, and returns the string.
+     * &lt;p&gt;
+     * If reaches the end of the channel and no data is read, returns {@code null}.
+     *
+     * @param src     the channel
+     * @param charset the specified charset
+     * @return a string with the specified charset, or {@code null} if reaches the end of the channel and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String string(
+        @Nonnull ReadableByteChannel src, @Nonnull Charset charset
+    ) throws IORuntimeException {
+<span class="fc" id="L621">        return io.string(src, charset);</span>
+    }
+
+    /**
+     * Reads data from the reader into the appender, until reaches the end of the reader, and returns the actual number
+     * of chars read to.
+     * &lt;p&gt;
+     * If reaches the end of the reader and no data is read, returns {@code -1}.
+     *
+     * @param src the reader
+     * @param dst the appender
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the reader and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static long readTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException {
+<span class="fc" id="L636">        return io.readTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the reader into the appender, until the read number reaches the specified
+     * length or reaches the end of the reader, returns the actual number of chars read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the reader and no
+     * data is read, returns {@code -1}.
+     *
+     * @param src the reader
+     * @param dst the appender
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the reader and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull Reader src, @Nonnull Appendable dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L656">        return io.readTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads data from the reader into the destination array, until the read number reaches the array's length or
+     * reaches the end of the reader, and returns the actual number of chars read to.
+     * &lt;p&gt;
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the reader and no
+     * data is read, returns {@code -1}.
+     *
+     * @param src the reader
+     * @param dst the destination array
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the reader and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull Reader src, char @Nonnull [] dst) throws IORuntimeException {
+<span class="fc" id="L672">        return io.readTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the reader into the destination array, starting at the specified offset,
+     * until the read number reaches the specified length or reaches the end of the reader, and returns the actual
+     * number of chars read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the reader and no
+     * data is read, returns {@code -1}.
+     *
+     * @param src the reader
+     * @param dst the destination array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the reader and no data is read
+     * @throws IndexOutOfBoundsException if the arguments are out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull Reader src, char @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L694">        return io.readTo(src, dst, off, len);</span>
+    }
+
+    /**
+     * Reads data from the reader into the destination buffer, until reaches the end of the reader or buffer, and
+     * returns the actual number of chars read to.
+     * &lt;p&gt;
+     * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
+     * reader and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the reader
+     * @param dst the destination buffer
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the reader and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull Reader src, @Nonnull CharBuffer dst) throws IORuntimeException {
+<span class="fc" id="L712">        return io.readTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the reader into the destination buffer, until the read number reaches the
+     * specified length or reaches the end of the reader or buffer, and returns the actual number of chars read to.
+     * &lt;p&gt;
+     * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
+     * reaches the end of the reader and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the reader
+     * @param dst the specified buffer
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the reader and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull Reader src, @Nonnull CharBuffer dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L734">        return io.readTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads available data from the input stream into a new array, continuing until no data is immediately available,
+     * and returns the array.
+     * &lt;p&gt;
+     * If reaches the end of the input stream and no data is read, returns {@code null}.
+     *
+     * @param src the input stream
+     * @return a new array containing the read data, possibly empty, or {@code null} if reaches the end of the input
+     * stream and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static byte @Nullable [] available(@Nonnull InputStream src) throws IORuntimeException {
+<span class="fc" id="L749">        return io.available(src);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into a new array, and returns the array. If the specified
+     * length is {@code 0}, returns an empty array without reading. Otherwise, this method keeps reading until the read
+     * number reaches the specified length or no data is immediately available.
+     * &lt;p&gt;
+     * If reaches the end of the input stream and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
+     *
+     * @param src the input stream
+     * @param len the specified read length, must {@code &gt;= 0}
+     * @return a new array containing the read data, possibly empty, or {@code null} if reaches the end of the input
+     * stream and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static byte @Nullable [] available(
+        @Nonnull InputStream src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L772">        return io.available(src, len);</span>
+    }
+
+    /**
+     * Reads available data from the source channel into a new buffer, continuing until no data is immediately
+     * available, and returns the buffer. The new buffer's position is {@code 0} and limit equals its capacity.
+     * &lt;p&gt;
+     * If reaches the end of the source channel and no data is read, returns {@code null}.
+     *
+     * @param src the source channel
+     * @return a new buffer containing the read data, possibly empty, or {@code null} if reaches the end of the source
+     * channel and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable ByteBuffer available(@Nonnull ReadableByteChannel src) throws IORuntimeException {
+<span class="fc" id="L787">        return io.available(src);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into a new buffer, and returns the buffer. If the
+     * specified length is {@code 0}, returns an empty buffer without reading. Otherwise, this method keeps reading
+     * until the read number reaches the specified length or no data is immediately available. The new buffer's position
+     * is {@code 0} and limit equals its capacity.
+     * &lt;p&gt;
+     * If reaches the end of the source channel and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * Note this method will allocate a new buffer with the specified length, and the excessive length may cause out of
+     * memory.
+     *
+     * @param src the source channel
+     * @param len the specified read length, must {@code &gt;= 0}
+     * @return a new buffer containing the read data, possibly empty, or {@code null} if reaches the end of the source
+     * channel and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static @Nullable ByteBuffer available(
+        @Nonnull ReadableByteChannel src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L811">        return io.available(src, len);</span>
+    }
+
+    /**
+     * Reads available data from the source channel into a new array, continuing until no data is immediately available,
+     * and returns the array.
+     * &lt;p&gt;
+     * If reaches the end of the source channel and no data is read, returns {@code null}.
+     *
+     * @param src the source channel
+     * @return a new array containing the read data, possibly empty, or {@code null} if reaches the end of the source
+     * channel and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static byte @Nullable [] availableBytes(@Nonnull ReadableByteChannel src) throws IORuntimeException {
+<span class="fc" id="L826">        return io.availableBytes(src);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into a new array, and returns the array. If the
+     * specified length is {@code 0}, returns an empty array without reading. Otherwise, this method keeps reading until
+     * the read number reaches the specified length or no data is immediately available.
+     * &lt;p&gt;
+     * If reaches the end of the source channel and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
+     *
+     * @param src the source channel
+     * @param len the specified read length, must {@code &gt;= 0}
+     * @return a new array containing the read data, possibly empty, or {@code null} if reaches the end of the source
+     * channel and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static byte @Nullable [] availableBytes(
+        @Nonnull ReadableByteChannel src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L849">        return io.availableBytes(src, len);</span>
+    }
+
+    /**
+     * Reads available data from the input stream into the output stream, until no data is immediately available, and
+     * returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If reaches the end of the input stream and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output stream
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * stream and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static long availableTo(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException {
+<span class="fc" id="L865">        return io.availableTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into the output stream, until the read number reaches the
+     * specified length or no data is immediately available, returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input stream
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output stream
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * stream and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull InputStream src, @Nonnull OutputStream dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L886">        return io.availableTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads available data from the input stream into the output channel, until no data is immediately available, and
+     * returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If reaches the end of the input stream and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output channel
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * stream and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst
+    ) throws IORuntimeException {
+<span class="fc" id="L904">        return io.availableTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into the output channel, until the read number reaches the
+     * specified length or no data is immediately available, returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input stream
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output channel
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * stream and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L925">        return io.availableTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads available data from the input stream into the destination array, until the read number reaches the array's
+     * length or no data is immediately available, and returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the input stream and
+     * no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the destination array
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * stream and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int availableTo(@Nonnull InputStream src, byte @Nonnull [] dst) throws IORuntimeException {
+<span class="fc" id="L942">        return io.availableTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into the destination array, starting at the specified
+     * offset, until the read number reaches the specified length or no data is immediately available, and returns the
+     * actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the input stream
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the destination array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * stream and no data is read
+     * @throws IndexOutOfBoundsException if the arguments are out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    public static int availableTo(
+        @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L965">        return io.availableTo(src, dst, off, len);</span>
+    }
+
+    /**
+     * Reads available data from the input stream into the destination buffer, until reaches the end of the buffer or no
+     * data is immediately available, and returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
+     * input stream and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the input stream
+     * @param dst the destination buffer
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * stream and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int availableTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException {
+<span class="fc" id="L984">        return io.availableTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into the destination buffer, until the read number reaches
+     * the specified length or reaches the end of the buffer or no data is immediately available, and returns the actual
+     * number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
+     * reaches the end of the input stream and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the input stream
+     * @param dst the specified buffer
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * stream and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int availableTo(
+        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1008">        return io.availableTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads available data from the input channel into the output stream, until no data is immediately available, and
+     * returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If reaches the end of the input channel and no data is read, returns {@code -1}.
+     *
+     * @param src the input channel
+     * @param dst the output stream
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * channel and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst
+    ) throws IORuntimeException {
+<span class="fc" id="L1026">        return io.availableTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the input channel into the output stream, until the read number reaches the
+     * specified length or no data is immediately available, returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input channel
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input channel
+     * @param dst the output stream
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * channel and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1047">        return io.availableTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads available data from the source channel into the destination channel, until no data is immediately
+     * available, and returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If reaches the end of the source channel and no data is read, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the destination channel
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the source
+     * channel and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst
+    ) throws IORuntimeException {
+<span class="fc" id="L1065">        return io.availableTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into the destination channel, until the read number
+     * reaches the specified length or no data is immediately available, returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the source channel
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the destination channel
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the source
+     * channel and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1086">        return io.availableTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads available data from the source channel into the destination array, until the read number reaches the
+     * array's length or no data is immediately available, and returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source channel
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the destination array
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the source
+     * channel and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int availableTo(@Nonnull ReadableByteChannel src, byte @Nonnull [] dst) throws IORuntimeException {
+<span class="fc" id="L1103">        return io.availableTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into the destination array, starting at the specified
+     * offset, until the read number reaches the specified length or no data is immediately available, and returns the
+     * actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source channel
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the destination array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the source
+     * channel and no data is read
+     * @throws IndexOutOfBoundsException if the arguments are out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    public static int availableTo(
+        @Nonnull ReadableByteChannel src, byte @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L1126">        return io.availableTo(src, dst, off, len);</span>
+    }
+
+    /**
+     * Reads available data from the source channel into the destination buffer, until reaches the end of the buffer or
+     * no data is immediately available, and returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
+     * source channel and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source channel
+     * @param dst the destination buffer
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the source
+     * channel and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int availableTo(
+        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst
+    ) throws IORuntimeException {
+<span class="fc" id="L1147">        return io.availableTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into the destination buffer, until the read number
+     * reaches the specified length or reaches the end of the buffer or no data is immediately available, and returns
+     * the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
+     * reaches the end of the source channel and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source channel
+     * @param dst the specified buffer
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the source
+     * channel and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int availableTo(
+        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1171">        return io.availableTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads available data from the reader, continuing until no data is immediately available, and returns the string.
+     * &lt;p&gt;
+     * If reaches the end of the reader and no data is read, returns {@code null}.
+     *
+     * @param src the reader
+     * @return a new array containing the read data, possibly empty, or {@code null} if reaches the end of the reader
+     * and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static char @Nullable [] available(@Nonnull Reader src) throws IORuntimeException {
+<span class="fc" id="L1185">        return io.available(src);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the reader, and returns the string. If the specified length is {@code 0},
+     * returns an empty string without reading. Otherwise, this method keeps reading until the read number reaches the
+     * specified length or no data is immediately available.
+     * &lt;p&gt;
+     * If reaches the end of the reader and no data is read, returns {@code null}.
+     *
+     * @param src the reader
+     * @param len the specified read length, must {@code &gt;= 0}
+     * @return a new array containing the read data, possibly empty, or {@code null} if reaches the end of the reader
+     * and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static char @Nullable [] available(
+        @Nonnull Reader src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1205">        return io.available(src, len);</span>
+    }
+
+    /**
+     * Reads available data from the reader as a string, continuing until no data is immediately available, and returns
+     * the string.
+     * &lt;p&gt;
+     * If reaches the end of the reader and no data is read, returns {@code null}.
+     *
+     * @param src the reader
+     * @return a string represents the read data, possibly empty, or {@code null} if reaches the end of the reader and
+     * no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String availableString(@Nonnull Reader src) throws IORuntimeException {
+<span class="fc" id="L1220">        return io.availableString(src);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the reader as a string, and returns the string. If the specified length is
+     * {@code 0}, returns an empty string without reading. Otherwise, this method keeps reading until the read number
+     * reaches the specified length or no data is immediately available.
+     * &lt;p&gt;
+     * If reaches the end of the reader and no data is read, returns {@code null}.
+     *
+     * @param src the reader
+     * @param len the specified read length, must {@code &gt;= 0}
+     * @return a string represents the read data, possibly empty, or {@code null} if reaches the end of the reader and
+     * no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static @Nullable String availableString(
+        @Nonnull Reader src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1240">        return io.availableString(src, len);</span>
+    }
+
+    /**
+     * Reads available data from the input stream as a string with {@link CharsKit#defaultCharset()}, continuing until
+     * no data is immediately available, and returns the string.
+     * &lt;p&gt;
+     * If reaches the end of the stream and no data is read, returns {@code null}.
+     *
+     * @param src the input stream
+     * @return a string with {@link CharsKit#defaultCharset()}, or {@code null} if reaches the end of the stream and no
+     * data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String availableString(@Nonnull InputStream src) throws IORuntimeException {
+<span class="fc" id="L1255">        return io.availableString(src);</span>
+    }
+
+    /**
+     * Reads available data from the input stream as a string with the specified charset, continuing until no data is
+     * immediately available, and returns the string.
+     * &lt;p&gt;
+     * If reaches the end of the stream and no data is read, returns {@code null}.
+     *
+     * @param src     the input stream
+     * @param charset the specified charset
+     * @return a string with the specified charset, or {@code null} if reaches the end of the stream and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String availableString(
+        @Nonnull InputStream src, @Nonnull Charset charset
+    ) throws IORuntimeException {
+<span class="fc" id="L1272">        return io.availableString(src, charset);</span>
+    }
+
+    /**
+     * Reads available data from the channel as a string with {@link CharsKit#defaultCharset()}, continuing until no
+     * data is immediately available, and returns the string.
+     * &lt;p&gt;
+     * If reaches the end of the channel and no data is read, returns {@code null}.
+     *
+     * @param src the channel
+     * @return a string with {@link CharsKit#defaultCharset()}, or {@code null} if reaches the end of the channel and no
+     * data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String availableString(@Nonnull ReadableByteChannel src) throws IORuntimeException {
+<span class="fc" id="L1287">        return io.availableString(src);</span>
+    }
+
+    /**
+     * Reads available data from the channel as a string with the specified charset, continuing until no data is
+     * immediately available, and returns the string.
+     * &lt;p&gt;
+     * If reaches the end of the channel and no data is read, returns {@code null}.
+     *
+     * @param src     the channel
+     * @param charset the specified charset
+     * @return a string with the specified charset, or {@code null} if reaches the end of the channel and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String availableString(
+        @Nonnull ReadableByteChannel src, @Nonnull Charset charset
+    ) throws IORuntimeException {
+<span class="fc" id="L1305">        return io.availableString(src, charset);</span>
+    }
+
+    /**
+     * Reads available data from the reader into the appender, until no data is immediately available, and returns the
+     * actual number of chars read to.
+     * &lt;p&gt;
+     * If reaches the end of the reader and no data is read, returns {@code -1}.
+     *
+     * @param src the reader
+     * @param dst the appender
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of the reader
+     * and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static long availableTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException {
+<span class="fc" id="L1321">        return io.availableTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the reader into the appender, until the read number reaches the specified
+     * length or no data is immediately available, returns the actual number of chars read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the reader and no
+     * data is read, returns {@code -1}.
+     *
+     * @param src the reader
+     * @param dst the appender
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of the reader
+     * and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull Reader src, @Nonnull Appendable dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1342">        return io.availableTo(src, dst, len);</span>
+    }
+
+    /**
+     * Reads available data from the reader into the destination array, until the read number reaches the array's length
+     * or no data is immediately available, and returns the actual number of chars read to.
+     * &lt;p&gt;
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the reader and no
+     * data is read, returns {@code -1}.
+     *
+     * @param src the reader
+     * @param dst the destination array
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of the reader
+     * and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int availableTo(@Nonnull Reader src, char @Nonnull [] dst) throws IORuntimeException {
+<span class="fc" id="L1359">        return io.availableTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the reader into the destination array, starting at the specified offset,
+     * until the read number reaches the specified length or no data is immediately available, and returns the actual
+     * number of chars read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the reader and no
+     * data is read, returns {@code -1}.
+     *
+     * @param src the reader
+     * @param dst the destination array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of the reader
+     * and no data is read
+     * @throws IndexOutOfBoundsException if the arguments are out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    public static int availableTo(
+        @Nonnull Reader src, char @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+<span class="fc" id="L1382">        return io.availableTo(src, dst, off, len);</span>
+    }
+
+    /**
+     * Reads available data from the reader into the destination buffer, until reaches the end of the buffer or no data
+     * is immediately available, and returns the actual number of chars read to.
+     * &lt;p&gt;
+     * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
+     * reader and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the reader
+     * @param dst the destination buffer
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of the reader
+     * and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int availableTo(@Nonnull Reader src, @Nonnull CharBuffer dst) throws IORuntimeException {
+<span class="fc" id="L1401">        return io.availableTo(src, dst);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the reader into the destination buffer, until the read number reaches the
+     * specified length or reaches the end of the buffer or no data is immediately available, and returns the actual
+     * number of chars read to.
+     * &lt;p&gt;
+     * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
+     * reaches the end of the reader and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the reader
+     * @param dst the specified buffer
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of the reader
+     * and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int availableTo(
+        @Nonnull Reader src, @Nonnull CharBuffer dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L1425">        return io.availableTo(src, dst, len);</span>
+    }
+
+    @SuppressWarnings(&quot;resource&quot;)
+    static byte @Nullable [] read0(
+        @Nonnull InputStream src, int bufSize, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc" id="L1432">        BytesBuilder builder = null;</span>
+        try {
+<span class="fc" id="L1434">            int available = src.available();</span>
+<span class="fc bfc" id="L1435" title="All 2 branches covered.">            byte[] buf = new byte[available &gt; 0 ? available : bufSize];</span>
+<span class="fc" id="L1436">            int off = 0;</span>
+            while (true) {
+<span class="fc" id="L1438">                int readSize = src.read(buf, off, buf.length - off);</span>
+<span class="fc bfc" id="L1439" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc bfc" id="L1440" title="All 2 branches covered.">                    if (builder != null) {</span>
+<span class="fc" id="L1441">                        builder.append(buf, 0, off);</span>
+<span class="fc" id="L1442">                        return builder.toByteArray();</span>
+                    }
+<span class="fc" id="L1444">                    int actualCount = readChecker.actualCount(readSize, off);</span>
+<span class="fc bfc" id="L1445" title="All 2 branches covered.">                    if (actualCount &lt; 0) {</span>
+<span class="fc" id="L1446">                        return null;</span>
+                    }
+<span class="fc" id="L1448">                    return Arrays.copyOfRange(buf, 0, off);</span>
+                }
+<span class="fc" id="L1450">                off += readSize;</span>
+<span class="fc bfc" id="L1451" title="All 2 branches covered.">                if (off == buf.length) {</span>
+<span class="fc bfc" id="L1452" title="All 2 branches covered.">                    if (builder == null) {</span>
+<span class="fc" id="L1453">                        int r = src.read();</span>
+<span class="fc bfc" id="L1454" title="All 2 branches covered.">                        if (r &lt; 0) {</span>
+<span class="fc" id="L1455">                            return buf;</span>
+                        }
+<span class="fc" id="L1457">                        builder = new BytesBuilder(buf.length + 1);</span>
+<span class="fc" id="L1458">                        builder.append(buf);</span>
+<span class="fc" id="L1459">                        builder.append(r);</span>
+<span class="fc" id="L1460">                    } else {</span>
+<span class="fc" id="L1461">                        builder.append(buf);</span>
+                    }
+<span class="fc" id="L1463">                    off = 0;</span>
+                }
+<span class="fc" id="L1465">            }</span>
+<span class="fc" id="L1466">        } catch (IOException e) {</span>
+<span class="fc" id="L1467">            throw new IORuntimeException(e);</span>
+        } finally {
+<span class="fc bfc" id="L1469" title="All 2 branches covered.">            if (builder != null) {</span>
+<span class="fc" id="L1470">                builder.close();</span>
+            }
+        }
+    }
+
+    static byte @Nullable [] read0(
+        @Nonnull InputStream src, int len, int bufSize, @Nonnull ReadChecker readChecker
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc bfc" id="L1478" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L1479">            return new byte[0];</span>
+        }
+        try {
+<span class="fc" id="L1482">            byte[] buf = new byte[len];</span>
+<span class="fc" id="L1483">            int off = 0;</span>
+<span class="fc bfc" id="L1484" title="All 2 branches covered.">            while (off &lt; len) {</span>
+<span class="fc" id="L1485">                int readSize = src.read(buf, off, buf.length - off);</span>
+<span class="fc bfc" id="L1486" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1487">                    int actualCount = readChecker.actualCount(readSize, off);</span>
+<span class="fc bfc" id="L1488" title="All 2 branches covered.">                    if (actualCount &lt; 0) {</span>
+<span class="fc" id="L1489">                        return null;</span>
+                    }
+<span class="fc" id="L1491">                    return Arrays.copyOfRange(buf, 0, off);</span>
+                }
+<span class="fc" id="L1493">                off += readSize;</span>
+<span class="fc" id="L1494">            }</span>
+<span class="fc" id="L1495">            return buf;</span>
+<span class="fc" id="L1496">        } catch (IOException e) {</span>
+<span class="fc" id="L1497">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    @SuppressWarnings(&quot;resource&quot;)
+    static @Nullable ByteBuffer read0(
+        @Nonnull ReadableByteChannel src, int bufSize, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc" id="L1505">        BytesBuilder builder = null;</span>
+        try {
+<span class="fc" id="L1507">            ByteBuffer dst = ByteBuffer.allocate(bufSize);</span>
+            int readSize;
+            while (true) {
+<span class="fc" id="L1510">                readSize = src.read(dst);</span>
+<span class="fc bfc" id="L1511" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1512">                    break;</span>
+                }
+<span class="fc bfc" id="L1514" title="All 2 branches covered.">                if (dst.remaining() == 0) {</span>
+<span class="fc bfc" id="L1515" title="All 2 branches covered.">                    if (builder == null) {</span>
+<span class="fc" id="L1516">                        int lastIndex = dst.capacity() - 1;</span>
+<span class="fc" id="L1517">                        byte b = dst.get(lastIndex);</span>
+<span class="fc" id="L1518">                        dst.position(lastIndex);</span>
+<span class="fc" id="L1519">                        int r = src.read(dst);</span>
+<span class="fc" id="L1520">                        dst.position(0);</span>
+<span class="fc bfc" id="L1521" title="All 2 branches covered.">                        if (readChecker.readEnd(r)) {</span>
+<span class="fc" id="L1522">                            return dst;</span>
+                        }
+<span class="fc" id="L1524">                        builder = new BytesBuilder(dst.capacity() + 1);</span>
+<span class="fc" id="L1525">                        dst.limit(lastIndex);</span>
+<span class="fc" id="L1526">                        builder.append(dst);</span>
+<span class="fc" id="L1527">                        builder.append(b);</span>
+<span class="fc" id="L1528">                        dst.limit(dst.capacity());</span>
+<span class="fc" id="L1529">                        builder.append(dst);</span>
+<span class="fc" id="L1530">                    } else {</span>
+<span class="fc" id="L1531">                        dst.flip();</span>
+<span class="fc" id="L1532">                        builder.append(dst);</span>
+                    }
+<span class="fc" id="L1534">                    dst.flip();</span>
+                }
+            }
+<span class="fc bfc" id="L1537" title="All 2 branches covered.">            if (builder == null) {</span>
+<span class="fc" id="L1538">                int actualCount = readChecker.actualCount(readSize, dst.position());</span>
+<span class="fc bfc" id="L1539" title="All 2 branches covered.">                if (actualCount &lt; 0) {</span>
+<span class="fc" id="L1540">                    return null;</span>
+                }
+<span class="fc" id="L1542">                return ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));</span>
+            } else {
+<span class="fc bfc" id="L1544" title="All 2 branches covered.">                if (dst.position() &gt; 0) {</span>
+<span class="fc" id="L1545">                    dst.flip();</span>
+<span class="fc" id="L1546">                    builder.append(dst);</span>
+                }
+<span class="fc" id="L1548">                return builder.toByteBuffer();</span>
+            }
+<span class="fc" id="L1550">        } catch (IOException e) {</span>
+<span class="fc" id="L1551">            throw new IORuntimeException(e);</span>
+        } finally {
+<span class="fc bfc" id="L1553" title="All 2 branches covered.">            if (builder != null) {</span>
+<span class="fc" id="L1554">                builder.close();</span>
+            }
+        }
+    }
+
+    static @Nullable ByteBuffer read0(
+        @Nonnull ReadableByteChannel src, int len, int bufSize, @Nonnull ReadChecker readChecker
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc bfc" id="L1562" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L1563">            return ByteBuffer.allocate(0);</span>
+        }
+        try {
+<span class="fc" id="L1566">            ByteBuffer dst = ByteBuffer.allocate(len);</span>
+<span class="fc bfc" id="L1567" title="All 2 branches covered.">            while (dst.remaining() &gt; 0) {</span>
+<span class="fc" id="L1568">                int readSize = src.read(dst);</span>
+<span class="fc bfc" id="L1569" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1570">                    int actualCount = readChecker.actualCount(readSize, dst.position());</span>
+<span class="fc bfc" id="L1571" title="All 2 branches covered.">                    if (actualCount &lt; 0) {</span>
+<span class="fc" id="L1572">                        return null;</span>
+                    }
+<span class="fc" id="L1574">                    return ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));</span>
+                }
+<span class="fc" id="L1576">            }</span>
+<span class="fc" id="L1577">            dst.flip();</span>
+<span class="fc" id="L1578">            return dst;</span>
+<span class="fc" id="L1579">        } catch (IOException e) {</span>
+<span class="fc" id="L1580">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static long readTo0(
+        @Nonnull InputStream src, @Nonnull OutputStream dst, int bufSize, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+        try {
+<span class="fc" id="L1588">            byte[] buf = new byte[bufSize];</span>
+<span class="fc" id="L1589">            long count = 0;</span>
+            while (true) {
+<span class="fc" id="L1591">                int readSize = src.read(buf);</span>
+<span class="fc bfc" id="L1592" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1593">                    return readChecker.actualCount(readSize, count);</span>
+                }
+<span class="fc" id="L1595">                dst.write(buf, 0, readSize);</span>
+<span class="fc" id="L1596">                count += readSize;</span>
+<span class="fc" id="L1597">            }</span>
+<span class="fc" id="L1598">        } catch (Exception e) {</span>
+<span class="fc" id="L1599">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static long readTo0(
+        @Nonnull InputStream src, @Nonnull OutputStream dst, long len, int bufSize, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L1606" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L1607">            return 0;</span>
+        }
+        try {
+<span class="fc" id="L1610">            byte[] buf = new byte[(int) Math.min(len, bufSize)];</span>
+<span class="fc" id="L1611">            long count = 0;</span>
+<span class="fc bfc" id="L1612" title="All 2 branches covered.">            while (count &lt; len) {</span>
+<span class="fc" id="L1613">                int readSize = src.read(buf, 0, (int) Math.min(buf.length, len - count));</span>
+<span class="fc bfc" id="L1614" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1615">                    return readChecker.actualCount(readSize, count);</span>
+                }
+<span class="fc" id="L1617">                dst.write(buf, 0, readSize);</span>
+<span class="fc" id="L1618">                count += readSize;</span>
+<span class="fc" id="L1619">            }</span>
+<span class="fc" id="L1620">            return count;</span>
+<span class="fc" id="L1621">        } catch (Exception e) {</span>
+<span class="fc" id="L1622">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static long readTo0(
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, int bufSize, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+        try {
+<span class="fc" id="L1630">            byte[] arr = new byte[bufSize];</span>
+<span class="fc" id="L1631">            ByteBuffer buf = ByteBuffer.wrap(arr);</span>
+<span class="fc" id="L1632">            long count = 0;</span>
+            while (true) {
+<span class="fc" id="L1634">                int readSize = src.read(arr);</span>
+<span class="fc bfc" id="L1635" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1636">                    return readChecker.actualCount(readSize, count);</span>
+                }
+<span class="fc" id="L1638">                buf.position(0);</span>
+<span class="fc" id="L1639">                buf.limit(readSize);</span>
+<span class="fc" id="L1640">                BufferKit.readTo(buf, dst);</span>
+<span class="fc" id="L1641">                count += readSize;</span>
+<span class="fc" id="L1642">            }</span>
+<span class="fc" id="L1643">        } catch (Exception e) {</span>
+<span class="fc" id="L1644">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static long readTo0(
+        @Nonnull InputStream src,
+        @Nonnull WritableByteChannel dst,
+        long len,
+        int bufSize,
+        @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L1655" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L1656">            return 0;</span>
+        }
+        try {
+<span class="fc" id="L1659">            byte[] arr = new byte[(int) Math.min(len, bufSize)];</span>
+<span class="fc" id="L1660">            ByteBuffer buf = ByteBuffer.wrap(arr);</span>
+<span class="fc" id="L1661">            long count = 0;</span>
+<span class="fc bfc" id="L1662" title="All 2 branches covered.">            while (count &lt; len) {</span>
+<span class="fc" id="L1663">                int readSize = src.read(arr, 0, (int) Math.min(arr.length, len - count));</span>
+<span class="fc bfc" id="L1664" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1665">                    return readChecker.actualCount(readSize, count);</span>
+                }
+<span class="fc" id="L1667">                buf.position(0);</span>
+<span class="fc" id="L1668">                buf.limit(readSize);</span>
+<span class="fc" id="L1669">                BufferKit.readTo(buf, dst);</span>
+<span class="fc" id="L1670">                count += readSize;</span>
+<span class="fc" id="L1671">            }</span>
+<span class="fc" id="L1672">            return count;</span>
+<span class="fc" id="L1673">        } catch (Exception e) {</span>
+<span class="fc" id="L1674">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static int readTo0(
+        @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L1681" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L1682">            return 0;</span>
+        }
+        try {
+<span class="fc" id="L1685">            int count = 0;</span>
+<span class="fc bfc" id="L1686" title="All 2 branches covered.">            while (count &lt; len) {</span>
+<span class="fc" id="L1687">                int readSize = src.read(dst, off + count, len - count);</span>
+<span class="fc bfc" id="L1688" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1689">                    return readChecker.actualCount(readSize, count);</span>
+                }
+<span class="fc" id="L1691">                count += readSize;</span>
+<span class="fc" id="L1692">            }</span>
+<span class="fc" id="L1693">            return count;</span>
+<span class="fc" id="L1694">        } catch (Exception e) {</span>
+<span class="fc" id="L1695">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static int readTo0(
+        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L1702" title="All 4 branches covered.">        if (len == 0 || dst.remaining() == 0) {</span>
+<span class="fc" id="L1703">            return 0;</span>
+        }
+<span class="fc" id="L1705">        return readTo0WithActualLen(src, dst, Math.min(dst.remaining(), len), readChecker);</span>
+    }
+
+    static long readTo0(
+        @Nonnull ReadableByteChannel src,
+        @Nonnull OutputStream dst,
+        int bufSize,
+        @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+        try {
+<span class="fc" id="L1715">            ByteBuffer buf = ByteBuffer.allocate(bufSize);</span>
+<span class="fc" id="L1716">            long count = 0;</span>
+            while (true) {
+<span class="fc" id="L1718">                int readSize = src.read(buf);</span>
+<span class="fc bfc" id="L1719" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1720">                    return readChecker.actualCount(readSize, count);</span>
+                }
+<span class="fc" id="L1722">                buf.flip();</span>
+<span class="fc" id="L1723">                BufferKit.readTo(buf, dst);</span>
+<span class="fc" id="L1724">                count += readSize;</span>
+<span class="fc" id="L1725">                buf.clear();</span>
+<span class="fc" id="L1726">            }</span>
+<span class="fc" id="L1727">        } catch (Exception e) {</span>
+<span class="fc" id="L1728">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static long readTo0(
+        @Nonnull ReadableByteChannel src,
+        @Nonnull OutputStream dst,
+        long len,
+        int bufSize,
+        @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L1739" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L1740">            return 0;</span>
+        }
+        try {
+<span class="fc" id="L1743">            int actualBufSize = (int) Math.min(len, bufSize);</span>
+<span class="fc" id="L1744">            ByteBuffer buf = ByteBuffer.allocate(actualBufSize);</span>
+<span class="fc" id="L1745">            long count = 0;</span>
+<span class="fc bfc" id="L1746" title="All 2 branches covered.">            while (count &lt; len) {</span>
+<span class="fc" id="L1747">                int actualSize = (int) Math.min(actualBufSize, len - count);</span>
+<span class="fc" id="L1748">                buf.limit(actualSize);</span>
+<span class="fc" id="L1749">                int readSize = src.read(buf);</span>
+<span class="fc bfc" id="L1750" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1751">                    return readChecker.actualCount(readSize, count);</span>
+                }
+<span class="fc" id="L1753">                buf.flip();</span>
+<span class="fc" id="L1754">                BufferKit.readTo(buf, dst);</span>
+<span class="fc" id="L1755">                count += readSize;</span>
+<span class="fc" id="L1756">                buf.clear();</span>
+<span class="fc" id="L1757">            }</span>
+<span class="fc" id="L1758">            return count;</span>
+<span class="fc" id="L1759">        } catch (Exception e) {</span>
+<span class="fc" id="L1760">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static long readTo0(
+        @Nonnull ReadableByteChannel src,
+        @Nonnull WritableByteChannel dst,
+        int bufSize,
+        @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+        try {
+<span class="fc" id="L1771">            ByteBuffer buf = ByteBuffer.allocate(bufSize);</span>
+<span class="fc" id="L1772">            long count = 0;</span>
+            while (true) {
+<span class="fc" id="L1774">                int readSize = src.read(buf);</span>
+<span class="fc bfc" id="L1775" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1776">                    return readChecker.actualCount(readSize, count);</span>
+                }
+<span class="fc" id="L1778">                buf.flip();</span>
+<span class="fc" id="L1779">                BufferKit.readTo(buf, dst);</span>
+<span class="fc" id="L1780">                count += readSize;</span>
+<span class="fc" id="L1781">                buf.clear();</span>
+<span class="fc" id="L1782">            }</span>
+<span class="fc" id="L1783">        } catch (Exception e) {</span>
+<span class="fc" id="L1784">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static long readTo0(
+        @Nonnull ReadableByteChannel src,
+        @Nonnull WritableByteChannel dst,
+        long len,
+        int bufSize,
+        @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L1795" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L1796">            return 0;</span>
+        }
+        try {
+<span class="fc" id="L1799">            int actualBufSize = (int) Math.min(len, bufSize);</span>
+<span class="fc" id="L1800">            ByteBuffer buf = ByteBuffer.allocate(actualBufSize);</span>
+<span class="fc" id="L1801">            long count = 0;</span>
+<span class="fc bfc" id="L1802" title="All 2 branches covered.">            while (count &lt; len) {</span>
+<span class="fc" id="L1803">                int actualSize = (int) Math.min(actualBufSize, len - count);</span>
+<span class="fc" id="L1804">                buf.limit(actualSize);</span>
+<span class="fc" id="L1805">                int readSize = src.read(buf);</span>
+<span class="fc bfc" id="L1806" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1807">                    return readChecker.actualCount(readSize, count);</span>
+                }
+<span class="fc" id="L1809">                buf.flip();</span>
+<span class="fc" id="L1810">                BufferKit.readTo(buf, dst);</span>
+<span class="fc" id="L1811">                count += readSize;</span>
+<span class="fc" id="L1812">                buf.clear();</span>
+<span class="fc" id="L1813">            }</span>
+<span class="fc" id="L1814">            return count;</span>
+<span class="fc" id="L1815">        } catch (Exception e) {</span>
+<span class="fc" id="L1816">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static int readTo0(
+        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L1823" title="All 2 branches covered.">        if (dst.remaining() == 0) {</span>
+<span class="fc" id="L1824">            return 0;</span>
+        }
+        try {
+<span class="fc" id="L1827">            int count = 0;</span>
+<span class="fc bfc" id="L1828" title="All 2 branches covered.">            while (dst.hasRemaining()) {</span>
+<span class="fc" id="L1829">                int readSize = src.read(dst);</span>
+<span class="fc bfc" id="L1830" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1831">                    return readChecker.actualCount(readSize, count);</span>
+                }
+<span class="fc" id="L1833">                count += readSize;</span>
+<span class="fc" id="L1834">            }</span>
+<span class="fc" id="L1835">            return count;</span>
+<span class="fc" id="L1836">        } catch (Exception e) {</span>
+<span class="fc" id="L1837">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static int readTo0(
+        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L1844" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L1845">            return 0;</span>
+        }
+<span class="fc" id="L1847">        int remaining = dst.remaining();</span>
+<span class="fc bfc" id="L1848" title="All 2 branches covered.">        if (remaining == 0) {</span>
+<span class="fc" id="L1849">            return 0;</span>
+        }
+<span class="fc" id="L1851">        int pos = dst.position();</span>
+<span class="fc" id="L1852">        int oldLimit = dst.limit();</span>
+<span class="fc" id="L1853">        int actualLen = Math.min(remaining, len);</span>
+<span class="fc" id="L1854">        dst.limit(pos + actualLen);</span>
+<span class="fc" id="L1855">        int ret = readTo0(src, dst, readChecker);</span>
+<span class="fc bfc" id="L1856" title="All 2 branches covered.">        if (ret &lt;= 0) {</span>
+<span class="fc" id="L1857">            return ret;</span>
+        }
+<span class="fc" id="L1859">        dst.position(pos + ret);</span>
+<span class="fc" id="L1860">        dst.limit(oldLimit);</span>
+<span class="fc" id="L1861">        return ret;</span>
+    }
+
+    static int readTo0WithActualLen(
+        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int actualLen, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+        try {
+<span class="fc bfc" id="L1868" title="All 2 branches covered.">            if (dst.hasArray()) {</span>
+<span class="fc" id="L1869">                int pos = dst.position();</span>
+<span class="fc" id="L1870">                int ret = readTo0(src, dst.array(), BufferKit.arrayStartIndex(dst), actualLen, readChecker);</span>
+<span class="fc bfc" id="L1871" title="All 2 branches covered.">                if (ret &lt;= 0) {</span>
+<span class="fc" id="L1872">                    return ret;</span>
+                }
+<span class="fc" id="L1874">                dst.position(pos + ret);</span>
+<span class="fc" id="L1875">                return ret;</span>
+            } else {
+<span class="fc" id="L1877">                byte[] buf = new byte[actualLen];</span>
+<span class="fc" id="L1878">                int ret = readTo0(src, buf, 0, buf.length, readChecker);</span>
+<span class="fc bfc" id="L1879" title="All 2 branches covered.">                if (ret &lt;= 0) {</span>
+<span class="fc" id="L1880">                    return ret;</span>
+                }
+<span class="fc" id="L1882">                dst.put(buf, 0, ret);</span>
+<span class="fc" id="L1883">                return ret;</span>
+            }
+<span class="fc" id="L1885">        } catch (Exception e) {</span>
+<span class="fc" id="L1886">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    @SuppressWarnings(&quot;resource&quot;)
+    static char @Nullable [] read0(
+        @Nonnull Reader src, int bufSize, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc" id="L1894">        CharsBuilder builder = null;</span>
+        try {
+<span class="fc" id="L1896">            char[] buf = new char[bufSize];</span>
+<span class="fc" id="L1897">            int off = 0;</span>
+            while (true) {
+<span class="fc" id="L1899">                int readSize = src.read(buf, off, buf.length - off);</span>
+<span class="fc bfc" id="L1900" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc bfc" id="L1901" title="All 2 branches covered.">                    if (builder != null) {</span>
+<span class="fc" id="L1902">                        builder.append(buf, 0, off);</span>
+<span class="fc" id="L1903">                        return builder.toCharArray();</span>
+                    }
+<span class="fc" id="L1905">                    int actualCount = readChecker.actualCount(readSize, off);</span>
+<span class="fc bfc" id="L1906" title="All 2 branches covered.">                    if (actualCount &lt; 0) {</span>
+<span class="fc" id="L1907">                        return null;</span>
+                    }
+<span class="fc" id="L1909">                    return Arrays.copyOfRange(buf, 0, off);</span>
+                }
+<span class="fc" id="L1911">                off += readSize;</span>
+<span class="fc bfc" id="L1912" title="All 2 branches covered.">                if (off == buf.length) {</span>
+<span class="fc bfc" id="L1913" title="All 2 branches covered.">                    if (builder == null) {</span>
+<span class="fc" id="L1914">                        int r = src.read();</span>
+<span class="fc bfc" id="L1915" title="All 2 branches covered.">                        if (r &lt; 0) {</span>
+<span class="fc" id="L1916">                            return buf;</span>
+                        }
+<span class="fc" id="L1918">                        builder = new CharsBuilder(buf.length + 1);</span>
+<span class="fc" id="L1919">                        builder.append(buf);</span>
+<span class="fc" id="L1920">                        builder.append(r);</span>
+<span class="fc" id="L1921">                    } else {</span>
+<span class="fc" id="L1922">                        builder.append(buf);</span>
+                    }
+<span class="fc" id="L1924">                    off = 0;</span>
+                }
+<span class="fc" id="L1926">            }</span>
+<span class="fc" id="L1927">        } catch (IOException e) {</span>
+<span class="fc" id="L1928">            throw new IORuntimeException(e);</span>
+        } finally {
+<span class="fc bfc" id="L1930" title="All 2 branches covered.">            if (builder != null) {</span>
+<span class="fc" id="L1931">                builder.close();</span>
+            }
+        }
+    }
+
+    static char @Nullable [] read0(
+        @Nonnull Reader src, int len, int bufSize, @Nonnull ReadChecker readChecker
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc bfc" id="L1939" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L1940">            return new char[0];</span>
+        }
+        try {
+<span class="fc" id="L1943">            char[] buf = new char[len];</span>
+<span class="fc" id="L1944">            int off = 0;</span>
+<span class="fc bfc" id="L1945" title="All 2 branches covered.">            while (off &lt; len) {</span>
+<span class="fc" id="L1946">                int readSize = src.read(buf, off, buf.length - off);</span>
+<span class="fc bfc" id="L1947" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1948">                    int actualCount = readChecker.actualCount(readSize, off);</span>
+<span class="fc bfc" id="L1949" title="All 2 branches covered.">                    if (actualCount &lt; 0) {</span>
+<span class="fc" id="L1950">                        return null;</span>
+                    }
+<span class="fc" id="L1952">                    return Arrays.copyOfRange(buf, 0, off);</span>
+                }
+<span class="fc" id="L1954">                off += readSize;</span>
+<span class="fc" id="L1955">            }</span>
+<span class="fc" id="L1956">            return buf;</span>
+<span class="fc" id="L1957">        } catch (IOException e) {</span>
+<span class="fc" id="L1958">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static long readTo0(
+        @Nonnull Reader src, @Nonnull Appendable dst, int bufSize, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+        try {
+<span class="fc" id="L1966">            char[] buf = new char[bufSize];</span>
+<span class="fc" id="L1967">            long count = 0;</span>
+            while (true) {
+<span class="fc" id="L1969">                int readSize = src.read(buf);</span>
+<span class="fc bfc" id="L1970" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1971">                    return readChecker.actualCount(readSize, count);</span>
+                }
+<span class="fc" id="L1973">                IOKit.write(dst, buf, 0, readSize);</span>
+<span class="fc" id="L1974">                count += readSize;</span>
+<span class="fc" id="L1975">            }</span>
+<span class="fc" id="L1976">        } catch (Exception e) {</span>
+<span class="fc" id="L1977">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static long readTo0(
+        @Nonnull Reader src, @Nonnull Appendable dst, long len, int bufSize, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L1984" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L1985">            return 0;</span>
+        }
+        try {
+<span class="fc" id="L1988">            char[] buf = new char[(int) Math.min(len, bufSize)];</span>
+<span class="fc" id="L1989">            long count = 0;</span>
+<span class="fc bfc" id="L1990" title="All 2 branches covered.">            while (count &lt; len) {</span>
+<span class="fc" id="L1991">                int readSize = src.read(buf, 0, (int) Math.min(buf.length, len - count));</span>
+<span class="fc bfc" id="L1992" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L1993">                    return readChecker.actualCount(readSize, count);</span>
+                }
+<span class="fc" id="L1995">                IOKit.write(dst, buf, 0, readSize);</span>
+<span class="fc" id="L1996">                count += readSize;</span>
+<span class="fc" id="L1997">            }</span>
+<span class="fc" id="L1998">            return count;</span>
+<span class="fc" id="L1999">        } catch (Exception e) {</span>
+<span class="fc" id="L2000">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static int readTo0(
+        @Nonnull Reader src, char @Nonnull [] dst, int off, int len, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L2007" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L2008">            return 0;</span>
+        }
+        try {
+<span class="fc" id="L2011">            int count = 0;</span>
+<span class="fc bfc" id="L2012" title="All 2 branches covered.">            while (count &lt; len) {</span>
+<span class="fc" id="L2013">                int readSize = src.read(dst, off + count, len - count);</span>
+<span class="fc bfc" id="L2014" title="All 2 branches covered.">                if (readChecker.readEnd(readSize)) {</span>
+<span class="fc" id="L2015">                    return readChecker.actualCount(readSize, count);</span>
+                }
+<span class="fc" id="L2017">                count += readSize;</span>
+<span class="fc" id="L2018">            }</span>
+<span class="fc" id="L2019">            return count;</span>
+<span class="fc" id="L2020">        } catch (Exception e) {</span>
+<span class="fc" id="L2021">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static int readTo0(
+        @Nonnull Reader src, @Nonnull CharBuffer dst, int len, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L2028" title="All 4 branches covered.">        if (len == 0 || dst.remaining() == 0) {</span>
+<span class="fc" id="L2029">            return 0;</span>
+        }
+<span class="fc" id="L2031">        return readTo0WithActualLen(src, dst, Math.min(dst.remaining(), len), readChecker);</span>
+    }
+
+    static int readTo0WithActualLen(
+        @Nonnull Reader src, @Nonnull CharBuffer dst, int actualLen, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+        try {
+<span class="fc bfc" id="L2038" title="All 2 branches covered.">            if (dst.hasArray()) {</span>
+<span class="fc" id="L2039">                int pos = dst.position();</span>
+<span class="fc" id="L2040">                int ret = readTo0(src, dst.array(), BufferKit.arrayStartIndex(dst), actualLen, readChecker);</span>
+<span class="fc bfc" id="L2041" title="All 2 branches covered.">                if (ret &lt;= 0) {</span>
+<span class="fc" id="L2042">                    return ret;</span>
+                }
+<span class="fc" id="L2044">                dst.position(pos + ret);</span>
+<span class="fc" id="L2045">                return ret;</span>
+            } else {
+<span class="fc" id="L2047">                char[] buf = new char[actualLen];</span>
+<span class="fc" id="L2048">                int ret = readTo0(src, buf, 0, buf.length, readChecker);</span>
+<span class="fc bfc" id="L2049" title="All 2 branches covered.">                if (ret &lt;= 0) {</span>
+<span class="fc" id="L2050">                    return ret;</span>
+                }
+<span class="fc" id="L2052">                dst.put(buf, 0, ret);</span>
+<span class="fc" id="L2053">                return ret;</span>
+            }
+<span class="fc" id="L2055">        } catch (Exception e) {</span>
+<span class="fc" id="L2056">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    /**
+     * Writes all data to the specified appender from the given array.
+     *
+     * @param dst the specified appender
+     * @param src the given array
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(@Nonnull Appendable dst, char @Nonnull [] src) throws IORuntimeException {
+<span class="fc" id="L2068">        write(dst, src, 0, src.length);</span>
+<span class="fc" id="L2069">    }</span>
+
+    /**
+     * Writes a specified length of data to the specified appender from the given array, starting at the specified
+     * offset.
+     *
+     * @param dst the specified appender
+     * @param src the given array
+     * @param off the specified offset
+     * @param len the specified length
+     * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull Appendable dst, char @Nonnull [] src, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        try {
+<span class="fc bfc" id="L2086" title="All 2 branches covered.">            if (dst instanceof Writer) {</span>
+<span class="fc" id="L2087">                ((Writer) dst).write(src, off, len);</span>
+<span class="fc" id="L2088">                return;</span>
+            }
+<span class="fc" id="L2090">            dst.append(new String(src, off, len));</span>
+<span class="fc" id="L2091">        } catch (IOException e) {</span>
+<span class="fc" id="L2092">            throw new IORuntimeException(e);</span>
+<span class="fc" id="L2093">        }</span>
+<span class="fc" id="L2094">    }</span>
+
+    /**
+     * Writes string to the specified output stream with {@link CharsKit#defaultCharset()}.
+     *
+     * @param dst the specified output stream
+     * @param str the string to write to the output stream
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull OutputStream dst, @Nonnull String str
+    ) throws IORuntimeException {
+<span class="fc" id="L2106">        write(dst, str, CharsKit.defaultCharset());</span>
+<span class="fc" id="L2107">    }</span>
+
+    /**
+     * Writes string to the specified output stream with the specified charset.
+     *
+     * @param dst     the specified output stream
+     * @param str     the string to write to the output stream
+     * @param charset the specified charset
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull OutputStream dst, @Nonnull String str, @Nonnull Charset charset
+    ) throws IORuntimeException {
+        try {
+<span class="fc" id="L2121">            byte[] bytes = str.getBytes(charset);</span>
+<span class="fc" id="L2122">            dst.write(bytes);</span>
+<span class="fc" id="L2123">        } catch (IOException e) {</span>
+<span class="fc" id="L2124">            throw new IORuntimeException(e);</span>
+<span class="fc" id="L2125">        }</span>
+<span class="fc" id="L2126">    }</span>
+
+    /**
+     * Closes the given closeable object, which is an instance of {@link Closeable} or {@link AutoCloseable}. If the
+     * given object is not an instance of above interfaces, then invoking this method has no effect.
+     *
+     * @param closeable the given closeable object
+     * @throws IOException if an I/O error occurs
+     */
+    public static void close(Object closeable) throws IOException {
+<span class="fc bfc" id="L2136" title="All 2 branches covered.">        if (closeable instanceof Closeable) {</span>
+<span class="fc" id="L2137">            ((Closeable) closeable).close();</span>
+<span class="fc bfc" id="L2138" title="All 2 branches covered.">        } else if (closeable instanceof AutoCloseable) {</span>
+            try {
+<span class="fc" id="L2140">                ((AutoCloseable) closeable).close();</span>
+<span class="fc" id="L2141">            } catch (IOException e) {</span>
+<span class="fc" id="L2142">                throw e;</span>
+<span class="fc" id="L2143">            } catch (Exception e) {</span>
+<span class="fc" id="L2144">                throw new IOException(e);</span>
+<span class="fc" id="L2145">            }</span>
+        }
+<span class="fc" id="L2147">    }</span>
+
+    /**
+     * Flushes the given flushable object, which is an instance of {@link Flushable}. If the given object is not an
+     * instance of {@link Flushable}, then invoking this method has no effect.
+     *
+     * @param flushable the given flushable object
+     * @throws IOException if an I/O error occurs
+     */
+    public static void flush(Object flushable) throws IOException {
+<span class="fc bfc" id="L2157" title="All 2 branches covered.">        if (flushable instanceof Flushable) {</span>
+<span class="fc" id="L2158">            ((Flushable) flushable).flush();</span>
+        }
+<span class="fc" id="L2160">    }</span>
+
+    /**
+     * Wraps the given array as a new {@link InputStream}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: supported and size-unlimited;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param array the given array
+     * @return the given array as a new {@link InputStream}
+     */
+    public static @Nonnull InputStream newInputStream(byte @Nonnull [] array) {
+<span class="fc" id="L2176">        return IOBack.inputStream(array);</span>
+    }
+
+    /**
+     * Wraps a specified length of data from the given array, starting at the specified offset, as a new
+     * {@link InputStream}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: supported and size-unlimited;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param array the given array
+     * @param off   the specified offset
+     * @param len   the specified length
+     * @return the given array as a new {@link InputStream}
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     */
+    public static @Nonnull InputStream newInputStream(
+        byte @Nonnull [] array, int off, int len
+    ) throws IndexOutOfBoundsException {
+<span class="fc" id="L2199">        return IOBack.inputStream(array, off, len);</span>
+    }
+
+    /**
+     * Wraps the given buffer as a new {@link InputStream}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: supported and size-unlimited;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param buffer the given buffer
+     * @return the given buffer as a new {@link InputStream}
+     */
+    public static @Nonnull InputStream newInputStream(@Nonnull ByteBuffer buffer) {
+<span class="fc" id="L2216">        return IOBack.inputStream(buffer);</span>
+    }
+
+    /**
+     * Wraps the given random access file, starting at the specified file pointer offset, as a new {@link InputStream}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: supports via {@link RandomAccessFile#seek(long)};&lt;/li&gt;
+     *     &lt;li&gt;close: closes the random access file;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param raf the given random access file
+     * @param off the specified file pointer offset
+     * @return the given random access file as a new {@link InputStream}
+     * @throws IllegalArgumentException if the offset is negative
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static @Nonnull InputStream newInputStream(
+        @Nonnull RandomAccessFile raf, long off
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L2238">        return IOBack.inputStream(raf, off);</span>
+    }
+
+    /**
+     * Wraps the given reader as a new {@link InputStream} with {@link CharsKit#defaultCharset()}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: based on the given reader;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the reader;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param reader the given reader
+     * @return the given reader as a new {@link InputStream}
+     */
+    public static @Nonnull InputStream newInputStream(@Nonnull Reader reader) {
+<span class="fc" id="L2255">        return newInputStream(reader, CharsKit.defaultCharset());</span>
+    }
+
+    /**
+     * Wraps the given reader as a new {@link InputStream} with the specified charset.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: based on the given reader;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the reader;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param reader  the given reader
+     * @param charset the specified charset
+     * @return the given reader as a new {@link InputStream}
+     */
+    public static @Nonnull InputStream newInputStream(@Nonnull Reader reader, @Nonnull Charset charset) {
+<span class="fc" id="L2273">        return IOBack.inputStream(reader, charset);</span>
+    }
+
+    /**
+     * Wraps the given stream as a new {@link InputStream} of which readable number is limited to the specified limit.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: based on the given stream;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the given stream;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param stream the given stream
+     * @param limit  the specified limit, must {@code &gt;= 0}
+     * @return the given stream as a new {@link InputStream} of which readable number is limited to the specified limit
+     * @throws IllegalArgumentException if the limit argument is negative
+     */
+    public static @Nonnull InputStream limitedInputStream(
+        @Nonnull InputStream stream, long limit
+    ) throws IllegalArgumentException {
+<span class="fc" id="L2294">        return IOBack.inputStream(stream, limit);</span>
+    }
+
+    /**
+     * Returns a singleton empty {@link InputStream}.
+     *
+     * @return a singleton empty {@link InputStream}
+     */
+    public static @Nonnull InputStream emptyInputStream() {
+<span class="fc" id="L2303">        return IOBack.emptyInputStream();</span>
+    }
+
+    /**
+     * Wraps the given array as a new {@link Reader}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: supported and size-unlimited;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param array the given array
+     * @return the given array as a new {@link Reader}
+     */
+    public static @Nonnull Reader newReader(char @Nonnull [] array) {
+<span class="fc" id="L2320">        return IOBack.reader(array);</span>
+    }
+
+    /**
+     * Wraps a specified length of data from the given array, starting at the specified offset, as a new
+     * {@link Reader}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: supported and size-unlimited;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param array the given array
+     * @param off   the specified offset
+     * @param len   the specified length
+     * @return the given array as a new {@link Reader}
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     */
+    public static @Nonnull Reader newReader(
+        char @Nonnull [] array, int off, int len
+    ) throws IndexOutOfBoundsException {
+<span class="fc" id="L2343">        return IOBack.reader(array, off, len);</span>
+    }
+
+    /**
+     * Wraps the given char sequence as a new {@link Reader}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: supported and size-unlimited;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param chars the given char sequence
+     * @return the given char sequence as a new {@link Reader}
+     */
+    public static @Nonnull Reader newReader(@Nonnull CharSequence chars) {
+<span class="fc" id="L2360">        return IOBack.reader(chars);</span>
+    }
+
+    /**
+     * Wraps the given char sequence, starting at the specified start index inclusive and ending at the specified end
+     * index exclusive, as a new {@link Reader}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: supported and size-unlimited;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param chars the given char sequence
+     * @param start the specified start index inclusive
+     * @param end   the specified end index exclusive
+     * @return the given char sequence as a new {@link Reader}
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     */
+    public static @Nonnull Reader newReader(
+        @Nonnull CharSequence chars, int start, int end
+    ) throws IndexOutOfBoundsException {
+<span class="fc" id="L2383">        return IOBack.reader(chars, start, end);</span>
+    }
+
+    /**
+     * Wraps the given buffer as a new {@link Reader}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: supported and size-unlimited;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param buffer the given buffer
+     * @return the given buffer as a new {@link Reader}
+     */
+    public static @Nonnull Reader newReader(@Nonnull CharBuffer buffer) {
+<span class="fc" id="L2400">        return IOBack.reader(buffer);</span>
+    }
+
+    /**
+     * Wraps the given stream as a new {@link Reader} with {@link CharsKit#defaultCharset()}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: based on the given stream;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the stream;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param stream the given stream
+     * @return the given stream as a new {@link Reader}
+     */
+    public static @Nonnull Reader newReader(@Nonnull InputStream stream) {
+<span class="fc" id="L2417">        return newReader(stream, CharsKit.defaultCharset());</span>
+    }
+
+    /**
+     * Wraps the given stream as a new {@link Reader} with the specified charset.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: based on the given stream;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the stream;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param stream  the given stream
+     * @param charset the specified charset
+     * @return the given stream as a new {@link Reader}
+     */
+    public static @Nonnull Reader newReader(@Nonnull InputStream stream, @Nonnull Charset charset) {
+<span class="fc" id="L2435">        return IOBack.reader(stream, charset);</span>
+    }
+
+    /**
+     * Wraps the given reader as a new {@link Reader} of which readable number is limited to the specified limit.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: based on the given reader;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the given reader;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param reader the given reader
+     * @param limit  the specified limit, must {@code &gt;= 0}
+     * @return the given reader as a new {@link Reader} of which readable number is limited to the specified limit
+     * @throws IllegalArgumentException if the limit argument is negative
+     */
+    public static @Nonnull Reader limitedReader(@Nonnull Reader reader, long limit) throws IllegalArgumentException {
+<span class="fc" id="L2454">        return IOBack.reader(reader, limit);</span>
+    }
+
+    /**
+     * Returns a singleton empty {@link Reader}.
+     *
+     * @return a singleton empty {@link Reader}
+     */
+    public static @Nonnull Reader emptyReader() {
+<span class="fc" id="L2463">        return IOBack.emptyReader();</span>
+    }
+
+    /**
+     * Wraps the given array as a new {@link OutputStream}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;capacity: in bounds of the array;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;flush: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param array the given array
+     * @return the given array as a new {@link OutputStream}
+     */
+    public static @Nonnull OutputStream newOutputStream(byte @Nonnull [] array) {
+<span class="fc" id="L2481">        return IOBack.outputStream(array);</span>
+    }
+
+    /**
+     * Wraps a specified length of data from the given array, starting at the specified offset, as a new
+     * {@link OutputStream}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;capacity: in specified bounds of the array;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;flush: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param array the given array
+     * @param off   the specified offset
+     * @param len   the specified length
+     * @return the given array as a new {@link OutputStream}
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     */
+    public static @Nonnull OutputStream newOutputStream(
+        byte @Nonnull [] array, int off, int len
+    ) throws IndexOutOfBoundsException {
+<span class="fc" id="L2505">        return IOBack.outputStream(array, off, len);</span>
+    }
+
+    /**
+     * Wraps the given buffer as a new {@link OutputStream}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;capacity: in bounds of the buffer;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;flush: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param buffer the given buffer
+     * @return the given buffer as a new {@link OutputStream}
+     */
+    public static @Nonnull OutputStream newOutputStream(@Nonnull ByteBuffer buffer) {
+<span class="fc" id="L2523">        return IOBack.outputStream(buffer);</span>
+    }
+
+    /**
+     * Wraps the given random access file, starting at the specified file pointer offset, as a new
+     * {@link OutputStream}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;capacity:determined by the random access file;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the random access file;&lt;/li&gt;
+     *     &lt;li&gt;flush: flushes the random access file;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param raf the given random access file
+     * @param off the specified file pointer offset
+     * @return the given random access file as a new {@link OutputStream}
+     * @throws IllegalArgumentException if the offset is negative
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static @Nonnull OutputStream newOutputStream(
+        @Nonnull RandomAccessFile raf, long off
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L2547">        return IOBack.outputStream(raf, off);</span>
+    }
+
+    /**
+     * Wraps the given appender as a new {@link OutputStream} with {@link CharsKit#defaultCharset()}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;capacity:determined by the appender;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the appender;&lt;/li&gt;
+     *     &lt;li&gt;flush: flushes the appender;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param appender the given appender
+     * @return the given appender as a new {@link InputStream}
+     */
+    public static @Nonnull OutputStream newOutputStream(@Nonnull Appendable appender) {
+<span class="fc" id="L2565">        return newOutputStream(appender, CharsKit.defaultCharset());</span>
+    }
+
+    /**
+     * Wraps the given appender as a new {@link OutputStream} with the specified charset.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;capacity:determined by the appender;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the appender;&lt;/li&gt;
+     *     &lt;li&gt;flush: flushes the appender;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param appender the given appender
+     * @param charset  the specified charset
+     * @return the given appender as a new {@link OutputStream}
+     */
+    public static @Nonnull OutputStream newOutputStream(@Nonnull Appendable appender, @Nonnull Charset charset) {
+<span class="fc" id="L2584">        return IOBack.outputStream(appender, charset);</span>
+    }
+
+    /**
+     * Wraps the given stream as a new {@link OutputStream} of which writable number is limited to the specified limit.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;capacity: based on the given stream and limited by the specified limit;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the given stream;&lt;/li&gt;
+     *     &lt;li&gt;flush: flushes the given stream;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param stream the given stream
+     * @param limit  the specified limit, must {@code &gt;= 0}
+     * @return the given stream as a new {@link OutputStream} of which writable number is limited to the specified limit
+     * @throws IllegalArgumentException if the limit argument is negative
+     */
+    public static @Nonnull OutputStream limitedOutputStream(
+        @Nonnull OutputStream stream, long limit
+    ) throws IllegalArgumentException {
+<span class="fc" id="L2606">        return IOBack.outputStream(stream, limit);</span>
+    }
+
+    /**
+     * Returns a singleton {@link OutputStream} which supports writing infinitely data but immediately discards them.
+     *
+     * @return a singleton {@link OutputStream} which supports writing infinitely data but immediately discards them.
+     */
+    public static @Nonnull OutputStream nullOutputStream() {
+<span class="fc" id="L2615">        return IOBack.nullOutputStream();</span>
+    }
+
+    /**
+     * Wraps the given array as a new {@link Writer}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;capacity: in bounds of the array;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;flush: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param array the given array
+     * @return the given array as a new {@link Writer}
+     */
+    public static @Nonnull Writer newWriter(char @Nonnull [] array) {
+<span class="fc" id="L2633">        return IOBack.writer(array);</span>
+    }
+
+    /**
+     * Wraps a specified length of data from the given array, starting at the specified offset, as a new
+     * {@link Writer}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;capacity: in specified bounds of the array;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;flush: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param array the given array
+     * @param off   the specified offset
+     * @param len   the specified length
+     * @return the given array as a new {@link Writer}
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     */
+    public static @Nonnull Writer newWriter(
+        char @Nonnull [] array, int off, int len
+    ) throws IndexOutOfBoundsException {
+<span class="fc" id="L2657">        return IOBack.writer(array, off, len);</span>
+    }
+
+    /**
+     * Wraps the given buffer as a new {@link Writer}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;capacity: in bounds of the buffer;&lt;/li&gt;
+     *     &lt;li&gt;close: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;flush: invoking has no effect;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param buffer the given buffer
+     * @return the given buffer as a new {@link Writer}
+     */
+    public static @Nonnull Writer newWriter(@Nonnull CharBuffer buffer) {
+<span class="fc" id="L2675">        return IOBack.writer(buffer);</span>
+    }
+
+    /**
+     * Wraps the given stream as a new {@link Writer} with {@link CharsKit#defaultCharset()}.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;capacity:determined by the stream;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the stream;&lt;/li&gt;
+     *     &lt;li&gt;flush: flushes the stream;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param stream the given stream
+     * @return the given stream as a new {@link InputStream}
+     */
+    public static @Nonnull Writer newWriter(@Nonnull OutputStream stream) {
+<span class="fc" id="L2693">        return newWriter(stream, CharsKit.defaultCharset());</span>
+    }
+
+    /**
+     * Wraps the given stream as a new {@link Writer} with the specified charset.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;capacity:determined by the stream;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the stream;&lt;/li&gt;
+     *     &lt;li&gt;flush: flushes the stream;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param stream  the given stream
+     * @param charset the specified charset
+     * @return the given stream as a new {@link Writer}
+     */
+    public static @Nonnull Writer newWriter(@Nonnull OutputStream stream, @Nonnull Charset charset) {
+<span class="fc" id="L2712">        return IOBack.writer(stream, charset);</span>
+    }
+
+    /**
+     * Wraps the given writer as a new {@link Writer} of which writable number is limited to the specified limit.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;capacity: based on the given writer and limited by the specified limit;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the given writer;&lt;/li&gt;
+     *     &lt;li&gt;flush: flushes the given writer;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param writer the given writer
+     * @param limit  the specified limit, must {@code &gt;= 0}
+     * @return the given writer as a new {@link Writer} of which writable number is limited to the specified limit
+     * @throws IllegalArgumentException if the limit argument is negative
+     */
+    public static @Nonnull Writer limitedWriter(@Nonnull Writer writer, long limit) throws IllegalArgumentException {
+<span class="fc" id="L2732">        return IOBack.writer(writer, limit);</span>
+    }
+
+    /**
+     * Returns a singleton {@link Writer} which supports writing infinitely data but immediately discards them.
+     *
+     * @return a singleton {@link Writer} which supports writing infinitely data but immediately discards them.
+     */
+    public static @Nonnull Writer nullWriter() {
+<span class="fc" id="L2741">        return IOBack.nullWriter();</span>
+    }
+
+    private IOKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,1196 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BufferKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.io</a> &gt; <span class="el_source">BufferKit.java</span></div><h1>BufferKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.io;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+import space.sunqian.common.base.bytes.BytesKit;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.base.math.MathKit;
+
+import java.io.OutputStream;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.CharBuffer;
+import java.nio.ReadOnlyBufferException;
+import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
+
+/**
+ * Utilities for {@link Buffer} related.
+ *
+ * @author sunqian
+ */
+public class BufferKit {
+
+    /**
+     * Returns the actual start index (inclusive) of the backing array in the given buffer.
+     *
+     * @param buffer the given buffer
+     * @return the actual start index (inclusive) of the backing array in the given buffer
+     * @throws ReadOnlyBufferException       if the buffer is backed by an array but is read-only
+     * @throws UnsupportedOperationException if the buffer is not backed by an accessible array
+     */
+    public static int arrayStartIndex(
+        @Nonnull Buffer buffer
+    ) throws ReadOnlyBufferException, UnsupportedOperationException {
+<span class="fc" id="L37">        return buffer.arrayOffset() + buffer.position();</span>
+    }
+
+    /**
+     * Returns the actual start index (exclusive) of the backing array in the given buffer.
+     *
+     * @param buffer the given buffer
+     * @return the actual start index (exclusive) of the backing array in the given buffer
+     * @throws ReadOnlyBufferException       if the buffer is backed by an array but is read-only
+     * @throws UnsupportedOperationException if the buffer is not backed by an accessible array
+     */
+    public static int arrayEndIndex(
+        @Nonnull Buffer buffer
+    ) throws ReadOnlyBufferException, UnsupportedOperationException {
+<span class="fc" id="L51">        return buffer.arrayOffset() + buffer.position() + buffer.remaining();</span>
+    }
+
+    /**
+     * Reads all data from the source buffer into a new array, continuing until reaches the end of the source buffer,
+     * and returns the array.
+     * &lt;p&gt;
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @return a new array containing the read data, or {@code null} if reaches the end of the source buffer and no data
+     * is read
+     */
+    public static byte @Nullable [] read(@Nonnull ByteBuffer src) {
+<span class="fc" id="L67">        int len = src.remaining();</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L69">            return null;</span>
+        }
+<span class="fc" id="L71">        byte[] result = new byte[len];</span>
+<span class="fc" id="L72">        src.get(result);</span>
+<span class="fc" id="L73">        return result;</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source buffer into a new array, and returns the array. If the specified
+     * length is {@code 0}, returns an empty array without reading. Otherwise, this method keeps reading until the read
+     * number reaches the specified length or reaches the end of the source buffer.
+     * &lt;p&gt;
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param len the specified read length, must {@code &gt;= 0}
+     * @return a new array containing the read data, or {@code null} if reaches the end of the source buffer and no data
+     * is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     */
+    public static byte @Nullable [] read(@Nonnull ByteBuffer src, int len) throws IllegalArgumentException {
+<span class="fc" id="L92">        IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L94">            return new byte[0];</span>
+        }
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        if (!src.hasRemaining()) {</span>
+<span class="fc" id="L97">            return null;</span>
+        }
+<span class="fc" id="L99">        int actualLen = Math.min(len, src.remaining());</span>
+<span class="fc" id="L100">        byte[] result = new byte[actualLen];</span>
+<span class="fc" id="L101">        src.get(result);</span>
+<span class="fc" id="L102">        return result;</span>
+    }
+
+    /**
+     * Reads data from the source buffer into the destination array, until the read number reaches the array's length or
+     * reaches the end of the source buffer, and returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the destination array
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     */
+    public static int readTo(@Nonnull ByteBuffer src, byte @Nonnull [] dst) {
+<span class="fc" id="L120">        return readTo0(src, dst, 0, dst.length);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source buffer into the destination array, starting at the specified
+     * offset, until the read number reaches the specified length or reaches the end of the source buffer, and returns
+     * the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the destination array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IndexOutOfBoundsException if the arguments are out of bounds
+     */
+    public static int readTo(
+        @Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException {
+<span class="fc" id="L144">        IOChecker.checkOffLen(off, len, dst.length);</span>
+<span class="fc" id="L145">        return readTo0(src, dst, off, len);</span>
+    }
+
+    /**
+     * Reads data from the source buffer into the destination buffer, until reaches the end of any buffer, and returns
+     * the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
+     * source buffer and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The both buffers' positions increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the destination buffer
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull ByteBuffer src, @Nonnull ByteBuffer dst) throws IORuntimeException {
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        if (!dst.hasRemaining()) {</span>
+<span class="fc" id="L165">            return 0;</span>
+        }
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        if (!src.hasRemaining()) {</span>
+<span class="fc" id="L168">            return -1;</span>
+        }
+        try {
+<span class="fc" id="L171">            int actualLen = Math.min(src.remaining(), dst.remaining());</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">            if (src.remaining() &lt;= dst.remaining()) {</span>
+<span class="fc" id="L173">                dst.put(src);</span>
+            } else {
+<span class="fc" id="L175">                ByteBuffer srcSlice = slice0(src, 0, dst.remaining());</span>
+<span class="fc" id="L176">                dst.put(srcSlice);</span>
+<span class="fc" id="L177">                src.position(src.position() + actualLen);</span>
+            }
+<span class="fc" id="L179">            return actualLen;</span>
+<span class="fc" id="L180">        } catch (Exception e) {</span>
+<span class="fc" id="L181">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    /**
+     * Reads a specified length of data from the source buffer into the destination buffer, until the read number
+     * reaches the specified length or reaches the end of any buffer, and returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
+     * reaches the end of the source buffer and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The both buffers' positions increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified buffer
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull ByteBuffer src, @Nonnull ByteBuffer dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L205">        IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L207">            return 0;</span>
+        }
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        if (!dst.hasRemaining()) {</span>
+<span class="fc" id="L210">            return 0;</span>
+        }
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        if (!src.hasRemaining()) {</span>
+<span class="fc" id="L213">            return -1;</span>
+        }
+        try {
+<span class="fc" id="L216">            int actualLen = MathKit.min(src.remaining(), dst.remaining(), len);</span>
+            ByteBuffer srcBuf;
+<span class="fc bfc" id="L218" title="All 2 branches covered.">            if (src.remaining() &gt; actualLen) {</span>
+<span class="fc" id="L219">                srcBuf = slice0(src, 0, actualLen);</span>
+            } else {
+<span class="fc" id="L221">                srcBuf = src;</span>
+            }
+<span class="fc" id="L223">            dst.put(srcBuf);</span>
+<span class="fc bfc" id="L224" title="All 2 branches covered.">            if (srcBuf != src) {</span>
+<span class="fc" id="L225">                src.position(src.position() + actualLen);</span>
+            }
+<span class="fc" id="L227">            return actualLen;</span>
+<span class="fc" id="L228">        } catch (Exception e) {</span>
+<span class="fc" id="L229">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    /**
+     * Reads data from the source buffer into the destination channel, until reaches the end of the source buffer, and
+     * returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If reaches the end of the source buffer and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the destination channel
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
+<span class="fc bfc" id="L248" title="All 2 branches covered.">        if (src.remaining() == 0) {</span>
+<span class="fc" id="L249">            return -1;</span>
+        }
+        try {
+<span class="fc" id="L252">            int actualLen = src.remaining();</span>
+<span class="fc bfc" id="L253" title="All 2 branches covered.">            while (src.remaining() &gt; 0) {</span>
+<span class="fc" id="L254">                dst.write(src);</span>
+            }
+<span class="fc" id="L256">            return actualLen;</span>
+<span class="fc" id="L257">        } catch (Exception e) {</span>
+<span class="fc" id="L258">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    /**
+     * Reads a specified length of data from the source buffer into the destination channel, until the read number
+     * reaches the specified length or reaches the end of the source buffer, returns the actual number of bytes read
+     * to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the destination channel
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L283">        IOChecker.checkLen(len);</span>
+<span class="fc" id="L284">        return readTo0(src, dst, len);</span>
+    }
+
+    /**
+     * Reads data from the source buffer into the output stream, until reaches the end of the source buffer, and returns
+     * the actual number of bytes read to.
+     * &lt;p&gt;
+     * If reaches the end of the source buffer and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the output stream
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull ByteBuffer src, @Nonnull OutputStream dst) throws IORuntimeException {
+<span class="fc bfc" id="L302" title="All 2 branches covered.">        if (src.remaining() == 0) {</span>
+<span class="fc" id="L303">            return -1;</span>
+        }
+<span class="fc" id="L305">        return readTo0WithActualLen(src, dst, src.remaining());</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source buffer into the output stream, until the read number reaches the
+     * specified length or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the output stream
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L328">        IOChecker.checkLen(len);</span>
+<span class="fc" id="L329">        return readTo0(src, dst, len);</span>
+    }
+
+    static int readTo0(@Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len) {
+<span class="fc bfc" id="L333" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L334">            return 0;</span>
+        }
+<span class="fc bfc" id="L336" title="All 2 branches covered.">        if (!src.hasRemaining()) {</span>
+<span class="fc" id="L337">            return -1;</span>
+        }
+<span class="fc" id="L339">        int actualLen = Math.min(len, src.remaining());</span>
+<span class="fc" id="L340">        src.get(dst, off, actualLen);</span>
+<span class="fc" id="L341">        return actualLen;</span>
+    }
+
+    static int readTo0(
+        @Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst, int len
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L347" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L348">            return 0;</span>
+        }
+<span class="fc bfc" id="L350" title="All 2 branches covered.">        if (src.remaining() == 0) {</span>
+<span class="fc" id="L351">            return -1;</span>
+        }
+        try {
+<span class="fc" id="L354">            int actualLen = Math.min(src.remaining(), len);</span>
+<span class="fc" id="L355">            int oldLimit = src.limit();</span>
+<span class="fc" id="L356">            src.limit(src.position() + actualLen);</span>
+<span class="fc bfc" id="L357" title="All 2 branches covered.">            while (src.remaining() &gt; 0) {</span>
+<span class="fc" id="L358">                dst.write(src);</span>
+            }
+<span class="fc" id="L360">            src.limit(oldLimit);</span>
+<span class="fc" id="L361">            return actualLen;</span>
+<span class="fc" id="L362">        } catch (Exception e) {</span>
+<span class="fc" id="L363">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    static int readTo0(
+        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, int len
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L370" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L371">            return 0;</span>
+        }
+<span class="fc bfc" id="L373" title="All 2 branches covered.">        if (src.remaining() == 0) {</span>
+<span class="fc" id="L374">            return -1;</span>
+        }
+<span class="fc" id="L376">        int actualLen = Math.min(src.remaining(), len);</span>
+<span class="fc" id="L377">        return readTo0WithActualLen(src, dst, actualLen);</span>
+    }
+
+    static int readTo0WithActualLen(
+        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, int actualLen
+    ) throws IORuntimeException {
+        try {
+<span class="fc bfc" id="L384" title="All 2 branches covered.">            if (src.hasArray()) {</span>
+<span class="fc" id="L385">                dst.write(src.array(), BufferKit.arrayStartIndex(src), actualLen);</span>
+<span class="fc" id="L386">                src.position(src.position() + actualLen);</span>
+            } else {
+<span class="fc" id="L388">                byte[] buf = new byte[actualLen];</span>
+<span class="fc" id="L389">                src.get(buf);</span>
+<span class="fc" id="L390">                dst.write(buf);</span>
+            }
+<span class="fc" id="L392">            return actualLen;</span>
+<span class="fc" id="L393">        } catch (Exception e) {</span>
+<span class="fc" id="L394">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    /**
+     * Reads all data from the source buffer into a new array, continuing until reaches the end of the source buffer,
+     * and returns the array.
+     * &lt;p&gt;
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @return a new array containing the read data, or {@code null} if reaches the end of the source buffer and no data
+     * is read
+     */
+    public static char @Nullable [] read(@Nonnull CharBuffer src) {
+<span class="fc" id="L411">        int len = src.remaining();</span>
+<span class="fc bfc" id="L412" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L413">            return null;</span>
+        }
+<span class="fc" id="L415">        char[] result = new char[len];</span>
+<span class="fc" id="L416">        src.get(result);</span>
+<span class="fc" id="L417">        return result;</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source buffer into a new array, and returns the array. If the specified
+     * length is {@code 0}, returns an empty array without reading. Otherwise, this method keeps reading until the read
+     * number reaches the specified length or reaches the end of the source buffer.
+     * &lt;p&gt;
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param len the specified read length, must {@code &gt;= 0}
+     * @return a new array containing the read data, or {@code null} if reaches the end of the source buffer and no data
+     * is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     */
+    public static char @Nullable [] read(@Nonnull CharBuffer src, int len) throws IllegalArgumentException {
+<span class="fc" id="L436">        IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L437" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L438">            return new char[0];</span>
+        }
+<span class="fc bfc" id="L440" title="All 2 branches covered.">        if (!src.hasRemaining()) {</span>
+<span class="fc" id="L441">            return null;</span>
+        }
+<span class="fc" id="L443">        int actualLen = Math.min(len, src.remaining());</span>
+<span class="fc" id="L444">        char[] result = new char[actualLen];</span>
+<span class="fc" id="L445">        src.get(result);</span>
+<span class="fc" id="L446">        return result;</span>
+    }
+
+    /**
+     * Reads data from the source buffer into the destination array, until the read number reaches the array's length or
+     * reaches the end of the source buffer, and returns the actual number of chars read to.
+     * &lt;p&gt;
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the destination array
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     */
+    public static int readTo(@Nonnull CharBuffer src, char @Nonnull [] dst) {
+<span class="fc" id="L464">        return readTo0(src, dst, 0, dst.length);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source buffer into the destination array, starting at the specified
+     * offset, until the read number reaches the specified length or reaches the end of the source buffer, and returns
+     * the actual number of chars read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the destination array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IndexOutOfBoundsException if the arguments are out of bounds
+     */
+    public static int readTo(
+        @Nonnull CharBuffer src, char @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException {
+<span class="fc" id="L488">        IOChecker.checkOffLen(off, len, dst.length);</span>
+<span class="fc" id="L489">        return readTo0(src, dst, off, len);</span>
+    }
+
+    /**
+     * Reads data from the source buffer into the destination buffer, until reaches the end of any buffer, and returns
+     * the actual number of chars read to.
+     * &lt;p&gt;
+     * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
+     * source buffer and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The both buffers' positions increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the destination buffer
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull CharBuffer src, @Nonnull CharBuffer dst) throws IORuntimeException {
+<span class="fc bfc" id="L508" title="All 2 branches covered.">        if (!dst.hasRemaining()) {</span>
+<span class="fc" id="L509">            return 0;</span>
+        }
+<span class="fc bfc" id="L511" title="All 2 branches covered.">        if (!src.hasRemaining()) {</span>
+<span class="fc" id="L512">            return -1;</span>
+        }
+        try {
+<span class="fc" id="L515">            int actualLen = Math.min(src.remaining(), dst.remaining());</span>
+<span class="fc bfc" id="L516" title="All 2 branches covered.">            if (src.remaining() &lt;= dst.remaining()) {</span>
+<span class="fc" id="L517">                dst.put(src);</span>
+            } else {
+<span class="fc" id="L519">                CharBuffer srcSlice = slice0(src, 0, dst.remaining());</span>
+<span class="fc" id="L520">                dst.put(srcSlice);</span>
+<span class="fc" id="L521">                src.position(src.position() + actualLen);</span>
+            }
+<span class="fc" id="L523">            return actualLen;</span>
+<span class="fc" id="L524">        } catch (Exception e) {</span>
+<span class="fc" id="L525">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    /**
+     * Reads a specified length of data from the source buffer into the destination buffer, until the read number
+     * reaches the specified length or reaches the end of any buffer, and returns the actual number of chars read to.
+     * &lt;p&gt;
+     * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
+     * reaches the end of the source buffer and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The both buffers' positions increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified buffer
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull CharBuffer src, @Nonnull CharBuffer dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L549">        IOChecker.checkLen(len);</span>
+<span class="fc bfc" id="L550" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L551">            return 0;</span>
+        }
+<span class="fc bfc" id="L553" title="All 2 branches covered.">        if (!dst.hasRemaining()) {</span>
+<span class="fc" id="L554">            return 0;</span>
+        }
+<span class="fc bfc" id="L556" title="All 2 branches covered.">        if (!src.hasRemaining()) {</span>
+<span class="fc" id="L557">            return -1;</span>
+        }
+        try {
+<span class="fc" id="L560">            int actualLen = MathKit.min(src.remaining(), dst.remaining(), len);</span>
+            CharBuffer srcBuf;
+<span class="fc bfc" id="L562" title="All 2 branches covered.">            if (src.remaining() &gt; actualLen) {</span>
+<span class="fc" id="L563">                srcBuf = slice0(src, 0, actualLen);</span>
+            } else {
+<span class="fc" id="L565">                srcBuf = src;</span>
+            }
+<span class="fc" id="L567">            dst.put(srcBuf);</span>
+<span class="fc bfc" id="L568" title="All 2 branches covered.">            if (srcBuf != src) {</span>
+<span class="fc" id="L569">                src.position(src.position() + actualLen);</span>
+            }
+<span class="fc" id="L571">            return actualLen;</span>
+<span class="fc" id="L572">        } catch (Exception e) {</span>
+<span class="fc" id="L573">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    /**
+     * Reads data from the source buffer into the output appender, until reaches the end of the source buffer, and
+     * returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If reaches the end of the source buffer and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the output appender
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull CharBuffer src, @Nonnull Appendable dst) throws IORuntimeException {
+<span class="fc bfc" id="L592" title="All 2 branches covered.">        if (src.remaining() == 0) {</span>
+<span class="fc" id="L593">            return -1;</span>
+        }
+<span class="fc" id="L595">        return readTo0WithActualLen(src, dst, src.remaining());</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source buffer into the output appender, until the read number reaches
+     * the specified length or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * &lt;p&gt;
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the output appender
+     * @param len the specified length, must {@code &gt;= 0}
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull CharBuffer src, @Nonnull Appendable dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+<span class="fc" id="L618">        IOChecker.checkLen(len);</span>
+<span class="fc" id="L619">        return readTo0(src, dst, len);</span>
+    }
+
+    static int readTo0(
+        @Nonnull CharBuffer src, char @Nonnull [] dst, int off, int len
+    ) {
+<span class="fc bfc" id="L625" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L626">            return 0;</span>
+        }
+<span class="fc bfc" id="L628" title="All 2 branches covered.">        if (!src.hasRemaining()) {</span>
+<span class="fc" id="L629">            return -1;</span>
+        }
+<span class="fc" id="L631">        int actualLen = Math.min(len, src.remaining());</span>
+<span class="fc" id="L632">        src.get(dst, off, actualLen);</span>
+<span class="fc" id="L633">        return actualLen;</span>
+    }
+
+    static int readTo0(
+        @Nonnull CharBuffer src, @Nonnull Appendable dst, int len
+    ) throws IORuntimeException {
+<span class="fc bfc" id="L639" title="All 2 branches covered.">        if (len == 0) {</span>
+<span class="fc" id="L640">            return 0;</span>
+        }
+<span class="fc bfc" id="L642" title="All 2 branches covered.">        if (src.remaining() == 0) {</span>
+<span class="fc" id="L643">            return -1;</span>
+        }
+<span class="fc" id="L645">        int actualLen = Math.min(src.remaining(), len);</span>
+<span class="fc" id="L646">        return readTo0WithActualLen(src, dst, actualLen);</span>
+    }
+
+    static int readTo0WithActualLen(
+        @Nonnull CharBuffer src, @Nonnull Appendable dst, int actualLen
+    ) throws IORuntimeException {
+        try {
+<span class="fc" id="L653">            dst.append(src, 0, actualLen);</span>
+<span class="fc" id="L654">            src.position(src.position() + actualLen);</span>
+<span class="fc" id="L655">            return actualLen;</span>
+<span class="fc" id="L656">        } catch (Exception e) {</span>
+<span class="fc" id="L657">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    /**
+     * Reads all data from the source buffer as a string, continuing until reaches the end of the source buffer, and
+     * returns the string.
+     * &lt;p&gt;
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @return a string represents the read data, or {@code null} if reaches the end of the source buffer and no data is
+     * read
+     */
+    public static @Nullable String string(@Nonnull CharBuffer src) {
+<span class="fc" id="L674">        char[] chars = read(src);</span>
+<span class="fc bfc" id="L675" title="All 2 branches covered.">        return chars == null ? null : new String(chars);</span>
+    }
+
+    /**
+     * Reads a specified length of data from the source buffer as a string, and returns the string. If the specified
+     * length is {@code 0}, returns an empty string without reading. Otherwise, this method keeps reading until the read
+     * number reaches the specified length or reaches the end of the source buffer.
+     * &lt;p&gt;
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param len the specified read length, must {@code &gt;= 0}
+     * @return a string represents the read data, or {@code null} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     */
+    public static @Nullable String string(@Nonnull CharBuffer src, int len) throws IllegalArgumentException {
+<span class="fc" id="L694">        char[] chars = read(src, len);</span>
+<span class="fc bfc" id="L695" title="All 2 branches covered.">        return chars == null ? null : new String(chars);</span>
+    }
+
+    /**
+     * Reads all data from the source buffer as a string with {@link CharsKit#defaultCharset()}, continuing until
+     * reaches the end of the source buffer, and returns the string.
+     * &lt;p&gt;
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @return a string represents the read data, with {@link CharsKit#defaultCharset()}, or {@code null} if reaches the
+     * end of the source buffer and no data is read
+     */
+    public static @Nullable String string(@Nonnull ByteBuffer src) {
+<span class="fc" id="L711">        return string(src, CharsKit.defaultCharset());</span>
+    }
+
+    /**
+     * Reads all data from the source buffer as a string with the specified charset, continuing until reaches the end of
+     * the source buffer, and returns the string.
+     * &lt;p&gt;
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
+     * &lt;p&gt;
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param cs  the specified charset
+     * @return a string represents the read data, with the specified charset, or {@code null} if reaches the end of the
+     * source buffer and no data is read
+     */
+    public static @Nullable String string(@Nonnull ByteBuffer src, @Nonnull Charset cs) {
+<span class="fc" id="L728">        byte[] bytes = read(src);</span>
+<span class="fc bfc" id="L729" title="All 2 branches covered.">        return bytes == null ? null : new String(bytes, cs);</span>
+    }
+
+    /**
+     * Writes string to the specified buffer with {@link CharsKit#defaultCharset()}.
+     *
+     * @param dst the specified buffer
+     * @param str the string to write to the buffer
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull ByteBuffer dst, @Nonnull String str
+    ) throws IORuntimeException {
+<span class="fc" id="L742">        write(dst, str, CharsKit.defaultCharset());</span>
+<span class="fc" id="L743">    }</span>
+
+    /**
+     * Writes string to the specified buffer with the specified charset.
+     *
+     * @param dst     the specified buffer
+     * @param str     the string to write to the buffer
+     * @param charset the specified charset
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull ByteBuffer dst, @Nonnull String str, @Nonnull Charset charset
+    ) throws IORuntimeException {
+        try {
+<span class="fc" id="L757">            byte[] bytes = str.getBytes(charset);</span>
+<span class="fc" id="L758">            dst.put(bytes);</span>
+<span class="fc" id="L759">        } catch (Exception e) {</span>
+<span class="fc" id="L760">            throw new IORuntimeException(e);</span>
+<span class="fc" id="L761">        }</span>
+<span class="fc" id="L762">    }</span>
+
+    /**
+     * Creates a new buffer with the specified length. Its content is a shared subsequence of the given buffer's
+     * content, starting at the given buffer's current position.
+     * &lt;p&gt;
+     * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
+     * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
+     * only if, the given buffer is direct, and it will be read-only if, and only if, the given buffer is read-only.
+     * &lt;p&gt;
+     * The position and limit of the given buffer will not be changed.
+     *
+     * @param src the given buffer
+     * @param len the specified length
+     * @return a new buffer whose content is a shared subsequence of the given buffer's content
+     * @throws IllegalArgumentException if the specified read length is illegal
+     */
+    public static @Nonnull ByteBuffer slice(@Nonnull ByteBuffer src, int len) throws IllegalArgumentException {
+<span class="fc" id="L780">        IOChecker.checkLen(len);</span>
+<span class="fc" id="L781">        return slice0(src, 0, len);</span>
+    }
+
+    /**
+     * Creates a new buffer with the specified length. Its content is a shared subsequence of the given buffer's
+     * content, starting at the specified offset of given buffer's current position ({@code src.position() + off}).
+     * &lt;p&gt;
+     * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
+     * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
+     * only if, the given buffer is direct, and it will be read-only if, and only if, the given buffer is read-only.
+     * &lt;p&gt;
+     * The position and limit of the given buffer will not be changed.
+     *
+     * @param src the given buffer
+     * @param off the specified offset
+     * @param len the specified length
+     * @return a new buffer whose content is a shared subsequence of the given buffer's content
+     * @throws IndexOutOfBoundsException if the offset and length is out of bounds
+     */
+    public static @Nonnull ByteBuffer slice(
+        @Nonnull ByteBuffer src, int off, int len
+    ) throws IndexOutOfBoundsException {
+<span class="fc" id="L803">        IOChecker.checkOffLen(off, len, src.remaining());</span>
+<span class="fc" id="L804">        return slice0(src, off, len);</span>
+    }
+
+    static @Nonnull ByteBuffer slice0(@Nonnull ByteBuffer src, int off, int len) {
+<span class="fc" id="L808">        int pos = src.position();</span>
+<span class="fc" id="L809">        int limit = src.limit();</span>
+<span class="fc" id="L810">        src.position(pos + off);</span>
+<span class="fc" id="L811">        src.limit(pos + off + len);</span>
+<span class="fc" id="L812">        ByteBuffer slice = src.slice();</span>
+<span class="fc" id="L813">        src.position(pos);</span>
+<span class="fc" id="L814">        src.limit(limit);</span>
+<span class="fc" id="L815">        return slice;</span>
+    }
+
+    /**
+     * Creates a new buffer with the specified length. Its content is a shared subsequence of the given buffer's
+     * content, starting at the given buffer's current position.
+     * &lt;p&gt;
+     * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
+     * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
+     * only if, the given buffer is direct, and it will be read-only if, and only if, the given buffer is read-only.
+     * &lt;p&gt;
+     * The position and limit of the given buffer will not be changed.
+     *
+     * @param src the given buffer
+     * @param len the specified length
+     * @return a new buffer whose content is a shared subsequence of the given buffer's content
+     * @throws IllegalArgumentException if the specified read length is illegal
+     */
+    public static @Nonnull CharBuffer slice(@Nonnull CharBuffer src, int len) throws IllegalArgumentException {
+<span class="fc" id="L834">        IOChecker.checkLen(len);</span>
+<span class="fc" id="L835">        return slice0(src, 0, len);</span>
+    }
+
+    /**
+     * Creates a new buffer with the specified length. Its content is a shared subsequence of the given buffer's
+     * content, starting at the specified offset of given buffer's current position ({@code src.position() + off}).
+     * &lt;p&gt;
+     * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
+     * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
+     * only if, the given buffer is direct, and it will be read-only if, and only if, the given buffer is read-only.
+     * &lt;p&gt;
+     * The position and limit of the given buffer will not be changed.
+     *
+     * @param src the given buffer
+     * @param off the specified offset
+     * @param len the specified length
+     * @return a new buffer whose content is a shared subsequence of the given buffer's content
+     * @throws IndexOutOfBoundsException if the offset and length is out of bounds
+     */
+    public static @Nonnull CharBuffer slice(
+        @Nonnull CharBuffer src, int off, int len
+    ) throws IndexOutOfBoundsException {
+<span class="fc" id="L857">        IOChecker.checkOffLen(off, len, src.remaining());</span>
+<span class="fc" id="L858">        return slice0(src, off, len);</span>
+    }
+
+    static @Nonnull CharBuffer slice0(@Nonnull CharBuffer src, int off, int len) {
+<span class="fc" id="L862">        int pos = src.position();</span>
+<span class="fc" id="L863">        int limit = src.limit();</span>
+<span class="fc" id="L864">        src.position(pos + off);</span>
+<span class="fc" id="L865">        src.limit(pos + off + len);</span>
+<span class="fc" id="L866">        CharBuffer slice = src.slice();</span>
+<span class="fc" id="L867">        src.position(pos);</span>
+<span class="fc" id="L868">        src.limit(limit);</span>
+<span class="fc" id="L869">        return slice;</span>
+    }
+
+    /**
+     * Returns a new buffer copied from the given source buffer. The content of the new buffer is independent and copied
+     * from {@code 0} to {@code src.capacity()} (not {@code src.position()} to {@code src.limit()}).
+     * &lt;p&gt;
+     * Position of the source buffer will not be changed. The new buffer's position, limit and capacity are same with
+     * the source buffer's, and the new buffer is direct if, and only if, the source buffer is direct.
+     *
+     * @param src the given source buffer
+     * @return a new buffer copied from the given source buffer
+     */
+    public static @Nonnull ByteBuffer copy(@Nonnull ByteBuffer src) {
+<span class="fc bfc" id="L883" title="All 2 branches covered.">        ByteBuffer dst = src.isDirect() ?</span>
+<span class="fc" id="L884">            ByteBuffer.allocateDirect(src.capacity())</span>
+            :
+<span class="fc" id="L886">            ByteBuffer.allocate(src.capacity());</span>
+<span class="fc" id="L887">        int pos = src.position();</span>
+<span class="fc" id="L888">        int limit = src.limit();</span>
+<span class="fc" id="L889">        src.position(0);</span>
+<span class="fc" id="L890">        src.limit(src.capacity());</span>
+<span class="fc" id="L891">        dst.put(src);</span>
+<span class="fc" id="L892">        src.position(pos);</span>
+<span class="fc" id="L893">        src.limit(limit);</span>
+<span class="fc" id="L894">        dst.position(pos);</span>
+<span class="fc" id="L895">        dst.limit(limit);</span>
+<span class="fc" id="L896">        return dst;</span>
+    }
+
+    /**
+     * Returns a new buffer copied from the given source buffer. The content of the new buffer is independent and copied
+     * from {@code 0} to {@code src.capacity()} (not {@code src.position()} to {@code src.limit()}).
+     * &lt;p&gt;
+     * Position of the source buffer will not be changed. The new buffer's position, limit and capacity are same with
+     * the source buffer's, and the new buffer is direct if, and only if, the source buffer is direct.
+     *
+     * @param src the given source buffer
+     * @return a new buffer copied from the given source buffer
+     */
+    public static @Nonnull CharBuffer copy(@Nonnull CharBuffer src) {
+<span class="fc bfc" id="L910" title="All 2 branches covered.">        CharBuffer dst = src.isDirect() ?</span>
+<span class="fc" id="L911">            directCharBuffer(src.capacity())</span>
+            :
+<span class="fc" id="L913">            CharBuffer.allocate(src.capacity());</span>
+<span class="fc" id="L914">        int pos = src.position();</span>
+<span class="fc" id="L915">        int limit = src.limit();</span>
+<span class="fc" id="L916">        src.position(0);</span>
+<span class="fc" id="L917">        src.limit(src.capacity());</span>
+<span class="fc" id="L918">        dst.put(src);</span>
+<span class="fc" id="L919">        src.position(pos);</span>
+<span class="fc" id="L920">        src.limit(limit);</span>
+<span class="fc" id="L921">        dst.position(pos);</span>
+<span class="fc" id="L922">        dst.limit(limit);</span>
+<span class="fc" id="L923">        return dst;</span>
+    }
+
+    /**
+     * Returns a new array copied from the remaining content of the given source buffer. Position of the source buffer
+     * will not be changed.
+     *
+     * @param src the given source buffer
+     * @return a new array copied from the remaining content of the given source buffer
+     */
+    public static byte @Nonnull [] copyContent(@Nonnull ByteBuffer src) {
+<span class="fc" id="L934">        byte[] ret = new byte[src.remaining()];</span>
+<span class="fc" id="L935">        int pos = src.position();</span>
+<span class="fc" id="L936">        src.get(ret);</span>
+<span class="fc" id="L937">        src.position(pos);</span>
+<span class="fc" id="L938">        return ret;</span>
+    }
+
+    /**
+     * Returns a new array copied from the remaining content of the given source buffer. Position of the source buffer
+     * will not be changed.
+     *
+     * @param src the given source buffer
+     * @return a new array copied from the remaining content of the given source buffer
+     */
+    public static char @Nonnull [] copyContent(@Nonnull CharBuffer src) {
+<span class="fc" id="L949">        char[] ret = new char[src.remaining()];</span>
+<span class="fc" id="L950">        int pos = src.position();</span>
+<span class="fc" id="L951">        src.get(ret);</span>
+<span class="fc" id="L952">        src.position(pos);</span>
+<span class="fc" id="L953">        return ret;</span>
+    }
+
+    /**
+     * Returns a new direct buffer of which content is copied from the given array.
+     * &lt;p&gt;
+     * Returned buffer's position is {@code 0}, limit and capacity is the array's length.
+     *
+     * @param src the given array
+     * @return a new direct buffer of which content is copied from the given array
+     */
+    public static @Nonnull ByteBuffer copyDirect(byte @Nonnull [] src) {
+<span class="fc" id="L965">        ByteBuffer buf = ByteBuffer.allocateDirect(src.length);</span>
+<span class="fc" id="L966">        buf.put(src);</span>
+<span class="fc" id="L967">        buf.flip();</span>
+<span class="fc" id="L968">        return buf;</span>
+    }
+
+    /**
+     * Returns a new direct buffer of which content is a copy of data from the given array. The copied data starts at
+     * the specified offset and has the specified length.
+     * &lt;p&gt;
+     * Returned buffer's position is {@code 0}, limit and capacity is the specified length.
+     *
+     * @param src the given array
+     * @param off the specified offset
+     * @param len the specified length
+     * @return a new direct buffer of which content is a copy of data from the given array
+     */
+    public static @Nonnull ByteBuffer copyDirect(
+        byte @Nonnull [] src, int off, int len
+    ) throws IndexOutOfBoundsException {
+<span class="fc" id="L985">        IOChecker.checkOffLen(off, len, src.length);</span>
+<span class="fc" id="L986">        ByteBuffer buf = ByteBuffer.allocateDirect(len);</span>
+<span class="fc" id="L987">        buf.put(src, off, len);</span>
+<span class="fc" id="L988">        buf.flip();</span>
+<span class="fc" id="L989">        return buf;</span>
+    }
+
+    /**
+     * Returns a new direct buffer of which content is copied from the given array.
+     * &lt;p&gt;
+     * Returned buffer's position is {@code 0}, limit and capacity is the array's length.
+     *
+     * @param src the given array
+     * @return a new direct buffer of which content is copied from the given array
+     */
+    public static @Nonnull CharBuffer copyDirect(char @Nonnull [] src) {
+<span class="fc" id="L1001">        CharBuffer buf = directCharBuffer(src.length);</span>
+<span class="fc" id="L1002">        buf.put(src);</span>
+<span class="fc" id="L1003">        buf.flip();</span>
+<span class="fc" id="L1004">        return buf;</span>
+    }
+
+    /**
+     * Returns a new direct buffer of which content is a copy of data from the given array. The copied data starts at
+     * the specified offset and has the specified length.
+     * &lt;p&gt;
+     * Returned buffer's position is {@code 0}, limit and capacity is the specified length.
+     *
+     * @param src the given array
+     * @param off the specified offset
+     * @param len the specified length
+     * @return a new direct buffer of which content is a copy of data from the given array
+     */
+    public static @Nonnull CharBuffer copyDirect(
+        char @Nonnull [] src, int off, int len
+    ) throws IndexOutOfBoundsException {
+<span class="fc" id="L1021">        IOChecker.checkOffLen(off, len, src.length);</span>
+<span class="fc" id="L1022">        CharBuffer buf = directCharBuffer(len);</span>
+<span class="fc" id="L1023">        buf.put(src, off, len);</span>
+<span class="fc" id="L1024">        buf.flip();</span>
+<span class="fc" id="L1025">        return buf;</span>
+    }
+
+    /**
+     * Returns a new direct {@link CharBuffer} with the specified capacity, and its endian is
+     * {@link ByteOrder#BIG_ENDIAN}.
+     * &lt;p&gt;
+     * Returned buffer's position is {@code 0}, limit equals to the capacity.
+     *
+     * @param capacity the specified capacity
+     * @return a new direct {@link CharBuffer} with the specified capacity
+     * @throws IllegalArgumentException if the specified capacity is negative
+     */
+    public static @Nonnull CharBuffer directCharBuffer(int capacity) throws IllegalArgumentException {
+<span class="fc" id="L1039">        IOChecker.checkCapacity(capacity);</span>
+<span class="fc" id="L1040">        return ByteBuffer.allocateDirect(capacity * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();</span>
+    }
+
+    /**
+     * Reads all data from the source buffer and processes them by the given operator, then writes the result into the
+     * destination buffer, returns the number of bytes written. The position of the source buffer will be increment to
+     * its limit, and position of the destination buffer will be increment by the write number.
+     * &lt;p&gt;
+     * Note:
+     * &lt;ul&gt;
+     *     &lt;li&gt;Make sure the destination has enough space to write;&lt;/li&gt;
+     *     &lt;li&gt;If an exception occurs during processing, the status of two buffers are undefined;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param src      the given source buffer
+     * @param dst      the given destination buffer
+     * @param operator the given operator
+     * @return the number of bytes written
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int process(
+        @Nonnull ByteBuffer src, @Nonnull ByteBuffer dst, @Nonnull ByteArrayOperator operator
+    ) throws IORuntimeException {
+        try {
+<span class="fc" id="L1064">            int len = src.remaining();</span>
+            int ret;
+<span class="fc bfc" id="L1066" title="All 2 branches covered.">            if (src.hasArray()) {</span>
+<span class="fc bfc" id="L1067" title="All 2 branches covered.">                if (dst.hasArray()) {</span>
+<span class="fc" id="L1068">                    ret = operator.process(</span>
+<span class="fc" id="L1069">                        src.array(),</span>
+<span class="fc" id="L1070">                        src.arrayOffset() + src.position(),</span>
+<span class="fc" id="L1071">                        dst.array(),</span>
+<span class="fc" id="L1072">                        dst.arrayOffset() + dst.position(),</span>
+                        len
+                    );
+<span class="fc" id="L1075">                    src.position(src.position() + len);</span>
+<span class="fc" id="L1076">                    dst.position(dst.position() + ret);</span>
+                } else {
+<span class="fc" id="L1078">                    byte[] dstArr = new byte[dst.remaining()];</span>
+<span class="fc" id="L1079">                    ret = operator.process(</span>
+<span class="fc" id="L1080">                        src.array(),</span>
+<span class="fc" id="L1081">                        src.arrayOffset() + src.position(),</span>
+                        dstArr,
+                        0,
+                        len
+                    );
+<span class="fc" id="L1086">                    src.position(src.position() + len);</span>
+<span class="fc" id="L1087">                    dst.put(dstArr, 0, ret);</span>
+<span class="fc" id="L1088">                }</span>
+            } else {
+<span class="fc" id="L1090">                byte[] srcArr = Fs.nonnull(read(src), BytesKit.empty());</span>
+<span class="fc bfc" id="L1091" title="All 2 branches covered.">                if (dst.hasArray()) {</span>
+<span class="fc" id="L1092">                    ret = operator.process(</span>
+                        srcArr,
+                        0,
+<span class="fc" id="L1095">                        dst.array(),</span>
+<span class="fc" id="L1096">                        dst.arrayOffset() + dst.position(),</span>
+                        len
+                    );
+<span class="fc" id="L1099">                    dst.position(dst.position() + ret);</span>
+                } else {
+<span class="fc" id="L1101">                    byte[] dstArr = new byte[dst.remaining()];</span>
+<span class="fc" id="L1102">                    ret = operator.process(</span>
+                        srcArr,
+                        0,
+                        dstArr,
+                        0,
+                        len
+                    );
+<span class="fc" id="L1109">                    dst.put(dstArr, 0, ret);</span>
+                }
+            }
+<span class="fc" id="L1112">            return ret;</span>
+<span class="fc" id="L1113">        } catch (Exception e) {</span>
+<span class="fc" id="L1114">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    /**
+     * Reads all data from the source buffer and processes them by the given operator, then writes the result into the
+     * destination buffer, returns the number of chars written. The position of the source buffer will be increment to
+     * its limit, and position of the destination buffer will be increment by the write number.
+     * &lt;p&gt;
+     * Note:
+     * &lt;ul&gt;
+     *     &lt;li&gt;Make sure the destination has enough space to write;&lt;/li&gt;
+     *     &lt;li&gt;If an exception occurs during processing, the status of two buffers are undefined;&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param src      the given source buffer
+     * @param dst      the given destination buffer
+     * @param operator the given operator
+     * @return the number of chars written
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int process(
+        @Nonnull CharBuffer src, @Nonnull CharBuffer dst, @Nonnull CharArrayOperator operator
+    ) throws IORuntimeException {
+        try {
+<span class="fc" id="L1139">            int len = src.remaining();</span>
+            int ret;
+<span class="fc bfc" id="L1141" title="All 2 branches covered.">            if (src.hasArray()) {</span>
+<span class="fc bfc" id="L1142" title="All 2 branches covered.">                if (dst.hasArray()) {</span>
+<span class="fc" id="L1143">                    ret = operator.process(</span>
+<span class="fc" id="L1144">                        src.array(),</span>
+<span class="fc" id="L1145">                        src.arrayOffset() + src.position(),</span>
+<span class="fc" id="L1146">                        dst.array(),</span>
+<span class="fc" id="L1147">                        dst.arrayOffset() + dst.position(),</span>
+                        len
+                    );
+<span class="fc" id="L1150">                    src.position(src.position() + len);</span>
+<span class="fc" id="L1151">                    dst.position(dst.position() + ret);</span>
+                } else {
+<span class="fc" id="L1153">                    char[] dstArr = new char[dst.remaining()];</span>
+<span class="fc" id="L1154">                    ret = operator.process(</span>
+<span class="fc" id="L1155">                        src.array(),</span>
+<span class="fc" id="L1156">                        src.arrayOffset() + src.position(),</span>
+                        dstArr,
+                        0,
+                        len
+                    );
+<span class="fc" id="L1161">                    src.position(src.position() + len);</span>
+<span class="fc" id="L1162">                    dst.put(dstArr, 0, ret);</span>
+<span class="fc" id="L1163">                }</span>
+            } else {
+<span class="fc" id="L1165">                char[] srcArr = Fs.nonnull(read(src), CharsKit.empty());</span>
+<span class="fc bfc" id="L1166" title="All 2 branches covered.">                if (dst.hasArray()) {</span>
+<span class="fc" id="L1167">                    ret = operator.process(</span>
+                        srcArr,
+                        0,
+<span class="fc" id="L1170">                        dst.array(),</span>
+<span class="fc" id="L1171">                        dst.arrayOffset() + dst.position(),</span>
+                        len
+                    );
+<span class="fc" id="L1174">                    dst.position(dst.position() + ret);</span>
+                } else {
+<span class="fc" id="L1176">                    char[] dstArr = new char[dst.remaining()];</span>
+<span class="fc" id="L1177">                    ret = operator.process(</span>
+                        srcArr,
+                        0,
+                        dstArr,
+                        0,
+                        len
+                    );
+<span class="fc" id="L1184">                    dst.put(dstArr, 0, ret);</span>
+                }
+            }
+<span class="fc" id="L1187">            return ret;</span>
+<span class="fc" id="L1188">        } catch (Exception e) {</span>
+<span class="fc" id="L1189">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    private BufferKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UnknownTypeException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.base.exception</a> &gt; <span class="el_source">UnknownTypeException.java</span></div><h1>UnknownTypeException.java</h1><pre class="source lang-java linenums">package space.sunqian.common.base.exception;
+
+import space.sunqian.annotations.Nonnull;
+
+import java.lang.reflect.Type;
+
+/**
+ * This runtime exception indicates encountering an unknown type.
+ *
+ * @author sunqian
+ */
+public class UnknownTypeException extends FsRuntimeException {
+
+    private static @Nonnull String toMessage(@Nonnull Type type) {
+<span class="fc" id="L15">        return &quot;Unknown type: &quot; + type + &quot;.&quot;;</span>
+    }
+
+    private static @Nonnull String toMessage(@Nonnull Type type, @Nonnull String keyword) {
+<span class="fc" id="L19">        return &quot;Unknown &quot; + keyword + &quot; type: &quot; + type + &quot;.&quot;;</span>
+    }
+
+    private static @Nonnull String toMessage(@Nonnull String typeName) {
+<span class="fc" id="L23">        return &quot;Unknown type: &quot; + typeName + &quot;.&quot;;</span>
+    }
+
+    /**
+     * Constructs with the unknown type.
+     *
+     * @param type the unknown type
+     */
+    public UnknownTypeException(@Nonnull Type type) {
+<span class="fc" id="L32">        super(toMessage(type));</span>
+<span class="fc" id="L33">    }</span>
+
+    /**
+     * Constructs with the unknown type and the keyword for the type. The message of this exception will be:
+     * {@code &quot;Unknown &quot; + keyword + &quot; type: &quot; + type + &quot;.&quot;}.
+     *
+     * @param type    the unknown type
+     * @param keyword the keyword for the type
+     */
+    public UnknownTypeException(@Nonnull Type type, @Nonnull String keyword) {
+<span class="fc" id="L43">        super(toMessage(type, keyword));</span>
+<span class="fc" id="L44">    }</span>
+
+    /**
+     * Constructs with the name of unknown type.
+     *
+     * @param typeName the name of unknown type
+     */
+    public UnknownTypeException(@Nonnull String typeName) {
+<span class="fc" id="L52">        super(toMessage(typeName));</span>
+<span class="fc" id="L53">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CharProcessor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.io</a> &gt; <span class="el_source">CharProcessor.java</span></div><h1>CharProcessor.java</h1><pre class="source lang-java linenums">package space.sunqian.common.io;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.common.base.chars.CharsBuilder;
+
+import java.io.Reader;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+
+/**
+ * This interface represents a processor to process char data, from the specified data source, through zero or more
+ * intermediate operations, finally produces a result or side effect, and the result will be written into a destination
+ * (if any). The following example shows a typical processing:
+ * &lt;pre&gt;{@code
+ * CharProcessor.from(input)
+ *     .readBlockSize(1024)
+ *     .readLimit(1024 * 8)
+ *     .transformer(transformer)
+ *     .processTo(output);
+ * }&lt;/pre&gt;
+ * &lt;p&gt;
+ * There are types of methods in this interface:
+ * &lt;ul&gt;
+ *     &lt;li&gt;
+ *         Setting methods: set the processing arguments to the current processor before a terminal method is invoked;
+ *     &lt;/li&gt;
+ *     &lt;li&gt;
+ *         Terminal methods: produce the processing result or side effect. Once a terminal method is invoked, the current
+ *         processor will be invalid, any further operations of the current processor will be undefined;
+ *     &lt;/li&gt;
+ * &lt;/ul&gt;
+ * The processor is lazy, operations on the source data are only performed when a terminal method is invoked, and the
+ * source data are consumed only as needed. Positions of the source and destination will increment by the actual read
+ * and write number.
+ *
+ * @author sunqian
+ */
+public interface CharProcessor {
+
+    /**
+     * Returns a new {@link CharProcessor} whose data source is the specified reader.
+     *
+     * @param src the specified reader
+     * @return a new {@link CharProcessor} whose data source is the specified reader
+     */
+    static @Nonnull CharProcessor from(@Nonnull Reader src) {
+<span class="fc" id="L47">        return new CharProcessorImpl(CharReader.from(src));</span>
+    }
+
+    /**
+     * Returns a new {@link CharProcessor} whose data source is the specified array.
+     *
+     * @param src the specified array
+     * @return a new {@link CharProcessor} whose data source is the specified array
+     */
+    static @Nonnull CharProcessor from(char @Nonnull [] src) {
+<span class="fc" id="L57">        return new CharProcessorImpl(CharReader.from(src));</span>
+    }
+
+    /**
+     * Returns a new {@link CharProcessor} whose data source is a specified length of data from the specified array,
+     * starting at the specified offset.
+     *
+     * @param src the specified array
+     * @param off the specified offset
+     * @param len the specified length
+     * @return a new {@link CharProcessor} whose data source is a specified length of data from the specified array,
+     * starting at the specified offset
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     */
+    static @Nonnull CharProcessor from(char @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
+<span class="fc" id="L72">        return new CharProcessorImpl(CharReader.from(src, off, len));</span>
+    }
+
+    /**
+     * Returns a new {@link CharProcessor} whose data source is the specified char sequence.
+     *
+     * @param src the specified char sequence
+     * @return a new {@link CharProcessor} whose data source is the specified char sequence
+     */
+    static @Nonnull CharProcessor from(@Nonnull CharSequence src) {
+<span class="fc" id="L82">        return new CharProcessorImpl(CharReader.from(src));</span>
+    }
+
+    /**
+     * Returns a new {@link CharProcessor} whose data source is the specified char sequence, starting at the specified
+     * start index inclusive and ending at the specified end index exclusive.
+     *
+     * @param src   the specified char sequence
+     * @param start the specified start index inclusive
+     * @param end   the specified end index exclusive
+     * @return a new {@link CharProcessor} whose data source is the specified char sequence, starting at the specified
+     * start index inclusive and ending at the specified end index exclusive.
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     */
+    static @Nonnull CharProcessor from(@Nonnull CharSequence src, int start, int end) throws IndexOutOfBoundsException {
+<span class="fc" id="L97">        return new CharProcessorImpl(CharReader.from(src, start, end));</span>
+    }
+
+    /**
+     * Returns a new {@link CharProcessor} whose data source is the specified buffer.
+     *
+     * @param src the specified buffer
+     * @return a new {@link CharProcessor} whose data source is the specified buffer
+     */
+    static @Nonnull CharProcessor from(@Nonnull CharBuffer src) {
+<span class="fc" id="L107">        return new CharProcessorImpl(CharReader.from(src));</span>
+    }
+
+    /**
+     * Returns a new {@link CharProcessor} whose data source is the specified {@link CharReader}.
+     *
+     * @param src the specified {@link CharReader}
+     * @return a new {@link CharProcessor} whose data source is the specified {@link CharReader}
+     */
+    static @Nonnull CharProcessor from(@Nonnull CharReader src) {
+<span class="fc" id="L117">        return new CharProcessorImpl(src);</span>
+    }
+
+    /**
+     * Sets the maximum number of chars to read from the data source.
+     * &lt;p&gt;
+     * This is an optional setting method.
+     *
+     * @param readLimit the maximum number of chars to read from the data source, must {@code &gt;= 0}
+     * @return this
+     * @throws IllegalArgumentException if the limit is negative
+     */
+    @Nonnull
+    CharProcessor readLimit(long readLimit) throws IllegalArgumentException;
+
+    /**
+     * Sets the number of chars for each read operation from the data source. The default is {@link IOKit#bufferSize()}.
+     * This setting is typically used for block-based processing.
+     * &lt;p&gt;
+     * This is an optional setting method.
+     *
+     * @param readBlockSize the number of chars for each read operation from the data source, must {@code &gt; 0}
+     * @return this
+     * @throws IllegalArgumentException if the block size is non-positive
+     */
+    @Nonnull
+    CharProcessor readBlockSize(int readBlockSize) throws IllegalArgumentException;
+
+    /**
+     * Adds the given transformer to this processor as the last transformer.
+     * &lt;p&gt;
+     * When the processing starts and there is at least one transformer, the processor reads a block of data from the
+     * data source, then passes the data block to the first transformer, then passes the result of the first transformer
+     * to the next transformer, and so on. If any transformer returns {@code null}, the current transformation chain
+     * will break. The last result of the last transformer, which serves as the final result, will be written to the
+     * destination if the final result is not empty. The processor continues this read-transform loop, until it reaches
+     * the end of the data source, or read number reaches the limit value set by {@link #readLimit(long)}. The logic is
+     * as follows:
+     * &lt;pre&gt;{@code
+     * while (true) {
+     *     CharSegment block = readNextBlock(blockSize, readLimit);
+     *     CharBuffer data = block.data();
+     *     boolean end = block.end();
+     *     for (CharTransformer transformer : transformers) {
+     *         if (data == null) {
+     *             break;
+     *         }
+     *         data = transformer.transform(data, end);
+     *     }
+     *     if (notEmpty(data)) {
+     *         writeTo(data);
+     *     }
+     *     if (end) {
+     *         break;
+     *     }
+     * }
+     * }&lt;/pre&gt;
+     * &lt;p&gt;
+     * The block size is typically determined by {@link #readBlockSize(int)}. And the data blocks are typically read by
+     * {@link CharReader#read(int)}, thus, their content may be shared with the data source. Changes to the data blocks
+     * may be reflected in the data source.
+     * &lt;p&gt;
+     * Normally, for the data block passed to the transformer, the unconsumed portion is ignored by the processor and
+     * will not be prepended to the next passed block. Use {@link CharTransformer#withBuffered(CharTransformer)} if it
+     * is needed.
+     * &lt;p&gt;
+     * This is an optional setting method. {@link CharProcessor} also provides some specific transformer wrappers such
+     * as: {@link CharTransformer#withFixedSize(CharTransformer, int)} and
+     * {@link CharTransformer#withMultipleSize(CharTransformer, int)}.
+     *
+     * @param transformer the given transformer
+     * @return this
+     */
+    @Nonnull
+    CharProcessor transformer(@Nonnull CharTransformer transformer);
+
+    /**
+     * Starts data processing and returns the actual number of chars read. If reaches the end of the data source and no
+     * data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The position of the data source, if any, will be incremented by the actual read number.
+     * &lt;p&gt;
+     * This is a terminal method, and it is typically used to produce side effects. This method is equivalent to:
+     * &lt;pre&gt;{@code
+     * return processeTo(IOKit.nullWriter());
+     * }&lt;/pre&gt;
+     *
+     * @return the actual number of chars read, or {@code -1} if reaches the end of the data source and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default long process() throws IORuntimeException {
+<span class="fc" id="L208">        return processTo(IOKit.nullWriter());</span>
+    }
+
+    /**
+     * Starts data processing, writes the processing result to the specified destination, and returns the actual number
+     * of chars read. If reaches the end of the data source and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The positions of the data source and destination, if any, will be incremented by the actual read and write
+     * numbers.
+     * &lt;p&gt;
+     * This is a terminal method.
+     *
+     * @param dst the specified destination
+     * @return the actual number of chars read, or {@code -1} if reaches the end of the data source and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    long processTo(@Nonnull Appendable dst) throws IORuntimeException;
+
+    /**
+     * Starts data processing, writes the processing result to the specified destination, and returns the actual number
+     * of chars read. If reaches the end of the data source and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The positions of the data source and destination, if any, will be incremented by the actual read and write
+     * numbers.
+     * &lt;p&gt;
+     * This is a terminal method.
+     *
+     * @param dst the specified destination
+     * @return the actual number of chars read, or {@code -1} if reaches the end of the data source and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    long processTo(char @Nonnull [] dst) throws IORuntimeException;
+
+    /**
+     * Starts data processing, writes the processing result to the specified destination (starting at the specified
+     * offset), and returns the actual number of chars read. If reaches the end of the data source and no data is read,
+     * returns {@code -1}.
+     * &lt;p&gt;
+     * The positions of the data source and destination, if any, will be incremented by the actual read and write
+     * numbers.
+     * &lt;p&gt;
+     * This is a terminal method.
+     *
+     * @param dst the specified destination
+     * @param off the specified offset
+     * @return the actual number of chars read, or {@code -1} if reaches the end of the data source and no data is read
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    long processTo(char @Nonnull [] dst, int off) throws IndexOutOfBoundsException, IORuntimeException;
+
+    /**
+     * Starts data processing, writes the processing result to the specified destination, and returns the actual number
+     * of chars read. If reaches the end of the data source and no data is read, returns {@code -1}.
+     * &lt;p&gt;
+     * The positions of the data source and destination, if any, will be incremented by the actual read and write
+     * numbers.
+     * &lt;p&gt;
+     * This is a terminal method.
+     *
+     * @param dst the specified destination
+     * @return the actual number of chars read, or {@code -1} if reaches the end of the data source and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    long processTo(@Nonnull CharBuffer dst) throws IORuntimeException;
+
+    /**
+     * Starts the processing, and returns the result as a new array. This method is equivalent to:
+     * &lt;pre&gt;{@code
+     *     CharsBuilder builder = new CharsBuilder();
+     *     processeTo(builder);
+     *     return builder.toCharArray();
+     * }&lt;/pre&gt;
+     * &lt;p&gt;
+     * The position of the data source, if any, will be incremented by the actual read number.
+     * &lt;p&gt;
+     * This is a terminal method.
+     *
+     * @return the processing result as a new array
+     * @throws IORuntimeException if an I/O error occurs
+     * @see #processTo(Appendable)
+     */
+    default char @Nonnull [] toCharArray() throws IORuntimeException {
+<span class="fc" id="L291">        CharsBuilder builder = new CharsBuilder();</span>
+<span class="fc" id="L292">        processTo(builder);</span>
+<span class="fc" id="L293">        return builder.toCharArray();</span>
+    }
+
+    /**
+     * Starts the processing, and returns the result as a new buffer. This method is equivalent to:
+     * &lt;pre&gt;{@code
+     *     CharsBuilder builder = new CharsBuilder();
+     *     processeTo(builder);
+     *     return builder.toCharBuffer();
+     * }&lt;/pre&gt;
+     * &lt;p&gt;
+     * The position of the data source, if any, will be incremented by the actual read number.
+     * &lt;p&gt;
+     * This is a terminal method.
+     *
+     * @return the processing result as a new buffer
+     * @throws IORuntimeException if an I/O error occurs
+     * @see #processTo(Appendable)
+     */
+    default @Nonnull CharBuffer toCharBuffer() throws IORuntimeException {
+<span class="fc" id="L313">        CharsBuilder builder = new CharsBuilder();</span>
+<span class="fc" id="L314">        processTo(builder);</span>
+<span class="fc" id="L315">        return builder.toCharBuffer();</span>
+    }
+
+    /**
+     * Starts the processing, and returns the result as a new string. This method is equivalent to:
+     * &lt;pre&gt;{@code
+     *     return new String(toCharArray());
+     * }&lt;/pre&gt;
+     * &lt;p&gt;
+     * The position of the data source, if any, will be incremented by the actual read number.
+     * &lt;p&gt;
+     * This is a terminal method.
+     *
+     * @return the processing result as a new string
+     * @throws IORuntimeException if an I/O error occurs
+     * @see #toCharArray()
+     */
+    @Nonnull
+    String toString() throws IORuntimeException;
+
+    /**
+     * Returns this {@link ByteProcessor} as a {@link Reader}. The status and data source of this processor are shared
+     * with the returned {@link Reader}, and the returned {@link Reader}'s content represents the processing result.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: Unsupported if any transformer(s) exist, otherwise based on the data source;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the data source;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     * &lt;p&gt;
+     * This is a terminal method.
+     *
+     * @return this {@link ByteProcessor} as a {@link Reader}
+     */
+    @Nonnull
+    Reader asReader();
+
+    /**
+     * Returns this {@link CharProcessor} as a {@link CharReader}. The status and data source of this processor are
+     * shared with the returned {@link CharReader}, and the returned {@link CharReader}'s content represents the
+     * processing result.
+     * &lt;p&gt;
+     * The result's support is as follows:
+     * &lt;ul&gt;
+     *     &lt;li&gt;mark/reset: Unsupported if any transformer(s) exist, otherwise based on the data source;&lt;/li&gt;
+     *     &lt;li&gt;close: closes the data source;&lt;/li&gt;
+     *     &lt;li&gt;thread safety: no;&lt;/li&gt;
+     * &lt;/ul&gt;
+     * &lt;p&gt;
+     * This is a terminal method.
+     *
+     * @return this {@link CharProcessor} as a {@link CharReader}
+     */
+    @Nonnull
+    CharReader asCharReader();
+
+    /**
+     * Converts this {@link CharProcessor} to a {@link ByteProcessor} with the specified charset.
+     * &lt;p&gt;
+     * This is a terminal method.
+     *
+     * @param charset the specified charset
+     * @return a new {@link ByteProcessor} converted from this {@link CharProcessor} with the specified charset
+     */
+    default @Nonnull ByteProcessor toByteEncoder(@Nonnull Charset charset) {
+<span class="fc" id="L381">        return ByteProcessor.from(IOKit.newInputStream(asReader(), charset));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

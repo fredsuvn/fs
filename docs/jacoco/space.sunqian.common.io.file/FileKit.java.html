@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FileKit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.io.file</a> &gt; <span class="el_source">FileKit.java</span></div><h1>FileKit.java</h1><pre class="source lang-java linenums">package space.sunqian.common.io.file;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.io.IORuntimeException;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttribute;
+
+/**
+ * Utilities for file related.
+ *
+ * @author sunqian
+ */
+public class FileKit {
+
+    /**
+     * Returns the path to the system's temporary directory.
+     * &lt;p&gt;
+     * The directory is determined by the {@code java.io.tmpdir} system property, which is platform-dependent but always
+     * represents a valid temporary directory. Different OS may have different temporary directory, for examples:
+     * &lt;table summary=&quot;System's Temporary Directory&quot;&gt;
+     *   &lt;tr&gt;
+     *     &lt;th&gt;OS&lt;/th&gt;
+     *     &lt;th&gt;Typical Path&lt;/th&gt;
+     *     &lt;th&gt;Notes&lt;/th&gt;
+     *   &lt;/tr&gt;
+     *   &lt;tr&gt;
+     *     &lt;td&gt;Windows&lt;/td&gt;
+     *     &lt;td&gt;&lt;code&gt;C:\\Users\\&amp;lt;username&amp;gt;\\AppData\\Local\\Temp&lt;/code&gt;&lt;/td&gt;
+     *     &lt;td&gt;User-specific temporary directory&lt;/td&gt;
+     *   &lt;/tr&gt;
+     *   &lt;tr&gt;
+     *     &lt;td&gt;Linux&lt;/td&gt;
+     *     &lt;td&gt;&lt;code&gt;/tmp&lt;/code&gt;&lt;/td&gt;
+     *     &lt;td&gt;System-wide temporary directory&lt;/td&gt;
+     *   &lt;/tr&gt;
+     *   &lt;tr&gt;
+     *     &lt;td&gt;macOS&lt;/td&gt;
+     *     &lt;td&gt;&lt;code&gt;/var/folders/xx/xxxxxxx/T&lt;/code&gt;&lt;/td&gt;
+     *     &lt;td&gt;Per-user private temporary directory&lt;/td&gt;
+     *   &lt;/tr&gt;
+     *   &lt;tr&gt;
+     *     &lt;td&gt;Android&lt;/td&gt;
+     *     &lt;td&gt;&lt;code&gt;/data/local/tmp&lt;/code&gt;&lt;/td&gt;
+     *     &lt;td&gt;Device temporary storage&lt;/td&gt;
+     *   &lt;/tr&gt;
+     * &lt;/table&gt;
+     *
+     * @return the path to the system's temporary directory
+     */
+    public static @Nonnull Path getTempDir() {
+<span class="fc" id="L55">        String tempDir = System.getProperty(&quot;java.io.tmpdir&quot;);</span>
+<span class="fc" id="L56">        return Paths.get(tempDir);</span>
+    }
+
+    /**
+     * Creates a temporary file in the system's temporary directory (specified by {@link #getTempDir()}), and returns
+     * the created file. The file name is generated using the specified prefix and suffix.
+     *
+     * @param prefix the prefix of the file name
+     * @param suffix the suffix of the file name
+     * @param attrs  an optional list of file attributes to set atomically when creating the file
+     * @return a temporary file with the specified file name
+     */
+    public static @Nonnull Path createTempFile(
+        @Nullable String prefix,
+        @Nullable String suffix,
+        @Nonnull FileAttribute&lt;?&gt; @Nonnull ... attrs
+    ) throws IORuntimeException {
+<span class="fc" id="L73">        return createTempFile(getTempDir(), prefix, suffix, attrs);</span>
+    }
+
+    private static @Nonnull Path createTempFile(
+        @Nonnull Path dir,
+        @Nullable String prefix,
+        @Nullable String suffix,
+        @Nonnull FileAttribute&lt;?&gt; @Nonnull ... attrs
+    ) throws IORuntimeException {
+        try {
+<span class="fc" id="L83">            return Files.createTempFile(dir, prefix, suffix, attrs);</span>
+<span class="fc" id="L84">        } catch (Exception e) {</span>
+<span class="fc" id="L85">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    /**
+     * Creates a temporary file in the system's temporary directory (specified by {@link #getTempDir()}), and returns
+     * the created file. The file name is generated using the specified prefix.
+     *
+     * @param prefix the prefix of the file name
+     * @param attrs  an optional list of file attributes to set atomically when creating the file
+     * @return a temporary file with the specified file name
+     */
+    public static @Nonnull Path createTempDir(
+        @Nullable String prefix,
+        @Nonnull FileAttribute&lt;?&gt; @Nonnull ... attrs
+    ) throws IORuntimeException {
+<span class="fc" id="L101">        return createTempDir(getTempDir(), prefix, attrs);</span>
+    }
+
+    private static @Nonnull Path createTempDir(
+        @Nonnull Path dir,
+        @Nullable String prefix,
+        @Nonnull FileAttribute&lt;?&gt; @Nonnull ... attrs
+    ) throws IORuntimeException {
+        try {
+<span class="fc" id="L110">            return Files.createTempDirectory(dir, prefix, attrs);</span>
+<span class="fc" id="L111">        } catch (Exception e) {</span>
+<span class="fc" id="L112">            throw new IORuntimeException(e);</span>
+        }
+    }
+
+    private FileKit() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

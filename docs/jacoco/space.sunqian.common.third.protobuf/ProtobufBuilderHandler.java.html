@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProtobufBuilderHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.third.protobuf</a> &gt; <span class="el_source">ProtobufBuilderHandler.java</span></div><h1>ProtobufBuilderHandler.java</h1><pre class="source lang-java linenums">package space.sunqian.common.third.protobuf;
+
+import com.google.protobuf.Message;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.Fs;
+import space.sunqian.common.object.data.DataObjectException;
+import space.sunqian.common.object.data.ObjectBuilder;
+import space.sunqian.common.object.data.ObjectBuilderProvider;
+import space.sunqian.common.runtime.invoke.Invocable;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+
+/**
+ * {@link ObjectBuilderProvider.Handler} implementation for
+ * &lt;a href=&quot;https://github.com/protocolbuffers/protobuf&quot;&gt;Protocol Buffers&lt;/a&gt;, can be quickly used through similar
+ * codes:
+ * &lt;pre&gt;{@code
+ * ObjectBuilderProvider provider = ObjectBuilderProvider
+ *     .defaultProvider()
+ *     .withFirstHandler(new ProtobufBuilderHandler());
+ * }&lt;/pre&gt;
+ * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment.
+ *
+ * @author sunqian
+ */
+<span class="fc" id="L28">public class ProtobufBuilderHandler implements ObjectBuilderProvider.Handler {</span>
+
+    @Override
+    public @Nullable ObjectBuilder newBuilder(@Nonnull Type target) throws Exception {
+        // Check whether it is a protobuf object
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (!(target instanceof Class&lt;?&gt;)) {</span>
+<span class="fc" id="L34">            return null;</span>
+        }
+<span class="fc" id="L36">        Class&lt;?&gt; rawTarget = (Class&lt;?&gt;) target;</span>
+<span class="fc" id="L37">        boolean isProtobuf = false;</span>
+<span class="fc" id="L38">        boolean isBuilder = false;</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (Message.class.isAssignableFrom(rawTarget)) {</span>
+<span class="fc" id="L40">            isProtobuf = true;</span>
+        }
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (Message.Builder.class.isAssignableFrom(rawTarget)) {</span>
+<span class="fc" id="L43">            isProtobuf = true;</span>
+<span class="fc" id="L44">            isBuilder = true;</span>
+        }
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (!isProtobuf) {</span>
+<span class="fc" id="L47">            return null;</span>
+        }
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (isBuilder) {</span>
+<span class="fc" id="L50">            Method buildMethod = rawTarget.getMethod(&quot;build&quot;);</span>
+<span class="fc" id="L51">            Class&lt;?&gt; messageType = buildMethod.getReturnType();</span>
+<span class="fc" id="L52">            Method builderMethod = messageType.getMethod(&quot;newBuilder&quot;);</span>
+<span class="fc" id="L53">            return new BuilderToBuilder(builderMethod, rawTarget);</span>
+        } else {
+<span class="fc" id="L55">            Method builderMethod = rawTarget.getMethod(&quot;newBuilder&quot;);</span>
+<span class="fc" id="L56">            Class&lt;?&gt; builderType = builderMethod.getReturnType();</span>
+<span class="fc" id="L57">            Method buildMethod = builderType.getMethod(&quot;build&quot;);</span>
+<span class="fc" id="L58">            return new BuilderToObject(builderMethod, buildMethod, builderType);</span>
+        }
+    }
+
+    private static final class BuilderToBuilder implements ObjectBuilder {
+
+        private final @Nonnull Invocable builder;
+        private final @Nonnull Type builderType;
+
+<span class="fc" id="L67">        private BuilderToBuilder(@Nonnull Method builderMethod, @Nonnull Type builderType) {</span>
+<span class="fc" id="L68">            this.builder = Invocable.of(builderMethod);</span>
+<span class="fc" id="L69">            this.builderType = builderType;</span>
+<span class="fc" id="L70">        }</span>
+
+        @Override
+        public @Nonnull Object newBuilder() throws DataObjectException {
+<span class="fc" id="L74">            return Fs.uncheck(() -&gt; builder.invoke(null), DataObjectException::new);</span>
+        }
+
+        @Override
+        public @Nonnull Type builderType() {
+<span class="fc" id="L79">            return builderType;</span>
+        }
+
+        @Override
+        public @Nonnull Object build(@Nonnull Object builder) throws DataObjectException {
+<span class="fc" id="L84">            return builder;</span>
+        }
+    }
+
+    private static final class BuilderToObject implements ObjectBuilder {
+
+        private final @Nonnull Invocable builder;
+        private final @Nonnull Invocable build;
+        private final @Nonnull Type builderType;
+
+        private BuilderToObject(
+            @Nonnull Method builderMethod, @Nonnull Method buildMethod, @Nonnull Type builderType
+<span class="fc" id="L96">        ) {</span>
+<span class="fc" id="L97">            this.builder = Invocable.of(builderMethod);</span>
+<span class="fc" id="L98">            this.build = Invocable.of(buildMethod);</span>
+<span class="fc" id="L99">            this.builderType = builderType;</span>
+<span class="fc" id="L100">        }</span>
+
+        @Override
+        public @Nonnull Object newBuilder() throws DataObjectException {
+<span class="fc" id="L104">            return Fs.uncheck(() -&gt; builder.invoke(null), DataObjectException::new);</span>
+        }
+
+        @Override
+        public @Nonnull Type builderType() {
+<span class="fc" id="L109">            return builderType;</span>
+        }
+
+        @Override
+        public @Nonnull Object build(@Nonnull Object builder) throws DataObjectException {
+<span class="fc" id="L114">            return Fs.uncheck(() -&gt; build.invoke(builder), DataObjectException::new);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
