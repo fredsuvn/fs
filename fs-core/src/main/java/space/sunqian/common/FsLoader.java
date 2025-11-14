@@ -75,23 +75,29 @@ public class FsLoader {
     }
 
     /**
-     * This method is used to load the given classes to instances, the {@code null} class elements and {@code null}
-     * instanced will be ignored.
+     * This method is used to load the given objects. If the object is {@link Class}, loads it to an instance, else
+     * loads the object itself. The {@code null} elements and {@code null} instanced (if loading fails) will be
+     * ignored.
      * <p>
      * This is a lib-internal method.
      *
-     * @param classes the classes that need to be loaded
-     * @param <T>     the type of the instances
-     * @return the class instances
+     * @param classesOrInstances the objects array that need to be loaded
+     * @param <T>                the type of the instances
+     * @return the instances
      */
-    public static <T> @Nonnull List<@Nonnull T> loadInstanceByClass(@Nullable Class<?> @Nonnull ... classes) {
-        ArrayList<T> list = new ArrayList<>(classes.length);
-        for (Class<?> aClass : classes) {
-            if (aClass == null) {
+    public static <T> @Nonnull List<@Nonnull T> loadInstances(@Nullable Object @Nonnull ... classesOrInstances) {
+        ArrayList<T> list = new ArrayList<>(classesOrInstances.length);
+        for (Object obj : classesOrInstances) {
+            if (obj == null) {
                 continue;
             }
-            Object obj = ClassKit.newInstance(aClass);
-            if (obj != null) {
+            if (obj instanceof Class<?>) {
+                Class<?> cls = (Class<?>) obj;
+                Object o = ClassKit.newInstance(cls);
+                if (o != null) {
+                    list.add(Fs.as(o));
+                }
+            } else {
                 list.add(Fs.as(obj));
             }
         }

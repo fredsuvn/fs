@@ -108,10 +108,10 @@ public class FsLoaderTest {
     }
 
     @Test
-    public void testLoadInstanceByClass() {
+    public void testLoadInstances() {
         assertEquals(
-            Arrays.asList(""),
-            FsLoader.loadInstanceByClass(String.class, null, NoLoad.class)
+            Arrays.asList("", "123"),
+            FsLoader.loadInstances(String.class, null, NoLoad.class, "123")
         );
     }
 
