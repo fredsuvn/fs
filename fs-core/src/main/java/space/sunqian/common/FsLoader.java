@@ -45,10 +45,28 @@ public class FsLoader {
         throw new UnknownTypeException(className);
     }
 
-    private static <T> @Nullable T loadImplByJvm(String classImplName) throws UnknownTypeException {
+    private static <T> @Nullable T loadImplByJvm(String classImplName) {
         Class<?> cls = ClassKit.classForName(classImplName);
         Enum<?> enumObj = EnumKit.findEnum(Fs.as(cls), "INST");
         return Fs.as(enumObj);
+    }
+
+    /**
+     * This method is used to load a class that depends on another class.
+     * <p>
+     * This is a lib-internal method.
+     *
+     * @param className          the name of the class that needs to be loaded
+     * @param dependentClassName the name of the dependent class
+     */
+    public static @Nullable Class<?> loadClassByDependent(
+        @Nonnull String className, @Nonnull String dependentClassName
+    ) {
+        Class<?> dependentClass = ClassKit.classForName(dependentClassName);
+        if (dependentClass == null) {
+            return null;
+        }
+        return ClassKit.classForName(className);
     }
 
     private FsLoader() {
