@@ -24,7 +24,7 @@ _fs_ includes 6 modules:
 
 Note:
 
-* _fs_dependencies_ should be published as a bom (<packaging>pom</packaging>);
+* _fs_dependencies_ should be published as a `bom` (`<packaging>pom</packaging>`);
 * _fs_annotations_, _fs-core_ and _fs-all_ should be published as jars;
 * _fs-internal_ and _fs-tests_ should not be published;
 
@@ -33,7 +33,7 @@ Note:
 
 src: link:../fs-dependencies/[fs-dependencies]
 
-_fs_dependencies_ is the dependency platform of _fs_, should be published as a bom (<packaging>pom</packaging>).
+_fs_dependencies_ is the dependency platform of _fs_, should be published as a `bom` (`<packaging>pom</packaging>`).
 
 [[chapter-annotations]]
 == _fs_annotations_
