@@ -6,6 +6,8 @@ import space.sunqian.common.FsLoader;
 import space.sunqian.common.base.exception.UnknownTypeException;
 import space.sunqian.common.base.system.JvmKit;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -103,5 +105,18 @@ public class FsLoaderTest {
             FsLoader.loadClassByDependent("java.lang.String", "java.lang.String")
         );
         assertNull(FsLoader.loadClassByDependent("java.lang.String", "666"));
+    }
+
+    @Test
+    public void testLoadInstanceByClass() {
+        assertEquals(
+            Arrays.asList(""),
+            FsLoader.loadInstanceByClass(String.class, null, NoLoad.class)
+        );
+    }
+
+    private static class NoLoad {
+        private NoLoad() {
+        }
     }
 }

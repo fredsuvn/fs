@@ -7,6 +7,10 @@ import space.sunqian.common.base.exception.UnknownTypeException;
 import space.sunqian.common.base.system.JvmKit;
 import space.sunqian.common.runtime.reflect.ClassKit;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Loader for implementations of this lib.
  *
@@ -58,6 +62,7 @@ public class FsLoader {
      *
      * @param className          the name of the class that needs to be loaded
      * @param dependentClassName the name of the dependent class
+     * @return the loaded class
      */
     public static @Nullable Class<?> loadClassByDependent(
         @Nonnull String className, @Nonnull String dependentClassName
@@ -67,6 +72,31 @@ public class FsLoader {
             return null;
         }
         return ClassKit.classForName(className);
+    }
+
+    /**
+     * This method is used to load the given classes to instances, the {@code null} class elements and {@code null}
+     * instanced will be ignored.
+     * <p>
+     * This is a lib-internal method.
+     *
+     * @param classes the classes that need to be loaded
+     * @param <T>     the type of the instances
+     * @return the class instances
+     */
+    public static <T> @Nonnull List<@Nonnull T> loadInstanceByClass(@Nullable Class<?> @Nonnull ... classes) {
+        ArrayList<T> list = new ArrayList<>(classes.length);
+        for (Class<?> aClass : classes) {
+            if (aClass == null) {
+                continue;
+            }
+            Object obj = ClassKit.newInstance(aClass);
+            if (obj != null) {
+                list.add(Fs.as(obj));
+            }
+        }
+        list.trimToSize();
+        return Collections.unmodifiableList(list);
     }
 
     private FsLoader() {
