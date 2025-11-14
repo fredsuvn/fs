@@ -68,6 +68,8 @@ tasks.named<Javadoc>("javadoc") {
   javadocTool = javaToolchains.javadocToolFor {
     languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
   }
+
+  destinationDir = rootDir.resolve("docs/javadoc")
 }
 
 val testJava17 = coreProject.tasks.named("testJava17")
@@ -106,6 +108,7 @@ tasks.jacocoTestReport {
     xml.required = false
     csv.required = false
     html.required = true
+    html.outputLocation = rootDir.resolve("docs/reports/jacoco")
   }
 }
 
@@ -121,6 +124,7 @@ tasks.testAggregateTestReport {
     internalProject.layout.buildDirectory.dir("test-results/test"),
     internalProject.layout.buildDirectory.dir("test-results/test/binary"),
   )
+  destinationDirectory = rootDir.resolve("docs/reports/test-aggregate")
 }
 
 publishing {

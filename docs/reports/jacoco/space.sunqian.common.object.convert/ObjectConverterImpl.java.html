@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ObjectConverterImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common.object.convert</a> &gt; <span class="el_source">ObjectConverterImpl.java</span></div><h1>ObjectConverterImpl.java</h1><pre class="source lang-java linenums">package space.sunqian.common.object.convert;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.annotations.RetainedParam;
+import space.sunqian.common.FsLoader;
+import space.sunqian.common.base.option.Option;
+import space.sunqian.common.object.convert.handlers.AssignableConvertHandler;
+import space.sunqian.common.object.convert.handlers.CommonConvertHandler;
+
+import java.lang.reflect.Type;
+import java.util.List;
+
+final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Handler {
+
+<span class="fc" id="L16">    static final @Nonnull ObjectConverterImpl DEFAULT = new ObjectConverterImpl(FsLoader.loadInstances(</span>
+<span class="fc" id="L17">        FsLoader.loadClassByDependent(</span>
+            &quot;space.sunqian.common.third.protobuf.ProtobufConvertHandler&quot;,
+            &quot;com.google.protobuf.Message&quot;
+        ),
+        new AssignableConvertHandler(),
+        new CommonConvertHandler()
+    ));
+
+    private final @Nonnull List&lt;ObjectConverter.@Nonnull Handler&gt; handlers;
+
+<span class="fc" id="L27">    ObjectConverterImpl(@RetainedParam List&lt;ObjectConverter.@Nonnull Handler&gt; handlers) {</span>
+<span class="fc" id="L28">        this.handlers = handlers;</span>
+<span class="fc" id="L29">    }</span>
+
+    @Override
+    public @Nonnull List&lt;@Nonnull Handler&gt; handlers() {
+<span class="fc" id="L33">        return handlers;</span>
+    }
+
+    @Override
+    public @Nonnull Handler asHandler() {
+<span class="fc" id="L38">        return this;</span>
+    }
+
+    @Override
+    public Object convert(
+        @Nullable Object src,
+        @Nonnull Type srcType,
+        @Nonnull Type target,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option&lt;?, ?&gt; @Nonnull ... options
+    ) throws Exception {
+        try {
+<span class="fc" id="L50">            return convert(src, srcType, target, options);</span>
+<span class="fc" id="L51">        } catch (UnsupportedObjectConvertException e) {</span>
+<span class="fc" id="L52">            return Status.HANDLER_CONTINUE;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

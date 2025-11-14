@@ -92,12 +92,23 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static &lt;T&gt;&nbsp;T</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#loadImplByJvm(java.lang.Class,int)" class="member-name-link">loadImplByJvm</a><wbr>(<a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;T&gt;&nbsp;serviceClass,
- int&nbsp;highVersion)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;?&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#loadClassByDependent(java.lang.String,java.lang.String)" class="member-name-link">loadClassByDependent</a><wbr>(<a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className,
+ <a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;dependentClassName)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">This method is used to load a class that depends on another class.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static &lt;T&gt;&nbsp;T</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#loadImplByJvm(java.lang.Class,int)" class="member-name-link">loadImplByJvm</a><wbr>(<a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;T&gt;&nbsp;serviceClass,
+ int&nbsp;highVersion)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">This method is used to load the corresponding version of service implementation based on the currently running
  JVM platform for this lib.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static &lt;T&gt;&nbsp;<a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> T&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#loadInstances(java.lang.Object...)" class="member-name-link">loadInstances</a><wbr>(<a href="../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a> <a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> ...&nbsp;classesOrInstances)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">This method is used to load the given objects.</div>
 </div>
 </div>
 </div>
@@ -138,6 +149,47 @@ loadScripts(document, 'script');</script>
 <dd>the corresponding version of service implementation</dd>
 <dt>Throws:</dt>
 <dd><code><a href="base/exception/UnknownTypeException.html" title="class in space.sunqian.common.base.exception">UnknownTypeException</a></code></dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="loadClassByDependent(java.lang.String,java.lang.String)">
+<h3>loadClassByDependent</h3>
+<div class="member-signature"><span class="annotations"><a href="../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a>
+</span><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;?&gt;</span>&nbsp;<span class="element-name">loadClassByDependent</span><wbr><span class="parameters">(<a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className,
+ <a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;dependentClassName)</span></div>
+<div class="block">This method is used to load a class that depends on another class.
+ <p>
+ This is a lib-internal method.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>className</code> - the name of the class that needs to be loaded</dd>
+<dd><code>dependentClassName</code> - the name of the dependent class</dd>
+<dt>Returns:</dt>
+<dd>the loaded class</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="loadInstances(java.lang.Object...)">
+<h3>loadInstances</h3>
+<div class="member-signature"><span class="annotations"><a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+</span><span class="modifiers">public static</span>&nbsp;<span class="type-parameters">&lt;T&gt;</span>&nbsp;<span class="return-type"><a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> T&gt;</span>&nbsp;<span class="element-name">loadInstances</span><wbr><span class="parameters">(<a href="../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a>
+ <a href="../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a> <a href="../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> ...&nbsp;classesOrInstances)</span></div>
+<div class="block">This method is used to load the given objects. If the object is <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link"><code>Class</code></a>, loads it to an instance, else
+ loads the object itself. The <code>null</code> elements and <code>null</code> instanced (if loading fails) will be
+ ignored.
+ <p>
+ This is a lib-internal method.</div>
+<dl class="notes">
+<dt>Type Parameters:</dt>
+<dd><code>T</code> - the type of the instances</dd>
+<dt>Parameters:</dt>
+<dd><code>classesOrInstances</code> - the objects array that need to be loaded</dd>
+<dt>Returns:</dt>
+<dd>the instances</dd>
 </dl>
 </section>
 </li>

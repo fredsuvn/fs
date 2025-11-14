@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FsLoader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fs-all</a> &gt; <a href="index.source.html" class="el_package">space.sunqian.common</a> &gt; <span class="el_source">FsLoader.java</span></div><h1>FsLoader.java</h1><pre class="source lang-java linenums">package space.sunqian.common;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.enums.EnumKit;
+import space.sunqian.common.base.exception.UnknownTypeException;
+import space.sunqian.common.base.system.JvmKit;
+import space.sunqian.common.runtime.reflect.ClassKit;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Loader for implementations of this lib.
+ *
+ * @author sunqian
+ */
+public class FsLoader {
+
+    /**
+     * This method is used to load the corresponding version of service implementation based on the currently running
+     * JVM platform for this lib.
+     * &lt;p&gt;
+     * This is a lib-internal method.
+     *
+     * @param serviceClass the service class
+     * @param highVersion  the high version
+     * @param &lt;T&gt;          the service type
+     * @return the corresponding version of service implementation
+     */
+    public static &lt;T&gt; @Nonnull T loadImplByJvm(
+        @Nonnull Class&lt;T&gt; serviceClass, int highVersion
+    ) throws UnknownTypeException {
+<span class="fc" id="L35">        int majorVersion = JvmKit.javaMajorVersion();</span>
+        String className;
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (majorVersion &gt; 8) {</span>
+<span class="fc" id="L38">            className = serviceClass.getName() + &quot;ImplByJ&quot; + highVersion;</span>
+<span class="fc" id="L39">            T ret = loadImplByJvm(className);</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">            if (ret != null) {</span>
+<span class="fc" id="L41">                return ret;</span>
+            }
+        }
+<span class="fc" id="L44">        className = serviceClass.getName() + &quot;Impl&quot;;</span>
+<span class="fc" id="L45">        T ret = loadImplByJvm(className);</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (ret != null) {</span>
+<span class="fc" id="L47">            return ret;</span>
+        }
+<span class="fc" id="L49">        throw new UnknownTypeException(className);</span>
+    }
+
+    private static &lt;T&gt; @Nullable T loadImplByJvm(String classImplName) {
+<span class="fc" id="L53">        Class&lt;?&gt; cls = ClassKit.classForName(classImplName);</span>
+<span class="fc" id="L54">        Enum&lt;?&gt; enumObj = EnumKit.findEnum(Fs.as(cls), &quot;INST&quot;);</span>
+<span class="fc" id="L55">        return Fs.as(enumObj);</span>
+    }
+
+    /**
+     * This method is used to load a class that depends on another class.
+     * &lt;p&gt;
+     * This is a lib-internal method.
+     *
+     * @param className          the name of the class that needs to be loaded
+     * @param dependentClassName the name of the dependent class
+     * @return the loaded class
+     */
+    public static @Nullable Class&lt;?&gt; loadClassByDependent(
+        @Nonnull String className, @Nonnull String dependentClassName
+    ) {
+<span class="fc" id="L70">        Class&lt;?&gt; dependentClass = ClassKit.classForName(dependentClassName);</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (dependentClass == null) {</span>
+<span class="fc" id="L72">            return null;</span>
+        }
+<span class="fc" id="L74">        return ClassKit.classForName(className);</span>
+    }
+
+    /**
+     * This method is used to load the given objects. If the object is {@link Class}, loads it to an instance, else
+     * loads the object itself. The {@code null} elements and {@code null} instanced (if loading fails) will be
+     * ignored.
+     * &lt;p&gt;
+     * This is a lib-internal method.
+     *
+     * @param classesOrInstances the objects array that need to be loaded
+     * @param &lt;T&gt;                the type of the instances
+     * @return the instances
+     */
+    public static &lt;T&gt; @Nonnull List&lt;@Nonnull T&gt; loadInstances(@Nullable Object @Nonnull ... classesOrInstances) {
+<span class="fc" id="L89">        ArrayList&lt;T&gt; list = new ArrayList&lt;&gt;(classesOrInstances.length);</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        for (Object obj : classesOrInstances) {</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">            if (obj == null) {</span>
+<span class="fc" id="L92">                continue;</span>
+            }
+<span class="fc bfc" id="L94" title="All 2 branches covered.">            if (obj instanceof Class&lt;?&gt;) {</span>
+<span class="fc" id="L95">                Class&lt;?&gt; cls = (Class&lt;?&gt;) obj;</span>
+<span class="fc" id="L96">                Object o = ClassKit.newInstance(cls);</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">                if (o != null) {</span>
+<span class="fc" id="L98">                    list.add(Fs.as(o));</span>
+                }
+<span class="fc" id="L100">            } else {</span>
+<span class="fc" id="L101">                list.add(Fs.as(obj));</span>
+            }
+        }
+<span class="fc" id="L104">        list.trimToSize();</span>
+<span class="fc" id="L105">        return Collections.unmodifiableList(list);</span>
+    }
+
+    private FsLoader() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
