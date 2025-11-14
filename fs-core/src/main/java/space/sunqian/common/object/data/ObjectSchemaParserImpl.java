@@ -2,16 +2,19 @@ package space.sunqian.common.object.data;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.RetainedParam;
+import space.sunqian.common.FsLoader;
 import space.sunqian.common.object.data.handlers.SimpleBeanSchemaHandler;
-import space.sunqian.common.runtime.reflect.ClassKit;
 
 import java.util.List;
 
 final class ObjectSchemaParserImpl implements ObjectSchemaParser, ObjectSchemaParser.Handler {
 
-    static @Nonnull ObjectSchemaParserImpl DEFAULT = new ObjectSchemaParserImpl(ClassKit.runtimeInstances(
-        "space.sunqian.common.third.protobuf.ProtobufSchemaHandler",
-        SimpleBeanSchemaHandler.class.getName()
+    static @Nonnull ObjectSchemaParserImpl DEFAULT = new ObjectSchemaParserImpl(FsLoader.loadInstances(
+        FsLoader.loadClassByDependent(
+            "space.sunqian.common.third.protobuf.ProtobufSchemaHandler",
+            "com.google.protobuf.Message"
+        ),
+        SimpleBeanSchemaHandler.class
     ));
 
     private final @Nonnull List<ObjectSchemaParser.@Nonnull Handler> handlers;

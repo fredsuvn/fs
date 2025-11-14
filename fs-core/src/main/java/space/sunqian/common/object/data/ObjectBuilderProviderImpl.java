@@ -2,6 +2,7 @@ package space.sunqian.common.object.data;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
+import space.sunqian.common.FsLoader;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.runtime.invoke.Invocable;
 import space.sunqian.common.runtime.invoke.InvocationException;
@@ -9,7 +10,6 @@ import space.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +19,14 @@ final class ObjectBuilderProviderImpl implements ObjectBuilderProvider, ObjectBu
 
     static final @Nonnull ObjectBuilderProvider DEFAULT = new ObjectBuilderProviderImpl(
         new BuilderCacheImpl(new ConcurrentHashMap<>()),
-        Collections.singletonList(DefaultHandler.INST)
+        // Collections.singletonList(DefaultHandler.INST)
+        FsLoader.loadInstances(
+            FsLoader.loadClassByDependent(
+                "space.sunqian.common.third.protobuf.ProtobufBuilderHandler",
+                "com.google.protobuf.Message"
+            ),
+            DefaultHandler.INST
+        )
     );
 
     private final @Nonnull ObjectBuilderProvider.BuilderCache builderCache;

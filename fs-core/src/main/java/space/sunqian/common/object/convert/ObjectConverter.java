@@ -56,7 +56,7 @@ public interface ObjectConverter {
      * @return the default converter
      */
     static @Nonnull ObjectConverter defaultConverter() {
-        return ObjectConverterImpl.DEFAULT_MAPPER;
+        return ObjectConverterImpl.DEFAULT;
     }
 
     /**

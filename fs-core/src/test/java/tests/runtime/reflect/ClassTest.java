@@ -5,7 +5,6 @@ import internal.test.J17Also;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
-import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.runtime.reflect.BytesClassLoader;
 import space.sunqian.common.runtime.reflect.ClassKit;
 import tests.utils.ErrorConstructor;
@@ -99,14 +98,6 @@ public class ClassTest implements AssertTest {
         Constructor<?> constructor = String.class.getConstructor();
         assertEquals("", ClassKit.newInstance(constructor));
         assertNull(ClassKit.newInstance(ErrorConstructor.class.getConstructor()));
-        assertEquals(
-            ClassKit.runtimeInstances(String.class.getName(), String.class.getName()),
-            ListKit.list("", "")
-        );
-        assertEquals(
-            ClassKit.runtimeInstances(String.class.getName(), "123"),
-            ListKit.list("")
-        );
     }
 
     @J17Also

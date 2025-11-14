@@ -3,7 +3,7 @@ package space.sunqian.common.object.convert;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.RetainedParam;
-import space.sunqian.common.Fs;
+import space.sunqian.common.FsLoader;
 import space.sunqian.common.base.option.Option;
 import space.sunqian.common.object.convert.handlers.AssignableConvertHandler;
 import space.sunqian.common.object.convert.handlers.CommonConvertHandler;
@@ -13,7 +13,11 @@ import java.util.List;
 
 final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Handler {
 
-    static final @Nonnull ObjectConverterImpl DEFAULT_MAPPER = new ObjectConverterImpl(Fs.list(
+    static final @Nonnull ObjectConverterImpl DEFAULT = new ObjectConverterImpl(FsLoader.loadInstances(
+        FsLoader.loadClassByDependent(
+            "space.sunqian.common.third.protobuf.ProtobufConvertHandler",
+            "com.google.protobuf.Message"
+        ),
         new AssignableConvertHandler(),
         new CommonConvertHandler()
     ));
