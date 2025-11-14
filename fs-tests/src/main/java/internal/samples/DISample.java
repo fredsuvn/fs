@@ -1,4 +1,4 @@
-package tests.app.di;
+package internal.samples;
 
 import internal.test.PrintTest;
 import space.sunqian.annotations.Nonnull;
@@ -16,7 +16,7 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-public class DIExample implements PrintTest {
+public class DISample implements PrintTest {
 
     public static void main(String[] args) {
         InjectedApp app = InjectedApp.newBuilder()

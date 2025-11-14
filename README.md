@@ -24,7 +24,11 @@ _fs_ is a lightweight, zero-dependency tool lib for java. It provides:
 
 Here are samples:
 
-[Samples](./fs-tests/src/main/java/internal/samples/Samples.java)
+- [Annotations](./fs-tests/src/main/java/internal/samples/AnnotationSample.java)
+- [Simple Cache](./fs-tests/src/main/java/internal/samples/CacheSample.java)
+- [Dependency Injection](./fs-tests/src/main/java/internal/samples/DISample.java)
+- [Proxy](./fs-tests/src/main/java/internal/samples/ProxySample.java)
+- [Other samples](./fs-tests/src/main/java/internal/samples/OtherSamples.java)
 
 ## Clone
 
