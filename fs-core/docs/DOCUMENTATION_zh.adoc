@@ -46,4 +46,4 @@ link:../src/tests/java/samples/[样例].
 
 == 基准测试
 
-link:../../docs/benchmark/[基准测试结果].
+link:../../docs/jmh/[基准测试结果].

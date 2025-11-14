@@ -1,31 +1,52 @@
-# ![](logo.svg) Gek: Core Libraries of [SrcLab](https://github.com/srclab-projects) and [Me](https://github.com/fredsuvn) for JVM
+# _fs_: a lightweight, zero-dependency tool lib for java
 
-## Documentation:
+## Overview:
 
-- AsciiDoc:
-  * [English](docs/DOCUMENTATION_en.adoc)
-  * [简体中文](docs/DOCUMENTATION_zh.adoc)
+![](logo.svg)
 
-More see [docs/](docs/)
+_fs_ is a lightweight, zero-dependency tool lib for java. It contains:
 
-## Build
+- annotations:
+  * annotations:
+  *
+- app: Application framework with dependency injection support
+- base: Fundamental data processing tools covering bytes, characters, encoding, dates, enums, etc.
+- codec: Encoding/decoding utilities including Base64, cryptography, digest, and hexadecimal processing
+- collect: Collection operation tools for arrays, lists, maps, sets, and stream processing
+- io: Input/output handling with communication, file operations, and buffer management
+- net: Network communication support for HTTP, TCP, and UDP protocols
+- random: Random number generation services
+- cache: Caching implementations with abstract and simple cache options
+- concurrent: Concurrency processing tools that simplify Future operations
+- object: Object conversion and data processing capabilities
+- runtime: Runtime utilities including aspects, reflection, proxy, and invocation mechanisms
+- third: Third-party integrations supporting ASM and Protocol Buffers
 
-```shell
-# build Gek
-git clone -b master https://github.com/fredsuvn/gek.git
-cd boat && gradle clean build
+```java
+
 ```
 
-**Note:**
+## Clone
 
-* Some properties should be configured if you want to enable publish to remote, see publish info part
-  of [build.gradle](build.gradle.kts)
-* `gek-core` need `protoc` to compile protobuf files, some architectures don't support it (such as `ARM`);
+```shell
+# clone and build
+git clone -b master https://github.com/fredsuvn/fs.git
+cd fs && gradle clean build
+```
 
-## Join
+## Documents
 
-* [SrcLab](https://github.com/srclab-projects)
-* [Me](https://github.com/fredsuvn)
+- manual: [manual.adoc](docs/manual.adoc)
+- javadoc: [javadoc](docs/javadoc/index.html)
+- test-reports: [test-aggregate](docs/reports/test-aggregate/index.html)
+- jacoco: [jacoco](docs/reports/jacoco/index.html)
+- benchmark:
+  * [jmh-visualizer](docs/reports/jmh/jmh-visualizer.html)
+  * [results.json](docs/reports/jmh/results.json)
+
+## Contact
+
+* [github](https://github.com/fredsuvn)
 * QQ group: 566185308
 
 ## License

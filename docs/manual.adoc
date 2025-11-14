@@ -1,0 +1,107 @@
+= Manual of _fs_
+:toc:
+:toclevels: 3
+:last-update-label!:
+孙谦 <fredsuvn@163.com>
+:encoding: UTF-8
+:emaill: fredsuvn@163.com
+:url: https://github.com/fredsuvn
+
+== Overview
+
+image::../logo.svg[]
+
+_fs_ is a lightweight, zero-dependency tool lib for java.
+
+_fs_ includes 6 modules:
+
+* <<chapter-dependencies>>: The dependency platform of _fs_;
+* <<chapter-annotations>>: Annotations of _fs_, including partial implementations of _jsr305_;
+* <<chapter-core>>: Core module of _fs_, only dependents on _fs-annotations_, including most utility kits and interfaces and their default implementations;
+* <<chapter-all>>: Aggregation of _fs_, including all classes and resources in _fs_annotations_ and _fs-core_, zero-dependency;
+* <<chapter-internal>>: Internal module, typically providing internal classes for tests;
+* <<chapter-tests>>: Tests module, benchmarks here;
+
+Note:
+
+* _fs_dependencies_ should be published as a bom (<packaging>pom</packaging>);
+* _fs_annotations_, _fs-core_ and _fs-all_ should be published as jars;
+* _fs-internal_ and _fs-tests_ should not be published;
+
+[[chapter-dependencies]]
+== _fs_dependencies_
+
+src: link:../fs-dependencies/[fs-dependencies]
+
+_fs_dependencies_ is the dependency platform of _fs_, should be published as a bom (<packaging>pom</packaging>).
+
+[[chapter-annotations]]
+== _fs_annotations_
+
+src: link:../fs-annotations/[fs-annotations]
+
+_fs_annotations_ is the annotation module of _fs_, should be published as a jar.
+
+It contains:
+
+* Annotations for _fs_: such as `space.sunqian.annotations.Nonnull`, `space.sunqian.annotations.Nullable`...;
+* Partial implementations of jsr305: `such as javax.annotation.Nonnull`...;
+
+[[chapter-core]]
+== _fs_core_
+
+src: link:../fs-core/[fs-core]
+
+_fs_core_ is core module of _fs_, should be published as a jar.
+It depends on _fs-annotations_.
+
+It contains:
+
+* Core utility kits: such as `Fs`, `StringKit`, `IOKit`...;
+* Core interfaces: such as `SimpleCache`, `InjectedApp`...;
+* Default implementations for core interfaces;
+
+Unless it is necessary to create a separate module, kits, interfaces, and implementations should all be written here.
+
+The codes from `JDK8` to `JDK17` are also written here, and the `build script` will automatically compile into the corresponding version of the class file. `FsLoader` can be used in the code to distinguish between different implementation versions:
+
+[source,java]
+----
+interface HttpCallerService {
+
+    @Nonnull
+    HttpCallerService INST = FsLoader.loadImplByJvm(HttpCallerService.class, 11);
+
+    @Nonnull
+    HttpCaller newCaller(
+        int bufSize,
+        @Nonnull Proxy proxy
+    ) throws HttpNetException;
+}
+----
+
+[[chapter-all]]
+== _fs_all_
+
+src: link:../fs-all/[fs-all]
+
+_fs_all_ is the aggregation of _fs_annotations_ and _fs_core_, should be published as a jar.
+It aggregates all classes and resources in _fs_annotations_ and _fs-core_, and zero-dependency for publishing.
+
+This module can not only integrate _fs_annotations_ and _fs_core_'s classes and resources, but also generate aggregated `Javadoc`, `Jacoco`, and `test reports`.
+
+[[chapter-internal]]
+== _fs_internal_
+
+src: link:../fs-internal/[fs-internal]
+
+_fs_internal_ is the internal module of _fs_, should not be published.
+It typically provides internal classes for tests.
+
+[[chapter-tests]]
+== _fs_tests_
+
+src: link:../fs-tests/[fs-tests]
+
+_fs_internal_ is the internal tests module of _fs_, should not be published.
+It typically provides internal tests such as benchmarks.
