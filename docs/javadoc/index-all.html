@@ -1153,6 +1153,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the body of the response.</div>
 </dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Builder.html#body(byte%5B%5D)" class="member-name-link">body(byte[])</a> - Method in class space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Builder.html" title="class in space.sunqian.common.net.http">HttpReq.Builder</a></dt>
+<dd>
+<div class="block">Sets the body of the request.</div>
+</dd>
 <dt><a href="space/sunqian/common/net/http/HttpReq.Builder.html#body(java.io.InputStream)" class="member-name-link">body(InputStream)</a> - Method in class space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Builder.html" title="class in space.sunqian.common.net.http">HttpReq.Builder</a></dt>
 <dd>
 <div class="block">Sets the body of the request.</div>
@@ -1161,7 +1165,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Sets the body of the request.</div>
 </dd>
-<dt><a href="space/sunqian/common/net/http/HttpReq.Builder.html#body(java.lang.String,java.nio.charset.Charset)" class="member-name-link">body(String, Charset)</a> - Method in class space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Builder.html" title="class in space.sunqian.common.net.http">HttpReq.Builder</a></dt>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Builder.html#body(java.nio.ByteBuffer)" class="member-name-link">body(ByteBuffer)</a> - Method in class space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Builder.html" title="class in space.sunqian.common.net.http">HttpReq.Builder</a></dt>
 <dd>
 <div class="block">Sets the body of the request.</div>
 </dd>
@@ -1287,6 +1291,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="space/sunqian/common/runtime/proxy/ProxyMaker.html#byJdk()" class="member-name-link">byJdk()</a> - Static method in interface space.sunqian.common.runtime.proxy.<a href="space/sunqian/common/runtime/proxy/ProxyMaker.html" title="interface in space.sunqian.common.runtime.proxy">ProxyMaker</a></dt>
 <dd>
 <div class="block">Returns an instance of <a href="space/sunqian/common/runtime/proxy/jdk/JdkProxyMaker.html" title="class in space.sunqian.common.runtime.proxy.jdk"><code>JdkProxyMaker</code></a> which implements the <a href="space/sunqian/common/runtime/proxy/ProxyMaker.html" title="interface in space.sunqian.common.runtime.proxy"><code>ProxyMaker</code></a>.</div>
+</dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Body.Type.html#BYTE_ARRAY" class="member-name-link">BYTE_ARRAY</a> - Enum constant in enum class space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Body.Type.html" title="enum class in space.sunqian.common.net.http">HttpReq.Body.Type</a></dt>
+<dd>
+<div class="block">Byte Array.</div>
+</dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Body.Type.html#BYTE_BUFFER" class="member-name-link">BYTE_BUFFER</a> - Enum constant in enum class space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Body.Type.html" title="enum class in space.sunqian.common.net.http">HttpReq.Body.Type</a></dt>
+<dd>
+<div class="block">Byte Buffer.</div>
 </dd>
 <dt><a href="space/sunqian/common/io/ByteArrayOperator.html" class="type-name-link" title="interface in space.sunqian.common.io">ByteArrayOperator</a> - Interface in <a href="space/sunqian/common/io/package-summary.html">space.sunqian.common.io</a></dt>
 <dd>
@@ -3594,6 +3606,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Http request info, can be built by <a href="space/sunqian/common/net/http/HttpReq.html#newBuilder()"><code>HttpReq.newBuilder()</code></a>.</div>
 </dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Body.html" class="type-name-link" title="interface in space.sunqian.common.net.http">HttpReq.Body</a> - Interface in <a href="space/sunqian/common/net/http/package-summary.html">space.sunqian.common.net.http</a></dt>
+<dd>
+<div class="block">Represents the body of the request.</div>
+</dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Body.Type.html" class="type-name-link" title="enum class in space.sunqian.common.net.http">HttpReq.Body.Type</a> - Enum Class in <a href="space/sunqian/common/net/http/package-summary.html">space.sunqian.common.net.http</a></dt>
+<dd>
+<div class="block">Type of request body.</div>
+</dd>
 <dt><a href="space/sunqian/common/net/http/HttpReq.Builder.html" class="type-name-link" title="class in space.sunqian.common.net.http">HttpReq.Builder</a> - Class in <a href="space/sunqian/common/net/http/package-summary.html">space.sunqian.common.net.http</a></dt>
 <dd>
 <div class="block">Builder for <a href="space/sunqian/common/net/http/HttpReq.html" title="interface in space.sunqian.common.net.http"><code>HttpReq</code></a>.</div>
@@ -3862,6 +3882,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="space/sunqian/common/app/di/InjectedResourceInitializationException.html#%3Cinit%3E(space.sunqian.common.app.di.InjectedResource,java.lang.Throwable,java.util.List,java.util.List)" class="member-name-link">InjectedResourceInitializationException(InjectedResource, Throwable, List&lt;InjectedResource&gt;, List&lt;InjectedResource&gt;)</a> - Constructor for exception space.sunqian.common.app.di.<a href="space/sunqian/common/app/di/InjectedResourceInitializationException.html" title="class in space.sunqian.common.app.di">InjectedResourceInitializationException</a></dt>
 <dd>
 <div class="block">Constructs an exception with detailed context about the resource initialize failure.</div>
+</dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Body.Type.html#INPUT_STREAM" class="member-name-link">INPUT_STREAM</a> - Enum constant in enum class space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Body.Type.html" title="enum class in space.sunqian.common.net.http">HttpReq.Body.Type</a></dt>
+<dd>
+<div class="block">Input stream.</div>
 </dd>
 <dt><a href="space/sunqian/common/app/di/InjectedResource.html#instance()" class="member-name-link">instance()</a> - Method in interface space.sunqian.common.app.di.<a href="space/sunqian/common/app/di/InjectedResource.html" title="interface in space.sunqian.common.app.di">InjectedResource</a></dt>
 <dd>
@@ -7735,6 +7759,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Evaluates this predicate on the given index and argument.</div>
 </dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Body.Type.html#TEXT" class="member-name-link">TEXT</a> - Enum constant in enum class space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Body.Type.html" title="enum class in space.sunqian.common.net.http">HttpReq.Body.Type</a></dt>
+<dd>
+<div class="block">Text.</div>
+</dd>
 <dt><a href="space/sunqian/common/net/NetServer.Worker.html#thread()" class="member-name-link">thread()</a> - Method in interface space.sunqian.common.net.<a href="space/sunqian/common/net/NetServer.Worker.html" title="interface in space.sunqian.common.net">NetServer.Worker</a></dt>
 <dd>
 <div class="block">Returns the thread this worker runs on.</div>
@@ -7800,6 +7828,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Starts the processing, and returns the result as a new array.</div>
 </dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Body.html#toByteArray()" class="member-name-link">toByteArray()</a> - Method in interface space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Body.html" title="interface in space.sunqian.common.net.http">HttpReq.Body</a></dt>
+<dd>
+<div class="block">Returns a byte array represents the data of the body.</div>
+</dd>
 <dt><a href="space/sunqian/common/base/bytes/BytesBuilder.html#toByteBuffer()" class="member-name-link">toByteBuffer()</a> - Method in class space.sunqian.common.base.bytes.<a href="space/sunqian/common/base/bytes/BytesBuilder.html" title="class in space.sunqian.common.base.bytes">BytesBuilder</a></dt>
 <dd>
 <div class="block">Returns a new buffer containing a copy of the appended data.</div>
@@ -7807,6 +7839,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="space/sunqian/common/io/ByteProcessor.html#toByteBuffer()" class="member-name-link">toByteBuffer()</a> - Method in interface space.sunqian.common.io.<a href="space/sunqian/common/io/ByteProcessor.html" title="interface in space.sunqian.common.io">ByteProcessor</a></dt>
 <dd>
 <div class="block">Starts the processing, and returns the result as a new buffer.</div>
+</dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Body.html#toByteBuffer()" class="member-name-link">toByteBuffer()</a> - Method in interface space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Body.html" title="interface in space.sunqian.common.net.http">HttpReq.Body</a></dt>
+<dd>
+<div class="block">Returns a byte buffer represents the data of the body.</div>
 </dd>
 <dt><a href="space/sunqian/common/io/CharProcessor.html#toByteEncoder(java.nio.charset.Charset)" class="member-name-link">toByteEncoder(Charset)</a> - Method in interface space.sunqian.common.io.<a href="space/sunqian/common/io/CharProcessor.html" title="interface in space.sunqian.common.io">CharProcessor</a></dt>
 <dd>
@@ -7875,6 +7911,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="space/sunqian/common/collect/SetKit.html#toHashSet(java.lang.Iterable)" class="member-name-link">toHashSet(Iterable&lt;T&gt;)</a> - Static method in class space.sunqian.common.collect.<a href="space/sunqian/common/collect/SetKit.html" title="class in space.sunqian.common.collect">SetKit</a></dt>
 <dd>
 <div class="block">Returns a new <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/HashSet.html" title="class or interface in java.util" class="external-link"><code>HashSet</code></a> initialing with the given iterable.</div>
+</dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Body.html#toInputStream()" class="member-name-link">toInputStream()</a> - Method in interface space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Body.html" title="interface in space.sunqian.common.net.http">HttpReq.Body</a></dt>
+<dd>
+<div class="block">Returns an <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link"><code>InputStream</code></a> to read the data of the body.</div>
 </dd>
 <dt><a href="space/sunqian/common/base/system/JvmKit.html#toInternalName(java.lang.Class)" class="member-name-link">toInternalName(Class&lt;?&gt;)</a> - Static method in class space.sunqian.common.base.system.<a href="space/sunqian/common/base/system/JvmKit.html" title="class in space.sunqian.common.base.system">JvmKit</a></dt>
 <dd>
@@ -8035,6 +8075,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns a <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link"><code>Supplier</code></a> whose result is the next element of the given <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/stream/Stream.html" title="class or interface in java.util.stream" class="external-link"><code>Stream</code></a>.</div>
 </dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Body.html#toText()" class="member-name-link">toText()</a> - Method in interface space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Body.html" title="interface in space.sunqian.common.net.http">HttpReq.Body</a></dt>
+<dd>
+<div class="block">Returns a string represents the data of the body using <a href="space/sunqian/common/base/chars/CharsKit.html#defaultCharset()"><code>CharsKit.defaultCharset()</code></a>.</div>
+</dd>
 <dt><a href="space/sunqian/common/base/value/BooleanVal.html#toVal()" class="member-name-link">toVal()</a> - Method in interface space.sunqian.common.base.value.<a href="space/sunqian/common/base/value/BooleanVal.html" title="interface in space.sunqian.common.base.value">BooleanVal</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="space/sunqian/common/base/value/ByteVal.html#toVal()" class="member-name-link">toVal()</a> - Method in interface space.sunqian.common.base.value.<a href="space/sunqian/common/base/value/ByteVal.html" title="interface in space.sunqian.common.base.value">ByteVal</a></dt>
@@ -8114,6 +8158,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="space/sunqian/common/app/di/InjectedResource.html#type()" class="member-name-link">type()</a> - Method in interface space.sunqian.common.app.di.<a href="space/sunqian/common/app/di/InjectedResource.html" title="interface in space.sunqian.common.app.di">InjectedResource</a></dt>
 <dd>
 <div class="block">Returns the type of this resource.</div>
+</dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Body.html#type()" class="member-name-link">type()</a> - Method in interface space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Body.html" title="interface in space.sunqian.common.net.http">HttpReq.Body</a></dt>
+<dd>
+<div class="block">Returns the type of the body.</div>
 </dd>
 <dt><a href="space/sunqian/common/object/data/DataSchema.html#type()" class="member-name-link">type()</a> - Method in interface space.sunqian.common.object.data.<a href="space/sunqian/common/object/data/DataSchema.html" title="interface in space.sunqian.common.object.data">DataSchema</a></dt>
 <dd>
@@ -8374,6 +8422,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Body.Type.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Body.Type.html" title="enum class in space.sunqian.common.net.http">HttpReq.Body.Type</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
 <dt><a href="space/sunqian/common/object/convert/ConvertOption.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class space.sunqian.common.object.convert.<a href="space/sunqian/common/object/convert/ConvertOption.html" title="enum class in space.sunqian.common.object.convert">ConvertOption</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
@@ -8397,6 +8449,11 @@ the order they are declared.</div>
 the order they are declared.</div>
 </dd>
 <dt><a href="space/sunqian/common/io/IOMode.html#values()" class="member-name-link">values()</a> - Static method in enum class space.sunqian.common.io.<a href="space/sunqian/common/io/IOMode.html" title="enum class in space.sunqian.common.io">IOMode</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="space/sunqian/common/net/http/HttpReq.Body.Type.html#values()" class="member-name-link">values()</a> - Static method in enum class space.sunqian.common.net.http.<a href="space/sunqian/common/net/http/HttpReq.Body.Type.html" title="enum class in space.sunqian.common.net.http">HttpReq.Body.Type</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>

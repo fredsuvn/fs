@@ -1,17 +1,18 @@
 package space.sunqian.common.net.http;
 
-import org.springframework.lang.Nullable;
 import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.RetainedParam;
 import space.sunqian.common.Check;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.io.BufferKit;
 import space.sunqian.common.io.IOKit;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,7 +72,7 @@ public interface HttpReq {
      * @return the body of the request, or {@code null} if no body data
      */
     @Nullable
-    InputStream body();
+    Body body();
 
     /**
      * Returns the timeout of the request. The default is {@link #DEFAULT_REQUEST_TIMEOUT}.
@@ -82,6 +83,77 @@ public interface HttpReq {
     Duration timeout();
 
     /**
+     * Represents the body of the request.
+     */
+    interface Body {
+
+        /**
+         * Returns the type of the body.
+         *
+         * @return the type of the body
+         */
+        @Nonnull
+        Type type();
+
+        /**
+         * Returns an {@link InputStream} to read the data of the body. If the data is originally of input stream type,
+         * return the data itself.
+         *
+         * @return an {@link InputStream} to read the data of the body
+         */
+        @Nonnull
+        InputStream toInputStream();
+
+        /**
+         * Returns a byte array represents the data of the body. If the data is originally of byte array type, return
+         * the data itself.
+         *
+         * @return a byte array represents the data of the body
+         */
+        byte @Nonnull [] toByteArray();
+
+        /**
+         * Returns a byte buffer represents the data of the body. If the data is originally of byte buffer type, return
+         * the data itself.
+         *
+         * @return a byte buffer represents the data of the body
+         */
+        @Nonnull
+        ByteBuffer toByteBuffer();
+
+        /**
+         * Returns a string represents the data of the body using {@link CharsKit#defaultCharset()}. If the data is
+         * originally of string type, return the data itself.
+         *
+         * @return a string represents the data of the body using {@link CharsKit#defaultCharset()}
+         */
+        @Nonnull
+        String toText();
+
+        /**
+         * Type of request body.
+         */
+        enum Type {
+            /**
+             * Input stream.
+             */
+            INPUT_STREAM,
+            /**
+             * Byte Array.
+             */
+            BYTE_ARRAY,
+            /**
+             * Byte Buffer.
+             */
+            BYTE_BUFFER,
+            /**
+             * Text.
+             */
+            TEXT
+        }
+    }
+
+    /**
      * Builder for {@link HttpReq}.
      */
     class Builder {
@@ -89,7 +161,7 @@ public interface HttpReq {
         private URL url;
         private String method = "GET";
         private Map<String, List<String>> headers;
-        private InputStream body;
+        private @Nullable Body body;
         private @Nonnull Duration timeout = DEFAULT_REQUEST_TIMEOUT;
 
         /**
@@ -167,33 +239,149 @@ public interface HttpReq {
         /**
          * Sets the body of the request.
          *
-         * @param body the body of the request
+         * @param body the body from the specified input stream
          * @return this builder
          */
         public @Nonnull Builder body(@Nonnull InputStream body) {
-            this.body = body;
+            this.body = new Body() {
+
+                @Override
+                public @Nonnull Type type() {
+                    return Type.INPUT_STREAM;
+                }
+
+                @Override
+                public @Nonnull InputStream toInputStream() {
+                    return body;
+                }
+
+                @Override
+                public byte @Nonnull [] toByteArray() {
+                    return Fs.asNonnull(IOKit.read(body));
+                }
+
+                @Override
+                public @Nonnull ByteBuffer toByteBuffer() {
+                    return ByteBuffer.wrap(toByteArray());
+                }
+
+                @Override
+                public @Nonnull String toText() {
+                    return Fs.asNonnull(IOKit.string(body));
+                }
+            };
             return this;
         }
 
         /**
          * Sets the body of the request. The body uses {@link CharsKit#defaultCharset()}.
          *
-         * @param body the body of the request
+         * @param body the body from the specified string
          * @return this builder
          */
         public @Nonnull Builder body(@Nonnull String body) {
-            return body(body, CharsKit.defaultCharset());
+            this.body = new Body() {
+
+                @Override
+                public @Nonnull Type type() {
+                    return Type.TEXT;
+                }
+
+                @Override
+                public @Nonnull InputStream toInputStream() {
+                    return new ByteArrayInputStream(body.getBytes(CharsKit.defaultCharset()));
+                }
+
+                @Override
+                public byte @Nonnull [] toByteArray() {
+                    return body.getBytes(CharsKit.defaultCharset());
+                }
+
+                @Override
+                public @Nonnull ByteBuffer toByteBuffer() {
+                    return ByteBuffer.wrap(toByteArray());
+                }
+
+                @Override
+                public @Nonnull String toText() {
+                    return body;
+                }
+            };
+            return this;
         }
 
         /**
          * Sets the body of the request.
          *
-         * @param body    the body of the request
-         * @param charset the charset of the body
+         * @param body the body from the specified byte array
          * @return this builder
          */
-        public @Nonnull Builder body(@Nonnull String body, @Nonnull Charset charset) {
-            return body(IOKit.newInputStream(new StringReader(body), charset));
+        public @Nonnull Builder body(byte @Nonnull [] body) {
+            this.body = new Body() {
+
+                @Override
+                public @Nonnull Type type() {
+                    return Type.BYTE_ARRAY;
+                }
+
+                @Override
+                public @Nonnull InputStream toInputStream() {
+                    return new ByteArrayInputStream(body);
+                }
+
+                @Override
+                public byte @Nonnull [] toByteArray() {
+                    return body;
+                }
+
+                @Override
+                public @Nonnull ByteBuffer toByteBuffer() {
+                    return ByteBuffer.wrap(toByteArray());
+                }
+
+                @Override
+                public @Nonnull String toText() {
+                    return new String(body, CharsKit.defaultCharset());
+                }
+            };
+            return this;
+        }
+
+        /**
+         * Sets the body of the request.
+         *
+         * @param body the body from the specified byte buffer
+         * @return this builder
+         */
+        public @Nonnull Builder body(@Nonnull ByteBuffer body) {
+            this.body = new Body() {
+
+                @Override
+                public @Nonnull Type type() {
+                    return Type.BYTE_BUFFER;
+                }
+
+                @Override
+                public @Nonnull InputStream toInputStream() {
+                    return IOKit.newInputStream(body);
+                }
+
+                @Override
+                public byte @Nonnull [] toByteArray() {
+                    return Fs.asNonnull(BufferKit.read(body));
+                }
+
+                @Override
+                public @Nonnull ByteBuffer toByteBuffer() {
+                    return body;
+                }
+
+                @Override
+                public @Nonnull String toText() {
+                    return new String(toByteArray(), CharsKit.defaultCharset());
+                }
+            };
+            return this;
         }
 
         /**
@@ -230,14 +418,14 @@ public interface HttpReq {
             private final @Nonnull URL url;
             private final @Nonnull String method;
             private final @Nonnull Map<String, List<String>> headers;
-            private final @Nonnull InputStream body;
+            private final @Nullable Body body;
             private final @Nonnull Duration timeout;
 
             private HttpReqImpl(
                 @Nonnull URL url,
                 @Nonnull String method,
                 @Nonnull Map<String, List<String>> headers,
-                @Nonnull InputStream body,
+                @Nullable Body body,
                 @Nonnull Duration timeout
             ) {
                 this.url = url;
@@ -264,7 +452,7 @@ public interface HttpReq {
             }
 
             @Override
-            public @Nonnull InputStream body() {
+            public @Nullable Body body() {
                 return body;
             }
 

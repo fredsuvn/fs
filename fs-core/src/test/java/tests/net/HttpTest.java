@@ -1,5 +1,6 @@
 package tests.net;
 
+import internal.test.DataTest;
 import internal.test.ErrorCharset;
 import internal.test.J17Also;
 import internal.test.PrintTest;
@@ -23,10 +24,12 @@ import space.sunqian.common.net.http.HttpResp;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,14 +38,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @J17Also
-public class HttpTest implements PrintTest {
+public class HttpTest implements PrintTest, DataTest {
 
     private static final String TEST_URL = "https://www.baidu.com/s";
 
@@ -286,6 +291,121 @@ public class HttpTest implements PrintTest {
         HttpResp resp = HttpKit.request(req);
         assertNull(resp.contentType());
         assertNull(resp.bodyCharset());
+    }
+
+    @Test
+    public void testRequestBody() throws Exception {
+        String text = "hello, world!";
+        byte[] bytes = text.getBytes(CharsKit.defaultCharset());
+        {
+            // input stream
+            ByteArrayInputStream data = new ByteArrayInputStream(bytes);
+            HttpReq req = HttpReq.newBuilder()
+                .url("http://localhost:" + httpServer.getURI().getPort())
+                .method("POST")
+                .headers(MapKit.map(
+                    "X-HEADER", Collections.singletonList("hello!"),
+                    "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
+                ))
+                .body(data)
+                .build();
+            HttpReq.Body body = req.body();
+            assertNotNull(body);
+            assertEquals(HttpReq.Body.Type.INPUT_STREAM, body.type());
+            assertSame(data, body.toInputStream());
+            assertEquals(text, body.toText());
+            data.reset();
+            assertArrayEquals(bytes, body.toByteArray());
+            data.reset();
+            assertEquals(ByteBuffer.wrap(bytes), body.toByteBuffer());
+            data.reset();
+            HttpResp resp = HttpKit.request(req, null);
+            assertEquals("200", resp.statusCode());
+            assertEquals("OK", resp.statusText());
+            checkRespHeaders(resp);
+            String bodyString = resp.bodyString();
+            assertEquals("hello, world2!", bodyString);
+        }
+        {
+            // text
+            HttpReq req = HttpReq.newBuilder()
+                .url("http://localhost:" + httpServer.getURI().getPort())
+                .method("POST")
+                .headers(MapKit.map(
+                    "X-HEADER", Collections.singletonList("hello!"),
+                    "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
+                ))
+                .body(text)
+                .build();
+            HttpReq.Body body = req.body();
+            assertNotNull(body);
+            assertEquals(HttpReq.Body.Type.TEXT, body.type());
+            assertArrayEquals(bytes, IOKit.read(body.toInputStream()));
+            assertSame(text, body.toText());
+            assertArrayEquals(bytes, body.toByteArray());
+            assertEquals(ByteBuffer.wrap(bytes), body.toByteBuffer());
+            HttpResp resp = HttpKit.request(req, null);
+            assertEquals("200", resp.statusCode());
+            assertEquals("OK", resp.statusText());
+            checkRespHeaders(resp);
+            String bodyString = resp.bodyString();
+            assertEquals("hello, world2!", bodyString);
+        }
+        {
+            // byte array
+            HttpReq req = HttpReq.newBuilder()
+                .url("http://localhost:" + httpServer.getURI().getPort())
+                .method("POST")
+                .headers(MapKit.map(
+                    "X-HEADER", Collections.singletonList("hello!"),
+                    "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
+                ))
+                .body(bytes)
+                .build();
+            HttpReq.Body body = req.body();
+            assertNotNull(body);
+            assertEquals(HttpReq.Body.Type.BYTE_ARRAY, body.type());
+            assertArrayEquals(bytes, IOKit.read(body.toInputStream()));
+            assertEquals(text, body.toText());
+            assertSame(bytes, body.toByteArray());
+            assertEquals(ByteBuffer.wrap(bytes), body.toByteBuffer());
+            HttpResp resp = HttpKit.request(req, null);
+            assertEquals("200", resp.statusCode());
+            assertEquals("OK", resp.statusText());
+            checkRespHeaders(resp);
+            String bodyString = resp.bodyString();
+            assertEquals("hello, world2!", bodyString);
+        }
+        {
+            // byte buffer
+            ByteBuffer buffer = ByteBuffer.wrap(bytes);
+            HttpReq req = HttpReq.newBuilder()
+                .url("http://localhost:" + httpServer.getURI().getPort())
+                .method("POST")
+                .headers(MapKit.map(
+                    "X-HEADER", Collections.singletonList("hello!"),
+                    "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
+                ))
+                .body(buffer)
+                .build();
+            HttpReq.Body body = req.body();
+            assertNotNull(body);
+            assertEquals(HttpReq.Body.Type.BYTE_BUFFER, body.type());
+            buffer.mark();
+            assertArrayEquals(bytes, IOKit.read(body.toInputStream()));
+            buffer.reset();
+            assertEquals(text, body.toText());
+            buffer.reset();
+            assertArrayEquals(bytes, body.toByteArray());
+            buffer.reset();
+            assertSame(buffer, body.toByteBuffer());
+            HttpResp resp = HttpKit.request(req, null);
+            assertEquals("200", resp.statusCode());
+            assertEquals("OK", resp.statusText());
+            checkRespHeaders(resp);
+            String bodyString = resp.bodyString();
+            assertEquals("hello, world2!", bodyString);
+        }
     }
 
     @Test

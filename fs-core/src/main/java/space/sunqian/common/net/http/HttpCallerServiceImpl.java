@@ -47,8 +47,9 @@ enum HttpCallerServiceImpl implements HttpCallerService {
             });
             // connection.setDoInput(true);
             connection.setRequestMethod(req.method());
-            InputStream in = req.body();
-            if (in != null) {
+            HttpReq.Body body = req.body();
+            if (body != null) {
+                InputStream in = body.toInputStream();
                 int firstByte = in.read();
                 if (firstByte != -1) {
                     connection.setDoOutput(true);

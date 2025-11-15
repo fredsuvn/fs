@@ -40,25 +40,26 @@ enum HttpCallerServiceImplByJ11 implements HttpCallerService {
             return Fs.uncheck(() -> request0(req), HttpNetException::new);
         }
 
-        @SuppressWarnings("resource")
+        //@SuppressWarnings("resource")
         private @Nonnull HttpResp request0(@Nonnull HttpReq req) throws Exception {
+            String[] headers = req.headers().entrySet().stream().flatMap(entry -> {
+                    List<String> values = entry.getValue();
+                    String[] kvs = new String[values.size() * 2];
+                    int i = 0;
+                    for (String value : values) {
+                        kvs[i++] = entry.getKey();
+                        kvs[i++] = value;
+                    }
+                    return Arrays.stream(kvs);
+                }
+            ).toArray(String[]::new);
+            HttpReq.Body body = req.body();
+            HttpRequest.BodyPublisher bodyPublisher = body == null ?
+                HttpRequest.BodyPublishers.noBody() : toBodyPublisher(body);
             HttpRequest request = HttpRequest.newBuilder()
                 .uri(req.url().toURI())
-                .headers(
-                    req.headers().entrySet().stream().flatMap(entry -> {
-                            List<String> values = entry.getValue();
-                            String[] kvs = new String[values.size() * 2];
-                            int i = 0;
-                            for (String value : values) {
-                                kvs[i++] = entry.getKey();
-                                kvs[i++] = value;
-                            }
-                            return Arrays.stream(kvs);
-                        }
-                    ).toArray(String[]::new)
-                )
-                .method(req.method(), req.body() == null ?
-                    HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofInputStream(req::body))
+                .headers(headers)
+                .method(req.method(), bodyPublisher)
                 .timeout(req.timeout())
                 .build();
             HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
@@ -94,6 +95,17 @@ enum HttpCallerServiceImplByJ11 implements HttpCallerService {
                     return response.headers().firstValue("Content-Type").orElse(null);
                 }
             };
+        }
+
+        private @Nonnull HttpRequest.BodyPublisher toBodyPublisher(@Nonnull HttpReq.Body body) {
+            switch (body.type()) {
+                case INPUT_STREAM:
+                    return HttpRequest.BodyPublishers.ofInputStream(body::toInputStream);
+                case TEXT:
+                    return HttpRequest.BodyPublishers.ofString(body.toText());
+                default:
+                    return HttpRequest.BodyPublishers.ofByteArray(body.toByteArray());
+            }
         }
 
         private static final @Nonnull Object @Nonnull [] TABLE = {
