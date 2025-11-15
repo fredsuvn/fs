@@ -1,0 +1,20 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <title>Boat</title>
+  <g id="group-back">
+    <rect id="back-global" x="0" y="0" width="100%" height="100%" fill="#927FC7" stroke="none"/>
+  </g>
+  <g id="group-boat"
+     stroke-linecap="square" stroke-miterlimit="100"
+     stroke="none" fill="#f7f7f7"
+  >
+    <path id="boat-body"
+          d="M60,60 m-55,30 l110,0 l-30,25 l-50,0 l-30,-25"
+    />
+    <path id="boat-sail-1"
+          d="M60,60 m0,28 l0,-85 l-40,85 l40,0"
+    />
+    <path id="boat-sail-2"
+          d="M60,60 m2,28 l0,-60 l35,60 l-35,0"
+    />
+  </g>
+</svg>

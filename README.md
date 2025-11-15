@@ -22,12 +22,13 @@ _fs_ is a lightweight, zero-dependency tool lib for java. It provides:
 - Proxy and aspect, supporting JDK dynamic proxy and [asm](https://asm.ow2.io);
 - Third-party supporting: [asm](https://asm.ow2.io), [protobuf](https://github.com/protocolbuffers/protobuf);
 
-Here are samples:
+Here are some samples:
 
 - [Annotations](./fs-tests/src/main/java/internal/samples/AnnotationSample.java)
 - [Simple Cache](./fs-tests/src/main/java/internal/samples/CacheSample.java)
 - [Dependency Injection](./fs-tests/src/main/java/internal/samples/DISample.java)
-- [Proxy](./fs-tests/src/main/java/internal/samples/ProxySample.java)
+- [Proxy and Aspect](./fs-tests/src/main/java/internal/samples/ProxyAndAspectSample.java)
+- [Net](./fs-tests/src/main/java/internal/samples/NetSample.java)
 - [Other samples](./fs-tests/src/main/java/internal/samples/OtherSamples.java)
 
 ## Clone
