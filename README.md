@@ -31,6 +31,8 @@ Here are some samples:
 - [Net](./fs-tests/src/main/java/internal/samples/NetSample.java)
 - [Other samples](./fs-tests/src/main/java/internal/samples/OtherSamples.java)
 
+The coverage rate of unit testing is 100%. (coverage tool: jacoco)
+
 ## Clone
 
 ```shell
@@ -43,11 +45,9 @@ cd fs && gradle clean build
 
 - develop manual: [manual.adoc](docs/dev-manual.adoc)
 - javadoc: [javadoc](docs/javadoc/index.html)
-- test-reports: [test-aggregate](docs/reports/test-aggregate/index.html)
-- jacoco: [jacoco](docs/reports/jacoco/index.html)
 - benchmark:
-  * [jmh-visualizer](docs/reports/jmh/jmh-visualizer.html)
-  * [results.json](docs/reports/jmh/results.json)
+  * [jmh-visualizer](docs/jmh/jmh-visualizer.html)
+  * [results.json](docs/jmh/results.json)
 
 ## Contact
 
