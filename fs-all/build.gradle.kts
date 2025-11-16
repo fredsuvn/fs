@@ -108,7 +108,7 @@ tasks.jacocoTestReport {
     xml.required = false
     csv.required = false
     html.required = true
-    html.outputLocation = rootDir.resolve("docs/reports/jacoco")
+    //html.outputLocation = rootDir.resolve("docs/reports/jacoco")
   }
 }
 
@@ -124,7 +124,7 @@ tasks.testAggregateTestReport {
     internalProject.layout.buildDirectory.dir("test-results/test"),
     internalProject.layout.buildDirectory.dir("test-results/test/binary"),
   )
-  destinationDirectory = rootDir.resolve("docs/reports/test-aggregate")
+  //destinationDirectory = rootDir.resolve("docs/reports/test-aggregate")
 }
 
 publishing {

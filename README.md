@@ -43,16 +43,18 @@ cd fs && gradle clean build
 
 ## Documents
 
-- develop manual: [manual.adoc](docs/dev-manual.adoc)
-- javadoc: [javadoc](docs/javadoc/index.html)
-- benchmark:
-  * [jmh-visualizer](docs/jmh/jmh-visualizer.html)
-  * [results.json](docs/jmh/results.json)
+- javadoc:
+  * javadoc: [index.html](docs/javadoc/index.html)
+- manuals:
+  * develop manual: [dev-manual.adoc](docs/dev-manual.adoc)
+- benchmarks:
+  * visualizer: [jmh-visualizer.html](docs/jmh/jmh-visualizer.html)
+  * json: [results.json](docs/jmh/results.json)
 
 ## Contact
 
-* [github](https://github.com/fredsuvn)
-* QQ group: 566185308
+* github: [https://github.com/fredsuvn](https://github.com/fredsuvn)
+* QQ group: [566185308](https://qm.qq.com/q/wlkc2tmOaG)
 
 ## License
 
