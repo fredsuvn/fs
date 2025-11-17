@@ -1,6 +1,4 @@
-# _fs_: a lightweight, zero-dependency tool lib for java
-
-![](logo.svg)
+# ![](logo.svg) _fs_: a lightweight, zero-dependency tool lib for java
 
 ## Overview
 
