@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+option java_package = "tests.protobuf";
+
+//option java_outer_classname = "ProtoMessage";
+option java_multiple_files = true;
+
+//option java_generic_services = true;
+
+message Request {
+    int32 code = 1;
+    bytes message = 2;
+    Data data = 3;
+}
+
+message Response {
+    string code = 1;
+    int64 state = 2;
+    Data data = 3;
+}
+
+message Data {
+    string str = 1;
+    int32 i32 = 2;
+    uint64 u64 = 3;
+    fixed32 f32 = 4;
+    fixed64 f64 = 5;
+    sfixed32 sf32 = 6;
+    sfixed64 sf64 = 7;
+    sint32 sint32 = 8;
+    sint64 sint64 = 9;
+    bytes bytes = 10;
+    bool bool = 11;
+    float float = 12;
+    double double = 13;
+    map<string, int32> siMap = 14;
+    repeated int32 iList = 15;
+    repeated string strList = 16;
+    xEnum xEnum = 17;
+}
+
+enum xEnum {
+    E1 = 0;
+    E2 = 1;
+}
+
+message PbSimple {
+    string p1 = 1;
+    int32 p2 = 2;
+}

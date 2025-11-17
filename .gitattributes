@@ -1,0 +1,9 @@
+#* text=auto
+*.java text eol=crlf
+*.js text eol=crlf
+*.html text eol=crlf
+*.css text eol=crlf
+*.svg text eol=crlf
+*.xml text eol=crlf
+*.kts text eol=crlf
+*.properties text eol=crlf

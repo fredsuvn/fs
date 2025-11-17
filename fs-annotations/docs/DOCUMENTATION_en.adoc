@@ -1,0 +1,20 @@
+= _gek-annotations_: Annotations of _Gek_
+:last-update-label!:
+Sun Qian <fredsuvn@163.com>
+:encoding: UTF-8
+:emaill: fredsuvn@163.com
+
+_gek-annotations_ provides a set of annotations to help your codes stay tidy and clean:
+
+* *Nullable*/*NonNull*: tells the annotated element is nullable/non-null;
+* *DefaultNullable*/*DefaultNonNull*: tells all elements which can be annotated by *Nullable*/*NonNull*
+in scope of annotated element are nullable/non-null, usually used in package-info.java;
+* *AcceptedType*/*AcceptedTypes*: tells which type is accepted;
+* *RejectedType*/*RejectedTypes*: tells which type is rejected;
+* *OutParam*: tells the parameter is an output param which can be modified;
+* *Immutable*: tells the annotated element is immutable;
+* *ThreadSafe*: tells the annotated element is thread-safe;
+
+link:../src/tests/java/samples/[Samples]
+
+link:javadoc/index.html[Javadoc]

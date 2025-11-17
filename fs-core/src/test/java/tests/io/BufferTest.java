@@ -1,0 +1,676 @@
+package tests.io;
+
+import internal.test.DataTest;
+import internal.test.ErrorAppender;
+import internal.test.ErrorOutputStream;
+import internal.test.MaterialBox;
+import org.junit.jupiter.api.Test;
+import space.sunqian.common.base.bytes.BytesBuilder;
+import space.sunqian.common.base.chars.CharsBuilder;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.collect.ArrayKit;
+import space.sunqian.common.io.BufferKit;
+import space.sunqian.common.io.ByteArrayOperator;
+import space.sunqian.common.io.CharArrayOperator;
+import space.sunqian.common.io.IORuntimeException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class BufferTest implements DataTest {
+
+    @Test
+    public void testIndex() {
+        byte[] bytes = new byte[100];
+        ByteBuffer buffer = MaterialBox.copyPadding(bytes);
+        buffer.get();
+        assertEquals(10, buffer.arrayOffset());
+        assertEquals(1, buffer.position());
+        assertEquals(99, buffer.remaining());
+        assertEquals(10 + 1, BufferKit.arrayStartIndex(buffer));
+        assertEquals(10 + 1 + 99, BufferKit.arrayEndIndex(buffer));
+    }
+
+    @Test
+    public void testDirect() {
+        {
+            // direct
+            char[] chars = randomChars(128);
+            CharBuffer heapBuffer = CharBuffer.wrap(chars);
+            CharBuffer directBuffer = BufferKit.directCharBuffer(chars.length);
+            directBuffer.put(chars);
+            directBuffer.flip();
+            assertEquals(directBuffer, heapBuffer);
+            assertTrue(directBuffer.isDirect());
+            assertThrows(IllegalArgumentException.class, () -> BufferKit.directCharBuffer(-1));
+        }
+        {
+            // byte
+            byte[] data = randomBytes(128);
+            ByteBuffer buffer = BufferKit.copyDirect(data);
+            assertEquals(buffer, ByteBuffer.wrap(data));
+            assertEquals(0, buffer.position());
+            assertEquals(buffer.limit(), data.length);
+            assertEquals(buffer.capacity(), data.length);
+            assertTrue(buffer.isDirect());
+            buffer = BufferKit.copyDirect(data, 6, 66);
+            assertEquals(buffer, ByteBuffer.wrap(data, 6, 66));
+            assertEquals(0, buffer.position());
+            assertEquals(66, buffer.limit());
+            assertEquals(66, buffer.capacity());
+            assertTrue(buffer.isDirect());
+        }
+        {
+            // char
+            char[] data = randomChars(128);
+            CharBuffer buffer = BufferKit.copyDirect(data);
+            assertEquals(buffer, CharBuffer.wrap(data));
+            assertEquals(0, buffer.position());
+            assertEquals(buffer.limit(), data.length);
+            assertEquals(buffer.capacity(), data.length);
+            assertTrue(buffer.isDirect());
+            buffer = BufferKit.copyDirect(data, 6, 66);
+            assertEquals(buffer, CharBuffer.wrap(data, 6, 66));
+            assertEquals(0, buffer.position());
+            assertEquals(66, buffer.limit());
+            assertEquals(66, buffer.capacity());
+            assertTrue(buffer.isDirect());
+        }
+    }
+
+    @Test
+    public void testCopy() {
+        {
+            // byte
+            byte[] data = randomBytes(128);
+            ByteBuffer b1 = ByteBuffer.wrap(data, 6, 66);
+            b1.get(new byte[5]);
+            ByteBuffer b2 = BufferKit.copy(b1);
+            assertEquals(b2, b1);
+            assertFalse(b2.isDirect());
+            ByteBuffer b3 = BufferKit.copyDirect(data);
+            b3.get(new byte[5]);
+            ByteBuffer b4 = BufferKit.copy(b3);
+            assertEquals(b4, b3);
+            assertTrue(b4.isDirect());
+            ByteBuffer b5 = ByteBuffer.wrap(data, 6, 66);
+            assertArrayEquals(BufferKit.copyContent(b5), Arrays.copyOfRange(data, 6, 6 + 66));
+            assertEquals(6, b5.position());
+            assertEquals(66, b5.remaining());
+        }
+        {
+            // char
+            char[] data = randomChars(128);
+            CharBuffer b1 = CharBuffer.wrap(data, 6, 66);
+            b1.get(new char[5]);
+            CharBuffer b2 = BufferKit.copy(b1);
+            assertEquals(b2, b1);
+            assertFalse(b2.isDirect());
+            CharBuffer b3 = BufferKit.directCharBuffer(data.length);
+            b3.put(data);
+            b3.flip();
+            b3.get(new char[5]);
+            CharBuffer b4 = BufferKit.copy(b3);
+            assertEquals(b4, b3);
+            assertTrue(b4.isDirect());
+            CharBuffer b5 = CharBuffer.wrap(data, 6, 66);
+            assertArrayEquals(BufferKit.copyContent(b5), Arrays.copyOfRange(data, 6, 6 + 66));
+            assertEquals(6, b5.position());
+            assertEquals(66, b5.remaining());
+        }
+    }
+
+    @Test
+    public void testSlice() {
+        testSlice(0, 0, 0);
+        testSlice(1024, 0, 0);
+        testSlice(1024, 111, 0);
+        testSlice(1024, 0, 111);
+        testSlice(1024, 111, 111);
+        testSlice(1024, 111, 222);
+
+        {
+            // exceptions
+            // byte
+            assertThrows(IllegalArgumentException.class, () ->
+                BufferKit.slice(ByteBuffer.allocate(100), -1));
+            assertThrows(IndexOutOfBoundsException.class, () ->
+                BufferKit.slice(ByteBuffer.allocate(100), 0, -1));
+            assertThrows(IndexOutOfBoundsException.class, () ->
+                BufferKit.slice(ByteBuffer.allocate(100), -1, 0));
+            assertThrows(IndexOutOfBoundsException.class, () ->
+                BufferKit.slice(ByteBuffer.allocate(100), 50, 51));
+            // char
+            assertThrows(IllegalArgumentException.class, () ->
+                BufferKit.slice(CharBuffer.allocate(100), -1));
+            assertThrows(IndexOutOfBoundsException.class, () ->
+                BufferKit.slice(CharBuffer.allocate(100), 0, -1));
+            assertThrows(IndexOutOfBoundsException.class, () ->
+                BufferKit.slice(CharBuffer.allocate(100), -1, 0));
+            assertThrows(IndexOutOfBoundsException.class, () ->
+                BufferKit.slice(CharBuffer.allocate(100), 50, 51));
+        }
+    }
+
+    private void testSlice(int size, int offset, int length) {
+        {
+            // byte: slice(src, len)
+            byte[] data = ArrayKit.fill(new byte[size], (byte) 6);
+            ByteBuffer buffer = ByteBuffer.wrap(data);
+            ByteBuffer slice = BufferKit.slice(buffer, length);
+            assertEquals(0, buffer.position());
+            assertEquals(buffer.limit(), size);
+            assertEquals(buffer.capacity(), size);
+            assertEquals(0, slice.position());
+            assertEquals(slice.limit(), length);
+            assertEquals(slice.capacity(), length);
+            slice.put(ArrayKit.fill(new byte[length], (byte) 8));
+            assertArrayEquals(
+                Arrays.copyOf(data, length),
+                ArrayKit.fill(new byte[length], (byte) 8)
+            );
+            assertArrayEquals(
+                Arrays.copyOfRange(data, length, data.length),
+                ArrayKit.fill(new byte[size - length], (byte) 6)
+            );
+        }
+        {
+            // byte: slice(src, off, len)
+            byte[] data = ArrayKit.fill(new byte[size], (byte) 6);
+            ByteBuffer buffer = ByteBuffer.wrap(data);
+            ByteBuffer slice = BufferKit.slice(buffer, offset, length);
+            assertEquals(0, buffer.position());
+            assertEquals(buffer.limit(), size);
+            assertEquals(buffer.capacity(), size);
+            assertEquals(0, slice.position());
+            assertEquals(slice.limit(), length);
+            assertEquals(slice.capacity(), length);
+            slice.put(ArrayKit.fill(new byte[length], (byte) 8));
+            assertArrayEquals(
+                Arrays.copyOfRange(data, offset, offset + length),
+                ArrayKit.fill(new byte[length], (byte) 8)
+            );
+            assertArrayEquals(
+                Arrays.copyOfRange(data, 0, offset),
+                ArrayKit.fill(new byte[offset], (byte) 6)
+            );
+            assertArrayEquals(
+                Arrays.copyOfRange(data, offset + length, data.length),
+                ArrayKit.fill(new byte[data.length - offset - length], (byte) 6)
+            );
+        }
+        {
+            // char: slice(src, len)
+            char[] data = ArrayKit.fill(new char[size], (char) 6);
+            CharBuffer buffer = CharBuffer.wrap(data);
+            CharBuffer slice = BufferKit.slice(buffer, length);
+            assertEquals(0, buffer.position());
+            assertEquals(buffer.limit(), size);
+            assertEquals(buffer.capacity(), size);
+            assertEquals(0, slice.position());
+            assertEquals(slice.limit(), length);
+            assertEquals(slice.capacity(), length);
+            slice.put(ArrayKit.fill(new char[length], (char) 8));
+            assertArrayEquals(
+                Arrays.copyOf(data, length),
+                ArrayKit.fill(new char[length], (char) 8)
+            );
+            assertArrayEquals(
+                Arrays.copyOfRange(data, length, data.length),
+                ArrayKit.fill(new char[size - length], (char) 6)
+            );
+        }
+        {
+            // char: slice(src, off, len)
+            char[] data = ArrayKit.fill(new char[size], (char) 6);
+            CharBuffer buffer = CharBuffer.wrap(data);
+            CharBuffer slice = BufferKit.slice(buffer, offset, length);
+            assertEquals(0, buffer.position());
+            assertEquals(buffer.limit(), size);
+            assertEquals(buffer.capacity(), size);
+            assertEquals(0, slice.position());
+            assertEquals(slice.limit(), length);
+            assertEquals(slice.capacity(), length);
+            slice.put(ArrayKit.fill(new char[length], (char) 8));
+            assertArrayEquals(
+                Arrays.copyOfRange(data, offset, offset + length),
+                ArrayKit.fill(new char[length], (char) 8)
+            );
+            assertArrayEquals(
+                Arrays.copyOfRange(data, 0, offset),
+                ArrayKit.fill(new char[offset], (char) 6)
+            );
+            assertArrayEquals(
+                Arrays.copyOfRange(data, offset + length, data.length),
+                ArrayKit.fill(new char[data.length - offset - length], (char) 6)
+            );
+        }
+    }
+
+    @Test
+    public void testByteRead() {
+        testByteRead(0, 0);
+        testByteRead(64, 0);
+        testByteRead(0, 64);
+        testByteRead(64, 64);
+        testByteRead(128, 64);
+        testByteRead(64, 128);
+
+        {
+            // byte to string
+            String hello = "hello";
+            byte[] bytes = hello.getBytes(CharsKit.defaultCharset());
+            assertEquals(hello, BufferKit.string(ByteBuffer.wrap(bytes)));
+            assertNull(BufferKit.string(ByteBuffer.allocate(0)));
+        }
+
+        {
+            // error
+            assertThrows(IllegalArgumentException.class, () ->
+                BufferKit.read(ByteBuffer.allocate(1), -1));
+            assertThrows(IllegalArgumentException.class, () ->
+                BufferKit.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1), -1));
+            assertThrows(IORuntimeException.class, () ->
+                BufferKit.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ErrorOutputStream())));
+            assertThrows(IllegalArgumentException.class, () ->
+                BufferKit.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ByteArrayOutputStream()), -1));
+            assertThrows(IORuntimeException.class, () ->
+                BufferKit.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ErrorOutputStream()), 1));
+            assertThrows(IORuntimeException.class, () ->
+                BufferKit.readTo(ByteBuffer.allocate(1), new ErrorOutputStream()));
+            assertThrows(IllegalArgumentException.class, () ->
+                BufferKit.readTo(ByteBuffer.allocate(1), new ByteArrayOutputStream(), -1));
+            assertThrows(IORuntimeException.class, () ->
+                BufferKit.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1).asReadOnlyBuffer()));
+            assertThrows(IORuntimeException.class, () ->
+                BufferKit.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1).asReadOnlyBuffer(), 1));
+        }
+    }
+
+    private void testByteRead(int totalSize, int readSize) {
+        int actualLen = Math.min(totalSize, readSize);
+        {
+            // read all
+            byte[] data = randomBytes(totalSize);
+            ByteBuffer src = ByteBuffer.wrap(data);
+            byte[] ret = BufferKit.read(src);
+            if (totalSize == 0) {
+                assertNull(ret);
+            } else {
+                assertArrayEquals(ret, data);
+            }
+            assertEquals(src.position(), src.limit());
+            src.clear();
+            ret = BufferKit.read(src, readSize);
+            if (totalSize == 0 && readSize != 0) {
+                assertNull(ret);
+            } else {
+                assertArrayEquals(ret, Arrays.copyOf(data, actualLen));
+            }
+            assertEquals(src.position(), actualLen);
+        }
+        {
+            // buffer to array
+            byte[] data = randomBytes(totalSize);
+            ByteBuffer src = ByteBuffer.wrap(data);
+            byte[] dst = new byte[readSize];
+            assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
+            assertArrayEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+            src.clear();
+            dst = new byte[readSize];
+            assertEquals(BufferKit.readTo(src, dst, 0, readSize), actualReadSize(totalSize, readSize));
+            assertArrayEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+        }
+        {
+            // buffer to buffer
+            byte[] data = randomBytes(totalSize);
+            ByteBuffer src = ByteBuffer.wrap(data);
+            byte[] dstData = new byte[readSize];
+            ByteBuffer dst = ByteBuffer.wrap(dstData);
+            assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
+            assertArrayEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+            assertEquals(dst.position(), actualLen);
+            src.clear();
+            dstData = new byte[readSize];
+            dst = ByteBuffer.wrap(dstData);
+            assertEquals(BufferKit.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
+            assertArrayEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+            assertEquals(dst.position(), actualLen);
+            src.clear();
+            dst = ByteBuffer.allocate(0);
+            assertEquals(0, BufferKit.readTo(src, dst, readSize));
+            assertEquals(0, src.position());
+        }
+        {
+            // buffer to channel
+            byte[] data = randomBytes(totalSize);
+            BytesBuilder builder = new BytesBuilder();
+            ByteBuffer src = ByteBuffer.wrap(data);
+            WritableByteChannel dst = Channels.newChannel(builder);
+            assertEquals(BufferKit.readTo(src, dst), totalSize == 0 ? -1 : totalSize);
+            assertArrayEquals(builder.toByteArray(), data);
+            assertEquals(src.position(), src.limit());
+            src.clear();
+            builder.reset();
+            assertEquals(BufferKit.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
+            assertArrayEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+            // write one byte channel
+            dst = new OneByteWritableChannel(builder);
+            src.clear();
+            builder.reset();
+            assertEquals(BufferKit.readTo(src, dst), totalSize == 0 ? -1 : totalSize);
+            assertArrayEquals(builder.toByteArray(), data);
+            assertEquals(src.position(), src.limit());
+            src.clear();
+            builder.reset();
+            assertEquals(BufferKit.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
+            assertArrayEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+        }
+        {
+            // heap buffer to stream
+            byte[] data = randomBytes(totalSize);
+            BytesBuilder builder = new BytesBuilder();
+            ByteBuffer src = ByteBuffer.wrap(data);
+            assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
+            assertArrayEquals(builder.toByteArray(), data);
+            assertEquals(src.position(), src.limit());
+            src.clear();
+            builder.reset();
+            assertEquals(BufferKit.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
+            assertArrayEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+        }
+        {
+            // direct buffer to stream
+            byte[] data = randomBytes(totalSize);
+            BytesBuilder builder = new BytesBuilder();
+            ByteBuffer src = BufferKit.copyDirect(data);
+            assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
+            assertArrayEquals(builder.toByteArray(), data);
+            assertEquals(src.position(), src.limit());
+            src.clear();
+            builder.reset();
+            assertEquals(BufferKit.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
+            assertArrayEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+        }
+    }
+
+    @Test
+    public void testCharRead() {
+        testCharRead(0, 0);
+        testCharRead(64, 0);
+        testCharRead(0, 64);
+        testCharRead(64, 64);
+        testCharRead(128, 64);
+        testCharRead(64, 128);
+
+        {
+            // error
+            assertThrows(IllegalArgumentException.class, () ->
+                BufferKit.read(CharBuffer.allocate(1), -1));
+            assertThrows(IllegalArgumentException.class, () ->
+                BufferKit.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1), -1));
+            assertThrows(IORuntimeException.class, () ->
+                BufferKit.readTo(CharBuffer.allocate(1), new ErrorAppender()));
+            assertThrows(IllegalArgumentException.class, () ->
+                BufferKit.readTo(CharBuffer.allocate(1), new CharArrayWriter(), -1));
+            assertThrows(IORuntimeException.class, () ->
+                BufferKit.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1).asReadOnlyBuffer()));
+            assertThrows(IORuntimeException.class, () ->
+                BufferKit.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1).asReadOnlyBuffer(), 1));
+        }
+    }
+
+    private void testCharRead(int totalSize, int readSize) {
+        int actualLen = Math.min(totalSize, readSize);
+        {
+            // read all
+            char[] data = randomChars(totalSize);
+            CharBuffer src = CharBuffer.wrap(data);
+            char[] ret = BufferKit.read(src);
+            if (totalSize == 0) {
+                assertNull(ret);
+            } else {
+                assertArrayEquals(ret, data);
+            }
+            assertEquals(src.position(), src.limit());
+            src.clear();
+            ret = BufferKit.read(src, readSize);
+            if (totalSize == 0 && readSize != 0) {
+                assertNull(ret);
+            } else {
+                assertArrayEquals(ret, Arrays.copyOf(data, actualLen));
+            }
+            assertEquals(src.position(), actualLen);
+            // string
+            src.clear();
+            String str = BufferKit.string(src);
+            if (totalSize == 0) {
+                assertNull(str);
+            } else {
+                assertEquals(str, new String(data));
+            }
+            assertEquals(src.position(), src.limit());
+            src.clear();
+            str = BufferKit.string(src, readSize);
+            if (totalSize == 0 && readSize != 0) {
+                assertNull(str);
+            } else {
+                assertEquals(str, new String(Arrays.copyOf(data, actualLen)));
+            }
+            assertEquals(src.position(), actualLen);
+        }
+        {
+            // buffer to array
+            char[] data = randomChars(totalSize);
+            CharBuffer src = CharBuffer.wrap(data);
+            char[] dst = new char[readSize];
+            assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
+            assertArrayEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+            src.clear();
+            dst = new char[readSize];
+            assertEquals(BufferKit.readTo(src, dst, 0, readSize), actualReadSize(totalSize, readSize));
+            assertArrayEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+        }
+        {
+            // buffer to buffer
+            char[] data = randomChars(totalSize);
+            CharBuffer src = CharBuffer.wrap(data);
+            char[] dstData = new char[readSize];
+            CharBuffer dst = CharBuffer.wrap(dstData);
+            assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
+            assertArrayEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+            assertEquals(dst.position(), actualLen);
+            src.clear();
+            dstData = new char[readSize];
+            dst = CharBuffer.wrap(dstData);
+            assertEquals(BufferKit.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
+            assertArrayEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+            assertEquals(dst.position(), actualLen);
+            src.clear();
+            dst = CharBuffer.allocate(0);
+            assertEquals(0, BufferKit.readTo(src, dst, readSize));
+            assertEquals(0, src.position());
+        }
+        {
+            // heap buffer to appender
+            char[] data = randomChars(totalSize);
+            CharsBuilder builder = new CharsBuilder();
+            CharBuffer src = CharBuffer.wrap(data);
+            assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
+            assertArrayEquals(builder.toCharArray(), data);
+            assertEquals(src.position(), src.limit());
+            src.clear();
+            builder.reset();
+            assertEquals(BufferKit.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
+            assertArrayEquals(builder.toCharArray(), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+        }
+        {
+            // direct buffer to appender
+            char[] data = randomChars(totalSize);
+            CharsBuilder builder = new CharsBuilder();
+            CharBuffer src = BufferKit.copyDirect(data);
+            assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
+            assertArrayEquals(builder.toCharArray(), data);
+            assertEquals(src.position(), src.limit());
+            src.clear();
+            builder.reset();
+            assertEquals(BufferKit.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
+            assertArrayEquals(builder.toCharArray(), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
+        }
+    }
+
+    private int actualReadSize(int totalSize, int readSize) {
+        if (totalSize == 0) {
+            return readSize == 0 ? 0 : -1;
+        }
+        return Math.min(totalSize, readSize);
+    }
+
+    @Test
+    public void testWrite() {
+        String str = "hello world";
+        byte[] strBytes = str.getBytes(CharsKit.defaultCharset());
+        ByteBuffer dst = ByteBuffer.allocate(strBytes.length);
+        BufferKit.write(dst, str);
+        dst.flip();
+        assertEquals(str, BufferKit.string(dst));
+        ByteBuffer dst2 = ByteBuffer.allocate(strBytes.length - 1);
+        assertThrows(IORuntimeException.class, () -> BufferKit.write(dst2, str));
+    }
+
+    @Test
+    public void testProcess() {
+        testProcess(0);
+        testProcess(64);
+        testProcess(111);
+    }
+
+    private void testProcess(int size) {
+        {
+            // bytes
+            ByteArrayOperator operator = (src, srcOff, dst, dstOff, len) -> {
+                System.arraycopy(src, srcOff, dst, dstOff, len);
+                System.arraycopy(src, srcOff, dst, dstOff + len, len);
+                return len * 2;
+            };
+            byte[] data = randomBytes(size);
+            byte[] expected = new byte[size * 2];
+            System.arraycopy(data, 0, expected, 0, size);
+            System.arraycopy(data, 0, expected, size, size);
+            // heap -> heap
+            ByteBuffer src1 = ByteBuffer.wrap(data);
+            ByteBuffer dst1 = ByteBuffer.allocate(size * 2);
+            assertEquals(BufferKit.process(src1, dst1, operator), size * 2);
+            assertEquals(src1.position(), size);
+            assertEquals(dst1.position(), size * 2);
+            dst1.flip();
+            assertArrayEquals(BufferKit.read(dst1), size == 0 ? null : expected);
+            // heap -> direct
+            ByteBuffer src2 = ByteBuffer.wrap(data);
+            ByteBuffer dst2 = ByteBuffer.allocateDirect(size * 2);
+            assertEquals(BufferKit.process(src2, dst2, operator), size * 2);
+            assertEquals(src2.position(), size);
+            assertEquals(dst2.position(), size * 2);
+            dst2.flip();
+            assertArrayEquals(BufferKit.read(dst2), size == 0 ? null : expected);
+            // direct -> heap
+            ByteBuffer src3 = BufferKit.copyDirect(data);
+            ByteBuffer dst3 = ByteBuffer.allocate(size * 2);
+            assertEquals(BufferKit.process(src3, dst3, operator), size * 2);
+            assertEquals(src3.position(), size);
+            assertEquals(dst3.position(), size * 2);
+            dst3.flip();
+            assertArrayEquals(BufferKit.read(dst3), size == 0 ? null : expected);
+            // direct -> direct
+            ByteBuffer src4 = BufferKit.copyDirect(data);
+            ByteBuffer dst4 = ByteBuffer.allocateDirect(size * 2);
+            assertEquals(BufferKit.process(src4, dst4, operator), size * 2);
+            assertEquals(src4.position(), size);
+            assertEquals(dst4.position(), size * 2);
+            dst4.flip();
+            assertArrayEquals(BufferKit.read(dst4), size == 0 ? null : expected);
+            // exception
+            assertThrows(IORuntimeException.class, () ->
+                BufferKit.process(src4, dst4, (src, srcOff, dst, dstOff, len) -> {
+                    throw new Exception();
+                })
+            );
+        }
+        {
+            // chars
+            CharArrayOperator operator = (src, srcOff, dst, dstOff, len) -> {
+                System.arraycopy(src, srcOff, dst, dstOff, len);
+                System.arraycopy(src, srcOff, dst, dstOff + len, len);
+                return len * 2;
+            };
+            char[] data = randomChars(size);
+            char[] expected = new char[size * 2];
+            System.arraycopy(data, 0, expected, 0, size);
+            System.arraycopy(data, 0, expected, size, size);
+            // heap -> heap
+            CharBuffer src1 = CharBuffer.wrap(data);
+            CharBuffer dst1 = CharBuffer.allocate(size * 2);
+            assertEquals(BufferKit.process(src1, dst1, operator), size * 2);
+            assertEquals(src1.position(), size);
+            assertEquals(dst1.position(), size * 2);
+            dst1.flip();
+            assertArrayEquals(BufferKit.read(dst1), size == 0 ? null : expected);
+            // heap -> direct
+            CharBuffer src2 = CharBuffer.wrap(data);
+            CharBuffer dst2 = BufferKit.directCharBuffer(size * 2);
+            assertEquals(BufferKit.process(src2, dst2, operator), size * 2);
+            assertEquals(src2.position(), size);
+            assertEquals(dst2.position(), size * 2);
+            dst2.flip();
+            assertArrayEquals(BufferKit.read(dst2), size == 0 ? null : expected);
+            // direct -> heap
+            CharBuffer src3 = BufferKit.copyDirect(data);
+            CharBuffer dst3 = CharBuffer.allocate(size * 2);
+            assertEquals(BufferKit.process(src3, dst3, operator), size * 2);
+            assertEquals(src3.position(), size);
+            assertEquals(dst3.position(), size * 2);
+            dst3.flip();
+            assertArrayEquals(BufferKit.read(dst3), size == 0 ? null : expected);
+            // direct -> direct
+            CharBuffer src4 = BufferKit.copyDirect(data);
+            CharBuffer dst4 = BufferKit.directCharBuffer(size * 2);
+            assertEquals(BufferKit.process(src4, dst4, operator), size * 2);
+            assertEquals(src4.position(), size);
+            assertEquals(dst4.position(), size * 2);
+            dst4.flip();
+            assertArrayEquals(BufferKit.read(dst4), size == 0 ? null : expected);
+            // exception
+            assertThrows(IORuntimeException.class, () ->
+                BufferKit.process(src4, dst4, (src, srcOff, dst, dstOff, len) -> {
+                    throw new Exception();
+                })
+            );
+        }
+    }
+}

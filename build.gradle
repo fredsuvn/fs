@@ -1,8 +1,0 @@
-plugins {
-  id 'gek'
-  id 'gek-config'
-  id 'gek-doc'
-}
-
-description = "Root Project of Gek"
-

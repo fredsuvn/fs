@@ -1,0 +1,120 @@
+package tests.runtime.reflect;
+
+import org.junit.jupiter.api.Test;
+import space.sunqian.common.io.IOKit;
+import space.sunqian.common.runtime.reflect.BytesClassLoader;
+
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class ClassLoaderTest {
+
+    @Test
+    public void testLoadClass() throws Exception {
+        {
+            BytesClassLoader loader = new BytesClassLoader();
+            InputStream in = ClassLoader.getSystemResourceAsStream(
+                LA.class.getName().replace('.', '/') + ".class"
+            );
+            byte[] bytes = IOKit.read(in);
+            Class<?> cls = loader.loadClass(LA.class.getName(), bytes);
+            assertNotEquals(LA.class, cls);
+            assertEquals(cls.getName(), LA.class.getName());
+            assertSame(
+                loader.loadClass(LA.class.getName(), ByteBuffer.wrap(bytes)),
+                cls
+            );
+            in.close();
+        }
+        {
+            BytesClassLoader loader = new BytesClassLoader();
+            InputStream in = ClassLoader.getSystemResourceAsStream(
+                LA.class.getName().replace('.', '/') + ".class"
+            );
+            byte[] bytes = IOKit.read(in);
+            Class<?> cls = loader.loadClass(LA.class.getName(), ByteBuffer.wrap(bytes));
+            assertNotEquals(LA.class, cls);
+            assertEquals(cls.getName(), LA.class.getName());
+            assertSame(
+                loader.loadClass(LA.class.getName(), bytes),
+                cls
+            );
+            in.close();
+        }
+        {
+            BytesClassLoader loader = new BytesClassLoader();
+            InputStream in = ClassLoader.getSystemResourceAsStream(
+                LA.class.getName().replace('.', '/') + ".class"
+            );
+            byte[] bytes = IOKit.read(in);
+            Class<?> cls = loader.loadClass(null, bytes);
+            assertNotEquals(LA.class, cls);
+            assertEquals(cls.getName(), LA.class.getName());
+            assertSame(
+                loader.loadClass(LA.class.getName(), ByteBuffer.wrap(bytes)),
+                cls
+            );
+            in.close();
+        }
+        {
+            BytesClassLoader loader = new BytesClassLoader();
+            InputStream in = ClassLoader.getSystemResourceAsStream(
+                LA.class.getName().replace('.', '/') + ".class"
+            );
+            byte[] bytes = IOKit.read(in);
+            Class<?> cls = loader.loadClass(null, ByteBuffer.wrap(bytes));
+            assertNotEquals(LA.class, cls);
+            assertEquals(cls.getName(), LA.class.getName());
+            assertSame(
+                loader.loadClass(LA.class.getName(), bytes),
+                cls
+            );
+            in.close();
+        }
+    }
+
+    @Test
+    public void testLoadedClass() throws Exception {
+        BytesClassLoader loader1 = new BytesClassLoader();
+        InputStream in1 = ClassLoader.getSystemResourceAsStream(
+            LA.class.getName().replace('.', '/') + ".class"
+        );
+        byte[] bytes1 = IOKit.read(in1);
+        Class<?> cls1 = loader1.loadClass(LA.class.getName(), bytes1);
+        in1.close();
+        BytesClassLoader loader2 = new BytesClassLoader();
+        InputStream in2 = ClassLoader.getSystemResourceAsStream(
+            LA.class.getName().replace('.', '/') + ".class"
+        );
+        byte[] bytes2 = IOKit.read(in2);
+        Class<?> cls2 = loader2.loadClass(LA.class.getName(), bytes2);
+        in2.close();
+        assertEquals(cls1.getName(), cls2.getName());
+        assertEquals(cls1.getName(), LA.class.getName());
+        assertNotEquals(LA.class, cls1);
+        assertNotEquals(LA.class, cls2);
+        assertNotEquals(cls1, cls2);
+        Object o1 = cls1.getConstructor().newInstance();
+        Object o2 = cls2.getConstructor().newInstance();
+        assertFalse(o1 instanceof LA);
+        assertFalse(o2 instanceof LA);
+        BytesClassLoader loader3 = new BytesClassLoader();
+        InputStream in3 = ClassLoader.getSystemResourceAsStream("reflect/LAC");
+        byte[] bytes3 = IOKit.read(in3);
+        Class<?> cls3 = loader3.loadClass(LA.class.getName(), bytes3);
+        in1.close();
+        assertTrue(LA.class.isAssignableFrom(cls3));
+        LA la = new LA();
+        Object lac = cls3.getConstructor().newInstance();
+        assertTrue(lac instanceof LA);
+        String test = "tests";
+        assertEquals(test + test, la.compute(test));
+        assertEquals(test, ((LA) lac).compute(test));
+    }
+}

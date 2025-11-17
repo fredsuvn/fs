@@ -1,0 +1,103 @@
+import org.jetbrains.dokka.gradle.DokkaTask
+
+plugins {
+  id 'fs'
+  //id 'org.jetbrains.kotlin.jvm'
+  id 'org.jetbrains.kotlin.jvm' version '1.9.23'
+  id 'org.jetbrains.dokka' version '1.9.0'
+  id 'fs-publish'
+}
+
+description = 'Kotlin support of Gek.'
+
+dependencies {
+
+  implementation platform(project(':fs-dependencies'))
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+  api project(':fs-annotations')
+  api project(':fs-core')
+
+  testImplementation project(":fs-internal")
+  testAnnotationProcessor platform(project(":fs-dependencies"))
+  testAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess"
+}
+
+javadoc {
+  destinationDir = file("$project.projectDir/docs/javadoc")
+  dependsOn dokkaJavadoc
+  options.encoding = 'UTF-8'
+  options.locale = 'en_US'
+}
+
+dokkaJavadoc {
+  outputDirectory = javadoc.destinationDir
+}
+
+dokkaHtml {
+  outputDirectory = javadoc.destinationDir
+}
+
+tasks.withType(DokkaTask).configureEach {
+  dokkaSourceSets.configureEach {
+    configuration {
+      language = "en"
+      encoding = "UTF-8"
+    }
+  }
+}
+
+clean {
+  //delete(javadoc.destinationDir)
+}
+
+//tasks.register('sourcesJar', Jar) {
+//  group "build"
+//  classifier "sources"
+//  from sourceSets.main.allSource
+//}
+
+//tasks.register('javadocJar', Jar) {
+//  group "build"
+//  dependsOn dokkaJavadoc {
+//    outputDirectory = javadoc.destinationDir
+//  }
+//  classifier "javadoc"
+//  from javadoc.destinationDir
+//}
+
+sourceSets {
+  main.kotlin.srcDirs += ['src/main/kotlin', 'src/main/java']
+  main.java.srcDirs += ['src/main/kotlin', 'src/main/java']
+  test.kotlin.srcDirs += ['src/test/kotlin', 'src/test/java']
+  test.java.srcDirs += ['src/test/kotlin', 'src/test/java']
+}
+
+compileJava {
+  options.encoding = 'UTF-8'
+  //options.compilerArgs += ['-Werror', '-Xlint']
+  options.incremental = false
+}
+compileTestJava {
+  options.encoding = 'UTF-8'
+}
+
+//compileKotlin {
+//  kotlinOptions {
+//    jvmTarget = javaVersion
+//    freeCompilerArgs = ['-Xjvm-default=all']
+//  }
+//}
+//compileTestKotlin {
+//  kotlinOptions {
+//    jvmTarget = javaVersion
+//    freeCompilerArgs = ['-Xjvm-default=all']
+//  }
+//}
+
+tasks.register('cleanWithJavadoc') {
+  dependsOn clean
+  group = 'build'
+  doLast {
+    delete(javadoc.destinationDir)
+  }
+}

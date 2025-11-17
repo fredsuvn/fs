@@ -1,0 +1,20 @@
+plugins {
+  id 'fs'
+  id 'java-platform'
+  id 'fs-publish'
+}
+
+description = "BOM of Gek."
+
+javaPlatform {
+  allowDependencies()
+}
+
+dependencies {
+  constraints {
+    //api project(":boat")
+    file("${rootDir}").eachDirMatch(~/gek-(?!(plugins|draft)).*/) { dir ->
+      api project(":${dir.name}")
+    }
+  }
+}
