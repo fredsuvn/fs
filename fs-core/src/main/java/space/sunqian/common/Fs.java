@@ -6,16 +6,17 @@ import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.RetainedParam;
 import space.sunqian.common.base.exception.AwaitingException;
 import space.sunqian.common.base.exception.UnknownArrayTypeException;
+import space.sunqian.common.base.function.callable.BooleanCallable;
+import space.sunqian.common.base.function.callable.VoidCallable;
 import space.sunqian.common.base.option.Option;
 import space.sunqian.common.base.process.ProcessKit;
 import space.sunqian.common.base.thread.ThreadKit;
+import space.sunqian.common.base.value.Ret;
 import space.sunqian.common.collect.ArrayKit;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.collect.MapKit;
 import space.sunqian.common.collect.SetKit;
 import space.sunqian.common.collect.StreamKit;
-import space.sunqian.common.base.function.callable.BooleanCallable;
-import space.sunqian.common.base.function.callable.VoidCallable;
 import space.sunqian.common.io.IORuntimeException;
 import space.sunqian.common.object.convert.ConvertOption;
 import space.sunqian.common.object.convert.DataMapper;
@@ -230,29 +231,26 @@ public class Fs {
     }
 
     /**
-     * Calls the given action and returns the result. If any exception is thrown, the exception will be passed to the
-     * given generator, and the generator will return a result as the action's result. The logic as follows:
+     * Calls the given action and returns the result wrapped by {@link Ret}. The logic as follows:
      * <pre>{@code
      * try {
-     *     return action.call();
-     * } catch (Exception e) {
-     *     return generator.apply(e);
+     *     T ret = action.call();
+     *     return Ret.of(ret);
+     * } catch (Throwable e) {
+     *     return Ret.of(e);
      * }
      * }</pre>
      *
-     * @param action    the given action
-     * @param generator the given generator to handle the exception
-     * @param <T>       the type of the result
-     * @return the result of the given action, or the result of the given generator if any exception is thrown
+     * @param action the given action
+     * @param <T>    the type of the result
+     * @return the result of the given action wrapped by {@link Ret}
      */
-    public static <T> T callUncheck(
-        @Nonnull Callable<T> action,
-        @Nonnull Function<? super @Nonnull Exception, ? extends T> generator
-    ) {
+    public static <T> Ret<T> call(@Nonnull Callable<T> action) {
         try {
-            return action.call();
-        } catch (Exception e) {
-            return generator.apply(e);
+            T ret = action.call();
+            return Ret.of(ret);
+        } catch (Throwable e) {
+            return Ret.of(e);
         }
     }
 

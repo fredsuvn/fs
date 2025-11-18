@@ -80,23 +80,21 @@ public class FsTest implements AssertTest, PrintTest {
                 assertSame(e, cause);
                 return new UnreachablePointException(e);
             }));
+            // ignore
+            Fs.uncheck(() -> {
+                throw new Exception();
+            });
         }
         {
             // call
             Exception cause = new Exception();
             assertEquals(1, Fs.call(() -> 1, 2));
             assertEquals(2, Fs.call(() -> throwEx(cause), 2));
-            assertEquals(1, Fs.callUncheck(() -> 1, e -> 2));
-            assertEquals(2, Fs.callUncheck(() -> throwEx(cause), e -> {
+            assertEquals(1, Fs.call(() -> 1).get(e -> 2));
+            assertEquals(2, Fs.call(() -> throwEx(cause)).get(e -> {
                 assertSame(e, cause);
                 return 2;
             }));
-        }
-        {
-            // ignore
-            Fs.uncheck(() -> {
-                throw new Exception();
-            });
         }
     }
 
