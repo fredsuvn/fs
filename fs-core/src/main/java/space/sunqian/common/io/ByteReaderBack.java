@@ -1372,7 +1372,7 @@ final class ByteReaderBack {
 
         @Override
         public void mark(int readAheadLimit) {
-            Fs.ignoreException(in::mark);
+            Fs.uncheck(in::mark);
         }
 
         @Override

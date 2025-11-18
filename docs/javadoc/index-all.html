@@ -1410,6 +1410,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Computes without any result, or throws an exception if unable to do so.</div>
 </dd>
+<dt><a href="space/sunqian/common/Fs.html#call(java.util.concurrent.Callable)" class="member-name-link">call(Callable&lt;T&gt;)</a> - Static method in class space.sunqian.common.<a href="space/sunqian/common/Fs.html" title="class in space.sunqian.common">Fs</a></dt>
+<dd>
+<div class="block">Calls the given action and returns the result wrapped by <a href="space/sunqian/common/base/value/Ret.html" title="interface in space.sunqian.common.base.value"><code>Ret</code></a>.</div>
+</dd>
 <dt><a href="space/sunqian/common/Fs.html#call(java.util.concurrent.Callable,T)" class="member-name-link">call(Callable&lt;T&gt;, T)</a> - Static method in class space.sunqian.common.<a href="space/sunqian/common/Fs.html" title="class in space.sunqian.common">Fs</a></dt>
 <dd>
 <div class="block">Calls the given action and returns the result.</div>
@@ -1429,10 +1433,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="space/sunqian/common/base/function/callable/LongCallable.html#callAsLong()" class="member-name-link">callAsLong()</a> - Method in interface space.sunqian.common.base.function.callable.<a href="space/sunqian/common/base/function/callable/LongCallable.html" title="interface in space.sunqian.common.base.function.callable">LongCallable</a></dt>
 <dd>
 <div class="block">Computes a result as <code>long</code>, or throws an exception if unable to do so.</div>
-</dd>
-<dt><a href="space/sunqian/common/Fs.html#callUncheck(java.util.concurrent.Callable,java.util.function.Function)" class="member-name-link">callUncheck(Callable&lt;T&gt;, Function&lt;? super Exception, ? extends T&gt;)</a> - Static method in class space.sunqian.common.<a href="space/sunqian/common/Fs.html" title="class in space.sunqian.common">Fs</a></dt>
-<dd>
-<div class="block">Calls the given action and returns the result.</div>
 </dd>
 <dt><a href="space/sunqian/common/base/string/StringKit.html#capitalize(java.lang.CharSequence)" class="member-name-link">capitalize(CharSequence)</a> - Static method in class space.sunqian.common.base.string.<a href="space/sunqian/common/base/string/StringKit.html" title="class in space.sunqian.common.base.string">StringKit</a></dt>
 <dd>
@@ -2988,6 +2988,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the held value.</div>
 </dd>
+<dt><a href="space/sunqian/common/base/value/Ret.html#get()" class="member-name-link">get()</a> - Method in interface space.sunqian.common.base.value.<a href="space/sunqian/common/base/value/Ret.html" title="interface in space.sunqian.common.base.value">Ret</a></dt>
+<dd>
+<div class="block">Returns the return value.</div>
+</dd>
 <dt><a href="space/sunqian/common/base/value/ShortVal.html#get()" class="member-name-link">get()</a> - Method in interface space.sunqian.common.base.value.<a href="space/sunqian/common/base/value/ShortVal.html" title="interface in space.sunqian.common.base.value">ShortVal</a></dt>
 <dd>
 <div class="block">Returns the held value.</div>
@@ -3073,6 +3077,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="space/sunqian/common/concurrent/FutureKit.html#get(java.util.concurrent.Future,T)" class="member-name-link">get(Future&lt;T&gt;, T)</a> - Static method in class space.sunqian.common.concurrent.<a href="space/sunqian/common/concurrent/FutureKit.html" title="class in space.sunqian.common.concurrent">FutureKit</a></dt>
 <dd>
 <div class="block">Gets the result of the future by <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/Future.html#get()" title="class or interface in java.util.concurrent" class="external-link"><code>Future.get()</code></a>, and if the operation fails, returns the default value.</div>
+</dd>
+<dt><a href="space/sunqian/common/base/value/Ret.html#get(java.util.function.Function)" class="member-name-link">get(Function&lt;Throwable, ? extends T&gt;)</a> - Method in interface space.sunqian.common.base.value.<a href="space/sunqian/common/base/value/Ret.html" title="interface in space.sunqian.common.base.value">Ret</a></dt>
+<dd>
+<div class="block">Returns the return value.</div>
 </dd>
 <dt><a href="space/sunqian/common/base/thread/LocalKit.html#get(K)" class="member-name-link">get(K)</a> - Static method in class space.sunqian.common.base.thread.<a href="space/sunqian/common/base/thread/LocalKit.html" title="class in space.sunqian.common.base.thread">LocalKit</a></dt>
 <dd>
@@ -3640,10 +3648,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="space/sunqian/common/object/convert/ConvertOption.html#IGNORE_PROPERTIES" class="member-name-link">IGNORE_PROPERTIES</a> - Enum constant in enum class space.sunqian.common.object.convert.<a href="space/sunqian/common/object/convert/ConvertOption.html" title="enum class in space.sunqian.common.object.convert">ConvertOption</a></dt>
 <dd>
 <div class="block">Key of <a href="space/sunqian/common/object/convert/ConvertOption.html#ignoreProperties(java.lang.Object...)"><code>ConvertOption.ignoreProperties(Object...)</code></a>.</div>
-</dd>
-<dt><a href="space/sunqian/common/Fs.html#ignoreException(space.sunqian.common.base.function.callable.VoidCallable)" class="member-name-link">ignoreException(VoidCallable)</a> - Static method in class space.sunqian.common.<a href="space/sunqian/common/Fs.html" title="class in space.sunqian.common">Fs</a></dt>
-<dd>
-<div class="block">Runs the given action and ignores any exception thrown by the action.</div>
 </dd>
 <dt><a href="space/sunqian/common/object/convert/ConvertOption.html#ignoreProperties(java.lang.Object...)" class="member-name-link">ignoreProperties(Object...)</a> - Static method in enum class space.sunqian.common.object.convert.<a href="space/sunqian/common/object/convert/ConvertOption.html" title="enum class in space.sunqian.common.object.convert">ConvertOption</a></dt>
 <dd>
@@ -5804,9 +5808,17 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns a <code>StringView</code> that is composed of the specified list of <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/CharSequence.html" title="class or interface in java.lang" class="external-link"><code>CharSequence</code></a>.</div>
 </dd>
+<dt><a href="space/sunqian/common/base/value/Ret.html#of(java.lang.Throwable)" class="member-name-link">of(Throwable)</a> - Static method in interface space.sunqian.common.base.value.<a href="space/sunqian/common/base/value/Ret.html" title="interface in space.sunqian.common.base.value">Ret</a></dt>
+<dd>
+<div class="block">Returns an instance of <a href="space/sunqian/common/base/value/Ret.html" title="interface in space.sunqian.common.base.value"><code>Ret</code></a> with the specified error.</div>
+</dd>
 <dt><a href="space/sunqian/common/base/option/Option.html#of(K,V)" class="member-name-link">of(K, V)</a> - Static method in interface space.sunqian.common.base.option.<a href="space/sunqian/common/base/option/Option.html" title="interface in space.sunqian.common.base.option">Option</a></dt>
 <dd>
 <div class="block">Returns an <a href="space/sunqian/common/base/option/Option.html" title="interface in space.sunqian.common.base.option"><code>Option</code></a> with the specified key and value.</div>
+</dd>
+<dt><a href="space/sunqian/common/base/value/Ret.html#of(T)" class="member-name-link">of(T)</a> - Static method in interface space.sunqian.common.base.value.<a href="space/sunqian/common/base/value/Ret.html" title="interface in space.sunqian.common.base.value">Ret</a></dt>
+<dd>
+<div class="block">Returns an instance of <a href="space/sunqian/common/base/value/Ret.html" title="interface in space.sunqian.common.base.value"><code>Ret</code></a> with the specified return value.</div>
 </dd>
 <dt><a href="space/sunqian/common/base/value/Val.html#of(T)" class="member-name-link">of(T)</a> - Static method in interface space.sunqian.common.base.value.<a href="space/sunqian/common/base/value/Val.html" title="interface in space.sunqian.common.base.value">Val</a></dt>
 <dd>
@@ -6987,6 +6999,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="space/sunqian/common/app/di/InjectedApp.Builder.html#resourceTypes(java.lang.reflect.Type...)" class="member-name-link">resourceTypes(Type...)</a> - Method in class space.sunqian.common.app.di.<a href="space/sunqian/common/app/di/InjectedApp.Builder.html" title="class in space.sunqian.common.app.di">InjectedApp.Builder</a></dt>
 <dd>
 <div class="block">Adds root resource types to this builder, each type should be a <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link"><code>Class</code></a> or <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/reflect/ParameterizedType.html" title="class or interface in java.lang.reflect" class="external-link"><code>ParameterizedType</code></a>.</div>
+</dd>
+<dt><a href="space/sunqian/common/base/value/Ret.html" class="type-name-link" title="interface in space.sunqian.common.base.value">Ret</a>&lt;<a href="space/sunqian/common/base/value/Ret.html" title="type parameter in Ret">T</a>&gt; - Interface in <a href="space/sunqian/common/base/value/package-summary.html">space.sunqian.common.base.value</a></dt>
+<dd>
+<div class="block">This interface represents a wrapper to wrap a return value from a method or function or other similar ones.</div>
 </dd>
 <dt><a href="space/sunqian/annotations/RetainedParam.html" class="type-name-link" title="annotation interface in space.sunqian.annotations">RetainedParam</a> - Annotation Interface in <a href="space/sunqian/annotations/package-summary.html">space.sunqian.annotations</a></dt>
 <dd>
@@ -8243,6 +8259,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Runs the given action and wraps any exception into an unchecked exception, the unchecked exception is generated
  by the given unchecked exception generator.</div>
+</dd>
+<dt><a href="space/sunqian/common/Fs.html#uncheck(space.sunqian.common.base.function.callable.VoidCallable)" class="member-name-link">uncheck(VoidCallable)</a> - Static method in class space.sunqian.common.<a href="space/sunqian/common/Fs.html" title="class in space.sunqian.common">Fs</a></dt>
+<dd>
+<div class="block">Runs the given action and ignores any exception thrown by the action.</div>
 </dd>
 <dt><a href="space/sunqian/common/Fs.html#uncheck(space.sunqian.common.base.function.callable.VoidCallable,java.util.function.Function)" class="member-name-link">uncheck(VoidCallable, Function&lt;? super Exception, ? extends RuntimeException&gt;)</a> - Static method in class space.sunqian.common.<a href="space/sunqian/common/Fs.html" title="class in space.sunqian.common">Fs</a></dt>
 <dd>
