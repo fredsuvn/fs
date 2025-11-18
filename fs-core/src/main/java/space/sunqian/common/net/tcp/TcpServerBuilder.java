@@ -4,8 +4,8 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.Check;
 import space.sunqian.common.Fs;
-import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.base.function.callable.VoidCallable;
+import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.communicate.AbstractChannelContext;
 import space.sunqian.common.net.NetException;
@@ -249,9 +249,9 @@ public class TcpServerBuilder {
 
         @Override
         public void await() throws NetException {
-            Fs.ignoreException(mainThread::join);
+            Fs.uncheck(mainThread::join);
             for (WorkerImpl worker : workers) {
-                Fs.ignoreException(worker.thread::join);
+                Fs.uncheck(worker.thread::join);
             }
         }
 

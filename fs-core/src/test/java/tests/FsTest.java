@@ -94,7 +94,7 @@ public class FsTest implements AssertTest, PrintTest {
         }
         {
             // ignore
-            Fs.ignoreException(() -> {
+            Fs.uncheck(() -> {
                 throw new Exception();
             });
         }

@@ -164,7 +164,7 @@ public class UdpServerBuilder {
 
         @Override
         public void await() throws NetException {
-            Fs.ignoreException(mainThread::join);
+            Fs.uncheck(mainThread::join);
         }
 
         @Override

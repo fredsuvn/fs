@@ -198,7 +198,7 @@ public class Fs {
      *
      * @param action the given action
      */
-    public static void ignoreException(@Nonnull VoidCallable action) {
+    public static void uncheck(@Nonnull VoidCallable action) {
         try {
             action.call();
         } catch (Exception ignored) {
