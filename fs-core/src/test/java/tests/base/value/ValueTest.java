@@ -16,6 +16,7 @@ import space.sunqian.common.base.value.IntVar;
 import space.sunqian.common.base.value.LongSpan;
 import space.sunqian.common.base.value.LongVal;
 import space.sunqian.common.base.value.LongVar;
+import space.sunqian.common.base.value.Ret;
 import space.sunqian.common.base.value.ShortVal;
 import space.sunqian.common.base.value.ShortVar;
 import space.sunqian.common.base.value.Span;
@@ -241,5 +242,13 @@ public class ValueTest {
             assertThrows(IllegalArgumentException.class, () -> LongSpan.of(end, start));
             assertSame(LongSpan.empty(), LongSpan.empty());
         }
+    }
+
+    @Test
+    public void testRet() {
+        assertEquals(66, Ret.of(66).get());
+        assertEquals(66, Ret.of(66).get(e -> 11));
+        assertEquals(66, Ret.of(new Throwable()).get(e -> 66));
+        assertThrows(Throwable.class, () -> Ret.of(new Throwable()).get());
     }
 }

@@ -12,6 +12,7 @@
  *     <li>{@link space.sunqian.common.base.value.LongVal};</li>
  *     <li>{@link space.sunqian.common.base.value.FloatVal};</li>
  *     <li>{@link space.sunqian.common.base.value.DoubleVal};</li>
+ *     <li>{@link space.sunqian.common.base.value.Ret};</li>
  * </ul>
  * Mutable interfaces:
  * <ul>
