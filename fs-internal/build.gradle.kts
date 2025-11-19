@@ -34,9 +34,11 @@ dependencies {
   api("org.jboss:jboss-vfs")
 }
 
+val javaVersionLow = project.property("javaLanguageVersionLow") as JavaLanguageVersion
+
 java {
   toolchain {
-    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
+    languageVersion = javaVersionLow
   }
 }
 
@@ -51,7 +53,7 @@ tasks.test {
     html.required = false
   }
   javaLauncher = javaToolchains.launcherFor {
-    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
+    languageVersion = javaVersionLow
   }
 }
 
