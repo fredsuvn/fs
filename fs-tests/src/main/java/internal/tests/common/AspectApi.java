@@ -41,7 +41,7 @@ public class AspectApi {
                     }
                 }
             ).newInstance();
-            case "original" -> new AspectApi() {
+            case "direct" -> new AspectApi() {
                 @Override
                 public String withPrimitive(int i, long l, String str) throws Exception {
                     return super.withPrimitive(i + 1, l, str);

@@ -15,7 +15,7 @@ public class PropertiesCopierTest {
         testCopier("fs");
         testCopier("apache");
         testCopier("hutool");
-        testCopier("original");
+        testCopier("direct");
     }
 
     public void testCopier(String copierType) throws Exception {

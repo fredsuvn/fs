@@ -54,7 +54,7 @@ public interface ProxyApi {
                     }
                 }
             ).newInstance();
-            case "original" -> new ProxyApi() {
+            case "direct" -> new ProxyApi() {
                 @Override
                 public String withPrimitive(int i, long l, String str) throws Exception {
                     return ProxyApi.super.withPrimitive(i, l, str) + "[proxy]";

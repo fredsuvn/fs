@@ -9,9 +9,9 @@ public class ProxyTest {
 
     @Test
     public void testProxy() throws Exception {
-        testProxy("original");
         testProxy("jdk");
         testProxy("asm");
+        testProxy("direct");
     }
 
     public void testProxy(String proxyType) throws Exception {

@@ -32,7 +32,7 @@ public class AspectBenchmark {
 
     @Param({
         "asm",
-        "original",
+        "direct",
     })
     private String aspectType;
 

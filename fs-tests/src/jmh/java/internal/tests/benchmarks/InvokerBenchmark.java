@@ -33,7 +33,7 @@ public class InvokerBenchmark {
         "reflect",
         "asm",
         "method_handle",
-        "original",
+        "direct",
     })
     private String invokeType;
 

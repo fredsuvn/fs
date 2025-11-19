@@ -33,7 +33,7 @@ public class ProxyBenchmark {
     @Param({
         "asm",
         "jdk",
-        "original",
+        "direct",
     })
     private String proxyType;
 

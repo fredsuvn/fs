@@ -12,7 +12,7 @@ public class InvokerTest {
         testInvoker("reflect");
         testInvoker("asm");
         testInvoker("method_handle");
-        testInvoker("instance");
+        testInvoker("direct");
     }
 
     public void testInvoker(String invokeType) throws Exception {

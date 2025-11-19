@@ -9,8 +9,8 @@ public class AspectTest {
 
     @Test
     public void testAspect() throws Exception {
-        testAspect("original");
         testAspect("asm");
+        testAspect("direct");
     }
 
     public void testAspect(String aspectType) throws Exception {

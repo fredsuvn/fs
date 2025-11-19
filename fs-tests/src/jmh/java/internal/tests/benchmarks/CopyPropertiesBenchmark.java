@@ -34,7 +34,7 @@ public class CopyPropertiesBenchmark {
         "fs",
         "apache",
         "hutool",
-        "original"
+        "direct"
     })
     private String copierType;
 

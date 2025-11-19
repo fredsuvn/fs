@@ -11,7 +11,7 @@ public interface PropertiesCopier {
             case "fs" -> Fs::copyProperties;
             case "apache" -> (source, target) -> BeanUtils.copyProperties(target, source);
             case "hutool" -> (source, target) -> BeanUtil.copyProperties(target, source);
-            case "original" -> (source, target) -> {
+            case "direct" -> (source, target) -> {
                 CommonData src = (CommonData) source;
                 CommonData dst = (CommonData) target;
                 dst.setI1(src.getI1());
