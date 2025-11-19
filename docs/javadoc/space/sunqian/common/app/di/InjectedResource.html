@@ -43,7 +43,7 @@ loadScripts(document, 'script');</script>
 <div>
 <ul class="sub-nav-list">
 <li>Summary:&nbsp;</li>
-<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#nested-class-summary">Nested</a>&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method-summary">Method</a></li>
@@ -79,17 +79,54 @@ loadScripts(document, 'script');</script>
 </section>
 <section class="summary">
 <ul class="summary-list">
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<li>
+<section class="nested-class-summary" id="nested-class-summary">
+<h2>Nested Class Summary</h2>
+<div class="caption"><span>Nested Classes</span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Interface</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>static interface&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="InjectedResource.Descriptor.html" class="type-name-link" title="interface in space.sunqian.common.app.di">InjectedResource.Descriptor</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Represents descriptor of resource type.</div>
+</div>
+<div class="col-first odd-row-color"><code>static interface&nbsp;</code></div>
+<div class="col-second odd-row-color"><code><a href="InjectedResource.FieldSetter.html" class="type-name-link" title="interface in space.sunqian.common.app.di">InjectedResource.FieldSetter</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Represents setter for dependency field.</div>
+</div>
+<div class="col-first even-row-color"><code>static interface&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="InjectedResource.Resolver.html" class="type-name-link" title="interface in space.sunqian.common.app.di">InjectedResource.Resolver</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Represents resolver for <a href="InjectedResource.html" title="interface in space.sunqian.common.app.di"><code>InjectedResource</code></a>.</div>
+</div>
+</div>
+</section>
+</li>
 <!-- ========== METHOD SUMMARY =========== -->
 <li>
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1"><code>static <a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="InjectedResource.FieldSetter.html" title="interface in space.sunqian.common.app.di">InjectedResource.FieldSetter</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1"><code><a href="#defaultFieldSetter()" class="member-name-link">defaultFieldSetter</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1">
+<div class="block">Returns the default field setter for <a href="InjectedResource.html" title="interface in space.sunqian.common.app.di"><code>InjectedResource</code></a>.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1"><code>static <a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="InjectedResource.Resolver.html" title="interface in space.sunqian.common.app.di">InjectedResource.Resolver</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1"><code><a href="#defaultResolver()" class="member-name-link">defaultResolver</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1">
+<div class="block">Returns the default resolver for <a href="InjectedResource.html" title="interface in space.sunqian.common.app.di"><code>InjectedResource</code></a>.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#instance()" class="member-name-link">instance</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
@@ -151,6 +188,30 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="defaultResolver()">
+<h3>defaultResolver</h3>
+<div class="member-signature"><span class="annotations"><a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+</span><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="InjectedResource.Resolver.html" title="interface in space.sunqian.common.app.di">InjectedResource.Resolver</a></span>&nbsp;<span class="element-name">defaultResolver</span>()</div>
+<div class="block">Returns the default resolver for <a href="InjectedResource.html" title="interface in space.sunqian.common.app.di"><code>InjectedResource</code></a>.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the default resolver for <a href="InjectedResource.html" title="interface in space.sunqian.common.app.di"><code>InjectedResource</code></a></dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="defaultFieldSetter()">
+<h3>defaultFieldSetter</h3>
+<div class="member-signature"><span class="annotations"><a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+</span><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="InjectedResource.FieldSetter.html" title="interface in space.sunqian.common.app.di">InjectedResource.FieldSetter</a></span>&nbsp;<span class="element-name">defaultFieldSetter</span>()</div>
+<div class="block">Returns the default field setter for <a href="InjectedResource.html" title="interface in space.sunqian.common.app.di"><code>InjectedResource</code></a>.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the default field setter for <a href="InjectedResource.html" title="interface in space.sunqian.common.app.di"><code>InjectedResource</code></a></dd>
+</dl>
+</section>
+</li>
 <li>
 <section class="detail" id="type()">
 <h3>type</h3>
