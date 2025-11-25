@@ -367,10 +367,24 @@ public class TcpServerBuilder {
             // the thread this worker starts on
             private Thread thread;
 
-            private volatile @Nullable ClientNode clientNode;
+            private volatile @Nonnull AcceptedEvent acceptedEvent = new AcceptedEvent();
 
             private WorkerImpl() {
                 this.selector = Fs.uncheck(Selector::open, NetException::new);
+            }
+
+            public void registerClient(SocketChannel client) {
+                AcceptedEvent newAc = new AcceptedEvent(client);
+                AcceptedEvent event = this.acceptedEvent;
+                while (true) {
+                    AcceptedEvent next = event.next;
+                    if (next == null) {
+                        event.next = newAc;
+                        break;
+                    } else {
+                        event = next;
+                    }
+                }
             }
 
             //@SuppressWarnings({"InfiniteLoopStatement"})
@@ -385,11 +399,8 @@ public class TcpServerBuilder {
             }
 
             private void doWorkerWork() throws Exception {
-                // register client
-                ClientNode head = this.clientNode;
-                if (head != null) {
-                    handleOpen(head);
-                }
+                // register read event
+                handleOpen();
                 // read event
                 handleRead();
                 // loop event
@@ -398,23 +409,23 @@ public class TcpServerBuilder {
                 handleClose();
             }
 
-            private void handleOpen(@Nonnull ClientNode head) throws Exception {
-                @Nonnull ClientNode node = head;
+            private void handleOpen() throws Exception {
+                @Nonnull AcceptedEvent event = this.acceptedEvent;
                 while (true) {
-                    if (!node.done) {
-                        SocketChannel channel = node.channel;
+                    SocketChannel channel = event.channel;
+                    if (channel != null) {
                         ContextImpl context = new ContextImpl(channel, bufSize);
                         clientSet.add(context);
                         registerRead(context);
+                        event.channel = null;
                         TcpKit.channelOpen(handler, context);
-                        node.done = true;
                     }
-                    ClientNode next = node.next;
+                    AcceptedEvent next = event.next;
                     if (next == null) {
-                        this.clientNode = node;
+                        this.acceptedEvent = event;
                         break;
                     } else {
-                        node = next;
+                        event = next;
                     }
                 }
             }
@@ -458,26 +469,8 @@ public class TcpServerBuilder {
                 }
             }
 
-            public void registerClient(SocketChannel client) {
-                ClientNode node = new ClientNode(client);
-                ClientNode head = clientNode;
-                if (head == null) {
-                    clientNode = node;
-                    return;
-                }
-                ClientNode cur = head;
-                while (true) {
-                    ClientNode next = cur.next;
-                    if (next == null) {
-                        cur.next = node;
-                        return;
-                    }
-                    cur = next;
-                }
-            }
-
             @Override
-            public int clientCount() {
+            public int connectionNumber() {
                 return clientSet.size();
             }
 
@@ -543,14 +536,17 @@ public class TcpServerBuilder {
             }
         }
 
-        private static final class ClientNode {
+        private static final class AcceptedEvent {
 
-            private final @Nonnull SocketChannel channel;
-            private volatile boolean done = false;
-            private volatile @Nullable ClientNode next;
+            private volatile @Nullable SocketChannel channel;
+            private volatile @Nullable AcceptedEvent next;
 
-            private ClientNode(@Nonnull SocketChannel channel) {
+            private AcceptedEvent(@Nonnull SocketChannel channel) {
                 this.channel = channel;
+            }
+
+            private AcceptedEvent() {
+                this.channel = null;
             }
         }
     }

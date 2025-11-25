@@ -1,21 +1,21 @@
 package tests.net;
 
+import internal.test.DataTest;
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.bytes.BytesBuilder;
 import space.sunqian.common.base.exception.ThrowKit;
+import space.sunqian.common.base.function.callable.VoidCallable;
 import space.sunqian.common.base.thread.ThreadGate;
 import space.sunqian.common.base.value.IntVar;
-import space.sunqian.common.base.function.callable.VoidCallable;
 import space.sunqian.common.net.NetException;
 import space.sunqian.common.net.NetServer;
 import space.sunqian.common.net.tcp.TcpClient;
 import space.sunqian.common.net.tcp.TcpContext;
 import space.sunqian.common.net.tcp.TcpServer;
 import space.sunqian.common.net.tcp.TcpServerHandler;
-import internal.test.DataTest;
-import internal.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
@@ -33,8 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TcpTest implements DataTest, PrintTest {
 
@@ -175,15 +175,15 @@ public class TcpTest implements DataTest, PrintTest {
             assertTrue(client.isConnected());
             assertFalse(client.isClosed());
             clients[i] = client;
-            printFor("client connect",
-                i, ", addr: ", client.channel().getRemoteAddress());
+            // printFor("client connect",
+            //     i, ", addr: ", client.channel().getRemoteAddress());
         }
 
         // worker threads
         List<NetServer.Worker> workers = server.workers();
         for (int i = 0; i < workers.size(); i++) {
             NetServer.Worker worker = workers.get(i);
-            assertEquals(1, worker.clientCount());
+            assertEquals(1, worker.connectionNumber());
             XThread thread = (XThread) worker.thread();
             assertEquals(thread.num, i);
         }

@@ -1,6 +1,8 @@
 package internal.tests.common;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -122,7 +124,15 @@ public abstract class TcpServerApi {
 
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) {
-                ctx.write(msg);
+                ByteBuf buf = (ByteBuf) msg;
+                try {
+                    byte[] bytes = new byte[buf.readableBytes()];
+                    buf.readBytes(bytes);
+                    // 释放原来的ByteBuf
+                    ctx.writeAndFlush(Unpooled.copiedBuffer(bytes));
+                } finally {
+                    buf.release(); // 或者使用ReferenceCountUtil.release(msg);
+                }
             }
 
             @Override
