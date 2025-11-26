@@ -29,6 +29,7 @@ dependencies {
   api("org.springframework:spring-core")
   api("cglib:cglib")
   api("net.bytebuddy:byte-buddy")
+  api("net.bytebuddy:byte-buddy-agent")
   api("org.springframework:spring-beans")
   api("org.projectlombok:lombok")
   api("org.mockito:mockito-core")

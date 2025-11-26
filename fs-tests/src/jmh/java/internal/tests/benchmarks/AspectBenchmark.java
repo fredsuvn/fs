@@ -32,6 +32,7 @@ public class AspectBenchmark {
 
     @Param({
         "fs-asm",
+        //"byte-buddy",
         "direct",
     })
     private String aspectType;
@@ -45,7 +46,7 @@ public class AspectBenchmark {
     private AspectApi aspect;
 
     @Setup(Level.Trial)
-    public void setup() {
+    public void setup() throws Exception {
         this.aspect = AspectApi.createAspect(aspectType);
     }
 

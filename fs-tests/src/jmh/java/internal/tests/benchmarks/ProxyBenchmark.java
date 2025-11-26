@@ -32,7 +32,9 @@ public class ProxyBenchmark {
 
     @Param({
         "fs-asm",
-        "jdk",
+        "fs-jdk",
+        "byte-buddy",
+        //"cglib",
         "direct",
     })
     private String proxyType;
@@ -46,7 +48,7 @@ public class ProxyBenchmark {
     private ProxyApi proxy;
 
     @Setup(Level.Trial)
-    public void setup() {
+    public void setup() throws Exception {
         this.proxy = ProxyApi.createProxy(proxyType);
     }
 

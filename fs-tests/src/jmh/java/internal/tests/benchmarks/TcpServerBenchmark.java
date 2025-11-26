@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 // @Fork(1)
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
-@Fork(1)
+@Fork(5)
 public class TcpServerBenchmark implements DataTest {
 
     @Param({

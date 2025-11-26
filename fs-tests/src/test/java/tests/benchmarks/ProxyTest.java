@@ -10,7 +10,9 @@ public class ProxyTest {
     @Test
     public void testProxy() throws Exception {
         testProxy("fs-asm");
-        testProxy("jdk");
+        testProxy("fs-jdk");
+        testProxy("byte-buddy");
+        // testProxy("cglib");
         testProxy("direct");
     }
 

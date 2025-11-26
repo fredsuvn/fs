@@ -59,6 +59,7 @@ dependencies {
     //generator
     api("cglib:cglib:3.3.0")
     api("net.bytebuddy:byte-buddy:1.18.1")
+    api("net.bytebuddy:byte-buddy-agent:1.18.1")
 
     //network
     api("io.netty:netty-all:4.1.100.Final")
