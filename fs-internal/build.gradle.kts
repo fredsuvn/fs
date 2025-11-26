@@ -28,6 +28,7 @@ dependencies {
   api("org.bouncycastle:bcprov-jdk18on")
   api("org.springframework:spring-core")
   api("cglib:cglib")
+  api("net.bytebuddy:byte-buddy")
   api("org.springframework:spring-beans")
   api("org.projectlombok:lombok")
   api("org.mockito:mockito-core")
