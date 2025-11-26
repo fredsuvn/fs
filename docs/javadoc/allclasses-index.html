@@ -177,76 +177,84 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">This interface defines a method for processing data from a source array and writing the result into a destination.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/ByteProcessor.html" title="interface in space.sunqian.common.io">ByteProcessor</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/ByteIOOperator.html" title="interface in space.sunqian.common.io">ByteIOOperator</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="block">This interface provides I/O operations for byte.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/ByteProcessor.html" title="interface in space.sunqian.common.io">ByteProcessor</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">This interface represents a processor to process byte data, from the specified data source, through zero or more
  intermediate operations, finally produces a result or side effect, and the result will be written into a destination
  (if any).</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/ByteReader.html" title="interface in space.sunqian.common.io">ByteReader</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/ByteReader.html" title="interface in space.sunqian.common.io">ByteReader</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
 <div class="block">This interface represents the byte data reader to read byte data as <a href="space/sunqian/common/io/ByteSegment.html" title="interface in space.sunqian.common.io"><code>ByteSegment</code></a> from the data source, which
  may be a byte sequence or a stream.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="space/sunqian/common/base/bytes/BytesBuilder.html" title="class in space.sunqian.common.base.bytes">BytesBuilder</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="space/sunqian/common/base/bytes/BytesBuilder.html" title="class in space.sunqian.common.base.bytes">BytesBuilder</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block"><code>BytesBuilder</code> is used to build byte arrays and their derived objects by appending byte data.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="space/sunqian/common/runtime/reflect/BytesClassLoader.html" title="class in space.sunqian.common.runtime.reflect">BytesClassLoader</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="space/sunqian/common/runtime/reflect/BytesClassLoader.html" title="class in space.sunqian.common.runtime.reflect">BytesClassLoader</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">A class loader provides methods for loading classes from the specified byte data:
  
      <a href="space/sunqian/common/runtime/reflect/BytesClassLoader.html#loadClass(java.lang.String,byte%5B%5D)"><code>BytesClassLoader.loadClass(String, byte[])</code></a>
      <a href="space/sunqian/common/runtime/reflect/BytesClassLoader.html#loadClass(java.lang.String,java.nio.ByteBuffer)"><code>BytesClassLoader.loadClass(String, ByteBuffer)</code></a>
  </div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/ByteSegment.html" title="interface in space.sunqian.common.io">ByteSegment</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/ByteSegment.html" title="interface in space.sunqian.common.io">ByteSegment</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">This interface represents a segment of byte data in the data source.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="space/sunqian/common/base/bytes/BytesKit.html" title="class in space.sunqian.common.base.bytes">BytesKit</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="space/sunqian/common/base/bytes/BytesKit.html" title="class in space.sunqian.common.base.bytes">BytesKit</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Utilities for <code>byte</code> and <code>byte array</code>.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/ByteTransformer.html" title="interface in space.sunqian.common.io">ByteTransformer</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/ByteTransformer.html" title="interface in space.sunqian.common.io">ByteTransformer</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">This interface is used to transform the input data, typically used for <a href="space/sunqian/common/io/ByteProcessor.html" title="interface in space.sunqian.common.io"><code>ByteProcessor</code></a>, to do the specific data
  transformation work.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/base/value/ByteVal.html" title="interface in space.sunqian.common.base.value">ByteVal</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/base/value/ByteVal.html" title="interface in space.sunqian.common.base.value">ByteVal</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Primitive <code>byte</code> version of <a href="space/sunqian/common/base/value/Val.html" title="interface in space.sunqian.common.base.value"><code>Val</code></a>.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/base/value/ByteVar.html" title="interface in space.sunqian.common.base.value">ByteVar</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/base/value/ByteVar.html" title="interface in space.sunqian.common.base.value">ByteVar</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Primitive <code>byte</code> version of <a href="space/sunqian/common/base/value/Var.html" title="interface in space.sunqian.common.base.value"><code>Var</code></a>.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab7"><a href="space/sunqian/annotations/CachedResult.html" title="annotation interface in space.sunqian.annotations">CachedResult</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab7">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab7"><a href="space/sunqian/annotations/CachedResult.html" title="annotation interface in space.sunqian.annotations">CachedResult</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab7">
 <div class="block">This annotation indicates that the return value of annotated method has already been cached using an appropriate
  caching strategy, and typically does not require additional caching.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;<a href="space/sunqian/common/io/communicate/ChannelContext.html" title="type parameter in ChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;<a href="space/sunqian/common/io/communicate/ChannelContext.html" title="type parameter in ChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Represents context of an underlying channel for IO Communication, extends <a href="space/sunqian/common/io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelReader</code></a> and
  <a href="space/sunqian/common/io/communicate/ChannelWriter.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelWriter</code></a> to provides advanced read/write operations, and the underlying channel is a
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link"><code>ByteChannel</code></a>.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/communicate/ChannelHandler.html" title="interface in space.sunqian.common.io.communicate">ChannelHandler</a>&lt;<a href="space/sunqian/common/io/communicate/ChannelHandler.html" title="type parameter in ChannelHandler">C</a> extends <a href="space/sunqian/common/io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;<a href="space/sunqian/common/io/communicate/ChannelHandler.html" title="type parameter in ChannelHandler">CH</a>&gt;,<wbr><a href="space/sunqian/common/io/communicate/ChannelHandler.html" title="type parameter in ChannelHandler">CH</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/communicate/ChannelHandler.html" title="interface in space.sunqian.common.io.communicate">ChannelHandler</a>&lt;<a href="space/sunqian/common/io/communicate/ChannelHandler.html" title="type parameter in ChannelHandler">C</a> extends <a href="space/sunqian/common/io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;<a href="space/sunqian/common/io/communicate/ChannelHandler.html" title="type parameter in ChannelHandler">CH</a>&gt;,<wbr><a href="space/sunqian/common/io/communicate/ChannelHandler.html" title="type parameter in ChannelHandler">CH</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Handler for handling underlying channel events of IO Communication.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;<a href="space/sunqian/common/io/communicate/ChannelReader.html" title="type parameter in ChannelReader">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&gt;</div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;<a href="space/sunqian/common/io/communicate/ChannelReader.html" title="type parameter in ChannelReader">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&gt;</div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Channel reader for IO Communication, typically used for network or IPC (Inter-Process Communication).</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/communicate/ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a>&lt;<a href="space/sunqian/common/io/communicate/ChannelWriter.html" title="type parameter in ChannelWriter">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&gt;</div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/communicate/ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a>&lt;<a href="space/sunqian/common/io/communicate/ChannelWriter.html" title="type parameter in ChannelWriter">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&gt;</div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Channel writer for IO Communication, typically used for network or IPC (Inter-Process Communication).</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/CharArrayOperator.html" title="interface in space.sunqian.common.io">CharArrayOperator</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/CharArrayOperator.html" title="interface in space.sunqian.common.io">CharArrayOperator</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">This interface defines a method for processing data from a source array and writing the result into a destination.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/CharIOOperator.html" title="interface in space.sunqian.common.io">CharIOOperator</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="block">This interface provides I/O operations for char.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/CharProcessor.html" title="interface in space.sunqian.common.io">CharProcessor</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab1">
@@ -652,7 +660,7 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="space/sunqian/common/io/IOOperator.html" title="interface in space.sunqian.common.io">IOOperator</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
-<div class="block">This interface provides I/O operations, and it is thread-safe.</div>
+<div class="block">This interface provides I/O operations.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab5"><a href="space/sunqian/common/io/IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab5">

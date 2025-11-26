@@ -63,7 +63,7 @@ tasks.named<Javadoc>("javadoc") {
   ops.jFlags("-Duser.language=en", "-Duser.country=US")
   ops.addStringOption("Xdoclint:none", "-quiet")
   javadocTool = javaToolchains.javadocToolFor {
-    languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
+    languageVersion = project.property("javaLanguageVersionHigh") as JavaLanguageVersion
   }
 
   destinationDir = rootDir.resolve("docs/javadoc")
