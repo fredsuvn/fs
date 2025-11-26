@@ -9,7 +9,7 @@ public class AspectTest {
 
     @Test
     public void testAspect() throws Exception {
-        testAspect("asm");
+        testAspect("fs-asm");
         testAspect("direct");
     }
 

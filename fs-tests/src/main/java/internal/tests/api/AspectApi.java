@@ -11,7 +11,7 @@ public class AspectApi {
 
     public static AspectApi createAspect(String aspectType) {
         return switch (aspectType) {
-            case "asm" -> AspectMaker.byAsm().make(
+            case "fs-asm" -> AspectMaker.byAsm().make(
                 AspectApi.class,
                 new AspectHandler() {
                     @Override

@@ -44,8 +44,8 @@ public class CacheBenchmark {
     }
 
     @Param({
-        "simpleWeak",
-        "simpleSoft",
+        "fs-simpleWeak",
+        "fs-simpleSoft",
         "caffeineWeak",
         "caffeineSoft",
         "caffeine",

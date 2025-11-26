@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 public class AspectBenchmark {
 
     @Param({
-        "asm",
+        "fs-asm",
         "direct",
     })
     private String aspectType;

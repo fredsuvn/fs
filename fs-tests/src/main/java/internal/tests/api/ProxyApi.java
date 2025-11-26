@@ -12,7 +12,7 @@ public interface ProxyApi {
 
     static ProxyApi createProxy(String proxyType) {
         return switch (proxyType) {
-            case "asm" -> ProxyMaker.byAsm().make(
+            case "fs-asm" -> ProxyMaker.byAsm().make(
                 null,
                 List.of(ProxyApi.class),
                 new ProxyHandler() {

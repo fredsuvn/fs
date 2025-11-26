@@ -9,8 +9,8 @@ public class CacheTest {
 
     @Test
     public void testCache() throws Exception {
-        testCache("simpleWeak");
-        testCache("simpleSoft");
+        testCache("fs-simpleWeak");
+        testCache("fs-simpleSoft");
         testCache("caffeineWeak");
         testCache("caffeineSoft");
         testCache("caffeine");

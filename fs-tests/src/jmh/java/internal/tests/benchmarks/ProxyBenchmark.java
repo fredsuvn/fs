@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 public class ProxyBenchmark {
 
     @Param({
-        "asm",
+        "fs-asm",
         "jdk",
         "direct",
     })

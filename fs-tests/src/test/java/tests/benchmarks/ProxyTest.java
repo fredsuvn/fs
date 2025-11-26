@@ -9,8 +9,8 @@ public class ProxyTest {
 
     @Test
     public void testProxy() throws Exception {
+        testProxy("fs-asm");
         testProxy("jdk");
-        testProxy("asm");
         testProxy("direct");
     }
 
