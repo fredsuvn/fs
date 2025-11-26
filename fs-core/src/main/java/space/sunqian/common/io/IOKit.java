@@ -838,6 +838,49 @@ public class IOKit {
     }
 
     /**
+     * Reads data from the reader into the appender, until reaches the end of the reader, and returns the actual number
+     * of chars read to.
+     * <p>
+     * If reaches the end of the reader and no data is read, returns {@code -1}.
+     *
+     * @param src the reader
+     * @param dst the appender
+     * @param buf the buffer used to read data
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the reader and no data is read
+     * @throws IllegalArgumentException if the specified buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull Reader src, @Nonnull Appendable dst, char @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, buf, IOChecker.endChecker());
+    }
+
+    /**
+     * Reads a specified length of data from the reader into the appender, until the read number reaches the specified
+     * length or reaches the end of the reader, returns the actual number of chars read to.
+     * <p>
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the reader and no
+     * data is read, returns {@code -1}.
+     *
+     * @param src the reader
+     * @param dst the appender
+     * @param len the specified length, must {@code >= 0}
+     * @param buf the buffer used to read data
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the reader and no data is read
+     * @throws IllegalArgumentException if the specified buffer size or length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull Reader src, @Nonnull Appendable dst, long len, char @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, len, buf, IOChecker.endChecker());
+    }
+
+    /**
      * Reads data from the reader into the destination array, until the read number reaches the array's length or
      * reaches the end of the reader, and returns the actual number of chars read to.
      * <p>
@@ -1124,7 +1167,7 @@ public class IOKit {
         @Nonnull InputStream src, @Nonnull OutputStream dst, byte @Nonnull [] buf
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkBufSize(buf.length);
-        return readTo0(src, dst, buf, IOChecker.endChecker());
+        return readTo0(src, dst, buf, IOChecker.availableChecker());
     }
 
     /**
@@ -1148,7 +1191,7 @@ public class IOKit {
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
         IOChecker.checkBufSize(buf.length);
-        return readTo0(src, dst, len, buf, IOChecker.endChecker());
+        return readTo0(src, dst, len, buf, IOChecker.availableChecker());
     }
 
     /**
@@ -1169,7 +1212,7 @@ public class IOKit {
         @Nonnull InputStream src, @Nonnull WritableByteChannel dst, byte @Nonnull [] buf
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkBufSize(buf.length);
-        return readTo0(src, dst, buf, IOChecker.endChecker());
+        return readTo0(src, dst, buf, IOChecker.availableChecker());
     }
 
     /**
@@ -1193,7 +1236,7 @@ public class IOKit {
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
         IOChecker.checkBufSize(buf.length);
-        return readTo0(src, dst, len, buf, IOChecker.endChecker());
+        return readTo0(src, dst, len, buf, IOChecker.availableChecker());
     }
 
     /**
@@ -1375,7 +1418,7 @@ public class IOKit {
         @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, byte @Nonnull [] buf
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkBufSize(buf.length);
-        return readTo0(src, dst, buf, IOChecker.endChecker());
+        return readTo0(src, dst, buf, IOChecker.availableChecker());
     }
 
     /**
@@ -1399,7 +1442,7 @@ public class IOKit {
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
         IOChecker.checkBufSize(buf.length);
-        return readTo0(src, dst, len, buf, IOChecker.endChecker());
+        return readTo0(src, dst, len, buf, IOChecker.availableChecker());
     }
 
     /**
@@ -1420,7 +1463,7 @@ public class IOKit {
         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, byte @Nonnull [] buf
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkBufSize(buf.length);
-        return readTo0(src, dst, buf, IOChecker.endChecker());
+        return readTo0(src, dst, buf, IOChecker.availableChecker());
     }
 
     /**
@@ -1444,7 +1487,7 @@ public class IOKit {
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
         IOChecker.checkBufSize(buf.length);
-        return readTo0(src, dst, len, buf, IOChecker.endChecker());
+        return readTo0(src, dst, len, buf, IOChecker.availableChecker());
     }
 
     /**
@@ -1701,6 +1744,51 @@ public class IOKit {
         @Nonnull Reader src, @Nonnull Appendable dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         return io.availableTo(src, dst, len);
+    }
+
+    /**
+     * Reads available data from the reader into the appender, until no data is immediately available, and returns the
+     * actual number of chars read to.
+     * <p>
+     * If reaches the end of the reader and no data is read, returns {@code -1}.
+     *
+     * @param src the reader
+     * @param dst the appender
+     * @param buf the buffer used to read data
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of the reader
+     * and no data is read
+     * @throws IllegalArgumentException if the specified buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull Reader src, @Nonnull Appendable dst, char @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, buf, IOChecker.availableChecker());
+    }
+
+    /**
+     * Reads a specified length of data from the reader into the appender, until the read number reaches the specified
+     * length or no data is immediately available, returns the actual number of chars read to.
+     * <p>
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the reader and no
+     * data is read, returns {@code -1}.
+     *
+     * @param src the reader
+     * @param dst the appender
+     * @param len the specified length, must {@code >= 0}
+     * @param buf the buffer used to read data
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of the reader
+     * and no data is read
+     * @throws IllegalArgumentException if the specified buffer size or length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull Reader src, @Nonnull Appendable dst, long len, char @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, len, buf, IOChecker.availableChecker());
     }
 
     /**
@@ -2409,8 +2497,15 @@ public class IOKit {
     static long readTo0(
         @Nonnull Reader src, @Nonnull Appendable dst, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
+        char[] buf = new char[bufSize];
+        return readTo0(src, dst, buf, readChecker);
+    }
+
+    static long readTo0(
+        @Nonnull Reader src, @Nonnull Appendable dst, char @Nonnull [] buf, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
         try {
-            char[] buf = new char[bufSize];
+            // char[] buf = new char[bufSize];
             long count = 0;
             while (true) {
                 int readSize = src.read(buf);
@@ -2431,8 +2526,18 @@ public class IOKit {
         if (len == 0) {
             return 0;
         }
+        char[] buf = new char[(int) Math.min(len, bufSize)];
+        return readTo0(src, dst, len, buf, readChecker);
+    }
+
+    static long readTo0(
+        @Nonnull Reader src, @Nonnull Appendable dst, long len, char @Nonnull [] buf, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
         try {
-            char[] buf = new char[(int) Math.min(len, bufSize)];
+            // char[] buf = new char[(int) Math.min(len, bufSize)];
             long count = 0;
             while (count < len) {
                 int readSize = src.read(buf, 0, (int) Math.min(buf.length, len - count));

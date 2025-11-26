@@ -16,6 +16,7 @@ import space.sunqian.common.io.IORuntimeException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayReader;
+import java.io.CharArrayWriter;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
@@ -405,84 +406,118 @@ public class IOTest implements DataTest {
 
     @Test
     public void testReadToWithBuffer() throws Exception {
-        testReadToWithBuffer(128, 11);
-        testReadToWithBuffer(128, 128);
-        testReadToWithBuffer(129, 1111);
+        testReadToWithBufferForBytes(128, 11);
+        testReadToWithBufferForBytes(128, 128);
+        testReadToWithBufferForBytes(129, 1111);
+        testReadToWithBufferForChars(128, 11);
+        testReadToWithBufferForChars(128, 128);
+        testReadToWithBufferForChars(129, 1111);
         {
             // read 0
-            ByteArrayInputStream in = new ByteArrayInputStream(new byte[0]);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] buf = new byte[1];
-            // stream
-            assertEquals(
-                -1,
-                IOKit.readTo(in, out, buf)
-            );
-            assertEquals(
-                0,
-                IOKit.readTo(in, out, 0, buf)
-            );
-            assertEquals(
-                -1,
-                IOKit.readTo(in, Channels.newChannel(out), buf)
-            );
-            assertEquals(
-                0,
-                IOKit.readTo(in, Channels.newChannel(out), 0, buf)
-            );
-            assertEquals(
-                -1,
-                IOKit.availableTo(in, out, buf)
-            );
-            assertEquals(
-                0,
-                IOKit.availableTo(in, out, 0, buf)
-            );
-            assertEquals(
-                -1,
-                IOKit.availableTo(in, Channels.newChannel(out), buf)
-            );
-            assertEquals(
-                0,
-                IOKit.availableTo(in, Channels.newChannel(out), 0, buf)
-            );
-            // channel
-            assertEquals(
-                -1,
-                IOKit.readTo(Channels.newChannel(in), out, buf)
-            );
-            assertEquals(
-                0,
-                IOKit.readTo(Channels.newChannel(in), out, 0, buf)
-            );
-            assertEquals(
-                -1,
-                IOKit.readTo(Channels.newChannel(in), Channels.newChannel(out), buf)
-            );
-            assertEquals(
-                0,
-                IOKit.readTo(Channels.newChannel(in), Channels.newChannel(out), 0, buf)
-            );
-            assertEquals(
-                -1,
-                IOKit.availableTo(Channels.newChannel(in), out, buf)
-            );
-            assertEquals(
-                0,
-                IOKit.availableTo(Channels.newChannel(in), out, 0, buf)
-            );
-            assertEquals(
-                -1,
-                IOKit.availableTo(Channels.newChannel(in), Channels.newChannel(out), buf)
-            );
-            assertEquals(
-                0,
-                IOKit.availableTo(Channels.newChannel(in), Channels.newChannel(out), 0, buf)
-            );
+            {
+                ByteArrayInputStream in = new ByteArrayInputStream(new byte[0]);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                byte[] buf = new byte[1];
+                // stream
+                assertEquals(
+                    -1,
+                    IOKit.readTo(in, out, buf)
+                );
+                assertEquals(
+                    0,
+                    IOKit.readTo(in, out, 0, buf)
+                );
+                assertEquals(
+                    -1,
+                    IOKit.readTo(in, Channels.newChannel(out), buf)
+                );
+                assertEquals(
+                    0,
+                    IOKit.readTo(in, Channels.newChannel(out), 0, buf)
+                );
+                assertEquals(
+                    -1,
+                    IOKit.availableTo(in, out, buf)
+                );
+                assertEquals(
+                    0,
+                    IOKit.availableTo(in, out, 0, buf)
+                );
+                assertEquals(
+                    -1,
+                    IOKit.availableTo(in, Channels.newChannel(out), buf)
+                );
+                assertEquals(
+                    0,
+                    IOKit.availableTo(in, Channels.newChannel(out), 0, buf)
+                );
+                // channel
+                assertEquals(
+                    -1,
+                    IOKit.readTo(Channels.newChannel(in), out, buf)
+                );
+                assertEquals(
+                    0,
+                    IOKit.readTo(Channels.newChannel(in), out, 0, buf)
+                );
+                assertEquals(
+                    -1,
+                    IOKit.readTo(Channels.newChannel(in), Channels.newChannel(out), buf)
+                );
+                assertEquals(
+                    0,
+                    IOKit.readTo(Channels.newChannel(in), Channels.newChannel(out), 0, buf)
+                );
+                assertEquals(
+                    -1,
+                    IOKit.availableTo(Channels.newChannel(in), out, buf)
+                );
+                assertEquals(
+                    0,
+                    IOKit.availableTo(Channels.newChannel(in), out, 0, buf)
+                );
+                assertEquals(
+                    -1,
+                    IOKit.availableTo(Channels.newChannel(in), Channels.newChannel(out), buf)
+                );
+                assertEquals(
+                    0,
+                    IOKit.availableTo(Channels.newChannel(in), Channels.newChannel(out), 0, buf)
+                );
+            }
+            {
+                CharArrayReader in = new CharArrayReader(new char[0]);
+                CharArrayWriter out = new CharArrayWriter();
+                char[] buf = new char[1];
+                assertEquals(
+                    -1,
+                    IOKit.readTo(in, out, buf)
+                );
+                in.reset();
+                out.reset();
+                assertEquals(
+                    0,
+                    IOKit.readTo(in, out, 0, buf)
+                );
+                in.reset();
+                out.reset();
+                assertEquals(
+                    -1,
+                    IOKit.availableTo(in, out, buf)
+                );
+                in.reset();
+                out.reset();
+                assertEquals(
+                    0,
+                    IOKit.availableTo(in, out, 0, buf)
+                );
+                in.reset();
+                out.reset();
+            }
         }
     }
 
-    private void testReadToWithBuffer(int dataSize, int bufSize) throws Exception {
+    private void testReadToWithBufferForBytes(int dataSize, int bufSize) throws Exception {
         byte[] data = randomBytes(dataSize);
         byte[] buf = new byte[bufSize];
         ByteArrayInputStream in = new ByteArrayInputStream(data);
@@ -589,5 +624,36 @@ public class IOTest implements DataTest {
             in.reset();
             out.reset();
         }
+    }
+
+    private void testReadToWithBufferForChars(int dataSize, int bufSize) throws Exception {
+        char[] data = randomChars(dataSize);
+        char[] buf = new char[bufSize];
+        CharArrayReader in = new CharArrayReader(data);
+        CharArrayWriter out = new CharArrayWriter();
+        assertEquals(
+            dataSize,
+            IOKit.readTo(in, out, buf)
+        );
+        in.reset();
+        out.reset();
+        assertEquals(
+            dataSize / 2,
+            IOKit.readTo(in, out, dataSize / 2, buf)
+        );
+        in.reset();
+        out.reset();
+        assertEquals(
+            dataSize,
+            IOKit.availableTo(in, out, buf)
+        );
+        in.reset();
+        out.reset();
+        assertEquals(
+            dataSize / 2,
+            IOKit.availableTo(in, out, dataSize / 2, buf)
+        );
+        in.reset();
+        out.reset();
     }
 }
