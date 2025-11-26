@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Data
 @EqualsAndHashCode
-public class CommonData {
+public class TestPropsData {
     private int i1;
     private long l1;
     private String str1;

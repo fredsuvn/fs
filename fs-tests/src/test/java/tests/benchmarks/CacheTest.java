@@ -1,6 +1,6 @@
 package tests.benchmarks;
 
-import internal.tests.common.CacheApi;
+import internal.tests.api.CacheApi;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

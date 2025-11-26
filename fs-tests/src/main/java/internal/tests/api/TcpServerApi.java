@@ -1,4 +1,4 @@
-package internal.tests.common;
+package internal.tests.api;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -18,6 +18,7 @@ import space.sunqian.common.net.tcp.TcpServer;
 import space.sunqian.common.net.tcp.TcpServerHandler;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 
 public abstract class TcpServerApi {
 
@@ -53,7 +54,7 @@ public abstract class TcpServerApi {
                 public void channelRead(@Nonnull TcpContext context) throws Exception {
                     byte[] bytes = context.availableBytes();
                     if (bytes != null) {
-                        context.writeBytes(bytes);
+                        context.writeBuffer(ByteBuffer.wrap(bytes));
                     }
                 }
 
@@ -90,7 +91,8 @@ public abstract class TcpServerApi {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline().addLast(new SimpleEchoHandler());
+                        ch.pipeline()
+                            .addLast(new SimpleEchoHandler());
                     }
                 });
             ChannelFuture future;
@@ -128,10 +130,9 @@ public abstract class TcpServerApi {
                 try {
                     byte[] bytes = new byte[buf.readableBytes()];
                     buf.readBytes(bytes);
-                    // 释放原来的ByteBuf
-                    ctx.writeAndFlush(Unpooled.copiedBuffer(bytes));
+                    ctx.writeAndFlush(Unpooled.wrappedBuffer(bytes));
                 } finally {
-                    buf.release(); // 或者使用ReferenceCountUtil.release(msg);
+                    buf.release();
                 }
             }
 

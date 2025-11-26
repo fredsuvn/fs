@@ -1,6 +1,7 @@
-package internal.tests.common;
+package internal.tests.api;
 
 import cn.hutool.core.bean.BeanUtil;
+import internal.tests.common.TestPropsData;
 import org.apache.commons.beanutils.BeanUtils;
 import space.sunqian.common.Fs;
 
@@ -12,8 +13,8 @@ public interface PropertiesCopier {
             case "apache" -> (source, target) -> BeanUtils.copyProperties(target, source);
             case "hutool" -> (source, target) -> BeanUtil.copyProperties(target, source);
             case "direct" -> (source, target) -> {
-                CommonData src = (CommonData) source;
-                CommonData dst = (CommonData) target;
+                TestPropsData src = (TestPropsData) source;
+                TestPropsData dst = (TestPropsData) target;
                 dst.setI1(src.getI1());
                 dst.setL1(src.getL1());
                 dst.setStr1(src.getStr1());

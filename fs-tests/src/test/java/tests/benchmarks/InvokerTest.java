@@ -1,6 +1,6 @@
 package tests.benchmarks;
 
-import internal.tests.common.Invoker;
+import internal.tests.api.Invoker;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Supplier;

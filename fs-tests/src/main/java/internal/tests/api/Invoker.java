@@ -1,4 +1,4 @@
-package internal.tests.common;
+package internal.tests.api;
 
 import space.sunqian.common.runtime.invoke.Invocable;
 import space.sunqian.common.runtime.invoke.InvocationMode;

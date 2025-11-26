@@ -1,8 +1,9 @@
 package tests.benchmarks;
 
 import internal.test.DataTest;
-import internal.tests.common.TcpServerApi;
+import internal.tests.api.TcpServerApi;
 import org.junit.jupiter.api.Test;
+import space.sunqian.common.io.IOKit;
 import space.sunqian.common.net.tcp.TcpClient;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -21,7 +22,7 @@ public class TcpServerTest implements DataTest {
         byte[] message = randomBytes(10);
         client.writeBytes(message);
         client.awaitReadable();
-        byte[] received = client.availableBytes();
+        byte[] received = IOKit.readBytes(client.channel(), message.length);
         assertArrayEquals(message, received);
         server.shutdown();
         client.close();

@@ -1,7 +1,7 @@
 package internal.tests.benchmarks;
 
 import internal.test.DataTest;
-import internal.tests.common.TcpServerApi;
+import internal.tests.api.TcpServerApi;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 // @Fork(1)
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
-@Fork(5)
+@Fork(1)
 public class TcpServerBenchmark implements DataTest {
 
     @Param({
@@ -68,12 +68,15 @@ public class TcpServerBenchmark implements DataTest {
 
     @Benchmark
     public void request(Blackhole blackhole) throws Exception {
-        Random random = ThreadLocalRandom.current();
-        int clientIndex = random.nextInt(clients.length);
-        TcpClient client = clients[clientIndex];
-        client.writeBytes(message);
-        client.awaitReadable();
-        byte[] ret = client.availableBytes();
-        blackhole.consume(ret);
+        for (TcpClient client : clients) {
+            client.writeBytes(message);
+            // client.awaitReadable();
+            // byte[] ret = client.availableBytes();
+            // blackhole.consume(ret);
+        }
+        for (TcpClient client : clients) {
+            byte[] ret = client.availableBytes();
+            blackhole.consume(ret);
+        }
     }
 }

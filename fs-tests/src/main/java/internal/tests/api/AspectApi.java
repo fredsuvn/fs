@@ -1,4 +1,4 @@
-package internal.tests.common;
+package internal.tests.api;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
