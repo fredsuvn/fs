@@ -246,6 +246,96 @@ public class IOKit {
     }
 
     /**
+     * Reads data from the input stream into the output stream, until reaches the end of the input stream, and returns
+     * the actual number of bytes read to.
+     * <p>
+     * If reaches the end of the input stream and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output stream
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input stream and no data is
+     * read
+     * @throws IllegalArgumentException if the specified buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull InputStream src, @Nonnull OutputStream dst, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, buf, IOChecker.endChecker());
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into the output stream, until the read number reaches the
+     * specified length or reaches the end of the input stream, returns the actual number of bytes read to.
+     * <p>
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input stream
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output stream
+     * @param len the specified length, must {@code >= 0}
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input stream and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length or buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull InputStream src, @Nonnull OutputStream dst, long len, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, len, buf, IOChecker.endChecker());
+    }
+
+    /**
+     * Reads data from the input stream into the output channel, until reaches the end of the input stream, and returns
+     * the actual number of bytes read to.
+     * <p>
+     * If reaches the end of the input stream and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output channel
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input stream and no data is
+     * read
+     * @throws IllegalArgumentException if the specified buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, buf, IOChecker.endChecker());
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into the output channel, until the read number reaches the
+     * specified length or reaches the end of the input stream, returns the actual number of bytes read to.
+     * <p>
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input stream
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output channel
+     * @param len the specified length, must {@code >= 0}
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input stream and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length or buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, len, buf, IOChecker.endChecker());
+    }
+
+    /**
      * Reads data from the input stream into the destination array, until the read number reaches the array's length or
      * reaches the end of the input stream, and returns the actual number of bytes read to.
      * <p>
@@ -400,6 +490,97 @@ public class IOKit {
         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         return io.readTo(src, dst, len);
+    }
+
+    /**
+     * Reads data from the input channel into the output stream, until reaches the end of the input channel, and returns
+     * the actual number of bytes read to.
+     * <p>
+     * If reaches the end of the input channel and no data is read, returns {@code -1}.
+     *
+     * @param src the input channel
+     * @param dst the output stream
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input channel and no data is
+     * read
+     * @throws IllegalArgumentException if the specified buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, buf, IOChecker.endChecker());
+    }
+
+    /**
+     * Reads a specified length of data from the input channel into the output stream, until the read number reaches the
+     * specified length or reaches the end of the input channel, returns the actual number of bytes read to.
+     * <p>
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input channel
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input channel
+     * @param dst the output stream
+     * @param len the specified length, must {@code >= 0}
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the input channel and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length or buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, long len, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, len, buf, IOChecker.endChecker());
+    }
+
+    /**
+     * Reads data from the source channel into the destination channel, until reaches the end of the source channel, and
+     * returns the actual number of bytes read to.
+     * <p>
+     * If reaches the end of the source channel and no data is read, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the destination channel
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source channel and no data is
+     * read
+     * @throws IllegalArgumentException if the specified buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, buf, IOChecker.endChecker());
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into the destination channel, until the read number
+     * reaches the specified length or reaches the end of the source channel, returns the actual number of bytes read
+     * to.
+     * <p>
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the source channel
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the destination channel
+     * @param len the specified length, must {@code >= 0}
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source channel and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length or buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, len, buf, IOChecker.endChecker());
     }
 
     /**
@@ -926,6 +1107,96 @@ public class IOKit {
     }
 
     /**
+     * Reads available data from the input stream into the output stream, until no data is immediately available, and
+     * returns the actual number of bytes read to.
+     * <p>
+     * If reaches the end of the input stream and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output stream
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * stream and no data is read
+     * @throws IllegalArgumentException if the specified buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull InputStream src, @Nonnull OutputStream dst, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, buf, IOChecker.endChecker());
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into the output stream, until the read number reaches the
+     * specified length or no data is immediately available, returns the actual number of bytes read to.
+     * <p>
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input stream
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output stream
+     * @param len the specified length, must {@code >= 0}
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * stream and no data is read
+     * @throws IllegalArgumentException if the specified read length or buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull InputStream src, @Nonnull OutputStream dst, long len, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, len, buf, IOChecker.endChecker());
+    }
+
+    /**
+     * Reads available data from the input stream into the output channel, until no data is immediately available, and
+     * returns the actual number of bytes read to.
+     * <p>
+     * If reaches the end of the input stream and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output channel
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * stream and no data is read
+     * @throws IllegalArgumentException if the specified buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, buf, IOChecker.endChecker());
+    }
+
+    /**
+     * Reads a specified length of data from the input stream into the output channel, until the read number reaches the
+     * specified length or no data is immediately available, returns the actual number of bytes read to.
+     * <p>
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input stream
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input stream
+     * @param dst the output channel
+     * @param len the specified length, must {@code >= 0}
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * stream and no data is read
+     * @throws IllegalArgumentException if the specified read length or buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, len, buf, IOChecker.endChecker());
+    }
+
+    /**
      * Reads available data from the input stream into the destination array, until the read number reaches the array's
      * length or no data is immediately available, and returns the actual number of bytes read to.
      * <p>
@@ -1084,6 +1355,96 @@ public class IOKit {
         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         return io.availableTo(src, dst, len);
+    }
+
+    /**
+     * Reads available data from the input channel into the output stream, until no data is immediately available, and
+     * returns the actual number of bytes read to.
+     * <p>
+     * If reaches the end of the input channel and no data is read, returns {@code -1}.
+     *
+     * @param src the input channel
+     * @param dst the output stream
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * channel and no data is read
+     * @throws IllegalArgumentException if the specified buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, buf, IOChecker.endChecker());
+    }
+
+    /**
+     * Reads a specified length of data from the input channel into the output stream, until the read number reaches the
+     * specified length or no data is immediately available, returns the actual number of bytes read to.
+     * <p>
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input channel
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the input channel
+     * @param dst the output stream
+     * @param len the specified length, must {@code >= 0}
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the input
+     * channel and no data is read
+     * @throws IllegalArgumentException if the specified read length or buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, long len, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, len, buf, IOChecker.endChecker());
+    }
+
+    /**
+     * Reads available data from the source channel into the destination channel, until no data is immediately
+     * available, and returns the actual number of bytes read to.
+     * <p>
+     * If reaches the end of the source channel and no data is read, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the destination channel
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the source
+     * channel and no data is read
+     * @throws IllegalArgumentException if the specified buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, buf, IOChecker.endChecker());
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into the destination channel, until the read number
+     * reaches the specified length or no data is immediately available, returns the actual number of bytes read to.
+     * <p>
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the source channel
+     * and no data is read, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the destination channel
+     * @param len the specified length, must {@code >= 0}
+     * @param buf the buffer used to read data
+     * @return the actual number of bytes read to, possibly {@code 0}, or {@code -1} if reaches the end of the source
+     * channel and no data is read
+     * @throws IllegalArgumentException if the specified read length or buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long availableTo(
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len, byte @Nonnull [] buf
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        IOChecker.checkBufSize(buf.length);
+        return readTo0(src, dst, len, buf, IOChecker.endChecker());
     }
 
     /**

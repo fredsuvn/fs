@@ -402,4 +402,192 @@ public class IOTest implements DataTest {
             throw new IORuntimeException(new IOException());
         });
     }
+
+    @Test
+    public void testReadToWithBuffer() throws Exception {
+        testReadToWithBuffer(128, 11);
+        testReadToWithBuffer(128, 128);
+        testReadToWithBuffer(129, 1111);
+        {
+            // read 0
+            ByteArrayInputStream in = new ByteArrayInputStream(new byte[0]);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[1];
+            // stream
+            assertEquals(
+                -1,
+                IOKit.readTo(in, out, buf)
+            );
+            assertEquals(
+                0,
+                IOKit.readTo(in, out, 0, buf)
+            );
+            assertEquals(
+                -1,
+                IOKit.readTo(in, Channels.newChannel(out), buf)
+            );
+            assertEquals(
+                0,
+                IOKit.readTo(in, Channels.newChannel(out), 0, buf)
+            );
+            assertEquals(
+                -1,
+                IOKit.availableTo(in, out, buf)
+            );
+            assertEquals(
+                0,
+                IOKit.availableTo(in, out, 0, buf)
+            );
+            assertEquals(
+                -1,
+                IOKit.availableTo(in, Channels.newChannel(out), buf)
+            );
+            assertEquals(
+                0,
+                IOKit.availableTo(in, Channels.newChannel(out), 0, buf)
+            );
+            // channel
+            assertEquals(
+                -1,
+                IOKit.readTo(Channels.newChannel(in), out, buf)
+            );
+            assertEquals(
+                0,
+                IOKit.readTo(Channels.newChannel(in), out, 0, buf)
+            );
+            assertEquals(
+                -1,
+                IOKit.readTo(Channels.newChannel(in), Channels.newChannel(out), buf)
+            );
+            assertEquals(
+                0,
+                IOKit.readTo(Channels.newChannel(in), Channels.newChannel(out), 0, buf)
+            );
+            assertEquals(
+                -1,
+                IOKit.availableTo(Channels.newChannel(in), out, buf)
+            );
+            assertEquals(
+                0,
+                IOKit.availableTo(Channels.newChannel(in), out, 0, buf)
+            );
+            assertEquals(
+                -1,
+                IOKit.availableTo(Channels.newChannel(in), Channels.newChannel(out), buf)
+            );
+            assertEquals(
+                0,
+                IOKit.availableTo(Channels.newChannel(in), Channels.newChannel(out), 0, buf)
+            );
+        }
+    }
+
+    private void testReadToWithBuffer(int dataSize, int bufSize) throws Exception {
+        byte[] data = randomBytes(dataSize);
+        byte[] buf = new byte[bufSize];
+        ByteArrayInputStream in = new ByteArrayInputStream(data);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        {
+            // stream
+            assertEquals(
+                dataSize,
+                IOKit.readTo(in, out, buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize / 2,
+                IOKit.readTo(in, out, dataSize / 2, buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize,
+                IOKit.readTo(in, Channels.newChannel(out), buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize / 2,
+                IOKit.readTo(in, Channels.newChannel(out), dataSize / 2, buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize,
+                IOKit.availableTo(in, out, buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize / 2,
+                IOKit.availableTo(in, out, dataSize / 2, buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize,
+                IOKit.availableTo(in, Channels.newChannel(out), buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize / 2,
+                IOKit.availableTo(in, Channels.newChannel(out), dataSize / 2, buf)
+            );
+            in.reset();
+            out.reset();
+        }
+        {
+            // channel
+            assertEquals(
+                dataSize,
+                IOKit.readTo(Channels.newChannel(in), out, buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize / 2,
+                IOKit.readTo(Channels.newChannel(in), out, dataSize / 2, buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize,
+                IOKit.readTo(Channels.newChannel(in), Channels.newChannel(out), buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize / 2,
+                IOKit.readTo(Channels.newChannel(in), Channels.newChannel(out), dataSize / 2, buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize,
+                IOKit.availableTo(Channels.newChannel(in), out, buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize / 2,
+                IOKit.availableTo(Channels.newChannel(in), out, dataSize / 2, buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize,
+                IOKit.availableTo(Channels.newChannel(in), Channels.newChannel(out), buf)
+            );
+            in.reset();
+            out.reset();
+            assertEquals(
+                dataSize / 2,
+                IOKit.availableTo(Channels.newChannel(in), Channels.newChannel(out), dataSize / 2, buf)
+            );
+            in.reset();
+            out.reset();
+        }
+    }
 }
