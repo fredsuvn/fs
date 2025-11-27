@@ -4,10 +4,10 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.base.date.DateFormatter;
 import space.sunqian.common.base.enums.EnumKit;
 import space.sunqian.common.base.number.NumberKit;
 import space.sunqian.common.base.option.Option;
-import space.sunqian.common.base.date.DateFormatter;
 import space.sunqian.common.collect.ArrayKit;
 import space.sunqian.common.collect.ArrayOperator;
 import space.sunqian.common.collect.CollectKit;
@@ -18,6 +18,7 @@ import space.sunqian.common.object.convert.DataMapper;
 import space.sunqian.common.object.convert.ObjectConverter;
 import space.sunqian.common.object.data.ObjectBuilder;
 import space.sunqian.common.object.data.ObjectBuilderProvider;
+import space.sunqian.common.runtime.reflect.ClassKit;
 import space.sunqian.common.runtime.reflect.ReflectionException;
 import space.sunqian.common.runtime.reflect.TypeKit;
 
@@ -594,7 +595,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                     return date.getTime();
                 }
             }
-            if (Number.class.isAssignableFrom((Class<?>) srcType)) {
+            if (Number.class.isAssignableFrom(ClassKit.wrapperClass((Class<?>) srcType))) {
                 Number srcNum = (Number) src;
                 return NumberKit.toNumber(srcNum, target);
             }
