@@ -30,9 +30,9 @@ import java.util.function.Supplier;
 public class InvokerBenchmark {
 
     @Param({
-        "reflect",
-        "asm",
-        "method_handle",
+        "byReflect",
+        "byAsm",
+        "byMethodHandle",
         "direct",
     })
     private String invokeType;

@@ -24,19 +24,19 @@ public class Invoker {
 
     private static Invocable createInvocable(String invokeType, String methodType) {
         if ("static".equals(methodType)) {
-            if ("reflect".equals(invokeType)) {
+            if ("byReflect".equals(invokeType)) {
                 return Invocable.of(INVOKE_STATIC, InvocationMode.REFLECTION);
-            } else if ("asm".equals(invokeType)) {
+            } else if ("byAsm".equals(invokeType)) {
                 return Invocable.of(INVOKE_STATIC, InvocationMode.ASM);
-            } else if ("method_handle".equals(invokeType)) {
+            } else if ("byMethodHandle".equals(invokeType)) {
                 return Invocable.of(INVOKE_STATIC, InvocationMode.METHOD_HANDLE);
             }
         } else {
-            if ("reflect".equals(invokeType)) {
+            if ("byReflect".equals(invokeType)) {
                 return Invocable.of(INVOKE_INSTANCE, InvocationMode.REFLECTION);
-            } else if ("asm".equals(invokeType)) {
+            } else if ("byAsm".equals(invokeType)) {
                 return Invocable.of(INVOKE_INSTANCE, InvocationMode.ASM);
-            } else if ("method_handle".equals(invokeType)) {
+            } else if ("byMethodHandle".equals(invokeType)) {
                 return Invocable.of(INVOKE_INSTANCE, InvocationMode.METHOD_HANDLE);
             }
         }

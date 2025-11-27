@@ -10,7 +10,7 @@ public class AspectTest {
     @Test
     public void testAspect() throws Exception {
         testAspect("fs-asm");
-        //testAspect("byte-buddy");
+        // testAspect("byte-buddy");
         testAspect("direct");
     }
 

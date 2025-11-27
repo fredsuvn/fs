@@ -18,8 +18,6 @@ import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 import space.sunqian.common.net.tcp.TcpClient;
 
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
@@ -30,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 // @Fork(1)
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
-@Fork(5)
+@Fork(1)
 public class TcpServerBenchmark implements DataTest {
 
     @Param({

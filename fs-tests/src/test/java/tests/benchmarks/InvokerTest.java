@@ -9,9 +9,9 @@ public class InvokerTest {
 
     @Test
     public void testInvoker() throws Exception {
-        testInvoker("reflect");
-        testInvoker("asm");
-        testInvoker("method_handle");
+        testInvoker("byReflect");
+        testInvoker("byAsm");
+        testInvoker("byMethodHandle");
         testInvoker("direct");
     }
 

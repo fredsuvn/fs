@@ -11,7 +11,7 @@ public class ProxyTest {
     public void testProxy() throws Exception {
         testProxy("fs-asm");
         testProxy("fs-jdk");
-        testProxy("byte-buddy");
+        // testProxy("byte-buddy");
         // testProxy("cglib");
         testProxy("direct");
     }

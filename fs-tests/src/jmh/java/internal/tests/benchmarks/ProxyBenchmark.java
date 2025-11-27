@@ -33,7 +33,7 @@ public class ProxyBenchmark {
     @Param({
         "fs-asm",
         "fs-jdk",
-        "byte-buddy",
+        //"byte-buddy",
         //"cglib",
         "direct",
     })

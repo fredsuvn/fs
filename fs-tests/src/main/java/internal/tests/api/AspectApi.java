@@ -1,24 +1,16 @@
 package internal.tests.api;
 
-import net.bytebuddy.ByteBuddy;
-import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
-import net.bytebuddy.implementation.MethodDelegation;
-import net.bytebuddy.implementation.bind.annotation.AllArguments;
-import net.bytebuddy.implementation.bind.annotation.RuntimeType;
-import net.bytebuddy.implementation.bind.annotation.SuperCall;
-import net.bytebuddy.matcher.ElementMatchers;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.runtime.aspect.AspectHandler;
 import space.sunqian.common.runtime.aspect.AspectMaker;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.Callable;
 
 public class AspectApi {
 
     public static AspectApi createAspect(String aspectType) throws Exception {
-        return (AspectApi) switch (aspectType) {
+        return switch (aspectType) {
             case "fs-asm" -> AspectMaker.byAsm().make(
                 AspectApi.class,
                 new AspectHandler() {
@@ -51,11 +43,12 @@ public class AspectApi {
             ).newInstance();
             // case "byte-buddy" -> new ByteBuddy()
             //     .subclass(AspectApi.class)
-            //     .method(ElementMatchers.named("withPrimitive")
-            //         .or(ElementMatchers.named("withoutPrimitive")))
-            //     .intercept(MethodDelegation.to(new ByteBuddyInterceptor()))
+            //     .method(ElementMatchers.named("withPrimitive"))
+            //     .intercept(Advice.to(ByteBuddyAdvice1.class))
+            //     .method(ElementMatchers.named("withoutPrimitive"))
+            //     .intercept(Advice.to(ByteBuddyAdvice2.class))
             //     .make()
-            //     .load(ProxyApi.class.getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
+            //     .load(ProxyApi.class.getClassLoader())
             //     .getLoaded()
             //     .newInstance();
             case "direct" -> new AspectApi() {
@@ -81,17 +74,39 @@ public class AspectApi {
         return i.toString() + l.toString() + str;
     }
 
-    public static class ByteBuddyInterceptor {
-
-        @RuntimeType
-        public Object intercept(
-            //@Origin Method method,
-            @AllArguments Object[] args,
-            //@This Object proxyObj,
-            @SuperCall Callable<?> callable
-        ) throws Exception {
-            args[0] = (Integer) args[0] + 1;
-            return callable.call();
-        }
-    }
+    // static class ByteBuddyAdvice1 {
+    //
+    //     @Advice.OnMethodEnter
+    //     public static void before(
+    //         @Advice.Argument(value = 0, readOnly = false) int i,
+    //         @Advice.Argument(value = 1, readOnly = false) long l
+    //     ) {
+    //         i = i + 1;
+    //     }
+    //
+    //     @Advice.OnMethodExit
+    //     public static void after(
+    //         @Advice.Argument(value = 0, readOnly = false) int i,
+    //         @Advice.Argument(value = 1, readOnly = false) long l
+    //     ) {
+    //     }
+    // }
+    //
+    // static class ByteBuddyAdvice2 {
+    //
+    //     @Advice.OnMethodEnter
+    //     public static void before(
+    //         @Advice.Argument(value = 0, readOnly = false) Integer i,
+    //         @Advice.Argument(value = 1, readOnly = false) Long l
+    //     ) {
+    //         i = i + 1;
+    //     }
+    //
+    //     @Advice.OnMethodExit
+    //     public static void after(
+    //         @Advice.Argument(value = 0, readOnly = false) Integer i,
+    //         @Advice.Argument(value = 1, readOnly = false) Long l
+    //     ) {
+    //     }
+    // }
 }
