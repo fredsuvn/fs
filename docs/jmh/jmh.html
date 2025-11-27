@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JMH Benchmark Results Analyzer</title>
+  <style>
+    :root {
+        --primary-color: #3498db;
+        --secondary-color: #2ecc71;
+        --danger-color: #e74c3c;
+        --warning-color: #f39c12;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        --border-color: #dee2e6;
+        --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f5f7fa;
+        padding: 20px;
+    }
+
+    header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    h1 {
+        color: var(--dark-color);
+        margin-bottom: 10px;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+    }
+
+    .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .control-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .drop-area {
+        border: 2px dashed var(--border-color);
+        border-radius: 5px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s;
+        margin-bottom: 20px;
+        background-color: var(--light-color);
+    }
+
+    .drop-area.highlight {
+        border-color: var(--primary-color);
+        background-color: rgba(52, 152, 219, 0.05);
+    }
+
+    .drop-area p {
+        margin: 0;
+        color: #666;
+    }
+
+    button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 14px;
+    }
+
+    button:hover {
+        background-color: #2980b9;
+    }
+
+    button.secondary {
+        background-color: var(--secondary-color);
+    }
+
+    button.secondary:hover {
+        background-color: #27ae60;
+    }
+
+    button.warning {
+        background-color: var(--warning-color);
+    }
+
+    button.warning:hover {
+        background-color: #e67e22;
+    }
+
+    .renderer-toggle {
+        display: flex;
+        gap: 5px;
+    }
+
+    .renderer-toggle button.active {
+        background-color: var(--dark-color);
+    }
+
+    .benchmark-group {
+        margin-bottom: 30px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .benchmark-header {
+        background-color: var(--light-color);
+        padding: 15px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .benchmark-header h3 {
+        margin: 0;
+    }
+
+    .benchmark-content {
+        padding: 15px;
+    }
+
+    .collapsed .benchmark-content {
+        display: none;
+    }
+
+    .environment-info {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+
+    .environment-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .env-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 1px dotted #ddd;
+    }
+
+    .env-label {
+        font-weight: bold;
+        color: #555;
+    }
+
+    .chart-container {
+        height: 400px;
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .chart-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .chart-local-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+        background-color: var(--light-color);
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+    }
+
+    th:hover {
+        background-color: #e9ecef;
+    }
+
+    th.sort-asc::after {
+        content: " ↑";
+        font-weight: bold;
+    }
+
+    th.sort-desc::after {
+        content: " ↓";
+        font-weight: bold;
+    }
+
+    .copy-svg-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+    }
+
+    footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-color);
+        color: #666;
+        font-size: 14px;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .error {
+        color: var(--danger-color);
+        padding: 10px;
+        background-color: #f8d7da;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+
+    .stats-summary {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        gap: 10px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 5px;
+        padding: 15px;
+        box-shadow: var(--shadow);
+        text-align: center;
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .toggle-control {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .param-info {
+        background-color: #e8f4fd;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .local-sort-controls {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+
+    .local-sort-controls select {
+        padding: 5px;
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>JMH Benchmark Results Analyzer</h1>
+    <p>Visualize and analyze JMH benchmark results</p>
+  </header>
+
+  <div class="controls">
+    <div class="control-group">
+      <div class="renderer-toggle">
+        <button id="canvas-btn" class="active">Canvas Renderer</button>
+        <button id="svg-btn">SVG Renderer</button>
+      </div>
+      <button id="orientation-btn" class="secondary">Switch All to Horizontal</button>
+      <button id="sort-all-btn">Global Sort</button>
+    </div>
+    <div class="control-group">
+      <button id="expand-all-btn">Expand All</button>
+      <button id="collapse-all-btn">Collapse All</button>
+    </div>
+  </div>
+
+  <div id="drop-area" class="drop-area">
+    <p>Drag and drop results.json file here, or <a href="#" id="file-input-link">click to select file</a></p>
+    <input type="file" id="file-input" accept=".json" class="hidden">
+  </div>
+
+  <div id="stats-summary" class="stats-summary hidden">
+    <!-- Statistics will be populated here -->
+  </div>
+
+  <div id="content">
+    <div class="no-data">Please upload or drag and drop JMH results.json file</div>
+  </div>
+
+  <footer>
+    <p>Created by DeepSeek</p>
+  </footer>
+</div>
+
+<script>
+  // 全局变量
+  let benchmarkData = null;
+  let currentRenderer = 'canvas';
+  let globalOrientation = 'vertical'; // 'vertical' or 'horizontal'
+  let globalSortField = 'score';
+  let globalSortOrder = 'desc';
+
+  // DOM元素
+  const dropArea = document.getElementById('drop-area');
+  const fileInput = document.getElementById('file-input');
+  const fileInputLink = document.getElementById('file-input-link');
+  const contentDiv = document.getElementById('content');
+  const statsSummaryDiv = document.getElementById('stats-summary');
+  const canvasBtn = document.getElementById('canvas-btn');
+  const svgBtn = document.getElementById('svg-btn');
+  const sortAllBtn = document.getElementById('sort-all-btn');
+  const orientationBtn = document.getElementById('orientation-btn');
+  const expandAllBtn = document.getElementById('expand-all-btn');
+  const collapseAllBtn = document.getElementById('collapse-all-btn');
+
+  // 事件监听
+  document.addEventListener('DOMContentLoaded', function() {
+      // 尝试加载同目录下的results.json
+      loadDefaultFile();
+
+      // 设置事件监听器
+      setupEventListeners();
+  });
+
+  function setupEventListeners() {
+      // 拖拽事件
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+          dropArea.addEventListener(eventName, preventDefaults, false);
+      });
+
+      function preventDefaults(e) {
+          e.preventDefault();
+          e.stopPropagation();
+      }
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+          dropArea.addEventListener(eventName, highlight, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+          dropArea.addEventListener(eventName, unhighlight, false);
+      });
+
+      function highlight() {
+          dropArea.classList.add('highlight');
+      }
+
+      function unhighlight() {
+          dropArea.classList.remove('highlight');
+      }
+
+      dropArea.addEventListener('drop', handleDrop, false);
+
+      // 文件选择事件
+      fileInputLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          fileInput.click();
+      });
+
+      fileInput.addEventListener('change', handleFileSelect, false);
+
+      // 渲染器切换
+      canvasBtn.addEventListener('click', function() {
+          setRenderer('canvas');
+      });
+
+      svgBtn.addEventListener('click', function() {
+          setRenderer('svg');
+      });
+
+      // 全局排序
+      sortAllBtn.addEventListener('click', function() {
+          if (!benchmarkData) return;
+
+          // 切换排序顺序
+          globalSortOrder = globalSortOrder === 'asc' ? 'desc' : 'asc';
+
+          // 对每个benchmark组内的数据进行排序
+          for (const groupName in benchmarkData.groups) {
+              const group = benchmarkData.groups[groupName];
+              group.benchmarks.sort((a, b) => {
+                  const aValue = getSortValue(a, globalSortField);
+                  const bValue = getSortValue(b, globalSortField);
+
+                  if (globalSortOrder === 'asc') {
+                      return aValue - bValue;
+                  } else {
+                      return bValue - aValue;
+                  }
+              });
+          }
+
+          // 重新渲染所有图表
+          renderAllCharts();
+      });
+
+      // 全局方向切换
+      orientationBtn.addEventListener('click', function() {
+          globalOrientation = globalOrientation === 'vertical' ? 'horizontal' : 'vertical';
+          orientationBtn.textContent = globalOrientation === 'vertical'
+              ? 'Switch All to Horizontal'
+              : 'Switch All to Vertical';
+
+          // 更新所有图表的本地方向设置
+          for (const groupName in benchmarkData.groups) {
+              const group = benchmarkData.groups[groupName];
+              group.localOrientation = globalOrientation;
+          }
+
+          if (benchmarkData) {
+              renderAllCharts();
+          }
+      });
+
+      // 展开/折叠所有分组
+      expandAllBtn.addEventListener('click', function() {
+          document.querySelectorAll('.benchmark-group').forEach(group => {
+              group.classList.remove('collapsed');
+          });
+      });
+
+      collapseAllBtn.addEventListener('click', function() {
+          document.querySelectorAll('.benchmark-group').forEach(group => {
+              group.classList.add('collapsed');
+          });
+      });
+  }
+
+  function setRenderer(renderer) {
+      currentRenderer = renderer;
+
+      if (renderer === 'canvas') {
+          canvasBtn.classList.add('active');
+          svgBtn.classList.remove('active');
+      } else {
+          canvasBtn.classList.remove('active');
+          svgBtn.classList.add('active');
+      }
+
+      // 重新渲染所有图表
+      if (benchmarkData) {
+          renderAllCharts();
+      }
+  }
+
+  function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+
+      if (files.length) {
+          processFile(files[0]);
+      }
+  }
+
+  function handleFileSelect(e) {
+      const files = e.target.files;
+
+      if (files.length) {
+          processFile(files[0]);
+      }
+  }
+
+  function loadDefaultFile() {
+      fetch('./results.json')
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('results.json file not found');
+              }
+              return response.json();
+          })
+          .then(data => {
+              processData(data);
+          })
+          .catch(error => {
+              console.log('Default file loading failed:', error.message);
+              // 不显示错误，因为用户可能还没有上传文件
+          });
+  }
+
+  function processFile(file) {
+      if (file.type !== 'application/json') {
+          showError('Please upload a JSON file');
+          return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+          try {
+              const data = JSON.parse(e.target.result);
+              processData(data);
+          } catch (error) {
+              showError(`JSON parsing error: ${error.message}`);
+          }
+      };
+
+      reader.readAsText(file);
+  }
+
+  function processData(data) {
+      // JMH结果可能是数组或对象格式
+      let benchmarks = [];
+      let jmhVersion = '';
+      let environmentInfo = {};
+
+      if (Array.isArray(data)) {
+          // 如果是数组格式，直接使用
+          benchmarks = data;
+          if (benchmarks.length > 0) {
+              jmhVersion = benchmarks[0].jmhVersion || '';
+          }
+      } else if (typeof data === 'object') {
+          // 如果是对象格式，检查是否有benchmarks字段
+          if (data.benchmarks && Array.isArray(data.benchmarks)) {
+              benchmarks = data.benchmarks;
+              jmhVersion = data.jmhVersion || '';
+          } else {
+              // 如果不是标准格式，尝试直接解析
+              benchmarks = [data];
+              jmhVersion = data.jmhVersion || '';
+          }
+
+          // 提取环境信息
+          if (data.environment) {
+              environmentInfo = data.environment;
+          }
+      } else {
+          showError('Invalid JMH result format: data must be an array or object');
+          return;
+      }
+
+      if (benchmarks.length === 0) {
+          showError('No benchmark data found');
+          return;
+      }
+
+      // 按benchmark类分组
+      const groups = {};
+
+      benchmarks.forEach(benchmark => {
+          const className = extractClassName(benchmark.benchmark);
+
+          if (!groups[className]) {
+              groups[className] = {
+                  className: className,
+                  benchmarks: [],
+                  localSortField: 'score',
+                  localSortOrder: 'desc',
+                  localOrientation: 'vertical'
+              };
+          }
+
+          groups[className].benchmarks.push(benchmark);
+      });
+
+      benchmarkData = {
+          jmhVersion: jmhVersion,
+          environment: environmentInfo,
+          groups: groups
+      };
+
+      renderContent();
+      updateStatsSummary();
+  }
+
+  function extractClassName(fullBenchmarkName) {
+      if (!fullBenchmarkName) return 'Unknown';
+
+      const parts = fullBenchmarkName.split('.');
+      if (parts.length <= 1) return fullBenchmarkName;
+
+      // 去掉方法名，返回类名
+      return parts.slice(0, -1).join('.');
+  }
+
+  function renderContent() {
+      if (!benchmarkData) return;
+
+      let html = '';
+
+      // 渲染每个benchmark组
+      for (const groupName in benchmarkData.groups) {
+          const group = benchmarkData.groups[groupName];
+
+          html += `<div class="benchmark-group">
+              <div class="benchmark-header" onclick="toggleGroup(this)">
+                  <h3>${group.className}</h3>
+                  <span>▼</span>
+              </div>
+              <div class="benchmark-content">
+                  ${renderEnvironmentInfo(groupName)}
+                  <div class="chart-controls">
+                      <div class="chart-local-controls">
+                          <div class="local-sort-controls">
+                              <label>Sort by:</label>
+                              <select class="local-sort-field" data-group="${groupName}">
+                                  <option value="benchmark">Method Name</option>
+                                  <option value="score" selected>Score</option>
+                                  <option value="scoreError">Error</option>
+                                  <option value="scoreUnit">Unit</option>
+                                  <option value="mode">Mode</option>
+                              </select>
+                              <button class="local-sort-order" data-group="${groupName}">Desc</button>
+                          </div>
+                          <button class="local-orientation" data-group="${groupName}">Switch to Horizontal</button>
+                      </div>
+                      <button class="copy-svg-btn" data-group="${groupName}">Copy SVG Code</button>
+                  </div>
+                  <div class="chart-container" id="chart-${groupName}"></div>
+                  <div class="table-container">
+                      <table id="table-${groupName}">
+                          <thead>
+                              <tr>
+                                  <th data-field="benchmark">Method Name</th>
+                                  <th data-field="score">Score</th>
+                                  <th data-field="scoreError">Error</th>
+                                  <th data-field="scoreUnit">Unit</th>
+                                  <th data-field="mode">Mode</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              ${group.benchmarks.map(benchmark => {
+                                  const metric = benchmark.primaryMetric || {};
+                                  const score = safeGetNumber(metric.score);
+                                  const scoreError = safeGetNumber(metric.scoreError);
+                                  const scoreUnit = metric.scoreUnit || 'N/A';
+                                  const mode = benchmark.mode || 'N/A';
+                                  const params = benchmark.params || {};
+
+                                  return `
+                                  <tr>
+                                      <td>
+                                          ${getMethodName(benchmark.benchmark)}
+                                          ${Object.keys(params).length > 0 ?
+                                              `<div class="param-info">${formatParams(params)}</div>` :
+                                              ''}
+                                      </td>
+                                      <td>${formatNumber(score)}</td>
+                                      <td>${scoreError !== null ? formatNumber(scoreError) : 'N/A'}</td>
+                                      <td>${scoreUnit}</td>
+                                      <td>${mode}</td>
+                                  </tr>
+                              `}).join('')}
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+          </div>`;
+      }
+
+      contentDiv.innerHTML = html;
+
+      // 设置本地排序字段选择器的初始值
+      for (const groupName in benchmarkData.groups) {
+          const group = benchmarkData.groups[groupName];
+          const sortFieldSelect = document.querySelector(`.local-sort-field[data-group="${groupName}"]`);
+          const sortOrderBtn = document.querySelector(`.local-sort-order[data-group="${groupName}"]`);
+          const orientationBtn = document.querySelector(`.local-orientation[data-group="${groupName}"]`);
+          const copySvgBtn = document.querySelector(`.copy-svg-btn[data-group="${groupName}"]`);
+
+          if (sortFieldSelect) {
+              sortFieldSelect.value = group.localSortField;
+          }
+
+          if (sortOrderBtn) {
+              sortOrderBtn.textContent = group.localSortOrder === 'asc' ? 'Asc' : 'Desc';
+          }
+
+          if (orientationBtn) {
+              orientationBtn.textContent = group.localOrientation === 'vertical'
+                  ? 'Switch to Horizontal'
+                  : 'Switch to Vertical';
+          }
+
+          // 添加本地排序字段选择事件
+          if (sortFieldSelect) {
+              sortFieldSelect.addEventListener('change', function() {
+                  const groupName = this.getAttribute('data-group');
+                  const field = this.value;
+                  localSortTable(groupName, field);
+              });
+          }
+
+          // 添加本地排序顺序按钮事件
+          if (sortOrderBtn) {
+              sortOrderBtn.addEventListener('click', function() {
+                  const groupName = this.getAttribute('data-group');
+                  const group = benchmarkData.groups[groupName];
+                  group.localSortOrder = group.localSortOrder === 'asc' ? 'desc' : 'asc';
+                  this.textContent = group.localSortOrder === 'asc' ? 'Asc' : 'Desc';
+                  localSortTable(groupName, group.localSortField);
+              });
+          }
+
+          // 添加本地方向切换事件
+          if (orientationBtn) {
+              orientationBtn.addEventListener('click', function() {
+                  const groupName = this.getAttribute('data-group');
+                  const group = benchmarkData.groups[groupName];
+                  group.localOrientation = group.localOrientation === 'vertical' ? 'horizontal' : 'vertical';
+                  this.textContent = group.localOrientation === 'vertical'
+                      ? 'Switch to Horizontal'
+                      : 'Switch to Vertical';
+                  renderChart(groupName);
+              });
+          }
+
+          // 添加复制SVG按钮事件
+          if (copySvgBtn) {
+              copySvgBtn.addEventListener('click', function() {
+                  const groupName = this.getAttribute('data-group');
+                  const chartContainer = document.getElementById(`chart-${groupName}`);
+                  const chart = chartContainer._chart;
+
+                  if (chart && currentRenderer === 'svg') {
+                      const svgElement = chartContainer.querySelector('svg');
+                      if (svgElement) {
+                          const svgCode = new XMLSerializer().serializeToString(svgElement);
+                          copyToClipboard(svgCode);
+                          alert('SVG code copied to clipboard');
+                      }
+                  } else {
+                      alert('Please switch to SVG renderer to copy SVG code');
+                  }
+              });
+          }
+      }
+
+      // 添加表格排序事件
+      document.querySelectorAll('th[data-field]').forEach(th => {
+          th.addEventListener('click', function() {
+              const field = this.getAttribute('data-field');
+              const tableId = this.closest('table').id;
+              const groupName = tableId.replace('table-', '');
+
+              sortTable(groupName, field);
+          });
+      });
+
+      // 渲染所有图表
+      renderAllCharts();
+  }
+
+  function renderEnvironmentInfo(groupName) {
+      const group = benchmarkData.groups[groupName];
+      if (!group || group.benchmarks.length === 0) return '';
+
+      const firstBenchmark = group.benchmarks[0];
+      let html = `<div class="environment-info">
+          <h4>Environment Information</h4>
+          <div class="environment-grid">`;
+
+      // JMH版本
+      if (benchmarkData.jmhVersion) {
+          html += `<div class="env-item">
+              <span class="env-label">JMH Version:</span>
+              <span>${benchmarkData.jmhVersion}</span>
+          </div>`;
+      }
+
+      // 基准测试模式
+      if (firstBenchmark.mode) {
+          html += `<div class="env-item">
+              <span class="env-label">Mode:</span>
+              <span>${firstBenchmark.mode}</span>
+          </div>`;
+      }
+
+      // 线程数
+      if (firstBenchmark.threads) {
+          html += `<div class="env-item">
+              <span class="env-label">Threads:</span>
+              <span>${firstBenchmark.threads}</span>
+          </div>`;
+      }
+
+      // 分叉数
+      if (firstBenchmark.forks) {
+          html += `<div class="env-item">
+              <span class="env-label">Forks:</span>
+              <span>${firstBenchmark.forks}</span>
+          </div>`;
+      }
+
+      // 预热迭代
+      if (firstBenchmark.warmupIterations) {
+          html += `<div class="env-item">
+              <span class="env-label">Warmup Iterations:</span>
+              <span>${firstBenchmark.warmupIterations}</span>
+          </div>`;
+      }
+
+      // 测量迭代
+      if (firstBenchmark.measurementIterations) {
+          html += `<div class="env-item">
+              <span class="env-label">Measurement Iterations:</span>
+              <span>${firstBenchmark.measurementIterations}</span>
+          </div>`;
+      }
+
+      // 添加环境信息
+      if (benchmarkData.environment) {
+          for (const [key, value] of Object.entries(benchmarkData.environment)) {
+              if (typeof value === 'object') {
+                  for (const [subKey, subValue] of Object.entries(value)) {
+                      html += `<div class="env-item">
+                          <span class="env-label">${key}.${subKey}:</span>
+                          <span>${subValue}</span>
+                      </div>`;
+                  }
+              } else {
+                  html += `<div class="env-item">
+                      <span class="env-label">${key}:</span>
+                      <span>${value}</span>
+                  </div>`;
+              }
+          }
+      }
+
+      html += `</div></div>`;
+      return html;
+  }
+
+  function updateStatsSummary() {
+      if (!benchmarkData) return;
+
+      let totalBenchmarks = 0;
+      let totalGroups = Object.keys(benchmarkData.groups).length;
+      let maxScore = -Infinity;
+      let minScore = Infinity;
+
+      for (const groupName in benchmarkData.groups) {
+          const group = benchmarkData.groups[groupName];
+          totalBenchmarks += group.benchmarks.length;
+
+          group.benchmarks.forEach(benchmark => {
+              const score = safeGetNumber(benchmark.primaryMetric?.score) || 0;
+              if (score > maxScore) maxScore = score;
+              if (score < minScore) minScore = score;
+          });
+      }
+
+      statsSummaryDiv.innerHTML = `
+          <div class="stat-card">
+              <div class="stat-value">${totalGroups}</div>
+              <div class="stat-label">Benchmark Groups</div>
+          </div>
+          <div class="stat-card">
+              <div class="stat-value">${totalBenchmarks}</div>
+              <div class="stat-label">Total Benchmarks</div>
+          </div>
+          <div class="stat-card">
+              <div class="stat-value">${formatNumber(maxScore)}</div>
+              <div class="stat-label">Max Score</div>
+          </div>
+          <div class="stat-card">
+              <div class="stat-value">${formatNumber(minScore)}</div>
+              <div class="stat-label">Min Score</div>
+          </div>
+      `;
+
+      statsSummaryDiv.classList.remove('hidden');
+  }
+
+  function renderAllCharts() {
+      if (!benchmarkData) return;
+
+      // 动态加载ECharts
+      loadECharts().then(() => {
+          for (const groupName in benchmarkData.groups) {
+              renderChart(groupName);
+          }
+      }).catch(error => {
+          showError(`Failed to load ECharts: ${error.message}`);
+      });
+  }
+
+  function loadECharts() {
+      return new Promise((resolve, reject) => {
+          if (window.echarts) {
+              resolve();
+              return;
+          }
+
+          // 尝试加载本地ECharts
+          const script = document.createElement('script');
+          script.src = '../js/echarts.min.js';
+          script.onload = () => {
+              if (window.echarts) {
+                  resolve();
+              } else {
+                  reject(new Error('ECharts not found'));
+              }
+          };
+          script.onerror = () => {
+              // 如果本地加载失败，尝试使用CDN
+              const cdnScript = document.createElement('script');
+              cdnScript.src = 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js';
+              cdnScript.onload = () => {
+                  if (window.echarts) {
+                      resolve();
+                  } else {
+                      reject(new Error('ECharts not found'));
+                  }
+              };
+              cdnScript.onerror = () => reject(new Error('Failed to load ECharts'));
+              document.head.appendChild(cdnScript);
+          };
+          document.head.appendChild(script);
+      });
+  }
+
+  function renderChart(groupName) {
+      const group = benchmarkData.groups[groupName];
+      const chartDom = document.getElementById(`chart-${groupName}`);
+
+      if (!chartDom || !window.echarts) return;
+
+      // 清除现有图表
+      if (chartDom._chart) {
+          chartDom._chart.dispose();
+      }
+
+      const chart = echarts.init(chartDom, null, {
+          renderer: currentRenderer
+      });
+
+      chartDom._chart = chart;
+
+      const methodNames = group.benchmarks.map(b => {
+          const methodName = getMethodName(b.benchmark);
+          const params = b.params || {};
+          if (Object.keys(params).length > 0) {
+              return `${methodName} (${formatParams(params, true)})`;
+          }
+          return methodName;
+      });
+
+      const scores = group.benchmarks.map(b => {
+          const metric = b.primaryMetric || {};
+          return safeGetNumber(metric.score) || 0;
+      });
+
+      const scoreUnit = group.benchmarks[0]?.primaryMetric?.scoreUnit || 'ops/s';
+      const isHorizontal = group.localOrientation === 'horizontal';
+
+      // 准备系列数据
+      const seriesData = scores.map((score, index) => {
+          const dataItem = {
+              value: isHorizontal ? score : [methodNames[index], score],
+              itemStyle: {
+                  color: getColorByIndex(index)
+              }
+          };
+
+          return dataItem;
+      });
+
+      const option = {
+          title: {
+              text: `${group.className} Performance Comparison`,
+              left: 'center'
+          },
+          tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                  type: 'shadow'
+              },
+              formatter: function(params) {
+                  const data = params[0];
+                  const benchmark = group.benchmarks[data.dataIndex];
+                  const metric = benchmark.primaryMetric || {};
+                  const score = safeGetNumber(metric.score) || 0;
+                  const scoreError = safeGetNumber(metric.scoreError) || 0;
+                  const scoreUnit = metric.scoreUnit || 'N/A';
+                  const paramsObj = benchmark.params || {};
+
+                  let tooltipText = `
+                      <strong>${data.name}</strong><br/>
+                      Score: ${formatNumber(score)}<br/>
+                      Error: ${scoreError !== 0 ? formatNumber(scoreError) : 'N/A'}<br/>
+                      Unit: ${scoreUnit}
+                  `;
+
+                  // 添加参数信息到tooltip
+                  if (Object.keys(paramsObj).length > 0) {
+                      tooltipText += `<br/>Parameters: ${formatParams(paramsObj)}`;
+                  }
+
+                  return tooltipText;
+              }
+          },
+          xAxis: {
+              type: isHorizontal ? 'value' : 'category',
+              data: isHorizontal ? null : methodNames,
+              name: isHorizontal ? scoreUnit : null,
+              axisLabel: isHorizontal ? null : {
+                  rotate: 30,
+                  formatter: function(value) {
+                      // 截断长标签
+                      return value.length > 20 ? value.substring(0, 20) + '...' : value;
+                  }
+              }
+          },
+          yAxis: {
+              type: isHorizontal ? 'category' : 'value',
+              data: isHorizontal ? methodNames : null,
+              name: isHorizontal ? null : scoreUnit,
+              axisLabel: isHorizontal ? {
+                  interval: 0,
+                  formatter: function(value) {
+                      // 截断长标签
+                      return value.length > 30 ? value.substring(0, 30) + '...' : value;
+                  }
+              } : null
+          },
+          series: [
+              {
+                  name: 'Score',
+                  type: 'bar',
+                  data: seriesData
+              }
+          ],
+          grid: {
+              left: '3%',
+              right: '4%',
+              bottom: isHorizontal ? '10%' : '15%',
+              top: '15%',
+              containLabel: true
+          }
+      };
+
+      chart.setOption(option);
+
+      // 调整图表大小
+      window.addEventListener('resize', function() {
+          chart.resize();
+      });
+  }
+
+  function sortTable(groupName, field) {
+      const group = benchmarkData.groups[groupName];
+      if (!group) return;
+
+      // 清除其他列的排序指示器
+      const table = document.getElementById(`table-${groupName}`);
+      table.querySelectorAll('th').forEach(th => {
+          th.classList.remove('sort-asc', 'sort-desc');
+      });
+
+      // 设置当前列的排序指示器
+      const currentTh = table.querySelector(`th[data-field="${field}"]`);
+      const isAsc = currentTh.classList.contains('sort-asc');
+
+      if (isAsc) {
+          currentTh.classList.remove('sort-asc');
+          currentTh.classList.add('sort-desc');
+      } else {
+          currentTh.classList.remove('sort-desc');
+          currentTh.classList.add('sort-asc');
+      }
+
+      // 对组内benchmarks进行排序
+      group.benchmarks.sort((a, b) => {
+          const aValue = getSortValue(a, field);
+          const bValue = getSortValue(b, field);
+
+          if (isAsc) {
+              return aValue - bValue;
+          } else {
+              return bValue - aValue;
+          }
+      });
+
+      // 更新表格
+      const tableBody = document.querySelector(`#table-${groupName} tbody`);
+      tableBody.innerHTML = group.benchmarks.map(benchmark => {
+          const metric = benchmark.primaryMetric || {};
+          const score = safeGetNumber(metric.score) || 0;
+          const scoreError = safeGetNumber(metric.scoreError);
+          const scoreUnit = metric.scoreUnit || 'N/A';
+          const mode = benchmark.mode || 'N/A';
+          const params = benchmark.params || {};
+
+          return `
+          <tr>
+              <td>
+                  ${getMethodName(benchmark.benchmark)}
+                  ${Object.keys(params).length > 0 ?
+                      `<div class="param-info">${formatParams(params)}</div>` :
+                      ''}
+              </td>
+              <td>${formatNumber(score)}</td>
+              <td>${scoreError !== null ? formatNumber(scoreError) : 'N/A'}</td>
+              <td>${scoreUnit}</td>
+              <td>${mode}</td>
+          </tr>
+      `}).join('');
+
+      // 重新渲染图表
+      renderChart(groupName);
+  }
+
+  function localSortTable(groupName, field) {
+      const group = benchmarkData.groups[groupName];
+      if (!group) return;
+
+      // 更新本地排序字段
+      group.localSortField = field;
+
+      // 对组内benchmarks进行排序
+      group.benchmarks.sort((a, b) => {
+          const aValue = getSortValue(a, field);
+          const bValue = getSortValue(b, field);
+
+          if (group.localSortOrder === 'asc') {
+              return aValue - bValue;
+          } else {
+              return bValue - aValue;
+          }
+      });
+
+      // 更新表格
+      const tableBody = document.querySelector(`#table-${groupName} tbody`);
+      tableBody.innerHTML = group.benchmarks.map(benchmark => {
+          const metric = benchmark.primaryMetric || {};
+          const score = safeGetNumber(metric.score) || 0;
+          const scoreError = safeGetNumber(metric.scoreError);
+          const scoreUnit = metric.scoreUnit || 'N/A';
+          const mode = benchmark.mode || 'N/A';
+          const params = benchmark.params || {};
+
+          return `
+          <tr>
+              <td>
+                  ${getMethodName(benchmark.benchmark)}
+                  ${Object.keys(params).length > 0 ?
+                      `<div class="param-info">${formatParams(params)}</div>` :
+                      ''}
+              </td>
+              <td>${formatNumber(score)}</td>
+              <td>${scoreError !== null ? formatNumber(scoreError) : 'N/A'}</td>
+              <td>${scoreUnit}</td>
+              <td>${mode}</td>
+          </tr>
+      `}).join('');
+
+      // 重新渲染图表
+      renderChart(groupName);
+  }
+
+  function getSortValue(benchmark, field) {
+      switch(field) {
+          case 'benchmark':
+              return benchmark.benchmark;
+          case 'score':
+              const metric = benchmark.primaryMetric || {};
+              return safeGetNumber(metric.score) || 0;
+          case 'scoreError':
+              const metricErr = benchmark.primaryMetric || {};
+              return safeGetNumber(metricErr.scoreError) || 0;
+          case 'scoreUnit':
+              const metricUnit = benchmark.primaryMetric || {};
+              return metricUnit.scoreUnit || '';
+          case 'mode':
+              return benchmark.mode || '';
+          default:
+              return 0;
+      }
+  }
+
+  function getMethodName(fullBenchmarkName) {
+      if (!fullBenchmarkName) return 'Unknown';
+
+      const parts = fullBenchmarkName.split('.');
+      return parts[parts.length - 1];
+  }
+
+  function formatParams(params, short = false) {
+      const paramStrings = [];
+      for (const [key, value] of Object.entries(params)) {
+          if (short) {
+              paramStrings.push(`${key}=${value}`);
+          } else {
+              paramStrings.push(`${key}: ${value}`);
+          }
+      }
+
+      if (short) {
+          return paramStrings.join(', ');
+      } else {
+          return paramStrings.join('; ');
+      }
+  }
+
+  function getColorByIndex(index) {
+      const colors = [
+          '#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6',
+          '#1abc9c', '#d35400', '#c0392b', '#16a085', '#8e44ad'
+      ];
+      return colors[index % colors.length];
+  }
+
+  function copyToClipboard(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+  }
+
+  function showError(message) {
+      contentDiv.innerHTML = `<div class="error">${message}</div>`;
+  }
+
+  // 安全获取数字值
+  function safeGetNumber(value) {
+      if (value === null || value === undefined) {
+          return null;
+      }
+
+      if (typeof value === 'number') {
+          return value;
+      }
+
+      if (typeof value === 'string') {
+          const num = parseFloat(value);
+          return isNaN(num) ? null : num;
+      }
+
+      // 如果是对象或其他类型，尝试转换为数字
+      const num = parseFloat(value);
+      return isNaN(num) ? null : num;
+  }
+
+  // 格式化数字显示
+  function formatNumber(num) {
+      if (num === null || num === undefined) {
+          return 'N/A';
+      }
+
+      // 根据数字大小选择合适的精度
+      if (Math.abs(num) < 0.0001) {
+          return num.toExponential(6);
+      } else if (Math.abs(num) < 1) {
+          return num.toFixed(8);
+      } else if (Math.abs(num) < 1000) {
+          return num.toFixed(6);
+      } else {
+          return num.toFixed(2);
+      }
+  }
+
+  // 切换分组折叠/展开
+  function toggleGroup(headerElement) {
+      const group = headerElement.closest('.benchmark-group');
+      group.classList.toggle('collapsed');
+  }
+</script>
+</body>
+</html>
