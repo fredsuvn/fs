@@ -1,4 +1,4 @@
-package internal.tests.common;
+package internal.tests.api;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
@@ -9,9 +9,9 @@ import java.lang.reflect.Method;
 
 public class AspectApi {
 
-    public static AspectApi createAspect(String aspectType) {
+    public static AspectApi createAspect(String aspectType) throws Exception {
         return switch (aspectType) {
-            case "asm" -> AspectMaker.byAsm().make(
+            case "fs-asm" -> AspectMaker.byAsm().make(
                 AspectApi.class,
                 new AspectHandler() {
                     @Override
@@ -41,7 +41,17 @@ public class AspectApi {
                     }
                 }
             ).newInstance();
-            case "original" -> new AspectApi() {
+            // case "byte-buddy" -> new ByteBuddy()
+            //     .subclass(AspectApi.class)
+            //     .method(ElementMatchers.named("withPrimitive"))
+            //     .intercept(Advice.to(ByteBuddyAdvice1.class))
+            //     .method(ElementMatchers.named("withoutPrimitive"))
+            //     .intercept(Advice.to(ByteBuddyAdvice2.class))
+            //     .make()
+            //     .load(ProxyApi.class.getClassLoader())
+            //     .getLoaded()
+            //     .newInstance();
+            case "direct" -> new AspectApi() {
                 @Override
                 public String withPrimitive(int i, long l, String str) throws Exception {
                     return super.withPrimitive(i + 1, l, str);
@@ -63,4 +73,40 @@ public class AspectApi {
     public String withoutPrimitive(Integer i, Long l, String str) throws Exception {
         return i.toString() + l.toString() + str;
     }
+
+    // static class ByteBuddyAdvice1 {
+    //
+    //     @Advice.OnMethodEnter
+    //     public static void before(
+    //         @Advice.Argument(value = 0, readOnly = false) int i,
+    //         @Advice.Argument(value = 1, readOnly = false) long l
+    //     ) {
+    //         i = i + 1;
+    //     }
+    //
+    //     @Advice.OnMethodExit
+    //     public static void after(
+    //         @Advice.Argument(value = 0, readOnly = false) int i,
+    //         @Advice.Argument(value = 1, readOnly = false) long l
+    //     ) {
+    //     }
+    // }
+    //
+    // static class ByteBuddyAdvice2 {
+    //
+    //     @Advice.OnMethodEnter
+    //     public static void before(
+    //         @Advice.Argument(value = 0, readOnly = false) Integer i,
+    //         @Advice.Argument(value = 1, readOnly = false) Long l
+    //     ) {
+    //         i = i + 1;
+    //     }
+    //
+    //     @Advice.OnMethodExit
+    //     public static void after(
+    //         @Advice.Argument(value = 0, readOnly = false) Integer i,
+    //         @Advice.Argument(value = 1, readOnly = false) Long l
+    //     ) {
+    //     }
+    // }
 }

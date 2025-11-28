@@ -2,9 +2,10 @@ package space.sunqian.common.app.di;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.app.SimpleApp;
 import space.sunqian.common.Fs;
+import space.sunqian.common.app.SimpleApp;
 import space.sunqian.common.collect.CollectKit;
+import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.annotation.Annotation;
@@ -12,9 +13,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * A dependency injection-based sub-interface of {@link SimpleApp}, built via {@link #newBuilder()}. See
@@ -131,18 +132,21 @@ public interface InjectedApp extends SimpleApp {
      */
     class Builder {
 
-        private static final @Nonnull String @Nonnull [] RESOURCE_ANNOTATIONS =
-            {"javax.annotation.Resource", "jakarta.annotation.Resource"};
-        private static final @Nonnull String @Nonnull [] POST_CONSTRUCT_ANNOTATIONS =
-            {"javax.annotation.PostConstruct", "jakarta.annotation.PostConstruct"};
-        private static final @Nonnull String @Nonnull [] PRE_DESTROY_ANNOTATIONS =
-            {"javax.annotation.PreDestroy", "jakarta.annotation.PreDestroy"};
+        private static final @Nonnull List<@Nonnull String> RESOURCE_ANNOTATIONS =
+            ListKit.list("javax.annotation.Resource", "jakarta.annotation.Resource");
+        private static final @Nonnull List<@Nonnull String> POST_CONSTRUCT_ANNOTATIONS =
+            ListKit.list("javax.annotation.PostConstruct", "jakarta.annotation.PostConstruct");
+        private static final @Nonnull List<@Nonnull String> PRE_DESTROY_ANNOTATIONS =
+            ListKit.list("javax.annotation.PreDestroy", "jakarta.annotation.PreDestroy");
 
-        private final @Nonnull Set<Type> resourceTypes = new LinkedHashSet<>();
-        private final @Nonnull Set<@Nonnull InjectedApp> parentApps = new LinkedHashSet<>();
-        private final @Nonnull Set<@Nonnull String> resourceAnnotations = new LinkedHashSet<>();
-        private final @Nonnull Set<@Nonnull String> postConstructAnnotations = new LinkedHashSet<>();
-        private final @Nonnull Set<@Nonnull String> preDestroyAnnotations = new LinkedHashSet<>();
+        private final @Nonnull Collection<Type> resourceTypes = new LinkedHashSet<>();
+        private final @Nonnull Collection<@Nonnull InjectedApp> parentApps = new LinkedHashSet<>();
+        private final @Nonnull Collection<@Nonnull String> resourceAnnotations = new LinkedHashSet<>();
+        private final @Nonnull Collection<@Nonnull String> postConstructAnnotations = new LinkedHashSet<>();
+        private final @Nonnull Collection<@Nonnull String> preDestroyAnnotations = new LinkedHashSet<>();
+
+        private @Nonnull InjectedResource.Resolver resourceResolver = InjectedResource.defaultResolver();
+        private @Nonnull InjectedResource.FieldSetter fieldSetter = InjectedResource.defaultFieldSetter();
 
         /**
          * Adds a resource annotation type that indicates a {@link Field} references a resource from the app.
@@ -256,6 +260,28 @@ public interface InjectedApp extends SimpleApp {
         }
 
         /**
+         * Sets the resource resolver for this app. The default is {@link InjectedResource#defaultResolver()}.
+         *
+         * @param resourceResolver the resource resolver
+         * @return this builder
+         */
+        public @Nonnull Builder resourceResolver(@Nonnull InjectedResource.Resolver resourceResolver) {
+            this.resourceResolver = resourceResolver;
+            return this;
+        }
+
+        /**
+         * Sets the field setter for this app. The default is {@link InjectedResource#defaultFieldSetter()}.
+         *
+         * @param fieldSetter the field setter
+         * @return this builder
+         */
+        public @Nonnull Builder fieldSetter(@Nonnull InjectedResource.FieldSetter fieldSetter) {
+            this.fieldSetter = fieldSetter;
+            return this;
+        }
+
+        /**
          * Builds and starts a new app instance. The startup process performs the following operations in sequence:
          * <ol>
          *   <li>Generating instances for all resource types with singleton mode;</li>
@@ -276,12 +302,23 @@ public interface InjectedApp extends SimpleApp {
          */
         public @Nonnull InjectedApp build()
             throws InjectedResourceInitializationException, InjectedAppException {
+            if (resourceAnnotations.isEmpty()) {
+                resourceAnnotations.addAll(RESOURCE_ANNOTATIONS);
+            }
+            if (postConstructAnnotations.isEmpty()) {
+                postConstructAnnotations.addAll(POST_CONSTRUCT_ANNOTATIONS);
+            }
+            if (preDestroyAnnotations.isEmpty()) {
+                preDestroyAnnotations.addAll(PRE_DESTROY_ANNOTATIONS);
+            }
             return new InjectedAppImpl(
                 resourceTypes,
-                parentApps.isEmpty() ? new InjectedApp[0] : parentApps.toArray(new InjectedApp[0]),
-                resourceAnnotations.isEmpty() ? RESOURCE_ANNOTATIONS : resourceAnnotations.toArray(new String[0]),
-                postConstructAnnotations.isEmpty() ? POST_CONSTRUCT_ANNOTATIONS : postConstructAnnotations.toArray(new String[0]),
-                preDestroyAnnotations.isEmpty() ? PRE_DESTROY_ANNOTATIONS : preDestroyAnnotations.toArray(new String[0])
+                parentApps,
+                resourceAnnotations,
+                postConstructAnnotations,
+                preDestroyAnnotations,
+                resourceResolver,
+                fieldSetter
             );
         }
     }

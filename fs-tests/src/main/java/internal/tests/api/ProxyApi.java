@@ -1,4 +1,4 @@
-package internal.tests.common;
+package internal.tests.api;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.runtime.proxy.ProxyHandler;
@@ -10,9 +10,9 @@ import java.util.List;
 
 public interface ProxyApi {
 
-    static ProxyApi createProxy(String proxyType) {
-        return switch (proxyType) {
-            case "asm" -> ProxyMaker.byAsm().make(
+    static ProxyApi createProxy(String proxyType) throws Exception {
+        return (ProxyApi) switch (proxyType) {
+            case "fs-asm" -> ProxyMaker.byAsm().make(
                 null,
                 List.of(ProxyApi.class),
                 new ProxyHandler() {
@@ -33,7 +33,7 @@ public interface ProxyApi {
                     }
                 }
             ).newInstance();
-            case "jdk" -> ProxyMaker.byJdk().make(
+            case "fs-jdk" -> ProxyMaker.byJdk().make(
                 null,
                 List.of(ProxyApi.class),
                 new ProxyHandler() {
@@ -54,7 +54,22 @@ public interface ProxyApi {
                     }
                 }
             ).newInstance();
-            case "original" -> new ProxyApi() {
+            // case "byte-buddy" -> new ByteBuddy()
+            //     .subclass(Object.class).implement(ProxyApi.class)
+            //     .method(ElementMatchers.named("withPrimitive")
+            //         .or(ElementMatchers.named("withoutPrimitive")))
+            //     .intercept(MethodDelegation.to(new ByteBuddyInterceptor()))
+            //     .make()
+            //     .load(ProxyApi.class.getClassLoader())
+            //     .getLoaded()
+            //     .newInstance();
+            // case "cglib" -> {
+            //     Enhancer enhancer = new Enhancer();
+            //     enhancer.setInterfaces(new Class[]{ProxyApi.class});
+            //     enhancer.setCallback(new CglibInterceptor());
+            //     yield enhancer.create();
+            // }
+            case "direct" -> new ProxyApi() {
                 @Override
                 public String withPrimitive(int i, long l, String str) throws Exception {
                     return ProxyApi.super.withPrimitive(i, l, str) + "[proxy]";
@@ -76,4 +91,45 @@ public interface ProxyApi {
     default String withoutPrimitive(Integer i, Long l, String str) throws Exception {
         return i.toString() + l.toString() + str;
     }
+
+    // class ByteBuddyInterceptor {
+    //
+    //     @RuntimeType
+    //     public Object intercept(
+    //         //@Origin Method method,
+    //         //@AllArguments Object[] args,
+    //         //@This Object proxyObj,
+    //         @SuperCall Callable<?> callable
+    //     ) throws Exception {
+    //         return callable.call() + "[proxy]";
+    //     }
+    // }
+    //
+    // class CglibInterceptor implements MethodInterceptor {
+    //
+    //     @Override
+    //     public Object intercept(
+    //         Object obj,
+    //         Method method,
+    //         Object[] args,
+    //         MethodProxy proxy
+    //     ) throws Throwable {
+    //         return proxy.invokeSuper(obj, args) + "[proxy]";
+    //     }
+    // }
+    //
+    // class ByteBuddyCallInterceptor {
+    //
+    //     @RuntimeType
+    //     public Object intercept(
+    //         @Origin Method method,
+    //         @AllArguments Object[] args,
+    //         @This Object proxyObj
+    //         //@SuperCall Callable<?> callable
+    //     ) throws Exception {
+    //         return MethodCall.invoke(method)
+    //             .on(proxyObj)
+    //             .with(args) + "[proxy]";
+    //     }
+    // }
 }

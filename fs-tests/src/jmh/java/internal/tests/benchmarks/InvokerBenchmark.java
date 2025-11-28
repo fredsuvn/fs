@@ -1,6 +1,6 @@
 package internal.tests.benchmarks;
 
-import internal.tests.common.Invoker;
+import internal.tests.api.Invoker;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -30,10 +30,10 @@ import java.util.function.Supplier;
 public class InvokerBenchmark {
 
     @Param({
-        "reflect",
-        "asm",
-        "method_handle",
-        "original",
+        "byReflect",
+        "byAsm",
+        "byMethodHandle",
+        "direct",
     })
     private String invokeType;
 

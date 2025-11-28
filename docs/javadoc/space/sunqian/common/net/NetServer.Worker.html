@@ -77,8 +77,8 @@ loadScripts(document, 'script');</script>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public static interface </span><span class="element-name type-name-label">NetServer.Worker</span></div>
-<div class="block">Represents the worker of the server. A worker typically is responsible for handling connected clients, with a
- delicated thread.</div>
+<div class="block">Represents the worker of the server. A worker is typically responsible for handling connections with a delicated
+ thread.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -94,9 +94,9 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#clientCount()" class="member-name-link">clientCount</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#connectionNumber()" class="member-name-link">connectionNumber</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Returns the number of connected clients this worker handles.</div>
+<div class="block">Returns the number of connections this worker handles.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Thread.html" title="class or interface in java.lang" class="external-link">Thread</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#thread()" class="member-name-link">thread</a>()</code></div>
@@ -118,13 +118,13 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="clientCount()">
-<h3>clientCount</h3>
-<div class="member-signature"><span class="return-type">int</span>&nbsp;<span class="element-name">clientCount</span>()</div>
-<div class="block">Returns the number of connected clients this worker handles.</div>
+<section class="detail" id="connectionNumber()">
+<h3>connectionNumber</h3>
+<div class="member-signature"><span class="return-type">int</span>&nbsp;<span class="element-name">connectionNumber</span>()</div>
+<div class="block">Returns the number of connections this worker handles.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the number of connected clients this worker handles</dd>
+<dd>the number of connections this worker handles</dd>
 </dl>
 </section>
 </li>

@@ -1,7 +1,7 @@
 package internal.tests.benchmarks;
 
-import internal.tests.common.CommonData;
-import internal.tests.common.PropertiesCopier;
+import internal.tests.common.TestPropsData;
+import internal.tests.api.PropertiesCopier;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -34,13 +34,13 @@ public class CopyPropertiesBenchmark {
         "fs",
         "apache",
         "hutool",
-        "original"
+        //"direct"
     })
     private String copierType;
 
     private PropertiesCopier copier;
 
-    private final CommonData data = new CommonData();
+    private final TestPropsData data = new TestPropsData();
 
     {
         data.setI1(1);
@@ -64,7 +64,7 @@ public class CopyPropertiesBenchmark {
 
     @Benchmark
     public void copyProperties(Blackhole blackhole) throws Exception {
-        CommonData copy = new CommonData();
+        TestPropsData copy = new TestPropsData();
         copier.copyProperties(data, copy);
         blackhole.consume(copy);
     }

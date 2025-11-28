@@ -1,8 +1,8 @@
-# ![](logo.svg) _fs_: a lightweight, zero-dependency tool lib for java
+# ![](logo.svg) _fs_: a lightweight, high-performance, zero-dependency tool lib for java
 
 ## Overview
 
-_fs_ is a lightweight, zero-dependency tool lib for java. It provides:
+_fs_ is a lightweight, high-performance, zero-dependency tool lib for java. It provides:
 
 - Annotations that can be used for code analysis;
 - Common utilities for bytes, chars, coding, date, enum, logging, math, number, thread, process, system, random,
@@ -20,16 +20,66 @@ _fs_ is a lightweight, zero-dependency tool lib for java. It provides:
 - Proxy and aspect, supporting JDK dynamic proxy and [asm](https://asm.ow2.io);
 - Third-party supporting: [asm](https://asm.ow2.io), [protobuf](https://github.com/protocolbuffers/protobuf);
 
-### Coverage: 100%
+## Multi-Version JDK Support
 
-The success rate and coverage rate of unit testing for this library are both 100%. (coverage tool: jacoco)
+_fs_ provides adaptive implementation loading that automatically selects the optimal class version based on the runtime
+JDK environment (from Java 8 to Java 17). Its main code is based on Java 8, but some interfaces have multiple
+implementation classes of different jdk versions.
 
-### Samples:
+For example, the implementation class of `space.sunqian.common.net.http.HttpCaller` has two versions:
+`of JDK8` and `of JDK11`. The former is based on `java.net.HttpURLConnection`, and the latter is based on
+`java.net.http.HttpClient`.
+
+This ensures:
+
+- **Backward Compatibility**: Seamlessly runs on older JDK versions (Java 8+);
+- **Forward Optimization**: Leverages newer JDK features when available (up to Java 17);
+- **Automatic Detection**: No manual configuration required -- the library automatically loads the appropriate
+  implementation at runtime;
+
+## High Performance
+
+_fs_ has higher performance than other common libraries in many places, Here are some examples:
+
+- **Simple Cache** (`space.sunqian.common.cache.SimpleCache`):
+  SimpleCache only considers common cache functions, so it has higher performance in common functions:
+
+  ![](docs/jmh/cache.svg)
+
+- **CopyProperties** (`Fs.copyProperties / space.sunqian.common.object.convert.DataMapper`):
+  DataMapper has better performance and more comprehensive support:
+
+  ![](docs/jmh/copyProperties.svg)
+
+- **TCP Server** (`space.sunqian.common.net.tcp.TcpServer`):
+  Rare interface server implementation with slightly better performance than **netty**:
+
+  ![](docs/jmh/tcpServer.svg)
+
+## Zero Dependency
+
+_fs_ has no strong dependency on any other libraries (except for JDK and its own modules, and _fs-all_ aggregates the
+classes of all modules without module dependencies).
+It implements some of the classes under the `javax` package, such as `javax.annotation.Nonnull`, and based on this,
+implements its own null-related annotations:
+`space.sunqian.annotatations.Nonnull` and `space.sunqian.annotatations.Nullable`.
+
+Some functions of _fs_ are based on
+[ASM](https://asm.ow2.io) and [protobuf](https://github.com/protocolbuffers/protobuf), such as bytecode proxy, aspect,
+and object conversion about protobuf. But **only when needed**, ASM and protobuf are tried to be loaded from the current
+environment. If these features are not used, there is no need to add these dependencies in the current environment.
+
+## Test passing rate and coverage: 100%
+
+The test passing rate and coverage for this library are both 100%. (coverage tool: jacoco)
+
+## Samples:
 
 - [Annotations](./fs-tests/src/main/java/internal/samples/AnnotationSample.java)
 - [Simple Cache](./fs-tests/src/main/java/internal/samples/CacheSample.java)
 - [Dependency Injection](./fs-tests/src/main/java/internal/samples/DISample.java)
 - [Proxy and Aspect](./fs-tests/src/main/java/internal/samples/ProxyAndAspectSample.java)
+- [Object Conversion](./fs-tests/src/main/java/internal/samples/ObjectSamples.java)
 - [Net](./fs-tests/src/main/java/internal/samples/NetSample.java)
 - [Other samples](./fs-tests/src/main/java/internal/samples/OtherSamples.java)
 
@@ -48,7 +98,7 @@ cd fs && gradle clean build
 - manuals:
   * develop manual: [dev-manual.adoc](docs/dev-manual.adoc)
 - benchmarks:
-  * visualizer: [jmh-visualizer.html](docs/jmh/jmh-visualizer.html)
+  * visualizer: [jmh.html](docs/jmh/jmh.html)
   * json: [results.json](docs/jmh/results.json)
 
 ## Contact

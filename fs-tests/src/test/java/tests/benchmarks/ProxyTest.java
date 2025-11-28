@@ -1,6 +1,6 @@
 package tests.benchmarks;
 
-import internal.tests.common.ProxyApi;
+import internal.tests.api.ProxyApi;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,9 +9,11 @@ public class ProxyTest {
 
     @Test
     public void testProxy() throws Exception {
-        testProxy("original");
-        testProxy("jdk");
-        testProxy("asm");
+        testProxy("fs-asm");
+        testProxy("fs-jdk");
+        // testProxy("byte-buddy");
+        // testProxy("cglib");
+        testProxy("direct");
     }
 
     public void testProxy(String proxyType) throws Exception {

@@ -1,4 +1,4 @@
-package internal.tests.common;
+package internal.tests.api;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -14,11 +14,11 @@ public interface CacheApi<K, V> {
 
     static <K, V> CacheApi<K, V> createCache(String cacheType) {
         return switch (cacheType) {
-            case "simpleWeak" -> {
+            case "fs-simpleWeak" -> {
                 SimpleCache<K, V> cache = SimpleCache.ofWeak();
                 yield cache::get;
             }
-            case "simpleSoft" -> {
+            case "fs-simpleSoft" -> {
                 SimpleCache<K, V> cache = SimpleCache.ofSoft();
                 yield cache::get;
             }

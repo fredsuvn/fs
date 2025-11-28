@@ -1,10 +1,10 @@
 package space.sunqian.common.app.di;
 
+import space.sunqian.annotations.Immutable;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.OutParam;
 import space.sunqian.common.Fs;
-import space.sunqian.common.collect.ArrayKit;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.runtime.aspect.AspectMaker;
 import space.sunqian.common.runtime.aspect.AspectSpec;
@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -38,11 +39,13 @@ final class InjectedAppImpl implements InjectedApp {
     private final @Nonnull List<@Nonnull InjectedApp> parentApps;
 
     public InjectedAppImpl(
-        @Nonnull Set<@Nonnull Type> resourceTypes,
-        @Nonnull InjectedApp @Nonnull [] parentApps,
-        @Nonnull String @Nonnull [] resourceAnnotations,
-        @Nonnull String @Nonnull [] postConstructAnnotations,
-        @Nonnull String @Nonnull [] preDestroyAnnotations
+        @Nonnull Collection<@Nonnull Type> resourceTypes,
+        @Nonnull Collection<@Nonnull InjectedApp> parentApps,
+        @Nonnull Collection<@Nonnull String> resourceAnnotations,
+        @Nonnull Collection<@Nonnull String> postConstructAnnotations,
+        @Nonnull Collection<@Nonnull String> preDestroyAnnotations,
+        @Nonnull InjectedResource.Resolver resolver,
+        @Nonnull InjectedResource.FieldSetter fieldSetter
     ) throws InjectedResourceInitializationException, InjectedAppException {
         Map<Type, Res> resourceMap = new LinkedHashMap<>();
         // add parent resource into this app
@@ -54,12 +57,12 @@ final class InjectedAppImpl implements InjectedApp {
         Set<FieldRes> fieldSet = new LinkedHashSet<>();
         // generate instances
         for (Type resourceType : resourceTypes) {
-            dependencyInjection(
+            doDependencyInjection(
                 resourceType,
                 resourceAnnotations,
                 postConstructAnnotations,
                 preDestroyAnnotations,
-                // parentApps,
+                resolver,
                 resourceMap,
                 fieldSet
             );
@@ -67,13 +70,14 @@ final class InjectedAppImpl implements InjectedApp {
         // base injects:
         for (FieldRes fieldRes : fieldSet) {
             setField(
+                fieldSetter,
                 fieldRes.field,
                 fieldRes.owner.instance,
                 getRes(fieldRes.field.getGenericType(), resourceMap).instance
             );
         }
         // aop
-        aop(resourceMap, fieldSet);
+        doAop(fieldSetter, resourceMap, fieldSet);
         // resources
         Map<Type, InjectedResource> resources = new LinkedHashMap<>();
         InjectedResource[] allResources = new InjectedResource[resourceMap.size()];
@@ -81,7 +85,13 @@ final class InjectedAppImpl implements InjectedApp {
         int i = 0;
         for (Res res : resourceMap.values()) {
             Object inst = getResInstance(res);
-            InjectedResource simpleResource = new InjectedRes(res.type, inst, res.local, res.postConstruct, res.preDestroy);
+            InjectedResource simpleResource = new InjectedRes(
+                res.type,
+                inst,
+                res.local,
+                res.postConstructMethod(),
+                res.preDestroyMethod()
+            );
             resources.put(res.type, simpleResource);
             allResources[i++] = simpleResource;
             if (res.local) {
@@ -95,7 +105,7 @@ final class InjectedAppImpl implements InjectedApp {
                 localResources[i++] = res;
             }
         }
-        this.parentApps = ListKit.list(parentApps);
+        this.parentApps = ListKit.toList(parentApps);
         this.resources = Collections.unmodifiableMap(resources);
         this.localResources = ListKit.list(localResources);
         this.allResources = ListKit.list(allResources);
@@ -131,57 +141,43 @@ final class InjectedAppImpl implements InjectedApp {
         }
     }
 
-    private void dependencyInjection(
+    private void doDependencyInjection(
         @Nonnull Type type,
-        @Nonnull String @Nonnull [] resourceAnnotations,
-        @Nonnull String @Nonnull [] postConstructAnnotations,
-        @Nonnull String @Nonnull [] preDestroyAnnotations,
-        //@Nonnull InjectedApp @Nonnull [] dependencyApps,
+        @Nonnull Collection<@Nonnull String> resourceAnnotations,
+        @Nonnull Collection<@Nonnull String> postConstructAnnotations,
+        @Nonnull Collection<@Nonnull String> preDestroyAnnotations,
+        @Nonnull InjectedResource.Resolver resolver,
         @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> resourceMap,
         @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet
     ) throws InjectedAppException {
         if (resourceMap.containsKey(type)) {
             return;
         }
-        // for (InjectedApp dependency : dependencyApps) {
-        //     Object instance = dependency.getResource(type);
-        //     if (instance != null) {
-        //         Res res = new Res(type, instance);
-        //         resourceMap.put(type, res);
-        //         return;
-        //     }
-        // }
-        Class<?> rawClass = rawClass(type);
-        if (!canInstantiate(rawClass)) {
+        InjectedResource.Descriptor descriptor = Fs.uncheck(() ->
+                resolver.resolve(type, resourceAnnotations, postConstructAnnotations, preDestroyAnnotations),
+            InjectedAppException::new
+        );
+        if (!canInstantiate(descriptor.rawClass())) {
             return;
         }
-        Res res = new Res(type, rawClass, postConstructAnnotations, preDestroyAnnotations);
+        Res res = new Res(descriptor);
         resourceMap.put(type, res);
-        Class<?> cur = rawClass;
-        while (cur != null) {
-            FIELD:
-            for (Field declaredField : cur.getDeclaredFields()) {
-                int mod = declaredField.getModifiers();
-                if (Modifier.isFinal(mod)) {
-                    continue;
-                }
-                for (Annotation annotation : declaredField.getAnnotations()) {
-                    if (ArrayKit.indexOf(resourceAnnotations, annotation.annotationType().getName()) >= 0) {
-                        dependencyInjection(
-                            declaredField.getGenericType(),
-                            resourceAnnotations,
-                            postConstructAnnotations,
-                            preDestroyAnnotations,
-                            // dependencyApps,
-                            resourceMap,
-                            fieldSet
-                        );
-                        fieldSet.add(new FieldRes(declaredField, res));
-                        continue FIELD;
-                    }
-                }
+        for (Field dependencyField : descriptor.dependencyFields()) {
+            Type dependencyType = dependencyField.getGenericType();
+            if (dependencyType.equals(type)) {
+                fieldSet.add(new FieldRes(dependencyField, res));
+                continue;
             }
-            cur = cur.getSuperclass();
+            doDependencyInjection(
+                dependencyType,
+                resourceAnnotations,
+                postConstructAnnotations,
+                preDestroyAnnotations,
+                resolver,
+                resourceMap,
+                fieldSet
+            );
+            fieldSet.add(new FieldRes(dependencyField, res));
         }
     }
 
@@ -192,7 +188,8 @@ final class InjectedAppImpl implements InjectedApp {
         return !Modifier.isAbstract(type.getModifiers());
     }
 
-    private void aop(
+    private void doAop(
+        @Nonnull InjectedResource.FieldSetter fieldSetter,
         @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> resourceMap,
         @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet
     ) throws InjectedAppException {
@@ -220,7 +217,7 @@ final class InjectedAppImpl implements InjectedApp {
             }
             for (InjectedAspect aspect : aspects) {
                 if (aspect.needsAspect(res.type)) {
-                    AspectSpec spec = aspectMaker.make(res.rawClass, aspect);
+                    AspectSpec spec = aspectMaker.make(Fs.asNonnull(res.descriptor).rawClass(), aspect);
                     res.advisedInstance = spec.newInstance();
                     break;
                 }
@@ -245,20 +242,18 @@ final class InjectedAppImpl implements InjectedApp {
                 value = valueRes.instance;
             }
             if (needsRewrite) {
-                setField(fieldRes.field, owner, value);
+                setField(fieldSetter, fieldRes.field, owner, value);
             }
         }
     }
 
     private void setField(
+        @Nonnull InjectedResource.FieldSetter fieldSetter,
         @Nonnull Field field, @Nonnull Object owner, @Nonnull Object value
     ) throws InjectedAppException {
         Fs.uncheck(
             () -> {
-                boolean accessible = field.isAccessible();
-                field.setAccessible(true);
-                field.set(owner, value);
-                field.setAccessible(accessible);
+                fieldSetter.set(field, owner, value);
             },
             InjectedAppException::new
         );
@@ -407,42 +402,20 @@ final class InjectedAppImpl implements InjectedApp {
 
         private final @Nonnull Type type;
         private final boolean local;
-        private final Class<?> rawClass;
-        private final @Nullable Method postConstruct;
-        private final @Nullable Method preDestroy;
         private final @Nonnull Object instance;
+        private final @Nullable InjectedResource.Descriptor descriptor;
 
         private Object advisedInstance;
         private boolean isAspectHandler = false;
 
         private Res(
-            @Nonnull Type type,
-            @Nonnull Class<?> rawClass,
-            @Nonnull String @Nonnull [] postConstructAnnotations,
-            @Nonnull String @Nonnull [] preDestroyAnnotations
+            @Nonnull InjectedResource.Descriptor descriptor
         ) throws InjectedAppException {
-            this.type = type;
+            this.type = descriptor.type();
             this.local = true;
-            this.rawClass = rawClass;
-            Method postConstruct = null;
-            Method preDestroy = null;
-            for (Method method : rawClass.getMethods()) {
-                for (Annotation annotation : method.getAnnotations()) {
-                    if (ArrayKit.indexOf(postConstructAnnotations, annotation.annotationType().getName()) >= 0) {
-                        postConstruct = method;
-                    }
-                    if (ArrayKit.indexOf(preDestroyAnnotations, annotation.annotationType().getName()) >= 0) {
-                        preDestroy = method;
-                    }
-                }
-                if (postConstruct != null && preDestroy != null) {
-                    break;
-                }
-            }
-            this.postConstruct = postConstruct;
-            this.preDestroy = preDestroy;
+            this.descriptor = descriptor;
             try {
-                this.instance = Invocable.of(rawClass.getConstructor()).invoke(null);
+                this.instance = Invocable.of(descriptor.rawClass().getConstructor()).invoke(null);
             } catch (Exception e) {
                 throw new InjectedAppException("Creates instance for " + type.getTypeName() + " failed.", e);
             }
@@ -451,10 +424,16 @@ final class InjectedAppImpl implements InjectedApp {
         private Res(@Nonnull Type type, @Nonnull Object instance) {
             this.type = type;
             this.local = false;
-            this.rawClass = null;
-            this.postConstruct = null;
-            this.preDestroy = null;
+            this.descriptor = null;
             this.instance = instance;
+        }
+
+        public @Nullable Method postConstructMethod() {
+            return descriptor != null ? descriptor.postConstructMethod() : null;
+        }
+
+        public @Nullable Method preDestroyMethod() {
+            return descriptor != null ? descriptor.preDestroyMethod() : null;
         }
     }
 
@@ -543,6 +522,89 @@ final class InjectedAppImpl implements InjectedApp {
         @Override
         public boolean isDestroyed() {
             return state == 2;
+        }
+    }
+
+    enum Resolver implements InjectedResource.Resolver {
+
+        INST;
+
+        @Override
+        public InjectedResource.@Nonnull Descriptor resolve(
+            @Nonnull Type type,
+            @Nonnull Collection<@Nonnull String> resourceAnnotations,
+            @Nonnull Collection<@Nonnull String> postConstructAnnotations,
+            @Nonnull Collection<@Nonnull String> preDestroyAnnotations
+        ) throws Exception {
+            Class<?> rawClass = rawClass(type);
+            // fields
+            Field[] fields = rawClass.getDeclaredFields();
+            ArrayList<Field> dependencyFields = new ArrayList<>();
+            for (Field field : fields) {
+                int mod = field.getModifiers();
+                if (Modifier.isFinal(mod)) {
+                    continue;
+                }
+                for (Annotation annotation : field.getAnnotations()) {
+                    if (resourceAnnotations.contains(annotation.annotationType().getName())) {
+                        dependencyFields.add(field);
+                    }
+                }
+            }
+            dependencyFields.trimToSize();
+            List<Field> depFields = Collections.unmodifiableList(dependencyFields);
+            // methods
+            Method postConstruct = null;
+            Method preDestroy = null;
+            for (Method method : rawClass.getMethods()) {
+                for (Annotation annotation : method.getAnnotations()) {
+                    if (postConstructAnnotations.contains(annotation.annotationType().getName())) {
+                        postConstruct = method;
+                    }
+                    if (preDestroyAnnotations.contains(annotation.annotationType().getName())) {
+                        preDestroy = method;
+                    }
+                }
+            }
+            Method postConstructMethod = postConstruct;
+            Method preDestroyMethod = preDestroy;
+            return new InjectedResource.Descriptor() {
+                @Override
+                public @Nonnull Type type() {
+                    return type;
+                }
+
+                @Override
+                public @Nonnull Class<?> rawClass() {
+                    return rawClass;
+                }
+
+                @Override
+                public @Nullable Method postConstructMethod() {
+                    return postConstructMethod;
+                }
+
+                @Override
+                public @Nullable Method preDestroyMethod() {
+                    return preDestroyMethod;
+                }
+
+                @Override
+                public @Nonnull @Immutable List<@Nonnull Field> dependencyFields() {
+                    return depFields;
+                }
+            };
+        }
+    }
+
+    enum FieldSetter implements InjectedResource.FieldSetter {
+
+        INST;
+
+        @Override
+        public void set(@Nonnull Field field, @Nonnull Object owner, @Nonnull Object value) throws Exception {
+            field.setAccessible(true);
+            field.set(owner, value);
         }
     }
 

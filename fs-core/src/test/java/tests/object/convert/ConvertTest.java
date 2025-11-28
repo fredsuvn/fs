@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.chars.CharsKit;
-import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.base.date.DateFormatter;
 import space.sunqian.common.base.date.DateKit;
+import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.collect.ArrayKit;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.collect.MapKit;
@@ -207,10 +207,12 @@ public class ConvertTest implements PrintTest {
         Type nonClass = X.class.getTypeParameters()[0];
         {
             // to Number
-            Date now = new Date();
+            assertEquals(123.0, converter.convert(123, double.class));
+            assertEquals(123.0, converter.convert(123, int.class, Double.class));
             assertEquals(123, converter.convert("123", int.class));
             assertEquals(123L, converter.convert("123", long.class));
             assertEquals(123L, converter.convert("123", Long.class));
+            Date now = new Date();
             assertEquals(converter.convert(now, long.class), now.getTime());
             assertEquals(converter.convert(now.toInstant(), Long.class), now.getTime());
             assertEquals(123L, converter.convert(123, long.class));

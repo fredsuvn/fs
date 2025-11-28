@@ -1,7 +1,7 @@
 package tests.benchmarks;
 
-import internal.tests.common.CommonData;
-import internal.tests.common.PropertiesCopier;
+import internal.tests.common.TestPropsData;
+import internal.tests.api.PropertiesCopier;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -15,11 +15,11 @@ public class PropertiesCopierTest {
         testCopier("fs");
         testCopier("apache");
         testCopier("hutool");
-        testCopier("original");
+        testCopier("direct");
     }
 
     public void testCopier(String copierType) throws Exception {
-        CommonData data = new CommonData();
+        TestPropsData data = new TestPropsData();
         data.setI1(1);
         data.setL1(2L);
         data.setStr1("hello");
@@ -32,7 +32,7 @@ public class PropertiesCopierTest {
         data.setIi2(3);
         data.setLl2(4L);
         data.setBb2(new BigDecimal("5.0"));
-        CommonData copy = new CommonData();
+        TestPropsData copy = new TestPropsData();
         PropertiesCopier copier = PropertiesCopier.createCopier(copierType);
         copier.copyProperties(data, copy);
         assertEquals(data, copy);
