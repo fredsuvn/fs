@@ -379,7 +379,9 @@
   </div>
 
   <div class="global-controls">
+    <!--
     <button id="globalSortBtn" class="secondary">Global Sort by Score</button>
+    -->
     <button id="toggleAllGroupsBtn">Collapse All Groups</button>
     <button id="globalChartTypeBtn">Switch to Horizontal Bars</button>
     <button id="globalRendererBtn">Switch to Canvas</button>
@@ -407,7 +409,7 @@
   const browseBtn = document.getElementById('browseBtn');
   const resultsContainer = document.getElementById('resultsContainer');
   const tocContainer = document.getElementById('tocContainer');
-  const globalSortBtn = document.getElementById('globalSortBtn');
+  // const globalSortBtn = document.getElementById('globalSortBtn');
   const toggleAllGroupsBtn = document.getElementById('toggleAllGroupsBtn');
   const globalChartTypeBtn = document.getElementById('globalChartTypeBtn');
   const globalRendererBtn = document.getElementById('globalRendererBtn');
@@ -463,7 +465,7 @@
       });
 
       // 全局控制按钮
-      globalSortBtn.addEventListener('click', toggleGlobalSort);
+      // globalSortBtn.addEventListener('click', toggleGlobalSort);
       toggleAllGroupsBtn.addEventListener('click', toggleAllGroups);
       globalChartTypeBtn.addEventListener('click', toggleGlobalChartType);
       globalRendererBtn.addEventListener('click', toggleGlobalRenderer);
@@ -562,11 +564,11 @@
       const groups = {};
 
       data.forEach(benchmark => {
-          const className = benchmark.benchmark;
+          const fullMethodName = benchmark.benchmark;
+          const className = fullMethodName.substring(0, fullMethodName.lastIndexOf('.'));
           // 获取简单类名（最后一个.后面的部分）
-          const names = className.split('.');
+          const names = fullMethodName.split('.');
           const simpleClassName = names[names.length - 2];
-          // const methodName = names[names.length - 1];
 
           if (!groups[className]) {
               groups[className] = {
@@ -574,7 +576,6 @@
                   params: new Set(),
                   primaryMetric: benchmark.primaryMetric,
                   simpleClassName: simpleClassName,
-                  // methodName: methodName
               };
           }
 
@@ -754,7 +755,7 @@
 
       const chartTitle = document.createElement('div');
       chartTitle.className = 'chart-title';
-      chartTitle.textContent = `${group.simpleClassName} - Performance Results`;
+      chartTitle.textContent = `Performance Results:`;
 
       const chartControls = document.createElement('div');
       chartControls.className = 'chart-controls';
@@ -1205,6 +1206,7 @@
       rows.forEach(row => tbody.appendChild(row));
   }
 
+  <!--
   function toggleGlobalSort() {
       globalSortOrder = globalSortOrder === 'desc' ? 'asc' : 'desc';
       globalSortBtn.textContent = `Global Sort by Score (${globalSortOrder.toUpperCase()})`;
@@ -1229,6 +1231,7 @@
           renderResults(groupedData);
       }
   }
+  -->
 
   function toggleAllGroups() {
       const groupContents = document.querySelectorAll('.group-content');
