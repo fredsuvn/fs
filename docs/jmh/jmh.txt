@@ -1,6 +1,6 @@
-帮我生成一个可以解析jmh结果results.json的本地html，可以用图标展现结果，要求如下：
+帮我生成一个可以解析benchmark(jmh)结果results.json的本地html，可以用图标展现结果，要求如下：
 只生成一个html，css和js包括在内；
-页脚要注明Created by [自己的名字]；
+页脚要注明Created by [你的名字]；
 图表支持svg和canvas双格式切换（包括全局和每个图表）；
 results.json默认就在和html同目录，也支持文件拖拽方式上传results.json(但是拖拽默认折叠)；
 每个svg格式的图表，支持一键复制svg代码；

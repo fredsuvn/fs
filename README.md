@@ -24,8 +24,9 @@ _fs_ is a lightweight, high-performance, zero-dependency tool lib for java. It p
 
 _fs_ provides adaptive implementation loading that automatically selects the optimal class version based on the runtime
 JDK environment (from Java 8 to Java 17). Its main code is based on Java 8, but some interfaces have multiple
-implementation classes of different jdk versions. For example, the implementation class of
-`space.sunqian.common.net.http.HttpCaller` has two versions:
+implementation classes of different jdk versions.
+
+For example, the implementation class of `space.sunqian.common.net.http.HttpCaller` has two versions:
 `of JDK8` and `of JDK11`. The former is based on `java.net.HttpURLConnection`, and the latter is based on
 `java.net.http.HttpClient`.
 
@@ -54,6 +55,19 @@ _fs_ has higher performance than other common libraries in many places, Here are
   Rare interface server implementation with slightly better performance than **netty**:
 
   ![](docs/jmh/tcpServer.svg)
+
+## Zero Dependency
+
+_fs_ has no strong dependency on any other libraries (except for JDK and its own modules, and _fs-all_ aggregates the
+classes of all modules without module dependencies).
+It implements some of the classes under the `javax` package, such as `javax.annotation.Nonnull`, and based on this,
+implements its own null-related annotations:
+`space.sunqian.annotatations.Nonnull` and `space.sunqian.annotatations.Nullable`.
+
+Some functions of _fs_ are based on
+[ASM](https://asm.ow2.io) and [protobuf](https://github.com/protocolbuffers/protobuf), such as bytecode proxy, aspect,
+and object conversion about protobuf. But **only when needed**, ASM and protobuf are tried to be loaded from the current
+environment. If these features are not used, there is no need to add these dependencies in the current environment.
 
 ## Test passing rate and coverage: 100%
 
