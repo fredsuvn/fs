@@ -23,14 +23,8 @@ dependencies {
   jmh(project(":fs-internal"))
   jmh("org.openjdk.jmh:jmh-generator-annprocess")
 
-  testImplementation(platform(project(":fs-dependencies")))
-  testImplementation(project(":fs-internal"))
-}
-
-java {
-  toolchain {
-    languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
-  }
+  //testImplementation(platform(project(":fs-dependencies")))
+  //testImplementation(project(":fs-internal"))
 }
 
 sourceSets {

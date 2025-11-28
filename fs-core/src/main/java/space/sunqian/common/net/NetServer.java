@@ -53,19 +53,19 @@ public interface NetServer<A> extends Cloneable {
     boolean isClosed();
 
     /**
-     * Represents the worker of the server. A worker typically is responsible for handling connected clients, with a
-     * delicated thread.
+     * Represents the worker of the server. A worker is typically responsible for handling connections with a delicated
+     * thread.
      *
      * @author sunqian
      */
     interface Worker {
 
         /**
-         * Returns the number of connected clients this worker handles.
+         * Returns the number of connections this worker handles.
          *
-         * @return the number of connected clients this worker handles
+         * @return the number of connections this worker handles
          */
-        int clientCount();
+        int connectionNumber();
 
         /**
          * Returns the thread this worker runs on.

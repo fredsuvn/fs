@@ -1,6 +1,6 @@
 package tests.benchmarks;
 
-import internal.tests.common.AspectApi;
+import internal.tests.api.AspectApi;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,8 +9,9 @@ public class AspectTest {
 
     @Test
     public void testAspect() throws Exception {
-        testAspect("original");
-        testAspect("asm");
+        testAspect("fs-asm");
+        // testAspect("byte-buddy");
+        testAspect("direct");
     }
 
     public void testAspect(String aspectType) throws Exception {

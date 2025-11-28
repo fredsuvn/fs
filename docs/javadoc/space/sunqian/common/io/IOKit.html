@@ -219,9 +219,26 @@ loadScripts(document, 'script');</script>
  returns the actual number of bytes read to.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.io.InputStream,java.io.OutputStream,long)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.io.InputStream,java.io.OutputStream,byte%5B%5D)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads available data from the input stream into the output stream, until no data is immediately available, and
+ returns the actual number of bytes read to.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.io.InputStream,java.io.OutputStream,long)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
  <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
  long&nbsp;len)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads a specified length of data from the input stream into the output stream, until the read number reaches the
+ specified length or no data is immediately available, returns the actual number of bytes read to.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.io.InputStream,java.io.OutputStream,long,byte%5B%5D)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Reads a specified length of data from the input stream into the output stream, until the read number reaches the
  specified length or no data is immediately available, returns the actual number of bytes read to.</div>
@@ -250,9 +267,26 @@ loadScripts(document, 'script');</script>
  returns the actual number of bytes read to.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.io.InputStream,java.nio.channels.WritableByteChannel,long)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.io.InputStream,java.nio.channels.WritableByteChannel,byte%5B%5D)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads available data from the input stream into the output channel, until no data is immediately available, and
+ returns the actual number of bytes read to.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.io.InputStream,java.nio.channels.WritableByteChannel,long)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
  <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
  long&nbsp;len)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads a specified length of data from the input stream into the output channel, until the read number reaches the
+ specified length or no data is immediately available, returns the actual number of bytes read to.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.io.InputStream,java.nio.channels.WritableByteChannel,long,byte%5B%5D)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Reads a specified length of data from the input stream into the output channel, until the read number reaches the
  specified length or no data is immediately available, returns the actual number of bytes read to.</div>
@@ -282,9 +316,26 @@ loadScripts(document, 'script');</script>
  actual number of chars read to.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.io.Reader,java.lang.Appendable,long)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Reader.html" title="class or interface in java.io" class="external-link">Reader</a>&nbsp;src,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.io.Reader,java.lang.Appendable,char%5B%5D)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Reader.html" title="class or interface in java.io" class="external-link">Reader</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Appendable.html" title="class or interface in java.lang" class="external-link">Appendable</a>&nbsp;dst,
+ char <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads available data from the reader into the appender, until no data is immediately available, and returns the
+ actual number of chars read to.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.io.Reader,java.lang.Appendable,long)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Reader.html" title="class or interface in java.io" class="external-link">Reader</a>&nbsp;src,
  <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Appendable.html" title="class or interface in java.lang" class="external-link">Appendable</a>&nbsp;dst,
  long&nbsp;len)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads a specified length of data from the reader into the appender, until the read number reaches the specified
+ length or no data is immediately available, returns the actual number of chars read to.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.io.Reader,java.lang.Appendable,long,char%5B%5D)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Reader.html" title="class or interface in java.io" class="external-link">Reader</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Appendable.html" title="class or interface in java.lang" class="external-link">Appendable</a>&nbsp;dst,
+ long&nbsp;len,
+ char <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Reads a specified length of data from the reader into the appender, until the read number reaches the specified
  length or no data is immediately available, returns the actual number of chars read to.</div>
@@ -330,9 +381,26 @@ loadScripts(document, 'script');</script>
  returns the actual number of bytes read to.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.nio.channels.ReadableByteChannel,java.io.OutputStream,long)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.nio.channels.ReadableByteChannel,java.io.OutputStream,byte%5B%5D)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads available data from the input channel into the output stream, until no data is immediately available, and
+ returns the actual number of bytes read to.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.nio.channels.ReadableByteChannel,java.io.OutputStream,long)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
  <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
  long&nbsp;len)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads a specified length of data from the input channel into the output stream, until the read number reaches the
+ specified length or no data is immediately available, returns the actual number of bytes read to.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.nio.channels.ReadableByteChannel,java.io.OutputStream,long,byte%5B%5D)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Reads a specified length of data from the input channel into the output stream, until the read number reaches the
  specified length or no data is immediately available, returns the actual number of bytes read to.</div>
@@ -361,9 +429,26 @@ loadScripts(document, 'script');</script>
  available, and returns the actual number of bytes read to.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.nio.channels.ReadableByteChannel,java.nio.channels.WritableByteChannel,long)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.nio.channels.ReadableByteChannel,java.nio.channels.WritableByteChannel,byte%5B%5D)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads available data from the source channel into the destination channel, until no data is immediately
+ available, and returns the actual number of bytes read to.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.nio.channels.ReadableByteChannel,java.nio.channels.WritableByteChannel,long)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
  <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
  long&nbsp;len)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads a specified length of data from the source channel into the destination channel, until the read number
+ reaches the specified length or no data is immediately available, returns the actual number of bytes read to.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#availableTo(java.nio.channels.ReadableByteChannel,java.nio.channels.WritableByteChannel,long,byte%5B%5D)" class="member-name-link">availableTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Reads a specified length of data from the source channel into the destination channel, until the read number
  reaches the specified length or no data is immediately available, returns the actual number of bytes read to.</div>
@@ -647,9 +732,26 @@ loadScripts(document, 'script');</script>
  the actual number of bytes read to.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.io.InputStream,java.io.OutputStream,long)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.io.InputStream,java.io.OutputStream,byte%5B%5D)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads data from the input stream into the output stream, until reaches the end of the input stream, and returns
+ the actual number of bytes read to.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.io.InputStream,java.io.OutputStream,long)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
  <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
  long&nbsp;len)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads a specified length of data from the input stream into the output stream, until the read number reaches the
+ specified length or reaches the end of the input stream, returns the actual number of bytes read to.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.io.InputStream,java.io.OutputStream,long,byte%5B%5D)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Reads a specified length of data from the input stream into the output stream, until the read number reaches the
  specified length or reaches the end of the input stream, returns the actual number of bytes read to.</div>
@@ -677,9 +779,26 @@ loadScripts(document, 'script');</script>
  the actual number of bytes read to.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.io.InputStream,java.nio.channels.WritableByteChannel,long)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.io.InputStream,java.nio.channels.WritableByteChannel,byte%5B%5D)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads data from the input stream into the output channel, until reaches the end of the input stream, and returns
+ the actual number of bytes read to.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.io.InputStream,java.nio.channels.WritableByteChannel,long)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
  <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
  long&nbsp;len)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads a specified length of data from the input stream into the output channel, until the read number reaches the
+ specified length or reaches the end of the input stream, returns the actual number of bytes read to.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.io.InputStream,java.nio.channels.WritableByteChannel,long,byte%5B%5D)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Reads a specified length of data from the input stream into the output channel, until the read number reaches the
  specified length or reaches the end of the input stream, returns the actual number of bytes read to.</div>
@@ -709,9 +828,26 @@ loadScripts(document, 'script');</script>
  of chars read to.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.io.Reader,java.lang.Appendable,long)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Reader.html" title="class or interface in java.io" class="external-link">Reader</a>&nbsp;src,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.io.Reader,java.lang.Appendable,char%5B%5D)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Reader.html" title="class or interface in java.io" class="external-link">Reader</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Appendable.html" title="class or interface in java.lang" class="external-link">Appendable</a>&nbsp;dst,
+ char <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads data from the reader into the appender, until reaches the end of the reader, and returns the actual number
+ of chars read to.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.io.Reader,java.lang.Appendable,long)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Reader.html" title="class or interface in java.io" class="external-link">Reader</a>&nbsp;src,
  <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Appendable.html" title="class or interface in java.lang" class="external-link">Appendable</a>&nbsp;dst,
  long&nbsp;len)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads a specified length of data from the reader into the appender, until the read number reaches the specified
+ length or reaches the end of the reader, returns the actual number of chars read to.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.io.Reader,java.lang.Appendable,long,char%5B%5D)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Reader.html" title="class or interface in java.io" class="external-link">Reader</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Appendable.html" title="class or interface in java.lang" class="external-link">Appendable</a>&nbsp;dst,
+ long&nbsp;len,
+ char <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Reads a specified length of data from the reader into the appender, until the read number reaches the specified
  length or reaches the end of the reader, returns the actual number of chars read to.</div>
@@ -756,9 +892,26 @@ loadScripts(document, 'script');</script>
  the actual number of bytes read to.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.nio.channels.ReadableByteChannel,java.io.OutputStream,long)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.nio.channels.ReadableByteChannel,java.io.OutputStream,byte%5B%5D)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads data from the input channel into the output stream, until reaches the end of the input channel, and returns
+ the actual number of bytes read to.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.nio.channels.ReadableByteChannel,java.io.OutputStream,long)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
  <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
  long&nbsp;len)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads a specified length of data from the input channel into the output stream, until the read number reaches the
+ specified length or reaches the end of the input channel, returns the actual number of bytes read to.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.nio.channels.ReadableByteChannel,java.io.OutputStream,long,byte%5B%5D)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Reads a specified length of data from the input channel into the output stream, until the read number reaches the
  specified length or reaches the end of the input channel, returns the actual number of bytes read to.</div>
@@ -787,9 +940,27 @@ loadScripts(document, 'script');</script>
  returns the actual number of bytes read to.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.nio.channels.ReadableByteChannel,java.nio.channels.WritableByteChannel,long)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.nio.channels.ReadableByteChannel,java.nio.channels.WritableByteChannel,byte%5B%5D)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads data from the source channel into the destination channel, until reaches the end of the source channel, and
+ returns the actual number of bytes read to.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.nio.channels.ReadableByteChannel,java.nio.channels.WritableByteChannel,long)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
  <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
  long&nbsp;len)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Reads a specified length of data from the source channel into the destination channel, until the read number
+ reaches the specified length or reaches the end of the source channel, returns the actual number of bytes read
+ to.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readTo(java.nio.channels.ReadableByteChannel,java.nio.channels.WritableByteChannel,long,byte%5B%5D)" class="member-name-link">readTo</a><wbr>(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Reads a specified length of data from the source channel into the destination channel, until the read number
  reaches the specified length or reaches the end of the source channel, returns the actual number of bytes read
@@ -1185,6 +1356,124 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="readTo(java.io.InputStream,java.io.OutputStream,byte[])">
+<h3>readTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">readTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                   throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads data from the input stream into the output stream, until reaches the end of the input stream, and returns
+ the actual number of bytes read to.
+ <p>
+ If reaches the end of the input stream and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the input stream</dd>
+<dd><code>dst</code> - the output stream</dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, or <code>-1</code> if reaches the end of the input stream and no data is
+ read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="readTo(java.io.InputStream,java.io.OutputStream,long,byte[])">
+<h3>readTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">readTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                   throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads a specified length of data from the input stream into the output stream, until the read number reaches the
+ specified length or reaches the end of the input stream, returns the actual number of bytes read to.
+ <p>
+ If the specified length is <code>0</code>, returns <code>0</code> without reading; if reaches the end of the input stream
+ and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the input stream</dd>
+<dd><code>dst</code> - the output stream</dd>
+<dd><code>len</code> - the specified length, must <code>&gt;= 0</code></dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, or <code>-1</code> if reaches the end of the input stream and no data is
+ read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified read length or buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="readTo(java.io.InputStream,java.nio.channels.WritableByteChannel,byte[])">
+<h3>readTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">readTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                   throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads data from the input stream into the output channel, until reaches the end of the input stream, and returns
+ the actual number of bytes read to.
+ <p>
+ If reaches the end of the input stream and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the input stream</dd>
+<dd><code>dst</code> - the output channel</dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, or <code>-1</code> if reaches the end of the input stream and no data is
+ read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="readTo(java.io.InputStream,java.nio.channels.WritableByteChannel,long,byte[])">
+<h3>readTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">readTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                   throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads a specified length of data from the input stream into the output channel, until the read number reaches the
+ specified length or reaches the end of the input stream, returns the actual number of bytes read to.
+ <p>
+ If the specified length is <code>0</code>, returns <code>0</code> without reading; if reaches the end of the input stream
+ and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the input stream</dd>
+<dd><code>dst</code> - the output channel</dd>
+<dd><code>len</code> - the specified length, must <code>&gt;= 0</code></dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, or <code>-1</code> if reaches the end of the input stream and no data is
+ read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified read length or buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="readTo(java.io.InputStream,byte[])">
 <h3>readTo</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">readTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
@@ -1400,6 +1689,125 @@ loadScripts(document, 'script');</script>
  read</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified read length is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="readTo(java.nio.channels.ReadableByteChannel,java.io.OutputStream,byte[])">
+<h3>readTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">readTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                   throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads data from the input channel into the output stream, until reaches the end of the input channel, and returns
+ the actual number of bytes read to.
+ <p>
+ If reaches the end of the input channel and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the input channel</dd>
+<dd><code>dst</code> - the output stream</dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, or <code>-1</code> if reaches the end of the input channel and no data is
+ read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="readTo(java.nio.channels.ReadableByteChannel,java.io.OutputStream,long,byte[])">
+<h3>readTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">readTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                   throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads a specified length of data from the input channel into the output stream, until the read number reaches the
+ specified length or reaches the end of the input channel, returns the actual number of bytes read to.
+ <p>
+ If the specified length is <code>0</code>, returns <code>0</code> without reading; if reaches the end of the input channel
+ and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the input channel</dd>
+<dd><code>dst</code> - the output stream</dd>
+<dd><code>len</code> - the specified length, must <code>&gt;= 0</code></dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, or <code>-1</code> if reaches the end of the input channel and no data is
+ read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified read length or buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="readTo(java.nio.channels.ReadableByteChannel,java.nio.channels.WritableByteChannel,byte[])">
+<h3>readTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">readTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                   throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads data from the source channel into the destination channel, until reaches the end of the source channel, and
+ returns the actual number of bytes read to.
+ <p>
+ If reaches the end of the source channel and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the source channel</dd>
+<dd><code>dst</code> - the destination channel</dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, or <code>-1</code> if reaches the end of the source channel and no data is
+ read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="readTo(java.nio.channels.ReadableByteChannel,java.nio.channels.WritableByteChannel,long,byte[])">
+<h3>readTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">readTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                   throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads a specified length of data from the source channel into the destination channel, until the read number
+ reaches the specified length or reaches the end of the source channel, returns the actual number of bytes read
+ to.
+ <p>
+ If the specified length is <code>0</code>, returns <code>0</code> without reading; if reaches the end of the source channel
+ and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the source channel</dd>
+<dd><code>dst</code> - the destination channel</dd>
+<dd><code>len</code> - the specified length, must <code>&gt;= 0</code></dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, or <code>-1</code> if reaches the end of the source channel and no data is
+ read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified read length or buffer size is illegal</dd>
 <dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
 </dl>
 </section>
@@ -1755,6 +2163,63 @@ loadScripts(document, 'script');</script>
 <dd>the actual number of chars read to, or <code>-1</code> if reaches the end of the reader and no data is read</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified read length is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="readTo(java.io.Reader,java.lang.Appendable,char[])">
+<h3>readTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">readTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Reader.html" title="class or interface in java.io" class="external-link">Reader</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Appendable.html" title="class or interface in java.lang" class="external-link">Appendable</a>&nbsp;dst,
+ char <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                   throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads data from the reader into the appender, until reaches the end of the reader, and returns the actual number
+ of chars read to.
+ <p>
+ If reaches the end of the reader and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the reader</dd>
+<dd><code>dst</code> - the appender</dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of chars read to, or <code>-1</code> if reaches the end of the reader and no data is read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="readTo(java.io.Reader,java.lang.Appendable,long,char[])">
+<h3>readTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">readTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Reader.html" title="class or interface in java.io" class="external-link">Reader</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Appendable.html" title="class or interface in java.lang" class="external-link">Appendable</a>&nbsp;dst,
+ long&nbsp;len,
+ char <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                   throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads a specified length of data from the reader into the appender, until the read number reaches the specified
+ length or reaches the end of the reader, returns the actual number of chars read to.
+ <p>
+ If the specified length is <code>0</code>, returns <code>0</code> without reading; if reaches the end of the reader and no
+ data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the reader</dd>
+<dd><code>dst</code> - the appender</dd>
+<dd><code>len</code> - the specified length, must <code>&gt;= 0</code></dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of chars read to, or <code>-1</code> if reaches the end of the reader and no data is read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified buffer size or length is illegal</dd>
 <dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
 </dl>
 </section>
@@ -2128,6 +2593,124 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="availableTo(java.io.InputStream,java.io.OutputStream,byte[])">
+<h3>availableTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">availableTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                        throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads available data from the input stream into the output stream, until no data is immediately available, and
+ returns the actual number of bytes read to.
+ <p>
+ If reaches the end of the input stream and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the input stream</dd>
+<dd><code>dst</code> - the output stream</dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, possibly <code>0</code>, or <code>-1</code> if reaches the end of the input
+ stream and no data is read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="availableTo(java.io.InputStream,java.io.OutputStream,long,byte[])">
+<h3>availableTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">availableTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                        throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads a specified length of data from the input stream into the output stream, until the read number reaches the
+ specified length or no data is immediately available, returns the actual number of bytes read to.
+ <p>
+ If the specified length is <code>0</code>, returns <code>0</code> without reading; if reaches the end of the input stream
+ and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the input stream</dd>
+<dd><code>dst</code> - the output stream</dd>
+<dd><code>len</code> - the specified length, must <code>&gt;= 0</code></dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, possibly <code>0</code>, or <code>-1</code> if reaches the end of the input
+ stream and no data is read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified read length or buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="availableTo(java.io.InputStream,java.nio.channels.WritableByteChannel,byte[])">
+<h3>availableTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">availableTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                        throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads available data from the input stream into the output channel, until no data is immediately available, and
+ returns the actual number of bytes read to.
+ <p>
+ If reaches the end of the input stream and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the input stream</dd>
+<dd><code>dst</code> - the output channel</dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, possibly <code>0</code>, or <code>-1</code> if reaches the end of the input
+ stream and no data is read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="availableTo(java.io.InputStream,java.nio.channels.WritableByteChannel,long,byte[])">
+<h3>availableTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">availableTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html" title="class or interface in java.io" class="external-link">InputStream</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                        throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads a specified length of data from the input stream into the output channel, until the read number reaches the
+ specified length or no data is immediately available, returns the actual number of bytes read to.
+ <p>
+ If the specified length is <code>0</code>, returns <code>0</code> without reading; if reaches the end of the input stream
+ and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the input stream</dd>
+<dd><code>dst</code> - the output channel</dd>
+<dd><code>len</code> - the specified length, must <code>&gt;= 0</code></dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, possibly <code>0</code>, or <code>-1</code> if reaches the end of the input
+ stream and no data is read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified read length or buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="availableTo(java.io.InputStream,byte[])">
 <h3>availableTo</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">availableTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
@@ -2343,6 +2926,124 @@ loadScripts(document, 'script');</script>
  channel and no data is read</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified read length is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="availableTo(java.nio.channels.ReadableByteChannel,java.io.OutputStream,byte[])">
+<h3>availableTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">availableTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                        throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads available data from the input channel into the output stream, until no data is immediately available, and
+ returns the actual number of bytes read to.
+ <p>
+ If reaches the end of the input channel and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the input channel</dd>
+<dd><code>dst</code> - the output stream</dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, possibly <code>0</code>, or <code>-1</code> if reaches the end of the input
+ channel and no data is read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="availableTo(java.nio.channels.ReadableByteChannel,java.io.OutputStream,long,byte[])">
+<h3>availableTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">availableTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/OutputStream.html" title="class or interface in java.io" class="external-link">OutputStream</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                        throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads a specified length of data from the input channel into the output stream, until the read number reaches the
+ specified length or no data is immediately available, returns the actual number of bytes read to.
+ <p>
+ If the specified length is <code>0</code>, returns <code>0</code> without reading; if reaches the end of the input channel
+ and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the input channel</dd>
+<dd><code>dst</code> - the output stream</dd>
+<dd><code>len</code> - the specified length, must <code>&gt;= 0</code></dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, possibly <code>0</code>, or <code>-1</code> if reaches the end of the input
+ channel and no data is read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified read length or buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="availableTo(java.nio.channels.ReadableByteChannel,java.nio.channels.WritableByteChannel,byte[])">
+<h3>availableTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">availableTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                        throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads available data from the source channel into the destination channel, until no data is immediately
+ available, and returns the actual number of bytes read to.
+ <p>
+ If reaches the end of the source channel and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the source channel</dd>
+<dd><code>dst</code> - the destination channel</dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, possibly <code>0</code>, or <code>-1</code> if reaches the end of the source
+ channel and no data is read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="availableTo(java.nio.channels.ReadableByteChannel,java.nio.channels.WritableByteChannel,long,byte[])">
+<h3>availableTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">availableTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/WritableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">WritableByteChannel</a>&nbsp;dst,
+ long&nbsp;len,
+ byte <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                        throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads a specified length of data from the source channel into the destination channel, until the read number
+ reaches the specified length or no data is immediately available, returns the actual number of bytes read to.
+ <p>
+ If the specified length is <code>0</code>, returns <code>0</code> without reading; if reaches the end of the source channel
+ and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the source channel</dd>
+<dd><code>dst</code> - the destination channel</dd>
+<dd><code>len</code> - the specified length, must <code>&gt;= 0</code></dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of bytes read to, possibly <code>0</code>, or <code>-1</code> if reaches the end of the source
+ channel and no data is read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified read length or buffer size is illegal</dd>
 <dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
 </dl>
 </section>
@@ -2698,6 +3399,65 @@ loadScripts(document, 'script');</script>
  and no data is read</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified read length is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="availableTo(java.io.Reader,java.lang.Appendable,char[])">
+<h3>availableTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">availableTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Reader.html" title="class or interface in java.io" class="external-link">Reader</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Appendable.html" title="class or interface in java.lang" class="external-link">Appendable</a>&nbsp;dst,
+ char <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                        throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads available data from the reader into the appender, until no data is immediately available, and returns the
+ actual number of chars read to.
+ <p>
+ If reaches the end of the reader and no data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the reader</dd>
+<dd><code>dst</code> - the appender</dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of chars read to, possibly <code>0</code>, or <code>-1</code> if reaches the end of the reader
+ and no data is read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified buffer size is illegal</dd>
+<dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="availableTo(java.io.Reader,java.lang.Appendable,long,char[])">
+<h3>availableTo</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">availableTo</span><wbr><span class="parameters">(<a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Reader.html" title="class or interface in java.io" class="external-link">Reader</a>&nbsp;src,
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Appendable.html" title="class or interface in java.lang" class="external-link">Appendable</a>&nbsp;dst,
+ long&nbsp;len,
+ char <a href="../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> []&nbsp;buf)</span>
+                        throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
+<a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block">Reads a specified length of data from the reader into the appender, until the read number reaches the specified
+ length or no data is immediately available, returns the actual number of chars read to.
+ <p>
+ If the specified length is <code>0</code>, returns <code>0</code> without reading; if reaches the end of the reader and no
+ data is read, returns <code>-1</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>src</code> - the reader</dd>
+<dd><code>dst</code> - the appender</dd>
+<dd><code>len</code> - the specified length, must <code>&gt;= 0</code></dd>
+<dd><code>buf</code> - the buffer used to read data</dd>
+<dt>Returns:</dt>
+<dd>the actual number of chars read to, possibly <code>0</code>, or <code>-1</code> if reaches the end of the reader
+ and no data is read</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the specified buffer size or length is illegal</dd>
 <dd><code><a href="IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an I/O error occurs</dd>
 </dl>
 </section>

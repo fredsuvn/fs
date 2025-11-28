@@ -28,15 +28,19 @@ dependencies {
   api("org.bouncycastle:bcprov-jdk18on")
   api("org.springframework:spring-core")
   api("cglib:cglib")
+  api("net.bytebuddy:byte-buddy")
+  api("net.bytebuddy:byte-buddy-agent")
   api("org.springframework:spring-beans")
   api("org.projectlombok:lombok")
   api("org.mockito:mockito-core")
   api("org.jboss:jboss-vfs")
 }
 
+val javaVersionLow = project.property("javaLanguageVersionLow") as JavaLanguageVersion
+
 java {
   toolchain {
-    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
+    languageVersion = javaVersionLow
   }
 }
 
@@ -51,7 +55,7 @@ tasks.test {
     html.required = false
   }
   javaLauncher = javaToolchains.launcherFor {
-    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
+    languageVersion = javaVersionLow
   }
 }
 

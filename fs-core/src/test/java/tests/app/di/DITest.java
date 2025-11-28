@@ -53,6 +53,8 @@ public class DITest implements PrintTest {
             .resourceAnnotation(TestRes.class)
             .postConstructAnnotation(TestPost.class)
             .preDestroyAnnotation(TestPre.class)
+            .resourceResolver(InjectedResource.defaultResolver())
+            .fieldSetter(InjectedResource.defaultFieldSetter())
             .build();
         assertEquals(
             postList,
@@ -226,6 +228,9 @@ public class DITest implements PrintTest {
     public static class ServiceAaa {
 
         @TestRes
+        private ServiceAaa serviceAaa;
+
+        @TestRes
         private ServiceBbb serviceBbb;
 
         private final String name = "A";
@@ -241,6 +246,11 @@ public class DITest implements PrintTest {
 
         public String getRemoteName() {
             return serviceBbb.getLocalName();
+        }
+
+        @TestPost
+        public void checkSelf() {
+            assertSame(serviceAaa, serviceAaa);
         }
     }
 

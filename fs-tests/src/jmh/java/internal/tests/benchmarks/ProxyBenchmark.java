@@ -1,6 +1,6 @@
 package internal.tests.benchmarks;
 
-import internal.tests.common.ProxyApi;
+import internal.tests.api.ProxyApi;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -31,9 +31,11 @@ import java.util.concurrent.TimeUnit;
 public class ProxyBenchmark {
 
     @Param({
-        "asm",
-        "jdk",
-        "original",
+        "fs-asm",
+        "fs-jdk",
+        //"byte-buddy",
+        //"cglib",
+        "direct",
     })
     private String proxyType;
 
@@ -46,7 +48,7 @@ public class ProxyBenchmark {
     private ProxyApi proxy;
 
     @Setup(Level.Trial)
-    public void setup() {
+    public void setup() throws Exception {
         this.proxy = ProxyApi.createProxy(proxyType);
     }
 

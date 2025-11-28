@@ -1,6 +1,6 @@
 package tests.benchmarks;
 
-import internal.tests.common.CacheApi;
+import internal.tests.api.CacheApi;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,8 +9,8 @@ public class CacheTest {
 
     @Test
     public void testCache() throws Exception {
-        testCache("simpleWeak");
-        testCache("simpleSoft");
+        testCache("fs-simpleWeak");
+        testCache("fs-simpleSoft");
         testCache("caffeineWeak");
         testCache("caffeineSoft");
         testCache("caffeine");

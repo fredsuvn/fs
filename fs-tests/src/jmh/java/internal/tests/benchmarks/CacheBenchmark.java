@@ -1,6 +1,6 @@
 package internal.tests.benchmarks;
 
-import internal.tests.common.CacheApi;
+import internal.tests.api.CacheApi;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -44,8 +44,8 @@ public class CacheBenchmark {
     }
 
     @Param({
-        "simpleWeak",
-        "simpleSoft",
+        "fs-simpleWeak",
+        "fs-simpleSoft",
         "caffeineWeak",
         "caffeineSoft",
         "caffeine",

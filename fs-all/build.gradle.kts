@@ -20,9 +20,6 @@ evaluationDependsOn(internalProject.path)
 java {
   withJavadocJar()
   withSourcesJar()
-  //  toolchain {
-  //    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
-  //  }
 }
 
 tasks.named<Jar>("jar") {
@@ -66,19 +63,19 @@ tasks.named<Javadoc>("javadoc") {
   ops.jFlags("-Duser.language=en", "-Duser.country=US")
   ops.addStringOption("Xdoclint:none", "-quiet")
   javadocTool = javaToolchains.javadocToolFor {
-    languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
+    languageVersion = project.property("javaLanguageVersionHigh") as JavaLanguageVersion
   }
 
   destinationDir = rootDir.resolve("docs/javadoc")
 }
 
-val testJava17 = coreProject.tasks.named("testJava17")
+val testJavaHighest = coreProject.tasks.named("testJavaHighest")
 
 tasks.test {
   dependsOn(
     annotationProject.tasks.test,
     coreProject.tasks.test,
-    testJava17,
+    testJavaHighest,
     internalProject.tasks.test,
   )
   reports {
@@ -96,7 +93,7 @@ tasks.jacocoTestReport {
   executionData(
     annotationProject.file("build/jacoco/test.exec"),
     coreProject.file("build/jacoco/test.exec"),
-    coreProject.file("build/jacoco/${testJava17.name}.exec"),
+    coreProject.file("build/jacoco/${testJavaHighest.name}.exec"),
     internalProject.file("build/jacoco/test.exec"),
   )
   sourceSets(
@@ -119,8 +116,8 @@ tasks.testAggregateTestReport {
     annotationProject.layout.buildDirectory.dir("test-results/test/binary"),
     coreProject.layout.buildDirectory.dir("test-results/test"),
     coreProject.layout.buildDirectory.dir("test-results/test/binary"),
-    coreProject.layout.buildDirectory.dir("test-results/${testJava17.name}"),
-    coreProject.layout.buildDirectory.dir("test-results/${testJava17.name}/binary"),
+    coreProject.layout.buildDirectory.dir("test-results/${testJavaHighest.name}"),
+    coreProject.layout.buildDirectory.dir("test-results/${testJavaHighest.name}/binary"),
     internalProject.layout.buildDirectory.dir("test-results/test"),
     internalProject.layout.buildDirectory.dir("test-results/test/binary"),
   )

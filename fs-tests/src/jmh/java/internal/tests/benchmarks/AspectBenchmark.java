@@ -1,6 +1,6 @@
 package internal.tests.benchmarks;
 
-import internal.tests.common.AspectApi;
+import internal.tests.api.AspectApi;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -31,8 +31,9 @@ import java.util.concurrent.TimeUnit;
 public class AspectBenchmark {
 
     @Param({
-        "asm",
-        "original",
+        "fs-asm",
+        //"byte-buddy",
+        "direct",
     })
     private String aspectType;
 
@@ -45,7 +46,7 @@ public class AspectBenchmark {
     private AspectApi aspect;
 
     @Setup(Level.Trial)
-    public void setup() {
+    public void setup() throws Exception {
         this.aspect = AspectApi.createAspect(aspectType);
     }
 
