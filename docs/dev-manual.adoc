@@ -9,7 +9,7 @@
 
 == Overview
 
-image::../logo.svg[]
+image::pics/logo-32.svg[]
 
 _fs_ is a lightweight, zero-dependency tool lib for java.
 
@@ -105,3 +105,5 @@ src: link:../fs-tests/[fs-tests]
 
 _fs_internal_ is the internal tests module of _fs_, should not be published.
 It typically provides internal tests such as benchmarks.
+
+image::pics/logo-64.svg[]
