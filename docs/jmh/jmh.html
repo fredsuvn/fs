@@ -616,7 +616,7 @@
       // 初始状态下所有分组展开
       document.querySelectorAll('.group-header').forEach(header => {
           const content = header.nextElementSibling;
-          const span = header.querySelector('span');
+          const span = header.querySelector('.collapse');
           content.style.display = 'block';
           span.textContent = '▲';
       });
@@ -628,7 +628,7 @@
 
       let tocHTML = `
           <div class="toc-header">
-              <h2>Table of Contents</h2>
+              <h2 id="table-of-content">Table of Contents</h2>
               <span>▼</span>
           </div>
           <div class="toc-content">
@@ -670,7 +670,7 @@
       headerDiv.className = 'group-header';
       headerDiv.innerHTML = `
           <h2>${group.simpleClassName}</h2>
-          <span>▲</span>
+          <span class="collapse">▲</span>
       `;
 
       // 组内容
@@ -700,10 +700,10 @@
           const isExpanded = contentDiv.style.display !== 'none';
           if (isExpanded) {
               contentDiv.style.display = 'none';
-              headerDiv.querySelector('span').textContent = '▼';
+              headerDiv.querySelector('.collapse').textContent = '▼';
           } else {
               contentDiv.style.display = 'block';
-              headerDiv.querySelector('span').textContent = '▲';
+              headerDiv.querySelector('collapse').textContent = '▲';
           }
       });
 
@@ -714,7 +714,10 @@
       const envDiv = document.createElement('div');
       envDiv.className = 'env-info';
 
-      let envHTML = '<h3>Environment Information</h3>';
+      let envHTML = '<h3 style="display: flex;justify-content: space-between">'+
+      '<span>Environment Information</span>'+
+      '<a href="#table-of-content" style="display: right">Back Top</a>'+
+      '</h3>';
 
       if (benchmark.primaryMetric) {
           envHTML += `<p><strong>Score Unit:</strong> ${benchmark.primaryMetric.scoreUnit}</p>`;
@@ -1243,10 +1246,10 @@
 
           if (allExpanded) {
               content.style.display = 'none';
-              header.querySelector('span').textContent = '▼';
+              header.querySelector('.collapse').textContent = '▼';
           } else {
               content.style.display = 'block';
-              header.querySelector('span').textContent = '▲';
+              header.querySelector('.collapse').textContent = '▲';
           }
       });
 
