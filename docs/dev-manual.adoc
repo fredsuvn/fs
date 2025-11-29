@@ -1,4 +1,4 @@
-= Manual of _fs_
+= image:pics/logo-32.svg[] Manual of _fs_
 :toc:
 :toclevels: 3
 :last-update-label!:
@@ -8,8 +8,6 @@
 :url: https://github.com/fredsuvn
 
 == Overview
-
-image::pics/logo-32.svg[]
 
 _fs_ is a lightweight, zero-dependency tool lib for java.
 
