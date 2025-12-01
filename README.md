@@ -1,4 +1,4 @@
-# ![](logo.svg) _fs_: a lightweight, high-performance, zero-dependency tool lib for java
+# ![](docs/pics/logo-32.svg) _fs_: a lightweight, high-performance, zero-dependency tool lib for java
 
 ## Overview
 
@@ -42,19 +42,28 @@ This ensures:
 _fs_ has higher performance than other common libraries in many places, Here are some examples:
 
 - **Simple Cache** (`space.sunqian.common.cache.SimpleCache`):
-  SimpleCache only considers common cache functions, so it has higher performance in common functions:
+  SimpleCache only considers common cache functions, so it has higher performance in common functions.
+  Here is the benchmark: [CacheBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/CacheBenchmark.java)
+  and its result:
 
   ![](docs/jmh/cache.svg)
 
 - **CopyProperties** (`Fs.copyProperties / space.sunqian.common.object.convert.DataMapper`):
-  DataMapper has better performance and more comprehensive support:
+  DataMapper has better performance and more comprehensive support.
+  Here is the
+  benchmark: [CopyPropertiesBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/CopyPropertiesBenchmark.java)
+  and its result:
 
   ![](docs/jmh/copyProperties.svg)
 
 - **TCP Server** (`space.sunqian.common.net.tcp.TcpServer`):
-  Rare interface server implementation with slightly better performance than **netty**:
+  Rare interface server implementation with slightly better performance than **netty**.
+  Here is the benchmark: [TcpServerBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/TcpServerBenchmark.java)
+  and its result:
 
   ![](docs/jmh/tcpServer.svg)
+
+Here is the full benchmark result: [results.json](docs/jmh/results.json).
 
 ## Zero Dependency
 
@@ -97,9 +106,6 @@ cd fs && gradle clean build
   * javadoc: [index.html](docs/javadoc/index.html)
 - manuals:
   * develop manual: [dev-manual.adoc](docs/dev-manual.adoc)
-- benchmarks:
-  * visualizer: [jmh.html](docs/jmh/jmh.html)
-  * json: [results.json](docs/jmh/results.json)
 
 ## Contact
 
@@ -111,3 +117,5 @@ cd fs && gradle clean build
 [Apache 2.0 license][license]
 
 [license]: https://www.apache.org/licenses/LICENSE-2.0.html
+
+![](docs/pics/logo-64.svg)
