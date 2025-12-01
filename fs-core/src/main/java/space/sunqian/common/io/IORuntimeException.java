@@ -55,6 +55,6 @@ public class IORuntimeException extends FsRuntimeException {
      * @param cause the {@link IOException}
      */
     public IORuntimeException(@Nonnull IOException cause) {
-        this(cause.getMessage(), cause.getCause());
+        this(cause.getMessage(), cause);
     }
 }
