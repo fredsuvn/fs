@@ -11,6 +11,7 @@ import space.sunqian.common.base.option.Option;
 import space.sunqian.common.collect.ArrayKit;
 import space.sunqian.common.collect.ArrayOperator;
 import space.sunqian.common.collect.CollectKit;
+import space.sunqian.common.collect.MapKit;
 import space.sunqian.common.io.BufferKit;
 import space.sunqian.common.io.IOOperator;
 import space.sunqian.common.object.convert.ConvertOption;
@@ -622,7 +623,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 return ((Number) src).intValue() != 0;
             }
             if (src instanceof String) {
-                return ((String) src).equalsIgnoreCase("true");
+                return "true".equalsIgnoreCase((String) src);
             }
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
