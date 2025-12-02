@@ -1,12 +1,14 @@
 package space.sunqian.common.io.communicate;
 
 import space.sunqian.annotations.Nonnull;
+import space.sunqian.common.io.IOKit;
 
 import java.nio.channels.ByteChannel;
 
 /**
- * Represents context of an underlying channel for IO Communication, and the underlying channel is an extension of
- * {@link ByteChannel}.
+ * Represents context of an underlying channel (can be accessed by {@link #channel()}) for IO Communication. This
+ * interface extends {@link ChannelReader} and {@link ChannelWriter}, providing a unified interface for reading and
+ * writing data to the connected remote endpoint.
  * <p>
  * ChannelContext is typically used in callbacks of {@link ChannelHandler}. All callbacks triggered by events from the
  * same underlying channel will use the same {@link ChannelContext} instance, ensuring consistent access to
@@ -14,15 +16,17 @@ import java.nio.channels.ByteChannel;
  *
  * @param <C> the type of the underlying channel
  * @author sunqian
+ * @implSpec The default I/O methods of this interface use {@link IOKit} to read and write data from the underlying
+ * channel, inherited from {@link ChannelReader} and {@link ChannelWriter}.
  */
-public interface ChannelContext<C extends ByteChannel> {
+public interface ChannelContext<C extends ByteChannel> extends ChannelReader<C>, ChannelWriter<C> {
 
     /**
      * Returns the underlying channel of this context.
      *
      * @return the underlying channel of this context
      */
-    //@Override
+    @Override
     @Nonnull
     C channel();
 
