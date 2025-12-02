@@ -1,11 +1,11 @@
 package space.sunqian.common.runtime.reflect;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.Fs;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This abstract class is used for obtaining runtime {@link Type} instance. The usage as following:
@@ -34,7 +34,7 @@ public abstract class TypeRef<T> {
         Type genericSuper = getClass().getGenericSuperclass();
         if (TypeKit.isParameterized(genericSuper)) {
             ParameterizedType parameterizedSuper = (ParameterizedType) genericSuper;
-            if (Fs.equals(parameterizedSuper.getRawType(), TypeRef.class)) {
+            if (Objects.equals(parameterizedSuper.getRawType(), TypeRef.class)) {
                 return parameterizedSuper.getActualTypeArguments()[0];
             }
         }
