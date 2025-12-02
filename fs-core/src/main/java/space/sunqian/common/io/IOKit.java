@@ -2610,6 +2610,92 @@ public class IOKit {
     }
 
     /**
+     * Writes all data to the specified output stream from the given array.
+     *
+     * @param dst the specified output stream
+     * @param src the given array
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(@Nonnull OutputStream dst, byte @Nonnull [] src) throws IORuntimeException {
+        try {
+            dst.write(src);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
+     * Writes a specified length of data to the specified output stream from the given array, starting at the specified
+     * offset.
+     *
+     * @param dst the specified output stream
+     * @param src the given array
+     * @param off the specified offset
+     * @param len the specified length
+     * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull OutputStream dst, byte @Nonnull [] src, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        try {
+            dst.write(src, off, len);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
+     * Writes all data to the specified output stream from the given {@link ByteBuffer}.
+     *
+     * @param dst the specified output stream
+     * @param src the given {@link ByteBuffer}
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(@Nonnull OutputStream dst, @Nonnull ByteBuffer src) throws IORuntimeException {
+        BufferKit.readTo(src, dst);
+    }
+
+    /**
+     * Writes all data to the specified writable byte channel from the given array.
+     *
+     * @param dst the specified writable byte channel
+     * @param src the given array
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(@Nonnull WritableByteChannel dst, byte @Nonnull [] src) throws IORuntimeException {
+        BufferKit.readTo(ByteBuffer.wrap(src), dst);
+    }
+
+    /**
+     * Writes a specified length of data to the specified writable byte channel from the given array, starting at the
+     * specified offset.
+     *
+     * @param dst the specified writable byte channel
+     * @param src the given array
+     * @param off the specified offset
+     * @param len the specified length
+     * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull WritableByteChannel dst, byte @Nonnull [] src, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        BufferKit.readTo(ByteBuffer.wrap(src, off, len), dst);
+    }
+
+    /**
+     * Writes all data to the specified writable byte channel from the given {@link ByteBuffer}.
+     *
+     * @param dst the specified writable byte channel
+     * @param src the given {@link ByteBuffer}
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(@Nonnull WritableByteChannel dst, @Nonnull ByteBuffer src) throws IORuntimeException {
+        BufferKit.readTo(src, dst);
+    }
+
+    /**
      * Writes all data to the specified appender from the given array.
      *
      * @param dst the specified appender
@@ -2672,7 +2758,39 @@ public class IOKit {
         try {
             byte[] bytes = str.getBytes(charset);
             dst.write(bytes);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
+     * Writes string to the specified writable byte channel with {@link CharsKit#defaultCharset()}.
+     *
+     * @param dst the specified writable byte channel
+     * @param str the string to write to the writable byte channel
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull WritableByteChannel dst, @Nonnull String str
+    ) throws IORuntimeException {
+        write(dst, str, CharsKit.defaultCharset());
+    }
+
+    /**
+     * Writes string to the specified writable byte channel with the specified charset.
+     *
+     * @param dst     the specified writable byte channel
+     * @param str     the string to write to the writable byte channel
+     * @param charset the specified charset
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull WritableByteChannel dst, @Nonnull String str, @Nonnull Charset charset
+    ) throws IORuntimeException {
+        try {
+            byte[] bytes = str.getBytes(charset);
+            BufferKit.readTo(ByteBuffer.wrap(bytes), dst);
+        } catch (Exception e) {
             throw new IORuntimeException(e);
         }
     }

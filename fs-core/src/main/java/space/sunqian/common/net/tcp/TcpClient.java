@@ -1,6 +1,7 @@
 package space.sunqian.common.net.tcp;
 
 import space.sunqian.annotations.Nonnull;
+import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.communicate.ChannelReader;
 import space.sunqian.common.io.communicate.ChannelWriter;
 import space.sunqian.common.net.NetClient;
@@ -12,11 +13,11 @@ import java.nio.channels.SocketChannel;
  * Represents a TCP client based on an underlying {@link SocketChannel}, can be built with {@link #newBuilder()}.
  *
  * @author sunqian
+ * @implSpec The default I/O methods of this interface use {@link IOKit} to read and write data from the underlying
+ * channel, inherited from {@link ChannelReader} and {@link ChannelWriter}.
  */
 public interface TcpClient extends
-    NetClient<InetSocketAddress, SocketChannel>,
-    ChannelReader<SocketChannel>,
-    ChannelWriter<SocketChannel> {
+    NetClient<InetSocketAddress, SocketChannel>, ChannelReader<SocketChannel>, ChannelWriter<SocketChannel> {
 
     /**
      * Returns a new builder for building {@link TcpClient}.
@@ -30,12 +31,12 @@ public interface TcpClient extends
     /**
      * Blocks current thread and waits for the client to be readable.
      */
-    void awaitReadable();
+    void readWait();
 
     /**
-     * Wakes up the thread blocked in {@link #awaitReadable()}.
+     * Wakes up the thread blocked in {@link #readWait()}.
      */
-    void wakeUpReadable();
+    void readWakeUp();
 
     /**
      * Returns the underlying socket channel that supports this client.

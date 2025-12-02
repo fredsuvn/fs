@@ -2,6 +2,7 @@ package tests.io;
 
 import internal.test.DataTest;
 import internal.test.ErrorAppender;
+import internal.test.ErrorOutputStream;
 import internal.test.ReadOps;
 import internal.test.TestInputStream;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class IOTest implements DataTest {
+public class IOKitTest implements DataTest {
 
     @Test
     public void testReader() throws Exception {
@@ -178,6 +179,41 @@ public class IOTest implements DataTest {
     @Test
     public void testWrite() throws Exception {
         {
+            // write bytes
+            ByteArrayOutputStream dst = new ByteArrayOutputStream();
+            byte[] bytes = randomBytes(16);
+            IOKit.write(dst, bytes);
+            assertArrayEquals(bytes, dst.toByteArray());
+            dst.reset();
+            bytes = randomBytes(16);
+            IOKit.write(dst, bytes, 2, 10);
+            assertArrayEquals(Arrays.copyOfRange(bytes, 2, 12), dst.toByteArray());
+            dst.reset();
+            bytes = randomBytes(16);
+            IOKit.write(dst, ByteBuffer.wrap(bytes));
+            assertArrayEquals(bytes, dst.toByteArray());
+            dst.reset();
+            bytes = randomBytes(16);
+            IOKit.write(Channels.newChannel(dst), bytes);
+            assertArrayEquals(bytes, dst.toByteArray());
+            dst.reset();
+            bytes = randomBytes(16);
+            IOKit.write(Channels.newChannel(dst), bytes, 2, 10);
+            assertArrayEquals(Arrays.copyOfRange(bytes, 2, 12), dst.toByteArray());
+            dst.reset();
+            bytes = randomBytes(16);
+            IOKit.write(Channels.newChannel(dst), ByteBuffer.wrap(bytes));
+            assertArrayEquals(bytes, dst.toByteArray());
+            dst.reset();
+            OutputStream err = new ErrorOutputStream();
+            assertThrows(IORuntimeException.class, () -> IOKit.write(err, new byte[10]));
+            assertThrows(IORuntimeException.class, () -> IOKit.write(err, new byte[10], 0, 1));
+            assertThrows(IORuntimeException.class, () -> IOKit.write(err, ByteBuffer.allocate(10)));
+            assertThrows(IORuntimeException.class, () -> IOKit.write(Channels.newChannel(err), new byte[10]));
+            assertThrows(IORuntimeException.class, () -> IOKit.write(Channels.newChannel(err), new byte[10], 0, 1));
+            assertThrows(IORuntimeException.class, () -> IOKit.write(Channels.newChannel(err), ByteBuffer.allocate(10)));
+        }
+        {
             // write to appender
             char[] data = randomChars(1024);
             CharsBuilder appender1 = new CharsBuilder();
@@ -222,13 +258,27 @@ public class IOTest implements DataTest {
             assertThrows(IORuntimeException.class, () -> IOKit.write(new ErrorAppender(), data));
         }
         {
-            // write to output stream
+            // write string
             String str = "hello world";
+            byte[] strBytes = str.getBytes(CharsKit.defaultCharset());
             ByteArrayOutputStream dst = new ByteArrayOutputStream();
             IOKit.write(dst, str);
-            assertEquals(str, dst.toString("UTF-8"));
-            OutputStream dst2 = IOKit.newOutputStream(new byte[1]);
-            assertThrows(IORuntimeException.class, () -> IOKit.write(dst2, str));
+            assertArrayEquals(strBytes, dst.toByteArray());
+            dst.reset();
+            IOKit.write(dst, str, CharsKit.defaultCharset());
+            assertArrayEquals(strBytes, dst.toByteArray());
+            dst.reset();
+            IOKit.write(Channels.newChannel(dst), str);
+            assertArrayEquals(strBytes, dst.toByteArray());
+            dst.reset();
+            IOKit.write(Channels.newChannel(dst), str, CharsKit.defaultCharset());
+            assertArrayEquals(strBytes, dst.toByteArray());
+            dst.reset();
+            OutputStream err = new ErrorOutputStream();
+            assertThrows(IORuntimeException.class, () -> IOKit.write(err, str));
+            assertThrows(IORuntimeException.class, () -> IOKit.write(err, str, CharsKit.defaultCharset()));
+            assertThrows(IORuntimeException.class, () -> IOKit.write(Channels.newChannel(err), str));
+            assertThrows(IORuntimeException.class, () -> IOKit.write(Channels.newChannel(err), str, CharsKit.defaultCharset()));
         }
     }
 

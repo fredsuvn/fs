@@ -44,13 +44,13 @@ loadScripts(document, 'script');</script>
 <ul class="sub-nav-list">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li><a href="#field-summary">Field</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor-summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method-summary">Method</a></li>
 </ul>
 <ul class="sub-nav-list">
 <li>Detail:&nbsp;</li>
-<li><a href="#field-detail">Field</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor-detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method-detail">Method</a></li>
 </ul>
@@ -86,36 +86,11 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public abstract class </span><span class="element-name type-name-label">AbstractChannelContext&lt;C extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements <a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;C&gt;</span></div>
-<div class="block">Skeletal implementation of <a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelContext</code></a> to help minimize effort in implementing <a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelContext</code></a>.
- <p>
- The read and write methods of this class is based on a given <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link"><code>ByteChannel</code></a>, which also serves as the underlying
- channel. And the advanced I/O operations are based on the <a href="#operator"><code>operator</code></a> witch is gotten by the specified buffer
- size. These two field is accessible for subclasses: <a href="#channel"><code>channel</code></a> and <a href="#operator"><code>operator</code></a>.</div>
+<div class="block">Skeletal implementation of <a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelContext</code></a>. Its read methods are based on the specified <a href="../IOOperator.html" title="interface in space.sunqian.common.io"><code>IOOperator</code></a>
+ provided by <a href="#ioOperator()"><code>ioOperator()</code></a>. The underlying channel is provided by <a href="#channel()"><code>channel()</code></a>.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
-<!-- =========== FIELD SUMMARY =========== -->
-<li>
-<section class="field-summary" id="field-summary">
-<h2>Field Summary</h2>
-<div class="caption"><span>Fields</span></div>
-<div class="summary-table three-column-summary">
-<div class="table-header col-first">Modifier and Type</div>
-<div class="table-header col-second">Field</div>
-<div class="table-header col-last">Description</div>
-<div class="col-first even-row-color"><code>protected final <a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a></code></div>
-<div class="col-second even-row-color"><code><a href="#channel" class="member-name-link">channel</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">The given underlying channel.</div>
-</div>
-<div class="col-first odd-row-color"><code>protected final <a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="../IOOperator.html" title="interface in space.sunqian.common.io">IOOperator</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#operator" class="member-name-link">operator</a></code></div>
-<div class="col-last odd-row-color">
-<div class="block">The <a href="../IOOperator.html" title="interface in space.sunqian.common.io"><code>IOOperator</code></a> for advanced I/O operations.</div>
-</div>
-</div>
-</section>
-</li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <li>
 <section class="constructor-summary" id="constructor-summary">
@@ -126,10 +101,9 @@ implements <a href="ChannelContext.html" title="interface in space.sunqian.commo
 <div class="table-header col-second">Constructor</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>protected </code></div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(C,int)" class="member-name-link">AbstractChannelContext</a><wbr>(<a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a>&nbsp;channel,
- int&nbsp;bufSize)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(C)" class="member-name-link">AbstractChannelContext</a><wbr>(<a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a>&nbsp;channel)</code></div>
 <div class="col-last even-row-color">
-<div class="block">Constructs with the given <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link"><code>ByteChannel</code></a> and the buffer size for advanced I/O operations.</div>
+<div class="block">Constructs with the given underlying channel.</div>
 </div>
 </div>
 </section>
@@ -139,28 +113,49 @@ implements <a href="ChannelContext.html" title="interface in space.sunqian.commo
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/ByteBuffer.html" title="class or interface in java.nio" class="external-link">ByteBuffer</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#availableBuffer()" class="member-name-link">availableBuffer</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#attach(java.lang.Object)" class="member-name-link">attach</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;attachment)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns all available bytes as a buffer in the underlying channel, possibly empty if no data is available but the
- channel is still alive, or <code>null</code> if the channel is closed.</div>
+<div class="block">Attaches the given attachment to this context.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>byte <a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> []</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#availableBytes()" class="member-name-link">availableBytes</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#attachment()" class="member-name-link">attachment</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the attachment of this context.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>byte <a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> []</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#availableBytes()" class="member-name-link">availableBytes</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns all available bytes in the underlying channel, possibly empty if no data is available but the channel is
  still alive, or <code>null</code> if the channel is closed.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#channel()" class="member-name-link">channel</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#availableString()" class="member-name-link">availableString</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns all available bytes as a string in the underlying channel, possibly empty if no data is available but the
+ channel is still alive, or <code>null</code> if the channel is closed.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#availableString(java.nio.charset.Charset)" class="member-name-link">availableString</a><wbr>(<a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/charset/Charset.html" title="class or interface in java.nio.charset" class="external-link">Charset</a>&nbsp;charset)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns all available bytes as a string in the underlying channel, possibly empty if no data is available but the
+ channel is still alive, or <code>null</code> if the channel is closed.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#channel()" class="member-name-link">channel</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the underlying channel of this context.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>protected abstract <a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="../IOOperator.html" title="interface in space.sunqian.common.io">IOOperator</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#ioOperator()" class="member-name-link">ioOperator</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Returns the <a href="../IOOperator.html" title="interface in space.sunqian.common.io"><code>IOOperator</code></a> to be used for read operations.</div>
 </div>
 </div>
 </div>
@@ -168,12 +163,6 @@ implements <a href="ChannelContext.html" title="interface in space.sunqian.commo
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
-<div class="inherited-list">
-<h3 id="methods-inherited-from-class-space.sunqian.common.io.communicate.ChannelContext">Methods inherited from interface&nbsp;space.sunqian.common.io.communicate.<a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a></h3>
-<code><a href="ChannelContext.html#attach(java.lang.Object)">attach</a>, <a href="ChannelContext.html#attachment()">attachment</a></code></div>
-<div class="inherited-list">
-<h3 id="methods-inherited-from-class-space.sunqian.common.io.communicate.ChannelReader">Methods inherited from interface&nbsp;space.sunqian.common.io.communicate.<a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a></h3>
-<code><a href="ChannelReader.html#availableString()">availableString</a>, <a href="ChannelReader.html#availableString(java.nio.charset.Charset)">availableString</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-space.sunqian.common.io.communicate.ChannelWriter">Methods inherited from interface&nbsp;space.sunqian.common.io.communicate.<a href="ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a></h3>
 <code><a href="ChannelWriter.html#writeBuffer(java.nio.ByteBuffer)">writeBuffer</a>, <a href="ChannelWriter.html#writeBytes(byte%5B%5D)">writeBytes</a>, <a href="ChannelWriter.html#writeString(java.lang.String)">writeString</a>, <a href="ChannelWriter.html#writeString(java.lang.String,java.nio.charset.Charset)">writeString</a></code></div>
@@ -183,49 +172,20 @@ implements <a href="ChannelContext.html" title="interface in space.sunqian.commo
 </section>
 <section class="details">
 <ul class="details-list">
-<!-- ============ FIELD DETAIL =========== -->
-<li>
-<section class="field-details" id="field-detail">
-<h2>Field Details</h2>
-<ul class="member-list">
-<li>
-<section class="detail" id="channel">
-<h3>channel</h3>
-<div class="member-signature"><span class="annotations"><a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
-</span><span class="modifiers">protected final</span>&nbsp;<span class="return-type"><a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a></span>&nbsp;<span class="element-name">channel</span></div>
-<div class="block">The given underlying channel.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="operator">
-<h3>operator</h3>
-<div class="member-signature"><span class="annotations"><a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
-</span><span class="modifiers">protected final</span>&nbsp;<span class="return-type"><a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="../IOOperator.html" title="interface in space.sunqian.common.io">IOOperator</a></span>&nbsp;<span class="element-name">operator</span></div>
-<div class="block">The <a href="../IOOperator.html" title="interface in space.sunqian.common.io"><code>IOOperator</code></a> for advanced I/O operations.</div>
-</section>
-</li>
-</ul>
-</section>
-</li>
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <li>
 <section class="constructor-details" id="constructor-detail">
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(C,int)">
-<h3 id="&lt;init&gt;(java.nio.channels.ByteChannel,int)">AbstractChannelContext</h3>
+<section class="detail" id="&lt;init&gt;(C)">
+<h3 id="&lt;init&gt;(java.nio.channels.ByteChannel)">AbstractChannelContext</h3>
 <div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="element-name">AbstractChannelContext</span><wbr><span class="parameters">(<a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
- <a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a>&nbsp;channel,
- int&nbsp;bufSize)</span>
-                          throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></span></div>
-<div class="block">Constructs with the given <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link"><code>ByteChannel</code></a> and the buffer size for advanced I/O operations.</div>
+ <a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a>&nbsp;channel)</span></div>
+<div class="block">Constructs with the given underlying channel.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>channel</code> - the given <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link"><code>ByteChannel</code></a></dd>
-<dd><code>bufSize</code> - the buffer size for advanced I/O operations</dd>
-<dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the buffer size <code>&lt;=0</code></dd>
+<dd><code>channel</code> - the underlying channel</dd>
 </dl>
 </section>
 </li>
@@ -238,40 +198,14 @@ implements <a href="ChannelContext.html" title="interface in space.sunqian.commo
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="availableBytes()">
-<h3>availableBytes</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">byte <a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> []</span>&nbsp;<span class="element-name">availableBytes</span>()
-                                 throws <span class="exceptions"><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="ChannelReader.html#availableBytes()">ChannelReader</a></code></span></div>
-<div class="block">Returns all available bytes in the underlying channel, possibly empty if no data is available but the channel is
- still alive, or <code>null</code> if the channel is closed.</div>
+<section class="detail" id="ioOperator()">
+<h3>ioOperator</h3>
+<div class="member-signature"><span class="annotations"><a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+</span><span class="modifiers">protected abstract</span>&nbsp;<span class="return-type"><a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="../IOOperator.html" title="interface in space.sunqian.common.io">IOOperator</a></span>&nbsp;<span class="element-name">ioOperator</span>()</div>
+<div class="block">Returns the <a href="../IOOperator.html" title="interface in space.sunqian.common.io"><code>IOOperator</code></a> to be used for read operations.</div>
 <dl class="notes">
-<dt>Specified by:</dt>
-<dd><code><a href="ChannelReader.html#availableBytes()">availableBytes</a></code>&nbsp;in interface&nbsp;<code><a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;<a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</code></dd>
 <dt>Returns:</dt>
-<dd>the available bytes in the underlying channel, possibly empty, or <code>null</code> if the channel is closed.</dd>
-<dt>Throws:</dt>
-<dd><code><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an error occurs</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="availableBuffer()">
-<h3>availableBuffer</h3>
-<div class="member-signature"><span class="annotations"><a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a>
-</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/ByteBuffer.html" title="class or interface in java.nio" class="external-link">ByteBuffer</a></span>&nbsp;<span class="element-name">availableBuffer</span>()
-                                     throws <span class="exceptions"><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
-<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="ChannelReader.html#availableBuffer()">ChannelReader</a></code></span></div>
-<div class="block">Returns all available bytes as a buffer in the underlying channel, possibly empty if no data is available but the
- channel is still alive, or <code>null</code> if the channel is closed. The position of the buffer is <code>0</code>.</div>
-<dl class="notes">
-<dt>Specified by:</dt>
-<dd><code><a href="ChannelReader.html#availableBuffer()">availableBuffer</a></code>&nbsp;in interface&nbsp;<code><a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;<a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</code></dd>
-<dt>Returns:</dt>
-<dd>the available bytes as a buffer in the underlying channel, possibly empty, may be <code>null</code> if the
- channel is closed.</dd>
-<dt>Throws:</dt>
-<dd><code><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an error occurs</dd>
+<dd>the <a href="../IOOperator.html" title="interface in space.sunqian.common.io"><code>IOOperator</code></a> to be used for read operations</dd>
 </dl>
 </section>
 </li>
@@ -291,6 +225,98 @@ implements <a href="ChannelContext.html" title="interface in space.sunqian.commo
 <dd><code><a href="ChannelWriter.html#channel()">channel</a></code>&nbsp;in interface&nbsp;<code><a href="ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a>&lt;<a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</code></dd>
 <dt>Returns:</dt>
 <dd>the underlying channel of this context</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="attach(java.lang.Object)">
+<h3>attach</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">attach</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;attachment)</span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="ChannelContext.html#attach(java.lang.Object)">ChannelContext</a></code></span></div>
+<div class="block">Attaches the given attachment to this context. The given attachment object is bound to this context for its
+ remaining lifetime. This method can be invoked multiple times to update the attachment.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="ChannelContext.html#attach(java.lang.Object)">attach</a></code>&nbsp;in interface&nbsp;<code><a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;<a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</code></dd>
+<dt>Parameters:</dt>
+<dd><code>attachment</code> - the given attachment to be attached</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="attachment()">
+<h3>attachment</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span>&nbsp;<span class="element-name">attachment</span>()</div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="ChannelContext.html#attachment()">ChannelContext</a></code></span></div>
+<div class="block">Returns the attachment of this context. The attachment is bound to this context by <a href="ChannelContext.html#attach(java.lang.Object)"><code>ChannelContext.attach(Object)</code></a>.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="ChannelContext.html#attachment()">attachment</a></code>&nbsp;in interface&nbsp;<code><a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;<a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</code></dd>
+<dt>Returns:</dt>
+<dd>the attachment of this context</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="availableBytes()">
+<h3>availableBytes</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">byte <a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> []</span>&nbsp;<span class="element-name">availableBytes</span>()
+                                 throws <span class="exceptions"><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="ChannelReader.html#availableBytes()">ChannelReader</a></code></span></div>
+<div class="block">Returns all available bytes in the underlying channel, possibly empty if no data is available but the channel is
+ still alive, or <code>null</code> if the channel is closed.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="ChannelReader.html#availableBytes()">availableBytes</a></code>&nbsp;in interface&nbsp;<code><a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;<a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</code></dd>
+<dt>Returns:</dt>
+<dd>the available bytes in the underlying channel, possibly empty, or <code>null</code> if the channel is closed.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="availableString()">
+<h3>availableString</h3>
+<div class="member-signature"><span class="annotations"><a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a>
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">availableString</span>()
+                                 throws <span class="exceptions"><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="ChannelReader.html#availableString()">ChannelReader</a></code></span></div>
+<div class="block">Returns all available bytes as a string in the underlying channel, possibly empty if no data is available but the
+ channel is still alive, or <code>null</code> if the channel is closed. The string is decoded by the
+ <a href="../../base/chars/CharsKit.html#defaultCharset()"><code>CharsKit.defaultCharset()</code></a>.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="ChannelReader.html#availableString()">availableString</a></code>&nbsp;in interface&nbsp;<code><a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;<a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</code></dd>
+<dt>Returns:</dt>
+<dd>the available bytes as a string in the underlying channel, possibly empty, may be <code>null</code> if the
+ channel is closed.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an error occurs</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="availableString(java.nio.charset.Charset)">
+<h3>availableString</h3>
+<div class="member-signature"><span class="annotations"><a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a>
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">availableString</span><wbr><span class="parameters">(<a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a>
+ <a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/charset/Charset.html" title="class or interface in java.nio.charset" class="external-link">Charset</a>&nbsp;charset)</span>
+                                 throws <span class="exceptions"><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="ChannelReader.html#availableString(java.nio.charset.Charset)">ChannelReader</a></code></span></div>
+<div class="block">Returns all available bytes as a string in the underlying channel, possibly empty if no data is available but the
+ channel is still alive, or <code>null</code> if the channel is closed. The string is decoded by the specified
+ charset.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="ChannelReader.html#availableString(java.nio.charset.Charset)">availableString</a></code>&nbsp;in interface&nbsp;<code><a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;<a href="AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</code></dd>
+<dt>Parameters:</dt>
+<dd><code>charset</code> - the specified charset</dd>
+<dt>Returns:</dt>
+<dd>the available bytes as a string in the underlying channel, possibly empty, may be <code>null</code> if the
+ channel is closed.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an error occurs</dd>
 </dl>
 </section>
 </li>

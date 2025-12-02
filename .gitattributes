@@ -1,12 +1,28 @@
-#* text=auto
-*.txt text eol=crlf
-*.java text eol=crlf
-*.js text eol=crlf
-*.html text eol=crlf
-*.css text eol=crlf
-*.svg text eol=crlf
-*.xml text eol=crlf
-*.kts text eol=crlf
-*.properties text eol=crlf
-*.md text eol=crlf
-*.adoc text eol=crlf
+# text to crlf
+# * text=auto
+* text eol=crlf
+
+# text files:
+*.txt text
+*.java text
+*.js text
+*.html text
+*.css text
+*.svg text
+*.xml text
+*.kts text
+*.properties text
+*.md text
+*.adoc text
+*.bat text
+*.gradle text
+*.kts text
+*.kt text
+
+# binary files:
+*.gif  binary
+*.jar  binary
+*.jpeg  binary
+*.jpg  binary
+*.png  binary
+*.vsd  binary

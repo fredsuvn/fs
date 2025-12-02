@@ -1,7 +1,10 @@
 package space.sunqian.common.net.tcp;
 
 import space.sunqian.annotations.Nonnull;
+import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.communicate.ChannelContext;
+import space.sunqian.common.io.communicate.ChannelReader;
+import space.sunqian.common.io.communicate.ChannelWriter;
 import space.sunqian.common.net.NetException;
 
 import java.net.InetSocketAddress;
@@ -15,6 +18,8 @@ import java.nio.channels.SocketChannel;
  * state and attachments throughout the channel's lifecycle.
  *
  * @author sunqian
+ * @implSpec The default I/O methods of this interface use {@link IOKit} to read and write data from the underlying
+ * channel, inherited from {@link ChannelReader} and {@link ChannelWriter}.
  */
 public interface TcpContext extends ChannelContext<SocketChannel> {
 

@@ -93,32 +93,32 @@ extends <a href="../NetClient.html" title="interface in space.sunqian.common.net
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/SocketChannel.html" title="class or interface in java.nio.channels" class="external-link">SocketChannel</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#channel()" class="member-name-link">channel</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Returns the underlying socket channel that supports this client.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1"><code>static <a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="TcpClientBuilder.html" title="class in space.sunqian.common.net.tcp">TcpClientBuilder</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1"><code><a href="#newBuilder()" class="member-name-link">newBuilder</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1">
+<div class="block">Returns a new builder for building <a href="TcpClient.html" title="interface in space.sunqian.common.net.tcp"><code>TcpClient</code></a>.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#awaitReadable()" class="member-name-link">awaitReadable</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#readWait()" class="member-name-link">readWait</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Blocks current thread and waits for the client to be readable.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/SocketChannel.html" title="class or interface in java.nio.channels" class="external-link">SocketChannel</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#channel()" class="member-name-link">channel</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Returns the underlying socket channel that supports this client.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1"><code>static <a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="TcpClientBuilder.html" title="class in space.sunqian.common.net.tcp">TcpClientBuilder</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1"><code><a href="#newBuilder()" class="member-name-link">newBuilder</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1">
-<div class="block">Returns a new builder for building <a href="TcpClient.html" title="interface in space.sunqian.common.net.tcp"><code>TcpClient</code></a>.</div>
-</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#wakeUpReadable()" class="member-name-link">wakeUpReadable</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#readWakeUp()" class="member-name-link">readWakeUp</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Wakes up the thread blocked in <a href="#awaitReadable()"><code>awaitReadable()</code></a>.</div>
+<div class="block">Wakes up the thread blocked in <a href="#readWait()"><code>readWait()</code></a>.</div>
 </div>
 </div>
 </div>
 </div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-space.sunqian.common.io.communicate.ChannelReader">Methods inherited from interface&nbsp;space.sunqian.common.io.communicate.<a href="../../io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a></h3>
-<code><a href="../../io/communicate/ChannelReader.html#availableBuffer()">availableBuffer</a>, <a href="../../io/communicate/ChannelReader.html#availableBytes()">availableBytes</a>, <a href="../../io/communicate/ChannelReader.html#availableString()">availableString</a>, <a href="../../io/communicate/ChannelReader.html#availableString(java.nio.charset.Charset)">availableString</a></code></div>
+<code><a href="../../io/communicate/ChannelReader.html#availableBytes()">availableBytes</a>, <a href="../../io/communicate/ChannelReader.html#availableString()">availableString</a>, <a href="../../io/communicate/ChannelReader.html#availableString(java.nio.charset.Charset)">availableString</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-space.sunqian.common.io.communicate.ChannelWriter">Methods inherited from interface&nbsp;space.sunqian.common.io.communicate.<a href="../../io/communicate/ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a></h3>
 <code><a href="../../io/communicate/ChannelWriter.html#writeBuffer(java.nio.ByteBuffer)">writeBuffer</a>, <a href="../../io/communicate/ChannelWriter.html#writeBytes(byte%5B%5D)">writeBytes</a>, <a href="../../io/communicate/ChannelWriter.html#writeString(java.lang.String)">writeString</a>, <a href="../../io/communicate/ChannelWriter.html#writeString(java.lang.String,java.nio.charset.Charset)">writeString</a></code></div>
@@ -149,17 +149,17 @@ extends <a href="../NetClient.html" title="interface in space.sunqian.common.net
 </section>
 </li>
 <li>
-<section class="detail" id="awaitReadable()">
-<h3>awaitReadable</h3>
-<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">awaitReadable</span>()</div>
+<section class="detail" id="readWait()">
+<h3>readWait</h3>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">readWait</span>()</div>
 <div class="block">Blocks current thread and waits for the client to be readable.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="wakeUpReadable()">
-<h3>wakeUpReadable</h3>
-<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">wakeUpReadable</span>()</div>
-<div class="block">Wakes up the thread blocked in <a href="#awaitReadable()"><code>awaitReadable()</code></a>.</div>
+<section class="detail" id="readWakeUp()">
+<h3>readWakeUp</h3>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">readWakeUp</span>()</div>
+<div class="block">Wakes up the thread blocked in <a href="#readWait()"><code>readWait()</code></a>.</div>
 </section>
 </li>
 <li>

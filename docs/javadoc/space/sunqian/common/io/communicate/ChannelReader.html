@@ -87,11 +87,11 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">ChannelReader&lt;C extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ReadableByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ReadableByteChannel</a>&gt;</span></div>
 <div class="block">Channel reader for IO Communication, typically used for network or IPC (Inter-Process Communication).
  <p>
- The reader holds an underlying channel to read and provides advanced read operations. If the read method of the
- underlying channel returns <code>-1</code>, it means the channel can no longer be read (for example: the TCP peer sent a
- <code>FIN</code> and entered the half-closed state). In this case, the channel can be closed to complete the close
- operation. If it returns <code>0</code>, it indicates that all available data, for now, has been read, but the channel
- remains alive.</div>
+ The reader holds an underlying channel (can be accessed by <a href="#channel()"><code>channel()</code></a>) to read and provides advanced read
+ operations. If the read method of the underlying channel returns <code>-1</code>, it means the channel can no longer be
+ read (for example: the TCP peer sent a <code>FIN</code> and entered the half-closed state). In this case, the channel can
+ be closed to complete the close operation. If it returns <code>0</code>, it indicates that all available data, for now,
+ has been read, but the channel remains alive.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -106,33 +106,27 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/ByteBuffer.html" title="class or interface in java.nio" class="external-link">ByteBuffer</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#availableBuffer()" class="member-name-link">availableBuffer</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Returns all available bytes as a buffer in the underlying channel, possibly empty if no data is available but the
- channel is still alive, or <code>null</code> if the channel is closed.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>byte <a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> []</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#availableBytes()" class="member-name-link">availableBytes</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default byte <a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> []</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#availableBytes()" class="member-name-link">availableBytes</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
 <div class="block">Returns all available bytes in the underlying channel, possibly empty if no data is available but the channel is
  still alive, or <code>null</code> if the channel is closed.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default <a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#availableString()" class="member-name-link">availableString</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
-<div class="block">Returns all available bytes as a string in the underlying channel, possibly empty if no data is available but the
- channel is still alive, or <code>null</code> if the channel is closed.</div>
-</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default <a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#availableString(java.nio.charset.Charset)" class="member-name-link">availableString</a><wbr>(<a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/charset/Charset.html" title="class or interface in java.nio.charset" class="external-link">Charset</a>&nbsp;charset)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#availableString()" class="member-name-link">availableString</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
 <div class="block">Returns all available bytes as a string in the underlying channel, possibly empty if no data is available but the
  channel is still alive, or <code>null</code> if the channel is closed.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ChannelReader.html" title="type parameter in ChannelReader">C</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#channel()" class="member-name-link">channel</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default <a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#availableString(java.nio.charset.Charset)" class="member-name-link">availableString</a><wbr>(<a href="../../../annotations/Nonnull.html" title="annotation interface in space.sunqian.annotations">@Nonnull</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/charset/Charset.html" title="class or interface in java.nio.charset" class="external-link">Charset</a>&nbsp;charset)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Returns all available bytes as a string in the underlying channel, possibly empty if no data is available but the
+ channel is still alive, or <code>null</code> if the channel is closed.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ChannelReader.html" title="type parameter in ChannelReader">C</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#channel()" class="member-name-link">channel</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns the underlying channel of this reader.</div>
 </div>
 </div>
@@ -152,30 +146,13 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="availableBytes()">
 <h3>availableBytes</h3>
-<div class="member-signature"><span class="return-type">byte <a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> []</span>&nbsp;<span class="element-name">availableBytes</span>()
-                          throws <span class="exceptions"><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">byte <a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> []</span>&nbsp;<span class="element-name">availableBytes</span>()
+                                  throws <span class="exceptions"><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
 <div class="block">Returns all available bytes in the underlying channel, possibly empty if no data is available but the channel is
  still alive, or <code>null</code> if the channel is closed.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>the available bytes in the underlying channel, possibly empty, or <code>null</code> if the channel is closed.</dd>
-<dt>Throws:</dt>
-<dd><code><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an error occurs</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="availableBuffer()">
-<h3>availableBuffer</h3>
-<div class="member-signature"><span class="annotations"><a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a>
-</span><span class="return-type"><a href="../../../annotations/Nullable.html" title="annotation interface in space.sunqian.annotations">@Nullable</a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/ByteBuffer.html" title="class or interface in java.nio" class="external-link">ByteBuffer</a></span>&nbsp;<span class="element-name">availableBuffer</span>()
-                              throws <span class="exceptions"><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></span></div>
-<div class="block">Returns all available bytes as a buffer in the underlying channel, possibly empty if no data is available but the
- channel is still alive, or <code>null</code> if the channel is closed. The position of the buffer is <code>0</code>.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>the available bytes as a buffer in the underlying channel, possibly empty, may be <code>null</code> if the
- channel is closed.</dd>
 <dt>Throws:</dt>
 <dd><code><a href="../IORuntimeException.html" title="class in space.sunqian.common.io">IORuntimeException</a></code> - if an error occurs</dd>
 </dl>

@@ -90,9 +90,9 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">ChannelContext&lt;C extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</span><span class="extends-implements">
 extends <a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;C&gt;, <a href="ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a>&lt;C&gt;</span></div>
-<div class="block">Represents context of an underlying channel for IO Communication, extends <a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelReader</code></a> and
- <a href="ChannelWriter.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelWriter</code></a> to provides advanced read/write operations, and the underlying channel is a
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link"><code>ByteChannel</code></a>.
+<div class="block">Represents context of an underlying channel (can be accessed by <a href="#channel()"><code>channel()</code></a>) for IO Communication. This
+ interface extends <a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelReader</code></a> and <a href="ChannelWriter.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelWriter</code></a>, providing a unified interface for reading and
+ writing data to the connected remote endpoint.
  <p>
  ChannelContext is typically used in callbacks of <a href="ChannelHandler.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelHandler</code></a>. All callbacks triggered by events from the
  same underlying channel will use the same <a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelContext</code></a> instance, ensuring consistent access to
@@ -131,7 +131,7 @@ extends <a href="ChannelReader.html" title="interface in space.sunqian.common.io
 </div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-space.sunqian.common.io.communicate.ChannelReader">Methods inherited from interface&nbsp;space.sunqian.common.io.communicate.<a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a></h3>
-<code><a href="ChannelReader.html#availableBuffer()">availableBuffer</a>, <a href="ChannelReader.html#availableBytes()">availableBytes</a>, <a href="ChannelReader.html#availableString()">availableString</a>, <a href="ChannelReader.html#availableString(java.nio.charset.Charset)">availableString</a></code></div>
+<code><a href="ChannelReader.html#availableBytes()">availableBytes</a>, <a href="ChannelReader.html#availableString()">availableString</a>, <a href="ChannelReader.html#availableString(java.nio.charset.Charset)">availableString</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-space.sunqian.common.io.communicate.ChannelWriter">Methods inherited from interface&nbsp;space.sunqian.common.io.communicate.<a href="ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a></h3>
 <code><a href="ChannelWriter.html#writeBuffer(java.nio.ByteBuffer)">writeBuffer</a>, <a href="ChannelWriter.html#writeBytes(byte%5B%5D)">writeBytes</a>, <a href="ChannelWriter.html#writeString(java.lang.String)">writeString</a>, <a href="ChannelWriter.html#writeString(java.lang.String,java.nio.charset.Charset)">writeString</a></code></div>
@@ -167,7 +167,7 @@ extends <a href="ChannelReader.html" title="interface in space.sunqian.common.io
 <h3>attach</h3>
 <div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">attach</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;attachment)</span></div>
 <div class="block">Attaches the given attachment to this context. The given attachment object is bound to this context for its
- entire lifetime.</div>
+ remaining lifetime. This method can be invoked multiple times to update the attachment.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>attachment</code> - the given attachment to be attached</dd>

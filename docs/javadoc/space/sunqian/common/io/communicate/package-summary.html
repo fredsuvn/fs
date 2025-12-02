@@ -64,18 +64,12 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="package-signature">package <span class="element-name">space.sunqian.common.io.communicate</span></div>
 <section class="package-description" id="package-description">
-<div class="block">Provides interfaces and classes for IO communication, typically for network or IPC (Inter-Process Communication).
+<div class="block">Provides interfaces for IO communication, typically for network or IPC (Inter-Process Communication).
  <p>
  Interfaces:
  <ul>
      <li><a href="ChannelHandler.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelHandler</code></a></li>
      <li><a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelContext</code></a></li>
-     <li><a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelReader</code></a></li>
-     <li><a href="ChannelWriter.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelWriter</code></a></li>
- </ul>
- Skeletal implementations:
- <ul>
-     <li><a href="AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate"><code>AbstractChannelContext</code></a></li>
  </ul></div>
 </section>
 <section class="summary">
@@ -106,13 +100,11 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a>&lt;C extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
-<div class="block">Skeletal implementation of <a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelContext</code></a> to help minimize effort in implementing <a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelContext</code></a>.</div>
+<div class="block">Skeletal implementation of <a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelContext</code></a>.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab1"><a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;C extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</div>
 <div class="col-last odd-row-color class-summary class-summary-tab1">
-<div class="block">Represents context of an underlying channel for IO Communication, extends <a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelReader</code></a> and
- <a href="ChannelWriter.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelWriter</code></a> to provides advanced read/write operations, and the underlying channel is a
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link"><code>ByteChannel</code></a>.</div>
+<div class="block">Represents context of an underlying channel (can be accessed by <a href="ChannelContext.html#channel()"><code>ChannelContext.channel()</code></a>) for IO Communication.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab1"><a href="ChannelHandler.html" title="interface in space.sunqian.common.io.communicate">ChannelHandler</a>&lt;C extends <a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;CH&gt;,<wbr>CH extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</div>
 <div class="col-last even-row-color class-summary class-summary-tab1">
