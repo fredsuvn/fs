@@ -2,6 +2,7 @@ package internal.samples;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
+import space.sunqian.common.io.IOKit;
 import space.sunqian.common.net.http.HttpCaller;
 import space.sunqian.common.net.http.HttpReq;
 import space.sunqian.common.net.http.HttpResp;
@@ -26,14 +27,14 @@ public class NetSample {
 
                 @Override
                 public void channelRead(@Nonnull TcpContext context) throws Exception {
-                    String msg = context.availableString();
+                    String msg = IOKit.availableString(context.channel());
                     System.out.println("Receives message: " + msg);
                     String response = "HTTP/1.1 200 OK\r\n" +
                         "Content-Type: text/plain\r\n" +
                         "Content-Length: 5\r\n" +
                         "\r\n" +
                         "Hello";
-                    context.writeString(response);
+                    IOKit.write(context.channel(), response);
                 }
 
                 @Override

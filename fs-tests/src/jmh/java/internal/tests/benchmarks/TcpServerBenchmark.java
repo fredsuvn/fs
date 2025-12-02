@@ -16,6 +16,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
+import space.sunqian.common.io.IOKit;
 import space.sunqian.common.net.tcp.TcpClient;
 
 import java.util.concurrent.TimeUnit;
@@ -23,12 +24,9 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @BenchmarkMode({Mode.Throughput})
-// @Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
-// @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
-// @Fork(1)
-@Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
-@Fork(1)
+@Warmup(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
+@Fork(3)
 public class TcpServerBenchmark implements DataTest {
 
     @Param({
@@ -67,13 +65,13 @@ public class TcpServerBenchmark implements DataTest {
     @Benchmark
     public void request(Blackhole blackhole) throws Exception {
         for (TcpClient client : clients) {
-            client.writeBytes(message);
+            IOKit.write(client.channel(), message);
             // client.awaitReadable();
             // byte[] ret = client.availableBytes();
             // blackhole.consume(ret);
         }
         for (TcpClient client : clients) {
-            byte[] ret = client.availableBytes();
+            byte[] ret = IOKit.availableBytes(client.channel());
             blackhole.consume(ret);
         }
     }
