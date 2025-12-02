@@ -16,6 +16,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * Utilities for {@link Class}.
@@ -343,7 +344,7 @@ public class ClassKit {
         }
         if (componentType.isPrimitive()) {
             // No void[]
-            if (Fs.equals(componentType, void.class)) {
+            if (Objects.equals(componentType, void.class)) {
                 return null;
             }
             return "[" + JvmKit.toDescriptor(componentType);
@@ -365,31 +366,31 @@ public class ClassKit {
     }
 
     private static Class<?> wrapperPrimitive(Class<?> cls) {
-        if (Fs.equals(cls, boolean.class)) {
+        if (Objects.equals(cls, boolean.class)) {
             return Boolean.class;
         }
-        if (Fs.equals(cls, byte.class)) {
+        if (Objects.equals(cls, byte.class)) {
             return Byte.class;
         }
-        if (Fs.equals(cls, short.class)) {
+        if (Objects.equals(cls, short.class)) {
             return Short.class;
         }
-        if (Fs.equals(cls, char.class)) {
+        if (Objects.equals(cls, char.class)) {
             return Character.class;
         }
-        if (Fs.equals(cls, int.class)) {
+        if (Objects.equals(cls, int.class)) {
             return Integer.class;
         }
-        if (Fs.equals(cls, long.class)) {
+        if (Objects.equals(cls, long.class)) {
             return Long.class;
         }
-        if (Fs.equals(cls, float.class)) {
+        if (Objects.equals(cls, float.class)) {
             return Float.class;
         }
-        if (Fs.equals(cls, double.class)) {
+        if (Objects.equals(cls, double.class)) {
             return Double.class;
         }
-        if (Fs.equals(cls, void.class)) {
+        if (Objects.equals(cls, void.class)) {
             return Void.class;
         }
         throw new UnknownPrimitiveTypeException(cls);

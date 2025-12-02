@@ -2,7 +2,7 @@ package space.sunqian.common.io.communicate;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.chars.CharsKit;
-import space.sunqian.common.io.BufferKit;
+import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IORuntimeException;
 
 import java.nio.ByteBuffer;
@@ -12,10 +12,12 @@ import java.nio.charset.Charset;
 /**
  * Channel writer for IO Communication, typically used for network or IPC (Inter-Process Communication).
  * <p>
- * The reader holds an underlying channel to write and provides advanced write operations.
+ * The reader holds an underlying channel (can be accessed by {@link #channel()}) to write and provides advanced write
+ * operations.
  *
  * @param <C> the type of underlying channel
  * @author sunqian
+ * @implSpec The default I/O methods of this interface use {@link IOKit} to write data to the underlying channel.
  */
 public interface ChannelWriter<C extends WritableByteChannel> {
 
@@ -26,7 +28,7 @@ public interface ChannelWriter<C extends WritableByteChannel> {
      * @throws IORuntimeException if an error occurs
      */
     default void writeBytes(byte @Nonnull [] src) throws IORuntimeException {
-        writeBuffer(ByteBuffer.wrap(src));
+        IOKit.write(channel(), src);
     }
 
     /**
@@ -37,7 +39,7 @@ public interface ChannelWriter<C extends WritableByteChannel> {
      * @throws IORuntimeException if an error occurs
      */
     default void writeBuffer(@Nonnull ByteBuffer src) throws IORuntimeException {
-        BufferKit.readTo(src, channel());
+        IOKit.write(channel(), src);
     }
 
     /**
@@ -48,7 +50,7 @@ public interface ChannelWriter<C extends WritableByteChannel> {
      * @throws IORuntimeException if an error occurs
      */
     default void writeString(@Nonnull String src) throws IORuntimeException {
-        writeString(src, CharsKit.defaultCharset());
+        IOKit.write(channel(), src);
     }
 
     /**
@@ -59,8 +61,7 @@ public interface ChannelWriter<C extends WritableByteChannel> {
      * @throws IORuntimeException if an error occurs
      */
     default void writeString(@Nonnull String src, @Nonnull Charset charset) throws IORuntimeException {
-        byte[] bytes = src.getBytes(charset);
-        writeBytes(bytes);
+        IOKit.write(channel(), src, charset);
     }
 
     /**

@@ -575,7 +575,7 @@ public class ArrayKit {
      */
     public static int indexOf(boolean @Nonnull [] array, boolean value) {
         for (int i = 0; i < array.length; i++) {
-            if (Fs.equals(array[i], value)) {
+            if (array[i] == value) {
                 return i;
             }
         }
@@ -592,7 +592,7 @@ public class ArrayKit {
      */
     public static int indexOf(byte @Nonnull [] array, byte value) {
         for (int i = 0; i < array.length; i++) {
-            if (Fs.equals(array[i], value)) {
+            if (array[i] == value) {
                 return i;
             }
         }
@@ -609,7 +609,7 @@ public class ArrayKit {
      */
     public static int indexOf(short @Nonnull [] array, short value) {
         for (int i = 0; i < array.length; i++) {
-            if (Fs.equals(array[i], value)) {
+            if (array[i] == value) {
                 return i;
             }
         }
@@ -626,7 +626,7 @@ public class ArrayKit {
      */
     public static int indexOf(char @Nonnull [] array, char value) {
         for (int i = 0; i < array.length; i++) {
-            if (Fs.equals(array[i], value)) {
+            if (array[i] == value) {
                 return i;
             }
         }
@@ -643,7 +643,7 @@ public class ArrayKit {
      */
     public static int indexOf(int @Nonnull [] array, int value) {
         for (int i = 0; i < array.length; i++) {
-            if (Fs.equals(array[i], value)) {
+            if (array[i] == value) {
                 return i;
             }
         }
@@ -660,7 +660,7 @@ public class ArrayKit {
      */
     public static int indexOf(long @Nonnull [] array, long value) {
         for (int i = 0; i < array.length; i++) {
-            if (Fs.equals(array[i], value)) {
+            if (array[i] == value) {
                 return i;
             }
         }
@@ -677,7 +677,7 @@ public class ArrayKit {
      */
     public static int indexOf(float @Nonnull [] array, float value) {
         for (int i = 0; i < array.length; i++) {
-            if (Fs.equals(array[i], value)) {
+            if (array[i] == value) {
                 return i;
             }
         }
@@ -694,7 +694,7 @@ public class ArrayKit {
      */
     public static int indexOf(double @Nonnull [] array, double value) {
         for (int i = 0; i < array.length; i++) {
-            if (Fs.equals(array[i], value)) {
+            if (array[i] == value) {
                 return i;
             }
         }

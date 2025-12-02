@@ -20,7 +20,6 @@ import space.sunqian.common.net.tcp.TcpServerHandler;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
-import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,8 +95,8 @@ public class TcpTest implements DataTest, PrintTest {
             .workerThreadNum(workerNum)
             .workerThreadFactory(workerFactory)
             .socketOption(StandardSocketOptions.SO_RCVBUF, 1024)
-            .selectTimeout(100)
             .bufferSize(1024)
+            .selectTimeout(100)
             .handler(new TcpServerHandler() {
 
                 @Override
@@ -195,13 +194,16 @@ public class TcpTest implements DataTest, PrintTest {
             readLatches[i].await();
             BytesBuilder b = new BytesBuilder();
             while (true) {
-                client.awaitReadable();
-                b.append(client.availableBytes());
+                client.readWait();
+                byte[] bytes = client.availableBytes();
+                if (bytes != null) {
+                    b.append(bytes);
+                }
                 if (b.size() == data.length) {
                     break;
                 }
             }
-            client.wakeUpReadable();
+            client.readWakeUp();
             assertArrayEquals(b.toByteArray(), data);
         }
 
@@ -341,7 +343,9 @@ public class TcpTest implements DataTest, PrintTest {
                 .bind();
             TcpClient client = TcpClient.newBuilder().connect(server.localAddress());
             client.writeString("hello world");
-            assertEquals(client.availableBuffer(), ByteBuffer.allocate(0));
+            byte[] bytes = client.availableBytes();
+            assertNotNull(bytes);
+            assertEquals(0, bytes.length);
             latch.await();
             client.close();
             server.close();

@@ -54,11 +54,11 @@ loadScripts(document, 'script');</script>
 <dl class="index">
 <dt><a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" class="type-name-link" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a>&lt;<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" title="type parameter in AbstractChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt; - Class in <a href="space/sunqian/common/io/communicate/package-summary.html">space.sunqian.common.io.communicate</a></dt>
 <dd>
-<div class="block">Skeletal implementation of <a href="space/sunqian/common/io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelContext</code></a> to help minimize effort in implementing <a href="space/sunqian/common/io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelContext</code></a>.</div>
+<div class="block">Skeletal implementation of <a href="space/sunqian/common/io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelContext</code></a>.</div>
 </dd>
-<dt><a href="space/sunqian/common/io/communicate/AbstractChannelContext.html#%3Cinit%3E(C,int)" class="member-name-link">AbstractChannelContext(C, int)</a> - Constructor for class space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a></dt>
+<dt><a href="space/sunqian/common/io/communicate/AbstractChannelContext.html#%3Cinit%3E(C)" class="member-name-link">AbstractChannelContext(C)</a> - Constructor for class space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a></dt>
 <dd>
-<div class="block">Constructs with the given <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link"><code>ByteChannel</code></a> and the buffer size for advanced I/O operations.</div>
+<div class="block">Constructs with the given underlying channel.</div>
 </dd>
 <dt><a href="space/sunqian/common/object/data/handlers/AbstractObjectSchemaHandler.html" class="type-name-link" title="class in space.sunqian.common.object.data.handlers">AbstractObjectSchemaHandler</a> - Class in <a href="space/sunqian/common/object/data/handlers/package-summary.html">space.sunqian.common.object.data.handlers</a></dt>
 <dd>
@@ -537,10 +537,14 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="space/sunqian/common/object/convert/handlers/AssignableConvertHandler.html#%3Cinit%3E()" class="member-name-link">AssignableConvertHandler()</a> - Constructor for class space.sunqian.common.object.convert.handlers.<a href="space/sunqian/common/object/convert/handlers/AssignableConvertHandler.html" title="class in space.sunqian.common.object.convert.handlers">AssignableConvertHandler</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="space/sunqian/common/io/communicate/AbstractChannelContext.html#attach(java.lang.Object)" class="member-name-link">attach(Object)</a> - Method in class space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="space/sunqian/common/io/communicate/ChannelContext.html#attach(java.lang.Object)" class="member-name-link">attach(Object)</a> - Method in interface space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a></dt>
 <dd>
 <div class="block">Attaches the given attachment to this context.</div>
 </dd>
+<dt><a href="space/sunqian/common/io/communicate/AbstractChannelContext.html#attachment()" class="member-name-link">attachment()</a> - Method in class space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="space/sunqian/common/io/communicate/ChannelContext.html#attachment()" class="member-name-link">attachment()</a> - Method in interface space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a></dt>
 <dd>
 <div class="block">Returns the attachment of this context.</div>
@@ -613,13 +617,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Reads a specified length of data from the source channel into a new buffer, and returns the buffer.</div>
 </dd>
-<dt><a href="space/sunqian/common/io/communicate/AbstractChannelContext.html#availableBuffer()" class="member-name-link">availableBuffer()</a> - Method in class space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="space/sunqian/common/io/communicate/ChannelReader.html#availableBuffer()" class="member-name-link">availableBuffer()</a> - Method in interface space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a></dt>
-<dd>
-<div class="block">Returns all available bytes as a buffer in the underlying channel, possibly empty if no data is available but the
- channel is still alive, or <code>null</code> if the channel is closed.</div>
-</dd>
 <dt><a href="space/sunqian/common/io/communicate/AbstractChannelContext.html#availableBytes()" class="member-name-link">availableBytes()</a> - Method in class space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="space/sunqian/common/io/communicate/ChannelReader.html#availableBytes()" class="member-name-link">availableBytes()</a> - Method in interface space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a></dt>
@@ -645,6 +642,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Reads a specified length of data from the source channel into a new array, and returns the array.</div>
 </dd>
+<dt><a href="space/sunqian/common/io/communicate/AbstractChannelContext.html#availableString()" class="member-name-link">availableString()</a> - Method in class space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="space/sunqian/common/io/communicate/ChannelReader.html#availableString()" class="member-name-link">availableString()</a> - Method in interface space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a></dt>
 <dd>
 <div class="block">Returns all available bytes as a string in the underlying channel, possibly empty if no data is available but the
@@ -708,6 +707,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Reads available data from the channel as a string with the specified charset, continuing until no data is
  immediately available, and returns the string.</div>
 </dd>
+<dt><a href="space/sunqian/common/io/communicate/AbstractChannelContext.html#availableString(java.nio.charset.Charset)" class="member-name-link">availableString(Charset)</a> - Method in class space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="space/sunqian/common/io/communicate/ChannelReader.html#availableString(java.nio.charset.Charset)" class="member-name-link">availableString(Charset)</a> - Method in interface space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a></dt>
 <dd>
 <div class="block">Returns all available bytes as a string in the underlying channel, possibly empty if no data is available but the
@@ -1106,10 +1107,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Constructs with the cause.</div>
 </dd>
-<dt><a href="space/sunqian/common/net/tcp/TcpClient.html#awaitReadable()" class="member-name-link">awaitReadable()</a> - Method in interface space.sunqian.common.net.tcp.<a href="space/sunqian/common/net/tcp/TcpClient.html" title="interface in space.sunqian.common.net.tcp">TcpClient</a></dt>
-<dd>
-<div class="block">Blocks current thread and waits for the client to be readable.</div>
-</dd>
 </dl>
 <h2 class="title" id="I:B">B</h2>
 <dl class="index">
@@ -1496,10 +1493,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Capitalizes the given string.</div>
 </dd>
-<dt><a href="space/sunqian/common/io/communicate/AbstractChannelContext.html#channel" class="member-name-link">channel</a> - Variable in class space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a></dt>
-<dd>
-<div class="block">The given underlying channel.</div>
-</dd>
 <dt><a href="space/sunqian/common/io/communicate/AbstractChannelContext.html#channel()" class="member-name-link">channel()</a> - Method in class space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="space/sunqian/common/io/communicate/ChannelContext.html#channel()" class="member-name-link">channel()</a> - Method in interface space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a></dt>
@@ -1536,9 +1529,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="space/sunqian/common/io/communicate/ChannelContext.html" class="type-name-link" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;<a href="space/sunqian/common/io/communicate/ChannelContext.html" title="type parameter in ChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt; - Interface in <a href="space/sunqian/common/io/communicate/package-summary.html">space.sunqian.common.io.communicate</a></dt>
 <dd>
-<div class="block">Represents context of an underlying channel for IO Communication, extends <a href="space/sunqian/common/io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelReader</code></a> and
- <a href="space/sunqian/common/io/communicate/ChannelWriter.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelWriter</code></a> to provides advanced read/write operations, and the underlying channel is a
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link"><code>ByteChannel</code></a>.</div>
+<div class="block">Represents context of an underlying channel (can be accessed by <a href="space/sunqian/common/io/communicate/ChannelContext.html#channel()"><code>ChannelContext.channel()</code></a>) for IO Communication.</div>
 </dd>
 <dt><a href="space/sunqian/common/io/communicate/ChannelHandler.html" class="type-name-link" title="interface in space.sunqian.common.io.communicate">ChannelHandler</a>&lt;<a href="space/sunqian/common/io/communicate/ChannelHandler.html" title="type parameter in ChannelHandler">C</a> extends <a href="space/sunqian/common/io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;<a href="space/sunqian/common/io/communicate/ChannelHandler.html" title="type parameter in ChannelHandler">CH</a>&gt;,<wbr><a href="space/sunqian/common/io/communicate/ChannelHandler.html" title="type parameter in ChannelHandler">CH</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt; - Interface in <a href="space/sunqian/common/io/communicate/package-summary.html">space.sunqian.common.io.communicate</a></dt>
 <dd>
@@ -4118,6 +4109,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">IO mode, blocking or non-blocking.</div>
 </dd>
+<dt><a href="space/sunqian/common/io/communicate/AbstractChannelContext.html#ioOperator()" class="member-name-link">ioOperator()</a> - Method in class space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a></dt>
+<dd>
+<div class="block">Returns the <a href="space/sunqian/common/io/IOOperator.html" title="interface in space.sunqian.common.io"><code>IOOperator</code></a> to be used for read operations.</div>
+</dd>
 <dt><a href="space/sunqian/common/io/IOKit.html#ioOperator()" class="member-name-link">ioOperator()</a> - Static method in class space.sunqian.common.io.<a href="space/sunqian/common/io/IOKit.html" title="class in space.sunqian.common.io">IOKit</a></dt>
 <dd>
 <div class="block">Returns the default io operator this class uses.</div>
@@ -5994,10 +5989,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Opens this thread gate.</div>
 </dd>
-<dt><a href="space/sunqian/common/io/communicate/AbstractChannelContext.html#operator" class="member-name-link">operator</a> - Variable in class space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a></dt>
-<dd>
-<div class="block">The <a href="space/sunqian/common/io/IOOperator.html" title="interface in space.sunqian.common.io"><code>IOOperator</code></a> for advanced I/O operations.</div>
-</dd>
 <dt><a href="space/sunqian/common/base/option/Option.html" class="type-name-link" title="interface in space.sunqian.common.base.option">Option</a>&lt;<a href="space/sunqian/common/base/option/Option.html" title="type parameter in Option">K</a>,<wbr><a href="space/sunqian/common/base/option/Option.html" title="type parameter in Option">V</a>&gt; - Interface in <a href="space/sunqian/common/base/option/package-summary.html">space.sunqian.common.base.option</a></dt>
 <dd>
 <div class="block">This interface represents an option with a key and value.</div>
@@ -7003,6 +6994,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Reads a specified length of data from the source buffer into the destination buffer, until the read number
  reaches the specified length or reaches the end of any buffer, and returns the actual number of chars read to.</div>
 </dd>
+<dt><a href="space/sunqian/common/net/tcp/TcpClient.html#readWait()" class="member-name-link">readWait()</a> - Method in interface space.sunqian.common.net.tcp.<a href="space/sunqian/common/net/tcp/TcpClient.html" title="interface in space.sunqian.common.net.tcp">TcpClient</a></dt>
+<dd>
+<div class="block">Blocks current thread and waits for the client to be readable.</div>
+</dd>
+<dt><a href="space/sunqian/common/net/tcp/TcpClient.html#readWakeUp()" class="member-name-link">readWakeUp()</a> - Method in interface space.sunqian.common.net.tcp.<a href="space/sunqian/common/net/tcp/TcpClient.html" title="interface in space.sunqian.common.net.tcp">TcpClient</a></dt>
+<dd>
+<div class="block">Wakes up the thread blocked in <a href="space/sunqian/common/net/tcp/TcpClient.html#readWait()"><code>TcpClient.readWait()</code></a>.</div>
+</dd>
 <dt><a href="space/sunqian/common/io/ByteReader.html#ready()" class="member-name-link">ready()</a> - Method in interface space.sunqian.common.io.<a href="space/sunqian/common/io/ByteReader.html" title="interface in space.sunqian.common.io">ByteReader</a></dt>
 <dd>
 <div class="block">Returns the bytes number this reader is ready to be read, may be <code>0</code>.</div>
@@ -7631,7 +7630,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="space/sunqian/common/io/communicate/package-summary.html">space.sunqian.common.io.communicate</a> - package space.sunqian.common.io.communicate</dt>
 <dd>
-<div class="block">Provides interfaces and classes for IO communication, typically for network or IPC (Inter-Process Communication).</div>
+<div class="block">Provides interfaces for IO communication, typically for network or IPC (Inter-Process Communication).</div>
 </dd>
 <dt><a href="space/sunqian/common/io/file/package-summary.html">space.sunqian.common.io.file</a> - package space.sunqian.common.io.file</dt>
 <dd>
@@ -8713,10 +8712,6 @@ the order they are declared.</div>
 <dl class="index">
 <dt><a href="space/sunqian/common/base/process/VirtualProcess.html#waitFor()" class="member-name-link">waitFor()</a> - Method in class space.sunqian.common.base.process.<a href="space/sunqian/common/base/process/VirtualProcess.html" title="class in space.sunqian.common.base.process">VirtualProcess</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="space/sunqian/common/net/tcp/TcpClient.html#wakeUpReadable()" class="member-name-link">wakeUpReadable()</a> - Method in interface space.sunqian.common.net.tcp.<a href="space/sunqian/common/net/tcp/TcpClient.html" title="interface in space.sunqian.common.net.tcp">TcpClient</a></dt>
-<dd>
-<div class="block">Wakes up the thread blocked in <a href="space/sunqian/common/net/tcp/TcpClient.html#awaitReadable()"><code>TcpClient.awaitReadable()</code></a>.</div>
-</dd>
 <dt><a href="space/sunqian/common/base/logging/SimpleLogger.html#warn(java.lang.Object...)" class="member-name-link">warn(Object...)</a> - Method in interface space.sunqian.common.base.logging.<a href="space/sunqian/common/base/logging/SimpleLogger.html" title="interface in space.sunqian.common.base.logging">SimpleLogger</a></dt>
 <dd>
 <div class="block">Logs the given message with <a href="space/sunqian/common/base/logging/SimpleLogger.Level.html#WARN"><code>SimpleLogger.Level.WARN</code></a> level.</div>
@@ -8867,6 +8862,15 @@ the order they are declared.</div>
 <dd>
 <div class="block">Appends the specified char to this builder.</div>
 </dd>
+<dt><a href="space/sunqian/common/io/IOKit.html#write(java.io.OutputStream,byte%5B%5D)" class="member-name-link">write(OutputStream, byte[])</a> - Static method in class space.sunqian.common.io.<a href="space/sunqian/common/io/IOKit.html" title="class in space.sunqian.common.io">IOKit</a></dt>
+<dd>
+<div class="block">Writes all data to the specified output stream from the given array.</div>
+</dd>
+<dt><a href="space/sunqian/common/io/IOKit.html#write(java.io.OutputStream,byte%5B%5D,int,int)" class="member-name-link">write(OutputStream, byte[], int, int)</a> - Static method in class space.sunqian.common.io.<a href="space/sunqian/common/io/IOKit.html" title="class in space.sunqian.common.io">IOKit</a></dt>
+<dd>
+<div class="block">Writes a specified length of data to the specified output stream from the given array, starting at the specified
+ offset.</div>
+</dd>
 <dt><a href="space/sunqian/common/io/IOKit.html#write(java.io.OutputStream,java.lang.String)" class="member-name-link">write(OutputStream, String)</a> - Static method in class space.sunqian.common.io.<a href="space/sunqian/common/io/IOKit.html" title="class in space.sunqian.common.io">IOKit</a></dt>
 <dd>
 <div class="block">Writes string to the specified output stream with <a href="space/sunqian/common/base/chars/CharsKit.html#defaultCharset()"><code>CharsKit.defaultCharset()</code></a>.</div>
@@ -8874,6 +8878,10 @@ the order they are declared.</div>
 <dt><a href="space/sunqian/common/io/IOKit.html#write(java.io.OutputStream,java.lang.String,java.nio.charset.Charset)" class="member-name-link">write(OutputStream, String, Charset)</a> - Static method in class space.sunqian.common.io.<a href="space/sunqian/common/io/IOKit.html" title="class in space.sunqian.common.io">IOKit</a></dt>
 <dd>
 <div class="block">Writes string to the specified output stream with the specified charset.</div>
+</dd>
+<dt><a href="space/sunqian/common/io/IOKit.html#write(java.io.OutputStream,java.nio.ByteBuffer)" class="member-name-link">write(OutputStream, ByteBuffer)</a> - Static method in class space.sunqian.common.io.<a href="space/sunqian/common/io/IOKit.html" title="class in space.sunqian.common.io">IOKit</a></dt>
+<dd>
+<div class="block">Writes all data to the specified output stream from the given <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/ByteBuffer.html" title="class or interface in java.nio" class="external-link"><code>ByteBuffer</code></a>.</div>
 </dd>
 <dt><a href="space/sunqian/common/io/IOKit.html#write(java.lang.Appendable,char%5B%5D)" class="member-name-link">write(Appendable, char[])</a> - Static method in class space.sunqian.common.io.<a href="space/sunqian/common/io/IOKit.html" title="class in space.sunqian.common.io">IOKit</a></dt>
 <dd>
@@ -8895,6 +8903,27 @@ the order they are declared.</div>
 <dt><a href="space/sunqian/common/io/BufferKit.html#write(java.nio.ByteBuffer,java.lang.String,java.nio.charset.Charset)" class="member-name-link">write(ByteBuffer, String, Charset)</a> - Static method in class space.sunqian.common.io.<a href="space/sunqian/common/io/BufferKit.html" title="class in space.sunqian.common.io">BufferKit</a></dt>
 <dd>
 <div class="block">Writes string to the specified buffer with the specified charset.</div>
+</dd>
+<dt><a href="space/sunqian/common/io/IOKit.html#write(java.nio.channels.WritableByteChannel,byte%5B%5D)" class="member-name-link">write(WritableByteChannel, byte[])</a> - Static method in class space.sunqian.common.io.<a href="space/sunqian/common/io/IOKit.html" title="class in space.sunqian.common.io">IOKit</a></dt>
+<dd>
+<div class="block">Writes all data to the specified writable byte channel from the given array.</div>
+</dd>
+<dt><a href="space/sunqian/common/io/IOKit.html#write(java.nio.channels.WritableByteChannel,byte%5B%5D,int,int)" class="member-name-link">write(WritableByteChannel, byte[], int, int)</a> - Static method in class space.sunqian.common.io.<a href="space/sunqian/common/io/IOKit.html" title="class in space.sunqian.common.io">IOKit</a></dt>
+<dd>
+<div class="block">Writes a specified length of data to the specified writable byte channel from the given array, starting at the
+ specified offset.</div>
+</dd>
+<dt><a href="space/sunqian/common/io/IOKit.html#write(java.nio.channels.WritableByteChannel,java.lang.String)" class="member-name-link">write(WritableByteChannel, String)</a> - Static method in class space.sunqian.common.io.<a href="space/sunqian/common/io/IOKit.html" title="class in space.sunqian.common.io">IOKit</a></dt>
+<dd>
+<div class="block">Writes string to the specified writable byte channel with <a href="space/sunqian/common/base/chars/CharsKit.html#defaultCharset()"><code>CharsKit.defaultCharset()</code></a>.</div>
+</dd>
+<dt><a href="space/sunqian/common/io/IOKit.html#write(java.nio.channels.WritableByteChannel,java.lang.String,java.nio.charset.Charset)" class="member-name-link">write(WritableByteChannel, String, Charset)</a> - Static method in class space.sunqian.common.io.<a href="space/sunqian/common/io/IOKit.html" title="class in space.sunqian.common.io">IOKit</a></dt>
+<dd>
+<div class="block">Writes string to the specified writable byte channel with the specified charset.</div>
+</dd>
+<dt><a href="space/sunqian/common/io/IOKit.html#write(java.nio.channels.WritableByteChannel,java.nio.ByteBuffer)" class="member-name-link">write(WritableByteChannel, ByteBuffer)</a> - Static method in class space.sunqian.common.io.<a href="space/sunqian/common/io/IOKit.html" title="class in space.sunqian.common.io">IOKit</a></dt>
+<dd>
+<div class="block">Writes all data to the specified writable byte channel from the given <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/ByteBuffer.html" title="class or interface in java.nio" class="external-link"><code>ByteBuffer</code></a>.</div>
 </dd>
 <dt><a href="space/sunqian/common/io/communicate/ChannelWriter.html#writeBuffer(java.nio.ByteBuffer)" class="member-name-link">writeBuffer(ByteBuffer)</a> - Method in interface space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a></dt>
 <dd>

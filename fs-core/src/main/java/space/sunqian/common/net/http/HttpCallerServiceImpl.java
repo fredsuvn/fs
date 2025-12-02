@@ -4,7 +4,7 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.math.MathKit;
-import space.sunqian.common.io.IOOperator;
+import space.sunqian.common.io.IOKit;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,11 +23,12 @@ enum HttpCallerServiceImpl implements HttpCallerService {
 
     private static final class CallerImpl implements HttpCaller {
 
-        private final @Nonnull IOOperator io;
+        // private final @Nonnull IOOperator io;
+        private final int bufSize;
         private final @Nonnull Proxy proxy;
 
         CallerImpl(int bufSize, @Nonnull Proxy proxy) throws HttpNetException {
-            this.io = Fs.uncheck(() -> IOOperator.get(bufSize), HttpNetException::new);
+            this.bufSize = bufSize;
             this.proxy = proxy;
         }
 
@@ -55,7 +56,7 @@ enum HttpCallerServiceImpl implements HttpCallerService {
                     connection.setDoOutput(true);
                     OutputStream out = connection.getOutputStream();
                     out.write(firstByte);
-                    io.readTo(in, out);
+                    IOKit.readTo(in, out, new byte[bufSize]);
                 }
             }
             int respCode = connection.getResponseCode();

@@ -7,6 +7,7 @@ import space.sunqian.common.Fs;
 import space.sunqian.common.base.function.callable.VoidCallable;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.io.IOKit;
+import space.sunqian.common.io.IOOperator;
 import space.sunqian.common.io.communicate.AbstractChannelContext;
 import space.sunqian.common.net.NetException;
 import space.sunqian.common.net.NetServer;
@@ -41,9 +42,9 @@ public class TcpServerBuilder {
     private int workerThreadNum = 1;
     private @Nullable ThreadFactory mainThreadFactory;
     private @Nullable ThreadFactory workerThreadFactory;
-    private int bufSize = IOKit.bufferSize();
     private final @Nonnull Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
     private long selectTimeout = 0;
+    private int bufSize = IOKit.bufferSize();
 
     /**
      * Sets the handler to handle server events. The default handler is {@link TcpServerHandler#nullHandler()}.
@@ -228,6 +229,7 @@ public class TcpServerBuilder {
             this.mainThread = newThread(mainthreadFactory, this);
             this.workers = new WorkerImpl[workThreadNum];
             this.selectTimeout = selectTimeout;
+            this.bufSize = bufSize;
             server.configureBlocking(false);
             socketOptions.forEach((name, value) ->
                 Fs.uncheck(() -> server.setOption(Fs.as(name), value), NetException::new));
@@ -239,7 +241,6 @@ public class TcpServerBuilder {
             }
             server.bind(localAddress, backlog);
             this.localAddress = (InetSocketAddress) server.getLocalAddress();
-            this.bufSize = bufSize;
             mainThread.start();
         }
 
@@ -485,20 +486,20 @@ public class TcpServerBuilder {
                 }
             }
 
-            private final class ContextImpl
-                extends AbstractChannelContext<SocketChannel> implements TcpContext {
+            private final class ContextImpl extends AbstractChannelContext<SocketChannel> implements TcpContext {
 
+                // private final @Nonnull SocketChannel channel;
                 private final @Nonnull InetSocketAddress clientAddress;
                 private final @Nonnull InetSocketAddress serverAddress;
-
-                private Object attachment;
+                private final @Nonnull IOOperator ioOperator;
 
                 private volatile boolean closed = false;
 
                 private ContextImpl(@Nonnull SocketChannel channel, int bufSize) throws IllegalArgumentException {
-                    super(channel, bufSize);
+                    super(channel);
                     this.clientAddress = (InetSocketAddress) Fs.uncheck(channel::getRemoteAddress, NetException::new);
                     this.serverAddress = (InetSocketAddress) Fs.uncheck(channel::getLocalAddress, NetException::new);
+                    this.ioOperator = IOOperator.get(bufSize);
                 }
 
                 @Override
@@ -517,6 +518,7 @@ public class TcpServerBuilder {
                         return;
                     }
                     Fs.uncheck(() -> {
+                        SocketChannel channel = channel();
                         channel.close();
                         channel.keyFor(selector).cancel();
                         TcpKit.channelClose(handler, this);
@@ -525,13 +527,8 @@ public class TcpServerBuilder {
                 }
 
                 @Override
-                public void attach(Object attachment) {
-                    this.attachment = attachment;
-                }
-
-                @Override
-                public Object attachment() {
-                    return this.attachment;
+                protected @Nonnull IOOperator ioOperator() {
+                    return ioOperator;
                 }
             }
         }

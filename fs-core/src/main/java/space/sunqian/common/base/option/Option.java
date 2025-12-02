@@ -6,6 +6,8 @@ import space.sunqian.annotations.Nullable;
 import space.sunqian.common.Fs;
 import space.sunqian.common.collect.ArrayKit;
 
+import java.util.Objects;
+
 /**
  * This interface represents an option with a key and value. For example:
  * <pre>{@code
@@ -70,7 +72,7 @@ public interface Option<K, V> {
             return null;
         }
         for (Option<?, ?> option : options) {
-            if (Fs.equals(option.key(), key)) {
+            if (Objects.equals(option.key(), key)) {
                 return Fs.as(option);
             }
         }

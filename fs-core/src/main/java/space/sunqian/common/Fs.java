@@ -356,7 +356,7 @@ public class Fs {
         }
         Class<?> typeA = a.getClass();
         Class<?> typeB = b.getClass();
-        if (typeA.isArray() && equals(typeA, typeB)) {
+        if (typeA.isArray() && Objects.equals(typeA, typeB)) {
             return equalsArray(a, b, deep);
         }
         return Objects.equals(a, b);
@@ -987,7 +987,7 @@ public class Fs {
         return ProcessKit.start(command);
     }
 
-    //---------------- Process Begin ----------------//
+    //---------------- Process End ----------------//
 
     private Fs() {
     }

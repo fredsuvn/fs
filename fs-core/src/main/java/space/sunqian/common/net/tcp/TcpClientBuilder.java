@@ -6,13 +6,12 @@ import space.sunqian.common.Check;
 import space.sunqian.common.Fs;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IOOperator;
-import space.sunqian.common.io.IORuntimeException;
+import space.sunqian.common.io.communicate.AbstractChannelContext;
 import space.sunqian.common.net.NetException;
 
 import java.net.InetSocketAddress;
 import java.net.SocketOption;
 import java.net.StandardSocketOptions;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -94,9 +93,9 @@ public class TcpClientBuilder {
         );
     }
 
-    private static final class TcpClientImpl implements TcpClient {
+    private static final class TcpClientImpl extends AbstractChannelContext<SocketChannel> implements TcpClient {
 
-        private final @Nonnull SocketChannel client;
+        // private final @Nonnull SocketChannel client;
         private final @Nonnull InetSocketAddress localAddress;
         private final @Nonnull InetSocketAddress remoteAddress;
         private final @Nonnull Selector selector;
@@ -111,7 +110,8 @@ public class TcpClientBuilder {
             @Nonnull Map<SocketOption<?>, Object> socketOptions,
             int bufSize
         ) throws Exception {
-            this.client = SocketChannel.open();
+            super(SocketChannel.open());
+            SocketChannel client = channel();
             this.remoteAddress = remoteAddress;
             socketOptions.forEach((name, value) ->
                 Fs.uncheck(() -> client.setOption(Fs.as(name), value), NetException::new));
@@ -131,6 +131,7 @@ public class TcpClientBuilder {
                 return;
             }
             Fs.uncheck(() -> {
+                SocketChannel client = channel();
                 client.close();
                 client.keyFor(selector).cancel();
                 selector.close();
@@ -148,8 +149,10 @@ public class TcpClientBuilder {
             return localAddress;
         }
 
+        @SuppressWarnings("resource")
         @Override
         public boolean isConnected() {
+            SocketChannel client = channel();
             return client.isConnected();
         }
 
@@ -159,22 +162,7 @@ public class TcpClientBuilder {
         }
 
         @Override
-        public @Nonnull SocketChannel channel() {
-            return client;
-        }
-
-        @Override
-        public byte @Nullable [] availableBytes() throws IORuntimeException {
-            return ioOperator.availableBytes(client);
-        }
-
-        @Override
-        public @Nullable ByteBuffer availableBuffer() throws IORuntimeException {
-            return ioOperator.available(client);
-        }
-
-        @Override
-        public void awaitReadable() {
+        public void readWait() {
             Fs.uncheck(() -> {
                 selector.select();
                 Set<SelectionKey> selectedKeys = selector.selectedKeys();
@@ -189,8 +177,13 @@ public class TcpClientBuilder {
         }
 
         @Override
-        public void wakeUpReadable() {
+        public void readWakeUp() {
             selector.wakeup();
+        }
+
+        @Override
+        protected @Nonnull IOOperator ioOperator() {
+            return ioOperator;
         }
     }
 }

@@ -409,7 +409,7 @@ public class TypeKit {
         @Nonnull Class<?> matching,
         @Nonnull Type replacement
     ) throws ReflectionException {
-        return replaceType(type, t -> Fs.equals(t, matching) ? replacement : t);
+        return replaceType(type, t -> Objects.equals(t, matching) ? replacement : t);
     }
 
     /**
@@ -437,7 +437,7 @@ public class TypeKit {
     ) throws ReflectionException {
         if (TypeKit.isClass(type)) {
             Type newType = mapper.apply((Class<?>) type);
-            if (!Fs.equals(type, newType)) {
+            if (!Objects.equals(type, newType)) {
                 return newType;
             }
         }
@@ -463,14 +463,14 @@ public class TypeKit {
         if (!TypeKit.isClass(newRawType)) {
             throw new ReflectionException("Unsupported raw type: " + newRawType + ".");
         }
-        if (!Fs.equals(rawType, newRawType)) {
+        if (!Objects.equals(rawType, newRawType)) {
             matched = true;
         }
         @Nullable Type ownerType = type.getOwnerType();
         Type newOwnerType = null;
         if (ownerType != null) {
             newOwnerType = replaceType(ownerType, mapper);
-            if (!Fs.equals(ownerType, newOwnerType)) {
+            if (!Objects.equals(ownerType, newOwnerType)) {
                 matched = true;
             }
         }
@@ -478,7 +478,7 @@ public class TypeKit {
         for (int i = 0; i < actualTypeArguments.length; i++) {
             Type actualTypeArgument = actualTypeArguments[i];
             Type newActualTypeArgument = replaceType(actualTypeArgument, mapper);
-            if (!Fs.equals(actualTypeArgument, newActualTypeArgument)) {
+            if (!Objects.equals(actualTypeArgument, newActualTypeArgument)) {
                 matched = true;
                 actualTypeArguments[i] = newActualTypeArgument;
             }
@@ -499,7 +499,7 @@ public class TypeKit {
         for (int i = 0; i < upperBounds.length; i++) {
             Type upperBound = upperBounds[i];
             Type newUpperBound = replaceType(upperBound, mapper);
-            if (!Fs.equals(upperBound, newUpperBound)) {
+            if (!Objects.equals(upperBound, newUpperBound)) {
                 matched = true;
                 upperBounds[i] = newUpperBound;
             }
@@ -508,7 +508,7 @@ public class TypeKit {
         for (int i = 0; i < lowerBounds.length; i++) {
             Type lowerBound = lowerBounds[i];
             Type newLowerBound = replaceType(lowerBound, mapper);
-            if (!Fs.equals(lowerBound, newLowerBound)) {
+            if (!Objects.equals(lowerBound, newLowerBound)) {
                 matched = true;
                 lowerBounds[i] = newLowerBound;
             }
@@ -527,7 +527,7 @@ public class TypeKit {
         boolean matched = false;
         Type componentType = type.getGenericComponentType();
         Type newComponentType = replaceType(componentType, mapper);
-        if (!Fs.equals(componentType, newComponentType)) {
+        if (!Objects.equals(componentType, newComponentType)) {
             matched = true;
         }
         if (matched) {
@@ -673,14 +673,14 @@ public class TypeKit {
             }
             if (o instanceof ParameterizedTypeImpl) {
                 ParameterizedTypeImpl that = (ParameterizedTypeImpl) o;
-                return Fs.equals(ownerType, that.ownerType) &&
-                    Fs.equals(rawType, that.rawType) &&
+                return Objects.equals(ownerType, that.ownerType) &&
+                    Objects.equals(rawType, that.rawType) &&
                     Arrays.equals(actualTypeArguments, that.actualTypeArguments);
             }
             if (o instanceof ParameterizedType) {
                 ParameterizedType that = (ParameterizedType) o;
-                return Fs.equals(ownerType, that.getOwnerType()) &&
-                    Fs.equals(rawType, that.getRawType()) &&
+                return Objects.equals(ownerType, that.getOwnerType()) &&
+                    Objects.equals(rawType, that.getRawType()) &&
                     Arrays.equals(actualTypeArguments, that.getActualTypeArguments());
             }
             return false;
@@ -779,7 +779,7 @@ public class TypeKit {
                 return "? super " + lowerBounds[0].getTypeName();
             }
             if (upperBounds.length > 0) {
-                if (Fs.equals(upperBounds[0], Object.class)) {
+                if (Objects.equals(upperBounds[0], Object.class)) {
                     return "?";
                 }
                 // ? extends
