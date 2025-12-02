@@ -5,14 +5,11 @@ import space.sunqian.annotations.Nullable;
 import space.sunqian.common.Check;
 import space.sunqian.common.Fs;
 import space.sunqian.common.io.IOKit;
-import space.sunqian.common.io.IOOperator;
-import space.sunqian.common.io.IORuntimeException;
 import space.sunqian.common.net.NetException;
 
 import java.net.InetSocketAddress;
 import java.net.SocketOption;
 import java.net.StandardSocketOptions;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -100,7 +97,6 @@ public class TcpClientBuilder {
         private final @Nonnull InetSocketAddress localAddress;
         private final @Nonnull InetSocketAddress remoteAddress;
         private final @Nonnull Selector selector;
-        private final @Nonnull IOOperator ioOperator;
 
         private volatile boolean closed = false;
 
@@ -122,7 +118,6 @@ public class TcpClientBuilder {
             client.connect(remoteAddress);
             client.configureBlocking(false);
             client.register(selector, SelectionKey.OP_READ);
-            this.ioOperator = IOOperator.get(bufSize);
         }
 
         @Override
@@ -161,16 +156,6 @@ public class TcpClientBuilder {
         @Override
         public @Nonnull SocketChannel channel() {
             return client;
-        }
-
-        @Override
-        public byte @Nullable [] availableBytes() throws IORuntimeException {
-            return ioOperator.availableBytes(client);
-        }
-
-        @Override
-        public @Nullable ByteBuffer availableBuffer() throws IORuntimeException {
-            return ioOperator.available(client);
         }
 
         @Override

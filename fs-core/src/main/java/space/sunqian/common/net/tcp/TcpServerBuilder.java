@@ -6,8 +6,6 @@ import space.sunqian.common.Check;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.function.callable.VoidCallable;
 import space.sunqian.common.collect.ListKit;
-import space.sunqian.common.io.IOKit;
-import space.sunqian.common.io.communicate.AbstractChannelContext;
 import space.sunqian.common.net.NetException;
 import space.sunqian.common.net.NetServer;
 
@@ -41,7 +39,6 @@ public class TcpServerBuilder {
     private int workerThreadNum = 1;
     private @Nullable ThreadFactory mainThreadFactory;
     private @Nullable ThreadFactory workerThreadFactory;
-    private int bufSize = IOKit.bufferSize();
     private final @Nonnull Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
     private long selectTimeout = 0;
 
@@ -98,19 +95,19 @@ public class TcpServerBuilder {
         return this;
     }
 
-    /**
-     * Sets the buffer size for advanced IO operations. Note this buffer size is not the kernel network buffer size, it
-     * is an I/O advanced operations buffer size.
-     *
-     * @param bufSize the buffer size for advanced IO operations
-     * @return this builder
-     * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
-     */
-    public @Nonnull TcpServerBuilder bufferSize(int bufSize) throws IllegalArgumentException {
-        Check.checkArgument(bufSize > 0, "bufSize must be positive");
-        this.bufSize = bufSize;
-        return this;
-    }
+    // /**
+    //  * Sets the buffer size for advanced IO operations. Note this buffer size is not the kernel network buffer size, it
+    //  * is an I/O advanced operations buffer size.
+    //  *
+    //  * @param bufSize the buffer size for advanced IO operations
+    //  * @return this builder
+    //  * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
+    //  */
+    // public @Nonnull TcpServerBuilder bufferSize(int bufSize) throws IllegalArgumentException {
+    //     Check.checkArgument(bufSize > 0, "bufSize must be positive");
+    //     this.bufSize = bufSize;
+    //     return this;
+    // }
 
     /**
      * Sets a socket option. This method can be invoked multiple times to set different socket options.
@@ -190,8 +187,7 @@ public class TcpServerBuilder {
                 workerThreadNum,
                 socketOptions,
                 selectTimeout,
-                backlog,
-                bufSize
+                backlog
             ),
             NetException::new
         );
@@ -206,7 +202,6 @@ public class TcpServerBuilder {
         private final @Nonnull WorkerImpl @Nonnull [] workers;
         private final @Nonnull TcpServerHandler handler;
         private final @Nonnull InetSocketAddress localAddress;
-        private final int bufSize;
 
         private volatile boolean closed = false;
 
@@ -219,8 +214,7 @@ public class TcpServerBuilder {
             int workThreadNum,
             Map<SocketOption<?>, Object> socketOptions,
             long selectTimeout,
-            int backlog,
-            int bufSize
+            int backlog
         ) throws Exception {
             this.server = ServerSocketChannel.open();
             this.mainSelector = Selector.open();
@@ -239,7 +233,6 @@ public class TcpServerBuilder {
             }
             server.bind(localAddress, backlog);
             this.localAddress = (InetSocketAddress) server.getLocalAddress();
-            this.bufSize = bufSize;
             mainThread.start();
         }
 
@@ -414,7 +407,7 @@ public class TcpServerBuilder {
                 while (true) {
                     SocketChannel channel = event.channel;
                     if (channel != null) {
-                        ContextImpl context = new ContextImpl(channel, bufSize);
+                        ContextImpl context = new ContextImpl(channel);
                         clientSet.add(context);
                         registerRead(context);
                         event.channel = null;
@@ -485,9 +478,9 @@ public class TcpServerBuilder {
                 }
             }
 
-            private final class ContextImpl
-                extends AbstractChannelContext<SocketChannel> implements TcpContext {
+            private final class ContextImpl implements TcpContext {
 
+                private final @Nonnull SocketChannel channel;
                 private final @Nonnull InetSocketAddress clientAddress;
                 private final @Nonnull InetSocketAddress serverAddress;
 
@@ -495,8 +488,8 @@ public class TcpServerBuilder {
 
                 private volatile boolean closed = false;
 
-                private ContextImpl(@Nonnull SocketChannel channel, int bufSize) throws IllegalArgumentException {
-                    super(channel, bufSize);
+                private ContextImpl(@Nonnull SocketChannel channel) throws IllegalArgumentException {
+                    this.channel = channel;
                     this.clientAddress = (InetSocketAddress) Fs.uncheck(channel::getRemoteAddress, NetException::new);
                     this.serverAddress = (InetSocketAddress) Fs.uncheck(channel::getLocalAddress, NetException::new);
                 }
@@ -522,6 +515,11 @@ public class TcpServerBuilder {
                         TcpKit.channelClose(handler, this);
                     }, NetException::new);
                     closed = true;
+                }
+
+                @Override
+                public @Nonnull SocketChannel channel() {
+                    return channel;
                 }
 
                 @Override

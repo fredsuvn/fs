@@ -5,8 +5,7 @@ import space.sunqian.annotations.Nonnull;
 import java.nio.channels.ByteChannel;
 
 /**
- * Represents context of an underlying channel for IO Communication, extends {@link ChannelReader} and
- * {@link ChannelWriter} to provides advanced read/write operations, and the underlying channel is a
+ * Represents context of an underlying channel for IO Communication, and the underlying channel is an extension of
  * {@link ByteChannel}.
  * <p>
  * ChannelContext is typically used in callbacks of {@link ChannelHandler}. All callbacks triggered by events from the
@@ -16,20 +15,20 @@ import java.nio.channels.ByteChannel;
  * @param <C> the type of the underlying channel
  * @author sunqian
  */
-public interface ChannelContext<C extends ByteChannel> extends ChannelReader<C>, ChannelWriter<C> {
+public interface ChannelContext<C extends ByteChannel> {
 
     /**
      * Returns the underlying channel of this context.
      *
      * @return the underlying channel of this context
      */
-    @Override
+    //@Override
     @Nonnull
     C channel();
 
     /**
      * Attaches the given attachment to this context. The given attachment object is bound to this context for its
-     * entire lifetime.
+     * remaining lifetime. This method can be invoked multiple times to update the attachment.
      *
      * @param attachment the given attachment to be attached
      */

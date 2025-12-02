@@ -1,13 +1,14 @@
 package tests.io.communicate;
 
+import internal.test.DataTest;
 import org.junit.jupiter.api.Test;
+import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.bytes.BytesBuilder;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.io.BufferKit;
+import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IORuntimeException;
-import space.sunqian.common.io.communicate.AbstractChannelContext;
 import space.sunqian.common.io.communicate.ChannelContext;
-import internal.test.DataTest;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -19,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CommunicateTest implements DataTest {
 
@@ -58,9 +59,14 @@ public class CommunicateTest implements DataTest {
                 closed = true;
             }
         };
-        ChannelContext<ByteChannel> ic = new AbstractChannelContext<ByteChannel>(bc, 1024) {
+        ChannelContext<ByteChannel> ic = new ChannelContext<ByteChannel>() {
 
             private Object attachment;
+
+            @Override
+            public @Nonnull ByteChannel channel() {
+                return bc;
+            }
 
             @Override
             public void attach(Object attachment) {
@@ -75,23 +81,23 @@ public class CommunicateTest implements DataTest {
         Object attachment = new Object();
         ic.attach(attachment);
         assertTrue(ic.channel().isOpen());
-        assertEquals("hello world", ic.availableString());
+        assertEquals("hello world", IOKit.availableString(ic.channel()));
         assertTrue(ic.channel().isOpen());
-        assertNull(ic.availableString());
+        assertNull(IOKit.availableString(ic.channel()));
         reader.clear();
-        assertArrayEquals(ic.availableBytes(), data);
-        assertNull(ic.availableBytes());
+        assertArrayEquals(IOKit.availableBytes(ic.channel()), data);
+        assertNull(IOKit.availableBytes(ic.channel()));
         reader.clear();
-        assertEquals(ic.availableBuffer(), ByteBuffer.wrap(data));
-        assertNull(ic.availableBytes());
-        ic.writeString("hello world");
+        assertArrayEquals(IOKit.availableBytes(ic.channel()), data);
+        assertNull(IOKit.availableBytes(ic.channel()));
+        IOKit.write(ic.channel(), "hello world");
         assertEquals("hello world", writer.toString());
-        assertNull(ic.availableString());
+        assertNull(IOKit.availableString(ic.channel()));
         assertTrue(ic.channel().isOpen());
         ic.channel().close();
         assertFalse(ic.channel().isOpen());
-        assertThrows(IORuntimeException.class, () -> ic.writeString("hello world"));
-        assertNull(ic.availableString());
+        assertThrows(IORuntimeException.class, () -> IOKit.write(ic.channel(), "hello world"));
+        assertNull(IOKit.availableString(ic.channel()));
         assertSame(ic.attachment(), attachment);
     }
 }

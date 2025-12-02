@@ -10,6 +10,7 @@ import space.sunqian.common.base.exception.ThrowKit;
 import space.sunqian.common.base.function.callable.VoidCallable;
 import space.sunqian.common.base.thread.ThreadGate;
 import space.sunqian.common.base.value.IntVar;
+import space.sunqian.common.io.IOKit;
 import space.sunqian.common.net.NetException;
 import space.sunqian.common.net.NetServer;
 import space.sunqian.common.net.tcp.TcpClient;
@@ -20,7 +21,6 @@ import space.sunqian.common.net.tcp.TcpServerHandler;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
-import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +97,6 @@ public class TcpTest implements DataTest, PrintTest {
             .workerThreadFactory(workerFactory)
             .socketOption(StandardSocketOptions.SO_RCVBUF, 1024)
             .selectTimeout(100)
-            .bufferSize(1024)
             .handler(new TcpServerHandler() {
 
                 @Override
@@ -119,10 +118,10 @@ public class TcpTest implements DataTest, PrintTest {
                     printFor("client read", thread.num);
                     assertEquals(clients[thread.num].remoteAddress(), context.serverAddress());
                     assertEquals(clients[thread.num].localAddress(), context.clientAddress());
-                    byte[] bytes = context.availableBytes();
+                    byte[] bytes = IOKit.availableBytes(context.channel());
                     if (bytes != null) {
                         builders[thread.num].append(bytes);
-                        context.writeBytes(bytes);
+                        IOKit.write(context.channel(), bytes);
                     }
                     if (builders[thread.num].size() == data.length) {
                         readLatches[thread.num].countDown();
@@ -191,12 +190,15 @@ public class TcpTest implements DataTest, PrintTest {
         // send data then read
         for (int i = 0; i < clients.length; i++) {
             TcpClient client = clients[i];
-            client.writeBytes(data);
+            IOKit.write(client.channel(), data);
             readLatches[i].await();
             BytesBuilder b = new BytesBuilder();
             while (true) {
                 client.awaitReadable();
-                b.append(client.availableBytes());
+                byte[] bytes = IOKit.availableBytes(client.channel());
+                if (bytes != null) {
+                    b.append(bytes);
+                }
                 if (b.size() == data.length) {
                     break;
                 }
@@ -340,8 +342,10 @@ public class TcpTest implements DataTest, PrintTest {
                 })
                 .bind();
             TcpClient client = TcpClient.newBuilder().connect(server.localAddress());
-            client.writeString("hello world");
-            assertEquals(client.availableBuffer(), ByteBuffer.allocate(0));
+            IOKit.write(client.channel(), "hello world");
+            byte[] bytes = IOKit.availableBytes(client.channel());
+            assertNotNull(bytes);
+            assertEquals(0, bytes.length);
             latch.await();
             client.close();
             server.close();
@@ -353,9 +357,9 @@ public class TcpTest implements DataTest, PrintTest {
                     .mainThreadFactory(Thread::new)
                     .workerThreadNum(0)
             );
-            assertThrows(IllegalArgumentException.class, () ->
-                TcpServer.newBuilder().bufferSize(0).bind()
-            );
+            // assertThrows(IllegalArgumentException.class, () ->
+            //     TcpServer.newBuilder().bufferSize(0).bind()
+            // );
             assertThrows(IllegalArgumentException.class, () ->
                 TcpServer.newBuilder().selectTimeout(-1).bind()
             );
@@ -394,7 +398,7 @@ public class TcpTest implements DataTest, PrintTest {
 
                 @Override
                 public void channelRead(@Nonnull TcpContext context) throws Exception {
-                    String msg = context.availableString();
+                    String msg = IOKit.availableString(context.channel());
                     if (msg == null) {
                         context.close();
                         return;
