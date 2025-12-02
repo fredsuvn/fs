@@ -6,6 +6,9 @@ import space.sunqian.common.Check;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.function.callable.VoidCallable;
 import space.sunqian.common.collect.ListKit;
+import space.sunqian.common.io.IOKit;
+import space.sunqian.common.io.IOOperator;
+import space.sunqian.common.io.communicate.AbstractChannelContext;
 import space.sunqian.common.net.NetException;
 import space.sunqian.common.net.NetServer;
 
@@ -41,6 +44,7 @@ public class TcpServerBuilder {
     private @Nullable ThreadFactory workerThreadFactory;
     private final @Nonnull Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
     private long selectTimeout = 0;
+    private int bufSize = IOKit.bufferSize();
 
     /**
      * Sets the handler to handle server events. The default handler is {@link TcpServerHandler#nullHandler()}.
@@ -95,19 +99,19 @@ public class TcpServerBuilder {
         return this;
     }
 
-    // /**
-    //  * Sets the buffer size for advanced IO operations. Note this buffer size is not the kernel network buffer size, it
-    //  * is an I/O advanced operations buffer size.
-    //  *
-    //  * @param bufSize the buffer size for advanced IO operations
-    //  * @return this builder
-    //  * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
-    //  */
-    // public @Nonnull TcpServerBuilder bufferSize(int bufSize) throws IllegalArgumentException {
-    //     Check.checkArgument(bufSize > 0, "bufSize must be positive");
-    //     this.bufSize = bufSize;
-    //     return this;
-    // }
+    /**
+     * Sets the buffer size for advanced IO operations. Note this buffer size is not the kernel network buffer size, it
+     * is an I/O advanced operations buffer size.
+     *
+     * @param bufSize the buffer size for advanced IO operations
+     * @return this builder
+     * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
+     */
+    public @Nonnull TcpServerBuilder bufferSize(int bufSize) throws IllegalArgumentException {
+        Check.checkArgument(bufSize > 0, "bufSize must be positive");
+        this.bufSize = bufSize;
+        return this;
+    }
 
     /**
      * Sets a socket option. This method can be invoked multiple times to set different socket options.
@@ -187,7 +191,8 @@ public class TcpServerBuilder {
                 workerThreadNum,
                 socketOptions,
                 selectTimeout,
-                backlog
+                backlog,
+                bufSize
             ),
             NetException::new
         );
@@ -202,6 +207,7 @@ public class TcpServerBuilder {
         private final @Nonnull WorkerImpl @Nonnull [] workers;
         private final @Nonnull TcpServerHandler handler;
         private final @Nonnull InetSocketAddress localAddress;
+        private final int bufSize;
 
         private volatile boolean closed = false;
 
@@ -214,7 +220,8 @@ public class TcpServerBuilder {
             int workThreadNum,
             Map<SocketOption<?>, Object> socketOptions,
             long selectTimeout,
-            int backlog
+            int backlog,
+            int bufSize
         ) throws Exception {
             this.server = ServerSocketChannel.open();
             this.mainSelector = Selector.open();
@@ -222,6 +229,7 @@ public class TcpServerBuilder {
             this.mainThread = newThread(mainthreadFactory, this);
             this.workers = new WorkerImpl[workThreadNum];
             this.selectTimeout = selectTimeout;
+            this.bufSize = bufSize;
             server.configureBlocking(false);
             socketOptions.forEach((name, value) ->
                 Fs.uncheck(() -> server.setOption(Fs.as(name), value), NetException::new));
@@ -407,7 +415,7 @@ public class TcpServerBuilder {
                 while (true) {
                     SocketChannel channel = event.channel;
                     if (channel != null) {
-                        ContextImpl context = new ContextImpl(channel);
+                        ContextImpl context = new ContextImpl(channel, bufSize);
                         clientSet.add(context);
                         registerRead(context);
                         event.channel = null;
@@ -478,20 +486,20 @@ public class TcpServerBuilder {
                 }
             }
 
-            private final class ContextImpl implements TcpContext {
+            private final class ContextImpl extends AbstractChannelContext<SocketChannel> implements TcpContext {
 
-                private final @Nonnull SocketChannel channel;
+                // private final @Nonnull SocketChannel channel;
                 private final @Nonnull InetSocketAddress clientAddress;
                 private final @Nonnull InetSocketAddress serverAddress;
-
-                private Object attachment;
+                private final @Nonnull IOOperator ioOperator;
 
                 private volatile boolean closed = false;
 
-                private ContextImpl(@Nonnull SocketChannel channel) throws IllegalArgumentException {
-                    this.channel = channel;
+                private ContextImpl(@Nonnull SocketChannel channel, int bufSize) throws IllegalArgumentException {
+                    super(channel);
                     this.clientAddress = (InetSocketAddress) Fs.uncheck(channel::getRemoteAddress, NetException::new);
                     this.serverAddress = (InetSocketAddress) Fs.uncheck(channel::getLocalAddress, NetException::new);
+                    this.ioOperator = IOOperator.get(bufSize);
                 }
 
                 @Override
@@ -510,6 +518,7 @@ public class TcpServerBuilder {
                         return;
                     }
                     Fs.uncheck(() -> {
+                        SocketChannel channel = channel();
                         channel.close();
                         channel.keyFor(selector).cancel();
                         TcpKit.channelClose(handler, this);
@@ -518,18 +527,8 @@ public class TcpServerBuilder {
                 }
 
                 @Override
-                public @Nonnull SocketChannel channel() {
-                    return channel;
-                }
-
-                @Override
-                public void attach(Object attachment) {
-                    this.attachment = attachment;
-                }
-
-                @Override
-                public Object attachment() {
-                    return this.attachment;
+                protected @Nonnull IOOperator ioOperator() {
+                    return ioOperator;
                 }
             }
         }
