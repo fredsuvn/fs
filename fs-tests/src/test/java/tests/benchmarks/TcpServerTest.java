@@ -20,7 +20,8 @@ public class TcpServerTest implements DataTest {
         TcpServerApi server = TcpServerApi.createServer(serverType);
         TcpClient client = TcpClient.newBuilder().connect(server.address());
         byte[] message = randomBytes(10);
-        IOKit.write(client.channel(), message);
+        client.writeBytes(message);
+        client.writeBytes(message);
         client.readWait();
         byte[] received = IOKit.readBytes(client.channel(), message.length);
         assertArrayEquals(message, received);

@@ -13,7 +13,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.io.IOKit;
 import space.sunqian.common.net.tcp.TcpContext;
 import space.sunqian.common.net.tcp.TcpServer;
 import space.sunqian.common.net.tcp.TcpServerHandler;
@@ -53,9 +52,9 @@ public abstract class TcpServerApi {
 
                 @Override
                 public void channelRead(@Nonnull TcpContext context) throws Exception {
-                    byte[] bytes = IOKit.availableBytes(context.channel());
+                    byte[] bytes = context.availableBytes();
                     if (bytes != null) {
-                        IOKit.write(context.channel(), ByteBuffer.wrap(bytes));
+                        context.writeBuffer(ByteBuffer.wrap(bytes));
                     }
                 }
 
