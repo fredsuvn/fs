@@ -16,7 +16,6 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
-import space.sunqian.common.io.IOKit;
 import space.sunqian.common.net.tcp.TcpClient;
 
 import java.util.concurrent.TimeUnit;
@@ -65,13 +64,13 @@ public class TcpServerBenchmark implements DataTest {
     @Benchmark
     public void request(Blackhole blackhole) throws Exception {
         for (TcpClient client : clients) {
-            IOKit.write(client.channel(), message);
+            client.writeBytes(message);
             // client.awaitReadable();
             // byte[] ret = client.availableBytes();
             // blackhole.consume(ret);
         }
         for (TcpClient client : clients) {
-            byte[] ret = IOKit.availableBytes(client.channel());
+            byte[] ret = client.availableBytes();
             blackhole.consume(ret);
         }
     }

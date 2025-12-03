@@ -109,6 +109,7 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" class="type-name-link external-link" title="class or interface in java.lang">Object</a>
 <ul>
+<li class="circle">space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/AbstractChannelContext.html" class="type-name-link" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a>&lt;C&gt; (implements space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;C&gt;)</li>
 <li class="circle">space.sunqian.common.object.data.handlers.<a href="space/sunqian/common/object/data/handlers/AbstractObjectSchemaHandler.html" class="type-name-link" title="class in space.sunqian.common.object.data.handlers">AbstractObjectSchemaHandler</a> (implements space.sunqian.common.object.data.<a href="space/sunqian/common/object/data/ObjectSchemaParser.Handler.html" title="interface in space.sunqian.common.object.data">ObjectSchemaParser.Handler</a>)
 <ul>
 <li class="circle">space.sunqian.common.object.data.handlers.<a href="space/sunqian/common/object/data/handlers/SimpleBeanSchemaHandler.html" class="type-name-link" title="class in space.sunqian.common.object.data.handlers">SimpleBeanSchemaHandler</a></li>
@@ -329,14 +330,29 @@ loadScripts(document, 'script');</script>
 <li class="circle">space.sunqian.common.base.function.callable.<a href="space/sunqian/common/base/function/callable/LongCallable.html" class="type-name-link" title="interface in space.sunqian.common.base.function.callable">LongCallable</a></li>
 </ul>
 </li>
-<li class="circle">space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelContext.html" class="type-name-link" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;C&gt;
+<li class="circle">space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelHandler.html" class="type-name-link" title="interface in space.sunqian.common.io.communicate">ChannelHandler</a>&lt;C,<wbr>CH&gt;
+<ul>
+<li class="circle">space.sunqian.common.net.tcp.<a href="space/sunqian/common/net/tcp/TcpServerHandler.html" class="type-name-link" title="interface in space.sunqian.common.net.tcp">TcpServerHandler</a></li>
+</ul>
+</li>
+<li class="circle">space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelReader.html" class="type-name-link" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;C&gt;
+<ul>
+<li class="circle">space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelContext.html" class="type-name-link" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;C&gt; (also extends space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a>&lt;C&gt;)
 <ul>
 <li class="circle">space.sunqian.common.net.tcp.<a href="space/sunqian/common/net/tcp/TcpContext.html" class="type-name-link" title="interface in space.sunqian.common.net.tcp">TcpContext</a></li>
 </ul>
 </li>
-<li class="circle">space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelHandler.html" class="type-name-link" title="interface in space.sunqian.common.io.communicate">ChannelHandler</a>&lt;C,<wbr>CH&gt;
+<li class="circle">space.sunqian.common.net.tcp.<a href="space/sunqian/common/net/tcp/TcpClient.html" class="type-name-link" title="interface in space.sunqian.common.net.tcp">TcpClient</a> (also extends space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a>&lt;C&gt;, space.sunqian.common.net.<a href="space/sunqian/common/net/NetClient.html" title="interface in space.sunqian.common.net">NetClient</a>&lt;A,<wbr>C&gt;)</li>
+</ul>
+</li>
+<li class="circle">space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelWriter.html" class="type-name-link" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a>&lt;C&gt;
 <ul>
-<li class="circle">space.sunqian.common.net.tcp.<a href="space/sunqian/common/net/tcp/TcpServerHandler.html" class="type-name-link" title="interface in space.sunqian.common.net.tcp">TcpServerHandler</a></li>
+<li class="circle">space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelContext.html" class="type-name-link" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;C&gt; (also extends space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;C&gt;)
+<ul>
+<li class="circle">space.sunqian.common.net.tcp.<a href="space/sunqian/common/net/tcp/TcpContext.html" class="type-name-link" title="interface in space.sunqian.common.net.tcp">TcpContext</a></li>
+</ul>
+</li>
+<li class="circle">space.sunqian.common.net.tcp.<a href="space/sunqian/common/net/tcp/TcpClient.html" class="type-name-link" title="interface in space.sunqian.common.net.tcp">TcpClient</a> (also extends space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;C&gt;, space.sunqian.common.net.<a href="space/sunqian/common/net/NetClient.html" title="interface in space.sunqian.common.net">NetClient</a>&lt;A,<wbr>C&gt;)</li>
 </ul>
 </li>
 <li class="circle">space.sunqian.common.io.<a href="space/sunqian/common/io/CharArrayOperator.html" class="type-name-link" title="interface in space.sunqian.common.io">CharArrayOperator</a></li>
@@ -358,7 +374,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">space.sunqian.common.io.<a href="space/sunqian/common/io/CharSegment.html" class="type-name-link" title="interface in space.sunqian.common.io">CharSegment</a></li>
 <li class="circle">space.sunqian.common.net.<a href="space/sunqian/common/net/NetClient.html" class="type-name-link" title="interface in space.sunqian.common.net">NetClient</a>&lt;A,<wbr>C&gt;
 <ul>
-<li class="circle">space.sunqian.common.net.tcp.<a href="space/sunqian/common/net/tcp/TcpClient.html" class="type-name-link" title="interface in space.sunqian.common.net.tcp">TcpClient</a></li>
+<li class="circle">space.sunqian.common.net.tcp.<a href="space/sunqian/common/net/tcp/TcpClient.html" class="type-name-link" title="interface in space.sunqian.common.net.tcp">TcpClient</a> (also extends space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;C&gt;, space.sunqian.common.io.communicate.<a href="space/sunqian/common/io/communicate/ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a>&lt;C&gt;)</li>
 </ul>
 </li>
 <li class="circle">space.sunqian.common.net.<a href="space/sunqian/common/net/NetServer.html" class="type-name-link" title="interface in space.sunqian.common.net">NetServer</a>&lt;A&gt;

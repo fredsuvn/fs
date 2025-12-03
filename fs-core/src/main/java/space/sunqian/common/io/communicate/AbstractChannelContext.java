@@ -1,62 +1,68 @@
-// package space.sunqian.common.io.communicate;
-//
-// import space.sunqian.annotations.Nonnull;
-// import space.sunqian.annotations.Nullable;
-// import space.sunqian.common.io.IOKit;
-// import space.sunqian.common.io.IOOperator;
-// import space.sunqian.common.io.IORuntimeException;
-//
-// import java.nio.ByteBuffer;
-// import java.nio.channels.ByteChannel;
-//
-// /**
-//  * Skeletal implementation of {@link ChannelContext} to help minimize effort in implementing {@link ChannelContext}.
-//  * <p>
-//  * The read and write methods of this class is based on a given {@link ByteChannel}, which also serves as the underlying
-//  * channel. These two field is accessible for subclasses: {@link #channel} and {@link #bufSize}.
-//  *
-//  * @param <C> the type of the underlying channel
-//  * @author sunqian
-//  */
-// public abstract class AbstractChannelContext<C extends ByteChannel> implements ChannelContext<C> {
-//
-//     /**
-//      * The given underlying channel.
-//      */
-//     protected final @Nonnull C channel;
-//     protected final int bufSize;
-//
-//     /**
-//      * The {@link IOOperator} for advanced I/O operations.
-//      */
-//     // protected final @Nonnull IOOperator operator;
-//
-//     /**
-//      * Constructs with the given {@link ByteChannel} and the buffer size for advanced I/O operations.
-//      *
-//      * @param channel the given {@link ByteChannel}
-//      * @param bufSize the buffer size for advanced I/O operations
-//      * @throws IllegalArgumentException if the buffer size {@code <=0}
-//      */
-//     protected AbstractChannelContext(@Nonnull C channel, int bufSize) throws IllegalArgumentException {
-//         this.channel = channel;
-//         // this.operator = IOOperator.get(bufSize);
-//         this.bufSize = bufSize;
-//     }
-//
-//     @Override
-//     public byte @Nullable [] availableBytes() throws IORuntimeException {
-//         //channel.
-//         return IOKit.a
-//     }
-//
-//     @Override
-//     public @Nullable ByteBuffer availableBuffer() throws IORuntimeException {
-//         return operator.available(channel);
-//     }
-//
-//     @Override
-//     public @Nonnull C channel() {
-//         return channel;
-//     }
-// }
+package space.sunqian.common.io.communicate;
+
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.io.IOOperator;
+import space.sunqian.common.io.IORuntimeException;
+
+import java.nio.channels.ByteChannel;
+import java.nio.charset.Charset;
+
+/**
+ * Skeletal implementation of {@link ChannelContext}. Its read methods are based on the specified {@link IOOperator}
+ * provided by {@link #ioOperator()}. The underlying channel is provided by {@link #channel()}.
+ *
+ * @param <C> the type of the underlying channel
+ * @author sunqian
+ */
+public abstract class AbstractChannelContext<C extends ByteChannel> implements ChannelContext<C> {
+
+    private final @Nonnull C channel;
+    private @Nullable Object attachment;
+
+    /**
+     * Constructs with the given underlying channel.
+     *
+     * @param channel the underlying channel
+     */
+    protected AbstractChannelContext(@Nonnull C channel) {
+        this.channel = channel;
+    }
+
+    /**
+     * Returns the {@link IOOperator} to be used for read operations.
+     *
+     * @return the {@link IOOperator} to be used for read operations
+     */
+    protected abstract @Nonnull IOOperator ioOperator();
+
+    @Override
+    public @Nonnull C channel() {
+        return channel;
+    }
+
+    @Override
+    public void attach(Object attachment) {
+        this.attachment = attachment;
+    }
+
+    @Override
+    public Object attachment() {
+        return attachment;
+    }
+
+    @Override
+    public byte @Nullable [] availableBytes() throws IORuntimeException {
+        return ioOperator().availableBytes(channel());
+    }
+
+    @Override
+    public @Nullable String availableString() throws IORuntimeException {
+        return ioOperator().availableString(channel());
+    }
+
+    @Override
+    public @Nullable String availableString(@Nonnull Charset charset) throws IORuntimeException {
+        return ioOperator().availableString(channel(), charset);
+    }
+}

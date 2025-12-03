@@ -76,13 +76,23 @@ loadScripts(document, 'script');</script>
 <dd><code>C</code> - the type of the underlying channel</dd>
 </dl>
 <dl class="notes">
+<dt>All Superinterfaces:</dt>
+<dd><code><a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;C&gt;</code>, <code><a href="ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a>&lt;C&gt;</code></dd>
+</dl>
+<dl class="notes">
 <dt>All Known Subinterfaces:</dt>
 <dd><code><a href="../../net/tcp/TcpContext.html" title="interface in space.sunqian.common.net.tcp">TcpContext</a></code></dd>
 </dl>
+<dl class="notes">
+<dt>All Known Implementing Classes:</dt>
+<dd><code><a href="AbstractChannelContext.html" title="class in space.sunqian.common.io.communicate">AbstractChannelContext</a></code></dd>
+</dl>
 <hr>
-<div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">ChannelContext&lt;C extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</span></div>
-<div class="block">Represents context of an underlying channel for IO Communication, and the underlying channel is an extension of
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link"><code>ByteChannel</code></a>.
+<div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">ChannelContext&lt;C extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</span><span class="extends-implements">
+extends <a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;C&gt;, <a href="ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a>&lt;C&gt;</span></div>
+<div class="block">Represents context of an underlying channel (can be accessed by <a href="#channel()"><code>channel()</code></a>) for IO Communication. This
+ interface extends <a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelReader</code></a> and <a href="ChannelWriter.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelWriter</code></a>, providing a unified interface for reading and
+ writing data to the connected remote endpoint.
  <p>
  ChannelContext is typically used in callbacks of <a href="ChannelHandler.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelHandler</code></a>. All callbacks triggered by events from the
  same underlying channel will use the same <a href="ChannelContext.html" title="interface in space.sunqian.common.io.communicate"><code>ChannelContext</code></a> instance, ensuring consistent access to
@@ -119,6 +129,12 @@ loadScripts(document, 'script');</script>
 </div>
 </div>
 </div>
+<div class="inherited-list">
+<h3 id="methods-inherited-from-class-space.sunqian.common.io.communicate.ChannelReader">Methods inherited from interface&nbsp;space.sunqian.common.io.communicate.<a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a></h3>
+<code><a href="ChannelReader.html#availableBytes()">availableBytes</a>, <a href="ChannelReader.html#availableString()">availableString</a>, <a href="ChannelReader.html#availableString(java.nio.charset.Charset)">availableString</a></code></div>
+<div class="inherited-list">
+<h3 id="methods-inherited-from-class-space.sunqian.common.io.communicate.ChannelWriter">Methods inherited from interface&nbsp;space.sunqian.common.io.communicate.<a href="ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a></h3>
+<code><a href="ChannelWriter.html#writeBuffer(java.nio.ByteBuffer)">writeBuffer</a>, <a href="ChannelWriter.html#writeBytes(byte%5B%5D)">writeBytes</a>, <a href="ChannelWriter.html#writeString(java.lang.String)">writeString</a>, <a href="ChannelWriter.html#writeString(java.lang.String,java.nio.charset.Charset)">writeString</a></code></div>
 </section>
 </li>
 </ul>
@@ -137,6 +153,10 @@ loadScripts(document, 'script');</script>
 </span><span class="return-type"><a href="ChannelContext.html" title="type parameter in ChannelContext">C</a></span>&nbsp;<span class="element-name">channel</span>()</div>
 <div class="block">Returns the underlying channel of this context.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="ChannelReader.html#channel()">channel</a></code>&nbsp;in interface&nbsp;<code><a href="ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;<a href="ChannelContext.html" title="type parameter in ChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</code></dd>
+<dt>Specified by:</dt>
+<dd><code><a href="ChannelWriter.html#channel()">channel</a></code>&nbsp;in interface&nbsp;<code><a href="ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a>&lt;<a href="ChannelContext.html" title="type parameter in ChannelContext">C</a> extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/ByteChannel.html" title="class or interface in java.nio.channels" class="external-link">ByteChannel</a>&gt;</code></dd>
 <dt>Returns:</dt>
 <dd>the underlying channel of this context</dd>
 </dl>

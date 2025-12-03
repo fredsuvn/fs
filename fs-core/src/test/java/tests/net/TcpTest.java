@@ -10,7 +10,6 @@ import space.sunqian.common.base.exception.ThrowKit;
 import space.sunqian.common.base.function.callable.VoidCallable;
 import space.sunqian.common.base.thread.ThreadGate;
 import space.sunqian.common.base.value.IntVar;
-import space.sunqian.common.io.IOKit;
 import space.sunqian.common.net.NetException;
 import space.sunqian.common.net.NetServer;
 import space.sunqian.common.net.tcp.TcpClient;
@@ -96,6 +95,7 @@ public class TcpTest implements DataTest, PrintTest {
             .workerThreadNum(workerNum)
             .workerThreadFactory(workerFactory)
             .socketOption(StandardSocketOptions.SO_RCVBUF, 1024)
+            .bufferSize(1024)
             .selectTimeout(100)
             .handler(new TcpServerHandler() {
 
@@ -118,10 +118,10 @@ public class TcpTest implements DataTest, PrintTest {
                     printFor("client read", thread.num);
                     assertEquals(clients[thread.num].remoteAddress(), context.serverAddress());
                     assertEquals(clients[thread.num].localAddress(), context.clientAddress());
-                    byte[] bytes = IOKit.availableBytes(context.channel());
+                    byte[] bytes = context.availableBytes();
                     if (bytes != null) {
                         builders[thread.num].append(bytes);
-                        IOKit.write(context.channel(), bytes);
+                        context.writeBytes(bytes);
                     }
                     if (builders[thread.num].size() == data.length) {
                         readLatches[thread.num].countDown();
@@ -190,12 +190,12 @@ public class TcpTest implements DataTest, PrintTest {
         // send data then read
         for (int i = 0; i < clients.length; i++) {
             TcpClient client = clients[i];
-            IOKit.write(client.channel(), data);
+            client.writeBytes(data);
             readLatches[i].await();
             BytesBuilder b = new BytesBuilder();
             while (true) {
-                client.awaitReadable();
-                byte[] bytes = IOKit.availableBytes(client.channel());
+                client.readWait();
+                byte[] bytes = client.availableBytes();
                 if (bytes != null) {
                     b.append(bytes);
                 }
@@ -203,7 +203,7 @@ public class TcpTest implements DataTest, PrintTest {
                     break;
                 }
             }
-            client.wakeUpReadable();
+            client.readWakeUp();
             assertArrayEquals(b.toByteArray(), data);
         }
 
@@ -342,8 +342,8 @@ public class TcpTest implements DataTest, PrintTest {
                 })
                 .bind();
             TcpClient client = TcpClient.newBuilder().connect(server.localAddress());
-            IOKit.write(client.channel(), "hello world");
-            byte[] bytes = IOKit.availableBytes(client.channel());
+            client.writeString("hello world");
+            byte[] bytes = client.availableBytes();
             assertNotNull(bytes);
             assertEquals(0, bytes.length);
             latch.await();
@@ -357,9 +357,9 @@ public class TcpTest implements DataTest, PrintTest {
                     .mainThreadFactory(Thread::new)
                     .workerThreadNum(0)
             );
-            // assertThrows(IllegalArgumentException.class, () ->
-            //     TcpServer.newBuilder().bufferSize(0).bind()
-            // );
+            assertThrows(IllegalArgumentException.class, () ->
+                TcpServer.newBuilder().bufferSize(0).bind()
+            );
             assertThrows(IllegalArgumentException.class, () ->
                 TcpServer.newBuilder().selectTimeout(-1).bind()
             );
@@ -398,7 +398,7 @@ public class TcpTest implements DataTest, PrintTest {
 
                 @Override
                 public void channelRead(@Nonnull TcpContext context) throws Exception {
-                    String msg = IOKit.availableString(context.channel());
+                    String msg = context.availableString();
                     if (msg == null) {
                         context.close();
                         return;

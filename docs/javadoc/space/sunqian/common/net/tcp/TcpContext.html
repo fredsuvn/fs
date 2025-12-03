@@ -73,7 +73,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Superinterfaces:</dt>
-<dd><code><a href="../../io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/SocketChannel.html" title="class or interface in java.nio.channels" class="external-link">SocketChannel</a>&gt;</code></dd>
+<dd><code><a href="../../io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/SocketChannel.html" title="class or interface in java.nio.channels" class="external-link">SocketChannel</a>&gt;</code>, <code><a href="../../io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/SocketChannel.html" title="class or interface in java.nio.channels" class="external-link">SocketChannel</a>&gt;</code>, <code><a href="../../io/communicate/ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/channels/SocketChannel.html" title="class or interface in java.nio.channels" class="external-link">SocketChannel</a>&gt;</code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">TcpContext</span><span class="extends-implements">
@@ -118,6 +118,12 @@ extends <a href="../../io/communicate/ChannelContext.html" title="interface in s
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-space.sunqian.common.io.communicate.ChannelContext">Methods inherited from interface&nbsp;space.sunqian.common.io.communicate.<a href="../../io/communicate/ChannelContext.html" title="interface in space.sunqian.common.io.communicate">ChannelContext</a></h3>
 <code><a href="../../io/communicate/ChannelContext.html#attach(java.lang.Object)">attach</a>, <a href="../../io/communicate/ChannelContext.html#attachment()">attachment</a>, <a href="../../io/communicate/ChannelContext.html#channel()">channel</a></code></div>
+<div class="inherited-list">
+<h3 id="methods-inherited-from-class-space.sunqian.common.io.communicate.ChannelReader">Methods inherited from interface&nbsp;space.sunqian.common.io.communicate.<a href="../../io/communicate/ChannelReader.html" title="interface in space.sunqian.common.io.communicate">ChannelReader</a></h3>
+<code><a href="../../io/communicate/ChannelReader.html#availableBytes()">availableBytes</a>, <a href="../../io/communicate/ChannelReader.html#availableString()">availableString</a>, <a href="../../io/communicate/ChannelReader.html#availableString(java.nio.charset.Charset)">availableString</a></code></div>
+<div class="inherited-list">
+<h3 id="methods-inherited-from-class-space.sunqian.common.io.communicate.ChannelWriter">Methods inherited from interface&nbsp;space.sunqian.common.io.communicate.<a href="../../io/communicate/ChannelWriter.html" title="interface in space.sunqian.common.io.communicate">ChannelWriter</a></h3>
+<code><a href="../../io/communicate/ChannelWriter.html#writeBuffer(java.nio.ByteBuffer)">writeBuffer</a>, <a href="../../io/communicate/ChannelWriter.html#writeBytes(byte%5B%5D)">writeBytes</a>, <a href="../../io/communicate/ChannelWriter.html#writeString(java.lang.String)">writeString</a>, <a href="../../io/communicate/ChannelWriter.html#writeString(java.lang.String,java.nio.charset.Charset)">writeString</a></code></div>
 </section>
 </li>
 </ul>

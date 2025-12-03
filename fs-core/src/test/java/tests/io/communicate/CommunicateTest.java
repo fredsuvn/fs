@@ -6,8 +6,9 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.bytes.BytesBuilder;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.io.BufferKit;
-import space.sunqian.common.io.IOKit;
+import space.sunqian.common.io.IOOperator;
 import space.sunqian.common.io.IORuntimeException;
+import space.sunqian.common.io.communicate.AbstractChannelContext;
 import space.sunqian.common.io.communicate.ChannelContext;
 
 import java.io.IOException;
@@ -30,7 +31,7 @@ public class CommunicateTest implements DataTest {
         byte[] data = "hello world".getBytes(CharsKit.defaultCharset());
         ByteBuffer reader = ByteBuffer.wrap(data);
         BytesBuilder writer = new BytesBuilder();
-        ByteChannel bc = new ByteChannel() {
+        class ByteChannelImpl implements ByteChannel {
 
             private boolean closed = false;
 
@@ -58,46 +59,81 @@ public class CommunicateTest implements DataTest {
             public void close() {
                 closed = true;
             }
-        };
-        ChannelContext<ByteChannel> ic = new ChannelContext<ByteChannel>() {
+        }
+        {
+            // interface
+            ByteChannel bc = new ByteChannelImpl();
+            ChannelContext<ByteChannel> ic = new ChannelContext<ByteChannel>() {
 
-            private Object attachment;
+                private Object attachment;
 
-            @Override
-            public @Nonnull ByteChannel channel() {
-                return bc;
-            }
+                @Override
+                public @Nonnull ByteChannel channel() {
+                    return bc;
+                }
 
-            @Override
-            public void attach(Object attachment) {
-                this.attachment = attachment;
-            }
+                @Override
+                public void attach(Object attachment) {
+                    this.attachment = attachment;
+                }
 
-            @Override
-            public Object attachment() {
-                return attachment;
-            }
-        };
+                @Override
+                public Object attachment() {
+                    return attachment;
+                }
+            };
+            testChannelContext(ic, reader, writer, data);
+        }
+        {
+            // abstract
+            ByteChannel bc = new ByteChannelImpl();
+            IOOperator ioOperator = IOOperator.defaultOperator();
+            ChannelContext<ByteChannel> ic = new AbstractChannelContext<ByteChannel>(bc) {
+
+                @Override
+                protected @Nonnull IOOperator ioOperator() {
+                    return ioOperator;
+                }
+            };
+            testChannelContext(ic, reader, writer, data);
+        }
+    }
+
+    private void testChannelContext(
+        ChannelContext<ByteChannel> ic, ByteBuffer reader, BytesBuilder writer, byte[] data
+    ) throws Exception {
+        reader.clear();
+        writer.reset();
         Object attachment = new Object();
         ic.attach(attachment);
         assertTrue(ic.channel().isOpen());
-        assertEquals("hello world", IOKit.availableString(ic.channel()));
+        assertEquals("hello world", ic.availableString());
         assertTrue(ic.channel().isOpen());
-        assertNull(IOKit.availableString(ic.channel()));
+        assertNull(ic.availableString(CharsKit.defaultCharset()));
         reader.clear();
-        assertArrayEquals(IOKit.availableBytes(ic.channel()), data);
-        assertNull(IOKit.availableBytes(ic.channel()));
+        assertArrayEquals(ic.availableBytes(), data);
+        assertNull(ic.availableBytes());
         reader.clear();
-        assertArrayEquals(IOKit.availableBytes(ic.channel()), data);
-        assertNull(IOKit.availableBytes(ic.channel()));
-        IOKit.write(ic.channel(), "hello world");
+        assertArrayEquals(ic.availableBytes(), data);
+        assertNull(ic.availableBytes());
+        ic.writeString("hello world");
         assertEquals("hello world", writer.toString());
-        assertNull(IOKit.availableString(ic.channel()));
+        writer.reset();
+        ic.writeString("hello world", CharsKit.defaultCharset());
+        assertEquals("hello world", writer.toString());
+        writer.reset();
+        ic.writeBytes(data);
+        assertEquals("hello world", writer.toString());
+        writer.reset();
+        ic.writeBuffer(ByteBuffer.wrap(data));
+        assertEquals("hello world", writer.toString());
+        writer.reset();
+        assertNull(ic.availableString());
         assertTrue(ic.channel().isOpen());
         ic.channel().close();
         assertFalse(ic.channel().isOpen());
-        assertThrows(IORuntimeException.class, () -> IOKit.write(ic.channel(), "hello world"));
-        assertNull(IOKit.availableString(ic.channel()));
+        assertThrows(IORuntimeException.class, () -> ic.writeString("hello world"));
+        assertNull(ic.availableString());
         assertSame(ic.attachment(), attachment);
     }
 }
