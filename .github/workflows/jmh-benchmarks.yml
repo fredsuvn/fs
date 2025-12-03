@@ -32,10 +32,10 @@ jobs:
         run: test -f ./gradlew && echo "gradlew exists" || echo "gradlew not found"
 
       - name: Clean fs-core module
-        run: ./gradlew :fs-core:clean
+        run: gradle :fs-core:clean
 
       - name: Run JMH benchmarks
-        run: ./gradlew :fs-tests:jmh
+        run: gradle :fs-tests:jmh
 
       - name: Copy results to docs directory
         run: mkdir -p docs/jmh && cp fs-tests/build/reports/jmh/results.json docs/jmh/
