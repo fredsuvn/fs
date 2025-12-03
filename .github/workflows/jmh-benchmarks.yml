@@ -1,7 +1,6 @@
 name: JMH Benchmarks
 
 on:
-  # only manual triggering is allowed
   workflow_dispatch:
 
 jobs:
