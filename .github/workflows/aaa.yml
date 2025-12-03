@@ -1,41 +1,8 @@
-name: JMH Benchmarks
-
+name: Test2
 on:
   workflow_dispatch:
-
 jobs:
-  jmh-benchmarks:
+  test:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'adopt'
-          cache: gradle
-
-      - name: Make Gradle wrapper executable
-        run: chmod +x ./gradlew
-
-      - name: Clean fs-core module
-        run: ./gradlew :fs-core:clean
-
-      - name: Run JMH benchmarks
-        run: ./gradlew :fs-tests:jmh
-
-      - name: Copy results to docs directory
-        run: mkdir -p docs/jmh && cp fs-tests/build/reports/jmh/results.json docs/jmh/
-
-      - name: Configure Git
-        run: |
-          git config --global user.name '${{ github.actor }}'
-          git config --global user.email '${{ github.actor }}@users.noreply.github.com'
-
-      - name: Commit and push results
-        run: |
-          git add docs/jmh/results.json
-          git commit -m 'Run jmh-benchmarks.yml and update JMH benchmark results via GitHub Actions'
-          git push origin HEAD:${{ github.ref_name }}
+      - run: echo "Hello"
