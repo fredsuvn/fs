@@ -19,6 +19,8 @@
 *.kts text
 *.kt text
 
+gradlew eol=lf
+
 # binary files:
 *.gif  binary
 *.jar  binary
