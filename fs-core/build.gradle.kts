@@ -74,7 +74,7 @@ tasks.register("compileJava${lowestJavaVersion}", JavaCompile::class) {
   source = sourceSets.main.get().allJava
   classpath = sourceSets.main.get().compileClasspath
   exclude("**/*${implByJvm}*.java")
-  destinationDirectory = file(layout.buildDirectory.dir("/classes/java/main"))
+  destinationDirectory = layout.buildDirectory.dir("classes/java/main").get().asFile
   javaCompiler = javaToolchains.compilerFor {
     languageVersion = javaVersionLow
   }
@@ -94,7 +94,7 @@ tasks.register("compileJava${lowestJavaVersion}", JavaCompile::class) {
     //      classpath += files(tasks.named<JavaCompile>("compileJava$jv").get().destinationDirectory)
     //    }
     include("**/*${implByJvm + javaVersion}.java")
-    destinationDirectory = file(layout.buildDirectory.dir("/classes/java/main"))
+    destinationDirectory = layout.buildDirectory.dir("classes/java/main").get().asFile
     javaCompiler = javaToolchains.compilerFor {
       languageVersion = javaVersionHigh
     }
@@ -126,7 +126,7 @@ tasks.register("compileTestJava$lowestJavaVersion", JavaCompile::class) {
   source = sourceSets.test.get().allJava
   classpath = sourceSets.test.get().compileClasspath
   exclude("**/*${implByJvm}*Test.java")
-  destinationDirectory = file(layout.buildDirectory.dir("/classes/java/test"))
+  destinationDirectory = file(layout.buildDirectory.dir("classes/java/test"))
   javaCompiler = javaToolchains.compilerFor {
     languageVersion = javaVersionLow
   }
@@ -145,7 +145,7 @@ tasks.register("compileTestJava$lowestJavaVersion", JavaCompile::class) {
     //      classpath += files(tasks.named<JavaCompile>("compileTestJava$jv").get().destinationDirectory)
     //    }
     include("**/*${implByJvm + javaVersion}Test.java")
-    destinationDirectory = file(layout.buildDirectory.dir("/classes/java/test"))
+    destinationDirectory = file(layout.buildDirectory.dir("classes/java/test"))
     javaCompiler = javaToolchains.compilerFor {
       languageVersion = javaVersionHigh
     }
@@ -184,7 +184,7 @@ tasks.test {
 val testJavaHighest by tasks.registering(Test::class) {
   dependsOn(compileTestJavaHighest)
   group = "verification"
-  testClassesDirs = fileTree(layout.buildDirectory.dir("/classes/java/test"))
+  testClassesDirs = fileTree(layout.buildDirectory.dir("classes/java/test"))
   classpath = sourceSets.test.get().runtimeClasspath
   ((lowestJavaVersion + 1)..highestJavaVersion).forEach { jv ->
     classpath += files(tasks.named<JavaCompile>("compileJava$jv").get().destinationDirectory)
