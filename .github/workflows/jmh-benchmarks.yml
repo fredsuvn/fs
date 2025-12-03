@@ -38,7 +38,7 @@ jobs:
         run: gradle :fs-tests:jmh
 
       - name: Copy results to docs directory
-        run: mkdir -p docs/jmh && cp fs-tests/build/reports/jmh/results.json docs/jmh/
+        run: mkdir -p docs/jmh-test && cp fs-tests/build/results/jmh/results.json docs/jmh-test/
 
       - name: Configure Git
         run: |
@@ -47,6 +47,6 @@ jobs:
 
       - name: Commit and push results
         run: |
-          git add docs/jmh/results.json
+          git add docs/jmh-test/results.json
           git commit -m 'Run jmh-benchmarks.yml and update JMH benchmark results via GitHub Actions'
           git push origin HEAD:${{ github.ref_name }}
