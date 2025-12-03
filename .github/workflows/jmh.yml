@@ -38,17 +38,3 @@ jobs:
 
     - name: Run JMH benchmarks
       run: ./gradlew :fs-tests:jmh
-
-    - name: Copy results to docs directory
-      run: mkdir -p docs/jmh && cp fs-tests/build/reports/jmh/results.json docs/jmh/
-
-    - name: Configure Git
-      run: |
-        git config --global user.name '${{ github.actor }}'
-        git config --global user.email '${{ github.actor }}@users.noreply.github.com'
-
-    - name: Commit and push results
-      run: |
-        git add docs/jmh/results.json
-        git commit -m 'Run jmh-benchmarks.yml and update JMH benchmark results via GitHub Actions'
-        git push origin HEAD:${{ github.ref_name }}
