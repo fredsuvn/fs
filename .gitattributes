@@ -2,6 +2,8 @@
 # * text=auto
 * text eol=crlf
 
+*.sh eol=lf
+
 # text files:
 *.txt text
 *.java text
