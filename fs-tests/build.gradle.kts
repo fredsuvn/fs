@@ -38,10 +38,10 @@ sourceSets {
 
 jmh {
   resultFormat = "json"
-  includes = listOf(
+  //includes = listOf(
     //"internal.tests.benchmarks.(AspectBenchmark|CopyPropertiesBenchmark)"
-    "internal.tests.benchmarks.TcpServerBenchmark"
-  )
+    //"internal.tests.benchmarks.TcpServerBenchmark"
+  //)
 }
 
 tasks.test {
