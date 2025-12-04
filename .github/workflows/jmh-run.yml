@@ -1,4 +1,4 @@
-name: JMH Benchmarks
+name: JMH Run
 
 on:
   workflow_dispatch:
@@ -38,8 +38,12 @@ jobs:
       - name: Run JMH benchmarks
         run: gradle :fs-tests:jmh
 
-      - name: Copy results to docs directory
-        run: mkdir -p docs/jmh-test && cp fs-tests/build/results/jmh/results.json docs/jmh-test/
+      - name: Copy results to docs directory with timestamp and update main results.json
+        run: |
+          TIMESTAMP=$(date +'%Y%m%d%H%M%S')
+          mkdir -p docs/jmh/results
+          cp fs-tests/build/results/jmh/results.json docs/jmh/results/results-${TIMESTAMP}.json
+          cp fs-tests/build/results/jmh/results.json docs/jmh/results.json
 
       - name: Configure Git
         run: |
@@ -48,6 +52,7 @@ jobs:
 
       - name: Commit and push results
         run: |
-          git add docs/jmh-test/results.json
-          git commit -m 'Run jmh-benchmarks.yml and update JMH benchmark results via GitHub Actions'
+          TIMESTAMP=$(date +'%Y%m%d%H%M%S')
+          git add docs/jmh/results/results-${TIMESTAMP}.json docs/jmh/results.json
+          git commit -m 'Run jmh-run.yml and update JMH benchmark results via GitHub Actions'
           git push origin HEAD:${{ github.ref_name }}
