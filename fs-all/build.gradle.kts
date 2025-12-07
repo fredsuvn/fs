@@ -66,7 +66,7 @@ tasks.named<Javadoc>("javadoc") {
     languageVersion = project.property("javaLanguageVersionHigh") as JavaLanguageVersion
   }
 
-  destinationDir = rootDir.resolve("docs/javadoc")
+  //destinationDir = rootDir.resolve("docs/javadoc")
 }
 
 val testJavaHighest = coreProject.tasks.named("testJavaHighest")

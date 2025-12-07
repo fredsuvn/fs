@@ -1,10 +1,10 @@
-name: JMH Run
+name: Docs Run
 
 on:
   workflow_dispatch:
 
 jobs:
-  jmh-benchmarks:
+  generate-and-publish-javadoc:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -18,41 +18,46 @@ jobs:
           distribution: 'temurin'
 
       # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-      # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
-      # Using gradle rather than ./gradlew
-      #- name: Make Gradle wrapper executable
-      #  run: chmod +x ./gradlew
+      - name: Generate Javadoc in fs-all module
+        run: gradle :fs-all:javadoc
 
-      #- name: Verify Gradle wrapper
-      #  run: ls -la ./gradlew
+      # Clone the target repository
+      - name: Clone fs-docs repository
+        uses: actions/checkout@v4
+        with:
+          repository: fredsuvn/fs-docs
+          ref: repo/fs
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: fs-docs
 
-      #- name: Check if gradlew exists
-      #  run: test -f ./gradlew && echo "gradlew exists" || echo "gradlew not found"
+      # Clear the existing javadoc directory
+      - name: Clear existing javadoc directory
+        run: rm -rf fs-docs/docs/fs/javadoc/*
 
-      - name: Clean fs-core module
-        run: gradle :fs-core:clean
-
-      - name: Run JMH benchmarks
-        run: gradle :fs-tests:jmh
-
-      - name: Copy results to docs directory with timestamp and update main results.json
-        run: |
-          TIMESTAMP=$(date +'%Y%m%d%H%M%S')
-          mkdir -p docs/jmh/results
-          cp fs-tests/build/results/jmh/results.json docs/jmh/results/results-${TIMESTAMP}.json
-          cp fs-tests/build/results/jmh/results.json docs/jmh/results.json
+      # Copy generated javadoc to target directory
+      - name: Copy javadoc to target directory
+        run: cp -r fs-all/build/docs/javadoc/* fs-docs/docs/fs/javadoc/
 
       - name: Configure Git
         run: |
           git config --global user.name '${{ github.actor }}'
           git config --global user.email '${{ github.actor }}@users.noreply.github.com'
 
-      - name: Commit and push results
+      # Commit changes to fs-docs repository
+      - name: Commit and push javadoc to fs-docs
         run: |
-          TIMESTAMP=$(date +'%Y%m%d%H%M%S')
-          git add docs/jmh/results/results-${TIMESTAMP}.json docs/jmh/results.json
-          git commit -m 'Run jmh-run.yml and update JMH benchmark results via GitHub Actions'
-          git push origin HEAD:${{ github.ref_name }}
+          cd fs-docs
+          git add docs/fs/javadoc/
+          git commit -m 'Update Javadoc from fs-all module'
+          git push origin repo/fs
+
+      # Merge repo/fs branch into main branch
+      - name: Merge repo/fs into main
+        run: |
+          cd fs-docs
+          git checkout main
+          git merge --no-ff repo/fs -m 'Merge repo/fs into main - Update Javadoc'
+          git push origin main
