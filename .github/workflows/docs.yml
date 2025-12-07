@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: fredsuvn/fs-docs
-          ref: repo/fs
+          ref: main
           token: ${{ secrets.FS_DOCS_PAT }}
           path: fs-docs
 
@@ -51,19 +51,10 @@ jobs:
           git config --global user.email '${{ github.actor }}@users.noreply.github.com'
 
       # Commit changes to fs-docs repository
-      - name: Commit and push javadoc to fs-docs
+      - name: Commit and push javadoc to fs-docs:main branch
         run: |
           cd fs-docs
           git remote set-url origin https://x-access-token:${{ secrets.FS_DOCS_PAT }}@github.com/fredsuvn/fs-docs.git
           git add docs/fs/javadoc/
           git commit -m 'Update Javadoc from fs-all module'
-          git push origin repo/fs
-
-      # Merge repo/fs branch into main branch
-      - name: Merge repo/fs into main
-        run: |
-          cd fs-docs
-          git remote set-url origin https://x-access-token:${{ secrets.FS_DOCS_PAT }}@github.com/fredsuvn/fs-docs.git
-          git checkout main
-          git merge --no-ff repo/fs -m 'Merge repo/fs into main - Update Javadoc'
           git push origin main
