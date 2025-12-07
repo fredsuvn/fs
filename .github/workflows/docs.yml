@@ -33,6 +33,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           path: fs-docs
 
+      # Create target directory if it doesn't exist
+      - name: Create target directory
+        run: mkdir -p fs-docs/docs/fs/javadoc/
+
       # Clear the existing javadoc directory
       - name: Clear existing javadoc directory
         run: rm -rf fs-docs/docs/fs/javadoc/*
