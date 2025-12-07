@@ -30,7 +30,7 @@ jobs:
         with:
           repository: fredsuvn/fs-docs
           ref: repo/fs
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.FS_DOCS_PAT }}
           path: fs-docs
 
       # Create target directory if it doesn't exist
@@ -54,6 +54,7 @@ jobs:
       - name: Commit and push javadoc to fs-docs
         run: |
           cd fs-docs
+          git remote set-url origin https://x-access-token:${{ secrets.FS_DOCS_PAT }}@github.com/fredsuvn/fs-docs.git
           git add docs/fs/javadoc/
           git commit -m 'Update Javadoc from fs-all module'
           git push origin repo/fs
@@ -62,6 +63,7 @@ jobs:
       - name: Merge repo/fs into main
         run: |
           cd fs-docs
+          git remote set-url origin https://x-access-token:${{ secrets.FS_DOCS_PAT }}@github.com/fredsuvn/fs-docs.git
           git checkout main
           git merge --no-ff repo/fs -m 'Merge repo/fs into main - Update Javadoc'
           git push origin main
