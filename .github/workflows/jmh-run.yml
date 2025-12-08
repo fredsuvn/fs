@@ -32,17 +32,17 @@ jobs:
       #- name: Check if gradlew exists
       #  run: test -f ./gradlew && echo "gradlew exists" || echo "gradlew not found"
 
-      - name: Clean fs-core module
-        run: gradle :fs-core:clean
+      #- name: Clean fs-core module
+      #  run: gradle :fs-core:clean
 
       - name: Run JMH benchmarks
         run: gradle :fs-tests:jmh
 
       - name: Copy results to docs directory with timestamp and update main results.json
         run: |
-          TIMESTAMP=$(date +'%Y%m%d%H%M%S')
+      #    TIMESTAMP=$(date +'%Y%m%d%H%M%S')
           mkdir -p docs/jmh/results
-          cp fs-tests/build/results/jmh/results.json docs/jmh/results/results-${TIMESTAMP}.json
+      #    cp fs-tests/build/results/jmh/results.json docs/jmh/results/results-${TIMESTAMP}.json
           cp fs-tests/build/results/jmh/results.json docs/jmh/results.json
 
       - name: Configure Git
@@ -52,7 +52,32 @@ jobs:
 
       - name: Commit and push results
         run: |
-          TIMESTAMP=$(date +'%Y%m%d%H%M%S')
-          git add docs/jmh/results/results-${TIMESTAMP}.json docs/jmh/results.json
+      #    TIMESTAMP=$(date +'%Y%m%d%H%M%S')
+      #    git add docs/jmh/results/results-${TIMESTAMP}.json docs/jmh/results.json
+          git add docs/jmh/results.json
           git commit -m 'Run jmh-run.yml and update JMH benchmark results via GitHub Actions'
           git push origin HEAD:${{ github.ref_name }}
+
+      # Clone the target repository
+      - name: Clone fs-docs repository
+        uses: actions/checkout@v4
+        with:
+          repository: fredsuvn/fs-docs
+          ref: main
+          token: ${{ secrets.FS_DOCS_PAT }}
+          path: fs-docs
+
+      # Create target jmh directory if it doesn't exist
+      - name: Create jmh directory
+        run: |
+          mkdir -p fs-docs/docs/fs/jmh/
+          cp fs-tests/build/results/jmh/results.json fs-docs/docs/fs/jmh/results.json
+
+      # Commit changes to fs-docs repository
+      - name: Commit and push results.json to fs-docs:main branch
+        run: |
+          cd fs-docs
+          git remote set-url origin https://x-access-token:${{ secrets.FS_DOCS_PAT }}@github.com/fredsuvn/fs-docs.git
+          git add docs/fs/jmh/results.json
+          git commit -m 'Update jmh results.json from fs-all module'
+          git push origin main
