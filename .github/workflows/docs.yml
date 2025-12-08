@@ -23,6 +23,10 @@ jobs:
 
       - name: Generate Javadoc in fs-all module
         run: gradle :fs-all:javadoc
+      - name: Generate jacoco in fs-all module
+        run: gradle :fs-all:jacocoTestReport
+      - name: Generate aggregated tests report in fs-all module
+        run: gradle :fs-all:testAggregateTestReport
 
       # Clone the target repository
       - name: Clone fs-docs repository
@@ -34,16 +38,20 @@ jobs:
           path: fs-docs
 
       # Create target directory if it doesn't exist
-      - name: Create target directory
-        run: mkdir -p fs-docs/docs/fs/javadoc/
+      - name: Create root docs directory
+        run: mkdir -p fs-docs/docs/fs/
+      - name: Clear existing root docs directory
+        run: rm -rf fs-docs/docs/fs/*
 
-      # Clear the existing javadoc directory
-      - name: Clear existing javadoc directory
-        run: rm -rf fs-docs/docs/fs/javadoc/*
+      - name: Create docs directory
+        run: mkdir -p fs-docs/docs/fs/docs/
+      - name: Copy docs to target directory
+        run: cp -r fs-all/build/docs/* fs-docs/docs/fs/docs/
 
-      # Copy generated javadoc to target directory
-      - name: Copy javadoc to target directory
-        run: cp -r fs-all/build/docs/javadoc/* fs-docs/docs/fs/javadoc/
+      - name: Create reports directory
+        run: mkdir -p fs-docs/docs/fs/reports/
+      - name: Copy reports to target directory
+        run: cp -r fs-all/build/reports/* fs-docs/docs/fs/reports/
 
       - name: Configure Git
         run: |
@@ -55,6 +63,6 @@ jobs:
         run: |
           cd fs-docs
           git remote set-url origin https://x-access-token:${{ secrets.FS_DOCS_PAT }}@github.com/fredsuvn/fs-docs.git
-          git add docs/fs/javadoc/
+          git add docs/fs/
           git commit -m 'Update Javadoc from fs-all module'
           git push origin main
