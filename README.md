@@ -1,4 +1,4 @@
-# ![](docs/pics/logo-32.svg) _fs_: a lightweight, high-performance, zero-dependency tool lib for java
+# ![](assets/favicon/favicon-32.svg) _fs_: a lightweight, high-performance, zero-dependency tool lib for java
 
 ## Overview
 
@@ -44,26 +44,20 @@ _fs_ has higher performance than other common libraries in many places, Here are
 - **Simple Cache** (`space.sunqian.common.cache.SimpleCache`):
   SimpleCache only considers common cache functions, so it has higher performance in common functions.
   Here is the benchmark: [CacheBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/CacheBenchmark.java)
-  and its result:
-
-  ![](docs/jmh/cache.svg)
 
 - **CopyProperties** (`Fs.copyProperties / space.sunqian.common.object.convert.DataMapper`):
   DataMapper has better performance and more comprehensive support.
   Here is the
   benchmark: [CopyPropertiesBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/CopyPropertiesBenchmark.java)
-  and its result:
-
-  ![](docs/jmh/copyProperties.svg)
 
 - **TCP Server** (`space.sunqian.common.net.tcp.TcpServer`):
   Rare interface server implementation with slightly better performance than **netty**.
   Here is the benchmark: [TcpServerBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/TcpServerBenchmark.java)
-  and its result:
-
-  ![](docs/jmh/tcpServer.svg)
 
 Here is the full benchmark result: [results.json](docs/jmh/results.json).
+
+And here is the benchmark result
+chart: [JMH Visualizer](https://fredsuvn.github.io/fs-docs/tools/jmh-visualizer/jmh-visualizer.html?resultsPath=../../docs/fs/jmh/results.json).
 
 ## Zero Dependency
 
@@ -80,7 +74,10 @@ environment. If these features are not used, there is no need to add these depen
 
 ## Test passing rate and coverage: 100%
 
-The test passing rate and coverage for this library are both 100%. (coverage tool: jacoco)
+The test passing rate and jacoco coverage for this library are both 100%:
+
+- [Aggregate Test Report](https://fredsuvn.github.io/fs-docs/docs/fs/reports/tests/test/aggregated-results/index.html)
+- [JaCoCo Coverage](https://fredsuvn.github.io/fs-docs/docs/fs/reports/jacoco/test/html/index.html)
 
 ## Samples:
 
@@ -102,14 +99,13 @@ cd fs && gradle clean build
 
 ## Documents
 
-- javadoc:
-  * javadoc: [index.html](docs/javadoc/index.html)
-- manuals:
-  * develop manual: [dev-manual.adoc](docs/dev-manual.adoc)
+- [JavaDoc](https://fredsuvn.github.io/fs-docs/docs/fs/docs/javadoc/index.html)
+- Manuals:
+  * Develop Manual: [dev-manual.adoc](docs/dev-manual.adoc)
 
 ## Contact
 
-* github: [https://github.com/fredsuvn](https://github.com/fredsuvn)
+* GitHub: [https://github.com/fredsuvn](https://github.com/fredsuvn)
 * QQ group: [566185308](https://qm.qq.com/q/wlkc2tmOaG)
 
 ## License
@@ -118,4 +114,4 @@ cd fs && gradle clean build
 
 [license]: https://www.apache.org/licenses/LICENSE-2.0.html
 
-![](docs/pics/logo-64.svg)
+![](assets/favicon/favicon-64.svg)
