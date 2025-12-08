@@ -40,9 +40,7 @@ jobs:
 
       - name: Copy results to docs directory with timestamp and update main results.json
         run: |
-      #    TIMESTAMP=$(date +'%Y%m%d%H%M%S')
           mkdir -p docs/jmh/results
-      #    cp fs-tests/build/results/jmh/results.json docs/jmh/results/results-${TIMESTAMP}.json
           cp fs-tests/build/results/jmh/results.json docs/jmh/results.json
 
       - name: Configure Git
@@ -52,8 +50,6 @@ jobs:
 
       - name: Commit and push results
         run: |
-      #    TIMESTAMP=$(date +'%Y%m%d%H%M%S')
-      #    git add docs/jmh/results/results-${TIMESTAMP}.json docs/jmh/results.json
           git add docs/jmh/results.json
           git commit -m 'Run jmh-run.yml and update JMH benchmark results via GitHub Actions'
           git push origin HEAD:${{ github.ref_name }}
