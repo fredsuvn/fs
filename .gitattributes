@@ -21,8 +21,6 @@
 *.kts text
 *.kt text
 
-gradlew eol=lf
-
 # binary files:
 *.gif  binary
 *.jar  binary
@@ -30,3 +28,6 @@ gradlew eol=lf
 *.jpg  binary
 *.png  binary
 *.vsd  binary
+
+gradlew eol=lf
+fs-core/src/test/resources/reflect/LAC binary
