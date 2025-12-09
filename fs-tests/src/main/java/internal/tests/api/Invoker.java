@@ -1,7 +1,7 @@
 package internal.tests.api;
 
-import space.sunqian.common.runtime.invoke.Invocable;
-import space.sunqian.common.runtime.invoke.InvocationMode;
+import space.sunqian.common.invoke.Invocable;
+import space.sunqian.common.invoke.InvocationMode;
 
 import java.lang.reflect.Method;
 import java.util.Random;

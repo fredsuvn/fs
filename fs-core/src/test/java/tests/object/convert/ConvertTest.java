@@ -22,8 +22,8 @@ import space.sunqian.common.object.convert.ObjectConvertException;
 import space.sunqian.common.object.convert.ObjectConverter;
 import space.sunqian.common.object.convert.UnsupportedObjectConvertException;
 import space.sunqian.common.object.data.ObjectBuilderProvider;
-import space.sunqian.common.runtime.reflect.TypeKit;
-import space.sunqian.common.runtime.reflect.TypeRef;
+import space.sunqian.common.reflect.TypeKit;
+import space.sunqian.common.reflect.TypeRef;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;

@@ -16,7 +16,7 @@ import space.sunqian.common.app.di.InjectedResource;
 import space.sunqian.common.app.di.InjectedResourceDestructionException;
 import space.sunqian.common.app.di.InjectedResourceInitializationException;
 import space.sunqian.common.collect.ListKit;
-import space.sunqian.common.runtime.reflect.TypeRef;
+import space.sunqian.common.reflect.TypeRef;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;

@@ -18,7 +18,7 @@ import space.sunqian.common.object.data.ObjectBuilderProvider;
 import space.sunqian.common.object.data.ObjectProperty;
 import space.sunqian.common.object.data.ObjectSchema;
 import space.sunqian.common.object.data.ObjectSchemaParser;
-import space.sunqian.common.runtime.reflect.TypeRef;
+import space.sunqian.common.reflect.TypeRef;
 import space.sunqian.common.third.protobuf.ProtobufBuilderHandler;
 import space.sunqian.common.third.protobuf.ProtobufConvertHandler;
 import space.sunqian.common.third.protobuf.ProtobufKit;

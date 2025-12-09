@@ -17,8 +17,8 @@ import space.sunqian.common.object.data.ObjectPropertyBase;
 import space.sunqian.common.object.data.ObjectSchema;
 import space.sunqian.common.object.data.ObjectSchemaParser;
 import space.sunqian.common.object.data.handlers.SimpleBeanSchemaHandler;
-import space.sunqian.common.runtime.invoke.Invocable;
-import space.sunqian.common.runtime.reflect.TypeRef;
+import space.sunqian.common.invoke.Invocable;
+import space.sunqian.common.reflect.TypeRef;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

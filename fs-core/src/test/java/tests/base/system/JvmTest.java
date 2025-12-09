@@ -6,12 +6,12 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.junit.jupiter.api.Test;
-import tests.runtime.reflect.TypeTest;
+import tests.reflect.TypeTest;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import space.sunqian.common.base.system.JvmException;
 import space.sunqian.common.base.system.JvmKit;
-import space.sunqian.common.runtime.reflect.TypeKit;
+import space.sunqian.common.reflect.TypeKit;
 import internal.test.AssertTest;
 import internal.test.PrintTest;
 

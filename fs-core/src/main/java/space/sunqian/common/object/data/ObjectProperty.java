@@ -3,7 +3,7 @@ package space.sunqian.common.object.data;
 import space.sunqian.annotations.Immutable;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.runtime.invoke.Invocable;
+import space.sunqian.common.invoke.Invocable;
 
 /**
  * This interface represents the property info of {@link ObjectSchema}. It is very similar to the simple property of

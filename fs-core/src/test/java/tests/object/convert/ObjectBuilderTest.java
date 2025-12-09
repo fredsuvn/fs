@@ -6,8 +6,8 @@ import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.object.data.DataObjectException;
 import space.sunqian.common.object.data.ObjectBuilder;
 import space.sunqian.common.object.data.ObjectBuilderProvider;
-import space.sunqian.common.runtime.reflect.TypeKit;
-import space.sunqian.common.runtime.reflect.TypeRef;
+import space.sunqian.common.reflect.TypeKit;
+import space.sunqian.common.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;

@@ -3,7 +3,7 @@ package space.sunqian.common.app.di;
 import space.sunqian.annotations.Immutable;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.runtime.invoke.InvocationException;
+import space.sunqian.common.invoke.InvocationException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

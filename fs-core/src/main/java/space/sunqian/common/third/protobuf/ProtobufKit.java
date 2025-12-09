@@ -1,6 +1,6 @@
 package space.sunqian.common.third.protobuf;
 
-import space.sunqian.common.runtime.reflect.ClassKit;
+import space.sunqian.common.reflect.ClassKit;
 
 /**
  * Utilities for <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>. To use this class, the

@@ -4,8 +4,8 @@ import space.sunqian.annotations.Immutable;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.Fs;
-import space.sunqian.common.runtime.invoke.Invocable;
-import space.sunqian.common.runtime.reflect.TypeKit;
+import space.sunqian.common.invoke.Invocable;
+import space.sunqian.common.reflect.TypeKit;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

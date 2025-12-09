@@ -8,7 +8,7 @@ import space.sunqian.annotations.Nullable;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.system.JvmKit;
 import space.sunqian.common.collect.ArrayKit;
-import space.sunqian.common.runtime.reflect.ClassKit;
+import space.sunqian.common.reflect.ClassKit;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;

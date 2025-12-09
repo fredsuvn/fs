@@ -5,7 +5,7 @@ import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.enums.EnumKit;
 import space.sunqian.common.base.exception.UnknownTypeException;
 import space.sunqian.common.base.system.JvmKit;
-import space.sunqian.common.runtime.reflect.ClassKit;
+import space.sunqian.common.reflect.ClassKit;
 
 import java.util.ArrayList;
 import java.util.Collections;

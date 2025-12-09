@@ -5,7 +5,7 @@ import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.RetainedParam;
 import space.sunqian.annotations.ThreadSafe;
 import space.sunqian.common.collect.ListKit;
-import space.sunqian.common.runtime.invoke.Invocable;
+import space.sunqian.common.invoke.Invocable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;

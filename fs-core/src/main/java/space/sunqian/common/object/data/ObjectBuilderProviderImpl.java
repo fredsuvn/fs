@@ -4,9 +4,9 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.FsLoader;
 import space.sunqian.common.collect.ListKit;
-import space.sunqian.common.runtime.invoke.Invocable;
-import space.sunqian.common.runtime.invoke.InvocationException;
-import space.sunqian.common.runtime.reflect.TypeKit;
+import space.sunqian.common.invoke.Invocable;
+import space.sunqian.common.invoke.InvocationException;
+import space.sunqian.common.reflect.TypeKit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;

@@ -6,8 +6,8 @@ import space.sunqian.common.Fs;
 import space.sunqian.common.collect.MapKit;
 import space.sunqian.common.object.data.ObjectPropertyBase;
 import space.sunqian.common.object.data.ObjectSchemaParser;
-import space.sunqian.common.runtime.invoke.Invocable;
-import space.sunqian.common.runtime.reflect.TypeKit;
+import space.sunqian.common.invoke.Invocable;
+import space.sunqian.common.reflect.TypeKit;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

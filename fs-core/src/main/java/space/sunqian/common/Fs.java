@@ -24,7 +24,7 @@ import space.sunqian.common.object.convert.ObjectConvertException;
 import space.sunqian.common.object.convert.ObjectConverter;
 import space.sunqian.common.object.convert.UnsupportedObjectConvertException;
 import space.sunqian.common.object.data.ObjectSchema;
-import space.sunqian.common.runtime.reflect.TypeRef;
+import space.sunqian.common.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.time.Duration;

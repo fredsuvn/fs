@@ -9,7 +9,7 @@ import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.object.convert.handlers.AssignableConvertHandler;
 import space.sunqian.common.object.convert.handlers.CommonConvertHandler;
 import space.sunqian.common.object.data.ObjectBuilderProvider;
-import space.sunqian.common.runtime.reflect.TypeRef;
+import space.sunqian.common.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.util.List;

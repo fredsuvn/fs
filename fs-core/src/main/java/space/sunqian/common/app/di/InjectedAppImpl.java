@@ -6,11 +6,11 @@ import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.OutParam;
 import space.sunqian.common.Fs;
 import space.sunqian.common.collect.ListKit;
-import space.sunqian.common.runtime.aspect.AspectMaker;
-import space.sunqian.common.runtime.aspect.AspectSpec;
-import space.sunqian.common.runtime.invoke.Invocable;
-import space.sunqian.common.runtime.invoke.InvocationException;
-import space.sunqian.common.runtime.reflect.TypeKit;
+import space.sunqian.common.dynamic.aspect.AspectMaker;
+import space.sunqian.common.dynamic.aspect.AspectSpec;
+import space.sunqian.common.invoke.Invocable;
+import space.sunqian.common.invoke.InvocationException;
+import space.sunqian.common.reflect.TypeKit;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

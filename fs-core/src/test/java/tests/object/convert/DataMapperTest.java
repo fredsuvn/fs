@@ -19,7 +19,7 @@ import space.sunqian.common.object.data.MapSchemaParser;
 import space.sunqian.common.object.data.ObjectProperty;
 import space.sunqian.common.object.data.ObjectSchema;
 import space.sunqian.common.object.data.ObjectSchemaParser;
-import space.sunqian.common.runtime.reflect.TypeRef;
+import space.sunqian.common.reflect.TypeRef;
 import tests.utils.ErrorMap;
 
 import java.lang.reflect.Type;

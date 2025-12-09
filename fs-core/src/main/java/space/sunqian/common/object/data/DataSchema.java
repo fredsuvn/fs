@@ -3,7 +3,7 @@ package space.sunqian.common.object.data;
 import space.sunqian.annotations.Immutable;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.Fs;
-import space.sunqian.common.runtime.reflect.TypeKit;
+import space.sunqian.common.reflect.TypeKit;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

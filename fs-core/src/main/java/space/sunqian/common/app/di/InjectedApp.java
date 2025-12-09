@@ -6,7 +6,7 @@ import space.sunqian.common.Fs;
 import space.sunqian.common.app.SimpleApp;
 import space.sunqian.common.collect.CollectKit;
 import space.sunqian.common.collect.ListKit;
-import space.sunqian.common.runtime.reflect.TypeRef;
+import space.sunqian.common.reflect.TypeRef;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
