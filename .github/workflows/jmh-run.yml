@@ -40,8 +40,8 @@ jobs:
 
       - name: Copy results to docs directory with timestamp and update main results.json
         run: |
-          mkdir -p docs/jmh/results
-          cp fs-tests/build/results/jmh/results.json docs/jmh/results.json
+          mkdir -p assets/docs/jmh
+          cp fs-tests/build/results/jmh/results.json assets/docs/jmh/results.json
 
       - name: Configure Git
         run: |
@@ -50,7 +50,7 @@ jobs:
 
       - name: Commit and push results
         run: |
-          git add docs/jmh/results.json
+          git add assets/docs/jmh/results.json
           git commit -m 'Run jmh-run.yml and update JMH benchmark results via GitHub Actions'
           git push origin HEAD:${{ github.ref_name }}
 
