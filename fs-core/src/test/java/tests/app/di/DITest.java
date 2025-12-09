@@ -370,14 +370,12 @@ public class DITest implements PrintTest {
     public static class NeedExecution2 {
 
         @TestPost
-        //@InjectedDependsOn(NeedExecution.class)
         public void postConstruct(NeedExecution dependent) {
             assertNotNull(dependent);
             postList.add(getClass().getName());
         }
 
         @TestPre
-        //@InjectedDependsOn(NeedExecution.class)
         public void preDestroy(NeedExecution dependent) {
             assertNotNull(dependent);
             preList.add(getClass().getName());
@@ -387,7 +385,6 @@ public class DITest implements PrintTest {
     public static class NeedExecution3 {
 
         @TestPost
-        //@InjectedDependsOn({NeedExecution.class, NeedExecution2.class})
         public void postConstruct(NeedExecution dependent, NeedExecution2 dependent2) {
             assertNotNull(dependent);
             assertNotNull(dependent2);
@@ -395,7 +392,6 @@ public class DITest implements PrintTest {
         }
 
         @TestPre
-        //@InjectedDependsOn({NeedExecution.class, NeedExecution2.class})
         public void preDestroy(NeedExecution dependent, NeedExecution2 dependent2) {
             assertNotNull(dependent);
             assertNotNull(dependent2);
@@ -580,14 +576,12 @@ public class DITest implements PrintTest {
     public static class Dep2 {
 
         @PostConstruct
-        //@InjectedDependsOn(Dep1.class)
         public void postConstruct(Dep1 dep1) {
             assertNotNull(dep1);
             Dep.postList.add(2);
         }
 
         @PreDestroy
-        //@InjectedDependsOn(Dep1.class)
         public void preDestroy(Dep1 dep1) {
             assertNotNull(dep1);
             Dep.destroyList.add(2);
@@ -597,7 +591,6 @@ public class DITest implements PrintTest {
     public static class Dep3 {
 
         @PostConstruct
-        //@InjectedDependsOn({Dep1.class, Dep2.class})
         public void postConstruct(Dep1 dep1, Dep2 dep2) {
             assertNotNull(dep1);
             assertNotNull(dep2);
@@ -605,7 +598,6 @@ public class DITest implements PrintTest {
         }
 
         @PreDestroy
-        //@InjectedDependsOn({Dep2.class, Dep1.class})
         public void preDestroy(Dep2 dep2, Dep1 dep1) {
             assertNotNull(dep2);
             assertNotNull(dep1);
@@ -616,7 +608,6 @@ public class DITest implements PrintTest {
     public static class Dep4 {
 
         @PostConstruct
-        //@InjectedDependsOn(Dep5.class)
         public void postConstruct(Dep5 dep5) {
             assertNotNull(dep5);
         }
@@ -625,7 +616,6 @@ public class DITest implements PrintTest {
     public static class Dep5 {
 
         @PostConstruct
-        //@InjectedDependsOn(Dep4.class)
         public void postConstruct(Dep4 dep4) {
             assertNotNull(dep4);
         }
@@ -634,7 +624,6 @@ public class DITest implements PrintTest {
     public static class Dep6 {
 
         @PreDestroy
-        //@InjectedDependsOn(Dep7.class)
         public void preDestroy(Dep7 dep7) {
             assertNotNull(dep7);
         }
@@ -643,7 +632,6 @@ public class DITest implements PrintTest {
     public static class Dep7 {
 
         @PreDestroy
-        //@InjectedDependsOn(Dep6.class)
         public void preDestroy(Dep6 dep6) {
             assertNotNull(dep6);
         }
@@ -652,12 +640,10 @@ public class DITest implements PrintTest {
     public static class Dep8 {
 
         @PostConstruct
-        //@InjectedDependsOn({})
         public void postConstruct() {
         }
 
         @PreDestroy
-        //@InjectedDependsOn({})
         public void preDestroy() {
         }
     }
@@ -695,7 +681,6 @@ public class DITest implements PrintTest {
     public static class DepErr1 {
 
         @PostConstruct
-        //@InjectedDependsOn(String.class)
         public void postConstruct(String str) {
             assertEquals("", str);
         }
@@ -704,7 +689,6 @@ public class DITest implements PrintTest {
     public static class DepErr2 {
 
         @PreDestroy
-        //@InjectedDependsOn(String.class)
         public void preDestroy(String str) {
             assertEquals("", str);
         }

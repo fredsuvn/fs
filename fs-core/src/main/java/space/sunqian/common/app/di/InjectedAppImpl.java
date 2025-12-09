@@ -33,6 +33,8 @@ import java.util.stream.Collectors;
 
 final class InjectedAppImpl implements InjectedApp {
 
+    private static final Runnable EMPTY_RUNNABLE = () -> {};
+
     private final @Nonnull Map<@Nonnull Type, @Nonnull InjectedResource> resources;
     private final @Nonnull Map<@Nonnull Type, @Nonnull InjectedResource> localResources;
     private final @Nonnull List<@Nonnull InjectedResource> preDestroyList;
@@ -312,7 +314,6 @@ final class InjectedAppImpl implements InjectedApp {
         }
         postConstructSet.add(curRes);
         Type[] sdo = postConstructMethod.getGenericParameterTypes();
-        // InjectedDependsOn sdo = postConstructMethod.getAnnotation(InjectedDependsOn.class);
         if (ArrayKit.isEmpty(sdo)) {
             return;
         }
@@ -344,7 +345,6 @@ final class InjectedAppImpl implements InjectedApp {
         }
         preDestroySet.add(curRes);
         Type[] sdo = preDestroyMethod.getGenericParameterTypes();
-        // InjectedDependsOn sdo = preDestroyMethod.getAnnotation(InjectedDependsOn.class);
         if (ArrayKit.isEmpty(sdo)) {
             return;
         }
@@ -503,7 +503,7 @@ final class InjectedAppImpl implements InjectedApp {
             this.local = local;
             this.postConstructMethod = postConstructMethod;
             this.postConstruct = postConstructMethod == null ?
-                () -> {}
+                EMPTY_RUNNABLE
                 :
                 () -> {
                     Invocable invocable = Invocable.of(postConstructMethod);
@@ -514,10 +514,9 @@ final class InjectedAppImpl implements InjectedApp {
                     }
                     invocable.invoke(instance, args);
                 };
-
             this.preDestroyMethod = preDestroyMethod;
             this.preDestroy = preDestroyMethod == null ?
-                () -> {}
+                EMPTY_RUNNABLE
                 :
                 () -> {
                     Invocable invocable = Invocable.of(preDestroyMethod);
@@ -669,8 +668,6 @@ final class InjectedAppImpl implements InjectedApp {
         public int compare(@Nonnull InjectedResource sr1, @Nonnull InjectedResource sr2) {
             Method pc1 = Fs.asNonnull(sr1.postConstructMethod());
             Method pc2 = Fs.asNonnull(sr2.postConstructMethod());
-            // InjectedDependsOn sd1 = pc1.getAnnotation(InjectedDependsOn.class);
-            // InjectedDependsOn sd2 = pc2.getAnnotation(InjectedDependsOn.class);
             Type[] sd1 = pc1.getGenericParameterTypes();
             Type[] sd2 = pc2.getGenericParameterTypes();
             return compareDependsOn(sr1, sd1, sr2, sd2);
@@ -685,34 +682,11 @@ final class InjectedAppImpl implements InjectedApp {
         public int compare(@Nonnull InjectedResource sr1, @Nonnull InjectedResource sr2) {
             Method pd1 = Fs.asNonnull(sr1.preDestroyMethod());
             Method pd2 = Fs.asNonnull(sr2.preDestroyMethod());
-            // InjectedDependsOn sd1 = pd1.getAnnotation(InjectedDependsOn.class);
-            // InjectedDependsOn sd2 = pd2.getAnnotation(InjectedDependsOn.class);
             Type[] sd1 = pd1.getGenericParameterTypes();
             Type[] sd2 = pd2.getGenericParameterTypes();
             return compareDependsOn(sr1, sd1, sr2, sd2);
         }
     }
-
-    // private static int compareDependsOn(
-    //     @Nonnull InjectedResource sr1, @Nullable InjectedDependsOn sd1,
-    //     @Nonnull InjectedResource sr2, @Nullable InjectedDependsOn sd2
-    // ) {
-    //     if (sd1 != null) {
-    //         for (Class<?> c1 : sd1.value()) {
-    //             if (c1.equals(sr2.type())) {
-    //                 return 1;
-    //             }
-    //         }
-    //     }
-    //     if (sd2 != null) {
-    //         for (Class<?> c2 : sd2.value()) {
-    //             if (c2.equals(sr1.type())) {
-    //                 return -1;
-    //             }
-    //         }
-    //     }
-    //     return 0;
-    // }
 
     private static int compareDependsOn(
         @Nonnull InjectedResource sr1, Type @Nonnull [] sd1,
