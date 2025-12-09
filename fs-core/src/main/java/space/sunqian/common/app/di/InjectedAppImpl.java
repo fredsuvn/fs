@@ -5,6 +5,7 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.OutParam;
 import space.sunqian.common.Fs;
+import space.sunqian.common.collect.ArrayKit;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.dynamic.aspect.AspectMaker;
 import space.sunqian.common.dynamic.aspect.AspectSpec;
@@ -32,9 +33,8 @@ import java.util.stream.Collectors;
 
 final class InjectedAppImpl implements InjectedApp {
 
-    private final @Nonnull List<@Nonnull InjectedResource> localResources;
-    private final @Nonnull List<@Nonnull InjectedResource> allResources;
     private final @Nonnull Map<@Nonnull Type, @Nonnull InjectedResource> resources;
+    private final @Nonnull Map<@Nonnull Type, @Nonnull InjectedResource> localResources;
     private final @Nonnull List<@Nonnull InjectedResource> preDestroyList;
     private final @Nonnull List<@Nonnull InjectedApp> parentApps;
 
@@ -50,7 +50,7 @@ final class InjectedAppImpl implements InjectedApp {
         Map<Type, Res> resourceMap = new LinkedHashMap<>();
         // add parent resource into this app
         for (InjectedApp parentApp : parentApps) {
-            for (InjectedResource resource : parentApp.resources()) {
+            for (InjectedResource resource : parentApp.resources().values()) {
                 resourceMap.put(resource.type(), new Res(resource.type(), resource.instance()));
             }
         }
@@ -79,10 +79,8 @@ final class InjectedAppImpl implements InjectedApp {
         // aop
         doAop(fieldSetter, resourceMap, fieldSet);
         // resources
-        Map<Type, InjectedResource> resources = new LinkedHashMap<>();
-        InjectedResource[] allResources = new InjectedResource[resourceMap.size()];
-        int localCount = 0;
-        int i = 0;
+        LinkedHashMap<Type, InjectedResource> resources = new LinkedHashMap<>(resourceMap.size());
+        LinkedHashMap<Type, InjectedResource> localResources = new LinkedHashMap<>(resourceMap.size());
         for (Res res : resourceMap.values()) {
             Object inst = getResInstance(res);
             InjectedResource simpleResource = new InjectedRes(
@@ -93,27 +91,18 @@ final class InjectedAppImpl implements InjectedApp {
                 res.preDestroyMethod()
             );
             resources.put(res.type, simpleResource);
-            allResources[i++] = simpleResource;
             if (res.local) {
-                localCount++;
-            }
-        }
-        InjectedResource[] localResources = new InjectedResource[localCount];
-        i = 0;
-        for (InjectedResource res : allResources) {
-            if (res.isLocal()) {
-                localResources[i++] = res;
+                localResources.put(res.type, simpleResource);
             }
         }
         this.parentApps = ListKit.toList(parentApps);
         this.resources = Collections.unmodifiableMap(resources);
-        this.localResources = ListKit.list(localResources);
-        this.allResources = ListKit.list(allResources);
+        this.localResources = Collections.unmodifiableMap(localResources);
         // post-construct and pre-destroy
         Set<InjectedResource> postConstructSet = new LinkedHashSet<>();
         Set<InjectedResource> preDestroySet = new LinkedHashSet<>();
         Set<Type> stack = new HashSet<>();
-        for (InjectedResource resource : localResources) {
+        for (InjectedResource resource : localResources.values()) {
             checkDependencyForPostConstruct(resource, stack, postConstructSet);
             stack.clear();
             checkDependencyForPreDestroy(resource, stack, preDestroySet);
@@ -124,6 +113,11 @@ final class InjectedAppImpl implements InjectedApp {
         List<InjectedResource> preDestroyList = new ArrayList<>(preDestroySet);
         preDestroyList.sort(PreDestroyComparator.INST);
         this.preDestroyList = preDestroyList;
+        // execute post-construct
+        doPostConstruct(postConstructList);
+    }
+
+    private void doPostConstruct(@Nonnull List<@Nonnull InjectedResource> postConstructList) {
         // execute post-construct
         List<InjectedResource> uninitializedResources = new ArrayList<>(postConstructList);
         List<InjectedResource> initializedResources = new ArrayList<>(postConstructList.size());
@@ -162,6 +156,7 @@ final class InjectedAppImpl implements InjectedApp {
         }
         Res res = new Res(descriptor);
         resourceMap.put(type, res);
+        // dependency fields
         for (Field dependencyField : descriptor.dependencyFields()) {
             Type dependencyType = dependencyField.getGenericType();
             if (dependencyType.equals(type)) {
@@ -178,6 +173,36 @@ final class InjectedAppImpl implements InjectedApp {
                 fieldSet
             );
             fieldSet.add(new FieldRes(dependencyField, res));
+        }
+        // dependency parameters of post-construct method
+        Method postConstructMethod = descriptor.postConstructMethod();
+        if (postConstructMethod != null) {
+            for (Type parameterType : postConstructMethod.getGenericParameterTypes()) {
+                doDependencyInjection(
+                    parameterType,
+                    resourceAnnotations,
+                    postConstructAnnotations,
+                    preDestroyAnnotations,
+                    resolver,
+                    resourceMap,
+                    fieldSet
+                );
+            }
+        }
+        // dependency parameters of pre-destroy method
+        Method preDestroyMethod = descriptor.preDestroyMethod();
+        if (preDestroyMethod != null) {
+            for (Type parameterType : preDestroyMethod.getGenericParameterTypes()) {
+                doDependencyInjection(
+                    parameterType,
+                    resourceAnnotations,
+                    postConstructAnnotations,
+                    preDestroyAnnotations,
+                    resolver,
+                    resourceMap,
+                    fieldSet
+                );
+            }
         }
     }
 
@@ -281,13 +306,14 @@ final class InjectedAppImpl implements InjectedApp {
         @Nonnull @OutParam Set<@Nonnull InjectedResource> postConstructSet
     ) throws InjectedAppException {
         Type curType = curRes.type();
-        Method postConstruct = curRes.postConstructMethod();
-        if (postConstruct == null) {
+        Method postConstructMethod = curRes.postConstructMethod();
+        if (postConstructMethod == null) {
             return;
         }
         postConstructSet.add(curRes);
-        InjectedDependsOn sdo = postConstruct.getAnnotation(InjectedDependsOn.class);
-        if (sdo == null) {
+        Type[] sdo = postConstructMethod.getGenericParameterTypes();
+        // InjectedDependsOn sdo = postConstructMethod.getAnnotation(InjectedDependsOn.class);
+        if (ArrayKit.isEmpty(sdo)) {
             return;
         }
         if (!stack.add(curType)) {
@@ -296,11 +322,11 @@ final class InjectedAppImpl implements InjectedApp {
                     stack.stream().map(Type::getTypeName).collect(Collectors.joining(" -> ")) + "."
             );
         }
-        for (Class<?> depType : sdo.value()) {
+        for (Type depType : sdo) {
             InjectedResource depRes = resources.get(depType);
-            if (depRes == null) {
-                throw new InjectedAppException("Unknown post-construct dependency type: " + depType.getTypeName() + ".");
-            }
+            // if (depRes == null) {
+            //     throw new InjectedAppException("Unknown post-construct dependency type: " + depType.getTypeName() + ".");
+            // }
             checkDependencyForPostConstruct(depRes, stack, postConstructSet);
             stack.remove(depType);
         }
@@ -312,13 +338,14 @@ final class InjectedAppImpl implements InjectedApp {
         @Nonnull @OutParam Set<@Nonnull InjectedResource> preDestroySet
     ) throws InjectedAppException {
         Type curType = curRes.type();
-        Method preDestroy = curRes.preDestroyMethod();
-        if (preDestroy == null) {
+        Method preDestroyMethod = curRes.preDestroyMethod();
+        if (preDestroyMethod == null) {
             return;
         }
         preDestroySet.add(curRes);
-        InjectedDependsOn sdo = preDestroy.getAnnotation(InjectedDependsOn.class);
-        if (sdo == null) {
+        Type[] sdo = preDestroyMethod.getGenericParameterTypes();
+        // InjectedDependsOn sdo = preDestroyMethod.getAnnotation(InjectedDependsOn.class);
+        if (ArrayKit.isEmpty(sdo)) {
             return;
         }
         if (!stack.add(curType)) {
@@ -327,11 +354,11 @@ final class InjectedAppImpl implements InjectedApp {
                     stack.stream().map(Type::getTypeName).collect(Collectors.joining(" -> ")) + "."
             );
         }
-        for (Class<?> depType : sdo.value()) {
+        for (Type depType : sdo) {
             InjectedResource depRes = resources.get(depType);
-            if (depRes == null) {
-                throw new InjectedAppException("Unknown pre-destroy dependency type: " + depType.getTypeName() + ".");
-            }
+            // if (depRes == null) {
+            //     throw new InjectedAppException("Unknown pre-destroy dependency type: " + depType.getTypeName() + ".");
+            // }
             checkDependencyForPreDestroy(depRes, stack, preDestroySet);
             stack.remove(depType);
         }
@@ -367,22 +394,27 @@ final class InjectedAppImpl implements InjectedApp {
     }
 
     @Override
-    public @Nonnull List<@Nonnull InjectedResource> localResources() {
+    public @Nonnull Map<@Nonnull Type, @Nonnull InjectedResource> localResources() {
         return localResources;
     }
 
     @Override
-    public @Nonnull List<@Nonnull InjectedResource> resources() {
-        return allResources;
+    public @Nonnull Map<@Nonnull Type, @Nonnull InjectedResource> resources() {
+        return resources;
     }
 
     @Override
-    public @Nullable Object getResource(@Nonnull Type type) {
+    public @Nullable InjectedResource getResource(@Nonnull Type type) {
+        return resources.get(type);
+    }
+
+    @Override
+    public @Nullable Object getObject(@Nonnull Type type) {
         InjectedResource resource = resources.get(type);
         if (resource != null) {
             return resource.instance();
         }
-        for (InjectedResource sr : allResources) {
+        for (InjectedResource sr : resources.values()) {
             if (TypeKit.isAssignable(type, sr.type())) {
                 return sr.instance();
             }
@@ -448,15 +480,15 @@ final class InjectedAppImpl implements InjectedApp {
         }
     }
 
-    private static final class InjectedRes implements InjectedResource {
+    private final class InjectedRes implements InjectedResource {
 
         private final @Nonnull Type type;
         private final @Nonnull Object instance;
         private final boolean local;
         private final @Nullable Method postConstructMethod;
-        private final @Nonnull Invocable postConstruct;
+        private final @Nonnull Runnable postConstruct;
         private final @Nullable Method preDestroyMethod;
-        private final @Nonnull Invocable preDestroy;
+        private final @Nonnull Runnable preDestroy;
         private volatile int state = 0;
 
         private InjectedRes(
@@ -470,11 +502,32 @@ final class InjectedAppImpl implements InjectedApp {
             this.instance = instance;
             this.local = local;
             this.postConstructMethod = postConstructMethod;
-            this.postConstruct = postConstructMethod == null ? Invocable.empty() : Invocable.of(postConstructMethod);
+            this.postConstruct = postConstructMethod == null ?
+                () -> {}
+                :
+                () -> {
+                    Invocable invocable = Invocable.of(postConstructMethod);
+                    Type[] paramTypes = postConstructMethod.getGenericParameterTypes();
+                    Object[] args = new Object[paramTypes.length];
+                    for (int i = 0; i < paramTypes.length; i++) {
+                        args[i] = getObject(paramTypes[i]);
+                    }
+                    invocable.invoke(instance, args);
+                };
+
             this.preDestroyMethod = preDestroyMethod;
-            this.preDestroy = preDestroyMethod == null ? Invocable.empty() : (
-                postConstructMethod == preDestroyMethod ? postConstruct : Invocable.of(preDestroyMethod)
-            );
+            this.preDestroy = preDestroyMethod == null ?
+                () -> {}
+                :
+                () -> {
+                    Invocable invocable = Invocable.of(preDestroyMethod);
+                    Type[] paramTypes = preDestroyMethod.getGenericParameterTypes();
+                    Object[] args = new Object[paramTypes.length];
+                    for (int i = 0; i < paramTypes.length; i++) {
+                        args[i] = getObject(paramTypes[i]);
+                    }
+                    invocable.invoke(instance, args);
+                };
         }
 
         @Override
@@ -499,7 +552,7 @@ final class InjectedAppImpl implements InjectedApp {
 
         @Override
         public void postConstruct() throws InvocationException {
-            postConstruct.invoke(instance);
+            postConstruct.run();
             state = 1;
         }
 
@@ -515,7 +568,7 @@ final class InjectedAppImpl implements InjectedApp {
 
         @Override
         public void preDestroy() throws InvocationException {
-            preDestroy.invoke(instance);
+            preDestroy.run();
             state = 2;
         }
 
@@ -616,8 +669,10 @@ final class InjectedAppImpl implements InjectedApp {
         public int compare(@Nonnull InjectedResource sr1, @Nonnull InjectedResource sr2) {
             Method pc1 = Fs.asNonnull(sr1.postConstructMethod());
             Method pc2 = Fs.asNonnull(sr2.postConstructMethod());
-            InjectedDependsOn sd1 = pc1.getAnnotation(InjectedDependsOn.class);
-            InjectedDependsOn sd2 = pc2.getAnnotation(InjectedDependsOn.class);
+            // InjectedDependsOn sd1 = pc1.getAnnotation(InjectedDependsOn.class);
+            // InjectedDependsOn sd2 = pc2.getAnnotation(InjectedDependsOn.class);
+            Type[] sd1 = pc1.getGenericParameterTypes();
+            Type[] sd2 = pc2.getGenericParameterTypes();
             return compareDependsOn(sr1, sd1, sr2, sd2);
         }
     }
@@ -630,28 +685,47 @@ final class InjectedAppImpl implements InjectedApp {
         public int compare(@Nonnull InjectedResource sr1, @Nonnull InjectedResource sr2) {
             Method pd1 = Fs.asNonnull(sr1.preDestroyMethod());
             Method pd2 = Fs.asNonnull(sr2.preDestroyMethod());
-            InjectedDependsOn sd1 = pd1.getAnnotation(InjectedDependsOn.class);
-            InjectedDependsOn sd2 = pd2.getAnnotation(InjectedDependsOn.class);
+            // InjectedDependsOn sd1 = pd1.getAnnotation(InjectedDependsOn.class);
+            // InjectedDependsOn sd2 = pd2.getAnnotation(InjectedDependsOn.class);
+            Type[] sd1 = pd1.getGenericParameterTypes();
+            Type[] sd2 = pd2.getGenericParameterTypes();
             return compareDependsOn(sr1, sd1, sr2, sd2);
         }
     }
 
+    // private static int compareDependsOn(
+    //     @Nonnull InjectedResource sr1, @Nullable InjectedDependsOn sd1,
+    //     @Nonnull InjectedResource sr2, @Nullable InjectedDependsOn sd2
+    // ) {
+    //     if (sd1 != null) {
+    //         for (Class<?> c1 : sd1.value()) {
+    //             if (c1.equals(sr2.type())) {
+    //                 return 1;
+    //             }
+    //         }
+    //     }
+    //     if (sd2 != null) {
+    //         for (Class<?> c2 : sd2.value()) {
+    //             if (c2.equals(sr1.type())) {
+    //                 return -1;
+    //             }
+    //         }
+    //     }
+    //     return 0;
+    // }
+
     private static int compareDependsOn(
-        @Nonnull InjectedResource sr1, @Nullable InjectedDependsOn sd1,
-        @Nonnull InjectedResource sr2, @Nullable InjectedDependsOn sd2
+        @Nonnull InjectedResource sr1, Type @Nonnull [] sd1,
+        @Nonnull InjectedResource sr2, Type @Nonnull [] sd2
     ) {
-        if (sd1 != null) {
-            for (Class<?> c1 : sd1.value()) {
-                if (c1.equals(sr2.type())) {
-                    return 1;
-                }
+        for (Type c1 : sd1) {
+            if (c1.equals(sr2.type())) {
+                return 1;
             }
         }
-        if (sd2 != null) {
-            for (Class<?> c2 : sd2.value()) {
-                if (c2.equals(sr1.type())) {
-                    return -1;
-                }
+        for (Type c2 : sd2) {
+            if (c2.equals(sr1.type())) {
+                return -1;
             }
         }
         return 0;

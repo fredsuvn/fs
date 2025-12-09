@@ -37,8 +37,8 @@
  *         }
  *
  *         @XPreDestroy
- *         @InjectedDependsOn(BeforeDestroyService.class)
- *         public void destroy() {
+ *         public void destroy(BeforeDestroyService beforeDestroyService) {
+ *             beforeDestroyService.doBeforeDestroyService();
  *             destroyService.doDestroy();
  *         }
  *     }
@@ -126,6 +126,7 @@
  * construct
  * do service...[proxied]
  * before destroy
+ * do before destroy
  * destroy
  * }</pre>
  * <p>
@@ -138,21 +139,37 @@
  * <p>
  * After configuration is complete, the {@code build} method executes the following process:
  * <ol>
- *   <li>Starting from the specified root type, scan each type's fields annotated as resources until all
- *       resource types are found (the root type itself is included, and duplicate types are counted only once).</li>
- *   <li>Instantiate each type using its no-argument constructor to create resource instances in singleton mode.</li>
- *   <li>Inject resource instances into their corresponding fields.</li>
- *   <li>After injection completes, identify all resource instances that implement the
- *   {@link space.sunqian.common.app.di.InjectedAspect} interface s AOP handlers.</li>
- *   <li>Pass the remaining resource instances to each AOP handler sequentially to determine if they need to
+ *   <li>
+ *       Scan all resource types starting from the specified root type. The fields annotated as resources, and the
+ *       parameter types of the methods annotated as post-construct methods and pre-destroy methods, will also be
+ *       considered as resources.
+ *   </li>
+ *   <li>
+ *       Instantiate each type using its no-argument constructor to create resource instances in singleton mode.
+ *   </li>
+ *   <li>
+ *       Inject resource instances into their corresponding fields.
+ *   </li>
+ *   <li>
+ *       After injection completes, identify all resource instances that implement the
+ *   {@link space.sunqian.common.app.di.InjectedAspect} interface s AOP handlers.
+ *   </li>
+ *   <li>
+ *       Pass the remaining resource instances to each AOP handler sequentially to determine if they need to
  *       generate aspect instances. If any handler matches, it will generate the aspect instance and the resource
  *       instance will not be passed to subsequent handlers. The newly generated aspect instance replaces the
- *       original resource instance.</li>
- *   <li>Re-execute the injection process to inject the aspect instances (which replaced the original resource
- *       instances) into the corresponding fields.</li>
- *   <li>Execute post-construct methods in dependency order as specified by
- *   {@link space.sunqian.common.app.di.InjectedDependsOn} (if any). Note if any method execution fails, an exception is
- *   thrown and already executed methods are not rolled back.</li>
+ *       original resource instance.
+ *   </li>
+ *   <li>
+ *       Re-execute the injection process to inject the aspect instances (which replaced the original resource
+ *       instances) into the corresponding fields.
+ *       </li>
+ *   <li>
+ *       Execute post-construct methods in dependency order (if any). The dependencies of each post-construct method are
+ *       determined by its parameter types, each parameter type is considered as a dependency. And when a post-construct
+ *       method is executed, all its dependency resource objects will be injected into it. Note if any post-construct
+ *       method execution fails, an exception will be thrown and all executed methods are not rolled back.
+ *   </li>
  * </ol>
  * <p>
  * An app can be inherited from a parent app:
@@ -171,9 +188,11 @@
  * one.
  * <p>
  * When {@code shutdown} method is executed, all {@code pre-destroy} methods in its app's resources are executed
- * sequentially according to their dependency relationships. If an exception occurs during the execution, an exception
- * will be thrown and the shutdown process will terminate immediately, and the remaining {@code pre-destroy} methods
- * will not be executed.
+ * sequentially according to their dependency relationships. The dependencies of each pre-destroy method are determined
+ * by its parameter types, each parameter type is considered as a dependency. And when a pre-destroy method is executed,
+ * all its dependency resource objects will be injected into it. If an exception occurs during the execution, an
+ * exception will be thrown and the shutdown process will terminate immediately, and the remaining {@code pre-destroy}
+ * methods will not be executed.
  * <p>
  * Once an app is shut down, it becomes invalid and cannot be restarted. However, its child-apps are not
  * automatically shut down along with it. Child-apps that depend on resources from this app will generally continue to

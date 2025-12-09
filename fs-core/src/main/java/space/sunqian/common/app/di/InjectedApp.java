@@ -16,6 +16,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A dependency injection-based sub-interface of {@link SimpleApp}, built via {@link #newBuilder()}. See
@@ -63,69 +64,83 @@ public interface InjectedApp extends SimpleApp {
     List<@Nonnull InjectedApp> parentApps();
 
     /**
-     * Returns the resources that are directly owned by this app, excluding the resources inherited from parent apps.
+     * Returns the resource map that are directly owned by this app, excluding the resources inherited from parent
+     * apps.
      *
-     * @return the resources that are directly owned by this app, excluding the resources inherited from parent apps
+     * @return the resource map that are directly owned by this app, excluding the resources inherited from parent apps
      */
     @Nonnull
-    List<@Nonnull InjectedResource> localResources();
+    Map<@Nonnull Type, @Nonnull InjectedResource> localResources();
 
     /**
-     * Returns all resources that constitute this app, including the resources inherited from parent apps.
+     * Returns all resource map that constitute this app, including the resources inherited from parent apps.
      *
-     * @return all resources that constitute this app, including the resources inherited from parent apps
+     * @return all resource map that constitute this app, including the resources inherited from parent apps
      */
     @Nonnull
-    List<@Nonnull InjectedResource> resources();
+    Map<@Nonnull Type, @Nonnull InjectedResource> resources();
 
     /**
-     * Returns a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
+     * Returns the resource whose type is assignable to the specified type, or {@code null} if no such resource exists.
+     * <p>
+     * This method first attempts to find a resource whose type exactly matches the specified type using
+     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource that can be
+     * assigned to the specified type from all resources that constitute this app.
+     *
+     * @param type the specified type
+     * @return the resource whose type is assignable to the specified type, or {@code null} if no such resource exists
+     */
+    @Nullable
+    InjectedResource getResource(@Nonnull Type type);
+
+    /**
+     * Returns the resource object whose type is assignable to the specified type, or {@code null} if no such resource
      * exists.
      * <p>
      * This method first attempts to find a resource whose type exactly matches the specified type using
-     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource instance that can
+     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource object that can
      * be assigned to the specified type from all resources that constitute this app.
      *
      * @param <T>  the specified type
      * @param type the specified type
-     * @return a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
+     * @return the resource object whose type is assignable to the specified type, or {@code null} if no such resource
      * exists
      */
-    default <T> @Nullable T getResource(@Nonnull Class<T> type) {
-        return Fs.as(getResource((Type) type));
+    default <T> @Nullable T getObject(@Nonnull Class<T> type) {
+        return Fs.as(getObject((Type) type));
     }
 
     /**
-     * Returns a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
+     * Returns the resource object whose type is assignable to the specified type, or {@code null} if no such resource
      * exists.
      * <p>
      * This method first attempts to find a resource whose type exactly matches the specified type using
-     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource instance that can
+     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource object that can
      * be assigned to the specified type from all resources that constitute this app.
      *
      * @param <T>  the specified type
      * @param type the {@link TypeRef} for the specified type
-     * @return a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
+     * @return the resource object whose type is assignable to the specified type, or {@code null} if no such resource
      * exists
      */
-    default <T> @Nullable T getResource(@Nonnull TypeRef<T> type) {
-        return Fs.as(getResource(type.type()));
+    default <T> @Nullable T getObject(@Nonnull TypeRef<T> type) {
+        return Fs.as(getObject(type.type()));
     }
 
     /**
-     * Returns a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
+     * Returns the resource object whose type is assignable to the specified type, or {@code null} if no such resource
      * exists.
      * <p>
      * This method first attempts to find a resource whose type exactly matches the specified type using
-     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource instance that can
+     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource object that can
      * be assigned to the specified type from all resources that constitute this app.
      *
      * @param type the specified type
-     * @return a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
+     * @return the resource object whose type is assignable to the specified type, or {@code null} if no such resource
      * exists
      */
     @Nullable
-    Object getResource(@Nonnull Type type);
+    Object getObject(@Nonnull Type type);
 
     /**
      * Builder for {@link InjectedApp}.

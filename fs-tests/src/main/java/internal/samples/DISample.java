@@ -5,7 +5,6 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.app.di.InjectedApp;
 import space.sunqian.common.app.di.InjectedAspect;
-import space.sunqian.common.app.di.InjectedDependsOn;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -30,7 +29,7 @@ public class DISample implements PrintTest {
             .postConstructAnnotation(XPostConstruct.class)
             .preDestroyAnnotation(XPreDestroy.class)
             .build();
-        XService xService = app.getResource(XService.class);
+        XService xService = app.getObject(XService.class);
         System.out.println(xService.doService());
         InjectedApp child = InjectedApp.newBuilder()
             .parentApps(app)
@@ -63,13 +62,17 @@ public class DISample implements PrintTest {
         }
 
         @XPreDestroy
-        @InjectedDependsOn(BeforeDestroyService.class)
-        public void destroy() {
+        public void destroy(BeforeDestroyService beforeDestroyService) {
+            beforeDestroyService.doBeforeDestroyService();
             destroyService.doDestroy();
         }
     }
 
     public static class BeforeDestroyService {
+
+        public void doBeforeDestroyService() {
+            System.out.println("do before destroy");
+        }
 
         @XPreDestroy
         public void destroy() {

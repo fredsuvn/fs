@@ -227,7 +227,7 @@ jacoco {
 tasks.jacocoTestReport {
   dependsOn(tasks.test)
   reports {
-    html.required = false
+    html.required = true
     xml.required = false
     csv.required = false
   }

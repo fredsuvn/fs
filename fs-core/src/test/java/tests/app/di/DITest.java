@@ -11,7 +11,6 @@ import space.sunqian.annotations.Nullable;
 import space.sunqian.common.app.di.InjectedApp;
 import space.sunqian.common.app.di.InjectedAppException;
 import space.sunqian.common.app.di.InjectedAspect;
-import space.sunqian.common.app.di.InjectedDependsOn;
 import space.sunqian.common.app.di.InjectedResource;
 import space.sunqian.common.app.di.InjectedResourceDestructionException;
 import space.sunqian.common.app.di.InjectedResourceInitializationException;
@@ -23,10 +22,12 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -60,8 +61,8 @@ public class DITest implements PrintTest {
             postList,
             ListKit.list(NeedExecution.class.getName(), NeedExecution2.class.getName(), NeedExecution3.class.getName())
         );
-        List<InjectedResource> appResources = app.resources();
-        for (InjectedResource appResource : appResources) {
+        Map<Type, InjectedResource> appResources = app.resources();
+        for (InjectedResource appResource : appResources.values()) {
             assertTrue(appResource.isLocal());
         }
         assertEquals(appResources, app.localResources());
@@ -85,11 +86,11 @@ public class DITest implements PrintTest {
             postList,
             ListKit.list(SubService2.class.getName())
         );
-        List<InjectedResource> app2Resources = app2.resources();
+        Map<Type, InjectedResource> app2Resources = app2.resources();
         assertEquals(app2Resources.size(), appResources.size() + 3);
-        List<InjectedResource> app2LocalResources = app2.localResources();
+        Map<Type, InjectedResource> app2LocalResources = app2.localResources();
         assertEquals(3, app2LocalResources.size());
-        for (InjectedResource app2Resource : app2Resources) {
+        for (InjectedResource app2Resource : app2Resources.values()) {
             if (app2Resource.type().equals(SubService.class)) {
                 assertTrue(app2Resource.isLocal());
             } else if (app2Resource.instance() instanceof SubService2) {
@@ -100,11 +101,11 @@ public class DITest implements PrintTest {
                 assertFalse(app2Resource.isLocal());
             }
         }
-        SubService subService = app2.getResource(SubService.class);
+        SubService subService = app2.getObject(SubService.class);
         assertEquals(subService.subService(), SubService.class.getName());
-        SubService2 subService2 = app2.getResource(SubService2.class);
+        SubService2 subService2 = app2.getObject(SubService2.class);
         assertEquals(subService2.subService2(), subService.subService() + "[" + AspectHandler2.class.getName() + "]");
-        ServiceAaa serviceAaa = app2.getResource(ServiceAaa.class);
+        ServiceAaa serviceAaa = app2.getObject(ServiceAaa.class);
         assertEquals("A", serviceAaa.getLocalName());
         assertEquals(app2.parentApps(), ListKit.list(app));
         preList.clear();
@@ -119,33 +120,35 @@ public class DITest implements PrintTest {
             .parentApps(app)
             .resourceTypes(Starter.class)
             .build();
-        assertSame(app.getResource(Starter.class), app3.getResource(Starter.class));
+        assertSame(app.getObject(Starter.class), app3.getObject(Starter.class));
 
         {
             // error
-            assertNull(app2.getResource(String.class));
+            assertNull(app2.getObject(String.class));
         }
     }
 
     private void testDIResources(InjectedApp app) {
-        printFor("Resources", app.resources().stream()
+        printFor("Resources", app.resources().values().stream()
             .map(r -> r.type().getTypeName() + ": " + r.instance())
             .collect(Collectors.joining(System.lineSeparator() + "    ")));
         // starter
-        Starter starter = app.getResource(Starter.class);
+        Starter starter = app.getObject(Starter.class);
         // common resource
-        ServiceAaa serviceAaa = app.getResource(ServiceAaa.class);
-        assertSame(serviceAaa, app.getResource(ServiceAaa.class));
+        ServiceAaa serviceAaa = app.getObject(ServiceAaa.class);
+        assertSame(serviceAaa, app.getObject(ServiceAaa.class));
         assertEquals("A", serviceAaa.getLocalName());
         assertEquals("B", serviceAaa.getRemoteName());
-        ServiceBbb serviceBbb = app.getResource(ServiceBbb.class);
-        assertSame(serviceBbb, app.getResource(ServiceBbb.class));
+        ServiceBbb serviceBbb = app.getObject(ServiceBbb.class);
+        assertSame(serviceBbb, app.getObject(ServiceBbb.class));
         assertEquals("B", serviceBbb.getLocalName());
         assertEquals("A", serviceBbb.getRemoteName());
-        InterService interService = app.getResource(InterService.class);
+        InterService interService = app.getObject(InterService.class);
         assertEquals(interService.interService(), InterServiceImpl.class.getName());
         assertEquals("AB", starter.getNames());
         assertEquals(starter.interService(), interService.interService());
+        InjectedResource serviceAaaRes = app.getResource(ServiceAaa.class);
+        assertSame(serviceAaa, serviceAaaRes.instance());
         // aspect
         assertEquals(
             starter.aspectService1(),
@@ -156,15 +159,15 @@ public class DITest implements PrintTest {
             "call: " + starter.aspectService1() + ";" + interService.interService()
         );
         // generic resource
-        Generic<String> stringGeneric = app.getResource(new TypeRef<Generic<String>>() {});
-        Generic<Integer> integerGeneric = app.getResource(new TypeRef<Generic<Integer>>() {});
+        Generic<String> stringGeneric = app.getObject(new TypeRef<Generic<String>>() {});
+        Generic<Integer> integerGeneric = app.getObject(new TypeRef<Generic<Integer>>() {});
         assertNotSame(stringGeneric, integerGeneric);
         assertEquals("X", stringGeneric.generic("X"));
         assertEquals(100, integerGeneric.generic(100));
         assertEquals("X", starter.generic("X"));
         assertEquals(100, starter.generic(100));
-        GenericInter<String> stringGenericInter = app.getResource(new TypeRef<GenericInter<String>>() {});
-        GenericInter<Integer> integerGenericInter = app.getResource(new TypeRef<GenericInter<Integer>>() {});
+        GenericInter<String> stringGenericInter = app.getObject(new TypeRef<GenericInter<String>>() {});
+        GenericInter<Integer> integerGenericInter = app.getObject(new TypeRef<GenericInter<Integer>>() {});
         assertSame(stringGenericInter, stringGeneric);
         assertSame(integerGenericInter, integerGeneric);
         assertEquals("X", starter.genericInter("X"));
@@ -367,14 +370,16 @@ public class DITest implements PrintTest {
     public static class NeedExecution2 {
 
         @TestPost
-        @InjectedDependsOn(NeedExecution.class)
-        public void postConstruct() {
+        //@InjectedDependsOn(NeedExecution.class)
+        public void postConstruct(NeedExecution dependent) {
+            assertNotNull(dependent);
             postList.add(getClass().getName());
         }
 
         @TestPre
-        @InjectedDependsOn(NeedExecution.class)
-        public void preDestroy() {
+        //@InjectedDependsOn(NeedExecution.class)
+        public void preDestroy(NeedExecution dependent) {
+            assertNotNull(dependent);
             preList.add(getClass().getName());
         }
     }
@@ -382,14 +387,18 @@ public class DITest implements PrintTest {
     public static class NeedExecution3 {
 
         @TestPost
-        @InjectedDependsOn({NeedExecution.class, NeedExecution2.class})
-        public void postConstruct() {
+        //@InjectedDependsOn({NeedExecution.class, NeedExecution2.class})
+        public void postConstruct(NeedExecution dependent, NeedExecution2 dependent2) {
+            assertNotNull(dependent);
+            assertNotNull(dependent2);
             postList.add(getClass().getName());
         }
 
         @TestPre
-        @InjectedDependsOn({NeedExecution.class, NeedExecution2.class})
-        public void preDestroy() {
+        //@InjectedDependsOn({NeedExecution.class, NeedExecution2.class})
+        public void preDestroy(NeedExecution dependent, NeedExecution2 dependent2) {
+            assertNotNull(dependent);
+            assertNotNull(dependent2);
             preList.add(getClass().getName());
         }
     }
@@ -512,14 +521,14 @@ public class DITest implements PrintTest {
             assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
+            InjectedApp.newBuilder().resourceTypes(DepErr1.class).build().shutdown();
+            InjectedApp.newBuilder().resourceTypes(DepErr2.class).build().shutdown();
+        }
+        {
             assertThrows(InjectedAppException.class, () ->
                 InjectedApp.newBuilder().resourceTypes(Dep4.class, Dep5.class).build());
             assertThrows(InjectedAppException.class, () ->
                 InjectedApp.newBuilder().resourceTypes(Dep6.class, Dep7.class).build());
-            assertThrows(InjectedAppException.class, () ->
-                InjectedApp.newBuilder().resourceTypes(DepErr1.class).build());
-            assertThrows(InjectedAppException.class, () ->
-                InjectedApp.newBuilder().resourceTypes(DepErr2.class).build());
             assertThrows(InjectedAppException.class, () ->
                 InjectedApp.newBuilder().resourceTypes(DepErr3.class).build());
         }
@@ -533,6 +542,19 @@ public class DITest implements PrintTest {
             InjectedApp app = InjectedApp.newBuilder()
                 .resourceTypes(Dep9.class, Dep10.class, Dep8.class)
                 .build();
+            app.shutdown();
+        }
+        {
+            // no dependency
+            InjectedApp app = InjectedApp.newBuilder()
+                .resourceTypes(Object.class)
+                .build();
+            InjectedResource res = app.getResource(Object.class);
+            assertNotNull(res);
+            assertNull(res.postConstructMethod());
+            res.postConstruct();
+            assertNull(res.preDestroyMethod());
+            res.preDestroy();
             app.shutdown();
         }
     }
@@ -558,14 +580,16 @@ public class DITest implements PrintTest {
     public static class Dep2 {
 
         @PostConstruct
-        @InjectedDependsOn(Dep1.class)
-        public void postConstruct() {
+        //@InjectedDependsOn(Dep1.class)
+        public void postConstruct(Dep1 dep1) {
+            assertNotNull(dep1);
             Dep.postList.add(2);
         }
 
         @PreDestroy
-        @InjectedDependsOn(Dep1.class)
-        public void preDestroy() {
+        //@InjectedDependsOn(Dep1.class)
+        public void preDestroy(Dep1 dep1) {
+            assertNotNull(dep1);
             Dep.destroyList.add(2);
         }
     }
@@ -573,14 +597,18 @@ public class DITest implements PrintTest {
     public static class Dep3 {
 
         @PostConstruct
-        @InjectedDependsOn({Dep1.class, Dep2.class})
-        public void postConstruct() {
+        //@InjectedDependsOn({Dep1.class, Dep2.class})
+        public void postConstruct(Dep1 dep1, Dep2 dep2) {
+            assertNotNull(dep1);
+            assertNotNull(dep2);
             Dep.postList.add(3);
         }
 
         @PreDestroy
-        @InjectedDependsOn({Dep2.class, Dep1.class})
-        public void preDestroy() {
+        //@InjectedDependsOn({Dep2.class, Dep1.class})
+        public void preDestroy(Dep2 dep2, Dep1 dep1) {
+            assertNotNull(dep2);
+            assertNotNull(dep1);
             Dep.destroyList.add(3);
         }
     }
@@ -588,44 +616,48 @@ public class DITest implements PrintTest {
     public static class Dep4 {
 
         @PostConstruct
-        @InjectedDependsOn(Dep5.class)
-        public void postConstruct() {
+        //@InjectedDependsOn(Dep5.class)
+        public void postConstruct(Dep5 dep5) {
+            assertNotNull(dep5);
         }
     }
 
     public static class Dep5 {
 
         @PostConstruct
-        @InjectedDependsOn(Dep4.class)
-        public void postConstruct() {
+        //@InjectedDependsOn(Dep4.class)
+        public void postConstruct(Dep4 dep4) {
+            assertNotNull(dep4);
         }
     }
 
     public static class Dep6 {
 
         @PreDestroy
-        @InjectedDependsOn(Dep7.class)
-        public void preDestroy() {
+        //@InjectedDependsOn(Dep7.class)
+        public void preDestroy(Dep7 dep7) {
+            assertNotNull(dep7);
         }
     }
 
     public static class Dep7 {
 
         @PreDestroy
-        @InjectedDependsOn(Dep6.class)
-        public void preDestroy() {
+        //@InjectedDependsOn(Dep6.class)
+        public void preDestroy(Dep6 dep6) {
+            assertNotNull(dep6);
         }
     }
 
     public static class Dep8 {
 
         @PostConstruct
-        @InjectedDependsOn({})
+        //@InjectedDependsOn({})
         public void postConstruct() {
         }
 
         @PreDestroy
-        @InjectedDependsOn({})
+        //@InjectedDependsOn({})
         public void preDestroy() {
         }
     }
@@ -663,16 +695,18 @@ public class DITest implements PrintTest {
     public static class DepErr1 {
 
         @PostConstruct
-        @InjectedDependsOn(String.class)
-        public void postConstruct() {
+        //@InjectedDependsOn(String.class)
+        public void postConstruct(String str) {
+            assertEquals("", str);
         }
     }
 
     public static class DepErr2 {
 
         @PreDestroy
-        @InjectedDependsOn(String.class)
-        public void preDestroy() {
+        //@InjectedDependsOn(String.class)
+        public void preDestroy(String str) {
+            assertEquals("", str);
         }
     }
 
@@ -736,7 +770,7 @@ public class DITest implements PrintTest {
             InjectedApp app = InjectedApp.newBuilder()
                 .resourceTypes(Dep11.class)
                 .build();
-            for (InjectedResource resource : app.resources()) {
+            for (InjectedResource resource : app.resources().values()) {
                 assertSame(resource.postConstructMethod(), resource.preDestroyMethod());
             }
             app.shutdown();
