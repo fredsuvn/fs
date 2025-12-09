@@ -1,5 +1,5 @@
 /**
- * This package and its subpackages provide varying degrees of runtime metaprogramming.
+ * This package and its subpackages provide varying degrees of dynamic runtime metaprogramming.
  * <p>
  * Subpackages:
  * <ul>
