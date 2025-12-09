@@ -11,8 +11,8 @@
  * <p>
  * Interfaces:
  * <ul>
- *     <li>{@link space.sunqian.common.random.Rng}</li>
- *     <li>{@link space.sunqian.common.random.Rog}</li>
+ *     <li>{@link space.sunqian.common.base.random.Rng}</li>
+ *     <li>{@link space.sunqian.common.base.random.Rog}</li>
  * </ul>
  */
-package space.sunqian.common.random;
+package space.sunqian.common.base.random;

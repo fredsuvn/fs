@@ -1,4 +1,4 @@
-package space.sunqian.common.random;
+package space.sunqian.common.base.random;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.FsLoader;

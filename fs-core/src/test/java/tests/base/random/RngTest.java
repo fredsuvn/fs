@@ -1,4 +1,4 @@
-package tests.random;
+package tests.base.random;
 
 import internal.test.AssertTest;
 import internal.test.J17Also;
@@ -6,7 +6,7 @@ import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.math.MathKit;
-import space.sunqian.common.random.Rng;
+import space.sunqian.common.base.random.Rng;
 import space.sunqian.common.collect.StreamKit;
 
 import java.nio.ByteBuffer;

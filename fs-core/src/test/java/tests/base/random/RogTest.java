@@ -1,8 +1,8 @@
-package tests.random;
+package tests.base.random;
 
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.exception.UnreachablePointException;
-import space.sunqian.common.random.Rog;
+import space.sunqian.common.base.random.Rog;
 import internal.test.AssertTest;
 import internal.test.PrintTest;
 

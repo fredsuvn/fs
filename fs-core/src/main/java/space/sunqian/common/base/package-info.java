@@ -28,6 +28,7 @@
  *     <li>{@link space.sunqian.common.base.system}</li>
  *     <li>{@link space.sunqian.common.base.thread}</li>
  *     <li>{@link space.sunqian.common.base.date}</li>
+ *     <li>{@link space.sunqian.common.base.random}</li>
  * </ul>
  */
 package space.sunqian.common.base;

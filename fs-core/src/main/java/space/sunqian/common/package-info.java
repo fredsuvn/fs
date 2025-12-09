@@ -16,7 +16,6 @@
  *     <li>{@link space.sunqian.common.io}</li>
  *     <li>{@link space.sunqian.common.net}</li>
  *     <li>{@link space.sunqian.common.object}</li>
- *     <li>{@link space.sunqian.common.random}</li>
  *     <li>{@link space.sunqian.common.runtime}</li>
  *     <li>{@link space.sunqian.common.third}</li>
  * </ul>
