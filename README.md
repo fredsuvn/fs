@@ -1,39 +1,39 @@
-# ![](assets/favicon/favicon-32.svg) _fs_: a lightweight, high-performance, zero-dependency tool lib for java
+# _fs_: a lightweight, high-performance, zero-dependency tool lib for java ![](assets/favicon/favicon-32.svg)
 
 ## Overview
 
 _fs_ is a lightweight, high-performance, zero-dependency tool lib for java. It provides:
 
 - Annotations that can be used for code analysis;
-- Common utilities for bytes, chars, coding, date, enum, logging, math, number, thread, process, system, random,
+- Common utilities and interfaces for bytes, chars, coding, date, enum, exception, logging, math, number, process,
+  random, resource, string, system, thread;
   reflect, etc.;
-- Extensions for functions and values;
-- Common exceptions;
+- Extensions for functions, values, and options;
 - I/O kits and interfaces;
-- Cache kits;
-- Operations for collections, maps, arrays, etc.;
-- Operations for codec;
+- More light and fast cache interfaces and implementations;
+- Kits for collections, maps, arrays, etc.;
+- Kits for codec;
 - Concurrent supports;
-- Net kits for http, tcp, udp, etc.;
+- Network kits and interfaces for http, tcp, udp, etc.;
 - Object parsing and conversion;
-- Invocation kits, supporting reflection, method-handle and [asm](https://asm.ow2.io);
-- Proxy and aspect, supporting JDK dynamic proxy and [asm](https://asm.ow2.io);
+- Dynamic invocation, supporting reflection, method-handle and [asm](https://asm.ow2.io);
+- Dynamic proxy and aspect, supporting JDK dynamic proxy and [asm](https://asm.ow2.io);
 - Third-party supporting: [asm](https://asm.ow2.io), [protobuf](https://github.com/protocolbuffers/protobuf);
 
 ## Multi-Version JDK Support
 
 _fs_ provides adaptive implementation loading that automatically selects the optimal class version based on the runtime
-JDK environment (from Java 8 to Java 17). Its main code is based on Java 8, but some interfaces have multiple
+JDK environment (from `JDK8` to `JDK17`). Its main code is based on `JDK8`, but some interfaces have multiple
 implementation classes of different jdk versions.
 
 For example, the implementation class of `space.sunqian.common.net.http.HttpCaller` has two versions:
-`of JDK8` and `of JDK11`. The former is based on `java.net.HttpURLConnection`, and the latter is based on
+`JDK8` and `JDK11`. The former is based on `java.net.HttpURLConnection`, and the latter is based on
 `java.net.http.HttpClient`.
 
 This ensures:
 
-- **Backward Compatibility**: Seamlessly runs on older JDK versions (Java 8+);
-- **Forward Optimization**: Leverages newer JDK features when available (up to Java 17);
+- **Backward Compatibility**: Seamlessly runs on older JDK versions (`JDK8+`);
+- **Forward Optimization**: Leverages newer JDK features when available (up to `JDK17`);
 - **Automatic Detection**: No manual configuration required -- the library automatically loads the appropriate
   implementation at runtime;
 
@@ -89,7 +89,9 @@ The test passing rate and jacoco coverage for this library are both 100%:
 - [Net](./fs-tests/src/main/java/internal/samples/NetSample.java)
 - [Other samples](./fs-tests/src/main/java/internal/samples/OtherSamples.java)
 
-## Clone
+## Clone and Build
+
+This library uses `gradle` as the build tool:
 
 ```shell
 # clone and build
@@ -105,7 +107,7 @@ cd fs && gradle clean build
 
 ## Contact
 
-* GitHub: [https://github.com/fredsuvn](https://github.com/fredsuvn)
+* [https://github.com/fredsuvn/fs](https://github.com/fredsuvn/fs/)
 * QQ group: [566185308](https://qm.qq.com/q/wlkc2tmOaG)
 
 ## License

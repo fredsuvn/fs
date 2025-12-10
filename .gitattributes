@@ -22,6 +22,11 @@
 *.kt text
 
 # binary files:
+*.class binary
+*.jar binary
+*.zip binary
+*.tar binary
+*.gz binary
 *.gif  binary
 *.jar  binary
 *.jpeg  binary
