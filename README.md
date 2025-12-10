@@ -1,4 +1,6 @@
-# _fs_: a lightweight, high-performance, zero-dependency tool lib for java ![](assets/favicon/favicon-32.svg)
+# _fs_: a lightweight, high-performance, zero-dependency tool lib for java
+
+![](docs/favicon/favicon-32.svg)
 
 ## Overview
 
@@ -54,7 +56,7 @@ _fs_ has higher performance than other common libraries in many places, Here are
   Rare interface server implementation with slightly better performance than **netty**.
   Here is the benchmark: [TcpServerBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/TcpServerBenchmark.java)
 
-Here is the full benchmark result: [results.json](assets/docs/jmh/results.json).
+Here is the full benchmark result: [results.json](docs/jmh/results.json).
 
 And here is the benchmark result
 chart: [JMH Visualizer](https://fredsuvn.github.io/fs-docs/tools/jmh-visualizer/jmh-visualizer.html?resultsPath=../../docs/fs/jmh/results.json).
@@ -103,7 +105,7 @@ cd fs && gradle clean build
 
 - [JavaDoc](https://fredsuvn.github.io/fs-docs/docs/fs/docs/javadoc/index.html)
 - Manuals:
-  * Develop Manual: [dev-manual.adoc](assets/docs/dev-manual.adoc)
+  * Develop Manual: [dev-manual.adoc](docs/dev-manual.adoc)
 
 ## Contact
 
@@ -116,4 +118,4 @@ cd fs && gradle clean build
 
 [license]: https://www.apache.org/licenses/LICENSE-2.0.html
 
-![](assets/favicon/favicon-64.svg)
+![](docs/favicon/favicon-64.svg)

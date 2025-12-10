@@ -27,8 +27,8 @@
 *.zip binary
 *.tar binary
 *.gz binary
+*.rar  binary
 *.gif  binary
-*.jar  binary
 *.jpeg  binary
 *.jpg  binary
 *.png  binary
