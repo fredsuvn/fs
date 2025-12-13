@@ -1,7 +1,7 @@
 <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
   <title>fs-logo</title>
   <g>
-    <path stroke="#98C379" stroke-width="1" fill="#3f3f3f" stroke-linecap="round" stroke-linejoin="round"
+    <path stroke="#D35400" stroke-width="1" fill="#3f3f3f" stroke-linecap="round" stroke-linejoin="round"
           d="
           M32,32 m-29.5,-31.5
           l59,0 a2,2,0,0,1,2,2
@@ -12,8 +12,9 @@
           "
     />
   </g>
-  <g stroke="#fefefe" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"
-     transform="translate(-14, 2.5) scale(1, 0.95)"
+  <g stroke="#98C379" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"
+     transform="translate(-5, 20) scale(1, 0.65)"
+     opacity="1"
   >
     <path d="
             M32,32 m5,-28
@@ -27,8 +28,8 @@
             "
     />
   </g>
-  <g stroke="#fefefe" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"
-     transform="translate(12, 15) scale(1, 0.75)"
+  <g stroke="#98C379" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"
+     transform="translate(20, 30) scale(0.9, 0.5)"
   >
     <path d="
           M32,32 m2,-28
@@ -46,6 +47,17 @@
           m18,-19
           a24,24,0,0,1,-1,21
           "
+    />
+  </g>
+  <g stroke="#E0E0E0" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"
+     transform="translate(0, 0)"
+  >
+    <path d="
+            M32,32 m-25,-25
+            l8,5 l-8,5
+            m10,0
+            l8,0
+            "
     />
   </g>
 </svg>
