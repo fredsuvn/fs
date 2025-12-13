@@ -13,13 +13,19 @@
 *.svg text
 *.xml text
 *.kts text
-*.properties text
-*.md text
-*.adoc text
 *.bat text
 *.gradle text
 *.kts text
 *.kt text
+
+# config files:
+*.json text
+*.yaml text
+*.yml text
+*.properties text
+*.md text
+*.adoc text
+*.toml text
 
 # binary files:
 *.class binary
@@ -34,5 +40,6 @@
 *.png  binary
 *.vsd  binary
 
+# special files:
 gradlew eol=lf
 fs-core/src/test/resources/reflect/LAC binary

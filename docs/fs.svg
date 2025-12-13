@@ -1,0 +1,54 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <title>fs-logo</title>
+  <g>
+    <path stroke="#98C379" stroke-width="1" fill="#3f3f3f"
+          stroke-linecap="round" stroke-miterlimit="1" stroke-linejoin="round"
+          d="
+          M32,32 m-29.5,-31.5
+          l59,0 a2,2,0,0,1,2,2
+          l0,59 a2,2,0,0,1,-2,2
+          l-59,0 a2,2,0,0,1,-2,-2
+          l0,-59 a2,2,0,0,1,2,-2
+          Z
+          "
+    />
+  </g>
+  <g stroke="#fefefe" stroke-width="2" fill="none"
+     stroke-linecap="round" stroke-miterlimit="100" stroke-linejoin="round"
+     transform="translate(-14, 2.5) scale(1, 0.95)"
+  >
+    <path d="
+            M32,32 m5,-28
+            a13,8.5,0,0,0,-5,14
+            a20,36,0,0,1,-5,44
+            "
+    />
+    <path d="
+            M32,32 m8,-6
+            a18,64,-10,0,1,-14,0
+            "
+    />
+  </g>
+  <g stroke="#fefefe" stroke-width="2" fill="none"
+     stroke-linecap="round" stroke-miterlimit="100" stroke-linejoin="round"
+     transform="translate(12, 15) scale(1, 0.75)"
+  >
+    <path d="
+          M32,32 m2,-28
+          a32,32,0,0,0,-1,28
+          a32,32,0,0,1,-4,30
+          "
+    />
+    <path d="
+          M32,32 m-8,-22
+          a28,24,0,0,0,0,20
+          m16,-19
+          a28,24,0,0,0,1,18
+          m-14,10
+          a24,24,0,0,1,-4.5,18
+          m18,-19
+          a24,24,0,0,1,-1,21
+          "
+    />
+  </g>
+</svg>

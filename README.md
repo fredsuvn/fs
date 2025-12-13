@@ -1,6 +1,6 @@
 # _fs_: a lightweight, high-performance, zero-dependency tool lib for java
 
-![](docs/logo/logo-fs.svg)
+![](docs/fs.svg)
 
 ## Overview
 
@@ -118,4 +118,4 @@ cd fs && gradle clean build
 
 [license]: https://www.apache.org/licenses/LICENSE-2.0.html
 
-![](docs/logo/logo-fs.svg)
+![](docs/fs.svg)
