@@ -17,7 +17,7 @@ dependencies {
   annotationProcessor(platform(project(":fs-dependencies")))
   annotationProcessor("org.projectlombok:lombok")
 
-  implementation(platform(project(":fs-dependencies")))
+  compileOnly(platform(project(":fs-dependencies")))
 
   compileOnly("org.projectlombok:lombok")
   compileOnly("org.springframework:spring-core")
