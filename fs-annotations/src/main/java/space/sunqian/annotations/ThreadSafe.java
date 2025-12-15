@@ -1,6 +1,7 @@
 package space.sunqian.annotations;
 
 import javax.annotation.meta.TypeQualifierNickname;
+
 import java.lang.annotation.*;
 
 /**

@@ -1,16 +1,16 @@
-package tests.annotations;
-
-import org.junit.jupiter.api.Test;
+package tests.jsr305;
 
 import javax.annotation.Nonnull;
 import javax.annotation.meta.When;
+
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 
-public class Jsr305Test extends Samples {
+public class Jsr305Test {
 
     @Test
     public void testJsr305() throws Exception {

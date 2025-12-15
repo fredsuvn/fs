@@ -6,12 +6,9 @@ plugins {
   id("fs")
 }
 
-description = "Base annotations of fs, supporting static analyses and providing partial of jsr305."
+description = "Annotations for jsr305."
 
 dependencies {
-  //implementation(platform(project(":fs-dependencies")))
-  //implementation("com.google.code.findbugs:jsr305")
-  api(project(":fs-jsr305"))
   testImplementation(platform(project(":fs-dependencies")))
   testImplementation("org.junit.jupiter:junit-jupiter-api")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")

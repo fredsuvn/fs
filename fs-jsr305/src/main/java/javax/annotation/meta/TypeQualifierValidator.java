@@ -1,6 +1,7 @@
 package javax.annotation.meta;
 
 import javax.annotation.Nonnull;
+
 import java.lang.annotation.Annotation;
 
 /**

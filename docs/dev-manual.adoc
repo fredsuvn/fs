@@ -1,4 +1,4 @@
-= image:pics/logo-32.svg[] Manual of _fs_
+= image:fs.svg[] Manual of _fs_
 :toc:
 :toclevels: 3
 :last-update-label!:
@@ -9,48 +9,59 @@
 
 == Overview
 
-_fs_ is a lightweight, zero-dependency tool lib for java.
-
-_fs_ includes 6 modules:
+_fs_ is a lightweight, high-performance, zero-dependency tool lib for java.
+It includes 7 modules:
 
 * <<chapter-dependencies>>: The dependency platform of _fs_;
-* <<chapter-annotations>>: Annotations of _fs_, including partial implementations of _jsr305_;
-* <<chapter-core>>: Core module of _fs_, only dependents on _fs-annotations_, including most utility kits and interfaces and their default implementations;
-* <<chapter-all>>: Aggregation of _fs_, including all classes and resources in _fs_annotations_ and _fs-core_, zero-dependency;
+* <<chapter-annotations>>: Annotations of _fs_, dependents on _fs-jsr305_, can help improve code quality;
+* <<chapter-jsr305>>: JSR305 for _fs_, providing partial implementations of _jsr305_ annotations;
+* <<chapter-core>>: Core module of _fs_, dependents on _fs-annotations_, main part of _fs_;
+* <<chapter-all>>: Aggregation of _fs_, including all classes and resources in _fs-jsr305_, _fs-annotations_ and _fs-core_, zero-dependency;
 * <<chapter-internal>>: Internal module, typically providing internal classes for tests;
 * <<chapter-tests>>: Tests module, benchmarks here;
 
 Note:
 
-* _fs_dependencies_ should be published as a `bom` (`<packaging>pom</packaging>`);
-* _fs_annotations_, _fs-core_ and _fs-all_ should be published as jars;
+* _fs-dependencies_ should be published as a `bom` (`<packaging>pom</packaging>`);
+* _fs-jsr305_, _fs-annotations_, _fs-core_ and _fs-all_ should be published as jars;
 * _fs-internal_ and _fs-tests_ should not be published;
 
 [[chapter-dependencies]]
-== _fs_dependencies_
+== _fs-dependencies_
 
 src: link:../fs-dependencies/[fs-dependencies]
 
-_fs_dependencies_ is the dependency platform of _fs_, should be published as a `bom` (`<packaging>pom</packaging>`).
+_fs-dependencies_ is the dependency platform of _fs_, should be published as a `bom` (`<packaging>pom</packaging>`).
 
 [[chapter-annotations]]
-== _fs_annotations_
+== _fs-annotations_
 
 src: link:../fs-annotations/[fs-annotations]
 
-_fs_annotations_ is the annotation module of _fs_, should be published as a jar.
+_fs-annotations_ is the annotation module of _fs_, should be published as a jar.
+It depends on _fs-jsr305_.
 
 It contains:
 
 * Annotations for _fs_: such as `space.sunqian.annotations.Nonnull`, `space.sunqian.annotations.Nullable`...;
-* Partial implementations of jsr305: `such as javax.annotation.Nonnull`...;
+
+[[chapter-jsr305]]
+== _fs-jsr305_
+
+src: link:../fs-jsr305/[fs-jsr305]
+
+_fs-jsr305_ is the partial jsr305 implementations for _fs_, should be published as a jar.
+
+It contains:
+
+* Partial implementations of jsr305: such as `javax.annotation.Nonnull`, `javax.annotation.Nullable`...;
 
 [[chapter-core]]
-== _fs_core_
+== _fs-core_
 
 src: link:../fs-core/[fs-core]
 
-_fs_core_ is core module of _fs_, should be published as a jar.
+_fs-core_ is main part of _fs_, should be published as a jar.
 It depends on _fs-annotations_.
 
 It contains:
@@ -79,29 +90,29 @@ interface HttpCallerService {
 ----
 
 [[chapter-all]]
-== _fs_all_
+== _fs-all_
 
 src: link:../fs-all/[fs-all]
 
-_fs_all_ is the aggregation of _fs_annotations_ and _fs_core_, should be published as a jar.
-It aggregates all classes and resources in _fs_annotations_ and _fs-core_, and zero-dependency for publishing.
+_fs-all_ is the aggregation of _fs-annotations_ and _fs-core_, should be published as a jar.
+It aggregates all classes and resources in _fs-jsr305_, _fs-annotations_ and _fs-core_, and zero-dependency for publishing.
 
-This module can not only integrate _fs_annotations_ and _fs_core_'s classes and resources, but also generate aggregated `Javadoc`, `Jacoco`, and `test reports`.
+This module can not only integrate _fs-jsr305_, _fs-annotations_ and _fs-core_'s classes and resources, but also generate aggregations for `Javadoc`, `Jacoco`, and `test reports`.
 
 [[chapter-internal]]
-== _fs_internal_
+== _fs-internal_
 
 src: link:../fs-internal/[fs-internal]
 
-_fs_internal_ is the internal module of _fs_, should not be published.
+_fs-internal_ is the internal module of _fs_, should not be published.
 It typically provides internal classes for tests.
 
 [[chapter-tests]]
-== _fs_tests_
+== _fs-tests_
 
 src: link:../fs-tests/[fs-tests]
 
-_fs_internal_ is the internal tests module of _fs_, should not be published.
+_fs-tests_ is the internal tests module of _fs_, should not be published.
 It typically provides internal tests such as benchmarks.
 
-image::pics/logo-64.svg[]
+image::fs.svg[]
