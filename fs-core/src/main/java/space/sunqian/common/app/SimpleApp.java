@@ -4,9 +4,10 @@ import space.sunqian.common.app.di.InjectedApp;
 
 /**
  * This interface represents a simple application. It is typically started by its creator and terminated by itself or
- * {@link #shutdown()}. The default implementation is {@link InjectedApp}.
+ * {@link #shutdown()}.
  *
  * @author sunqian
+ * @implSpec This is the top-level interface, and {@link InjectedApp} is typically used in practice.
  */
 public interface SimpleApp {
 

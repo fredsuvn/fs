@@ -21,6 +21,8 @@ import java.util.function.Function;
  * @param <K> the key type
  * @param <V> the value type
  * @author sunqian
+ * @implSpec Although the default implementations will call {@link #clean()} every time they execute other methods, it
+ * is recommended to take some measures to enable the {@link #clean()} to call regularly to clean invalid entries
  * @see AbstractSimpleCache
  */
 @ThreadSafe
