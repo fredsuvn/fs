@@ -1,7 +1,7 @@
 package space.sunqian.common.base.random;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.Check;
+import space.sunqian.common.base.Checker;
 import space.sunqian.common.base.bytes.BytesKit;
 import space.sunqian.common.base.math.MathKit;
 import space.sunqian.common.collect.StreamKit;
@@ -183,7 +183,7 @@ enum RngServiceImpl implements RngService {
                 random().nextBytes(bytes);
                 return;
             }
-            Check.checkOffLen(off, len, bytes.length);
+            Checker.checkOffLen(off, len, bytes.length);
             int i = off;
             int end = off + len;
             for (int words = len >> 3; words-- > 0; ) {

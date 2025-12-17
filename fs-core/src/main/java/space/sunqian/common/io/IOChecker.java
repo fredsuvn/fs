@@ -1,55 +1,55 @@
 package space.sunqian.common.io;
 
-import space.sunqian.common.Check;
+import space.sunqian.common.base.Checker;
 
 final class IOChecker {
 
     static void checkOffLen(int off, int len, int capacity) throws IndexOutOfBoundsException {
-        Check.checkOffLen(off, len, capacity);
+        Checker.checkOffLen(off, len, capacity);
     }
 
     static void checkStartEnd(int start, int end, int capacity) throws IndexOutOfBoundsException {
-        Check.checkStartEnd(start, end, capacity);
+        Checker.checkStartEnd(start, end, capacity);
     }
 
     static void checkBufSize(int bufSize) throws IllegalArgumentException {
-        Check.checkArgument(bufSize > 0, "bufSize must > 0.");
+        Checker.checkArgument(bufSize > 0, "bufSize must > 0.");
     }
 
     static void checkSize(int size) throws IllegalArgumentException {
-        Check.checkArgument(size > 0, "size must > 0.");
+        Checker.checkArgument(size > 0, "size must > 0.");
     }
 
     static void checkLen(int len) throws IllegalArgumentException {
-        Check.checkArgument(len >= 0, "len must >= 0.");
+        Checker.checkArgument(len >= 0, "len must >= 0.");
     }
 
     static void checkLen(long len) throws IllegalArgumentException {
-        Check.checkArgument(len >= 0, "len must >= 0.");
+        Checker.checkArgument(len >= 0, "len must >= 0.");
     }
 
     static void checkSkip(long skip) throws IllegalArgumentException {
-        Check.checkArgument(skip >= 0, "skip value must >= 0.");
+        Checker.checkArgument(skip >= 0, "skip value must >= 0.");
     }
 
     static void checkLimit(long limit) throws IllegalArgumentException {
-        Check.checkArgument(limit >= 0, "limit must >= 0.");
+        Checker.checkArgument(limit >= 0, "limit must >= 0.");
     }
 
     static void checkReadLimit(long readLimit) throws IllegalArgumentException {
-        Check.checkArgument(readLimit >= 0, "readLimit must >= 0.");
+        Checker.checkArgument(readLimit >= 0, "readLimit must >= 0.");
     }
 
     static void checkReadBlockSize(long readBlockSize) throws IllegalArgumentException {
-        Check.checkArgument(readBlockSize > 0, "readBlockSize must > 0.");
+        Checker.checkArgument(readBlockSize > 0, "readBlockSize must > 0.");
     }
 
     static void checkSeek(long seek) throws IllegalArgumentException {
-        Check.checkArgument(seek >= 0, "seek must >= 0.");
+        Checker.checkArgument(seek >= 0, "seek must >= 0.");
     }
 
     static void checkCapacity(int capacity) throws IllegalArgumentException {
-        Check.checkArgument(capacity >= 0, "capacity must >= 0");
+        Checker.checkArgument(capacity >= 0, "capacity must >= 0");
     }
 
     static EndChecker endChecker() {

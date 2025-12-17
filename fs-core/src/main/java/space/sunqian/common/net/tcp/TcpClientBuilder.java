@@ -2,7 +2,7 @@ package space.sunqian.common.net.tcp;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.Check;
+import space.sunqian.common.base.Checker;
 import space.sunqian.common.Fs;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IOOperator;
@@ -40,7 +40,7 @@ public class TcpClientBuilder {
      * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
      */
     public @Nonnull TcpClientBuilder bufferSize(int bufSize) throws IllegalArgumentException {
-        Check.checkArgument(bufSize > 0, "bufSize must be positive");
+        Checker.checkArgument(bufSize > 0, "bufSize must be positive");
         this.bufSize = bufSize;
         return this;
     }

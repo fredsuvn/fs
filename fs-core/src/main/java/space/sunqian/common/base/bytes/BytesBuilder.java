@@ -1,7 +1,7 @@
 package space.sunqian.common.base.bytes;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.Check;
+import space.sunqian.common.base.Checker;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.io.BufferKit;
 import space.sunqian.common.io.IOKit;
@@ -105,7 +105,7 @@ public class BytesBuilder extends OutputStream {
      */
     @Override
     public void write(byte @Nonnull [] b, int off, int len) throws IndexOutOfBoundsException {
-        Check.checkOffLen(off, len, b.length);
+        Checker.checkOffLen(off, len, b.length);
         ensureCapacity(count + len);
         System.arraycopy(b, off, buf, count, len);
         count += len;

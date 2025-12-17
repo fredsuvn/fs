@@ -1,7 +1,7 @@
 package space.sunqian.common.base.random;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.Check;
+import space.sunqian.common.base.Checker;
 
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
@@ -238,7 +238,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @throws IndexOutOfBoundsException if {@code off < 0} or {@code len < 0} or {@code off + len > bytes.length}
      */
     default void nextBytes(byte @Nonnull [] bytes, int off, int len) throws IndexOutOfBoundsException {
-        Check.checkOffLen(off, len, bytes.length);
+        Checker.checkOffLen(off, len, bytes.length);
         int i = off;
         int end = off + len;
         for (int words = len >> 3; words-- > 0; ) {

@@ -3,7 +3,7 @@ package space.sunqian.common.net.http;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.RetainedParam;
-import space.sunqian.common.Check;
+import space.sunqian.common.base.Checker;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.io.BufferKit;
@@ -402,7 +402,7 @@ public interface HttpReq {
          * @throws IllegalArgumentException if there exists invalid arguments
          */
         public @Nonnull HttpReq build() throws IllegalArgumentException {
-            Check.checkArgument(url != null, "The url can not be null.");
+            Checker.checkArgument(url != null, "The url can not be null.");
             // CheckKit.checkArgument(method != null, "The method can not be null.");
             return new HttpReqImpl(
                 url,

@@ -2,7 +2,7 @@ package space.sunqian.common.net.udp;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.Check;
+import space.sunqian.common.base.Checker;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.function.callable.VoidCallable;
 import space.sunqian.common.io.BufferKit;
@@ -72,7 +72,7 @@ public class UdpServerBuilder {
      * @throws IllegalArgumentException If the max packet size is less than 1
      */
     public @Nonnull UdpServerBuilder maxPacketSize(int maxPacketSize) throws IllegalArgumentException {
-        Check.checkArgument(maxPacketSize >= 1, "maxPacketSize must >= 1");
+        Checker.checkArgument(maxPacketSize >= 1, "maxPacketSize must >= 1");
         this.maxPacketSize = maxPacketSize;
         return this;
     }

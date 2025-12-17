@@ -1,4 +1,4 @@
-package space.sunqian.common;
+package space.sunqian.common.base;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.exception.UnreachablePointException;
@@ -6,11 +6,11 @@ import space.sunqian.common.base.exception.UnreachablePointException;
 import java.util.NoSuchElementException;
 
 /**
- * The core utilities kit for checking and verifying.
+ * This class is the core utilities for checking and verifying parameters.
  *
  * @author sunqian
  */
-public class Check {
+public class Checker {
 
     /**
      * Checks whether the given {@code off} and {@code len} are out of the range: {@code [0, capacity)}. Its logic is
@@ -350,6 +350,6 @@ public class Check {
         }
     }
 
-    private Check() {
+    private Checker() {
     }
 }

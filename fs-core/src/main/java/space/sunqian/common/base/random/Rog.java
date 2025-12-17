@@ -2,7 +2,7 @@ package space.sunqian.common.base.random;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.Check;
+import space.sunqian.common.base.Checker;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.exception.UnreachablePointException;
 
@@ -91,7 +91,7 @@ public interface Rog<T> {
         public <T1> @Nonnull Builder<T1> weight(
             long weight, @Nonnull Supplier<T> supplier
         ) throws IllegalArgumentException {
-            Check.checkArgument(weight >= 0, "weight must be non-negative");
+            Checker.checkArgument(weight >= 0, "weight must be non-negative");
             weights.add(new Weight<>(weight, supplier));
             return Fs.as(this);
         }

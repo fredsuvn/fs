@@ -2,7 +2,7 @@ package space.sunqian.common.base.string;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.Check;
+import space.sunqian.common.base.Checker;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.exception.UnknownArrayTypeException;
 
@@ -683,8 +683,8 @@ public class StringKit {
         if (str instanceof String) {
             ((String) str).getChars(start, end, dst, off);
         } else {
-            Check.checkInBounds(start, end, 0, str.length());
-            Check.checkInBounds(off, off + end - start, 0, dst.length);
+            Checker.checkInBounds(start, end, 0, str.length());
+            Checker.checkInBounds(off, off + end - start, 0, dst.length);
             if (start == end) {
                 return;
             }
@@ -717,8 +717,8 @@ public class StringKit {
         if (src instanceof String) {
             ((String) src).getChars(srcOff, srcOff + len, dst, dstOff);
         } else {
-            Check.checkOffLen(srcOff, len, src.length());
-            Check.checkOffLen(dstOff, len, dst.length);
+            Checker.checkOffLen(srcOff, len, src.length());
+            Checker.checkOffLen(dstOff, len, dst.length);
             if (len == 0) {
                 return;
             }
