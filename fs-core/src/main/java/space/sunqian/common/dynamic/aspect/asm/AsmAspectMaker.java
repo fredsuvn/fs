@@ -27,7 +27,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The <a href="https://asm.ow2.io/">ASM</a> implementation for {@link AspectMaker}. The runtime environment must have
@@ -66,8 +65,6 @@ public class AsmAspectMaker implements AspectMaker {
     private static final @Nonnull String METHOD_NAME = JvmKit.toInternalName(Method.class);
     private static final @Nonnull String ARGS_NAME = JvmKit.toInternalName(Object[].class);
 
-    private static final @Nonnull AtomicLong classCounter = new AtomicLong();
-
     @Override
     public @Nonnull AspectSpec make(
         @Nonnull Class<?> advisedClass,
@@ -76,8 +73,7 @@ public class AsmAspectMaker implements AspectMaker {
         try {
             Package pkg = AsmAspectMaker.class.getPackage();
             // aspect class internal name
-            String aspectName = pkg.getName().replace('.', '/')
-                + "/" + AsmKit.generateClassSimpleName(classCounter.incrementAndGet());
+            String aspectName = AsmKit.newClassInternalName(pkg);
             // aspect class descriptor
             // String aspectDescriptor = "L" + aspectName + ";";
             String advisedName = JvmKit.toInternalName(advisedClass);

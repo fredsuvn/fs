@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The <a href="https://asm.ow2.io/">ASM</a> implementation for {@link ProxyMaker}. The runtime environment must have
@@ -77,8 +76,6 @@ public class AsmProxyMaker implements ProxyMaker {
     private static final @Nonnull String INVOKER_INVOKE_SUPER_DESCRIPTOR = JvmKit.toDescriptor(INVOKER_INVOKE_SUPER);
     private static final @Nonnull String @Nullable [] INVOKER_INVOKE_SUPER_EXCEPTIONS = AsmKit.getExceptions(INVOKER_INVOKE_SUPER);
 
-    private static final @Nonnull AtomicLong classCounter = new AtomicLong();
-
     @Override
     public @Nonnull ProxySpec make(
         @Nullable Class<?> proxiedClass,
@@ -88,8 +85,7 @@ public class AsmProxyMaker implements ProxyMaker {
         try {
             Package pkg = AsmProxyMaker.class.getPackage();
             // proxy class internal name
-            String proxyName = pkg.getName().replace('.', '/')
-                + "/" + AsmKit.generateClassSimpleName(classCounter.incrementAndGet());
+            String proxyName = AsmKit.newClassInternalName(pkg);
             // proxy class descriptor
             String proxyDescriptor = "L" + proxyName + ";";
             // proxy class's superclass, which is the proxied class

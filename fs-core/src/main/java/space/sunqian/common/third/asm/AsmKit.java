@@ -13,6 +13,7 @@ import space.sunqian.common.reflect.ClassKit;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Utilities for <a href="https://asm.ow2.io/">ASM</a>. To use this class, the asm package {@code org.objectweb.asm}
@@ -37,6 +38,8 @@ public class AsmKit {
      * The descriptor of constructor with empty parameter.
      */
     public static final @Nonnull String EMPTY_CONSTRUCTOR_DESCRIPTOR = "()V";
+
+    private static final @Nonnull AtomicLong classCounter = new AtomicLong();
 
     /**
      * Returns whether the {@code ASM} is available on the current runtime environment.
@@ -432,15 +435,17 @@ public class AsmKit {
     }
 
     /**
-     * Generates and returns a class simple name with the given count.
+     * Generates and returns a class internal name (of which dot '.' is replaced by slash '/') with the specified
+     * package.
      *
-     * @param count the given count
-     * @return a class simple name
+     * @param pkg the specified package
+     * @return a class name
      */
-    public static String generateClassSimpleName(long count) {
-        return "ClassGeneratedBy" + Fs.LIB_NAME
-            + "$V" + Fs.LIB_VERSION.replace('.', '_')
-            + "$C" + count;
+    public static String newClassInternalName(@Nonnull Package pkg) {
+        return pkg.getName().replace('.', '/') + "/GenBy" +
+            "$" + Fs.LIB_NAME +
+            "$V" + Fs.LIB_VERSION.replace('.', '_') +
+            "$C" + classCounter.incrementAndGet();
     }
 
     private AsmKit() {

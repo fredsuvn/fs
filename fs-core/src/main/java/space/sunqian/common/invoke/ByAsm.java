@@ -14,7 +14,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.concurrent.atomic.AtomicLong;
 
 final class ByAsm {
 
@@ -26,8 +25,6 @@ final class ByAsm {
     );
     private static final @Nonnull String @Nonnull [] INVOKE_CHECKED_EXCEPTIONS = {JvmKit.toInternalName(Throwable.class)};
     private static final @Nonnull String INVOKE_CHECKED_DESC = JvmKit.toDescriptor(INVOKE_CHECKED);
-
-    private static final @Nonnull AtomicLong classCounter = new AtomicLong();
 
     static @Nonnull Invocable newInvocable(@Nonnull Method method) {
         String className = buildClassName();
@@ -48,8 +45,8 @@ final class ByAsm {
     }
 
     private static String buildClassName() {
-        return ByAsm.class.getPackage().getName().replace('.', '/')
-            + "/" + AsmKit.generateClassSimpleName(classCounter.incrementAndGet());
+        Package pkg = ByAsm.class.getPackage();
+        return AsmKit.newClassInternalName(pkg);
     }
 
     private static Invocable generate(byte[] bytecode) {
