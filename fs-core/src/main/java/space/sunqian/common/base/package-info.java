@@ -1,6 +1,11 @@
 /**
  * This package is the base package for this lib, provides basic supports.
  * <p>
+ * Global kits:
+ * <ul>
+ *     <li>{@link space.sunqian.common.base.Checker}: the core kit for checking and verifying;</li>
+ * </ul>
+ * <p>
  * Extensions for language base:
  * <ul>
  *     <li>{@link space.sunqian.common.base.coding}</li>
