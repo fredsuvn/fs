@@ -27,7 +27,7 @@ dependencies {
   api("org.yaml:snakeyaml")
   api("org.bouncycastle:bcprov-jdk18on")
   api("org.springframework:spring-core")
-  api("cglib:cglib")
+  //api("cglib:cglib")
   api("net.bytebuddy:byte-buddy")
   api("net.bytebuddy:byte-buddy-agent")
   api("org.springframework:spring-beans")

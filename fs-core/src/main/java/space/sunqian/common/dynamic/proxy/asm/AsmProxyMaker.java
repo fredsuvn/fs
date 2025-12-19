@@ -1,14 +1,14 @@
 package space.sunqian.common.dynamic.proxy.asm;
 
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.RetainedParam;
 import space.sunqian.annotations.ThreadSafe;
+import space.sunqian.asm.ClassWriter;
+import space.sunqian.asm.FieldVisitor;
+import space.sunqian.asm.Label;
+import space.sunqian.asm.MethodVisitor;
+import space.sunqian.asm.Opcodes;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.system.JvmKit;
 import space.sunqian.common.base.value.IntVar;
@@ -32,8 +32,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The <a href="https://asm.ow2.io/">ASM</a> implementation for {@link ProxyMaker}. The runtime environment must have
- * asm package {@code org.objectweb.asm}.
+ * The <a href="https://asm.ow2.io/">ASM</a> implementation for {@link ProxyMaker}. This implementation uses the
+ * built-in asm package: {@code space.sunqian.asm}.
  * <p>
  * This implementation uses inheritance to implement proxy, just like the keywords: {@code extends} and
  * {@code implements}. That means the superclass, which is the proxied class, cannot be {@code final} and must be

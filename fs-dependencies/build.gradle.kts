@@ -57,7 +57,7 @@ dependencies {
     api("org.jetbrains.kotlin:kotlin-test-testng:1.9.10")
 
     //generator
-    api("cglib:cglib:3.3.0")
+    //api("cglib:cglib:3.3.0")
     api("net.bytebuddy:byte-buddy:1.18.1")
     api("net.bytebuddy:byte-buddy-agent:1.18.1")
 

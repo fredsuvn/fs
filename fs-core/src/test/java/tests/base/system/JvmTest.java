@@ -1,19 +1,19 @@
 package tests.base.system;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import internal.test.AssertTest;
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import tests.reflect.TypeTest;
+import space.sunqian.asm.ClassReader;
+import space.sunqian.asm.ClassVisitor;
+import space.sunqian.asm.FieldVisitor;
+import space.sunqian.asm.MethodVisitor;
+import space.sunqian.asm.Opcodes;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import space.sunqian.common.base.system.JvmException;
 import space.sunqian.common.base.system.JvmKit;
 import space.sunqian.common.reflect.TypeKit;
-import internal.test.AssertTest;
-import internal.test.PrintTest;
+import tests.reflect.TypeTest;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -26,8 +26,8 @@ import java.util.Map;
 import java.util.RandomAccess;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JvmTest implements AssertTest, PrintTest {
 
@@ -68,7 +68,7 @@ public class JvmTest implements AssertTest, PrintTest {
     }
 
     private String asmInternalName(Class<?> cls) {
-        return org.objectweb.asm.Type.getInternalName(cls);
+        return space.sunqian.asm.Type.getInternalName(cls);
     }
 
     @Test
@@ -159,7 +159,7 @@ public class JvmTest implements AssertTest, PrintTest {
     }
 
     private String asmDescriptor(Class<?> cls) {
-        return org.objectweb.asm.Type.getDescriptor(cls);
+        return space.sunqian.asm.Type.getDescriptor(cls);
     }
 
     @Test

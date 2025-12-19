@@ -1,14 +1,13 @@
 package space.sunqian.common.third.asm;
 
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 import space.sunqian.annotations.NonExported;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
+import space.sunqian.asm.MethodVisitor;
+import space.sunqian.asm.Opcodes;
 import space.sunqian.common.Fs;
 import space.sunqian.common.base.system.JvmKit;
 import space.sunqian.common.collect.ArrayKit;
-import space.sunqian.common.reflect.ClassKit;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -16,8 +15,8 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Utilities for <a href="https://asm.ow2.io/">ASM</a>. To use this class, the asm package {@code org.objectweb.asm}
- * must in the runtime environment.
+ * Utilities for <a href="https://asm.ow2.io/">ASM</a>. This class uses the built-in asm package:
+ * {@code space.sunqian.asm}.
  *
  * @author sunqian
  */
@@ -40,15 +39,6 @@ public class AsmKit {
     public static final @Nonnull String EMPTY_CONSTRUCTOR_DESCRIPTOR = "()V";
 
     private static final @Nonnull AtomicLong classCounter = new AtomicLong();
-
-    /**
-     * Returns whether the {@code ASM} is available on the current runtime environment.
-     *
-     * @return whether the {@code ASM} is available on the current runtime environment
-     */
-    public static boolean isAvailable() {
-        return ClassKit.classExists("org.objectweb.asm.ClassWriter");
-    }
 
     /**
      * Loads a constant by {@code MethodVisitor.visitInsn}.

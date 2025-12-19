@@ -10,11 +10,12 @@
 == Overview
 
 _fs_ is a lightweight, high-performance, zero-dependency tool lib for java.
-It includes 7 modules:
+It includes 8 modules:
 
 * <<chapter-dependencies>>: The dependency platform of _fs_;
 * <<chapter-annotations>>: Annotations of _fs_, dependents on _fs-jsr305_, can help improve code quality;
 * <<chapter-jsr305>>: JSR305 for _fs_, providing partial implementations of _jsr305_ annotations;
+* <<chapter-asm>>: Internal asm (7.1) for _fs_, no dependencies;
 * <<chapter-core>>: Core module of _fs_, dependents on _fs-annotations_, main part of _fs_;
 * <<chapter-all>>: Aggregation of _fs_, including all classes and resources in _fs-jsr305_, _fs-annotations_ and _fs-core_, zero-dependency;
 * <<chapter-internal>>: Internal module, typically providing internal classes for tests;
@@ -23,7 +24,7 @@ It includes 7 modules:
 Note:
 
 * _fs-dependencies_ should be published as a `bom` (`<packaging>pom</packaging>`);
-* _fs-jsr305_, _fs-annotations_, _fs-core_ and _fs-all_ should be published as jars;
+* _fs-jsr305_, _fs-annotations_, _fs-asm_, _fs-core_ and _fs-all_ should be published as jars;
 * _fs-internal_ and _fs-tests_ should not be published;
 
 [[chapter-dependencies]]
@@ -55,6 +56,15 @@ _fs-jsr305_ is the partial jsr305 implementations for _fs_, should be published 
 It contains:
 
 * Partial implementations of jsr305: such as `javax.annotation.Nonnull`, `javax.annotation.Nullable`...;
+
+[[chapter-asm]]
+== _fs-asm_
+
+src: link:../fs-asm/[fs-asm]
+
+_fs-asm_ is the internal asm (7.1) for _fs_, should be published as a jar.
+
+It contains core asm classes: such as `ClassReader`, `ClassWriter`, `MethodVisitor`... under `space.sunqian.asm` package.
 
 [[chapter-core]]
 == _fs-core_

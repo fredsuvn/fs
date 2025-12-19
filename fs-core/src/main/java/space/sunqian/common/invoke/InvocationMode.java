@@ -27,6 +27,8 @@ public enum InvocationMode {
 
     /**
      * Using <a href="https://asm.ow2.io/">ASM</a> to implement {@link Invocable}.
+     * <p>
+     * Note it uses the built-in asm package: {@code space.sunqian.asm}.
      */
     ASM,
     ;

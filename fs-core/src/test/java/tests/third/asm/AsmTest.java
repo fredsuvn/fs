@@ -10,11 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class AsmTest implements PrintTest {
 
     @Test
-    public void testAsm() {
-        assertTrue(AsmKit.isAvailable());
-    }
-
-    @Test
     public void testNewClassInternalName() {
         Package pkg = AsmTest.class.getPackage();
         String className = AsmKit.newClassInternalName(pkg);

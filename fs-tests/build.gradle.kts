@@ -15,7 +15,7 @@ dependencies {
   implementation(project(":fs-core"))
   implementation(project(":fs-internal"))
 
-  implementation("cglib:cglib")
+  //implementation("cglib:cglib")
 
   jmh(platform(project(":fs-dependencies")))
   jmh(project(":fs-annotations"))

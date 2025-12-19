@@ -1,6 +1,6 @@
 /**
  * Provides utilities for <a href="https://asm.ow2.io/">ASM</a>. This package and the classes it contains are
- * non-exported. And the runtime environment must have asm package {@code org.objectweb.asm}.
+ * non-exported. And it uses the built-in asm package: {@code space.sunqian.asm}.
  * <p>
  * Utilities:
  * <ul>
