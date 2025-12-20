@@ -6,7 +6,7 @@ plugins {
   id("fs")
 }
 
-description = "Internal ASM (7.1) for fs."
+description = "The built-in ASM framework for fs."
 
 dependencies {
   testImplementation(platform(project(":fs-dependencies")))

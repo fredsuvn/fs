@@ -4,7 +4,7 @@
 
 ## Overview
 
-_fs_ is a lightweight, high-performance, zero-dependency tool lib for java. It provides:
+_fs_ is a lightweight, multi-version JDK support, high-performance, zero-dependency tool lib for java. It provides:
 
 - Annotations that can be used for code analysis;
 - Common utilities and interfaces for bytes, chars, coding, date, enum, exception, logging, math, number, process,
@@ -63,17 +63,18 @@ chart: [JMH Visualizer](https://fredsuvn.github.io/fs-docs/tools/jmh-visualizer/
 
 ## Zero Dependency
 
-_fs_ has no strong dependency on any other libraries (except for JDK and its own modules, and _fs-all_ aggregates the
-classes of all modules without module dependencies).
-It implements some of the classes under the `javax` package for jsr305, such as `javax.annotation.Nonnull`, and based on
-this, it also implements its own null-related annotations, such as:
+_fs_ has no strong dependency on any other libraries (except for JDK and its own modules, and _fs-all_ aggregates all
+the classes of all modules without module dependencies).
+It implements some of the classes from the `javax` package in jsr305, such as `javax.annotation.Nonnull`, and based on
+this, it also implements its own annotations, such as:
 `space.sunqian.annotatations.Nonnull` and `space.sunqian.annotatations.Nullable`.
 
 Some functions of _fs_ are based on
 [ASM](https://asm.ow2.io) and [protobuf](https://github.com/protocolbuffers/protobuf), such as bytecode proxy, aspect,
 and object conversion about protobuf. The *ASM* uses built-in package `space.sunqian.asm`, so this lib has no
-dependencies for package `org.objectweb.asm`. For protobuf, although it depends on `com.google.protobuf`.
-the protobuf classes will not be loaded unless necessary.
+dependencies for package `org.objectweb.asm`.
+
+For protobuf, although it depends on `com.google.protobuf`, the protobuf classes will not be loaded unless necessary.
 
 ## Test passing rate and coverage: 100%
 

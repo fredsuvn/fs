@@ -52,7 +52,7 @@ tasks.named<Javadoc>("javadoc") {
   val projectsToDocument = listOf(
     jsr305Project,
     annotationProject,
-    //asmProject,
+    asmProject,
     coreProject,
   )
   source = files(projectsToDocument.flatMap { project ->
