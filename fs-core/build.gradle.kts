@@ -19,8 +19,8 @@ dependencies {
 
   compileOnly(platform(project(":fs-dependencies")))
 
-  compileOnly("org.projectlombok:lombok")
-  compileOnly("org.springframework:spring-core")
+  //compileOnly("org.projectlombok:lombok")
+  //compileOnly("org.springframework:spring-core")
   //compileOnly("cglib:cglib")
   compileOnly("com.google.protobuf:protobuf-java")
 
@@ -30,12 +30,17 @@ dependencies {
   testAnnotationProcessor(platform(project(":fs-dependencies")))
   testAnnotationProcessor("org.projectlombok:lombok")
 
+  testCompileOnly(platform(project(":fs-dependencies")))
+  testCompileOnly("org.projectlombok:lombok")
+
   testImplementation(platform(project(":fs-dependencies")))
   testImplementation(project(":fs-internal"))
   testImplementation("com.google.protobuf:protobuf-java")
   testImplementation("org.bouncycastle:bcpkix-jdk18on")
-  testImplementation("org.mockito:mockito-core")
+  //testImplementation("org.mockito:mockito-core")
   testImplementation("jakarta.annotation:jakarta.annotation-api")
+
+  // jetty
   testImplementation(platform("org.eclipse.jetty:jetty-bom"))
   testImplementation("org.eclipse.jetty:jetty-server")
   testImplementation("org.eclipse.jetty:jetty-servlet")
