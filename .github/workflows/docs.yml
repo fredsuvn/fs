@@ -23,7 +23,7 @@ jobs:
 
       - name: Generate Javadoc in fs-all module
         run: gradle :fs-all:javadoc
-      - name: Generate jacoco in fs-all module
+      - name: Generate JaCoCo in fs-all module
         run: gradle :fs-all:jacocoTestReport
       - name: Generate aggregated tests report in fs-all module
         run: gradle :fs-all:testAggregateTestReport
@@ -40,8 +40,8 @@ jobs:
       # Create target directory if it doesn't exist
       - name: Create root docs directory
         run: mkdir -p fs-docs/docs/fs/
-      - name: Clear existing root docs directory
-        run: rm -rf fs-docs/docs/fs/*
+      - name: Clear existing root docs directory except jmh
+        run: find fs-docs/docs/fs/ -mindepth 1 -maxdepth 1 ! -name 'jmh' -exec rm -rf {} +
 
       - name: Create docs directory
         run: mkdir -p fs-docs/docs/fs/docs/
