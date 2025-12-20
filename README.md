@@ -78,10 +78,13 @@ For protobuf, although it depends on `com.google.protobuf`, the protobuf classes
 
 ## Test passing rate and coverage: 100%
 
-The test passing rate and jacoco coverage for this library are both 100%:
+The test passing rate and jacoco coverage for this library are both 100%[^1]:
 
 - [Aggregate Test Report](https://fredsuvn.github.io/fs-docs/docs/fs/reports/tests/test/aggregated-results/index.html)
 - [JaCoCo Coverage](https://fredsuvn.github.io/fs-docs/docs/fs/reports/jacoco/test/html/index.html)
+
+[^1]: _fs-asm_ is excluded from the test and coverage report because it is total copied from [ASM](https://asm.ow2.io)
+framework.
 
 ## Samples:
 
