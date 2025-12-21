@@ -9,7 +9,8 @@
 
 == Overview
 
-_fs_ is a lightweight, high-performance, zero-dependency tool lib for java.
+_fs_ is a lightweight, multi-version JDK support, high-performance, zero-dependency tool lib for java.
+
 It includes 8 modules:
 
 * <<chapter-dependencies>>: The dependency platform of _fs_;
@@ -21,11 +22,29 @@ It includes 8 modules:
 * <<chapter-internal>>: Internal module, typically providing internal classes for tests;
 * <<chapter-tests>>: Tests module, benchmarks here;
 
-Note:
-
+[NOTE]
+====
 * _fs-dependencies_ should be published as a `bom` (`<packaging>pom</packaging>`);
 * _fs-jsr305_, _fs-annotations_, _fs-asm_, _fs-core_ and _fs-all_ should be published as jars;
 * _fs-internal_ and _fs-tests_ should not be published;
+====
+
+_fs_ uses `gradle` to build, and it needs multi JDK versions to build: from `1.8` to `17`.
+
+[NOTE]
+====
+The root `gradle` properties file link:../gradle.properties[gradle.properties] configures the multi JDK versions in:
+
+[source,properties]
+----
+org.gradle.java.installations.paths=\
+  ~/.jdks/azul-1.8.0_462,\
+  ~/.jdks/azul-17.0.17,\
+  ~/.jdks/openjdk-25,
+----
+
+Change this property to your local JDK paths, or let `gradle` automatically download required JDK versions without manual configuration.
+====
 
 [[chapter-dependencies]]
 == _fs-dependencies_

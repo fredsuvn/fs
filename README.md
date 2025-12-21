@@ -98,13 +98,25 @@ framework.
 
 ## Clone and Build
 
-This library uses `gradle` as the build tool:
+_fs_ uses `gradle` as the build tool:
 
 ```shell
 # clone and build
 git clone -b master https://github.com/fredsuvn/fs.git
 cd fs && gradle clean build
 ```
+
+_fs_ uses multi JDK versions to build: from `1.8` to `17`.
+
+> The root `gradle` properties file ([gradle.properties](gradle.properties)) configures the multi JDK versions in:
+> ```
+> org.gradle.java.installations.paths=\
+>   ~/.jdks/azul-1.8.0_462,\
+>   ~/.jdks/azul-17.0.17,\
+>   ~/.jdks/openjdk-25,
+> ```
+> Change this property to your local JDK paths, or let `gradle` automatically download required JDK versions without
+> manual configuration.
 
 ## Documents
 
