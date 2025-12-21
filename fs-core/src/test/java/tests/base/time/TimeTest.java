@@ -1,10 +1,10 @@
 package tests.base.time;
 
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.date.DateException;
 import space.sunqian.common.base.date.DateFormatter;
 import space.sunqian.common.base.date.DateKit;
-import internal.test.PrintTest;
 
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
@@ -25,8 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TimeTest implements PrintTest {
 

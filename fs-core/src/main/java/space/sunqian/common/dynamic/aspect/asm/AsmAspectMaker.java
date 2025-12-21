@@ -3,12 +3,12 @@ package space.sunqian.common.dynamic.aspect.asm;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.ThreadSafe;
-import space.sunqian.asm.ClassWriter;
-import space.sunqian.asm.FieldVisitor;
-import space.sunqian.asm.Label;
-import space.sunqian.asm.MethodVisitor;
-import space.sunqian.asm.Opcodes;
 import space.sunqian.common.Fs;
+import space.sunqian.common.asm.ClassWriter;
+import space.sunqian.common.asm.FieldVisitor;
+import space.sunqian.common.asm.Label;
+import space.sunqian.common.asm.MethodVisitor;
+import space.sunqian.common.asm.Opcodes;
 import space.sunqian.common.base.system.JvmKit;
 import space.sunqian.common.dynamic.aspect.AspectException;
 import space.sunqian.common.dynamic.aspect.AspectHandler;
@@ -30,7 +30,7 @@ import java.util.Objects;
 
 /**
  * The <a href="https://asm.ow2.io/">ASM</a> implementation for {@link AspectMaker}. This implementation uses the
- * built-in asm package: {@code space.sunqian.asm}.
+ * built-in asm package: {@code space.sunqian.commonasm}.
  * <p>
  * This implementation uses inheritance to implement proxy, just like the keywords: {@code extends}. That means the
  * superclass, which is the advised class, cannot be {@code final} and must be inheritable, and must have an empty

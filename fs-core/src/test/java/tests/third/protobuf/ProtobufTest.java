@@ -2,12 +2,10 @@ package tests.third.protobuf;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ProtocolStringList;
+import internal.test.PrintTest;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
-import tests.protobuf.Data;
-import tests.protobuf.PbSimple;
-import tests.protobuf.xEnum;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.collect.MapKit;
 import space.sunqian.common.collect.SetKit;
@@ -23,7 +21,9 @@ import space.sunqian.common.third.protobuf.ProtobufBuilderHandler;
 import space.sunqian.common.third.protobuf.ProtobufConvertHandler;
 import space.sunqian.common.third.protobuf.ProtobufKit;
 import space.sunqian.common.third.protobuf.ProtobufSchemaHandler;
-import internal.test.PrintTest;
+import tests.protobuf.Data;
+import tests.protobuf.PbSimple;
+import tests.protobuf.xEnum;
 
 import java.util.List;
 import java.util.Map;
@@ -32,8 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ProtobufTest implements PrintTest {
 

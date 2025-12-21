@@ -3,9 +3,9 @@ package space.sunqian.common.third.asm;
 import space.sunqian.annotations.NonExported;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.asm.MethodVisitor;
-import space.sunqian.asm.Opcodes;
 import space.sunqian.common.Fs;
+import space.sunqian.common.asm.MethodVisitor;
+import space.sunqian.common.asm.Opcodes;
 import space.sunqian.common.base.system.JvmKit;
 import space.sunqian.common.collect.ArrayKit;
 
@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Utilities for <a href="https://asm.ow2.io/">ASM</a>. This class uses the built-in asm package:
- * {@code space.sunqian.asm}.
+ * {@code space.sunqian.common.asm}.
  *
  * @author sunqian
  */

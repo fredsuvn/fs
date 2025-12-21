@@ -1,10 +1,10 @@
 package space.sunqian.common.invoke;
 
 import space.sunqian.annotations.Nonnull;
-import space.sunqian.asm.ClassWriter;
-import space.sunqian.asm.MethodVisitor;
-import space.sunqian.asm.Opcodes;
 import space.sunqian.common.Fs;
+import space.sunqian.common.asm.ClassWriter;
+import space.sunqian.common.asm.MethodVisitor;
+import space.sunqian.common.asm.Opcodes;
 import space.sunqian.common.base.system.JvmKit;
 import space.sunqian.common.reflect.BytesClassLoader;
 import space.sunqian.common.reflect.ClassKit;

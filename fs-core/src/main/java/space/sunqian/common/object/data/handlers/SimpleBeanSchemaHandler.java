@@ -2,8 +2,8 @@ package space.sunqian.common.object.data.handlers;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.object.data.ObjectSchemaParser;
 import space.sunqian.common.invoke.Invocable;
+import space.sunqian.common.object.data.ObjectSchemaParser;
 
 import java.lang.reflect.Method;
 import java.util.Objects;

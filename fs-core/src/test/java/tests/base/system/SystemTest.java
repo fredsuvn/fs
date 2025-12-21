@@ -1,9 +1,9 @@
 package tests.base.system;
 
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.system.SystemKeys;
 import space.sunqian.common.base.system.SystemKit;
-import internal.test.PrintTest;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

@@ -9,6 +9,7 @@ import space.sunqian.annotations.Immutable;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.collect.SetKit;
+import space.sunqian.common.invoke.Invocable;
 import space.sunqian.common.object.data.DataObjectException;
 import space.sunqian.common.object.data.MapSchema;
 import space.sunqian.common.object.data.MapSchemaParser;
@@ -17,7 +18,6 @@ import space.sunqian.common.object.data.ObjectPropertyBase;
 import space.sunqian.common.object.data.ObjectSchema;
 import space.sunqian.common.object.data.ObjectSchemaParser;
 import space.sunqian.common.object.data.handlers.SimpleBeanSchemaHandler;
-import space.sunqian.common.invoke.Invocable;
 import space.sunqian.common.reflect.TypeRef;
 
 import java.lang.reflect.Field;

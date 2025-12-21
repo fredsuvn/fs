@@ -1,9 +1,9 @@
 package tests.base.number;
 
-import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.number.NumberKit;
 import internal.test.DataTest;
 import internal.test.PrintTest;
+import org.junit.jupiter.api.Test;
+import space.sunqian.common.base.number.NumberKit;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

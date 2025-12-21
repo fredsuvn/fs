@@ -1,8 +1,8 @@
 package tests.base.logging;
 
+import internal.test.ErrorAppender;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.logging.SimpleLogger;
-import internal.test.ErrorAppender;
 
 import java.lang.reflect.Method;
 

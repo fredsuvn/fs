@@ -1,9 +1,9 @@
 package tests.app;
 
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.app.SimpleApp;
 import space.sunqian.common.app.SimpleAppException;
-import internal.test.PrintTest;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

@@ -1,12 +1,12 @@
 package tests.base.string;
 
+import internal.test.DataTest;
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.exception.UnknownArrayTypeException;
 import space.sunqian.common.base.string.StringKit;
 import space.sunqian.common.base.string.StringView;
-import internal.test.DataTest;
-import internal.test.PrintTest;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -17,8 +17,8 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StringTest implements DataTest, PrintTest {
 

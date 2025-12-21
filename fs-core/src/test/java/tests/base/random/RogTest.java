@@ -1,10 +1,10 @@
 package tests.base.random;
 
+import internal.test.AssertTest;
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.base.random.Rog;
-import internal.test.AssertTest;
-import internal.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

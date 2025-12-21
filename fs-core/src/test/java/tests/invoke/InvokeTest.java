@@ -1,12 +1,12 @@
 package tests.invoke;
 
 import org.junit.jupiter.api.Test;
-import tests.utils.LotsOfMethods;
 import space.sunqian.common.Fs;
 import space.sunqian.common.invoke.Invocable;
 import space.sunqian.common.invoke.InvocationException;
 import space.sunqian.common.invoke.InvocationMode;
 import space.sunqian.common.invoke.InvokeKit;
+import tests.utils.LotsOfMethods;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -19,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InvokeTest {
 

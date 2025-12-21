@@ -3,12 +3,13 @@ package tests.base.system;
 import internal.test.AssertTest;
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.asm.ClassReader;
-import space.sunqian.asm.ClassVisitor;
-import space.sunqian.asm.FieldVisitor;
-import space.sunqian.asm.MethodVisitor;
-import space.sunqian.asm.Opcodes;
 import space.sunqian.common.Fs;
+import space.sunqian.common.asm.ClassReader;
+import space.sunqian.common.asm.ClassVisitor;
+import space.sunqian.common.asm.FieldVisitor;
+import space.sunqian.common.asm.MethodVisitor;
+import space.sunqian.common.asm.Opcodes;
+import space.sunqian.common.asm.Type;
 import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import space.sunqian.common.base.system.JvmException;
 import space.sunqian.common.base.system.JvmKit;
@@ -68,7 +69,7 @@ public class JvmTest implements AssertTest, PrintTest {
     }
 
     private String asmInternalName(Class<?> cls) {
-        return space.sunqian.asm.Type.getInternalName(cls);
+        return Type.getInternalName(cls);
     }
 
     @Test
@@ -159,7 +160,7 @@ public class JvmTest implements AssertTest, PrintTest {
     }
 
     private String asmDescriptor(Class<?> cls) {
-        return space.sunqian.asm.Type.getDescriptor(cls);
+        return Type.getDescriptor(cls);
     }
 
     @Test

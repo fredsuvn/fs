@@ -1,10 +1,10 @@
 package tests.base.string;
 
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.base.string.StringView;
 import space.sunqian.common.collect.ListKit;
-import internal.test.PrintTest;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,7 +12,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class StringViewTest implements PrintTest {

@@ -1,9 +1,9 @@
 package tests.codec;
 
+import internal.test.DataTest;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.codec.HexKit;
-import internal.test.DataTest;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

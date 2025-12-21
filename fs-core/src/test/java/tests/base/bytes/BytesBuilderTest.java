@@ -1,13 +1,13 @@
 package tests.base.bytes;
 
+import internal.test.AssertTest;
+import internal.test.DataTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.bytes.BytesBuilder;
 import space.sunqian.common.base.bytes.BytesKit;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IORuntimeException;
-import internal.test.AssertTest;
-import internal.test.DataTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

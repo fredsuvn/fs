@@ -71,7 +71,7 @@ this, it also implements its own annotations, such as:
 
 Some functions of _fs_ are based on
 [ASM](https://asm.ow2.io) and [protobuf](https://github.com/protocolbuffers/protobuf), such as bytecode proxy, aspect,
-and object conversion about protobuf. The *ASM* uses built-in package `space.sunqian.asm`, so this lib has no
+and object conversion about protobuf. The *ASM* uses built-in package `space.sunqian.common.asm`, so this lib has no
 dependencies for package `org.objectweb.asm`.
 
 For protobuf, although it depends on `com.google.protobuf`, the protobuf classes will not be loaded unless necessary.

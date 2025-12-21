@@ -83,7 +83,7 @@ src: link:../fs-asm/[fs-asm]
 
 _fs-asm_ is the internal asm (7.1) for _fs_, should be published as a jar.
 
-It contains core asm classes: such as `ClassReader`, `ClassWriter`, `MethodVisitor`... under `space.sunqian.asm` package.
+It contains core asm classes: such as `ClassReader`, `ClassWriter`, `MethodVisitor`... (all in `space.sunqian.common.asm` package).
 
 [[chapter-core]]
 == _fs-core_
