@@ -106,7 +106,7 @@ git clone -b master https://github.com/fredsuvn/fs.git
 cd fs && gradle clean build
 ```
 
-_fs_ uses multi JDK versions to build: from `1.8` to `17`.
+_fs_ needs multi JDK versions to build: from `1.8` to `17`.
 
 > The root `gradle` properties file ([gradle.properties](gradle.properties)) configures the multi JDK versions in:
 > ```
