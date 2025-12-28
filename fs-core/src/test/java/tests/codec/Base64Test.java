@@ -2,6 +2,7 @@ package tests.codec;
 
 import internal.test.DataTest;
 import org.junit.jupiter.api.Test;
+import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.codec.Base64Kit;
 
 import java.nio.ByteBuffer;
@@ -122,6 +123,13 @@ public class Base64Test implements DataTest {
             defectiveBuf.clear();
             e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(defectiveBuf));
             assertEquals(e.position(), midIndex);
+        }
+        {
+            // decodeToString
+            char[] chars = randomChars(size, 'a', 'z');
+            String str = new String(chars);
+            String base64 = Base64.getEncoder().encodeToString(str.getBytes(CharsKit.defaultCharset()));
+            assertEquals(Base64Kit.decoder().decodeToString(base64), str);
         }
     }
 

@@ -3,6 +3,7 @@ package tests.codec;
 import internal.test.DataTest;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.Test;
+import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.codec.HexKit;
 
 import java.nio.ByteBuffer;
@@ -147,6 +148,13 @@ public class HexTest implements DataTest {
             String upperTail = hexUpper + "A";
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder(false).decode(upperTail));
             assertEquals(-1, e.position());
+        }
+        {
+            // decodeToString
+            char[] chars = randomChars(size, 'a', 'z');
+            String str = new String(chars);
+            String hex = HexKit.encoder().encodeToString(str.getBytes(CharsKit.defaultCharset()));
+            assertEquals(HexKit.decoder().decodeToString(hex), str);
         }
     }
 

@@ -2,12 +2,14 @@ package space.sunqian.common.codec;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.exception.FsRuntimeException;
 import space.sunqian.common.io.BufferKit;
 import space.sunqian.common.io.ByteArrayOperator;
 import space.sunqian.common.io.IORuntimeException;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -300,6 +302,31 @@ public class HexKit {
         default byte @Nonnull [] decode(@Nonnull String hex) throws HexException {
             byte[] src = hex.getBytes(StandardCharsets.ISO_8859_1);
             return decode(src);
+        }
+
+        /**
+         * Decodes the given hex string to the original bytes, and then convert to string with the given charset.
+         *
+         * @param hex     the given hex string
+         * @param charset the charset to use
+         * @return the original string
+         * @throws HexException if any error occurs
+         */
+        default @Nonnull String decodeToString(@Nonnull String hex, @Nonnull Charset charset) throws HexException {
+            byte[] src = decode(hex);
+            return new String(src, charset);
+        }
+
+        /**
+         * Decodes the given hex string to the original bytes, and then convert to string with the
+         * {@link CharsKit#defaultCharset()}.
+         *
+         * @param hex the given hex string
+         * @return the original string decoded with the {@link CharsKit#defaultCharset()}
+         * @throws HexException if any error occurs
+         */
+        default @Nonnull String decodeToString(@Nonnull String hex) throws HexException {
+            return decodeToString(hex, CharsKit.defaultCharset());
         }
     }
 

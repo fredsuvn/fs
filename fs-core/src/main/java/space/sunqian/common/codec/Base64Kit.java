@@ -2,12 +2,14 @@ package space.sunqian.common.codec;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.exception.FsRuntimeException;
 import space.sunqian.common.io.BufferKit;
 import space.sunqian.common.io.ByteArrayOperator;
 import space.sunqian.common.io.IORuntimeException;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -375,6 +377,31 @@ public class Base64Kit {
         default byte @Nonnull [] decode(@Nonnull String base64) throws Base64Exception {
             byte[] src = base64.getBytes(StandardCharsets.ISO_8859_1);
             return decode(src);
+        }
+
+        /**
+         * Decodes the given base64 string to the original bytes, and then convert to string with the given charset.
+         *
+         * @param base64  the given base64 string
+         * @param charset the charset to use
+         * @return the original string
+         * @throws Base64Exception if any error occurs
+         */
+        default @Nonnull String decodeToString(@Nonnull String base64, @Nonnull Charset charset) throws Base64Exception {
+            byte[] src = decode(base64);
+            return new String(src, charset);
+        }
+
+        /**
+         * Decodes the given base64 string to the original bytes, and then convert to string with the
+         * {@link CharsKit#defaultCharset()}.
+         *
+         * @param base64 the given base64 string
+         * @return the original string decoded with the {@link CharsKit#defaultCharset()}
+         * @throws Base64Exception if any error occurs
+         */
+        default @Nonnull String decodeToString(@Nonnull String base64) throws Base64Exception {
+            return decodeToString(base64, CharsKit.defaultCharset());
         }
     }
 
