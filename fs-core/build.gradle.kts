@@ -97,10 +97,6 @@ tasks.register("compileJava${javaVerFrom}", JavaCompile::class) {
     dependsOn(lastCompileTask)
     source = sourceSets.main.get().allJava
     classpath = sourceSets.main.get().compileClasspath + files(lastCompileTask.get().destinationDirectory)
-    //    (8..<jvmVersion).forEach { jv ->
-    //      dependsOn += tasks.named("compileJava$jv")
-    //      classpath += files(tasks.named<JavaCompile>("compileJava$jv").get().destinationDirectory)
-    //    }
     include("**/*${implByJvm + javaVersion}.java")
     destinationDirectory = layout.buildDirectory.dir("classes/java/main").get().asFile
     javaCompiler = javaToolchains.compilerFor {
@@ -151,10 +147,6 @@ tasks.register("compileTestJava$javaVerFrom", JavaCompile::class) {
     dependsOn(tasks.named("compileTestJava${javaVersion - 1}"))
     source = sourceSets.test.get().allJava
     classpath = sourceSets.test.get().compileClasspath
-    //    (8..<jvmVersion).forEach { jv ->
-    //      dependsOn += tasks.named("compileTestJava$jv")
-    //      classpath += files(tasks.named<JavaCompile>("compileTestJava$jv").get().destinationDirectory)
-    //    }
     include("**/*${implByJvm + javaVersion}Test.java")
     destinationDirectory = file(layout.buildDirectory.dir("classes/java/test"))
     javaCompiler = javaToolchains.compilerFor {
@@ -201,8 +193,6 @@ val testJavaHighest by tasks.registering(Test::class) {
     classpath += files(tasks.named<JavaCompile>("compileJava$jv").get().destinationDirectory)
     classpath += files(tasks.named<JavaCompile>("compileTestJava$jv").get().destinationDirectory)
   }
-  //include("**/*${j17Suffix}Test.class")
-  //include("**/*MultiJvmTest.class")
   useJUnitPlatform {
     includeTags("J17Also", "J17Only")
   }
