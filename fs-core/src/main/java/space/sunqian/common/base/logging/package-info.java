@@ -5,9 +5,9 @@
  * <ul>
  *     <li>{@link space.sunqian.common.base.logging.SimpleLogger}</li>
  * </ul>
- * Classes:
+ * Utilities:
  * <ul>
- *     <li>{@link space.sunqian.common.base.logging.LogString}</li>
+ *     <li>{@link space.sunqian.common.base.logging.LogKit}</li>
  * </ul>
  */
 package space.sunqian.common.base.logging;

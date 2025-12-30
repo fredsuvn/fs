@@ -16,7 +16,7 @@ public interface SimpleLogger {
      * @return a system default logger with level of {@link Level#INFO} and appender of {@link System#out}
      */
     static @Nonnull SimpleLogger system() {
-        return LoggingBack.SYSTEM;
+        return LogKit.SYSTEM;
     }
 
     /**
@@ -27,7 +27,7 @@ public interface SimpleLogger {
      * @return a new logger with the given log level and appender
      */
     static @Nonnull SimpleLogger newLogger(@Nonnull SimpleLogger.Level level, @Nonnull Appendable appendable) {
-        return LoggingBack.newLogger(level, appendable);
+        return LogKit.newLogger(level, appendable);
     }
 
     /**
@@ -93,67 +93,45 @@ public interface SimpleLogger {
     Level level();
 
     /**
-     * Level of {@link SimpleLogger}, contains a {@code value}, which is used to compare, and a {@code name}.
-     * <p>
-     * From high to low, it is: {@link #FATAL}, {@link #ERROR}, {@link #WARN}, {@link #INFO}, {@link #DEBUG}, and
-     * {@link #TRACE}.
+     * Level of {@link SimpleLogger}, including: {@link #FATAL}, {@link #ERROR}, {@link #WARN}, {@link #INFO},
+     * {@link #DEBUG}, and {@link #TRACE}, from highest to lowest level.
      */
     enum Level {
 
         /**
-         * The highest level for fatal error.
+         * The level for fatal error, it is the highest level.
          */
-        FATAL(5, "FATAL"),
+        FATAL(5),
 
         /**
          * The level for error.
          */
-        ERROR(4, "ERROR"),
+        ERROR(4),
 
         /**
          * The level for warning.
          */
-        WARN(3, "WARN"),
+        WARN(3),
 
         /**
          * The middle level.
          */
-        INFO(2, "INFO"),
+        INFO(2),
 
         /**
          * The level for debug.
          */
-        DEBUG(1, "DEBUG"),
+        DEBUG(1),
 
         /**
-         * The lowest level for tracing.
+         * The level for tracing, it is the lowest level.
          */
-        TRACE(0, "TRACE");;
+        TRACE(0);;
 
-        private final int value;
-        private final String name;
+        final int value;
 
-        Level(int value, String name) {
+        Level(int value) {
             this.value = value;
-            this.name = name;
-        }
-
-        /**
-         * Returns the value of this level.
-         *
-         * @return the value of this level
-         */
-        public int levelValue() {
-            return value;
-        }
-
-        /**
-         * Returns the name of this level.
-         *
-         * @return the name of this level
-         */
-        public String levelName() {
-            return name;
         }
     }
 }

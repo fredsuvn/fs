@@ -6,8 +6,16 @@ import space.sunqian.common.Fs;
 import space.sunqian.common.base.date.DateKit;
 
 import java.util.Date;
+import java.util.function.Supplier;
 
-final class LoggingBack {
+/**
+ * Utilities for logging.
+ *
+ * @author sunqian
+ */
+public class LogKit {
+
+    // Implementation of SimpleLogger
 
     static @Nonnull SimpleLogger SYSTEM = newLogger(SimpleLogger.Level.INFO, System.out);
 
@@ -64,7 +72,7 @@ final class LoggingBack {
         }
 
         private void log(Level level, @Nonnull String methodName, Object... message) {
-            if (level.levelValue() < this.level.levelValue()) {
+            if (level.value < this.level.value) {
                 return;
             }
             try {
@@ -72,7 +80,7 @@ final class LoggingBack {
                 StackTraceElement caller = Fs.nonnull(getCallerTrace(methodName, stackElements), NULL_TRACE);
                 appendable.append(DateKit.format(new Date()))
                     .append("[")
-                    .append(level.levelName())
+                    .append(level.name())
                     .append("]");
                 appendable.append("@")
                     .append(caller.getClassName())
@@ -102,8 +110,10 @@ final class LoggingBack {
             int i = -1;
             for (StackTraceElement element : stackElements) {
                 i++;
-                if (getClass().getName().equals(element.getClassName())
-                    && methodName.equals(element.getMethodName())) {
+                if (
+                    getClass().getName().equals(element.getClassName())
+                        && methodName.equals(element.getMethodName())
+                ) {
                     break;
                 }
             }
@@ -114,6 +124,34 @@ final class LoggingBack {
         }
     }
 
-    private LoggingBack() {
+    // For lazy toString for logging
+
+    /**
+     * Returns an object that encapsulates a specified {@link Supplier}, and {@link Supplier#get()} will only be called
+     * when {@link #toString()} of the returned object is called. This class is typically used to reduce the high
+     * overhead concatenation operations for log printing.
+     *
+     * @param supplier the specified {@link Supplier}
+     * @return an object that encapsulates the specified {@link Supplier}
+     */
+    public static @Nonnull Object lazyToString(@Nonnull Supplier<@Nonnull String> supplier) {
+        return new LazyToString(supplier);
+    }
+
+    private static final class LazyToString {
+
+        private final @Nonnull Supplier<@Nonnull String> supplier;
+
+        private LazyToString(@Nonnull Supplier<@Nonnull String> supplier) {
+            this.supplier = supplier;
+        }
+
+        @Override
+        public @Nonnull String toString() {
+            return supplier.get();
+        }
+    }
+
+    private LogKit() {
     }
 }

@@ -2,6 +2,7 @@ package tests.base.logging;
 
 import internal.test.ErrorAppender;
 import org.junit.jupiter.api.Test;
+import space.sunqian.common.base.logging.LogKit;
 import space.sunqian.common.base.logging.SimpleLogger;
 
 import java.lang.reflect.Method;
@@ -10,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class LoggerTest {
+public class LogTest {
 
     @Test
     public void testLogger() throws Exception {
@@ -40,5 +41,11 @@ public class LoggerTest {
                 "info",
                 "ErrorAppender.java", 1)}
         ));
+    }
+
+    @Test
+    public void testLazyToString() {
+        Object lazyString = LogKit.lazyToString(() -> "hello world");
+        assertEquals("hello world", lazyString.toString());
     }
 }
