@@ -69,12 +69,13 @@ sourceSets {
 }
 
 val implByJvm = "ImplByJ"
-val javaVersionLow = project.property("javaLanguageVersionLow") as JavaLanguageVersion
-val javaVersionHigh = project.property("javaLanguageVersionHigh") as JavaLanguageVersion
-val lowestJavaVersion = javaVersionLow.asInt()
-val highestJavaVersion = javaVersionHigh.asInt()
+val javaVersionFrom = project.property("javaLangVersionFrom") as JavaLanguageVersion
+val javaVersionTo = project.property("javaLangVersionTo") as JavaLanguageVersion
+val javaVerFrom = javaVersionFrom.asInt()
+val javaVerTo = javaVersionTo.asInt()
 
-tasks.register("compileJava${lowestJavaVersion}", JavaCompile::class) {
+// java8 base
+tasks.register("compileJava${javaVerFrom}", JavaCompile::class) {
   group = "compile"
   //dependsOn(tasks.compileJava)
   source = sourceSets.main.get().allJava
@@ -82,12 +83,13 @@ tasks.register("compileJava${lowestJavaVersion}", JavaCompile::class) {
   exclude("**/*${implByJvm}*.java")
   destinationDirectory = layout.buildDirectory.dir("classes/java/main").get().asFile
   javaCompiler = javaToolchains.compilerFor {
-    languageVersion = javaVersionLow
+    languageVersion = javaVersionFrom
   }
   options.annotationProcessorPath = configurations.getByName("annotationProcessor")
 }
 
-((lowestJavaVersion + 1)..highestJavaVersion).forEach { javaVersion ->
+// 9-17
+((javaVerFrom + 1)..javaVerTo).forEach { javaVersion ->
   val taskName = "compileJava$javaVersion"
   tasks.register(taskName, JavaCompile::class) {
     group = "compile"
@@ -102,14 +104,15 @@ tasks.register("compileJava${lowestJavaVersion}", JavaCompile::class) {
     include("**/*${implByJvm + javaVersion}.java")
     destinationDirectory = layout.buildDirectory.dir("classes/java/main").get().asFile
     javaCompiler = javaToolchains.compilerFor {
-      languageVersion = javaVersionHigh
+      languageVersion = javaVersionTo
     }
     options.compilerArgs.add("--release")
     options.compilerArgs.add(javaVersion.toString())
+    options.annotationProcessorPath = configurations.getByName("annotationProcessor")
   }
 }
 
-val compileJavaHighest = tasks.named<JavaCompile>("compileJava$highestJavaVersion")
+val compileJavaHighest = tasks.named<JavaCompile>("compileJava$javaVerTo")
 
 tasks.compileJava {
   group = "compile"
@@ -126,7 +129,8 @@ tasks.compileTestJava {
   enabled = false
 }
 
-tasks.register("compileTestJava$lowestJavaVersion", JavaCompile::class) {
+// java8 base
+tasks.register("compileTestJava$javaVerFrom", JavaCompile::class) {
   group = "compile"
   dependsOn(compileJavaHighest)
   source = sourceSets.test.get().allJava
@@ -134,12 +138,13 @@ tasks.register("compileTestJava$lowestJavaVersion", JavaCompile::class) {
   exclude("**/*${implByJvm}*Test.java")
   destinationDirectory = file(layout.buildDirectory.dir("classes/java/test"))
   javaCompiler = javaToolchains.compilerFor {
-    languageVersion = javaVersionLow
+    languageVersion = javaVersionFrom
   }
   options.annotationProcessorPath = configurations.getByName("testAnnotationProcessor")
 }
 
-((lowestJavaVersion + 1)..highestJavaVersion).forEach { javaVersion ->
+// 9-17
+((javaVerFrom + 1)..javaVerTo).forEach { javaVersion ->
   val taskName = "compileTestJava$javaVersion"
   tasks.register(taskName, JavaCompile::class) {
     group = "compile"
@@ -153,7 +158,7 @@ tasks.register("compileTestJava$lowestJavaVersion", JavaCompile::class) {
     include("**/*${implByJvm + javaVersion}Test.java")
     destinationDirectory = file(layout.buildDirectory.dir("classes/java/test"))
     javaCompiler = javaToolchains.compilerFor {
-      languageVersion = javaVersionHigh
+      languageVersion = javaVersionTo
     }
     options.compilerArgs.add("--release")
     options.compilerArgs.add(javaVersion.toString())
@@ -161,7 +166,7 @@ tasks.register("compileTestJava$lowestJavaVersion", JavaCompile::class) {
   }
 }
 
-val compileTestJavaHighest = tasks.named<JavaCompile>("compileTestJava$highestJavaVersion")
+val compileTestJavaHighest = tasks.named<JavaCompile>("compileTestJava$javaVerTo")
 
 tasks.named("compileTestJava") {
   dependsOn(tasks.named("generateTestProto"), compileTestJavaHighest)
@@ -179,7 +184,7 @@ tasks.test {
     excludeTags("J17Only")
   }
   javaLauncher = javaToolchains.launcherFor {
-    languageVersion = javaVersionLow
+    languageVersion = javaVersionFrom
   }
   failOnNoDiscoveredTests = false
   reports {
@@ -192,7 +197,7 @@ val testJavaHighest by tasks.registering(Test::class) {
   group = "verification"
   testClassesDirs = fileTree(layout.buildDirectory.dir("classes/java/test"))
   classpath = sourceSets.test.get().runtimeClasspath
-  ((lowestJavaVersion + 1)..highestJavaVersion).forEach { jv ->
+  ((javaVerFrom + 1)..javaVerTo).forEach { jv ->
     classpath += files(tasks.named<JavaCompile>("compileJava$jv").get().destinationDirectory)
     classpath += files(tasks.named<JavaCompile>("compileTestJava$jv").get().destinationDirectory)
   }
@@ -202,7 +207,7 @@ val testJavaHighest by tasks.registering(Test::class) {
     includeTags("J17Also", "J17Only")
   }
   javaLauncher = javaToolchains.launcherFor {
-    languageVersion = javaVersionHigh
+    languageVersion = javaVersionTo
   }
   failOnNoDiscoveredTests = false
   reports {
@@ -221,7 +226,7 @@ tasks.named<Javadoc>("javadoc") {
   ops.jFlags("-Duser.language=en", "-Duser.country=US")
   ops.addStringOption("Xdoclint:none", "-quiet")
   javadocTool = javaToolchains.javadocToolFor {
-    languageVersion = javaVersionHigh
+    languageVersion = javaVersionTo
   }
 }
 

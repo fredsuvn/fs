@@ -18,14 +18,14 @@ dependencies {
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-val javaVersionLow = project.property("javaLanguageVersionLow") as JavaLanguageVersion
-val javaVersionHigh = project.property("javaLanguageVersionHigh") as JavaLanguageVersion
+val javaVersionFrom = project.property("javaLangVersionFrom") as JavaLanguageVersion
+val javaVersionTo = project.property("javaLangVersionTo") as JavaLanguageVersion
 
 java {
   withJavadocJar()
   withSourcesJar()
   toolchain {
-    languageVersion = javaVersionLow
+    languageVersion = javaVersionFrom
   }
 }
 
@@ -36,7 +36,7 @@ tasks.test {
     html.required = false
   }
   javaLauncher = javaToolchains.launcherFor {
-    languageVersion = javaVersionLow
+    languageVersion = javaVersionFrom
   }
 }
 
@@ -49,7 +49,7 @@ tasks.named<Javadoc>("javadoc") {
   ops.jFlags("-Duser.language=en", "-Duser.country=US")
   ops.addStringOption("Xdoclint:none", "-quiet")
   javadocTool = javaToolchains.javadocToolFor {
-    languageVersion = javaVersionHigh
+    languageVersion = javaVersionTo
   }
 }
 
