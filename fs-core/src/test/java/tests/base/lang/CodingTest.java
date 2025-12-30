@@ -1,7 +1,7 @@
 package tests.base.lang;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.coding.CodingKit;
+import space.sunqian.common.base.lang.CodingKit;
 
 import java.util.Arrays;
 import java.util.Collections;

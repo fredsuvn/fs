@@ -1,4 +1,4 @@
-package space.sunqian.common.base.coding;
+package space.sunqian.common.base.lang;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;

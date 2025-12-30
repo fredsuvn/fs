@@ -2,8 +2,8 @@ package space.sunqian.common;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.enums.EnumKit;
 import space.sunqian.common.base.exception.UnknownTypeException;
+import space.sunqian.common.base.lang.EnumKit;
 import space.sunqian.common.base.system.JvmKit;
 import space.sunqian.common.reflect.ClassKit;
 
