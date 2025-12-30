@@ -1,4 +1,4 @@
-name: JMH Run
+name: JMH Generate and Publish Results
 
 on:
   workflow_dispatch:

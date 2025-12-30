@@ -1,4 +1,4 @@
-name: Docs Run
+name: Docs Generate and Publish
 
 on:
   workflow_dispatch:
