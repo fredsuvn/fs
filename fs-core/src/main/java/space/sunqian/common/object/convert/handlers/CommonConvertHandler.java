@@ -6,7 +6,7 @@ import space.sunqian.common.Fs;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.date.DateFormatter;
 import space.sunqian.common.base.enums.EnumKit;
-import space.sunqian.common.base.number.NumberKit;
+import space.sunqian.common.base.number.NumKit;
 import space.sunqian.common.base.option.Option;
 import space.sunqian.common.collect.ArrayKit;
 import space.sunqian.common.collect.ArrayOperator;
@@ -105,11 +105,11 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td rowspan="2">Numbers</td>
  *     <td>{@link String}</td>
- *     <td>Using {@link NumberKit#toNumber(CharSequence, Class)}.</td>
+ *     <td>Using {@link NumKit#toNumber(CharSequence, Class)}.</td>
  * </tr>
  * <tr>
  *     <td>Other Numbers</td>
- *     <td>Using {@link NumberKit#toNumber(Number, Class)}.</td>
+ *     <td>Using {@link NumKit#toNumber(Number, Class)}.</td>
  * </tr>
  * <tr>
  *     <td>{@code long} and {@link Long}</td>
@@ -576,7 +576,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @Nonnull Option<?, ?> @Nonnull ... options
         ) {
             if (src instanceof String) {
-                return NumberKit.toNumber((String) src, target);
+                return NumKit.toNumber((String) src, target);
             }
             if (!(srcType instanceof Class<?>)) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
@@ -597,7 +597,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             }
             if (Number.class.isAssignableFrom(ClassKit.wrapperClass((Class<?>) srcType))) {
                 Number srcNum = (Number) src;
-                return NumberKit.toNumber(srcNum, target);
+                return NumKit.toNumber(srcNum, target);
             }
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }

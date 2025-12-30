@@ -11,7 +11,7 @@ import java.math.BigInteger;
  *
  * @author sunqian
  */
-public class NumberKit {
+public class NumKit {
 
     /**
      * Converts the given string to the specified number type. Supported number types are:
@@ -139,6 +139,6 @@ public class NumberKit {
         throw new UnsupportedOperationException("Unsupported number type: " + numType);
     }
 
-    private NumberKit() {
+    private NumKit() {
     }
 }

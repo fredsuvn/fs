@@ -3,7 +3,7 @@
  * <p>
  * Utilities:
  * <ul>
- *     <li>{@link space.sunqian.common.base.number.NumberKit}</li>
+ *     <li>{@link space.sunqian.common.base.number.NumKit}</li>
  * </ul>
  */
 package space.sunqian.common.base.number;
