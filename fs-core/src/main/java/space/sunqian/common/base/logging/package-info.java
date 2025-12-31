@@ -1,9 +1,10 @@
 /**
  * Provides utilities and classes for logging.
  * <p>
- * Core interfaces:
+ * Core interfaces and classes:
  * <ul>
  *     <li>{@link space.sunqian.common.base.logging.SimpleLogger}</li>
+ *     <li>{@link space.sunqian.common.base.logging.AbstractSimpleLogger}</li>
  * </ul>
  * Utilities:
  * <ul>

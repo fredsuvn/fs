@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 /**
- * This is a skeletal implementation of the {@link SimpleCache} to minimize the effort required to implement the
- * interface. To implement a cache, just need to override the {@link #generate(Object, Object)} and {@link #clean()}.
+ * This is a skeletal implementation of {@link SimpleCache} to minimize the effort required to implement the interface.
+ * To implement a cache, just need to override the {@link #generate(Object, Object)} and {@link #clean()}.
  * <p>
  * This implementation is based on an underlying {@link ConcurrentMap}, which is a protected field: {@link #cacheMap}.
  * The type of {@link #cacheMap}'s value is {@link Value}, which wraps the actual value to be cached. Every time this

@@ -16,7 +16,7 @@ public interface SimpleLogger {
      * @return a system default logger with level of {@link Level#INFO} and appender of {@link System#out}
      */
     static @Nonnull SimpleLogger system() {
-        return LogKit.SYSTEM;
+        return SimpleLoggerImpl.SYSTEM;
     }
 
     /**
@@ -27,7 +27,7 @@ public interface SimpleLogger {
      * @return a new logger with the given log level and appender
      */
     static @Nonnull SimpleLogger newLogger(@Nonnull SimpleLogger.Level level, @Nonnull Appendable appendable) {
-        return LogKit.newLogger(level, appendable);
+        return new SimpleLoggerImpl(level, appendable);
     }
 
     /**
@@ -37,7 +37,7 @@ public interface SimpleLogger {
      *
      * @param message the given message
      */
-    void fatal(Object... message);
+    void fatal(Object @Nonnull ... message);
 
     /**
      * Logs the given message with {@link Level#ERROR} level. The message will be output on a single line in the order
@@ -46,7 +46,7 @@ public interface SimpleLogger {
      *
      * @param message the given message
      */
-    void error(Object... message);
+    void error(Object @Nonnull ... message);
 
     /**
      * Logs the given message with {@link Level#WARN} level. The message will be output on a single line in the order of
@@ -55,7 +55,7 @@ public interface SimpleLogger {
      *
      * @param message the given message
      */
-    void warn(Object... message);
+    void warn(Object @Nonnull ... message);
 
     /**
      * Logs the given message with {@link Level#INFO} level. The message will be output on a single line in the order of
@@ -64,7 +64,7 @@ public interface SimpleLogger {
      *
      * @param message the given message
      */
-    void info(Object... message);
+    void info(Object @Nonnull ... message);
 
     /**
      * Logs the given message with {@link Level#DEBUG} level. The message will be output on a single line in the order
@@ -73,7 +73,7 @@ public interface SimpleLogger {
      *
      * @param message the given message
      */
-    void debug(Object... message);
+    void debug(Object @Nonnull ... message);
 
     /**
      * Logs the given message with {@link Level#TRACE} level. The message will be output on a single line in the order
@@ -82,7 +82,7 @@ public interface SimpleLogger {
      *
      * @param message the given message
      */
-    void trace(Object... message);
+    void trace(Object @Nonnull ... message);
 
     /**
      * Returns the level of this logger.
@@ -104,7 +104,7 @@ public interface SimpleLogger {
         FATAL(5),
 
         /**
-         * The level for error.
+         * The error level.
          */
         ERROR(4),
 
@@ -114,7 +114,7 @@ public interface SimpleLogger {
         WARN(3),
 
         /**
-         * The middle level.
+         * The info level.
          */
         INFO(2),
 
@@ -128,10 +128,20 @@ public interface SimpleLogger {
          */
         TRACE(0);;
 
-        final int value;
+        private final int value;
 
         Level(int value) {
             this.value = value;
+        }
+
+        /**
+         * Returns the value of this level. The more severe, the higher the value (e.g. {@link #FATAL} has the highest
+         * value 5, while {@link #TRACE} has the lowest value 0).
+         *
+         * @return the value of this level
+         */
+        int value() {
+            return value;
         }
     }
 }
