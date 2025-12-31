@@ -346,12 +346,12 @@ final class IOBack {
             if (n <= 0) {
                 return 0;
             }
-            return raf.skipBytes(MathKit.intValue(n));
+            return raf.skipBytes(MathKit.safeInt(n));
         }
 
         @Override
         public int available() throws IOException {
-            return MathKit.intValue(raf.length() - raf.getFilePointer());
+            return MathKit.safeInt(raf.length() - raf.getFilePointer());
         }
 
         @Override
@@ -598,7 +598,7 @@ final class IOBack {
 
         @Override
         public int available() throws IOException {
-            return Math.min(in.available(), MathKit.intValue(limit - pos));
+            return Math.min(in.available(), MathKit.safeInt(limit - pos));
         }
 
         @Override

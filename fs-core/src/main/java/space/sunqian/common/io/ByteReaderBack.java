@@ -1006,7 +1006,7 @@ final class ByteReaderBack {
 
         @Override
         public int ready() throws IORuntimeException {
-            return Math.min(src.ready(), MathKit.intValue(limit - pos));
+            return Math.min(src.ready(), MathKit.safeInt(limit - pos));
         }
 
         @Override
@@ -1019,7 +1019,7 @@ final class ByteReaderBack {
             if (pos >= limit) {
                 return null;
             }
-            int len = MathKit.intValue(limit - pos);
+            int len = MathKit.safeInt(limit - pos);
             return read(len).data();
         }
 
@@ -1160,7 +1160,7 @@ final class ByteReaderBack {
 
         @Override
         public @Nonnull ByteSegment available() throws IORuntimeException {
-            return available(MathKit.intValue(limit - pos));
+            return available(MathKit.safeInt(limit - pos));
         }
 
         @Override

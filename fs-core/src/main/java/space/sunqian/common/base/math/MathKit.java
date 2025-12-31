@@ -56,14 +56,14 @@ public class MathKit {
     }
 
     /**
-     * Returns the integer value of the long value. If the long value {@code >} {@link Integer#MAX_VALUE}, returns
+     * Returns the safe integer value of the long value. If the long value {@code >} {@link Integer#MAX_VALUE}, returns
      * {@link Integer#MAX_VALUE}; else if the long value {@code <} {@link Integer#MIN_VALUE}, returns
      * {@link Integer#MIN_VALUE}; otherwise, returns the long value itself.
      *
      * @param value the long value
      * @return the integer value of the long value
      */
-    public static int intValue(long value) {
+    public static int safeInt(long value) {
         return value == 0 ? 0 : (
             value > Integer.MAX_VALUE ? Integer.MAX_VALUE : (
                 value < Integer.MIN_VALUE ? Integer.MIN_VALUE : (int) value
@@ -80,7 +80,7 @@ public class MathKit {
      * @param size  the size
      * @return the portion number for {@code total / size}
      */
-    public static int portionNum(int total, int size) {
+    public static int portion(int total, int size) {
         return (total + size - 1) / size;
     }
 
@@ -94,7 +94,7 @@ public class MathKit {
      * @param size  the size
      * @return the portion number for {@code total / size}
      */
-    public static long portionNum(long total, long size) {
+    public static long portion(long total, long size) {
         return (total + size - 1) / size;
     }
 

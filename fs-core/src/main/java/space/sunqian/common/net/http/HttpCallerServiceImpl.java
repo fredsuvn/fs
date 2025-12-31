@@ -39,8 +39,8 @@ enum HttpCallerServiceImpl implements HttpCallerService {
 
         private @Nonnull HttpResp request0(@Nonnull HttpReq req) throws Exception {
             HttpURLConnection connection = (HttpURLConnection) req.url().openConnection(proxy);
-            connection.setConnectTimeout(MathKit.intValue(req.timeout().toMillis()));
-            connection.setReadTimeout(MathKit.intValue(req.timeout().toMillis()));
+            connection.setConnectTimeout(MathKit.safeInt(req.timeout().toMillis()));
+            connection.setReadTimeout(MathKit.safeInt(req.timeout().toMillis()));
             req.headers().forEach((k, list) -> {
                 for (String s : list) {
                     connection.addRequestProperty(k, s);

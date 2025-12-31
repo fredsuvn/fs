@@ -21,33 +21,33 @@ public class MathTest {
 
     @Test
     public void testIntValue() {
-        assertEquals(0, MathKit.intValue(0));
-        assertEquals(1, MathKit.intValue(1));
-        assertEquals(-1, MathKit.intValue(-1));
-        assertEquals(Integer.MAX_VALUE, MathKit.intValue(Integer.MAX_VALUE));
-        assertEquals(Integer.MIN_VALUE, MathKit.intValue(Integer.MIN_VALUE));
-        assertEquals(Integer.MAX_VALUE, MathKit.intValue(Integer.MAX_VALUE + 1L));
-        assertEquals(Integer.MIN_VALUE, MathKit.intValue(Integer.MIN_VALUE - 1L));
+        assertEquals(0, MathKit.safeInt(0));
+        assertEquals(1, MathKit.safeInt(1));
+        assertEquals(-1, MathKit.safeInt(-1));
+        assertEquals(Integer.MAX_VALUE, MathKit.safeInt(Integer.MAX_VALUE));
+        assertEquals(Integer.MIN_VALUE, MathKit.safeInt(Integer.MIN_VALUE));
+        assertEquals(Integer.MAX_VALUE, MathKit.safeInt(Integer.MAX_VALUE + 1L));
+        assertEquals(Integer.MIN_VALUE, MathKit.safeInt(Integer.MIN_VALUE - 1L));
     }
 
     @Test
     public void testPortionNum() {
         // int
-        assertEquals(2, MathKit.portionNum(4, 2));
-        assertEquals(3, MathKit.portionNum(5, 2));
-        assertEquals(3, MathKit.portionNum(6, 2));
-        assertEquals(4, MathKit.portionNum(7, 2));
-        assertEquals(3, MathKit.portionNum(7, 3));
-        assertEquals(100, MathKit.portionNum(100, 1));
-        assertEquals(15, MathKit.portionNum(100, 7));
+        assertEquals(2, MathKit.portion(4, 2));
+        assertEquals(3, MathKit.portion(5, 2));
+        assertEquals(3, MathKit.portion(6, 2));
+        assertEquals(4, MathKit.portion(7, 2));
+        assertEquals(3, MathKit.portion(7, 3));
+        assertEquals(100, MathKit.portion(100, 1));
+        assertEquals(15, MathKit.portion(100, 7));
         // long
-        assertEquals(2L, MathKit.portionNum(4L, 2L));
-        assertEquals(3L, MathKit.portionNum(5L, 2L));
-        assertEquals(3L, MathKit.portionNum(6L, 2L));
-        assertEquals(4L, MathKit.portionNum(7L, 2L));
-        assertEquals(3L, MathKit.portionNum(7L, 3L));
-        assertEquals(100L, MathKit.portionNum(100L, 1L));
-        assertEquals(15L, MathKit.portionNum(100L, 7L));
+        assertEquals(2L, MathKit.portion(4L, 2L));
+        assertEquals(3L, MathKit.portion(5L, 2L));
+        assertEquals(3L, MathKit.portion(6L, 2L));
+        assertEquals(4L, MathKit.portion(7L, 2L));
+        assertEquals(3L, MathKit.portion(7L, 3L));
+        assertEquals(100L, MathKit.portion(100L, 1L));
+        assertEquals(15L, MathKit.portion(100L, 7L));
     }
 
     @Test
