@@ -6,7 +6,7 @@
  * }</pre>
  * Core implementations:
  * <ul>
- *     <li>{@link space.sunqian.fs.dynamic.aspect.asm.AsmAspectMaker}</li>
+ *     <li>{@link space.sunqian.fs.dynamic.aop.asm.AsmAspectMaker}</li>
  * </ul>
  */
-package space.sunqian.fs.dynamic.aspect.asm;
+package space.sunqian.fs.dynamic.aop.asm;

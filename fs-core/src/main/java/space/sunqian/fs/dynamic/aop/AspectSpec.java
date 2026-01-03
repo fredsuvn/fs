@@ -1,4 +1,4 @@
-package space.sunqian.fs.dynamic.aspect;
+package space.sunqian.fs.dynamic.aop;
 
 import space.sunqian.annotation.Nonnull;
 

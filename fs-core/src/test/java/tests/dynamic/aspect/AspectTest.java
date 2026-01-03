@@ -6,10 +6,10 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.value.BooleanVar;
 import space.sunqian.fs.base.value.IntVar;
 import space.sunqian.fs.base.value.Var;
-import space.sunqian.fs.dynamic.aspect.AspectException;
-import space.sunqian.fs.dynamic.aspect.AspectHandler;
-import space.sunqian.fs.dynamic.aspect.AspectMaker;
-import space.sunqian.fs.dynamic.aspect.AspectSpec;
+import space.sunqian.fs.dynamic.aop.AspectException;
+import space.sunqian.fs.dynamic.aop.AspectHandler;
+import space.sunqian.fs.dynamic.aop.AspectMaker;
+import space.sunqian.fs.dynamic.aop.AspectSpec;
 
 import java.lang.reflect.Method;
 

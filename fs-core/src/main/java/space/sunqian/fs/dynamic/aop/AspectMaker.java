@@ -1,8 +1,8 @@
-package space.sunqian.fs.dynamic.aspect;
+package space.sunqian.fs.dynamic.aop;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.ThreadSafe;
-import space.sunqian.fs.dynamic.aspect.asm.AsmAspectMaker;
+import space.sunqian.fs.dynamic.aop.asm.AsmAspectMaker;
 
 /**
  * This interface is used to create aspect class to implement aspect-oriented programming. The implementations should be
