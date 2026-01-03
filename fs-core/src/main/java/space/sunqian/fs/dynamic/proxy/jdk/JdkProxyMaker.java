@@ -6,13 +6,13 @@ import space.sunqian.annotation.RetainedParam;
 import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.value.Var;
+import space.sunqian.fs.dynamic.DynamicClassLoader;
 import space.sunqian.fs.dynamic.proxy.ProxyException;
 import space.sunqian.fs.dynamic.proxy.ProxyHandler;
 import space.sunqian.fs.dynamic.proxy.ProxyInvoker;
 import space.sunqian.fs.dynamic.proxy.ProxyMaker;
 import space.sunqian.fs.dynamic.proxy.ProxySpec;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.reflect.BytesClassLoader;
 import space.sunqian.fs.reflect.ClassKit;
 
 import java.lang.reflect.Constructor;
@@ -43,7 +43,7 @@ public class JdkProxyMaker implements ProxyMaker {
         @Nonnull ProxyHandler proxyHandler
     ) throws ProxyException {
         Class<?> proxyClass = Proxy.getProxyClass(
-            new BytesClassLoader(),
+            new DynamicClassLoader(),
             interfaces.toArray(new Class<?>[0])
         );
         Map<Method, Var<ProxyInvoker>> proxiedMethods = new HashMap<>();

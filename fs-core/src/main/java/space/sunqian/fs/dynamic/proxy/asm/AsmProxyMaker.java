@@ -12,13 +12,13 @@ import space.sunqian.fs.asm.MethodVisitor;
 import space.sunqian.fs.asm.Opcodes;
 import space.sunqian.fs.base.system.JvmKit;
 import space.sunqian.fs.base.value.IntVar;
+import space.sunqian.fs.dynamic.DynamicClassLoader;
 import space.sunqian.fs.dynamic.proxy.ProxyException;
 import space.sunqian.fs.dynamic.proxy.ProxyHandler;
 import space.sunqian.fs.dynamic.proxy.ProxyInvoker;
 import space.sunqian.fs.dynamic.proxy.ProxyKit;
 import space.sunqian.fs.dynamic.proxy.ProxyMaker;
 import space.sunqian.fs.dynamic.proxy.ProxySpec;
-import space.sunqian.fs.reflect.BytesClassLoader;
 import space.sunqian.fs.reflect.ClassKit;
 import space.sunqian.fs.third.asm.AsmKit;
 
@@ -134,7 +134,7 @@ public class AsmProxyMaker implements ProxyMaker {
             byte[] proxyClassBytes = generateProxyClass(pcInfo);
             byte[] invokerClassBytes = generateInvokerClass(pcInfo);
             // using new class loader to help collect unused classes
-            BytesClassLoader loader = ClassKit.newClassLoader();
+            DynamicClassLoader loader = new DynamicClassLoader();
             Class<?> proxyClass = loader.loadClass(null, proxyClassBytes);
             loader.loadClass(null, invokerClassBytes);
             return new AsmProxySpec(

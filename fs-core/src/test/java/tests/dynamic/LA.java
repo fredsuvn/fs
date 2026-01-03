@@ -1,4 +1,4 @@
-package tests.reflect;
+package tests.dynamic;
 
 public class LA {
 

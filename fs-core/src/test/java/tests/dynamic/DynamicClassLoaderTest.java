@@ -1,8 +1,8 @@
-package tests.reflect;
+package tests.dynamic;
 
 import org.junit.jupiter.api.Test;
+import space.sunqian.fs.dynamic.DynamicClassLoader;
 import space.sunqian.fs.io.IOKit;
-import space.sunqian.fs.reflect.BytesClassLoader;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -13,12 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ClassLoaderTest {
+public class DynamicClassLoaderTest {
 
     @Test
     public void testLoadClass() throws Exception {
         {
-            BytesClassLoader loader = new BytesClassLoader();
+            DynamicClassLoader loader = new DynamicClassLoader();
             InputStream in = ClassLoader.getSystemResourceAsStream(
                 LA.class.getName().replace('.', '/') + ".class"
             );
@@ -33,7 +33,7 @@ public class ClassLoaderTest {
             in.close();
         }
         {
-            BytesClassLoader loader = new BytesClassLoader();
+            DynamicClassLoader loader = new DynamicClassLoader();
             InputStream in = ClassLoader.getSystemResourceAsStream(
                 LA.class.getName().replace('.', '/') + ".class"
             );
@@ -48,7 +48,7 @@ public class ClassLoaderTest {
             in.close();
         }
         {
-            BytesClassLoader loader = new BytesClassLoader();
+            DynamicClassLoader loader = new DynamicClassLoader();
             InputStream in = ClassLoader.getSystemResourceAsStream(
                 LA.class.getName().replace('.', '/') + ".class"
             );
@@ -63,7 +63,7 @@ public class ClassLoaderTest {
             in.close();
         }
         {
-            BytesClassLoader loader = new BytesClassLoader();
+            DynamicClassLoader loader = new DynamicClassLoader();
             InputStream in = ClassLoader.getSystemResourceAsStream(
                 LA.class.getName().replace('.', '/') + ".class"
             );
@@ -81,14 +81,14 @@ public class ClassLoaderTest {
 
     @Test
     public void testLoadedClass() throws Exception {
-        BytesClassLoader loader1 = new BytesClassLoader();
+        DynamicClassLoader loader1 = new DynamicClassLoader();
         InputStream in1 = ClassLoader.getSystemResourceAsStream(
             LA.class.getName().replace('.', '/') + ".class"
         );
         byte[] bytes1 = IOKit.read(in1);
         Class<?> cls1 = loader1.loadClass(LA.class.getName(), bytes1);
         in1.close();
-        BytesClassLoader loader2 = new BytesClassLoader();
+        DynamicClassLoader loader2 = new DynamicClassLoader();
         InputStream in2 = ClassLoader.getSystemResourceAsStream(
             LA.class.getName().replace('.', '/') + ".class"
         );
@@ -104,8 +104,8 @@ public class ClassLoaderTest {
         Object o2 = cls2.getConstructor().newInstance();
         assertFalse(o1 instanceof LA);
         assertFalse(o2 instanceof LA);
-        BytesClassLoader loader3 = new BytesClassLoader();
-        InputStream in3 = ClassLoader.getSystemResourceAsStream("reflect/LAC");
+        DynamicClassLoader loader3 = new DynamicClassLoader();
+        InputStream in3 = ClassLoader.getSystemResourceAsStream("dynamic/LAC");
         byte[] bytes3 = IOKit.read(in3);
         Class<?> cls3 = loader3.loadClass(LA.class.getName(), bytes3);
         in1.close();

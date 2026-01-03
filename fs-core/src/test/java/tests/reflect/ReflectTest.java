@@ -5,7 +5,7 @@ import space.sunqian.fs.reflect.ReflectionException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ExceptionTest {
+public class ReflectTest {
 
     @Test
     public void testExceptions() {

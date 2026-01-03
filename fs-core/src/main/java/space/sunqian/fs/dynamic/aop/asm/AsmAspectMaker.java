@@ -10,13 +10,12 @@ import space.sunqian.fs.asm.Label;
 import space.sunqian.fs.asm.MethodVisitor;
 import space.sunqian.fs.asm.Opcodes;
 import space.sunqian.fs.base.system.JvmKit;
+import space.sunqian.fs.dynamic.DynamicClassLoader;
 import space.sunqian.fs.dynamic.aop.AspectException;
 import space.sunqian.fs.dynamic.aop.AspectHandler;
 import space.sunqian.fs.dynamic.aop.AspectMaker;
 import space.sunqian.fs.dynamic.aop.AspectSpec;
 import space.sunqian.fs.dynamic.proxy.ProxyKit;
-import space.sunqian.fs.reflect.BytesClassLoader;
-import space.sunqian.fs.reflect.ClassKit;
 import space.sunqian.fs.third.asm.AsmKit;
 
 import java.lang.reflect.Constructor;
@@ -105,7 +104,7 @@ public class AsmAspectMaker implements AspectMaker {
             );
             byte[] aspectClassBytes = generateAspectClass(acInfo);
             // using new class loader to help collect unused classes
-            BytesClassLoader loader = ClassKit.newClassLoader();
+            DynamicClassLoader loader = new DynamicClassLoader();
             Class<?> aspectClass = loader.loadClass(null, aspectClassBytes);
             return new AsmAspectSpec(
                 aspectClass,
