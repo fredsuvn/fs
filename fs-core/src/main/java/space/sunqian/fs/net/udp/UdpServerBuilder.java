@@ -4,7 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.Checker;
-import space.sunqian.fs.base.function.callable.VoidCallable;
+import space.sunqian.fs.base.function.VoidCallable;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.net.NetException;

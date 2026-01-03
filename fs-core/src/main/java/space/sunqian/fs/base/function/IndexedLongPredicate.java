@@ -1,17 +1,16 @@
-package space.sunqian.fs.base.function.predicate;
+package space.sunqian.fs.base.function;
 
-import java.util.function.Predicate;
+import java.util.function.LongPredicate;
 
 /**
  * Represents a predicate (boolean-valued function) of an index and one argument.
  * <p>
- * This is an indexed version of {@link Predicate} whose functional method is {@link #test(int, Object)}.
+ * This is an indexed version of {@link LongPredicate} whose functional method is {@link #test(int, long)}.
  *
- * @param <T> the type of the input to the predicate
  * @author sunqian
  */
 @FunctionalInterface
-public interface IndexedPredicate<T> {
+public interface IndexedLongPredicate {
 
     /**
      * Evaluates this predicate on the given index and argument.
@@ -20,5 +19,5 @@ public interface IndexedPredicate<T> {
      * @param t     the input argument
      * @return {@code true} if the index and input argument matches the predicate, otherwise {@code false}
      */
-    boolean test(int index, T t);
+    boolean test(int index, long t);
 }

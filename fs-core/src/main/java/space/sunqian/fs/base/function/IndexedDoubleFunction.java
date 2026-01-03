@@ -1,18 +1,17 @@
-package space.sunqian.fs.base.function.function;
+package space.sunqian.fs.base.function;
 
-import java.util.function.Function;
+import java.util.function.DoubleFunction;
 
 /**
  * Represents a function that accepts an index and one argument and produces a result.
  * <p>
- * This is an indexed version of {@link Function} whose functional method is {@link #apply(int, Object)}.
+ * This is an indexed version of {@link DoubleFunction} whose functional method is {@link #apply(int, double)}.
  *
- * @param <T> the type of the input to the function
  * @param <R> the type of the result of the function
  * @author sunqian
  */
 @FunctionalInterface
-public interface IndexedFunction<T, R> {
+public interface IndexedDoubleFunction<R> {
 
     /**
      * Applies this function to the given index and argument.
@@ -21,5 +20,5 @@ public interface IndexedFunction<T, R> {
      * @param t     the function argument
      * @return the function result
      */
-    R apply(int index, T t);
+    R apply(int index, double t);
 }

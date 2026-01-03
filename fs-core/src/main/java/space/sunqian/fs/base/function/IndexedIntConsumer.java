@@ -1,16 +1,16 @@
-package space.sunqian.fs.base.function.consumer;
+package space.sunqian.fs.base.function;
 
-import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
 
 /**
  * Represents an operation that accepts an index and a single input argument and returns no result.
  * <p>
- * This is an indexed version of {@link DoubleConsumer} whose functional method is {@link #accept(int, double)}.
+ * This is an indexed version of {@link IntConsumer} whose functional method is {@link #accept(int, int)}.
  *
  * @author sunqian
  */
 @FunctionalInterface
-public interface IndexedDoubleConsumer {
+public interface IndexedIntConsumer {
 
     /**
      * Performs this operation on the given argument.
@@ -18,5 +18,5 @@ public interface IndexedDoubleConsumer {
      * @param index the index
      * @param t     the input argument
      */
-    void accept(int index, double t);
+    void accept(int index, int t);
 }

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.chars.CharsKit;
-import space.sunqian.fs.base.function.callable.VoidCallable;
+import space.sunqian.fs.base.function.VoidCallable;
 import space.sunqian.fs.net.NetException;
 import space.sunqian.fs.net.udp.UdpSender;
 import space.sunqian.fs.net.udp.UdpServer;

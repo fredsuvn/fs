@@ -1,4 +1,4 @@
-package space.sunqian.fs.base.function.consumer;
+package space.sunqian.fs.base.function;
 
 import java.util.function.Consumer;
 

@@ -1,4 +1,4 @@
-package space.sunqian.fs.base.function.callable;
+package space.sunqian.fs.base.function;
 
 import java.util.concurrent.Callable;
 

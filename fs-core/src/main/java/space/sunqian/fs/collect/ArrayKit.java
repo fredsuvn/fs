@@ -5,10 +5,10 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.OutParam;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.base.function.predicate.IndexedDoublePredicate;
-import space.sunqian.fs.base.function.predicate.IndexedIntPredicate;
-import space.sunqian.fs.base.function.predicate.IndexedLongPredicate;
-import space.sunqian.fs.base.function.predicate.IndexedPredicate;
+import space.sunqian.fs.base.function.IndexedDoublePredicate;
+import space.sunqian.fs.base.function.IndexedIntPredicate;
+import space.sunqian.fs.base.function.IndexedLongPredicate;
+import space.sunqian.fs.base.function.IndexedPredicate;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;

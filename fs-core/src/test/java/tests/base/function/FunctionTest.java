@@ -1,10 +1,10 @@
 package tests.base.function;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.fs.base.function.callable.BooleanCallable;
-import space.sunqian.fs.base.function.callable.DoubleCallable;
-import space.sunqian.fs.base.function.callable.IntCallable;
-import space.sunqian.fs.base.function.callable.LongCallable;
+import space.sunqian.fs.base.function.BooleanCallable;
+import space.sunqian.fs.base.function.DoubleCallable;
+import space.sunqian.fs.base.function.IntCallable;
+import space.sunqian.fs.base.function.LongCallable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

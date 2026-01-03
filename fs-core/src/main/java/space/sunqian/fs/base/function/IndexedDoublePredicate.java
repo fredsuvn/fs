@@ -1,16 +1,16 @@
-package space.sunqian.fs.base.function.predicate;
+package space.sunqian.fs.base.function;
 
-import java.util.function.IntPredicate;
+import java.util.function.DoublePredicate;
 
 /**
  * Represents a predicate (boolean-valued function) of an index and one argument.
  * <p>
- * This is an indexed version of {@link IntPredicate} whose functional method is {@link #test(int, int)}.
+ * This is an indexed version of {@link DoublePredicate} whose functional method is {@link #test(int, double)}.
  *
  * @author sunqian
  */
 @FunctionalInterface
-public interface IndexedIntPredicate {
+public interface IndexedDoublePredicate {
 
     /**
      * Evaluates this predicate on the given index and argument.
@@ -19,5 +19,5 @@ public interface IndexedIntPredicate {
      * @param t     the input argument
      * @return {@code true} if the index and input argument matches the predicate, otherwise {@code false}
      */
-    boolean test(int index, int t);
+    boolean test(int index, double t);
 }

@@ -7,7 +7,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.bytes.BytesBuilder;
 import space.sunqian.fs.base.exception.ThrowKit;
-import space.sunqian.fs.base.function.callable.VoidCallable;
+import space.sunqian.fs.base.function.VoidCallable;
 import space.sunqian.fs.base.thread.ThreadGate;
 import space.sunqian.fs.base.value.IntVar;
 import space.sunqian.fs.net.NetException;
