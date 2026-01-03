@@ -2,8 +2,8 @@ package tests.codec;
 
 import internal.test.DataTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.codec.DigestKit;
-import space.sunqian.common.io.ByteProcessor;
+import space.sunqian.fs.codec.DigestKit;
+import space.sunqian.fs.io.ByteProcessor;
 
 import java.security.MessageDigest;
 

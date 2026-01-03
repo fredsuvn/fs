@@ -1,7 +1,7 @@
 package tests.collect;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.collect.ListKit;
+import space.sunqian.fs.collect.ListKit;
 
 import java.util.ArrayList;
 import java.util.Arrays;

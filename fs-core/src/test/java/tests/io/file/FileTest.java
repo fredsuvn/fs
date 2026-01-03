@@ -4,12 +4,12 @@ import internal.test.AssertTest;
 import internal.test.DataTest;
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.chars.CharsKit;
-import space.sunqian.common.io.BufferKit;
-import space.sunqian.common.io.IOKit;
-import space.sunqian.common.io.IORuntimeException;
-import space.sunqian.common.io.file.FileKit;
-import space.sunqian.common.io.file.FileRef;
+import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.io.BufferKit;
+import space.sunqian.fs.io.IOKit;
+import space.sunqian.fs.io.IORuntimeException;
+import space.sunqian.fs.io.file.FileKit;
+import space.sunqian.fs.io.file.FileRef;
 
 import java.io.File;
 import java.io.FileInputStream;

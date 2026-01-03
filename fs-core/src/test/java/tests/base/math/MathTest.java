@@ -1,7 +1,7 @@
 package tests.base.math;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.math.MathKit;
+import space.sunqian.fs.base.math.MathKit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -1,6 +1,6 @@
 package tests.utils;
 
-import space.sunqian.common.Fs;
+import space.sunqian.fs.Fs;
 
 public class Utils {
 

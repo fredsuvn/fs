@@ -1,6 +1,6 @@
 package internal.samples;
 
-import space.sunqian.common.cache.SimpleCache;
+import space.sunqian.fs.cache.SimpleCache;
 
 public class CacheSample {
 

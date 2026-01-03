@@ -2,7 +2,7 @@ package tests.base.system;
 
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.system.OSKit;
+import space.sunqian.fs.base.system.OSKit;
 
 public class OSTest implements PrintTest {
 

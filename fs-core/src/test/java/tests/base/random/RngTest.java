@@ -4,10 +4,10 @@ import internal.test.AssertTest;
 import internal.test.J17Also;
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.math.MathKit;
-import space.sunqian.common.base.random.Rng;
-import space.sunqian.common.collect.StreamKit;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.fs.base.math.MathKit;
+import space.sunqian.fs.base.random.Rng;
+import space.sunqian.fs.collect.StreamKit;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

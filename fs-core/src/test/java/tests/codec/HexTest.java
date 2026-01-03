@@ -3,8 +3,8 @@ package tests.codec;
 import internal.test.DataTest;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.chars.CharsKit;
-import space.sunqian.common.codec.HexKit;
+import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.codec.HexKit;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

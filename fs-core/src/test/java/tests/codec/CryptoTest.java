@@ -2,8 +2,8 @@ package tests.codec;
 
 import internal.test.DataTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.codec.CryptoKit;
-import space.sunqian.common.io.ByteProcessor;
+import space.sunqian.fs.codec.CryptoKit;
+import space.sunqian.fs.io.ByteProcessor;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;

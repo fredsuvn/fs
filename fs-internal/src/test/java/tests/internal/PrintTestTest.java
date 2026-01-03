@@ -1,7 +1,7 @@
 package tests.internal;
 
-import org.junit.jupiter.api.Test;
 import internal.test.PrintTest;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;

@@ -1,7 +1,7 @@
 package tests.reflect;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.reflect.TypeKit;
+import space.sunqian.fs.reflect.TypeKit;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;

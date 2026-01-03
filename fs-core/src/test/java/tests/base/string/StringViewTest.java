@@ -2,9 +2,9 @@ package tests.base.string;
 
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.exception.UnreachablePointException;
-import space.sunqian.common.base.string.StringView;
-import space.sunqian.common.collect.ListKit;
+import space.sunqian.fs.base.exception.UnreachablePointException;
+import space.sunqian.fs.base.string.StringView;
+import space.sunqian.fs.collect.ListKit;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

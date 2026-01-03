@@ -16,7 +16,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
-import space.sunqian.common.net.tcp.TcpClient;
+import space.sunqian.fs.net.tcp.TcpClient;
 
 import java.util.concurrent.TimeUnit;
 

@@ -1,7 +1,7 @@
 package tests.base.system;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.system.JvmException;
+import space.sunqian.fs.base.system.JvmException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

@@ -1,9 +1,9 @@
 package internal.tests.api;
 
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.dynamic.proxy.ProxyHandler;
-import space.sunqian.common.dynamic.proxy.ProxyInvoker;
-import space.sunqian.common.dynamic.proxy.ProxyMaker;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.fs.dynamic.proxy.ProxyHandler;
+import space.sunqian.fs.dynamic.proxy.ProxyInvoker;
+import space.sunqian.fs.dynamic.proxy.ProxyMaker;
 
 import java.lang.reflect.Method;
 import java.util.List;

@@ -1,10 +1,10 @@
 package tests.internal;
 
-import org.junit.jupiter.api.Test;
 import internal.test.ReadOps;
 import internal.test.TestIOException;
 import internal.test.TestInputStream;
 import internal.test.TestReader;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SpecialReaderTest {
 

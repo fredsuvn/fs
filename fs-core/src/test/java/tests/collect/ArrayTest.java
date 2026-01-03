@@ -1,9 +1,9 @@
 package tests.collect;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.Fs;
-import space.sunqian.common.collect.ArrayKit;
-import space.sunqian.common.collect.ArrayOperator;
+import space.sunqian.fs.Fs;
+import space.sunqian.fs.collect.ArrayKit;
+import space.sunqian.fs.collect.ArrayOperator;
 
 import java.util.List;
 

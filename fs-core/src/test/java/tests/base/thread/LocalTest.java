@@ -2,8 +2,8 @@ package tests.base.thread;
 
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.thread.LocalKit;
-import space.sunqian.common.collect.MapKit;
+import space.sunqian.fs.base.thread.LocalKit;
+import space.sunqian.fs.collect.MapKit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;

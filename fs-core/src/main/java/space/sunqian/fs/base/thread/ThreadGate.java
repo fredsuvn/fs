@@ -1,0 +1,80 @@
+package space.sunqian.fs.base.thread;
+
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.ThreadSafe;
+import space.sunqian.fs.base.exception.AwaitingException;
+
+import java.time.Duration;
+
+/**
+ * This interface represents a gate that can block or continue the current thread. It has two states: opened and closed.
+ * If it is closed, its {@link #await()} and {@link #await(Duration)} methods block the current thread until the state
+ * becomes opened.
+ * <p>
+ * This interface is thread-safe, and its initialized state is closed.
+ *
+ * @author sunqian
+ */
+@ThreadSafe
+public interface ThreadGate {
+
+    /**
+     * Returns a new {@link ThreadGate}.
+     *
+     * @return a new {@link ThreadGate}
+     */
+    static @Nonnull ThreadGate newThreadGate() {
+        return ThreadGateImpl.newThreadGate();
+    }
+
+    /**
+     * Returns whether this thread gate is opened.
+     *
+     * @return whether this thread gate is opened
+     */
+    boolean isOpened();
+
+    /**
+     * Returns whether this thread gate is closed.
+     *
+     * @return whether this thread gate is closed
+     */
+    boolean isClosed();
+
+    /**
+     * Opens this thread gate.
+     */
+    void open();
+
+    /**
+     * Closes this thread gate.
+     */
+    void close();
+
+    /**
+     * Blocks the current thread until this thread gate is opened.
+     *
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
+     */
+    void await() throws AwaitingException;
+
+    /**
+     * Blocks the current thread until this thread gate is opened, or the specified waiting time elapses. Returns
+     * {@code true} if this thread gate become opened and {@code false} if the waiting time elapsed.
+     *
+     * @param millis the maximum milliseconds to wait
+     * @return {@code true} if this thread gate become opened and {@code false} if the waiting time elapsed
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
+     */
+    boolean await(long millis) throws AwaitingException;
+
+    /**
+     * Blocks the current thread until this thread gate is opened, or the specified waiting time elapses. Returns
+     * {@code true} if this thread gate become opened and {@code false} if the waiting time elapsed.
+     *
+     * @param duration the maximum time to wait
+     * @return {@code true} if this thread gate become opened and {@code false} if the waiting time elapsed
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
+     */
+    boolean await(@Nonnull Duration duration) throws AwaitingException;
+}

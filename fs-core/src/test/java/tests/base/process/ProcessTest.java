@@ -2,11 +2,11 @@ package tests.base.process;
 
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.chars.CharsKit;
-import space.sunqian.common.base.process.ProcessKit;
-import space.sunqian.common.base.process.VirtualProcess;
-import space.sunqian.common.base.system.OSKit;
-import space.sunqian.common.io.IOKit;
+import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.base.process.ProcessKit;
+import space.sunqian.fs.base.process.VirtualProcess;
+import space.sunqian.fs.base.system.OSKit;
+import space.sunqian.fs.io.IOKit;
 
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;

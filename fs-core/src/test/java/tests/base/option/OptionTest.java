@@ -1,12 +1,12 @@
 package tests.base.option;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.option.Option;
+import space.sunqian.fs.base.option.Option;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static space.sunqian.common.collect.ArrayKit.array;
+import static space.sunqian.fs.collect.ArrayKit.array;
 
 public class OptionTest {
 

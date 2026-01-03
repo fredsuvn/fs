@@ -1,13 +1,13 @@
 package tests.internal;
 
-import org.junit.jupiter.api.Test;
 import internal.test.DataTest;
 import internal.test.PrintTest;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DataTestTest implements DataTest, PrintTest {
 

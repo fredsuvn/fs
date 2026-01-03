@@ -3,7 +3,7 @@ package internal.tests.api;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.cache.CacheBuilder;
-import space.sunqian.common.cache.SimpleCache;
+import space.sunqian.fs.cache.SimpleCache;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;

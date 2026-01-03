@@ -3,12 +3,12 @@ package tests.base.chars;
 import internal.test.AssertTest;
 import internal.test.DataTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.chars.CharsBuilder;
-import space.sunqian.common.base.chars.CharsKit;
-import space.sunqian.common.io.BufferKit;
-import space.sunqian.common.io.IOKit;
-import space.sunqian.common.io.IORuntimeException;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.fs.base.chars.CharsBuilder;
+import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.io.BufferKit;
+import space.sunqian.fs.io.IOKit;
+import space.sunqian.fs.io.IORuntimeException;
 
 import java.io.CharArrayReader;
 import java.io.CharArrayWriter;

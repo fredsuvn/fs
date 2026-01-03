@@ -1,14 +1,14 @@
 package internal.samples;
 
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.annotations.Nullable;
-import space.sunqian.common.io.IOKit;
-import space.sunqian.common.net.http.HttpCaller;
-import space.sunqian.common.net.http.HttpReq;
-import space.sunqian.common.net.http.HttpResp;
-import space.sunqian.common.net.tcp.TcpContext;
-import space.sunqian.common.net.tcp.TcpServer;
-import space.sunqian.common.net.tcp.TcpServerHandler;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.io.IOKit;
+import space.sunqian.fs.net.http.HttpCaller;
+import space.sunqian.fs.net.http.HttpReq;
+import space.sunqian.fs.net.http.HttpResp;
+import space.sunqian.fs.net.tcp.TcpContext;
+import space.sunqian.fs.net.tcp.TcpServer;
+import space.sunqian.fs.net.tcp.TcpServerHandler;
 
 public class NetSample {
 

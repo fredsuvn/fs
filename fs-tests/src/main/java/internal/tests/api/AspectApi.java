@@ -1,9 +1,9 @@
 package internal.tests.api;
 
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.annotations.Nullable;
-import space.sunqian.common.dynamic.aspect.AspectHandler;
-import space.sunqian.common.dynamic.aspect.AspectMaker;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.dynamic.aspect.AspectHandler;
+import space.sunqian.fs.dynamic.aspect.AspectMaker;
 
 import java.lang.reflect.Method;
 

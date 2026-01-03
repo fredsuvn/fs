@@ -1,7 +1,7 @@
 package tests.benchmarks;
 
-import internal.tests.common.TestPropsData;
 import internal.tests.api.PropertiesCopier;
+import internal.tests.common.TestPropsData;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

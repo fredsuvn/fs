@@ -1,8 +1,8 @@
 package tests.reflect;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.reflect.TypeKit;
-import space.sunqian.common.reflect.TypeRef;
+import space.sunqian.fs.reflect.TypeKit;
+import space.sunqian.fs.reflect.TypeRef;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;

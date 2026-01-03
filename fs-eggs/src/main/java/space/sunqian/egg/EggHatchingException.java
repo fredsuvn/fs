@@ -1,7 +1,7 @@
 package space.sunqian.egg;
 
-import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.exception.FsRuntimeException;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.base.exception.FsRuntimeException;
 
 public class EggHatchingException extends FsRuntimeException {
 

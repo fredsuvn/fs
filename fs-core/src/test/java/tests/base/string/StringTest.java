@@ -3,10 +3,10 @@ package tests.base.string;
 import internal.test.DataTest;
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.chars.CharsKit;
-import space.sunqian.common.base.exception.UnknownArrayTypeException;
-import space.sunqian.common.base.string.StringKit;
-import space.sunqian.common.base.string.StringView;
+import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.base.exception.UnknownArrayTypeException;
+import space.sunqian.fs.base.string.StringKit;
+import space.sunqian.fs.base.string.StringView;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

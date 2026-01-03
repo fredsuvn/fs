@@ -2,7 +2,7 @@ package tests.net;
 
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.net.NetException;
+import space.sunqian.fs.net.NetException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

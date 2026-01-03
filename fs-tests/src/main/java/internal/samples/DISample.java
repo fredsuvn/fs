@@ -1,10 +1,10 @@
 package internal.samples;
 
 import internal.test.PrintTest;
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.annotations.Nullable;
-import space.sunqian.common.app.di.InjectedApp;
-import space.sunqian.common.app.di.InjectedAspect;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.app.di.InjectedApp;
+import space.sunqian.fs.app.di.InjectedAspect;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

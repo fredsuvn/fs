@@ -1,12 +1,12 @@
 package tests.reflect;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.annotations.Nullable;
-import space.sunqian.common.Fs;
-import space.sunqian.common.reflect.ReflectionException;
-import space.sunqian.common.reflect.TypeKit;
-import space.sunqian.common.reflect.TypeRef;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.Fs;
+import space.sunqian.fs.reflect.ReflectionException;
+import space.sunqian.fs.reflect.TypeKit;
+import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;

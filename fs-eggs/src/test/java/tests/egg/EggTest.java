@@ -1,10 +1,10 @@
 package tests.egg;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.codec.Base64Kit;
 import space.sunqian.egg.FsEgg;
 import space.sunqian.egg.FsEggImpl;
 import space.sunqian.egg.FsEggLoader;
+import space.sunqian.fs.codec.Base64Kit;
 
 public class EggTest {
 

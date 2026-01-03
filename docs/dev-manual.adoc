@@ -1,4 +1,4 @@
-= image:fs.svg[] Manual of _fs_
+= Manual of _fs_
 :toc:
 :toclevels: 3
 :last-update-label!:
@@ -7,6 +7,8 @@
 :emaill: fredsuvn@163.com
 :url: https://github.com/fredsuvn
 
+image:fs.svg[]
+
 == Overview
 
 _fs_ is a lightweight, multi-version JDK support, high-performance, zero-dependency tool lib for java.
@@ -14,18 +16,18 @@ _fs_ is a lightweight, multi-version JDK support, high-performance, zero-depende
 It includes 8 modules:
 
 * <<chapter-dependencies>>: The dependency platform of _fs_;
-* <<chapter-annotations>>: Annotations of _fs_, dependents on _fs-jsr305_, can help improve code quality;
-* <<chapter-jsr305>>: JSR305 for _fs_, providing partial implementations of _jsr305_ annotations;
+* <<chapter-annotation>>: Annotation of _fs_, dependents on _fs-jsr305_, can help improve code quality;
+* <<chapter-jsr305>>: JSR305 for _fs_, providing partial implementations of _jsr305_ annotation;
 * <<chapter-asm>>: Internal asm (7.1) for _fs_, no dependencies;
-* <<chapter-core>>: Core module of _fs_, dependents on _fs-annotations_, main part of _fs_;
-* <<chapter-all>>: Aggregation of _fs_, including all classes and resources in _fs-jsr305_, _fs-annotations_ and _fs-core_, zero-dependency;
+* <<chapter-core>>: Core module of _fs_, dependents on _fs-annotation_, main part of _fs_;
+* <<chapter-all>>: Aggregation of _fs_, including all classes and resources in _fs-jsr305_, _fs-annotation_ and _fs-core_, zero-dependency;
 * <<chapter-internal>>: Internal module, typically providing internal classes for tests;
 * <<chapter-tests>>: Tests module, benchmarks here;
 
 [NOTE]
 ====
 * _fs-dependencies_ should be published as a `bom` (`<packaging>pom</packaging>`);
-* _fs-jsr305_, _fs-annotations_, _fs-asm_, _fs-core_ and _fs-all_ should be published as jars;
+* _fs-jsr305_, _fs-annotation_, _fs-asm_, _fs-core_ and _fs-all_ should be published as jars;
 * _fs-internal_ and _fs-tests_ should not be published;
 ====
 
@@ -53,17 +55,17 @@ src: link:../fs-dependencies/[fs-dependencies]
 
 _fs-dependencies_ is the dependency platform of _fs_, should be published as a `bom` (`<packaging>pom</packaging>`).
 
-[[chapter-annotations]]
-== _fs-annotations_
+[[chapter-annotation]]
+== _fs-annotation_
 
-src: link:../fs-annotations/[fs-annotations]
+src: link:../fs-annotation/[fs-annotation]
 
-_fs-annotations_ is the annotation module of _fs_, should be published as a jar.
+_fs-annotation_ is the annotation module of _fs_, should be published as a jar.
 It depends on _fs-jsr305_.
 
 It contains:
 
-* Annotations for _fs_: such as `space.sunqian.annotations.Nonnull`, `space.sunqian.annotations.Nullable`...;
+* Annotation for _fs_: such as `space.sunqian.annotation.Nonnull`, `space.sunqian.annotation.Nullable`...;
 
 [[chapter-jsr305]]
 == _fs-jsr305_
@@ -83,7 +85,7 @@ src: link:../fs-asm/[fs-asm]
 
 _fs-asm_ is the internal asm (7.1) for _fs_, should be published as a jar.
 
-It contains core asm classes: such as `ClassReader`, `ClassWriter`, `MethodVisitor`... (all in `space.sunqian.common.asm` package).
+It contains core asm classes: such as `ClassReader`, `ClassWriter`, `MethodVisitor`... (all in `space.sunqian.fs.asm` package).
 
 [[chapter-core]]
 == _fs-core_
@@ -91,7 +93,7 @@ It contains core asm classes: such as `ClassReader`, `ClassWriter`, `MethodVisit
 src: link:../fs-core/[fs-core]
 
 _fs-core_ is main part of _fs_, should be published as a jar.
-It depends on _fs-annotations_.
+It depends on _fs-annotation_.
 
 It contains:
 
@@ -123,10 +125,10 @@ interface HttpCallerService {
 
 src: link:../fs-all/[fs-all]
 
-_fs-all_ is the aggregation of _fs-annotations_ and _fs-core_, should be published as a jar.
-It aggregates all classes and resources in _fs-jsr305_, _fs-annotations_ and _fs-core_, and zero-dependency for publishing.
+_fs-all_ is the aggregation of _fs-annotation_ and _fs-core_, should be published as a jar.
+It aggregates all classes and resources in _fs-jsr305_, _fs-annotation_ and _fs-core_, and zero-dependency for publishing.
 
-This module can not only integrate _fs-jsr305_, _fs-annotations_ and _fs-core_'s classes and resources, but also generate aggregations for `Javadoc`, `Jacoco`, and `test reports`.
+This module can not only integrate _fs-jsr305_, _fs-annotation_ and _fs-core_'s classes and resources, but also generate aggregations for `Javadoc`, `Jacoco`, and `test reports`.
 
 [[chapter-internal]]
 == _fs-internal_

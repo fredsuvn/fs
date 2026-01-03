@@ -1,15 +1,15 @@
 package tests.dynamic.aspect;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.value.BooleanVar;
-import space.sunqian.common.base.value.IntVar;
-import space.sunqian.common.base.value.Var;
-import space.sunqian.common.dynamic.aspect.AspectException;
-import space.sunqian.common.dynamic.aspect.AspectHandler;
-import space.sunqian.common.dynamic.aspect.AspectMaker;
-import space.sunqian.common.dynamic.aspect.AspectSpec;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.base.value.BooleanVar;
+import space.sunqian.fs.base.value.IntVar;
+import space.sunqian.fs.base.value.Var;
+import space.sunqian.fs.dynamic.aspect.AspectException;
+import space.sunqian.fs.dynamic.aspect.AspectHandler;
+import space.sunqian.fs.dynamic.aspect.AspectMaker;
+import space.sunqian.fs.dynamic.aspect.AspectSpec;
 
 import java.lang.reflect.Method;
 

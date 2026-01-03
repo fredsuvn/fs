@@ -1,12 +1,12 @@
 package internal.samples;
 
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.annotations.Nullable;
-import space.sunqian.common.dynamic.aspect.AspectHandler;
-import space.sunqian.common.dynamic.aspect.AspectMaker;
-import space.sunqian.common.dynamic.proxy.ProxyHandler;
-import space.sunqian.common.dynamic.proxy.ProxyInvoker;
-import space.sunqian.common.dynamic.proxy.ProxyMaker;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.dynamic.aspect.AspectHandler;
+import space.sunqian.fs.dynamic.aspect.AspectMaker;
+import space.sunqian.fs.dynamic.proxy.ProxyHandler;
+import space.sunqian.fs.dynamic.proxy.ProxyInvoker;
+import space.sunqian.fs.dynamic.proxy.ProxyMaker;
 
 import java.lang.reflect.Method;
 import java.util.Collections;

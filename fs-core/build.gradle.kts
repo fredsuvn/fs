@@ -24,7 +24,7 @@ dependencies {
   //compileOnly("cglib:cglib")
   compileOnly("com.google.protobuf:protobuf-java")
 
-  api(project(":fs-annotations"))
+  api(project(":fs-annotation"))
   api(project(":fs-asm"))
 
   testAnnotationProcessor(platform(project(":fs-dependencies")))

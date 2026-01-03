@@ -1,7 +1,7 @@
 package tests.invoke;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.invoke.InvocationMode;
+import space.sunqian.fs.invoke.InvocationMode;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

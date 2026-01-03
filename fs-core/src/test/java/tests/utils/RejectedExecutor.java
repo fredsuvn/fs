@@ -1,6 +1,6 @@
 package tests.utils;
 
-import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotation.Nonnull;
 
 import java.util.Collection;
 import java.util.Collections;

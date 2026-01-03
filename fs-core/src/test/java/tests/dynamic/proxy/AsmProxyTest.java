@@ -2,16 +2,16 @@ package tests.dynamic.proxy;
 
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.annotations.Nullable;
-import space.sunqian.common.Fs;
-import space.sunqian.common.base.value.BooleanVar;
-import space.sunqian.common.base.value.IntVar;
-import space.sunqian.common.dynamic.proxy.ProxyHandler;
-import space.sunqian.common.dynamic.proxy.ProxyInvoker;
-import space.sunqian.common.dynamic.proxy.ProxyMaker;
-import space.sunqian.common.dynamic.proxy.ProxySpec;
-import space.sunqian.common.dynamic.proxy.asm.AsmProxyMaker;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.Fs;
+import space.sunqian.fs.base.value.BooleanVar;
+import space.sunqian.fs.base.value.IntVar;
+import space.sunqian.fs.dynamic.proxy.ProxyHandler;
+import space.sunqian.fs.dynamic.proxy.ProxyInvoker;
+import space.sunqian.fs.dynamic.proxy.ProxyMaker;
+import space.sunqian.fs.dynamic.proxy.ProxySpec;
+import space.sunqian.fs.dynamic.proxy.asm.AsmProxyMaker;
 import tests.utils.LotsOfMethods;
 
 import java.lang.reflect.Constructor;

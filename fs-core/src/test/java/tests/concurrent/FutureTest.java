@@ -1,8 +1,8 @@
 package tests.concurrent;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.exception.AwaitingException;
-import space.sunqian.common.concurrent.FutureKit;
+import space.sunqian.fs.base.exception.AwaitingException;
+import space.sunqian.fs.concurrent.FutureKit;
 
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;

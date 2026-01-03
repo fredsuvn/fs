@@ -1,7 +1,7 @@
 package tests.base.thread;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.thread.ThreadKit;
+import space.sunqian.fs.base.thread.ThreadKit;
 
 import java.time.Duration;
 

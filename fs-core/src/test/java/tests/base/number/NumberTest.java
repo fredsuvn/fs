@@ -3,7 +3,7 @@ package tests.base.number;
 import internal.test.DataTest;
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.number.NumKit;
+import space.sunqian.fs.base.number.NumKit;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

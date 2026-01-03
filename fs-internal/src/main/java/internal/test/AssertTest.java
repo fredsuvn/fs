@@ -2,8 +2,8 @@ package internal.test;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.annotations.Nullable;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

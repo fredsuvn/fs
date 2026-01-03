@@ -1,8 +1,8 @@
 package tests.reflect;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.io.IOKit;
-import space.sunqian.common.reflect.BytesClassLoader;
+import space.sunqian.fs.io.IOKit;
+import space.sunqian.fs.reflect.BytesClassLoader;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;

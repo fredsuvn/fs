@@ -1,10 +1,10 @@
 package tests.internal;
 
-import org.junit.jupiter.api.Test;
 import internal.test.AssertTest;
 import internal.test.FsTestException;
 import internal.test.MaterialBox;
 import internal.test.TestIOException;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
@@ -15,16 +15,16 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static internal.test.MaterialBox.copyBuffer;
 import static internal.test.MaterialBox.copyBytes;
 import static internal.test.MaterialBox.copyChars;
 import static internal.test.MaterialBox.copyDirect;
 import static internal.test.MaterialBox.newFile;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AssertTestTest implements AssertTest {
 

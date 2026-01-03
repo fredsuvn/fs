@@ -1,7 +1,7 @@
 package internal.tests.benchmarks;
 
-import internal.tests.common.TestPropsData;
 import internal.tests.api.PropertiesCopier;
+import internal.tests.common.TestPropsData;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;

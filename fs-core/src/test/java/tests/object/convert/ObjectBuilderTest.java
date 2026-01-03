@@ -1,13 +1,13 @@
 package tests.object.convert;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.base.exception.UnreachablePointException;
-import space.sunqian.common.object.data.DataObjectException;
-import space.sunqian.common.object.data.ObjectBuilder;
-import space.sunqian.common.object.data.ObjectBuilderProvider;
-import space.sunqian.common.reflect.TypeKit;
-import space.sunqian.common.reflect.TypeRef;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.fs.base.exception.UnreachablePointException;
+import space.sunqian.fs.object.data.DataObjectException;
+import space.sunqian.fs.object.data.ObjectBuilder;
+import space.sunqian.fs.object.data.ObjectBuilderProvider;
+import space.sunqian.fs.reflect.TypeKit;
+import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;

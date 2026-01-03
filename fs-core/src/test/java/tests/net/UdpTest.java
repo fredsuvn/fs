@@ -2,14 +2,14 @@ package tests.net;
 
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.annotations.Nullable;
-import space.sunqian.common.base.chars.CharsKit;
-import space.sunqian.common.base.function.callable.VoidCallable;
-import space.sunqian.common.net.NetException;
-import space.sunqian.common.net.udp.UdpSender;
-import space.sunqian.common.net.udp.UdpServer;
-import space.sunqian.common.net.udp.UdpServerHandler;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.base.function.callable.VoidCallable;
+import space.sunqian.fs.net.NetException;
+import space.sunqian.fs.net.udp.UdpSender;
+import space.sunqian.fs.net.udp.UdpServer;
+import space.sunqian.fs.net.udp.UdpServerHandler;
 
 import java.lang.reflect.Method;
 import java.net.DatagramPacket;

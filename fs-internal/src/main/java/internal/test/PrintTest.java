@@ -1,7 +1,7 @@
 package internal.test;
 
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.annotations.Nullable;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
 
 import java.io.PrintStream;
 

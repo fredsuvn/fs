@@ -2,9 +2,10 @@ package tests.base.logging;
 
 import internal.test.ErrorAppender;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.logging.LogKit;
-import space.sunqian.common.base.logging.SimpleLogger;
-import space.sunqian.common.base.thread.TraceKit;
+import space.sunqian.fs.base.logging.LogKit;
+import space.sunqian.fs.base.logging.SimpleLog;
+import space.sunqian.fs.base.logging.SimpleLogger;
+import space.sunqian.fs.base.thread.TraceKit;
 
 import java.lang.reflect.Method;
 
@@ -33,7 +34,7 @@ public class LogTest {
             assertEquals(TraceKit.EMPTY_FRAME, caller);
             caller = (StackTraceElement) getCallerTrace.invoke(
                 sysLogger, infoMethod, new StackTraceElement[]{
-                    new StackTraceElement("space.sunqian.common.base.logging.SimpleLoggerImpl",
+                    new StackTraceElement(SimpleLog.class.getPackage().getName() + ".SimpleLoggerImpl",
                         "info",
                         "ErrorAppender.java", 1)});
             assertEquals(TraceKit.EMPTY_FRAME, caller);

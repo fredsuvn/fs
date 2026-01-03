@@ -2,8 +2,8 @@ package tests.codec;
 
 import internal.test.DataTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.chars.CharsKit;
-import space.sunqian.common.codec.Base64Kit;
+import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.codec.Base64Kit;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

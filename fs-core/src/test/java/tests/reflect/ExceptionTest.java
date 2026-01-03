@@ -1,7 +1,7 @@
 package tests.reflect;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.reflect.ReflectionException;
+import space.sunqian.fs.reflect.ReflectionException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

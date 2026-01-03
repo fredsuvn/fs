@@ -7,10 +7,10 @@ plugins {
   id("fs")
 }
 
-description = "Aggregation of fs, including fs-jsr305, fs-annotations and fs-core, without dependencies."
+description = "Aggregation of fs, including fs-jsr305, fs-annotation and fs-core, without dependencies."
 
 val jsr305Project = project(":fs-jsr305")
-val annotationProject = project(":fs-annotations")
+val annotationProject = project(":fs-annotation")
 val asmProject = project(":fs-asm")
 val coreProject = project(":fs-core")
 val internalProject = project(":fs-internal")

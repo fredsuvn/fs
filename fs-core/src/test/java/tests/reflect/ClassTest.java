@@ -3,10 +3,10 @@ package tests.reflect;
 import internal.test.AssertTest;
 import internal.test.J17Also;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.Fs;
-import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
-import space.sunqian.common.reflect.BytesClassLoader;
-import space.sunqian.common.reflect.ClassKit;
+import space.sunqian.fs.Fs;
+import space.sunqian.fs.base.exception.UnknownPrimitiveTypeException;
+import space.sunqian.fs.reflect.BytesClassLoader;
+import space.sunqian.fs.reflect.ClassKit;
 import tests.utils.ErrorConstructor;
 
 import java.lang.reflect.Constructor;

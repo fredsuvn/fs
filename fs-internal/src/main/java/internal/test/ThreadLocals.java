@@ -1,6 +1,6 @@
 package internal.test;
 
-import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotation.Nonnull;
 
 import java.util.HashMap;
 import java.util.Map;

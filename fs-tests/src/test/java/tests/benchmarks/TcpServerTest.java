@@ -3,8 +3,8 @@ package tests.benchmarks;
 import internal.test.DataTest;
 import internal.tests.api.TcpServerApi;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.io.IOKit;
-import space.sunqian.common.net.tcp.TcpClient;
+import space.sunqian.fs.io.IOKit;
+import space.sunqian.fs.net.tcp.TcpClient;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 

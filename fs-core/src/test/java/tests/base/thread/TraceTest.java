@@ -2,7 +2,7 @@ package tests.base.thread;
 
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.thread.TraceKit;
+import space.sunqian.fs.base.thread.TraceKit;
 
 import java.lang.reflect.Method;
 import java.util.Collections;

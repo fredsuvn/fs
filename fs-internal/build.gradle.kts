@@ -8,7 +8,7 @@ description = "Internal supporting for fs."
 
 dependencies {
   implementation(platform(project(":fs-dependencies")))
-  implementation(project(":fs-annotations"))
+  implementation(project(":fs-annotation"))
   api("org.junit.jupiter:junit-jupiter-api")
   runtimeOnly("org.junit.jupiter:junit-jupiter-engine")
   runtimeOnly("org.junit.platform:junit-platform-launcher")

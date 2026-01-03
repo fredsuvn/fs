@@ -1,7 +1,7 @@
 package tests.invoke;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.invoke.InvocationException;
+import space.sunqian.fs.invoke.InvocationException;
 
 import java.lang.reflect.InvocationTargetException;
 

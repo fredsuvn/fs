@@ -2,9 +2,9 @@ package tests;
 
 import internal.test.J17Also;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.FsLoader;
-import space.sunqian.common.base.exception.UnknownTypeException;
-import space.sunqian.common.base.system.JvmKit;
+import space.sunqian.fs.FsLoader;
+import space.sunqian.fs.base.exception.UnknownTypeException;
+import space.sunqian.fs.base.system.JvmKit;
 
 import java.util.Arrays;
 

@@ -2,8 +2,8 @@ package tests.base.chars;
 
 import internal.test.AssertTest;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.chars.CharsKit;
-import space.sunqian.common.base.system.SystemKeys;
+import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.base.system.SystemKeys;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

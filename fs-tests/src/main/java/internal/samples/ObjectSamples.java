@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import space.sunqian.common.object.convert.ObjectConverter;
+import space.sunqian.fs.object.convert.ObjectConverter;
 
 public class ObjectSamples {
 

@@ -1,6 +1,6 @@
 package tests.io;
 
-import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotation.Nonnull;
 
 import java.io.IOException;
 import java.io.Reader;

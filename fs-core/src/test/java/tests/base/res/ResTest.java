@@ -1,8 +1,8 @@
 package tests.base.res;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.system.ResKit;
-import space.sunqian.common.io.IOKit;
+import space.sunqian.fs.base.system.ResKit;
+import space.sunqian.fs.io.IOKit;
 
 import java.net.URL;
 import java.util.Set;

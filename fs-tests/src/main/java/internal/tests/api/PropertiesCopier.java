@@ -3,7 +3,7 @@ package internal.tests.api;
 import cn.hutool.core.bean.BeanUtil;
 import internal.tests.common.TestPropsData;
 import org.apache.commons.beanutils.BeanUtils;
-import space.sunqian.common.Fs;
+import space.sunqian.fs.Fs;
 
 public interface PropertiesCopier {
 

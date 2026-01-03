@@ -1,7 +1,7 @@
 package tests.dynamic.aspect;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.dynamic.aspect.AspectException;
+import space.sunqian.fs.dynamic.aspect.AspectException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

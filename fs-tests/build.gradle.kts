@@ -11,14 +11,14 @@ dependencies {
   annotationProcessor("org.projectlombok:lombok")
 
   implementation(platform(project(":fs-dependencies")))
-  implementation(project(":fs-annotations"))
+  implementation(project(":fs-annotation"))
   implementation(project(":fs-core"))
   implementation(project(":fs-internal"))
 
   //implementation("cglib:cglib")
 
   jmh(platform(project(":fs-dependencies")))
-  jmh(project(":fs-annotations"))
+  jmh(project(":fs-annotation"))
   jmh(project(":fs-core"))
   jmh(project(":fs-internal"))
   jmh("org.openjdk.jmh:jmh-generator-annprocess")

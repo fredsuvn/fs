@@ -1,13 +1,13 @@
 package internal.samples;
 
-import space.sunqian.annotations.CachedResult;
-import space.sunqian.annotations.DefaultNonNull;
-import space.sunqian.annotations.DefaultNullable;
-import space.sunqian.annotations.Immutable;
-import space.sunqian.annotations.NonExported;
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.annotations.Nullable;
-import space.sunqian.annotations.OutParam;
+import space.sunqian.annotation.CachedResult;
+import space.sunqian.annotation.DefaultNonNull;
+import space.sunqian.annotation.DefaultNullable;
+import space.sunqian.annotation.Immutable;
+import space.sunqian.annotation.NonExported;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.annotation.OutParam;
 
 import java.util.Collections;
 import java.util.List;

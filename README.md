@@ -28,7 +28,7 @@ _fs_ provides adaptive implementation loading that automatically selects the opt
 JDK environment (from `JDK8` to `JDK17`). Its main code is based on `JDK8`, but some interfaces have multiple
 implementation classes of different jdk versions.
 
-For example, the implementation class of `space.sunqian.common.net.http.HttpCaller` has two versions:
+For example, the implementation class of `space.sunqian.fs.net.http.HttpCaller` has two versions:
 `JDK8` and `JDK11`. The former is based on `java.net.HttpURLConnection`, and the latter is based on
 `java.net.http.HttpClient`.
 
@@ -43,16 +43,16 @@ This ensures:
 
 _fs_ has higher performance than other common libraries in many places, Here are some examples:
 
-- **Simple Cache** (`space.sunqian.common.cache.SimpleCache`):
+- **Simple Cache** (`space.sunqian.fs.cache.SimpleCache`):
   SimpleCache only considers common cache functions, so it has higher performance in common functions.
   Here is the benchmark: [CacheBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/CacheBenchmark.java)
 
-- **CopyProperties** (`Fs.copyProperties / space.sunqian.common.object.convert.DataMapper`):
+- **CopyProperties** (`Fs.copyProperties / space.sunqian.fs.object.convert.DataMapper`):
   DataMapper has better performance and more comprehensive support.
   Here is the
   benchmark: [CopyPropertiesBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/CopyPropertiesBenchmark.java)
 
-- **TCP Server** (`space.sunqian.common.net.tcp.TcpServer`):
+- **TCP Server** (`space.sunqian.fs.net.tcp.TcpServer`):
   Rare interface server implementation with slightly better performance than **netty**.
   Here is the benchmark: [TcpServerBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/TcpServerBenchmark.java)
 
@@ -71,7 +71,7 @@ this, it also implements its own annotations, such as:
 
 Some functions of _fs_ are based on
 [ASM](https://asm.ow2.io) and [protobuf](https://github.com/protocolbuffers/protobuf), such as bytecode proxy, aspect,
-and object conversion about protobuf. The *ASM* uses built-in package `space.sunqian.common.asm`, so this lib has no
+and object conversion about protobuf. The *ASM* uses built-in package `space.sunqian.fs.asm`, so this lib has no
 dependencies for package `org.objectweb.asm`.
 
 For protobuf, although it depends on `com.google.protobuf`, the protobuf classes will not be loaded unless necessary.
@@ -88,7 +88,7 @@ The test passing rate and JaCoCo coverage for this library are both 100%:
 
 ## Samples:
 
-- [Annotations](./fs-tests/src/main/java/internal/samples/AnnotationSample.java)
+- [Annotation](./fs-tests/src/main/java/internal/samples/AnnotationSample.java)
 - [Simple Cache](./fs-tests/src/main/java/internal/samples/CacheSample.java)
 - [Dependency Injection](./fs-tests/src/main/java/internal/samples/DISample.java)
 - [Proxy and Aspect](./fs-tests/src/main/java/internal/samples/ProxyAndAspectSample.java)

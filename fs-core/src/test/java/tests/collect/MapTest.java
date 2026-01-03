@@ -1,8 +1,8 @@
 package tests.collect;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.Fs;
-import space.sunqian.common.collect.MapKit;
+import space.sunqian.fs.Fs;
+import space.sunqian.fs.collect.MapKit;
 
 import java.util.ArrayList;
 import java.util.Arrays;

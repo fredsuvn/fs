@@ -1,7 +1,7 @@
 package tests.internal;
 
-import org.junit.jupiter.api.Test;
 import internal.test.ErrorCharset;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;
 

@@ -4,7 +4,7 @@ plugins {
 
 description = "Root project of fs."
 
-rootProject.group = "space.sunqian.common"
+rootProject.group = "space.sunqian.fs"
 
 val projectVersion: String by project
 

@@ -1,8 +1,8 @@
 package space.sunqian.egg;
 
-import space.sunqian.annotations.Nonnull;
-import space.sunqian.common.codec.Base64Kit;
-import space.sunqian.common.reflect.ClassKit;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.fs.codec.Base64Kit;
+import space.sunqian.fs.reflect.ClassKit;
 
 public class FsEggLoader {
 

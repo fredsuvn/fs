@@ -1,6 +1,6 @@
 package internal.test;
 
-import space.sunqian.annotations.Nullable;
+import space.sunqian.annotation.Nullable;
 
 /**
  * Exception for I/O tests.

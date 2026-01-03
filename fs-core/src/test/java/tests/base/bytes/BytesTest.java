@@ -1,7 +1,7 @@
 package tests.base.bytes;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.bytes.BytesKit;
+import space.sunqian.fs.base.bytes.BytesKit;
 
 import java.nio.ByteBuffer;
 

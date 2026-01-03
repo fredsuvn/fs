@@ -1,7 +1,7 @@
 package tests.dynamic.proxy;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.dynamic.proxy.ProxyException;
+import space.sunqian.fs.dynamic.proxy.ProxyException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

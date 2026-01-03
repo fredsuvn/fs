@@ -10,7 +10,7 @@ dependencies {
   annotationProcessor("org.projectlombok:lombok")
 
   implementation(platform(project(":fs-dependencies")))
-  implementation(project(":fs-annotations"))
+  implementation(project(":fs-annotation"))
   implementation(project(":fs-core"))
 
   testImplementation(platform(project(":fs-dependencies")))

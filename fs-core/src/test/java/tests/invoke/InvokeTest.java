@@ -1,11 +1,11 @@
 package tests.invoke;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.Fs;
-import space.sunqian.common.invoke.Invocable;
-import space.sunqian.common.invoke.InvocationException;
-import space.sunqian.common.invoke.InvocationMode;
-import space.sunqian.common.invoke.InvokeKit;
+import space.sunqian.fs.Fs;
+import space.sunqian.fs.invoke.Invocable;
+import space.sunqian.fs.invoke.InvocationException;
+import space.sunqian.fs.invoke.InvocationMode;
+import space.sunqian.fs.invoke.InvokeKit;
 import tests.utils.LotsOfMethods;
 
 import java.lang.invoke.MethodHandle;

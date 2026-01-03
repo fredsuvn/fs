@@ -11,10 +11,13 @@ pluginManagement {
   }
 
   plugins {
+    // protobuf
     val protobufPluginVersion: String by settings
     id("com.google.protobuf") version protobufPluginVersion
+    // jmh
     val jmhPluginVersion: String by settings
     id("me.champeau.jmh") version jmhPluginVersion
+    // spotbugs
     //val spotbugsPluginVersion: String by settings
     //id("com.github.spotbugs") version spotbugsPluginVersion
   }

@@ -2,10 +2,10 @@ package tests.base.string;
 
 import internal.test.ErrorAppender;
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.base.string.NameFormatException;
-import space.sunqian.common.base.string.NameFormatter;
-import space.sunqian.common.base.value.Span;
-import space.sunqian.common.collect.ArrayKit;
+import space.sunqian.fs.base.string.NameFormatException;
+import space.sunqian.fs.base.string.NameFormatter;
+import space.sunqian.fs.base.value.Span;
+import space.sunqian.fs.collect.ArrayKit;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -1,7 +1,7 @@
 package tests.collect;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.collect.SetKit;
+import space.sunqian.fs.collect.SetKit;
 
 import java.util.Arrays;
 import java.util.HashSet;

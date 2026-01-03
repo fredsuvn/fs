@@ -1,7 +1,7 @@
 package tests.reflect;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.common.reflect.TypeRef;
+import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
