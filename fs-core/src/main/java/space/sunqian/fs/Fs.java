@@ -5,11 +5,11 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.base.exception.AwaitingException;
-import space.sunqian.fs.base.exception.UnknownArrayTypeException;
 import space.sunqian.fs.base.function.callable.BooleanCallable;
 import space.sunqian.fs.base.function.callable.VoidCallable;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.process.ProcessKit;
+import space.sunqian.fs.base.string.StringKit;
 import space.sunqian.fs.base.thread.ThreadKit;
 import space.sunqian.fs.base.value.Ret;
 import space.sunqian.fs.collect.ArrayKit;
@@ -18,6 +18,7 @@ import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.collect.StreamKit;
 import space.sunqian.fs.io.IORuntimeException;
+import space.sunqian.fs.object.ObjectKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.DataMapper;
 import space.sunqian.fs.object.convert.ObjectConvertException;
@@ -288,34 +289,35 @@ public class Fs {
         }
     }
 
+    //---------------- Equals Begin ----------------//
+
     /**
      * Returns whether the given objects are equal. If the given objects are arrays, uses {@code Arrays.equals} or
      * {@link Arrays#deepEquals(Object[], Object[])} if necessary.
      * <p>
      * This method is equivalent to ({@link #equalsWith(Object, Object, boolean, boolean)}):
      * {@code equalsWith(a, b, true, true)}.
+     * <p>
+     * This method is a shortcut to the {@link ObjectKit#equals(Object, Object)}.
      *
      * @param a the given object a
      * @param b the given object b
      * @return whether the given objects are equal
      */
     public static boolean equals(@Nullable Object a, @Nullable Object b) {
-        return equalsWith(a, b, true, true);
+        return ObjectKit.equals(a, b);
     }
 
     /**
      * Returns whether the given objects are equal each other by {@link #equals(Object, Object)}.
+     * <p>
+     * This method is a shortcut to the {@link ObjectKit#equalsAll(Object[])}.
      *
      * @param objects the given objects
      * @return whether the given objects are equal
      */
     public static boolean equalsAll(@Nullable Object @Nonnull ... objects) {
-        for (int i = 0; i < objects.length - 1; i++) {
-            if (!equals(objects[i], objects[i + 1])) {
-                return false;
-            }
-        }
-        return true;
+        return ObjectKit.equalsAll(objects);
     }
 
     /**
@@ -337,6 +339,8 @@ public class Fs {
      *         Returns {@link Objects#equals(Object, Object)} otherwise.
      *     </li>
      * </ul>
+     * <p>
+     * This method is a shortcut to the {@link ObjectKit#equalsWith(Object, Object, boolean, boolean)}.
      *
      * @param a           the given object a
      * @param b           the given object b
@@ -345,67 +349,38 @@ public class Fs {
      * @return whether the given objects are equal
      */
     public static boolean equalsWith(@Nullable Object a, @Nullable Object b, boolean arrayEquals, boolean deep) {
-        if (a == b) {
-            return true;
-        }
-        if (a == null || b == null) {
-            return false;
-        }
-        if (!arrayEquals) {
-            return Objects.equals(a, b);
-        }
-        Class<?> typeA = a.getClass();
-        Class<?> typeB = b.getClass();
-        if (typeA.isArray() && Objects.equals(typeA, typeB)) {
-            return equalsArray(a, b, deep);
-        }
-        return Objects.equals(a, b);
+        return ObjectKit.equalsWith(a, b, arrayEquals, deep);
     }
 
-    private static boolean equalsArray(@Nonnull Object a, @Nonnull Object b, boolean deep) {
-        if (a instanceof Object[]) {
-            return deep ? Arrays.deepEquals((Object[]) a, (Object[]) b) : Arrays.equals((Object[]) a, (Object[]) b);
-        } else if (a instanceof boolean[]) {
-            return Arrays.equals((boolean[]) a, (boolean[]) b);
-        } else if (a instanceof byte[]) {
-            return Arrays.equals((byte[]) a, (byte[]) b);
-        } else if (a instanceof short[]) {
-            return Arrays.equals((short[]) a, (short[]) b);
-        } else if (a instanceof char[]) {
-            return Arrays.equals((char[]) a, (char[]) b);
-        } else if (a instanceof int[]) {
-            return Arrays.equals((int[]) a, (int[]) b);
-        } else if (a instanceof long[]) {
-            return Arrays.equals((long[]) a, (long[]) b);
-        } else if (a instanceof float[]) {
-            return Arrays.equals((float[]) a, (float[]) b);
-        } else if (a instanceof double[]) {
-            return Arrays.equals((double[]) a, (double[]) b);
-        }
-        throw new UnknownArrayTypeException(a.getClass());
-    }
+    //---------------- Equals End ----------------//
+
+    //---------------- Hashcode Begin ----------------//
 
     /**
      * Returns the hashcode of the given object. If the given object is array, uses {@code Arrays.hashCode} or
      * {@link Arrays#deepHashCode(Object[])} if necessary.
      * <p>
      * This method is equivalent to ({@link #hashWith(Object, boolean, boolean)}): {@code hashWith(obj, true, true)}.
+     * <p>
+     * This method is a shortcut to the {@link ObjectKit#hashCode(Object)}.
      *
      * @param obj the given object
      * @return the hashcode of the given object
      */
     public static int hashCode(@Nullable Object obj) {
-        return hashWith(obj, true, true);
+        return ObjectKit.hashCode(obj);
     }
 
     /**
      * Returns the hashcode of the given objects via {@link Arrays#deepHashCode(Object[])}.
+     * <p>
+     * This method is a shortcut to the {@link ObjectKit#hashAll(Object[])}.
      *
      * @param objs the given objects
      * @return the hashcode of the given objects via {@link Arrays#deepHashCode(Object[])}
      */
     public static int hashAll(@Nullable Object @Nonnull ... objs) {
-        return Arrays.deepHashCode(objs);
+        return ObjectKit.hashAll(objs);
     }
 
     /**
@@ -427,6 +402,8 @@ public class Fs {
      *         Returns {@link Objects#hashCode(Object)} otherwise.
      *     </li>
      * </ul>
+     * <p>
+     * This method is a shortcut to the {@link ObjectKit#hashWith(Object, boolean, boolean)}.
      *
      * @param obj       the given object
      * @param arrayHash the arrayHash option
@@ -434,57 +411,86 @@ public class Fs {
      * @return the hashcode of the given object
      */
     public static int hashWith(@Nullable Object obj, boolean arrayHash, boolean deep) {
-        if (obj == null || !arrayHash) {
-            return Objects.hashCode(obj);
-        }
-        Class<?> cls = obj.getClass();
-        if (cls.isArray()) {
-            return hashArray(obj, deep);
-        }
-        return obj.hashCode();
-    }
-
-    private static int hashArray(@Nonnull Object obj, boolean deep) {
-        if (obj instanceof Object[]) {
-            return deep ? Arrays.deepHashCode((Object[]) obj) : Arrays.hashCode((Object[]) obj);
-        }
-        if (obj instanceof boolean[]) {
-            return Arrays.hashCode((boolean[]) obj);
-        }
-        if (obj instanceof byte[]) {
-            return Arrays.hashCode((byte[]) obj);
-        }
-        if (obj instanceof short[]) {
-            return Arrays.hashCode((short[]) obj);
-        }
-        if (obj instanceof char[]) {
-            return Arrays.hashCode((char[]) obj);
-        }
-        if (obj instanceof int[]) {
-            return Arrays.hashCode((int[]) obj);
-        }
-        if (obj instanceof long[]) {
-            return Arrays.hashCode((long[]) obj);
-        }
-        if (obj instanceof float[]) {
-            return Arrays.hashCode((float[]) obj);
-        }
-        if (obj instanceof double[]) {
-            return Arrays.hashCode((double[]) obj);
-        }
-        throw new UnknownArrayTypeException(obj.getClass());
+        return ObjectKit.hashWith(obj, arrayHash, deep);
     }
 
     /**
      * Returns the identity hashcode of the given object, this method is equivalent to
      * {@link System#identityHashCode(Object)}.
+     * <p>
+     * This method is a shortcut to the {@link ObjectKit#id(Object)}.
      *
      * @param obj the given object
      * @return the identity hashcode of the given object
      */
-    public static int hashId(@Nullable Object obj) {
-        return System.identityHashCode(obj);
+    public static int id(@Nullable Object obj) {
+        return ObjectKit.id(obj);
     }
+
+    //---------------- Hashcode End ----------------//
+
+    //---------------- ToString Begin ----------------//
+
+    /**
+     * Returns the {@code toString} of the given object. If the given object is array, uses {@code Arrays.toString} or
+     * {@link Arrays#deepToString(Object[])} if necessary.
+     * <p>
+     * This method is equivalent to ({@link #toStringWith(Object, boolean, boolean)}):
+     * {@code toStringWith(obj, true, true)}.
+     * <p>
+     * This method is a shortcut to the {@link StringKit#toString(Object)}.
+     *
+     * @param obj the given object
+     * @return the {@code toString} of the given object
+     */
+    public static @Nonnull String toString(@Nullable Object obj) {
+        return StringKit.toString(obj);
+    }
+
+    /**
+     * Returns the {@code toString} of the given objects via {@link Arrays#deepToString(Object[])}.
+     * <p>
+     * This method is a shortcut to the {@link StringKit#toStringAll(Object[])}.
+     *
+     * @param objs the given objects
+     * @return the {@code toString} of the given objects via {@link Arrays#deepToString(Object[])}
+     */
+    public static @Nonnull String toStringAll(@Nullable Object @Nonnull ... objs) {
+        return StringKit.toStringAll(objs);
+    }
+
+    /**
+     * Returns the {@code toString} of the given object. This method follows the following logic:
+     * <ul>
+     *     <li>
+     *         If the given object is not an array, returns {@link Objects#toString(Object)}.
+     *     </li>
+     *     <li>
+     *         If the {@code arrayToString} is {@code true}:
+     *         <ul>
+     *             <li>
+     *                 If the {@code deep} is {@code true}, uses {@link Arrays#deepToString(Object[])} for them.
+     *                 Otherwise, uses {@code Arrays.toString}.
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Returns {@link Objects#toString(Object)} otherwise.
+     *     </li>
+     * </ul>
+     * <p>
+     * This method is a shortcut to the {@link StringKit#toStringWith(Object, boolean, boolean)}.
+     *
+     * @param obj           the given object
+     * @param arrayToString the arrayToString option
+     * @param deep          the deep option
+     * @return the {@code toString} of the given object
+     */
+    public static @Nonnull String toStringWith(@Nullable Object obj, boolean arrayToString, boolean deep) {
+        return StringKit.toStringWith(obj, arrayToString, deep);
+    }
+
+    //---------------- ToString End ----------------//
 
     //---------------- Copy Properties Begin ----------------//
 

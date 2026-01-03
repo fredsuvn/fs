@@ -147,7 +147,7 @@ public class AsmProxyTest implements PrintTest {
             SameMethodA sa = pc.newInstance();
             assertFalse(sa.equals(""));
             assertEquals(0, counter.get());
-            assertEquals(sa.hashCode(), Fs.hashId(sa));
+            assertEquals(sa.hashCode(), Fs.id(sa));
             assertEquals(0, counter.get());
             assertEquals(sa.toString(), sa.getClass().getName() + '@' + Integer.toHexString(sa.hashCode()));
             assertEquals(0, counter.get());
@@ -525,7 +525,7 @@ public class AsmProxyTest implements PrintTest {
     private void testInterA(InterA obj, IntVar counter) {
         assertFalse(obj.equals(""));
         assertEquals(1, counter.get());
-        assertEquals(obj.hashCode(), Fs.hashId(obj));
+        assertEquals(obj.hashCode(), Fs.id(obj));
         assertEquals(2, counter.get());
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
         assertEquals(5, counter.get());
@@ -556,7 +556,7 @@ public class AsmProxyTest implements PrintTest {
     private void testInterB(InterB obj, IntVar counter) {
         assertFalse(obj.equals(""));
         assertEquals(1, counter.get());
-        assertEquals(obj.hashCode(), Fs.hashId(obj));
+        assertEquals(obj.hashCode(), Fs.id(obj));
         assertEquals(2, counter.get());
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
         assertEquals(5, counter.get());
@@ -587,7 +587,7 @@ public class AsmProxyTest implements PrintTest {
     private void testInterD(InterD obj, ClsD cd, IntVar counter) {
         assertFalse(obj.equals(""));
         assertEquals(1, counter.get());
-        assertEquals(obj.hashCode(), Fs.hashId(obj));
+        assertEquals(obj.hashCode(), Fs.id(obj));
         assertEquals(2, counter.get());
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
         assertEquals(5, counter.get());
@@ -648,7 +648,7 @@ public class AsmProxyTest implements PrintTest {
     private void testInterC(InterC obj1, InterC<String> obj2, IntVar counter) {
         assertFalse(obj1.equals(""));
         assertEquals(1, counter.get());
-        assertEquals(obj1.hashCode(), Fs.hashId(obj1));
+        assertEquals(obj1.hashCode(), Fs.id(obj1));
         assertEquals(2, counter.get());
         assertEquals(obj1.toString(), obj1.getClass().getName() + '@' + Integer.toHexString(obj1.hashCode()));
         assertEquals(5, counter.get());
@@ -657,7 +657,7 @@ public class AsmProxyTest implements PrintTest {
         counter.clear();
         assertFalse(obj2.equals(""));
         assertEquals(1, counter.get());
-        assertEquals(obj2.hashCode(), Fs.hashId(obj2));
+        assertEquals(obj2.hashCode(), Fs.id(obj2));
         assertEquals(2, counter.get());
         assertEquals(obj2.toString(), obj2.getClass().getName() + '@' + Integer.toHexString(obj2.hashCode()));
         assertEquals(5, counter.get());
@@ -669,7 +669,7 @@ public class AsmProxyTest implements PrintTest {
     private void testClsA(ClsA obj, IntVar counter) {
         assertFalse(obj.equals(""));
         assertEquals(1, counter.get());
-        assertEquals(obj.hashCode(), Fs.hashId(obj));
+        assertEquals(obj.hashCode(), Fs.id(obj));
         assertEquals(2, counter.get());
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
         assertEquals(5, counter.get());
@@ -680,7 +680,7 @@ public class AsmProxyTest implements PrintTest {
     private void testClsB(ClsB obj1, ClsB<String> obj2, IntVar counter) {
         assertFalse(obj1.equals(""));
         assertEquals(1, counter.get());
-        assertEquals(obj1.hashCode(), Fs.hashId(obj1));
+        assertEquals(obj1.hashCode(), Fs.id(obj1));
         assertEquals(2, counter.get());
         assertEquals(obj1.toString(), obj1.getClass().getName() + '@' + Integer.toHexString(obj1.hashCode()));
         assertEquals(5, counter.get());
@@ -689,7 +689,7 @@ public class AsmProxyTest implements PrintTest {
         counter.clear();
         assertFalse(obj2.equals(""));
         assertEquals(1, counter.get());
-        assertEquals(obj2.hashCode(), Fs.hashId(obj2));
+        assertEquals(obj2.hashCode(), Fs.id(obj2));
         assertEquals(2, counter.get());
         assertEquals(obj2.toString(), obj2.getClass().getName() + '@' + Integer.toHexString(obj2.hashCode()));
         assertEquals(5, counter.get());
@@ -701,7 +701,7 @@ public class AsmProxyTest implements PrintTest {
     private void testClsC(ClsC obj, IntVar counter) {
         assertFalse(obj.equals(""));
         assertEquals(1, counter.get());
-        assertEquals(obj.hashCode(), Fs.hashId(obj));
+        assertEquals(obj.hashCode(), Fs.id(obj));
         assertEquals(2, counter.get());
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
         assertEquals(5, counter.get());

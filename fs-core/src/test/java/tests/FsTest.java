@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.exception.AwaitingException;
-import space.sunqian.fs.base.exception.UnknownArrayTypeException;
 import space.sunqian.fs.base.exception.UnreachablePointException;
 import space.sunqian.fs.base.system.OSKit;
 import space.sunqian.fs.io.IOKit;
@@ -18,7 +17,6 @@ import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -131,95 +129,6 @@ public class FsTest implements AssertTest, PrintTest {
         assertTrue(Fs.equalsAll(new Object[]{""}));
         assertTrue(Fs.equalsAll(new Object[]{"", ""}));
         assertFalse(Fs.equalsAll(new Object[]{"1", "2"}));
-
-        // boolean
-        assertTrue(Fs.equals(new boolean[]{true}, new boolean[]{true}));
-        assertFalse(Fs.equals(new boolean[]{true}, new byte[]{1}));
-        assertFalse(Fs.equals(new boolean[]{true}, new short[]{1}));
-        assertFalse(Fs.equals(new boolean[]{true}, new char[]{1}));
-        assertFalse(Fs.equals(new boolean[]{true}, new int[]{1}));
-        assertFalse(Fs.equals(new boolean[]{true}, new long[]{1}));
-        assertFalse(Fs.equals(new boolean[]{true}, new float[]{1}));
-        assertFalse(Fs.equals(new boolean[]{true}, new double[]{1}));
-
-        // byte
-        assertFalse(Fs.equals(new byte[]{1}, new boolean[]{true}));
-        assertTrue(Fs.equals(new byte[]{1}, new byte[]{1}));
-        assertFalse(Fs.equals(new byte[]{1}, new short[]{1}));
-        assertFalse(Fs.equals(new byte[]{1}, new char[]{1}));
-        assertFalse(Fs.equals(new byte[]{1}, new int[]{1}));
-        assertFalse(Fs.equals(new byte[]{1}, new long[]{1}));
-        assertFalse(Fs.equals(new byte[]{1}, new float[]{1}));
-        assertFalse(Fs.equals(new byte[]{1}, new double[]{1}));
-
-        // short
-        assertFalse(Fs.equals(new short[]{1}, new boolean[]{true}));
-        assertFalse(Fs.equals(new short[]{1}, new byte[]{1}));
-        assertTrue(Fs.equals(new short[]{1}, new short[]{1}));
-        assertFalse(Fs.equals(new short[]{1}, new char[]{1}));
-        assertFalse(Fs.equals(new short[]{1}, new int[]{1}));
-        assertFalse(Fs.equals(new short[]{1}, new long[]{1}));
-        assertFalse(Fs.equals(new short[]{1}, new float[]{1}));
-        assertFalse(Fs.equals(new short[]{1}, new double[]{1}));
-
-        // char
-        assertFalse(Fs.equals(new char[]{1}, new boolean[]{true}));
-        assertFalse(Fs.equals(new char[]{1}, new byte[]{1}));
-        assertFalse(Fs.equals(new char[]{1}, new short[]{1}));
-        assertTrue(Fs.equals(new char[]{1}, new char[]{1}));
-        assertFalse(Fs.equals(new char[]{1}, new int[]{1}));
-        assertFalse(Fs.equals(new char[]{1}, new long[]{1}));
-        assertFalse(Fs.equals(new char[]{1}, new float[]{1}));
-        assertFalse(Fs.equals(new char[]{1}, new double[]{1}));
-
-        // int
-        assertFalse(Fs.equals(new int[]{1}, new boolean[]{true}));
-        assertFalse(Fs.equals(new int[]{1}, new byte[]{1}));
-        assertFalse(Fs.equals(new int[]{1}, new short[]{1}));
-        assertFalse(Fs.equals(new int[]{1}, new char[]{1}));
-        assertTrue(Fs.equals(new int[]{1}, new int[]{1}));
-        assertFalse(Fs.equals(new int[]{1}, new long[]{1}));
-        assertFalse(Fs.equals(new int[]{1}, new float[]{1}));
-        assertFalse(Fs.equals(new int[]{1}, new double[]{1}));
-
-        // long
-        assertFalse(Fs.equals(new long[]{1}, new boolean[]{true}));
-        assertFalse(Fs.equals(new long[]{1}, new byte[]{1}));
-        assertFalse(Fs.equals(new long[]{1}, new short[]{1}));
-        assertFalse(Fs.equals(new long[]{1}, new char[]{1}));
-        assertFalse(Fs.equals(new long[]{1}, new int[]{1}));
-        assertTrue(Fs.equals(new long[]{1}, new long[]{1}));
-        assertFalse(Fs.equals(new long[]{1}, new float[]{1}));
-        assertFalse(Fs.equals(new long[]{1}, new double[]{1}));
-
-        // float
-        assertFalse(Fs.equals(new float[]{1}, new boolean[]{true}));
-        assertFalse(Fs.equals(new float[]{1}, new byte[]{1}));
-        assertFalse(Fs.equals(new float[]{1}, new short[]{1}));
-        assertFalse(Fs.equals(new float[]{1}, new char[]{1}));
-        assertFalse(Fs.equals(new float[]{1}, new int[]{1}));
-        assertFalse(Fs.equals(new float[]{1}, new long[]{1}));
-        assertTrue(Fs.equals(new float[]{1}, new float[]{1}));
-        assertFalse(Fs.equals(new float[]{1}, new double[]{1}));
-
-        // double
-        assertFalse(Fs.equals(new double[]{1}, new boolean[]{true}));
-        assertFalse(Fs.equals(new double[]{1}, new byte[]{1}));
-        assertFalse(Fs.equals(new double[]{1}, new short[]{1}));
-        assertFalse(Fs.equals(new double[]{1}, new char[]{1}));
-        assertFalse(Fs.equals(new double[]{1}, new int[]{1}));
-        assertFalse(Fs.equals(new double[]{1}, new long[]{1}));
-        assertFalse(Fs.equals(new double[]{1}, new float[]{1}));
-        assertTrue(Fs.equals(new double[]{1}, new double[]{1}));
-
-        // object
-        assertFalse(Fs.equals(new Object[]{1}, new boolean[]{true}));
-        assertTrue(Fs.equalsWith(new Object[]{1}, new Object[]{1}, true, true));
-        assertFalse(Fs.equalsWith(new Object[]{new Object[]{1}}, new Object[]{new Object[]{1}}, true, false));
-
-        // unknown:
-        Method equalsArray = Fs.class.getDeclaredMethod("equalsArray", Object.class, Object.class, boolean.class);
-        invokeThrows(UnknownArrayTypeException.class, equalsArray, null, "str", "str", true);
     }
 
     @Test
@@ -241,15 +150,20 @@ public class FsTest implements AssertTest, PrintTest {
         assertEquals(Fs.hashCode(new long[]{6, 66}), Arrays.hashCode(new long[]{6, 66}));
         assertEquals(Fs.hashCode(new float[]{6, 66}), Arrays.hashCode(new float[]{6, 66}));
         assertEquals(Fs.hashCode(new double[]{6, 66}), Arrays.hashCode(new double[]{6, 66}));
-        assertEquals(Fs.hashId(str), System.identityHashCode(str));
+        assertEquals(Fs.id(str), System.identityHashCode(str));
+    }
 
-        // null:
-        assertEquals(Fs.hashCode(null), Objects.hashCode(null));
-        assertEquals(Fs.hashWith(null, false, false), Objects.hashCode(null));
-
-        // unknown:
-        Method hashArray = Fs.class.getDeclaredMethod("hashArray", Object.class, boolean.class);
-        invokeThrows(UnknownArrayTypeException.class, hashArray, null, "str", true);
+    @Test
+    public void testToString() throws Exception {
+        Object a = new Object();
+        Object b = new Object();
+        assertEquals(Fs.toString(a), a.toString());
+        assertEquals(Fs.toString(b), b.toString());
+        assertEquals(Fs.toStringAll(a, b), Arrays.toString(new Object[]{a, b}));
+        assertEquals(
+            Fs.toStringWith(new Object[]{a, b}, true, true),
+            Arrays.toString(new Object[]{a, b})
+        );
     }
 
     @Test
