@@ -23,7 +23,7 @@ final class ObjectBuilderProviderImpl implements ObjectBuilderProvider, ObjectBu
         // Collections.singletonList(DefaultHandler.INST)
         FsLoader.loadInstances(
             FsLoader.loadClassByDependent(
-                ThirdKit.thirdPackageName() + ".protobuf.ProtobufBuilderHandler",
+                ThirdKit.thirdClassName("protobuf", "ProtobufBuilderHandler"),
                 "com.google.protobuf.Message"
             ),
             DefaultHandler.INST

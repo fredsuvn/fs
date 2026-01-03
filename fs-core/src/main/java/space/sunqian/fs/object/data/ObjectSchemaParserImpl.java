@@ -12,7 +12,7 @@ final class ObjectSchemaParserImpl implements ObjectSchemaParser, ObjectSchemaPa
 
     static @Nonnull ObjectSchemaParserImpl DEFAULT = new ObjectSchemaParserImpl(FsLoader.loadInstances(
         FsLoader.loadClassByDependent(
-            ThirdKit.thirdPackageName() + ".protobuf.ProtobufSchemaHandler",
+            ThirdKit.thirdClassName("protobuf", "ProtobufSchemaHandler"),
             "com.google.protobuf.Message"
         ),
         SimpleBeanSchemaHandler.class

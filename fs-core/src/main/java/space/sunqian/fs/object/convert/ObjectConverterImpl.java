@@ -16,7 +16,7 @@ final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Hand
 
     static final @Nonnull ObjectConverterImpl DEFAULT = new ObjectConverterImpl(FsLoader.loadInstances(
         FsLoader.loadClassByDependent(
-            ThirdKit.thirdPackageName() + ".protobuf.ProtobufConvertHandler",
+            ThirdKit.thirdClassName("protobuf", "ProtobufConvertHandler"),
             "com.google.protobuf.Message"
         ),
         new AssignableConvertHandler(),
