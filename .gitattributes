@@ -42,4 +42,4 @@
 
 # special files:
 gradlew eol=lf
-fs-core/src/test/resources/dynamic/LAC.bytecode binary
+*.binary binary
