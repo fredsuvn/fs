@@ -105,7 +105,7 @@ public class DynamicClassLoaderTest {
         assertFalse(o1 instanceof LA);
         assertFalse(o2 instanceof LA);
         DynamicClassLoader loader3 = new DynamicClassLoader();
-        InputStream in3 = ClassLoader.getSystemResourceAsStream("dynamic/LAC");
+        InputStream in3 = ClassLoader.getSystemResourceAsStream("dynamic/LAC.bytecode");
         byte[] bytes3 = IOKit.read(in3);
         Class<?> cls3 = loader3.loadClass(LA.class.getName(), bytes3);
         in3.close();
