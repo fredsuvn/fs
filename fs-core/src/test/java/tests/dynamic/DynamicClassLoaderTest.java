@@ -108,7 +108,7 @@ public class DynamicClassLoaderTest {
         InputStream in3 = ClassLoader.getSystemResourceAsStream("dynamic/LAC");
         byte[] bytes3 = IOKit.read(in3);
         Class<?> cls3 = loader3.loadClass(LA.class.getName(), bytes3);
-        in1.close();
+        in3.close();
         assertTrue(LA.class.isAssignableFrom(cls3));
         LA la = new LA();
         Object lac = cls3.getConstructor().newInstance();
