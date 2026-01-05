@@ -1,6 +1,6 @@
 # _fs_: a lightweight, high-performance, zero-dependency tool lib for java
 
-## ![](docs/fs.svg) | [JavaDoc](https://fredsuvn.github.io/fs-docs/docs/fs/docs/javadoc/index.html) | [DevDoc](docs/dev-manual.adoc) | [Coverage](https://fredsuvn.github.io/fs-docs/docs/fs/reports/jacoco/test/html/index.html) | [JMH](https://fredsuvn.github.io/fs-docs/tools/jmh-visualizer/jmh-visualizer.html?resultsPath=../../docs/fs/jmh/results.json)
+### ![](docs/fs.svg) | [JavaDoc](https://fredsuvn.github.io/fs-docs/docs/fs/docs/javadoc/index.html) | [Coverage](https://fredsuvn.github.io/fs-docs/docs/fs/reports/jacoco/test/html/index.html) | [JMH](https://fredsuvn.github.io/fs-docs/tools/jmh-visualizer/jmh-visualizer.html?resultsPath=../../docs/fs/jmh/results.json) | [DevDoc](docs/dev-manual.adoc)
 
 ## Overview
 
@@ -86,15 +86,20 @@ The test passing rate and JaCoCo coverage for this library are both 100%:
 > _fs-asm_ is excluded from the test and coverage report because it is total copied from [ASM](https://asm.ow2.io)
 > framework.
 
-## Samples:
+## Documents and Samples
 
-- [Annotation](./fs-tests/src/main/java/internal/samples/AnnotationSample.java)
-- [Simple Cache](./fs-tests/src/main/java/internal/samples/CacheSample.java)
-- [Dependency Injection](./fs-tests/src/main/java/internal/samples/DISample.java)
-- [Proxy and Aspect](./fs-tests/src/main/java/internal/samples/ProxyAndAspectSample.java)
-- [Object Conversion](./fs-tests/src/main/java/internal/samples/ObjectSamples.java)
-- [Net](./fs-tests/src/main/java/internal/samples/NetSample.java)
-- [Other samples](./fs-tests/src/main/java/internal/samples/OtherSamples.java)
+- For Users:
+  * [JavaDoc](https://fredsuvn.github.io/fs-docs/docs/fs/docs/javadoc/index.html)
+- For Developers:
+  * [DevDoc](docs/dev-manual.adoc)
+- Samples:
+  * [Annotation](./fs-tests/src/main/java/internal/samples/AnnotationSample.java)
+  * [Simple Cache](./fs-tests/src/main/java/internal/samples/CacheSample.java)
+  * [Dependency Injection](./fs-tests/src/main/java/internal/samples/DISample.java)
+  * [Proxy and Aspect](./fs-tests/src/main/java/internal/samples/ProxyAndAspectSample.java)
+  * [Object Conversion](./fs-tests/src/main/java/internal/samples/ObjectSamples.java)
+  * [Net](./fs-tests/src/main/java/internal/samples/NetSample.java)
+  * [Other samples](./fs-tests/src/main/java/internal/samples/OtherSamples.java)
 
 ## Clone and Build
 
@@ -118,16 +123,10 @@ _fs_ needs multi JDK versions to build: from `1.8` to `17`.
 > Change this property to your local JDK paths, or let `gradle` automatically download required JDK versions without
 > manual configuration.
 
-## Documents
-
-- [JavaDoc](https://fredsuvn.github.io/fs-docs/docs/fs/docs/javadoc/index.html)
-- Manuals:
-  * Develop Manual: [dev-manual.adoc](docs/dev-manual.adoc)
-
 ## Contact
 
 * [https://github.com/fredsuvn/fs](https://github.com/fredsuvn/fs/)
-* QQ group: [566185308](https://qm.qq.com/q/wlkc2tmOaG)
+* [QQ group: 566185308](https://qm.qq.com/q/wlkc2tmOaG)
 
 ## License
 
