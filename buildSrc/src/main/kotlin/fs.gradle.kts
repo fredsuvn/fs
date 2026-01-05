@@ -1,4 +1,6 @@
-apply(plugin = "fs.build.pLogger")
+import space.sunqian.fs.build.gradle.plugin.FsBuildLogger
+
+apply(plugin = "fs.build.fsLogger")
 
 project.repositories {
   mavenLocal()
@@ -9,6 +11,9 @@ project.repositories {
   mavenCentral()
   //jcenter()
 }
+
+val fsLogger: FsBuildLogger by project
+fsLogger.info("hello, fs!")
 
 val javaVersionFrom: String by project
 val javaVersionTo: String by project

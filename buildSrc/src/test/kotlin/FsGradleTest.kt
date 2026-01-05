@@ -11,18 +11,18 @@ class FsGradleTest {
     lateinit var testProjectDir: File
 
     @Test
-    fun `plugin should apply successfully`() {
+    fun `tes plugin fs`() {
         newPropertiesFile(testProjectDir)
         File(testProjectDir, "build.gradle.kts").writeText(
             """
             plugins {
                 id("fs")
             }
-            pLogger.trace("test", "trace")
-            pLogger.debug("test", "trace")
-            pLogger.info("test", "trace")
-            pLogger.warn("test", "trace")
-            pLogger.error("test", "trace")
+            fsLogger.trace("test", "trace")
+            fsLogger.debug("test", "debug")
+            fsLogger.info("test", "info")
+            fsLogger.warn("test", "warn")
+            fsLogger.error("test", "error")
         """.trimIndent()
         )
         val result = GradleRunner.create()

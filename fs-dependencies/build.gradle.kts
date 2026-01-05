@@ -30,7 +30,7 @@ dependencies {
     api("org.junit.jupiter:junit-jupiter-api:5.14.0")
     api("org.junit.jupiter:junit-jupiter-engine:5.14.0")
     api("org.junit.platform:junit-platform-launcher:1.14.0")
-    api("org.testng:testng:7.5.1")
+    //api("org.testng:testng:7.5.1")
     api("org.openjdk.jmh:jmh-core:1.37")
     api("org.openjdk.jmh:jmh-generator-annprocess:1.37")
     api("org.mockito:mockito-core:5.5.0")
@@ -53,8 +53,9 @@ dependencies {
     api("org.bouncycastle:bcpkix-jdk18on:1.79")
 
     //kotlin
-    api("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10")
-    api("org.jetbrains.kotlin:kotlin-test-testng:1.9.10")
+    val kotlinVersion: String by project
+    api("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+    api("org.jetbrains.kotlin:kotlin-test-testng:$kotlinVersion")
 
     //generator
     //api("cglib:cglib:3.3.0")
@@ -72,9 +73,11 @@ dependencies {
     //protobuf
     api("com.google.protobuf:protobuf-java:3.24.4")
 
-    //misc
-    api("org.yaml:snakeyaml:2.2")
+    //logging
     api("org.slf4j:slf4j-api:2.0.9")
+
+    //config
+    api("org.yaml:snakeyaml:2.2")
   }
 }
 

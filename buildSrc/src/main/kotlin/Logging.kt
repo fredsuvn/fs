@@ -1,3 +1,5 @@
+package space.sunqian.fs.build.gradle.plugin
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import java.time.LocalDateTime
@@ -5,15 +7,15 @@ import java.time.format.DateTimeFormatter
 
 val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
 
-class PluginLogger : Plugin<Project> {
+class FsBuildLogger : Plugin<Project> {
 
     private lateinit var level: Level
     private lateinit var project: Project
 
     override fun apply(project: Project) {
         this.project = project
-        level = levelFrom(project.property("pluginLogLevel")?.toString())
-        project.extensions.add("pLogger", this)
+        level = levelFrom(project.property("fsBuildLogLevel")?.toString())
+        project.extensions.add("fsLogger", this)
     }
 
     private fun levelFrom(level: String?): Level {
@@ -56,8 +58,8 @@ class PluginLogger : Plugin<Project> {
             return;
         }
         val output = "[${formatter.format(LocalDateTime.now())}]" +
-            "[${level.name}]: " +
-            "[${project.name}]" +
+            "[${level.name}]" +
+            "@[${project.name}]: " +
             msg.joinToString(" ");
         println(output)
     }
