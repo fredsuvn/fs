@@ -1,6 +1,6 @@
 # _fs_: a lightweight, high-performance, zero-dependency tool lib for java
 
-![](docs/fs.svg)
+## ![](docs/fs.svg) | [JavaDoc](https://fredsuvn.github.io/fs-docs/docs/fs/docs/javadoc/index.html) | [DevDoc](docs/dev-manual.adoc) | [Coverage](https://fredsuvn.github.io/fs-docs/docs/fs/reports/jacoco/test/html/index.html) | [JMH](https://fredsuvn.github.io/fs-docs/tools/jmh-visualizer/jmh-visualizer.html?resultsPath=../../docs/fs/jmh/results.json)
 
 ## Overview
 
