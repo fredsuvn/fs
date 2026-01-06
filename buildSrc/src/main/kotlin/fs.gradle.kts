@@ -13,7 +13,7 @@ project.repositories {
 }
 
 val fsLogger: FsBuildLogger by project
-fsLogger.info("hello, fs!")
+//fsLogger.info("hello, ${project.name}!")
 
 val javaVersionFrom: String by project
 val javaVersionTo: String by project
