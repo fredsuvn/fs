@@ -23,12 +23,12 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew \
-          :fs-all:jar :fs-all:javadocJar :fs-all:sourcesJar \
-          :fs-core:jar :fs-core:javadocJar :fs-core:sourcesJar \
-          :fs-annotation:jar :fs-annotation:javadocJar :fs-annotation:sourcesJar \
-          :fs-asm:jar :fs-asm:javadocJar :fs-asm:sourcesJar \
-          :fs-jsr305:jar :fs-jsr305:javadocJar :fs-jsr305:sourcesJar
+        run: |
+          ./gradlew :fs-all:jar :fs-all:javadocJar :fs-all:sourcesJar
+          ./gradlew :fs-core:jar :fs-core:javadocJar :fs-core:sourcesJar
+          ./gradlew :fs-annotation:jar :fs-annotation:javadocJar :fs-annotation:sourcesJar
+          ./gradlew :fs-asm:jar :fs-asm:javadocJar :fs-asm:sourcesJar
+          ./gradlew :fs-jsr305:jar :fs-jsr305:javadocJar :fs-jsr305:sourcesJar
 
       - name: Get project version
         id: get_version
