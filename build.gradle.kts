@@ -7,6 +7,7 @@ description = "Root project of fs."
 rootProject.group = "space.sunqian.fs"
 
 val projectVersion: String by project
+version = projectVersion
 
 val projectInfo by extra(
   ProjectInfo(
@@ -58,3 +59,11 @@ val publishInfo by extra(
     releaseUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2",
   )
 )
+
+tasks.register("printVersion") {
+  group = "version"
+  description = "Prints the project version"
+  doLast {
+    println(project.version)
+  }
+}

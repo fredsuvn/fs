@@ -1,0 +1,206 @@
+name: Release
+
+on:
+  release:
+    types: [ created ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Generate Gradle wrapper
+        run: gradle wrapper --gradle-version 9.2.1
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew \
+          :fs-all:jar :fs-all:javadocJar :fs-all:sourcesJar \
+          :fs-core:jar :fs-core:javadocJar :fs-core:sourcesJar \
+          :fs-annotation:jar :fs-annotation:javadocJar :fs-annotation:sourcesJar \
+          :fs-asm:jar :fs-asm:javadocJar :fs-asm:sourcesJar \
+          :fs-jsr305:jar :fs-jsr305:javadocJar :fs-jsr305:sourcesJar
+
+      - name: Get project version
+        id: get_version
+        run: echo "version=$(./gradlew -q printVersion)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Upload fs-all jars
+      - name: Upload fs-all jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-all/build/libs/fs-all.jar
+          asset_name: fs-all-${{ steps.get_version.outputs.version }}.jar
+          asset_content_type: application/java-archive
+
+      - name: Upload fs-all javadoc jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-all/build/libs/fs-all-javadoc.jar
+          asset_name: fs-all-${{ steps.get_version.outputs.version }}-javadoc.jar
+          asset_content_type: application/java-archive
+
+      - name: Upload fs-all sources jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-all/build/libs/fs-all-sources.jar
+          asset_name: fs-all-${{ steps.get_version.outputs.version }}-sources.jar
+          asset_content_type: application/java-archive
+
+      # Upload fs-core jars
+      - name: Upload fs-core jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-core/build/libs/fs-core.jar
+          asset_name: fs-core-${{ steps.get_version.outputs.version }}.jar
+          asset_content_type: application/java-archive
+
+      - name: Upload fs-core javadoc jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-core/build/libs/fs-core-javadoc.jar
+          asset_name: fs-core-${{ steps.get_version.outputs.version }}-javadoc.jar
+          asset_content_type: application/java-archive
+
+      - name: Upload fs-core sources jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-core/build/libs/fs-core-sources.jar
+          asset_name: fs-core-${{ steps.get_version.outputs.version }}-sources.jar
+          asset_content_type: application/java-archive
+
+      # Upload fs-annotation jars
+      - name: Upload fs-annotation jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-annotation/build/libs/fs-annotation.jar
+          asset_name: fs-annotation-${{ steps.get_version.outputs.version }}.jar
+          asset_content_type: application/java-archive
+
+      - name: Upload fs-annotation javadoc jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-annotation/build/libs/fs-annotation-javadoc.jar
+          asset_name: fs-annotation-${{ steps.get_version.outputs.version }}-javadoc.jar
+          asset_content_type: application/java-archive
+
+      - name: Upload fs-annotation sources jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-annotation/build/libs/fs-annotation-sources.jar
+          asset_name: fs-annotation-${{ steps.get_version.outputs.version }}-sources.jar
+          asset_content_type: application/java-archive
+
+      # Upload fs-asm jars
+      - name: Upload fs-asm jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-asm/build/libs/fs-asm.jar
+          asset_name: fs-asm-${{ steps.get_version.outputs.version }}.jar
+          asset_content_type: application/java-archive
+
+      - name: Upload fs-asm javadoc jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-asm/build/libs/fs-asm-javadoc.jar
+          asset_name: fs-asm-${{ steps.get_version.outputs.version }}-javadoc.jar
+          asset_content_type: application/java-archive
+
+      - name: Upload fs-asm sources jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-asm/build/libs/fs-asm-sources.jar
+          asset_name: fs-asm-${{ steps.get_version.outputs.version }}-sources.jar
+          asset_content_type: application/java-archive
+
+      # Upload fs-jsr305 jars
+      - name: Upload fs-jsr305 jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-jsr305/build/libs/fs-jsr305.jar
+          asset_name: fs-jsr305-${{ steps.get_version.outputs.version }}.jar
+          asset_content_type: application/java-archive
+
+      - name: Upload fs-jsr305 javadoc jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-jsr305/build/libs/fs-jsr305-javadoc.jar
+          asset_name: fs-jsr305-${{ steps.get_version.outputs.version }}-javadoc.jar
+          asset_content_type: application/java-archive
+
+      - name: Upload fs-jsr305 sources jar archive as asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fs-jsr305/build/libs/fs-jsr305-sources.jar
+          asset_name: fs-jsr305-${{ steps.get_version.outputs.version }}-sources.jar
+          asset_content_type: application/java-archive
