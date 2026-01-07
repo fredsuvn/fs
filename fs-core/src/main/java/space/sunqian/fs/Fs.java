@@ -64,7 +64,7 @@ public class Fs {
     /**
      * Version of this lib.
      */
-    public static final @Nonnull String LIB_VERSION = "0.0.0";
+    public static final @Nonnull String LIB_VERSION = "0.0.1-SNAPSHOT";
 
     /**
      * String value for {@code null}.

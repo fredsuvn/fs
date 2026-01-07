@@ -38,6 +38,21 @@ public class AsmKit {
      */
     public static final @Nonnull String EMPTY_CONSTRUCTOR_DESCRIPTOR = "()V";
 
+    /**
+     * The prefix of generated class name.
+     */
+    public static final String GEN_CLASS_PREFIX = "GenBy$"
+        +
+        Fs.LIB_NAME
+        +
+        "$"
+        +
+        Fs.LIB_VERSION
+            .replace('.', '_')
+            .replace('-', '_')
+        +
+        "$";
+
     private static final @Nonnull AtomicLong classCounter = new AtomicLong();
 
     /**
@@ -432,10 +447,8 @@ public class AsmKit {
      * @return a class name
      */
     public static String newClassInternalName(@Nonnull Package pkg) {
-        return pkg.getName().replace('.', '/') + "/GenBy" +
-            "$" + Fs.LIB_NAME +
-            "$V" + Fs.LIB_VERSION.replace('.', '_') +
-            "$C" + classCounter.incrementAndGet();
+        return pkg.getName().replace('.', '/')
+            + "/" + GEN_CLASS_PREFIX + classCounter.incrementAndGet();
     }
 
     private AsmKit() {
