@@ -1,10 +1,9 @@
 package internal.samples;
 
-import internal.test.PrintTest;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.di.DIContainer;
 import space.sunqian.fs.di.DIAspectHandler;
+import space.sunqian.fs.di.DIContainer;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -15,10 +14,10 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-public class DISample implements PrintTest {
+public class DISample {
 
     public static void main(String[] args) {
-        DIContainer app = DIContainer.newBuilder()
+        DIContainer diContainer = DIContainer.newBuilder()
             .componentTypes(
                 XController.class,
                 XServiceImpl.class,
@@ -28,11 +27,12 @@ public class DISample implements PrintTest {
             .componentAnnotation(XResource.class)
             .postConstructAnnotation(XPostConstruct.class)
             .preDestroyAnnotation(XPreDestroy.class)
-            .build();
-        XService xService = app.getObject(XService.class);
+            .build()
+            .initialize();
+        XService xService = diContainer.getObject(XService.class);
         System.out.println(xService.doService());
         DIContainer child = DIContainer.newBuilder()
-            .parentContainers(app)
+            .parentContainers(diContainer)
             .componentTypes(
                 XController.class,
                 XServiceImpl.class,
@@ -42,8 +42,9 @@ public class DISample implements PrintTest {
             .componentAnnotation(XResource.class)
             .postConstructAnnotation(XPostConstruct.class)
             .preDestroyAnnotation(XPreDestroy.class)
-            .build();
-        app.shutdown();
+            .build()
+            .initialize();
+        diContainer.shutdown();
         child.shutdown();
     }
 

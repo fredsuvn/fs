@@ -19,7 +19,7 @@ import java.util.List;
  *
  * @author sunqian
  */
-public interface DIComponent extends DependentComponent<DIComponent> {
+public interface DIComponent {
 
     /**
      * Returns the default resolver for {@link DIComponent}.
@@ -65,6 +65,15 @@ public interface DIComponent extends DependentComponent<DIComponent> {
     boolean isLocal();
 
     /**
+     * Returns the dependencies of this component.
+     *
+     * @return the dependencies of this component
+     */
+    @Nonnull
+    @Immutable
+    List<@Nonnull DIComponent> dependencies();
+
+    /**
      * Returns the post-construct method of this component.
      *
      * @return the post-construct method of this component
@@ -73,8 +82,17 @@ public interface DIComponent extends DependentComponent<DIComponent> {
     Method postConstructMethod();
 
     /**
+     * Returns the dependencies of this component for post-construct method.
+     *
+     * @return the dependencies of this component for post-construct method
+     */
+    @Nonnull
+    @Immutable
+    List<@Nonnull DIComponent> postConstructDependencies();
+
+    /**
      * Invokes the post-construct method of this component if the post-construct method is not {@code null}, otherwise
-     * this method has no effect.
+     * this method has no effect. Note this method ignore the dependencies of the post-construct method.
      *
      * @throws InvocationException for wrapping any error during execution of the method
      */
@@ -96,8 +114,17 @@ public interface DIComponent extends DependentComponent<DIComponent> {
     Method preDestroyMethod();
 
     /**
+     * Returns the dependencies of this component for pre-destroy method.
+     *
+     * @return the dependencies of this component for pre-destroy method
+     */
+    @Nonnull
+    @Immutable
+    List<@Nonnull DIComponent> preDestroyDependencies();
+
+    /**
      * Invokes the pre-destroy method of this component if the pre-destroy method is not {@code null}, otherwise this
-     * method has no effect.
+     * method has no effect. Note this method ignore the dependencies of the pre-destroy method.
      *
      * @throws InvocationException for wrapping any error during execution of the method
      */
@@ -109,15 +136,6 @@ public interface DIComponent extends DependentComponent<DIComponent> {
      * @return {@code true} if this component is destroyed; {@code false} otherwise
      */
     boolean isDestroyed();
-
-    /**
-     * Returns the dependencies of this component.
-     *
-     * @return the dependencies of this component
-     */
-    @Nonnull
-    @Immutable
-    List<@Nonnull DIComponent> dependencies();
 
     /**
      * Represents resolver for {@link DIComponent}.

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.di.DIAspectHandler;
 import space.sunqian.fs.di.DIComponent;
 import space.sunqian.fs.di.DIContainer;
@@ -145,21 +146,33 @@ public class DIContainerTest implements PrintTest {
             .collect(Collectors.joining(System.lineSeparator() + "    ")));
         // starter
         Starter starter = container.getObject(Starter.class);
+        assertNotNull(starter);
         // common components
         ServiceAaa serviceAaa = container.getObject(ServiceAaa.class);
+        assertNotNull(serviceAaa);
         assertSame(serviceAaa, container.getObject(ServiceAaa.class));
         assertEquals("A", serviceAaa.getLocalName());
         assertEquals("B", serviceAaa.getRemoteName());
         ServiceBbb serviceBbb = container.getObject(ServiceBbb.class);
+        assertNotNull(serviceBbb);
         assertSame(serviceBbb, container.getObject(ServiceBbb.class));
         assertEquals("B", serviceBbb.getLocalName());
         assertEquals("A", serviceBbb.getRemoteName());
         InterService interService = container.getObject(InterService.class);
+        assertNotNull(interService);
         assertEquals(interService.interService(), InterServiceImpl.class.getName());
         assertEquals("AB", starter.getNames());
         assertEquals(starter.interService(), interService.interService());
-        DIComponent serviceAaaRes = container.getComponent(ServiceAaa.class);
-        assertSame(serviceAaa, serviceAaaRes.instance());
+        // dependencies
+        DIComponent aaa = container.getComponent(ServiceAaa.class);
+        assertNotNull(aaa);
+        assertSame(serviceAaa, aaa.instance());
+        DIComponent bbb = container.getComponent(ServiceBbb.class);
+        assertNotNull(bbb);
+        List<DIComponent> aaaDependencies = aaa.dependencies();
+        assertEquals(2, aaaDependencies.size());
+        assertTrue(aaaDependencies.contains(aaa));
+        assertTrue(aaaDependencies.contains(bbb));
         // aspect
         assertEquals(
             starter.aspectService1(),
@@ -473,8 +486,16 @@ public class DIContainerTest implements PrintTest {
             DIContainer container = DIContainer.newBuilder()
                 .componentTypes(Dep1.class, Dep2.class, Dep3.class)
                 .build()
-                .initialize()
-                .shutdown();
+                .initialize();
+            DIComponent dep1 = container.getComponent(Dep1.class);
+            assertNotNull(dep1);
+            DIComponent dep2 = container.getComponent(Dep2.class);
+            assertNotNull(dep2);
+            assertEquals(1, dep2.postConstructDependencies().size());
+            assertEquals(dep1, dep2.postConstructDependencies().get(0));
+            assertEquals(1, dep2.preDestroyDependencies().size());
+            assertEquals(dep1, dep2.preDestroyDependencies().get(0));
+            container.shutdown();
             assertEquals(Dep.postList, ListKit.list(1, 2, 3));
             assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
@@ -544,8 +565,8 @@ public class DIContainerTest implements PrintTest {
         {
             assertThrows(DIException.class, () ->
                 DIContainer.newBuilder().componentTypes(Dep4.class, Dep5.class).build().initialize());
-            // assertThrows(DIException.class, () ->
-            //     DIContainer.newBuilder().componentTypes(Dep6.class, Dep7.class).build());
+            assertThrows(DIException.class, () ->
+                DIContainer.newBuilder().componentTypes(Dep6.class, Dep7.class).build().initialize());
             assertThrows(DIException.class, () ->
                 DIContainer.newBuilder().componentTypes(DepErr3.class).build().initialize());
         }
@@ -739,15 +760,15 @@ public class DIContainerTest implements PrintTest {
                 assertTrue(initializedComponent.isInitialized());
             }
             assertEquals(
-                startErr.initializedComponents().stream().map(DIComponent::type).collect(Collectors.toList()),
-                ListKit.list(Dep8.class, Dep9.class)
+                startErr.initializedComponents().stream().map(DIComponent::type).collect(Collectors.toSet()),
+                SetKit.set(Dep8.class, Dep9.class)
             );
             for (DIComponent uninitializedComponent : startErr.uninitializedComponents()) {
                 assertFalse(uninitializedComponent.isInitialized());
             }
             assertEquals(
-                startErr.uninitializedComponents().stream().map(DIComponent::type).collect(Collectors.toList()),
-                ListKit.list(Dep10.class)
+                startErr.uninitializedComponents().stream().map(DIComponent::type).collect(Collectors.toSet()),
+                SetKit.set(Dep10.class)
             );
         }
         {
@@ -764,15 +785,15 @@ public class DIContainerTest implements PrintTest {
                 assertTrue(destroyedComponent.isDestroyed());
             }
             assertEquals(
-                shutErr.destroyedComponents().stream().map(DIComponent::type).collect(Collectors.toList()),
-                ListKit.list(Dep8.class, Dep9.class)
+                shutErr.destroyedComponents().stream().map(DIComponent::type).collect(Collectors.toSet()),
+                SetKit.set(Dep8.class, Dep9.class)
             );
             for (DIComponent undestroyedComponent : shutErr.undestroyedComponents()) {
                 assertFalse(undestroyedComponent.isDestroyed());
             }
             assertEquals(
-                shutErr.undestroyedComponents().stream().map(DIComponent::type).collect(Collectors.toList()),
-                ListKit.list(Dep10.class)
+                shutErr.undestroyedComponents().stream().map(DIComponent::type).collect(Collectors.toSet()),
+                SetKit.set(Dep10.class)
             );
         }
         {

@@ -5,7 +5,6 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.OutParam;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.dynamic.aop.AspectMaker;
 import space.sunqian.fs.dynamic.aop.AspectSpec;
@@ -22,14 +21,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -106,7 +101,7 @@ final class DIContainerImpl implements DIContainer {
             }
         }
         // components
-        LinkedHashMap<Type, DIComponent> components = new LinkedHashMap<>(resMap.size());
+        LinkedHashMap<Type, DIComponentImpl> components = new LinkedHashMap<>(resMap.size());
         LinkedHashMap<Type, DIComponentImpl> localComponents = new LinkedHashMap<>(resMap.size());
         for (Res res : resMap.values()) {
             Object inst = getResInstance(res);
@@ -128,9 +123,10 @@ final class DIContainerImpl implements DIContainer {
         this.localComponents = Collections.unmodifiableMap(localComponents);
         // set dependencies
         configureComponentDependencies(resMap);
-        // check cycle dependencies
-        for (DIComponentImpl component : localComponents.values()) {
-            DIKit.checkCycleDependencies(component);
+        // check cycle dependencies for post-construct methods and pre-destroy methods
+        for (DIComponent component : localComponents.values()) {
+            DIKit.checkCycleDependencies(component, DIComponent::postConstructDependencies);
+            DIKit.checkCycleDependencies(component, DIComponent::preDestroyDependencies);
         }
     }
 
@@ -142,35 +138,37 @@ final class DIContainerImpl implements DIContainer {
             // @Resource
             Res res = getRes(component.type(), resMap);
             DIComponent.Descriptor descriptor = Fs.asNonnull(res.descriptor);
-            component.depList.addAll(
+            component.dependenciesVar.addAll(
                 descriptor.dependencyFields().stream()
-                    .map(field -> getComponent(field.getGenericType()))
-                    //.filter(Objects::nonNull)
-                    .filter(c -> c != component)
+                    .map(field -> getNonnullComponent(field.getGenericType()))
                     .collect(Collectors.toList())
             );
             // post-construct method parameters
             Method postConstructMethod = descriptor.postConstructMethod();
             if (postConstructMethod != null) {
-                component.depList.addAll(
+                component.postConstructDependenciesVar.addAll(
                     Arrays.stream(postConstructMethod.getParameterTypes())
-                        .map(this::getComponent)
-                        .filter(c -> c != component)
+                        .map(this::getNonnullComponent)
                         .collect(Collectors.toList())
                 );
             }
             // pre-destroy method parameters
             Method preDestroyMethod = descriptor.preDestroyMethod();
             if (preDestroyMethod != null) {
-                component.depList.addAll(
+                component.preDestroyDependenciesVar.addAll(
                     Arrays.stream(preDestroyMethod.getParameterTypes())
-                        .map(this::getComponent)
-                        .filter(c -> c != component)
+                        .map(this::getNonnullComponent)
                         .collect(Collectors.toList())
                 );
             }
-            component.depList.trimToSize();
+            component.dependenciesVar.trimToSize();
+            component.postConstructDependenciesVar.trimToSize();
+            component.preDestroyDependenciesVar.trimToSize();
         }
+    }
+
+    private @Nonnull DIComponent getNonnullComponent(@Nonnull Type type) {
+        return Fs.asNonnull(getComponent(type));
     }
 
     private void doDependencyInjection(
@@ -316,62 +314,6 @@ final class DIContainerImpl implements DIContainer {
         throw new DIException("Can not find resource instance for type :" + type.getTypeName() + ".");
     }
 
-    private void checkDependencyForPostConstruct(
-        @Nonnull DIComponent curRes,
-        @Nonnull Set<@Nonnull Type> stack,
-        @Nonnull @OutParam Set<@Nonnull DIComponent> postConstructSet
-    ) throws DIException {
-        Type curType = curRes.type();
-        Method postConstructMethod = curRes.postConstructMethod();
-        if (postConstructMethod == null) {
-            return;
-        }
-        postConstructSet.add(curRes);
-        Type[] sdo = postConstructMethod.getGenericParameterTypes();
-        if (ArrayKit.isEmpty(sdo)) {
-            return;
-        }
-        if (!stack.add(curType)) {
-            throw new DIException(
-                "Circular post-construct dependency detected: " +
-                    stack.stream().map(Type::getTypeName).collect(Collectors.joining(" -> ")) + "."
-            );
-        }
-        for (Type depType : sdo) {
-            DIComponent depRes = components.get(depType);
-            checkDependencyForPostConstruct(depRes, stack, postConstructSet);
-            stack.remove(depType);
-        }
-    }
-
-    private void checkDependencyForPreDestroy(
-        @Nonnull DIComponent curRes,
-        @Nonnull Set<@Nonnull Type> stack,
-        @Nonnull @OutParam Set<@Nonnull DIComponent> preDestroySet
-    ) throws DIException {
-        Type curType = curRes.type();
-        Method preDestroyMethod = curRes.preDestroyMethod();
-        if (preDestroyMethod == null) {
-            return;
-        }
-        preDestroySet.add(curRes);
-        Type[] sdo = preDestroyMethod.getGenericParameterTypes();
-        if (ArrayKit.isEmpty(sdo)) {
-            return;
-        }
-        if (!stack.add(curType)) {
-            throw new DIException(
-                "Circular pre-destroy dependency: " +
-                    stack.stream().map(Type::getTypeName).collect(Collectors.joining(" -> ")) + "."
-            );
-        }
-        for (Type depType : sdo) {
-            DIComponent depRes = components.get(depType);
-            checkDependencyForPreDestroy(depRes, stack, preDestroySet);
-            stack.remove(depType);
-        }
-    }
-
     private @Nonnull Object getResInstance(
         @Nonnull Res res
     ) {
@@ -384,36 +326,36 @@ final class DIContainerImpl implements DIContainer {
             throw new DIException("DIContainer is already initialized.");
         }
         try {
-            Set<DIComponent> postConstructSet = new LinkedHashSet<>();
-            Set<Type> stack = new HashSet<>();
+            Set<DIComponent> unprocessed = new LinkedHashSet<>(localComponents.values());
+            Set<DIComponent> processed = new LinkedHashSet<>(unprocessed.size());
             for (DIComponent component : localComponents.values()) {
-                checkDependencyForPostConstruct(component, stack, postConstructSet);
-                stack.clear();
+                try {
+                    postConstruct(component, unprocessed, processed);
+                } catch (Exception e) {
+                    unprocessed.remove(component);
+                    throw new DIInitializeException(component, e, new ArrayList<>(processed), new ArrayList<>(unprocessed));
+                }
             }
-            List<DIComponent> postConstructList = new ArrayList<>(postConstructSet);
-            postConstructList.sort(PostConstructComparator.INST);
-            doPostConstruct(postConstructList);
         } finally {
             this.state = 1;
         }
         return this;
     }
 
-    private void doPostConstruct(@Nonnull List<@Nonnull DIComponent> postConstructList) {
-        List<DIComponent> uninitializedComponents = new ArrayList<>(postConstructList);
-        List<DIComponent> initializedComponents = new ArrayList<>(postConstructList.size());
-        Iterator<DIComponent> uninitializedIt = uninitializedComponents.iterator();
-        while (uninitializedIt.hasNext()) {
-            DIComponent component = uninitializedIt.next();
-            try {
-                component.postConstruct();
-            } catch (Exception e) {
-                throw new DIInitializeException(component, e, initializedComponents, uninitializedComponents);
-            } finally {
-                uninitializedIt.remove();
-            }
-            initializedComponents.add(component);
+    private void postConstruct(
+        @Nonnull DIComponent component,
+        @Nonnull Set<@Nonnull DIComponent> unprocessed,
+        @Nonnull Set<@Nonnull DIComponent> processed
+    ) {
+        if (component.isInitialized()) {
+            return;
         }
+        for (DIComponent postConstructDependency : component.postConstructDependencies()) {
+            postConstruct(postConstructDependency, unprocessed, processed);
+        }
+        component.postConstruct();
+        unprocessed.remove(component);
+        processed.add(component);
     }
 
     @Override
@@ -430,36 +372,36 @@ final class DIContainerImpl implements DIContainer {
             throw new DIException("DIContainer is already shutdown.");
         }
         try {
-            Set<DIComponent> preDestroySet = new LinkedHashSet<>();
-            Set<Type> stack = new HashSet<>();
+            Set<DIComponent> unprocessed = new LinkedHashSet<>(localComponents.values());
+            Set<DIComponent> processed = new LinkedHashSet<>(unprocessed.size());
             for (DIComponent component : localComponents.values()) {
-                checkDependencyForPreDestroy(component, stack, preDestroySet);
-                stack.clear();
+                try {
+                    preDestroy(component, unprocessed, processed);
+                } catch (Exception e) {
+                    unprocessed.remove(component);
+                    throw new DIShutdownException(component, e, new ArrayList<>(processed), new ArrayList<>(unprocessed));
+                }
             }
-            List<DIComponent> preDestroyList = new ArrayList<>(preDestroySet);
-            preDestroyList.sort(PreDestroyComparator.INST);
-            doPreDestroy(preDestroyList);
         } finally {
             this.state = 2;
         }
         return this;
     }
 
-    private void doPreDestroy(@Nonnull List<DIComponent> preDestroyList) {
-        List<DIComponent> undestroyedComponents = new ArrayList<>(preDestroyList);
-        List<DIComponent> destroyedComponents = new ArrayList<>(preDestroyList.size());
-        Iterator<DIComponent> undestroyedIt = undestroyedComponents.iterator();
-        while (undestroyedIt.hasNext()) {
-            DIComponent component = undestroyedIt.next();
-            try {
-                component.preDestroy();
-                destroyedComponents.add(component);
-            } catch (Exception e) {
-                throw new DIShutdownException(component, e, destroyedComponents, undestroyedComponents);
-            } finally {
-                undestroyedIt.remove();
-            }
+    private void preDestroy(
+        @Nonnull DIComponent component,
+        @Nonnull Set<@Nonnull DIComponent> unprocessed,
+        @Nonnull Set<@Nonnull DIComponent> processed
+    ) {
+        if (component.isDestroyed()) {
+            return;
         }
+        for (DIComponent preDestroyDependency : component.preDestroyDependencies()) {
+            preDestroy(preDestroyDependency, unprocessed, processed);
+        }
+        component.preDestroy();
+        unprocessed.remove(component);
+        processed.add(component);
     }
 
     @Override
@@ -563,8 +505,17 @@ final class DIContainerImpl implements DIContainer {
         private final @Nonnull Runnable postConstruct;
         private final @Nullable Method preDestroyMethod;
         private final @Nonnull Runnable preDestroy;
-        final @Nonnull ArrayList<@Nonnull DIComponent> depList = new ArrayList<>();
-        private final @Nonnull List<@Nonnull DIComponent> dependencies = Collections.unmodifiableList(depList);
+
+        final @Nonnull ArrayList<@Nonnull DIComponent> dependenciesVar = new ArrayList<>();
+        final @Nonnull ArrayList<@Nonnull DIComponent> postConstructDependenciesVar = new ArrayList<>();
+        final @Nonnull ArrayList<@Nonnull DIComponent> preDestroyDependenciesVar = new ArrayList<>();
+        private final @Nonnull List<@Nonnull DIComponent> dependencies =
+            Collections.unmodifiableList(dependenciesVar);
+        private final @Nonnull List<@Nonnull DIComponent> postConstructDependencies =
+            Collections.unmodifiableList(postConstructDependenciesVar);
+        private final @Nonnull List<@Nonnull DIComponent> preDestroyDependencies =
+            Collections.unmodifiableList(preDestroyDependenciesVar);
+
         private volatile int state = 0;
 
         private DIComponentImpl(
@@ -578,6 +529,7 @@ final class DIContainerImpl implements DIContainer {
             this.instance = instance;
             this.local = local;
             this.postConstructMethod = postConstructMethod;
+            this.preDestroyMethod = preDestroyMethod;
             this.postConstruct = postConstructMethod == null ?
                 EMPTY_RUNNABLE
                 :
@@ -590,7 +542,6 @@ final class DIContainerImpl implements DIContainer {
                     }
                     invocable.invoke(instance, args);
                 };
-            this.preDestroyMethod = preDestroyMethod;
             this.preDestroy = preDestroyMethod == null ?
                 EMPTY_RUNNABLE
                 :
@@ -621,19 +572,29 @@ final class DIContainerImpl implements DIContainer {
         }
 
         @Override
+        public @Nonnull List<DIComponent> dependencies() {
+            return dependencies;
+        }
+
+        @Override
         public @Nullable Method postConstructMethod() {
             return postConstructMethod;
         }
 
         @Override
-        public void postConstruct() throws InvocationException {
+        public @Nonnull List<@Nonnull DIComponent> postConstructDependencies() {
+            return postConstructDependencies;
+        }
+
+        @Override
+        public synchronized void postConstruct() throws InvocationException {
             postConstruct.run();
             state = 1;
         }
 
         @Override
         public boolean isInitialized() {
-            return state == 1;
+            return state >= 1;
         }
 
         @Override
@@ -642,19 +603,19 @@ final class DIContainerImpl implements DIContainer {
         }
 
         @Override
-        public void preDestroy() throws InvocationException {
+        public @Nonnull List<@Nonnull DIComponent> preDestroyDependencies() {
+            return preDestroyDependencies;
+        }
+
+        @Override
+        public synchronized void preDestroy() throws InvocationException {
             preDestroy.run();
             state = 2;
         }
 
         @Override
         public boolean isDestroyed() {
-            return state == 2;
-        }
-
-        @Override
-        public @Nonnull List<DIComponent> dependencies() {
-            return dependencies;
+            return state >= 2;
         }
 
         @Override
@@ -744,50 +705,5 @@ final class DIContainerImpl implements DIContainer {
             field.setAccessible(true);
             field.set(owner, value);
         }
-    }
-
-    private enum PostConstructComparator implements Comparator<DIComponent> {
-
-        INST;
-
-        @Override
-        public int compare(@Nonnull DIComponent sr1, @Nonnull DIComponent sr2) {
-            Method pc1 = Fs.asNonnull(sr1.postConstructMethod());
-            Method pc2 = Fs.asNonnull(sr2.postConstructMethod());
-            Type[] sd1 = pc1.getGenericParameterTypes();
-            Type[] sd2 = pc2.getGenericParameterTypes();
-            return compareDependsOn(sr1, sd1, sr2, sd2);
-        }
-    }
-
-    private enum PreDestroyComparator implements Comparator<DIComponent> {
-
-        INST;
-
-        @Override
-        public int compare(@Nonnull DIComponent sr1, @Nonnull DIComponent sr2) {
-            Method pd1 = Fs.asNonnull(sr1.preDestroyMethod());
-            Method pd2 = Fs.asNonnull(sr2.preDestroyMethod());
-            Type[] sd1 = pd1.getGenericParameterTypes();
-            Type[] sd2 = pd2.getGenericParameterTypes();
-            return compareDependsOn(sr1, sd1, sr2, sd2);
-        }
-    }
-
-    private static int compareDependsOn(
-        @Nonnull DIComponent sr1, Type @Nonnull [] sd1,
-        @Nonnull DIComponent sr2, Type @Nonnull [] sd2
-    ) {
-        for (Type c1 : sd1) {
-            if (c1.equals(sr2.type())) {
-                return 1;
-            }
-        }
-        for (Type c2 : sd2) {
-            if (c2.equals(sr1.type())) {
-                return -1;
-            }
-        }
-        return 0;
     }
 }
