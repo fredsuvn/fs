@@ -1,19 +1,19 @@
-package space.sunqian.fs.app.di;
+package space.sunqian.fs.di;
 
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.app.SimpleAppException;
+import space.sunqian.fs.base.exception.FsRuntimeException;
 
 /**
- * Exception for {@link InjectedApp}.
+ * Exception for dependency injection.
  *
  * @author sunqian
  */
-public class InjectedAppException extends SimpleAppException {
+public class DIException extends FsRuntimeException {
 
     /**
      * Empty constructor.
      */
-    public InjectedAppException() {
+    public DIException() {
         super();
     }
 
@@ -22,7 +22,7 @@ public class InjectedAppException extends SimpleAppException {
      *
      * @param message the message
      */
-    public InjectedAppException(@Nullable String message) {
+    public DIException(@Nullable String message) {
         super(message);
     }
 
@@ -32,7 +32,7 @@ public class InjectedAppException extends SimpleAppException {
      * @param message the message
      * @param cause   the cause
      */
-    public InjectedAppException(@Nullable String message, @Nullable Throwable cause) {
+    public DIException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -41,7 +41,7 @@ public class InjectedAppException extends SimpleAppException {
      *
      * @param cause the cause
      */
-    public InjectedAppException(@Nullable Throwable cause) {
+    public DIException(@Nullable Throwable cause) {
         super(cause);
     }
 }

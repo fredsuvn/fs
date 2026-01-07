@@ -98,7 +98,7 @@ It depends on _fs-annotation_.
 It contains:
 
 * Core utility kits: such as `Fs`, `StringKit`, `IOKit`...;
-* Core interfaces: such as `SimpleCache`, `InjectedApp`...;
+* Core interfaces: such as `SimpleCache`, `DIContainer`...;
 * Default implementations for core interfaces;
 
 Unless it is necessary to create a separate module, kits, interfaces, and implementations should all be written here.

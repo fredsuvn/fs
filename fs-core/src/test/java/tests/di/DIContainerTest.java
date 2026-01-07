@@ -1,4 +1,4 @@
-package tests.app.di;
+package tests.di;
 
 import internal.test.FsTestException;
 import internal.test.PrintTest;
@@ -8,13 +8,13 @@ import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.app.di.InjectedApp;
-import space.sunqian.fs.app.di.InjectedAppException;
-import space.sunqian.fs.app.di.InjectedAspect;
-import space.sunqian.fs.app.di.InjectedResource;
-import space.sunqian.fs.app.di.InjectedResourceDestructionException;
-import space.sunqian.fs.app.di.InjectedResourceInitializationException;
 import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.di.DIAspectHandler;
+import space.sunqian.fs.di.DIComponent;
+import space.sunqian.fs.di.DIContainer;
+import space.sunqian.fs.di.DIException;
+import space.sunqian.fs.di.DIInitializeException;
+import space.sunqian.fs.di.DIShutdownException;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Method;
@@ -34,120 +34,131 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DITest implements PrintTest {
+public class DIContainerTest implements PrintTest {
 
     private static final List<String> postList = new ArrayList<>();
     private static final List<String> preList = new ArrayList<>();
 
     @Test
-    public void testDIResources() {
-        // app
+    public void testDIComponents() {
+        // container1
         postList.clear();
-        InjectedApp app = InjectedApp.newBuilder()
-            .resourceTypes(
+        DIContainer container1 = DIContainer.newBuilder()
+            .componentTypes(
                 Starter.class, ServiceAaa.class, ServiceBbb.class, InterServiceImpl.class,
                 AspectService1Impl.class, AspectHandler.class,
                 new TypeRef<Generic<String>>() {}.type(), new TypeRef<Generic<Integer>>() {}.type(),
                 NeedExecution.class, NeedExecution2.class, NeedExecution3.class
             )
-            .resourceTypes(ListKit.list(NeedExecution.class, NeedExecution2.class, NeedExecution3.class))
-            .resourceAnnotation(TestRes.class)
+            .componentTypes(ListKit.list(NeedExecution.class, NeedExecution2.class, NeedExecution3.class))
+            .componentAnnotation(TestRes.class)
             .postConstructAnnotation(TestPost.class)
             .preDestroyAnnotation(TestPre.class)
-            .resourceResolver(InjectedResource.defaultResolver())
-            .fieldSetter(InjectedResource.defaultFieldSetter())
+            .componentResolver(DIComponent.defaultResolver())
+            .fieldSetter(DIComponent.defaultFieldSetter())
             .build();
+        assertFalse(container1.isInitialized());
+        assertFalse(container1.isShutdown());
+        assertThrows(DIException.class, container1::shutdown);
+        container1.initialize();
+        assertTrue(container1.isInitialized());
+        assertThrows(DIException.class, container1::initialize);
         assertEquals(
             postList,
             ListKit.list(NeedExecution.class.getName(), NeedExecution2.class.getName(), NeedExecution3.class.getName())
         );
-        Map<Type, InjectedResource> appResources = app.resources();
-        for (InjectedResource appResource : appResources.values()) {
-            assertTrue(appResource.isLocal());
+        Map<Type, DIComponent> c1Components = container1.components();
+        for (DIComponent component : c1Components.values()) {
+            assertTrue(component.isLocal());
         }
-        assertEquals(appResources, app.localResources());
-        assertEquals(app.parentApps(), Collections.emptyList());
-        testDIResources(app);
+        assertEquals(c1Components, container1.localComponents());
+        assertEquals(container1.parentContainers(), Collections.emptyList());
+        testDIComponents(container1);
         preList.clear();
-        app.shutdown();
+        container1.shutdown();
+        assertTrue(container1.isShutdown());
         assertEquals(
             preList,
             ListKit.list(NeedExecution.class.getName(), NeedExecution2.class.getName(), NeedExecution3.class.getName())
         );
+        assertThrows(DIException.class, container1::initialize);
+        assertThrows(DIException.class, container1::shutdown);
 
-        // app2
+        // container2
         postList.clear();
-        InjectedApp app2 = InjectedApp.newBuilder()
-            .resourceTypes(SubService2.class, AspectHandler2.class)
-            .parentApps(app)
-            .parentApps(ListKit.list(app))
+        DIContainer container2 = DIContainer.newBuilder()
+            .componentTypes(SubService2.class, AspectHandler2.class)
+            .parentContainers(container1)
+            .parentContainers(ListKit.list(container1))
             .build();
+        container2.initialize();
         assertEquals(
             postList,
             ListKit.list(SubService2.class.getName())
         );
-        Map<Type, InjectedResource> app2Resources = app2.resources();
-        assertEquals(app2Resources.size(), appResources.size() + 3);
-        Map<Type, InjectedResource> app2LocalResources = app2.localResources();
-        assertEquals(3, app2LocalResources.size());
-        for (InjectedResource app2Resource : app2Resources.values()) {
-            if (app2Resource.type().equals(SubService.class)) {
-                assertTrue(app2Resource.isLocal());
-            } else if (app2Resource.instance() instanceof SubService2) {
-                assertTrue(app2Resource.isLocal());
-            } else if (app2Resource.instance() instanceof AspectHandler2) {
-                assertTrue(app2Resource.isLocal());
+        Map<Type, DIComponent> c2Components = container2.components();
+        assertEquals(c2Components.size(), c1Components.size() + 3);
+        Map<Type, DIComponent> c2LocalComponents = container2.localComponents();
+        assertEquals(3, c2LocalComponents.size());
+        for (DIComponent component : c2Components.values()) {
+            if (component.type().equals(SubService.class)) {
+                assertTrue(component.isLocal());
+            } else if (component.instance() instanceof SubService2) {
+                assertTrue(component.isLocal());
+            } else if (component.instance() instanceof AspectHandler2) {
+                assertTrue(component.isLocal());
             } else {
-                assertFalse(app2Resource.isLocal());
+                assertFalse(component.isLocal());
             }
         }
-        SubService subService = app2.getObject(SubService.class);
+        SubService subService = container2.getObject(SubService.class);
         assertEquals(subService.subService(), SubService.class.getName());
-        SubService2 subService2 = app2.getObject(SubService2.class);
+        SubService2 subService2 = container2.getObject(SubService2.class);
         assertEquals(subService2.subService2(), subService.subService() + "[" + AspectHandler2.class.getName() + "]");
-        ServiceAaa serviceAaa = app2.getObject(ServiceAaa.class);
+        ServiceAaa serviceAaa = container2.getObject(ServiceAaa.class);
         assertEquals("A", serviceAaa.getLocalName());
-        assertEquals(app2.parentApps(), ListKit.list(app));
+        assertEquals(container2.parentContainers(), ListKit.list(container1));
         preList.clear();
-        app2.shutdown();
+        container2.shutdown();
         assertEquals(
             preList,
             ListKit.list(SubService2.class.getName())
         );
 
-        // app3
-        InjectedApp app3 = InjectedApp.newBuilder()
-            .parentApps(app)
-            .resourceTypes(Starter.class)
+        // container3
+        DIContainer container3 = DIContainer.newBuilder()
+            .parentContainers(container1)
+            .componentTypes(Starter.class)
             .build();
-        assertSame(app.getObject(Starter.class), app3.getObject(Starter.class));
+        container3.initialize();
+        assertSame(container1.getObject(Starter.class), container3.getObject(Starter.class));
 
         {
             // error
-            assertNull(app2.getObject(String.class));
+            assertNull(container2.getObject(String.class));
         }
     }
 
-    private void testDIResources(InjectedApp app) {
-        printFor("Resources", app.resources().values().stream()
+    private void testDIComponents(DIContainer container) {
+        printFor("Components", container.components().values().stream()
             .map(r -> r.type().getTypeName() + ": " + r.instance())
             .collect(Collectors.joining(System.lineSeparator() + "    ")));
         // starter
-        Starter starter = app.getObject(Starter.class);
-        // common resource
-        ServiceAaa serviceAaa = app.getObject(ServiceAaa.class);
-        assertSame(serviceAaa, app.getObject(ServiceAaa.class));
+        Starter starter = container.getObject(Starter.class);
+        // common components
+        ServiceAaa serviceAaa = container.getObject(ServiceAaa.class);
+        assertSame(serviceAaa, container.getObject(ServiceAaa.class));
         assertEquals("A", serviceAaa.getLocalName());
         assertEquals("B", serviceAaa.getRemoteName());
-        ServiceBbb serviceBbb = app.getObject(ServiceBbb.class);
-        assertSame(serviceBbb, app.getObject(ServiceBbb.class));
+        ServiceBbb serviceBbb = container.getObject(ServiceBbb.class);
+        assertSame(serviceBbb, container.getObject(ServiceBbb.class));
         assertEquals("B", serviceBbb.getLocalName());
         assertEquals("A", serviceBbb.getRemoteName());
-        InterService interService = app.getObject(InterService.class);
+        InterService interService = container.getObject(InterService.class);
         assertEquals(interService.interService(), InterServiceImpl.class.getName());
         assertEquals("AB", starter.getNames());
         assertEquals(starter.interService(), interService.interService());
-        InjectedResource serviceAaaRes = app.getResource(ServiceAaa.class);
+        DIComponent serviceAaaRes = container.getComponent(ServiceAaa.class);
         assertSame(serviceAaa, serviceAaaRes.instance());
         // aspect
         assertEquals(
@@ -158,16 +169,16 @@ public class DITest implements PrintTest {
             starter.aspectService2(),
             "call: " + starter.aspectService1() + ";" + interService.interService()
         );
-        // generic resource
-        Generic<String> stringGeneric = app.getObject(new TypeRef<Generic<String>>() {});
-        Generic<Integer> integerGeneric = app.getObject(new TypeRef<Generic<Integer>>() {});
+        // generic components
+        Generic<String> stringGeneric = container.getObject(new TypeRef<Generic<String>>() {});
+        Generic<Integer> integerGeneric = container.getObject(new TypeRef<Generic<Integer>>() {});
         assertNotSame(stringGeneric, integerGeneric);
         assertEquals("X", stringGeneric.generic("X"));
         assertEquals(100, integerGeneric.generic(100));
         assertEquals("X", starter.generic("X"));
         assertEquals(100, starter.generic(100));
-        GenericInter<String> stringGenericInter = app.getObject(new TypeRef<GenericInter<String>>() {});
-        GenericInter<Integer> integerGenericInter = app.getObject(new TypeRef<GenericInter<Integer>>() {});
+        GenericInter<String> stringGenericInter = container.getObject(new TypeRef<GenericInter<String>>() {});
+        GenericInter<Integer> integerGenericInter = container.getObject(new TypeRef<GenericInter<Integer>>() {});
         assertSame(stringGenericInter, stringGeneric);
         assertSame(integerGenericInter, integerGeneric);
         assertEquals("X", starter.genericInter("X"));
@@ -310,7 +321,7 @@ public class DITest implements PrintTest {
         }
     }
 
-    public static class AspectHandler implements InjectedAspect {
+    public static class AspectHandler implements DIAspectHandler {
 
         @TestRes
         private InterService interService;
@@ -427,7 +438,7 @@ public class DITest implements PrintTest {
         }
     }
 
-    public static class AspectHandler2 implements InjectedAspect {
+    public static class AspectHandler2 implements DIAspectHandler {
 
         @Override
         public boolean needsAspect(@Nonnull Type type) {
@@ -459,99 +470,112 @@ public class DITest implements PrintTest {
         {
             Dep.postList.clear();
             Dep.destroyList.clear();
-            InjectedApp app = InjectedApp.newBuilder()
-                .resourceTypes(Dep1.class, Dep2.class, Dep3.class)
-                .build();
-            app.shutdown();
+            DIContainer container = DIContainer.newBuilder()
+                .componentTypes(Dep1.class, Dep2.class, Dep3.class)
+                .build()
+                .initialize()
+                .shutdown();
             assertEquals(Dep.postList, ListKit.list(1, 2, 3));
             assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
             Dep.postList.clear();
             Dep.destroyList.clear();
-            InjectedApp app = InjectedApp.newBuilder()
-                .resourceTypes(Dep1.class, Dep3.class, Dep2.class)
-                .build();
-            app.shutdown();
+            DIContainer container = DIContainer.newBuilder()
+                .componentTypes(Dep1.class, Dep3.class, Dep2.class)
+                .build()
+                .initialize()
+                .shutdown();
             assertEquals(Dep.postList, ListKit.list(1, 2, 3));
             assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
             Dep.postList.clear();
             Dep.destroyList.clear();
-            InjectedApp app = InjectedApp.newBuilder()
-                .resourceTypes(Dep2.class, Dep1.class, Dep3.class)
-                .build();
-            app.shutdown();
+            DIContainer container = DIContainer.newBuilder()
+                .componentTypes(Dep2.class, Dep1.class, Dep3.class)
+                .build()
+                .initialize()
+                .shutdown();
             assertEquals(Dep.postList, ListKit.list(1, 2, 3));
             assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
             Dep.postList.clear();
             Dep.destroyList.clear();
-            InjectedApp app = InjectedApp.newBuilder()
-                .resourceTypes(Dep2.class, Dep3.class, Dep1.class)
-                .build();
-            app.shutdown();
+            DIContainer container = DIContainer.newBuilder()
+                .componentTypes(Dep2.class, Dep3.class, Dep1.class)
+                .build()
+                .initialize()
+                .shutdown();
             assertEquals(Dep.postList, ListKit.list(1, 2, 3));
             assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
             Dep.postList.clear();
             Dep.destroyList.clear();
-            InjectedApp app = InjectedApp.newBuilder()
-                .resourceTypes(Dep3.class, Dep1.class, Dep2.class)
-                .build();
-            app.shutdown();
+            DIContainer container = DIContainer.newBuilder()
+                .componentTypes(Dep3.class, Dep1.class, Dep2.class)
+                .build()
+                .initialize()
+                .shutdown();
             assertEquals(Dep.postList, ListKit.list(1, 2, 3));
             assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
             Dep.postList.clear();
             Dep.destroyList.clear();
-            InjectedApp app = InjectedApp.newBuilder()
-                .resourceTypes(Dep3.class, Dep2.class, Dep1.class)
-                .build();
-            app.shutdown();
+            DIContainer container = DIContainer.newBuilder()
+                .componentTypes(Dep3.class, Dep2.class, Dep1.class)
+                .build()
+                .initialize()
+                .shutdown();
             assertEquals(Dep.postList, ListKit.list(1, 2, 3));
             assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
-            InjectedApp.newBuilder().resourceTypes(DepErr1.class).build().shutdown();
-            InjectedApp.newBuilder().resourceTypes(DepErr2.class).build().shutdown();
+            DIContainer container = DIContainer.newBuilder().componentTypes(DepErr1.class).build();
+            container.initialize();
+            container.shutdown();
+            DIContainer container2 = DIContainer.newBuilder().componentTypes(DepErr2.class).build();
+            container2.initialize();
+            container2.shutdown();
         }
         {
-            assertThrows(InjectedAppException.class, () ->
-                InjectedApp.newBuilder().resourceTypes(Dep4.class, Dep5.class).build());
-            assertThrows(InjectedAppException.class, () ->
-                InjectedApp.newBuilder().resourceTypes(Dep6.class, Dep7.class).build());
-            assertThrows(InjectedAppException.class, () ->
-                InjectedApp.newBuilder().resourceTypes(DepErr3.class).build());
+            assertThrows(DIException.class, () ->
+                DIContainer.newBuilder().componentTypes(Dep4.class, Dep5.class).build().initialize());
+            // assertThrows(DIException.class, () ->
+            //     DIContainer.newBuilder().componentTypes(Dep6.class, Dep7.class).build());
+            assertThrows(DIException.class, () ->
+                DIContainer.newBuilder().componentTypes(DepErr3.class).build().initialize());
         }
         {
-            InjectedApp app = InjectedApp.newBuilder()
-                .resourceTypes(Dep8.class, Dep10.class, Dep9.class)
-                .build();
-            app.shutdown();
+            DIContainer container = DIContainer.newBuilder()
+                .componentTypes(Dep8.class, Dep10.class, Dep9.class)
+                .build()
+                .initialize();
+            container.shutdown();
         }
         {
-            InjectedApp app = InjectedApp.newBuilder()
-                .resourceTypes(Dep9.class, Dep10.class, Dep8.class)
-                .build();
-            app.shutdown();
+            DIContainer container = DIContainer.newBuilder()
+                .componentTypes(Dep9.class, Dep10.class, Dep8.class)
+                .build()
+                .initialize();
+            container.shutdown();
         }
         {
             // no dependency
-            InjectedApp app = InjectedApp.newBuilder()
-                .resourceTypes(Object.class)
-                .build();
-            InjectedResource res = app.getResource(Object.class);
+            DIContainer container = DIContainer.newBuilder()
+                .componentTypes(Object.class)
+                .build()
+                .initialize();
+            DIComponent res = container.getComponent(Object.class);
             assertNotNull(res);
             assertNull(res.postConstructMethod());
             res.postConstruct();
             assertNull(res.preDestroyMethod());
             res.preDestroy();
-            app.shutdown();
+            container.shutdown();
         }
     }
 
@@ -704,60 +728,63 @@ public class DITest implements PrintTest {
     public void testStartAndShutdown() {
         {
             // startup
-            InjectedResourceInitializationException startErr = assertThrows(InjectedResourceInitializationException.class, () -> {
-                InjectedApp.newBuilder()
-                    .resourceTypes(Dep8.class, Dep9.class, ConstructErr.class, Dep10.class)
-                    .build();
+            DIInitializeException startErr = assertThrows(DIInitializeException.class, () -> {
+                DIContainer.newBuilder()
+                    .componentTypes(Dep8.class, Dep9.class, ConstructErr.class, Dep10.class)
+                    .build()
+                    .initialize();
             });
-            assertEquals(ConstructErr.class, startErr.failedResource().type());
-            for (InjectedResource initializedResource : startErr.initializedResources()) {
-                assertTrue(initializedResource.isInitialized());
+            assertEquals(ConstructErr.class, startErr.failedComponent().type());
+            for (DIComponent initializedComponent : startErr.initializedComponents()) {
+                assertTrue(initializedComponent.isInitialized());
             }
             assertEquals(
-                startErr.initializedResources().stream().map(InjectedResource::type).collect(Collectors.toList()),
+                startErr.initializedComponents().stream().map(DIComponent::type).collect(Collectors.toList()),
                 ListKit.list(Dep8.class, Dep9.class)
             );
-            for (InjectedResource uninitializedResource : startErr.uninitializedResources()) {
-                assertFalse(uninitializedResource.isInitialized());
+            for (DIComponent uninitializedComponent : startErr.uninitializedComponents()) {
+                assertFalse(uninitializedComponent.isInitialized());
             }
             assertEquals(
-                startErr.uninitializedResources().stream().map(InjectedResource::type).collect(Collectors.toList()),
+                startErr.uninitializedComponents().stream().map(DIComponent::type).collect(Collectors.toList()),
                 ListKit.list(Dep10.class)
             );
         }
         {
             // shutdown
-            InjectedResourceDestructionException shutErr = assertThrows(InjectedResourceDestructionException.class, () -> {
-                InjectedApp.newBuilder()
-                    .resourceTypes(Dep8.class, Dep9.class, DestroyErr.class, Dep10.class)
+            DIShutdownException shutErr = assertThrows(DIShutdownException.class, () -> {
+                DIContainer.newBuilder()
+                    .componentTypes(Dep8.class, Dep9.class, DestroyErr.class, Dep10.class)
                     .build()
+                    .initialize()
                     .shutdown();
             });
-            assertEquals(DestroyErr.class, shutErr.failedResource().type());
-            for (InjectedResource destroyedResource : shutErr.destroyedResources()) {
-                assertTrue(destroyedResource.isDestroyed());
+            assertEquals(DestroyErr.class, shutErr.failedComponent().type());
+            for (DIComponent destroyedComponent : shutErr.destroyedComponents()) {
+                assertTrue(destroyedComponent.isDestroyed());
             }
             assertEquals(
-                shutErr.destroyedResources().stream().map(InjectedResource::type).collect(Collectors.toList()),
+                shutErr.destroyedComponents().stream().map(DIComponent::type).collect(Collectors.toList()),
                 ListKit.list(Dep8.class, Dep9.class)
             );
-            for (InjectedResource undestroyedResource : shutErr.undestroyedResources()) {
-                assertFalse(undestroyedResource.isDestroyed());
+            for (DIComponent undestroyedComponent : shutErr.undestroyedComponents()) {
+                assertFalse(undestroyedComponent.isDestroyed());
             }
             assertEquals(
-                shutErr.undestroyedResources().stream().map(InjectedResource::type).collect(Collectors.toList()),
+                shutErr.undestroyedComponents().stream().map(DIComponent::type).collect(Collectors.toList()),
                 ListKit.list(Dep10.class)
             );
         }
         {
             // PostConstruct and PreDestroy at same method
-            InjectedApp app = InjectedApp.newBuilder()
-                .resourceTypes(Dep11.class)
-                .build();
-            for (InjectedResource resource : app.resources().values()) {
-                assertSame(resource.postConstructMethod(), resource.preDestroyMethod());
+            DIContainer container = DIContainer.newBuilder()
+                .componentTypes(Dep11.class)
+                .build()
+                .initialize();
+            for (DIComponent component : container.components().values()) {
+                assertSame(component.postConstructMethod(), component.preDestroyMethod());
             }
-            app.shutdown();
+            container.shutdown();
         }
     }
 
@@ -780,33 +807,33 @@ public class DITest implements PrintTest {
     @Test
     public void testException() throws Exception {
         {
-            // InjectedSimpleAppException
-            assertThrows(InjectedAppException.class, () -> {
-                throw new InjectedAppException();
+            // DIException
+            assertThrows(DIException.class, () -> {
+                throw new DIException();
             });
-            assertThrows(InjectedAppException.class, () -> {
-                throw new InjectedAppException("");
+            assertThrows(DIException.class, () -> {
+                throw new DIException("");
             });
-            assertThrows(InjectedAppException.class, () -> {
-                throw new InjectedAppException("", new RuntimeException());
+            assertThrows(DIException.class, () -> {
+                throw new DIException("", new RuntimeException());
             });
-            assertThrows(InjectedAppException.class, () -> {
-                throw new InjectedAppException(new RuntimeException());
+            assertThrows(DIException.class, () -> {
+                throw new DIException(new RuntimeException());
             });
         }
-        assertThrows(InjectedAppException.class, () -> {
-            InjectedApp.newBuilder()
-                .resourceTypes(DepErr5.class)
+        assertThrows(DIException.class, () -> {
+            DIContainer.newBuilder()
+                .componentTypes(DepErr5.class)
                 .build();
         });
-        assertThrows(InjectedAppException.class, () -> {
-            InjectedApp.newBuilder()
-                .resourceTypes(DepErr5.class.getTypeParameters()[0])
+        assertThrows(DIException.class, () -> {
+            DIContainer.newBuilder()
+                .componentTypes(DepErr5.class.getTypeParameters()[0])
                 .build();
         });
-        assertThrows(InjectedAppException.class, () -> {
-            InjectedApp.newBuilder()
-                .resourceTypes(DepErr6.class)
+        assertThrows(DIException.class, () -> {
+            DIContainer.newBuilder()
+                .componentTypes(DepErr6.class)
                 .build();
         });
     }

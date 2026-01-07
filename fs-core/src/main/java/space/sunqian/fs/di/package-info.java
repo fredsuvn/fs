@@ -152,7 +152,7 @@
  *   </li>
  *   <li>
  *       After injection completes, identify all resource instances that implement the
- *   {@link space.sunqian.fs.app.di.InjectedAspect} interface s AOP handlers.
+ *   {@link space.sunqian.fs.di.DIAspectHandler} interface s AOP handlers.
  *   </li>
  *   <li>
  *       Pass the remaining resource instances to each AOP handler sequentially to determine if they need to
@@ -199,4 +199,4 @@
  * function normally, as long as those resources haven't been destroyed (by {@code pre-destroy} methods) during this
  * shutdown process.
  */
-package space.sunqian.fs.app.di;
+package space.sunqian.fs.di;

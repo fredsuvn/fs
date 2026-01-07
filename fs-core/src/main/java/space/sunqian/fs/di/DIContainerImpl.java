@@ -1,4 +1,4 @@
-package space.sunqian.fs.app.di;
+package space.sunqian.fs.di;
 
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,153 +29,188 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-final class InjectedAppImpl implements InjectedApp {
+final class DIContainerImpl implements DIContainer {
 
     private static final Runnable EMPTY_RUNNABLE = () -> {};
 
-    private final @Nonnull Map<@Nonnull Type, @Nonnull InjectedResource> resources;
-    private final @Nonnull Map<@Nonnull Type, @Nonnull InjectedResource> localResources;
-    private final @Nonnull List<@Nonnull InjectedResource> preDestroyList;
-    private final @Nonnull List<@Nonnull InjectedApp> parentApps;
+    private final @Nonnull Map<@Nonnull Type, @Nonnull DIComponent> components;
+    private final @Nonnull Map<@Nonnull Type, @Nonnull DIComponent> localComponents;
+    private final @Nonnull List<@Nonnull DIContainer> parentContainers;
 
-    public InjectedAppImpl(
-        @Nonnull Collection<@Nonnull Type> resourceTypes,
-        @Nonnull Collection<@Nonnull InjectedApp> parentApps,
-        @Nonnull Collection<@Nonnull String> resourceAnnotations,
+    private volatile int state = 0;
+
+    public DIContainerImpl(
+        @Nonnull Collection<@Nonnull Type> componentTypes,
+        @Nonnull Collection<@Nonnull DIContainer> parentContainers,
+        @Nonnull Collection<@Nonnull String> componentAnnotations,
         @Nonnull Collection<@Nonnull String> postConstructAnnotations,
         @Nonnull Collection<@Nonnull String> preDestroyAnnotations,
-        @Nonnull InjectedResource.Resolver resolver,
-        @Nonnull InjectedResource.FieldSetter fieldSetter
-    ) throws InjectedResourceInitializationException, InjectedAppException {
-        Map<Type, Res> resourceMap = new LinkedHashMap<>();
-        // add parent resource into this app
-        for (InjectedApp parentApp : parentApps) {
-            for (InjectedResource resource : parentApp.resources().values()) {
-                resourceMap.put(resource.type(), new Res(resource.type(), resource.instance()));
+        @Nonnull DIComponent.Resolver resolver,
+        @Nonnull DIComponent.FieldSetter fieldSetter
+    ) throws DIInitializeException, DIException {
+        Map<Type, Res> resMap = new LinkedHashMap<>();
+        // add components from parent containers
+        for (DIContainer container : parentContainers) {
+            for (DIComponent component : container.components().values()) {
+                resMap.put(component.type(), new Res(component.type(), component.instance()));
             }
         }
-        Set<FieldRes> fieldSet = new LinkedHashSet<>();
+        Set<ResField> fieldSet = new LinkedHashSet<>();
         // generate instances
-        for (Type resourceType : resourceTypes) {
+        for (Type componentType : componentTypes) {
             doDependencyInjection(
-                resourceType,
-                resourceAnnotations,
+                componentType,
+                componentAnnotations,
                 postConstructAnnotations,
                 preDestroyAnnotations,
                 resolver,
-                resourceMap,
+                resMap,
                 fieldSet
             );
         }
         // base injects:
-        for (FieldRes fieldRes : fieldSet) {
+        for (ResField resField : fieldSet) {
             setField(
                 fieldSetter,
-                fieldRes.field,
-                fieldRes.owner.instance,
-                getRes(fieldRes.field.getGenericType(), resourceMap).instance
+                resField.field,
+                resField.owner.instance,
+                getRes(resField.field.getGenericType(), resMap).instance
             );
         }
         // aop
-        doAop(fieldSetter, resourceMap, fieldSet);
-        // resources
-        LinkedHashMap<Type, InjectedResource> resources = new LinkedHashMap<>(resourceMap.size());
-        LinkedHashMap<Type, InjectedResource> localResources = new LinkedHashMap<>(resourceMap.size());
-        for (Res res : resourceMap.values()) {
+        doAop(fieldSetter, resMap, fieldSet);
+        // rewrite fields
+        for (ResField resField : fieldSet) {
+            boolean needsRewrite = false;
+            Object owner;
+            if (resField.owner.advisedInstance != null) {
+                needsRewrite = true;
+                owner = resField.owner.advisedInstance;
+            } else {
+                owner = resField.owner.instance;
+            }
+            Res valueRes = getRes(resField.field.getGenericType(), resMap);
+            Object value;
+            if (valueRes.advisedInstance != null) {
+                needsRewrite = true;
+                value = valueRes.advisedInstance;
+            } else {
+                value = valueRes.instance;
+            }
+            if (needsRewrite) {
+                setField(fieldSetter, resField.field, owner, value);
+            }
+        }
+        // components
+        LinkedHashMap<Type, DIComponent> components = new LinkedHashMap<>(resMap.size());
+        LinkedHashMap<Type, DIComponentImpl> localComponents = new LinkedHashMap<>(resMap.size());
+        for (Res res : resMap.values()) {
             Object inst = getResInstance(res);
-            InjectedResource simpleResource = new InjectedRes(
+            DIComponentImpl component = new DIComponentImpl(
                 res.type,
                 inst,
                 res.local,
                 res.postConstructMethod(),
                 res.preDestroyMethod()
             );
-            resources.put(res.type, simpleResource);
+            components.put(res.type, component);
             if (res.local) {
-                localResources.put(res.type, simpleResource);
+                localComponents.put(res.type, component);
             }
         }
-        this.parentApps = ListKit.toList(parentApps);
-        this.resources = Collections.unmodifiableMap(resources);
-        this.localResources = Collections.unmodifiableMap(localResources);
-        // post-construct and pre-destroy
-        Set<InjectedResource> postConstructSet = new LinkedHashSet<>();
-        Set<InjectedResource> preDestroySet = new LinkedHashSet<>();
-        Set<Type> stack = new HashSet<>();
-        for (InjectedResource resource : localResources.values()) {
-            checkDependencyForPostConstruct(resource, stack, postConstructSet);
-            stack.clear();
-            checkDependencyForPreDestroy(resource, stack, preDestroySet);
-            stack.clear();
+        // complete
+        this.parentContainers = ListKit.toList(parentContainers);
+        this.components = Collections.unmodifiableMap(components);
+        this.localComponents = Collections.unmodifiableMap(localComponents);
+        // set dependencies
+        configureComponentDependencies(resMap);
+        // check cycle dependencies
+        for (DIComponentImpl component : localComponents.values()) {
+            DIKit.checkCycleDependencies(component);
         }
-        List<InjectedResource> postConstructList = new ArrayList<>(postConstructSet);
-        postConstructList.sort(PostConstructComparator.INST);
-        List<InjectedResource> preDestroyList = new ArrayList<>(preDestroySet);
-        preDestroyList.sort(PreDestroyComparator.INST);
-        this.preDestroyList = preDestroyList;
-        // execute post-construct
-        doPostConstruct(postConstructList);
     }
 
-    private void doPostConstruct(@Nonnull List<@Nonnull InjectedResource> postConstructList) {
-        // execute post-construct
-        List<InjectedResource> uninitializedResources = new ArrayList<>(postConstructList);
-        List<InjectedResource> initializedResources = new ArrayList<>(postConstructList.size());
-        Iterator<InjectedResource> uninitializedIt = uninitializedResources.iterator();
-        while (uninitializedIt.hasNext()) {
-            InjectedResource resource = uninitializedIt.next();
-            try {
-                resource.postConstruct();
-            } catch (Exception e) {
-                throw new InjectedResourceInitializationException(resource, e, initializedResources, uninitializedResources);
-            } finally {
-                uninitializedIt.remove();
+    private void configureComponentDependencies(
+        @Nonnull Map<@Nonnull Type, @Nonnull Res> resMap
+    ) {
+        for (DIComponent value : localComponents.values()) {
+            DIComponentImpl component = (DIComponentImpl) value;
+            // @Resource
+            Res res = getRes(component.type(), resMap);
+            DIComponent.Descriptor descriptor = Fs.asNonnull(res.descriptor);
+            component.depList.addAll(
+                descriptor.dependencyFields().stream()
+                    .map(field -> getComponent(field.getGenericType()))
+                    //.filter(Objects::nonNull)
+                    .filter(c -> c != component)
+                    .collect(Collectors.toList())
+            );
+            // post-construct method parameters
+            Method postConstructMethod = descriptor.postConstructMethod();
+            if (postConstructMethod != null) {
+                component.depList.addAll(
+                    Arrays.stream(postConstructMethod.getParameterTypes())
+                        .map(this::getComponent)
+                        .filter(c -> c != component)
+                        .collect(Collectors.toList())
+                );
             }
-            initializedResources.add(resource);
+            // pre-destroy method parameters
+            Method preDestroyMethod = descriptor.preDestroyMethod();
+            if (preDestroyMethod != null) {
+                component.depList.addAll(
+                    Arrays.stream(preDestroyMethod.getParameterTypes())
+                        .map(this::getComponent)
+                        .filter(c -> c != component)
+                        .collect(Collectors.toList())
+                );
+            }
+            component.depList.trimToSize();
         }
     }
 
     private void doDependencyInjection(
         @Nonnull Type type,
-        @Nonnull Collection<@Nonnull String> resourceAnnotations,
+        @Nonnull Collection<@Nonnull String> componentAnnotations,
         @Nonnull Collection<@Nonnull String> postConstructAnnotations,
         @Nonnull Collection<@Nonnull String> preDestroyAnnotations,
-        @Nonnull InjectedResource.Resolver resolver,
-        @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> resourceMap,
-        @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet
-    ) throws InjectedAppException {
-        if (resourceMap.containsKey(type)) {
+        @Nonnull DIComponent.Resolver resolver,
+        @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> componentMap,
+        @Nonnull @OutParam Set<@Nonnull ResField> fieldSet
+    ) throws DIException {
+        if (componentMap.containsKey(type)) {
             return;
         }
-        InjectedResource.Descriptor descriptor = Fs.uncheck(() ->
-                resolver.resolve(type, resourceAnnotations, postConstructAnnotations, preDestroyAnnotations),
-            InjectedAppException::new
+        DIComponent.Descriptor descriptor = Fs.uncheck(() ->
+                resolver.resolve(type, componentAnnotations, postConstructAnnotations, preDestroyAnnotations),
+            DIException::new
         );
         if (!canInstantiate(descriptor.rawClass())) {
             return;
         }
         Res res = new Res(descriptor);
-        resourceMap.put(type, res);
+        componentMap.put(type, res);
         // dependency fields
         for (Field dependencyField : descriptor.dependencyFields()) {
             Type dependencyType = dependencyField.getGenericType();
             if (dependencyType.equals(type)) {
-                fieldSet.add(new FieldRes(dependencyField, res));
+                fieldSet.add(new ResField(dependencyField, res));
                 continue;
             }
             doDependencyInjection(
                 dependencyType,
-                resourceAnnotations,
+                componentAnnotations,
                 postConstructAnnotations,
                 preDestroyAnnotations,
                 resolver,
-                resourceMap,
+                componentMap,
                 fieldSet
             );
-            fieldSet.add(new FieldRes(dependencyField, res));
+            fieldSet.add(new ResField(dependencyField, res));
         }
         // dependency parameters of post-construct method
         Method postConstructMethod = descriptor.postConstructMethod();
@@ -182,11 +218,11 @@ final class InjectedAppImpl implements InjectedApp {
             for (Type parameterType : postConstructMethod.getGenericParameterTypes()) {
                 doDependencyInjection(
                     parameterType,
-                    resourceAnnotations,
+                    componentAnnotations,
                     postConstructAnnotations,
                     preDestroyAnnotations,
                     resolver,
-                    resourceMap,
+                    componentMap,
                     fieldSet
                 );
             }
@@ -197,11 +233,11 @@ final class InjectedAppImpl implements InjectedApp {
             for (Type parameterType : preDestroyMethod.getGenericParameterTypes()) {
                 doDependencyInjection(
                     parameterType,
-                    resourceAnnotations,
+                    componentAnnotations,
                     postConstructAnnotations,
                     preDestroyAnnotations,
                     resolver,
-                    resourceMap,
+                    componentMap,
                     fieldSet
                 );
             }
@@ -216,18 +252,18 @@ final class InjectedAppImpl implements InjectedApp {
     }
 
     private void doAop(
-        @Nonnull InjectedResource.FieldSetter fieldSetter,
-        @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> resourceMap,
-        @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet
-    ) throws InjectedAppException {
-        List<InjectedAspect> aspects = new ArrayList<>();
-        for (Res res : resourceMap.values()) {
+        @Nonnull DIComponent.FieldSetter fieldSetter,
+        @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> componentMap,
+        @Nonnull @OutParam Set<@Nonnull ResField> fieldSet
+    ) throws DIException {
+        List<DIAspectHandler> aspects = new ArrayList<>();
+        for (Res res : componentMap.values()) {
             if (!res.local) {
                 continue;
             }
             Object instance = res.instance;
-            if (instance instanceof InjectedAspect) {
-                aspects.add((InjectedAspect) instance);
+            if (instance instanceof DIAspectHandler) {
+                aspects.add((DIAspectHandler) instance);
                 res.isAspectHandler = true;
             }
         }
@@ -235,14 +271,14 @@ final class InjectedAppImpl implements InjectedApp {
             return;
         }
         AspectMaker aspectMaker = AspectMaker.byAsm();
-        for (Res res : resourceMap.values()) {
+        for (Res res : componentMap.values()) {
             if (!res.local) {
                 continue;
             }
             if (res.isAspectHandler) {
                 continue;
             }
-            for (InjectedAspect aspect : aspects) {
+            for (DIAspectHandler aspect : aspects) {
                 if (aspect.needsAspect(res.type)) {
                     AspectSpec spec = aspectMaker.make(Fs.asNonnull(res.descriptor).rawClass(), aspect);
                     res.advisedInstance = spec.newInstance();
@@ -250,63 +286,41 @@ final class InjectedAppImpl implements InjectedApp {
                 }
             }
         }
-        // rewrite fields
-        for (FieldRes fieldRes : fieldSet) {
-            boolean needsRewrite = false;
-            Object owner;
-            if (fieldRes.owner.advisedInstance != null) {
-                needsRewrite = true;
-                owner = fieldRes.owner.advisedInstance;
-            } else {
-                owner = fieldRes.owner.instance;
-            }
-            Res valueRes = getRes(fieldRes.field.getGenericType(), resourceMap);
-            Object value;
-            if (valueRes.advisedInstance != null) {
-                needsRewrite = true;
-                value = valueRes.advisedInstance;
-            } else {
-                value = valueRes.instance;
-            }
-            if (needsRewrite) {
-                setField(fieldSetter, fieldRes.field, owner, value);
-            }
-        }
     }
 
     private void setField(
-        @Nonnull InjectedResource.FieldSetter fieldSetter,
+        @Nonnull DIComponent.FieldSetter fieldSetter,
         @Nonnull Field field, @Nonnull Object owner, @Nonnull Object value
-    ) throws InjectedAppException {
+    ) throws DIException {
         Fs.uncheck(
             () -> {
                 fieldSetter.set(field, owner, value);
             },
-            InjectedAppException::new
+            DIException::new
         );
     }
 
     private @Nonnull Res getRes(
         @Nonnull Type type,
-        @Nonnull Map<@Nonnull Type, @Nonnull Res> resourceMap
-    ) throws InjectedAppException {
-        Res res = resourceMap.get(type);
+        @Nonnull Map<@Nonnull Type, @Nonnull Res> componentMap
+    ) throws DIException {
+        Res res = componentMap.get(type);
         if (res != null) {
             return res;
         }
-        for (Res resource : resourceMap.values()) {
+        for (Res resource : componentMap.values()) {
             if (TypeKit.isAssignable(type, resource.type)) {
                 return resource;
             }
         }
-        throw new InjectedAppException("Can not find resource instance for type :" + type.getTypeName() + ".");
+        throw new DIException("Can not find resource instance for type :" + type.getTypeName() + ".");
     }
 
     private void checkDependencyForPostConstruct(
-        @Nonnull InjectedResource curRes,
+        @Nonnull DIComponent curRes,
         @Nonnull Set<@Nonnull Type> stack,
-        @Nonnull @OutParam Set<@Nonnull InjectedResource> postConstructSet
-    ) throws InjectedAppException {
+        @Nonnull @OutParam Set<@Nonnull DIComponent> postConstructSet
+    ) throws DIException {
         Type curType = curRes.type();
         Method postConstructMethod = curRes.postConstructMethod();
         if (postConstructMethod == null) {
@@ -318,26 +332,23 @@ final class InjectedAppImpl implements InjectedApp {
             return;
         }
         if (!stack.add(curType)) {
-            throw new InjectedAppException(
+            throw new DIException(
                 "Circular post-construct dependency detected: " +
                     stack.stream().map(Type::getTypeName).collect(Collectors.joining(" -> ")) + "."
             );
         }
         for (Type depType : sdo) {
-            InjectedResource depRes = resources.get(depType);
-            // if (depRes == null) {
-            //     throw new InjectedAppException("Unknown post-construct dependency type: " + depType.getTypeName() + ".");
-            // }
+            DIComponent depRes = components.get(depType);
             checkDependencyForPostConstruct(depRes, stack, postConstructSet);
             stack.remove(depType);
         }
     }
 
     private void checkDependencyForPreDestroy(
-        @Nonnull InjectedResource curRes,
+        @Nonnull DIComponent curRes,
         @Nonnull Set<@Nonnull Type> stack,
-        @Nonnull @OutParam Set<@Nonnull InjectedResource> preDestroySet
-    ) throws InjectedAppException {
+        @Nonnull @OutParam Set<@Nonnull DIComponent> preDestroySet
+    ) throws DIException {
         Type curType = curRes.type();
         Method preDestroyMethod = curRes.preDestroyMethod();
         if (preDestroyMethod == null) {
@@ -349,16 +360,13 @@ final class InjectedAppImpl implements InjectedApp {
             return;
         }
         if (!stack.add(curType)) {
-            throw new InjectedAppException(
+            throw new DIException(
                 "Circular pre-destroy dependency: " +
                     stack.stream().map(Type::getTypeName).collect(Collectors.joining(" -> ")) + "."
             );
         }
         for (Type depType : sdo) {
-            InjectedResource depRes = resources.get(depType);
-            // if (depRes == null) {
-            //     throw new InjectedAppException("Unknown pre-destroy dependency type: " + depType.getTypeName() + ".");
-            // }
+            DIComponent depRes = components.get(depType);
             checkDependencyForPreDestroy(depRes, stack, preDestroySet);
             stack.remove(depType);
         }
@@ -371,17 +379,83 @@ final class InjectedAppImpl implements InjectedApp {
     }
 
     @Override
-    public void shutdown() throws InjectedResourceDestructionException, InjectedAppException {
-        List<InjectedResource> undestroyedResources = new ArrayList<>(preDestroyList);
-        List<InjectedResource> destroyedResources = new ArrayList<>(preDestroyList.size());
-        Iterator<InjectedResource> undestroyedIt = undestroyedResources.iterator();
-        while (undestroyedIt.hasNext()) {
-            InjectedResource resource = undestroyedIt.next();
+    public synchronized DIContainer initialize() throws DIInitializeException, DIException {
+        if (state > 0) {
+            throw new DIException("DIContainer is already initialized.");
+        }
+        try {
+            Set<DIComponent> postConstructSet = new LinkedHashSet<>();
+            Set<Type> stack = new HashSet<>();
+            for (DIComponent component : localComponents.values()) {
+                checkDependencyForPostConstruct(component, stack, postConstructSet);
+                stack.clear();
+            }
+            List<DIComponent> postConstructList = new ArrayList<>(postConstructSet);
+            postConstructList.sort(PostConstructComparator.INST);
+            doPostConstruct(postConstructList);
+        } finally {
+            this.state = 1;
+        }
+        return this;
+    }
+
+    private void doPostConstruct(@Nonnull List<@Nonnull DIComponent> postConstructList) {
+        List<DIComponent> uninitializedComponents = new ArrayList<>(postConstructList);
+        List<DIComponent> initializedComponents = new ArrayList<>(postConstructList.size());
+        Iterator<DIComponent> uninitializedIt = uninitializedComponents.iterator();
+        while (uninitializedIt.hasNext()) {
+            DIComponent component = uninitializedIt.next();
             try {
-                resource.preDestroy();
-                destroyedResources.add(resource);
+                component.postConstruct();
             } catch (Exception e) {
-                throw new InjectedResourceDestructionException(resource, e, destroyedResources, undestroyedResources);
+                throw new DIInitializeException(component, e, initializedComponents, uninitializedComponents);
+            } finally {
+                uninitializedIt.remove();
+            }
+            initializedComponents.add(component);
+        }
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return state > 0;
+    }
+
+    @Override
+    public synchronized DIContainer shutdown() throws DIShutdownException, DIException {
+        if (state < 1) {
+            throw new DIException("DIContainer is not initialized.");
+        }
+        if (state >= 2) {
+            throw new DIException("DIContainer is already shutdown.");
+        }
+        try {
+            Set<DIComponent> preDestroySet = new LinkedHashSet<>();
+            Set<Type> stack = new HashSet<>();
+            for (DIComponent component : localComponents.values()) {
+                checkDependencyForPreDestroy(component, stack, preDestroySet);
+                stack.clear();
+            }
+            List<DIComponent> preDestroyList = new ArrayList<>(preDestroySet);
+            preDestroyList.sort(PreDestroyComparator.INST);
+            doPreDestroy(preDestroyList);
+        } finally {
+            this.state = 2;
+        }
+        return this;
+    }
+
+    private void doPreDestroy(@Nonnull List<DIComponent> preDestroyList) {
+        List<DIComponent> undestroyedComponents = new ArrayList<>(preDestroyList);
+        List<DIComponent> destroyedComponents = new ArrayList<>(preDestroyList.size());
+        Iterator<DIComponent> undestroyedIt = undestroyedComponents.iterator();
+        while (undestroyedIt.hasNext()) {
+            DIComponent component = undestroyedIt.next();
+            try {
+                component.preDestroy();
+                destroyedComponents.add(component);
+            } catch (Exception e) {
+                throw new DIShutdownException(component, e, destroyedComponents, undestroyedComponents);
             } finally {
                 undestroyedIt.remove();
             }
@@ -389,34 +463,34 @@ final class InjectedAppImpl implements InjectedApp {
     }
 
     @Override
-    public @Nonnull List<@Nonnull InjectedApp> parentApps() {
-        return parentApps;
+    public boolean isShutdown() {
+        return state >= 2;
     }
 
     @Override
-    public @Nonnull Map<@Nonnull Type, @Nonnull InjectedResource> localResources() {
-        return localResources;
+    public @Nonnull List<@Nonnull DIContainer> parentContainers() {
+        return parentContainers;
     }
 
     @Override
-    public @Nonnull Map<@Nonnull Type, @Nonnull InjectedResource> resources() {
-        return resources;
+    public @Nonnull Map<@Nonnull Type, @Nonnull DIComponent> localComponents() {
+        return localComponents;
     }
 
     @Override
-    public @Nullable InjectedResource getResource(@Nonnull Type type) {
-        return resources.get(type);
+    public @Nonnull Map<@Nonnull Type, @Nonnull DIComponent> components() {
+        return components;
     }
 
     @Override
-    public @Nullable Object getObject(@Nonnull Type type) {
-        InjectedResource resource = resources.get(type);
-        if (resource != null) {
-            return resource.instance();
+    public @Nullable DIComponent getComponent(@Nonnull Type type) {
+        DIComponent component = components.get(type);
+        if (component != null) {
+            return component;
         }
-        for (InjectedResource sr : resources.values()) {
+        for (DIComponent sr : components.values()) {
             if (TypeKit.isAssignable(type, sr.type())) {
-                return sr.instance();
+                return sr;
             }
         }
         return null;
@@ -425,7 +499,7 @@ final class InjectedAppImpl implements InjectedApp {
     private static @Nonnull Class<?> rawClass(@Nonnull Type type) {
         Class<?> raw = TypeKit.getRawClass(type);
         if (raw == null) {
-            throw new InjectedAppException("Unsupported DI type: " + type.getTypeName() + ".");
+            throw new DIException("Unsupported DI type: " + type.getTypeName() + ".");
         }
         return raw;
     }
@@ -435,21 +509,21 @@ final class InjectedAppImpl implements InjectedApp {
         private final @Nonnull Type type;
         private final boolean local;
         private final @Nonnull Object instance;
-        private final @Nullable InjectedResource.Descriptor descriptor;
+        private final @Nullable DIComponent.Descriptor descriptor;
 
         private Object advisedInstance;
         private boolean isAspectHandler = false;
 
         private Res(
-            @Nonnull InjectedResource.Descriptor descriptor
-        ) throws InjectedAppException {
+            @Nonnull DIComponent.Descriptor descriptor
+        ) throws DIException {
             this.type = descriptor.type();
             this.local = true;
             this.descriptor = descriptor;
             try {
                 this.instance = Invocable.of(descriptor.rawClass().getConstructor()).invoke(null);
             } catch (Exception e) {
-                throw new InjectedAppException("Creates instance for " + type.getTypeName() + " failed.", e);
+                throw new DIException("Creates instance for " + type.getTypeName() + " failed.", e);
             }
         }
 
@@ -469,18 +543,18 @@ final class InjectedAppImpl implements InjectedApp {
         }
     }
 
-    private static final class FieldRes {
+    private static final class ResField {
 
         private final @Nonnull Field field;
         private final @Nonnull Res owner;
 
-        private FieldRes(@Nonnull Field field, @Nonnull Res owner) {
+        private ResField(@Nonnull Field field, @Nonnull Res owner) {
             this.field = field;
             this.owner = owner;
         }
     }
 
-    private final class InjectedRes implements InjectedResource {
+    private final class DIComponentImpl implements DIComponent {
 
         private final @Nonnull Type type;
         private final @Nonnull Object instance;
@@ -489,9 +563,11 @@ final class InjectedAppImpl implements InjectedApp {
         private final @Nonnull Runnable postConstruct;
         private final @Nullable Method preDestroyMethod;
         private final @Nonnull Runnable preDestroy;
+        final @Nonnull ArrayList<@Nonnull DIComponent> depList = new ArrayList<>();
+        private final @Nonnull List<@Nonnull DIComponent> dependencies = Collections.unmodifiableList(depList);
         private volatile int state = 0;
 
-        private InjectedRes(
+        private DIComponentImpl(
             @Nonnull Type type,
             @Nonnull Object instance,
             boolean local,
@@ -575,16 +651,26 @@ final class InjectedAppImpl implements InjectedApp {
         public boolean isDestroyed() {
             return state == 2;
         }
+
+        @Override
+        public @Nonnull List<DIComponent> dependencies() {
+            return dependencies;
+        }
+
+        @Override
+        public @Nonnull String toString() {
+            return "DIComponent-" + instance();
+        }
     }
 
-    enum Resolver implements InjectedResource.Resolver {
+    enum Resolver implements DIComponent.Resolver {
 
         INST;
 
         @Override
-        public InjectedResource.@Nonnull Descriptor resolve(
+        public DIComponent.@Nonnull Descriptor resolve(
             @Nonnull Type type,
-            @Nonnull Collection<@Nonnull String> resourceAnnotations,
+            @Nonnull Collection<@Nonnull String> componentAnnotations,
             @Nonnull Collection<@Nonnull String> postConstructAnnotations,
             @Nonnull Collection<@Nonnull String> preDestroyAnnotations
         ) throws Exception {
@@ -598,7 +684,7 @@ final class InjectedAppImpl implements InjectedApp {
                     continue;
                 }
                 for (Annotation annotation : field.getAnnotations()) {
-                    if (resourceAnnotations.contains(annotation.annotationType().getName())) {
+                    if (componentAnnotations.contains(annotation.annotationType().getName())) {
                         dependencyFields.add(field);
                     }
                 }
@@ -620,7 +706,7 @@ final class InjectedAppImpl implements InjectedApp {
             }
             Method postConstructMethod = postConstruct;
             Method preDestroyMethod = preDestroy;
-            return new InjectedResource.Descriptor() {
+            return new DIComponent.Descriptor() {
                 @Override
                 public @Nonnull Type type() {
                     return type;
@@ -649,7 +735,7 @@ final class InjectedAppImpl implements InjectedApp {
         }
     }
 
-    enum FieldSetter implements InjectedResource.FieldSetter {
+    enum FieldSetter implements DIComponent.FieldSetter {
 
         INST;
 
@@ -660,12 +746,12 @@ final class InjectedAppImpl implements InjectedApp {
         }
     }
 
-    private enum PostConstructComparator implements Comparator<InjectedResource> {
+    private enum PostConstructComparator implements Comparator<DIComponent> {
 
         INST;
 
         @Override
-        public int compare(@Nonnull InjectedResource sr1, @Nonnull InjectedResource sr2) {
+        public int compare(@Nonnull DIComponent sr1, @Nonnull DIComponent sr2) {
             Method pc1 = Fs.asNonnull(sr1.postConstructMethod());
             Method pc2 = Fs.asNonnull(sr2.postConstructMethod());
             Type[] sd1 = pc1.getGenericParameterTypes();
@@ -674,12 +760,12 @@ final class InjectedAppImpl implements InjectedApp {
         }
     }
 
-    private enum PreDestroyComparator implements Comparator<InjectedResource> {
+    private enum PreDestroyComparator implements Comparator<DIComponent> {
 
         INST;
 
         @Override
-        public int compare(@Nonnull InjectedResource sr1, @Nonnull InjectedResource sr2) {
+        public int compare(@Nonnull DIComponent sr1, @Nonnull DIComponent sr2) {
             Method pd1 = Fs.asNonnull(sr1.preDestroyMethod());
             Method pd2 = Fs.asNonnull(sr2.preDestroyMethod());
             Type[] sd1 = pd1.getGenericParameterTypes();
@@ -689,8 +775,8 @@ final class InjectedAppImpl implements InjectedApp {
     }
 
     private static int compareDependsOn(
-        @Nonnull InjectedResource sr1, Type @Nonnull [] sd1,
-        @Nonnull InjectedResource sr2, Type @Nonnull [] sd2
+        @Nonnull DIComponent sr1, Type @Nonnull [] sd1,
+        @Nonnull DIComponent sr2, Type @Nonnull [] sd2
     ) {
         for (Type c1 : sd1) {
             if (c1.equals(sr2.type())) {

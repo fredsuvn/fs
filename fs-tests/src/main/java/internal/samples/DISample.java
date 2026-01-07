@@ -3,8 +3,8 @@ package internal.samples;
 import internal.test.PrintTest;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.app.di.InjectedApp;
-import space.sunqian.fs.app.di.InjectedAspect;
+import space.sunqian.fs.di.DIContainer;
+import space.sunqian.fs.di.DIAspectHandler;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -18,28 +18,28 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public class DISample implements PrintTest {
 
     public static void main(String[] args) {
-        InjectedApp app = InjectedApp.newBuilder()
-            .resourceTypes(
+        DIContainer app = DIContainer.newBuilder()
+            .componentTypes(
                 XController.class,
                 XServiceImpl.class,
                 XServiceProxy.class,
                 BeforeDestroyService.class
             )
-            .resourceAnnotation(XResource.class)
+            .componentAnnotation(XResource.class)
             .postConstructAnnotation(XPostConstruct.class)
             .preDestroyAnnotation(XPreDestroy.class)
             .build();
         XService xService = app.getObject(XService.class);
         System.out.println(xService.doService());
-        InjectedApp child = InjectedApp.newBuilder()
-            .parentApps(app)
-            .resourceTypes(
+        DIContainer child = DIContainer.newBuilder()
+            .parentContainers(app)
+            .componentTypes(
                 XController.class,
                 XServiceImpl.class,
                 XServiceProxy.class,
                 BeforeDestroyService.class
             )
-            .resourceAnnotation(XResource.class)
+            .componentAnnotation(XResource.class)
             .postConstructAnnotation(XPostConstruct.class)
             .preDestroyAnnotation(XPreDestroy.class)
             .build();
@@ -93,7 +93,7 @@ public class DISample implements PrintTest {
         }
     }
 
-    public static class XServiceProxy implements InjectedAspect {
+    public static class XServiceProxy implements DIAspectHandler {
 
         @Override
         public boolean needsAspect(@Nonnull Type type) {
