@@ -56,7 +56,10 @@ dependencies {
     //kotlin
     val kotlinVersion: String by project
     api("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-    api("org.jetbrains.kotlin:kotlin-test-testng:$kotlinVersion")
+    api("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+    api("org.jetbrains.kotlin:kotlin-test:${kotlinVersion}")
+    api("org.jetbrains.kotlin:kotlin-test-junit5:${kotlinVersion}")
+    //api("org.jetbrains.kotlin:kotlin-test-testng:$kotlinVersion")
 
     //generator
     //api("cglib:cglib:3.3.0")

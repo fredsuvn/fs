@@ -38,6 +38,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class FsTest implements AssertTest, PrintTest {
 
     @Test
+    public void testVersion() {
+        printFor("Fs.LIB_VERSION: " + Fs.LIB_VERSION);
+    }
+
+    @Test
     public void testBase() {
         assertNotNull(Fs.LIB_NAME);
         assertNotNull(Fs.LIB_VERSION);

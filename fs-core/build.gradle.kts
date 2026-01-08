@@ -17,8 +17,10 @@ dependencies {
 
   annotationProcessor(platform(project(":fs-dependencies")))
   annotationProcessor("org.projectlombok:lombok")
+  annotationProcessor(project(":fs-build"))
 
   compileOnly(platform(project(":fs-dependencies")))
+  compileOnly(project(":fs-build"))
 
   //compileOnly("org.projectlombok:lombok")
   //compileOnly("org.springframework:spring-core")
@@ -78,7 +80,8 @@ val javaVerTo = javaVersionTo.asInt()
 // java8 base
 tasks.register("compileJava${javaVerFrom}", JavaCompile::class) {
   group = "compile"
-  //dependsOn(tasks.compileJava)
+  val fsVersion = tasks.named("fsVersion")
+  dependsOn(fsVersion)
   source = sourceSets.main.get().allJava
   classpath = sourceSets.main.get().compileClasspath
   exclude("**/*${implByJvm}*.java")
@@ -270,4 +273,22 @@ tasks.clean {
 
 fun deleteProtoGeneratedFiles() {
   delete(protobuf.generatedFilesBaseDir)
+}
+
+tasks.register("fsVersion") {
+  group = "version"
+  description = "Set FS.LIB_VERSION"
+  doLast {
+    val fsVersion = rootProject.version.toString()
+    val originCodes = file("src/main/java/space/sunqian/fs/Fs.java")
+      .readText()
+    val fieldRegex = "LIB_VERSION = \"([^\"]*)\"".toRegex()
+    val commentRegex = "\\* \\<pre\\>\\{@code ([^ ]*) \\}\\</pre\\>".toRegex()
+    val newCodes = fieldRegex.replace(originCodes, "LIB_VERSION = \"$fsVersion\"")
+      .let { commentRegex.replace(it, "* <pre>{@code $fsVersion }</pre>") }
+    //println("Replace: $originCodes -> $newCodes")
+    if (newCodes != originCodes) {
+      file("src/main/java/space/sunqian/fs/Fs.java").writeText(newCodes)
+    }
+  }
 }

@@ -12,6 +12,7 @@ import space.sunqian.fs.base.process.ProcessKit;
 import space.sunqian.fs.base.string.StringKit;
 import space.sunqian.fs.base.thread.ThreadKit;
 import space.sunqian.fs.base.value.Ret;
+import space.sunqian.fs.build.processing.AutoVersion;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
@@ -62,8 +63,10 @@ public class Fs {
     public static final @Nonnull String LIB_NAME = "fs";
 
     /**
-     * Version of this lib.
+     * Version of this lib, current version:
+     * <pre>{@code 0.0.1-SNAPSHOT }</pre>
      */
+    @AutoVersion
     public static final @Nonnull String LIB_VERSION = "0.0.1-SNAPSHOT";
 
     /**
