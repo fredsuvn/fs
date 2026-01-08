@@ -47,13 +47,34 @@ public class AsmKit {
         +
         "$"
         +
-        Fs.LIB_VERSION
-            .replace('.', '_')
-            .replace('-', '_')
+        toGeneratedClassName(Fs.LIB_VERSION)
         +
         "$";
 
     private static final @Nonnull AtomicLong classCounter = new AtomicLong();
+
+    /**
+     * Converts the specified version string to a generated class name.
+     *
+     * @param version the specified version string
+     * @return the generated class name
+     */
+    public static @Nonnull String toGeneratedClassName(@Nonnull String version) {
+        char[] versionChars = version.toCharArray();
+        for (int i = 0; i < versionChars.length; i++) {
+            char c = versionChars[i];
+            if (
+                (c >= '0' && c <= '9')
+                    || (c >= 'A' && c <= 'Z')
+                    || (c >= 'a' && c <= 'z')
+            ) {
+                versionChars[i] = c;
+            } else {
+                versionChars[i] = '_';
+            }
+        }
+        return new String(versionChars);
+    }
 
     /**
      * Loads a constant by {@code MethodVisitor.visitInsn}.
