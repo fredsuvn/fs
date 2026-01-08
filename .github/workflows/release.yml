@@ -22,6 +22,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Get project version
+        id: get_version
+        run: echo "$(./gradlew -q printVersion | grep -E -o '^version=.*$')" >> $GITHUB_OUTPUT
+        shell: bash
+
       - name: Build with Gradle
         run: |
           ./gradlew :fs-all:jar :fs-all:javadocJar :fs-all:sourcesJar
@@ -29,11 +34,6 @@ jobs:
           ./gradlew :fs-annotation:jar :fs-annotation:javadocJar :fs-annotation:sourcesJar
           ./gradlew :fs-asm:jar :fs-asm:javadocJar :fs-asm:sourcesJar
           ./gradlew :fs-jsr305:jar :fs-jsr305:javadocJar :fs-jsr305:sourcesJar
-
-      - name: Get project version
-        id: get_version
-        run: echo "version=$(./gradlew -q printVersion)" >> $GITHUB_OUTPUT
-        shell: bash
 
       # Upload fs-all jars
       - name: Upload fs-all jar archive as asset
