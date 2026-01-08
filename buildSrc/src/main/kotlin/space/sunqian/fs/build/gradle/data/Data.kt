@@ -1,3 +1,5 @@
+package space.sunqian.fs.build.gradle.data
+
 data class ProjectInfo(
     val version: String,
     val url: String,

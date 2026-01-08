@@ -5,7 +5,10 @@ plugins {
   `maven-publish`
   signing
   id("fs")
+  id("fs-publish")
 }
+
+val publishType by extra { "jar" }
 
 description = "Aggregation of fs, including fs-jsr305, fs-annotation and fs-core, without dependencies."
 
@@ -142,49 +145,4 @@ tasks.testAggregateTestReport {
     internalProject.layout.buildDirectory.dir("test-results/test/binary"),
   )
   //destinationDirectory = rootDir.resolve("docs/reports/test-aggregate")
-}
-
-publishing {
-  publications {
-    create<MavenPublication>("main") {
-      from(components["java"])
-      val projectInfo: ProjectInfo by rootProject.extra
-      pom {
-        version = projectInfo.version
-        group = rootProject.group
-        name = project.name
-        description = project.description
-        url = projectInfo.url
-        licenses {
-          projectInfo.licenses.forEach {
-            license {
-              name.set(it.name)
-              url.set(it.url)
-            }
-          }
-        }
-        developers {
-          projectInfo.developers.forEach {
-            developer {
-              id.set(it.id)
-              name.set(it.name)
-              email.set(it.email)
-              url.set(it.url)
-            }
-          }
-        }
-        scm {
-          connection = projectInfo.scm.connection
-          developerConnection = projectInfo.scm.developerConnection
-          url = projectInfo.scm.url
-        }
-      }
-    }
-  }
-  repositories {
-    mavenLocal()
-  }
-}
-
-signing {
 }

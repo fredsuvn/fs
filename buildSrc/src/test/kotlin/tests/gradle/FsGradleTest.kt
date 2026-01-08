@@ -1,3 +1,5 @@
+package tests.gradle
+
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
