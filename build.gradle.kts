@@ -1,4 +1,4 @@
-import space.sunqian.fs.build.gradle.data.*
+import space.sunqian.fs.build.gradle.*
 
 plugins {
   id("fs")

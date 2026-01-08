@@ -1,4 +1,4 @@
-import space.sunqian.fs.build.gradle.data.ProjectInfo
+import space.sunqian.fs.build.gradle.ProjectInfo
 
 plugins {
   `maven-publish`
@@ -9,7 +9,6 @@ project.afterEvaluate {
 
   //val publishType: String? = project.findProperty("publishType")?.toString()
   val publishType: String by extra
-  println("publishType: $publishType")
 
   publishing {
     publications {

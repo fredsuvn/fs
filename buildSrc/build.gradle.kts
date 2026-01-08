@@ -28,7 +28,7 @@ gradlePlugin {
   plugins {
     create("fsLogger") {
       id = "fs.build.fsLogger"
-      implementationClass = "space.sunqian.fs.build.gradle.plugin.FsBuildLogger"
+      implementationClass = "space.sunqian.fs.build.gradle.FsBuildLogger"
     }
   }
 }

@@ -1,4 +1,4 @@
-package space.sunqian.fs.build.gradle.plugin
+package space.sunqian.fs.build.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -7,6 +7,9 @@ import java.time.format.DateTimeFormatter
 
 val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
 
+/**
+ * FsBuildLogger is the build logger for this lib.
+ */
 class FsBuildLogger : Plugin<Project> {
 
     private lateinit var level: Level

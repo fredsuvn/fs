@@ -1,4 +1,4 @@
-import space.sunqian.fs.build.gradle.plugin.FsBuildLogger
+import space.sunqian.fs.build.gradle.FsBuildLogger
 
 apply(plugin = "fs.build.fsLogger")
 
@@ -13,7 +13,7 @@ project.repositories {
 }
 
 val fsLogger: FsBuildLogger by project
-//fsLogger.info("hello, ${project.name}!")
+fsLogger.info("hello, ${project.name}!")
 
 val javaVersionFrom: String by project
 val javaVersionTo: String by project

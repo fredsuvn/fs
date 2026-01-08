@@ -1,7 +1,5 @@
 plugins {
   `java-platform`
-  `maven-publish`
-  signing
   id("fs")
   id("fs-publish")
 }

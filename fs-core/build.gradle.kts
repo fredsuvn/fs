@@ -1,8 +1,6 @@
 plugins {
   `java-library`
   jacoco
-  `maven-publish`
-  signing
   id("com.google.protobuf")
   id("fs")
   id("fs-publish")

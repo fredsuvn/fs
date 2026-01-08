@@ -1,8 +1,6 @@
 plugins {
   `java-library`
   jacoco
-  `maven-publish`
-  signing
   id("fs")
   id("fs-publish")
 }

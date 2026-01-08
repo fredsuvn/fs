@@ -2,8 +2,6 @@ plugins {
   `java-library`
   jacoco
   `test-report-aggregation`
-  `maven-publish`
-  signing
   id("fs")
   id("fs-publish")
 }
