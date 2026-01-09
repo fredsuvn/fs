@@ -124,11 +124,6 @@ tasks.named("classes") {
   dependsOn(compileJavaHighest)
 }
 
-tasks.compileTestJava {
-  group = "compile"
-  enabled = false
-}
-
 // java8 base
 tasks.register("compileTestJava$javaVerFrom", JavaCompile::class) {
   group = "compile"
@@ -164,7 +159,9 @@ tasks.register("compileTestJava$javaVerFrom", JavaCompile::class) {
 
 val compileTestJavaHighest = tasks.named<JavaCompile>("compileTestJava$javaVerTo")
 
-tasks.named("compileTestJava") {
+tasks.compileTestJava {
+  group = "compile"
+  enabled = false
   dependsOn(tasks.named("generateTestProto"), compileTestJavaHighest)
 }
 
