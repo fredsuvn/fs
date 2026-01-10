@@ -71,6 +71,9 @@ dependencies {
     api("jakarta.annotation:jakarta.annotation-api:2.1.1")
     api("org.eclipse.jetty:jetty-bom:9.4.58.v20250814")
 
+    // database
+    api("com.h2database:h2:2.4.240")
+
     //template
     api("org.apache.velocity:velocity-engine-core:2.3")
 

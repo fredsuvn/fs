@@ -48,6 +48,9 @@ dependencies {
   testImplementation("org.eclipse.jetty:jetty-server")
   testImplementation("org.eclipse.jetty:jetty-servlet")
   testImplementation("javax.servlet:javax.servlet-api")
+
+  // h2 database
+  testImplementation("com.h2database:h2")
 }
 
 java {
@@ -177,7 +180,8 @@ tasks.test {
     excludeTags("J17Only")
   }
   javaLauncher = javaToolchains.launcherFor {
-    languageVersion = javaVersionFrom
+    //languageVersion = javaVersionFrom
+    languageVersion = javaVersionTo
   }
   failOnNoDiscoveredTests = false
   reports {
