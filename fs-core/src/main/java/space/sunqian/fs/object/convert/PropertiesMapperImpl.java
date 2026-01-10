@@ -17,13 +17,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-final class DataMapperImpl implements DataMapper {
+final class PropertiesMapperImpl implements PropertiesMapper {
 
-    static final @Nonnull DataMapper DEFAULT = new DataMapperImpl(new SchemaCacheImpl(new ConcurrentHashMap<>()));
+    static final @Nonnull PropertiesMapper DEFAULT = new PropertiesMapperImpl(new SchemaCacheImpl(new ConcurrentHashMap<>()));
 
     private final @Nonnull SchemaCache schemaCache;
 
-    DataMapperImpl(@Nonnull SchemaCache schemaCache) {
+    PropertiesMapperImpl(@Nonnull SchemaCache schemaCache) {
         this.schemaCache = schemaCache;
     }
 
@@ -37,8 +37,8 @@ final class DataMapperImpl implements DataMapper {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectConvertException {
         try {
-            DataMapper.PropertyMapper propertyMapper = Option.findValue(ConvertOption.PROPERTY_MAPPER, options);
-            DataMapper.ExceptionHandler exceptionHandler = Option.findValue(ConvertOption.EXCEPTION_HANDLER, options);
+            PropertyMapper propertyMapper = Option.findValue(ConvertOption.PROPERTY_MAPPER, options);
+            PropertiesMapper.ExceptionHandler exceptionHandler = Option.findValue(ConvertOption.EXCEPTION_HANDLER, options);
             if (src instanceof Map) {
                 MapSchemaParser mapSchemaParser = Fs.nonnull(
                     Option.findValue(ConvertOption.MAP_SCHEMA_PARSER),
@@ -93,8 +93,8 @@ final class DataMapperImpl implements DataMapper {
         @Nonnull Map<Object, Object> dst,
         @Nonnull MapSchema dstSchema,
         @Nonnull ObjectConverter converter,
-        @Nullable DataMapper.PropertyMapper propertyMapper,
-        @Nullable DataMapper.ExceptionHandler exceptionHandler,
+        @Nullable PropertyMapper propertyMapper,
+        @Nullable PropertiesMapper.ExceptionHandler exceptionHandler,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         src.forEach((srcKey, srcValue) -> {
@@ -143,8 +143,8 @@ final class DataMapperImpl implements DataMapper {
         @Nonnull Object dst,
         @Nonnull ObjectSchema dstSchema,
         @Nonnull ObjectConverter converter,
-        @Nullable DataMapper.PropertyMapper propertyMapper,
-        @Nullable DataMapper.ExceptionHandler exceptionHandler,
+        @Nullable PropertyMapper propertyMapper,
+        @Nullable PropertiesMapper.ExceptionHandler exceptionHandler,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         src.forEach((srcKey, srcValue) -> {
@@ -200,8 +200,8 @@ final class DataMapperImpl implements DataMapper {
         @Nonnull Map<Object, Object> dst,
         @Nonnull MapSchema dstSchema,
         @Nonnull ObjectConverter converter,
-        @Nullable DataMapper.PropertyMapper propertyMapper,
-        @Nullable DataMapper.ExceptionHandler exceptionHandler,
+        @Nullable PropertyMapper propertyMapper,
+        @Nullable PropertiesMapper.ExceptionHandler exceptionHandler,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {
@@ -257,8 +257,8 @@ final class DataMapperImpl implements DataMapper {
         @Nonnull Object dst,
         @Nonnull ObjectSchema dstSchema,
         @Nonnull ObjectConverter converter,
-        @Nullable DataMapper.PropertyMapper propertyMapper,
-        @Nullable DataMapper.ExceptionHandler exceptionHandler,
+        @Nullable PropertyMapper propertyMapper,
+        @Nullable PropertiesMapper.ExceptionHandler exceptionHandler,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {

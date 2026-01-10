@@ -47,7 +47,7 @@ _fs_ has higher performance than other common libraries in many places, Here are
   SimpleCache only considers common cache functions, so it has higher performance in common functions.
   Here is the benchmark: [CacheBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/CacheBenchmark.java)
 
-- **CopyProperties** (`Fs.copyProperties / space.sunqian.fs.object.convert.DataMapper`):
+- **CopyProperties** (`Fs.copyProperties / space.sunqian.fs.object.convert.PropertiesMapper`):
   DataMapper has better performance and more comprehensive support.
   Here is the
   benchmark: [CopyPropertiesBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/CopyPropertiesBenchmark.java)

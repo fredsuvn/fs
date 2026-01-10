@@ -39,7 +39,7 @@ import java.util.List;
  * throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
  * }</pre>
  * <p>
- * The thread safety of the methods in this interface is determined by its dependent {@link DataMapper},
+ * The thread safety of the methods in this interface is determined by its dependent {@link PropertiesMapper},
  * {@link ObjectBuilderProvider}, and other objects. By default, they are all thread-safe.
  *
  * @author sunqian
@@ -291,7 +291,7 @@ public interface ObjectConverter {
     /**
      * Handler for {@link ObjectConverter}, provides the specific conversion logic.
      * <p>
-     * The thread safety of the methods in this interface is determined by its dependent {@link DataMapper},
+     * The thread safety of the methods in this interface is determined by its dependent {@link PropertiesMapper},
      * {@link ObjectBuilderProvider}, and other objects. By default, they are all thread-safe.
      *
      * @author sunqian

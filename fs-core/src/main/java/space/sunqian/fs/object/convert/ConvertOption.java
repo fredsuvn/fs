@@ -40,12 +40,12 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     MAP_SCHEMA_PARSER,
 
     /**
-     * Key of {@link #propertyMapper(DataMapper.PropertyMapper)}.
+     * Key of {@link #propertyMapper(PropertyMapper)}.
      */
     PROPERTY_MAPPER,
 
     /**
-     * Key of {@link #exceptionHandler(DataMapper.ExceptionHandler)}.
+     * Key of {@link #exceptionHandler(PropertiesMapper.ExceptionHandler)}.
      */
     EXCEPTION_HANDLER,
 
@@ -61,7 +61,7 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     IGNORE_PROPERTIES,
 
     /**
-     * Key of {@link #dataMapper(DataMapper)}.
+     * Key of {@link #dataMapper(PropertiesMapper)}.
      */
     DATA_MAPPER,
 
@@ -81,9 +81,9 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     CHARSET,
 
     /**
-     * Key of {@link #timeFormatter(DateFormatter)}.
+     * Key of {@link #dateFormatter(DateFormatter)}.
      */
-    TIME_FORMATTER,
+    DATE_FORMATTER,
     ;
 
     /**
@@ -115,29 +115,29 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     }
 
     /**
-     * Returns an option to specify the {@link DataMapper.PropertyMapper}.
+     * Returns an option to specify the {@link PropertyMapper}.
      * <p>
      * By default, all properties which is both readable and writable will be copied with their original names.
      *
-     * @param propertyMapper the {@link DataMapper.PropertyMapper} to be specified
-     * @return an option to specify the {@link DataMapper.PropertyMapper}
+     * @param propertyMapper the {@link PropertyMapper} to be specified
+     * @return an option to specify the {@link PropertyMapper}
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, DataMapper.@Nonnull PropertyMapper> propertyMapper(
-        @Nonnull DataMapper.PropertyMapper propertyMapper
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull PropertyMapper> propertyMapper(
+        @Nonnull PropertyMapper propertyMapper
     ) {
         return Option.of(PROPERTY_MAPPER, propertyMapper);
     }
 
     /**
-     * Returns an option to specify the {@link DataMapper.ExceptionHandler}.
+     * Returns an option to specify the {@link PropertiesMapper.ExceptionHandler}.
      * <p>
      * By default, the exception will be thrown directly.
      *
-     * @param exceptionHandler the {@link DataMapper.ExceptionHandler} to be specified
-     * @return an option to specify the {@link DataMapper.ExceptionHandler}
+     * @param exceptionHandler the {@link PropertiesMapper.ExceptionHandler} to be specified
+     * @return an option to specify the {@link PropertiesMapper.ExceptionHandler}
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, DataMapper.@Nonnull ExceptionHandler> exceptionHandler(
-        @Nonnull DataMapper.ExceptionHandler exceptionHandler
+    public static @Nonnull Option<@Nonnull ConvertOption, PropertiesMapper.@Nonnull ExceptionHandler> exceptionHandler(
+        @Nonnull PropertiesMapper.ExceptionHandler exceptionHandler
     ) {
         return Option.of(EXCEPTION_HANDLER, exceptionHandler);
     }
@@ -157,17 +157,17 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     }
 
     /**
-     * Returns an option to specify the {@link DataMapper}.
+     * Returns an option to specify the {@link PropertiesMapper}.
      * <p>
-     * By default, the {@link DataMapper#defaultMapper()} is used.
+     * By default, the {@link PropertiesMapper#defaultMapper()} is used.
      *
-     * @param dataMapper the {@link DataMapper} to be specified
-     * @return an option to specify the {@link DataMapper}
+     * @param propertiesMapper the {@link PropertiesMapper} to be specified
+     * @return an option to specify the {@link PropertiesMapper}
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DataMapper> dataMapper(
-        @Nonnull DataMapper dataMapper
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull PropertiesMapper> dataMapper(
+        @Nonnull PropertiesMapper propertiesMapper
     ) {
-        return Option.of(DATA_MAPPER, dataMapper);
+        return Option.of(DATA_MAPPER, propertiesMapper);
     }
 
     /**
@@ -220,10 +220,10 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
      * @param dateFormatter the {@link DateFormatter} to be specified
      * @return an option to specify the {@link DateFormatter} if needed
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter> timeFormatter(
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter> dateFormatter(
         @Nonnull DateFormatter dateFormatter
     ) {
-        return Option.of(TIME_FORMATTER, dateFormatter);
+        return Option.of(DATE_FORMATTER, dateFormatter);
     }
 
     @Override

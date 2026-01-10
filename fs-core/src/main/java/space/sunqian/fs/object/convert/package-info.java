@@ -9,7 +9,7 @@
  * }</pre>
  * The core interface for data mapping:
  * <ul>
- *     <li>{@link space.sunqian.fs.object.convert.DataMapper}</li>
+ *     <li>{@link space.sunqian.fs.object.convert.PropertiesMapper}</li>
  * </ul>
  * <p>
  * Supports object type conversion, using codes similar to the following:

@@ -14,8 +14,8 @@ import space.sunqian.fs.collect.CollectKit;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.convert.ConvertOption;
-import space.sunqian.fs.object.convert.DataMapper;
 import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.object.convert.PropertiesMapper;
 import space.sunqian.fs.object.data.ObjectBuilder;
 import space.sunqian.fs.object.data.ObjectBuilderProvider;
 import space.sunqian.fs.reflect.ClassKit;
@@ -91,7 +91,7 @@ import java.util.function.IntFunction;
  * </tr>
  * <tr>
  *     <td>Date and Time Objects</td>
- *     <td>Using {@link ConvertOption#timeFormatter(DateFormatter)} to handle.</td>
+ *     <td>Using {@link ConvertOption#dateFormatter(DateFormatter)} to handle.</td>
  * </tr>
  * <tr>
  *     <td>Others</td>
@@ -128,11 +128,11 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td rowspan="2">Date and Time</td>
  *     <td>{@link String} and Other Date Time Objects</td>
- *     <td>Using {@link ConvertOption#timeFormatter(DateFormatter)} to handle.</td>
+ *     <td>Using {@link ConvertOption#dateFormatter(DateFormatter)} to handle.</td>
  * </tr>
  * <tr>
  *     <td>{@code long} and {@link Long}</td>
- *     <td>Treated as an epoch milliseconds, then using {@link ConvertOption#timeFormatter(DateFormatter)} to
+ *     <td>Treated as an epoch milliseconds, then using {@link ConvertOption#dateFormatter(DateFormatter)} to
  *     handle.</td>
  * </tr>
  * <tr>
@@ -154,8 +154,8 @@ import java.util.function.IntFunction;
  *     <td>Map and Data Objects</td>
  *     <td>Any Objects</td>
  *     <td>Generating data object is based on {@link ConvertOption#builderProvider(ObjectBuilderProvider)} and
- *     {@link ConvertOption#dataMapper(DataMapper)}. Generating map using its constructor, and copying properties
- *     also using {@link ConvertOption#dataMapper(DataMapper)}. The supported map types:
+ *     {@link ConvertOption#dataMapper(PropertiesMapper)}. Generating map using its constructor, and copying properties
+ *     also using {@link ConvertOption#dataMapper(PropertiesMapper)}. The supported map types:
  *     {@link Map}, {@link AbstractMap}, {@link LinkedHashMap}, {@link HashMap}, {@link TreeMap}, {@link ConcurrentMap},
  *     {@link ConcurrentHashMap}, {@link Hashtable}, {@link ConcurrentSkipListMap}.
  *     </td>
@@ -383,13 +383,13 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
         IntFunction<Object> mapFunc = MapClasses.get(rawTarget);
-        DataMapper dataMapper = Fs.nonnull(
+        PropertiesMapper propertiesMapper = Fs.nonnull(
             Option.findValue(ConvertOption.DATA_MAPPER, options),
-            DataMapper.defaultMapper()
+            PropertiesMapper.defaultMapper()
         );
         if (mapFunc != null) {
             Object targetObject = mapFunc.apply(0);
-            dataMapper.copyProperties(src, srcType, targetObject, target, converter, options);
+            propertiesMapper.copyProperties(src, srcType, targetObject, target, converter, options);
             return targetObject;
         } else {
             ObjectBuilderProvider builderProvider = Fs.nonnull(
@@ -401,7 +401,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
             }
             Object targetBuilder = builder.newBuilder();
-            dataMapper.copyProperties(src, srcType, targetBuilder, builder.builderType(), converter, options);
+            propertiesMapper.copyProperties(src, srcType, targetBuilder, builder.builderType(), converter, options);
             return builder.build(targetBuilder);
         }
     }
@@ -524,14 +524,14 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             }
             if (src instanceof Date) {
                 DateFormatter dateFormatter = Fs.nonnull(
-                    Option.findValue(ConvertOption.TIME_FORMATTER, options),
+                    Option.findValue(ConvertOption.DATE_FORMATTER, options),
                     DateFormatter.defaultFormatter()
                 );
                 return dateFormatter.format((Date) src);
             }
             if (src instanceof TemporalAccessor) {
                 DateFormatter dateFormatter = Fs.nonnull(
-                    Option.findValue(ConvertOption.TIME_FORMATTER, options),
+                    Option.findValue(ConvertOption.DATE_FORMATTER, options),
                     DateFormatter.defaultFormatter()
                 );
                 return dateFormatter.format((TemporalAccessor) src);
@@ -588,7 +588,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 if (TemporalAccessor.class.isAssignableFrom((Class<?>) srcType)) {
                     TemporalAccessor ta = (TemporalAccessor) src;
                     DateFormatter dateFormatter = Fs.nonnull(
-                        Option.findValue(ConvertOption.TIME_FORMATTER, options),
+                        Option.findValue(ConvertOption.DATE_FORMATTER, options),
                         DateFormatter.defaultFormatter()
                     );
                     Date date = dateFormatter.convert(ta, Date.class);
@@ -641,7 +641,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @Nonnull Option<?, ?> @Nonnull ... options
         ) {
             DateFormatter dateFormatter = Fs.nonnull(
-                Option.findValue(ConvertOption.TIME_FORMATTER, options),
+                Option.findValue(ConvertOption.DATE_FORMATTER, options),
                 DateFormatter.defaultFormatter()
             );
             if (srcType.equals(String.class)) {

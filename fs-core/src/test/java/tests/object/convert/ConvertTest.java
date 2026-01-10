@@ -17,9 +17,9 @@ import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.convert.ConvertOption;
-import space.sunqian.fs.object.convert.DataMapper;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.object.convert.PropertiesMapper;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
 import space.sunqian.fs.object.data.ObjectBuilderProvider;
 import space.sunqian.fs.reflect.TypeKit;
@@ -273,12 +273,12 @@ public class ConvertTest implements PrintTest {
             // with options
             Date[] dateArray = new Date[]{now, now, now};
             assertArrayEquals(
-                converter.convert(dateArray, String[].class, ConvertOption.timeFormatter(nowFormat)),
+                converter.convert(dateArray, String[].class, ConvertOption.dateFormatter(nowFormat)),
                 new String[]{nowStr, nowStr, nowStr}
             );
             List<Date> dateList = ListKit.list(now, now, now);
             assertArrayEquals(converter.convert(
-                    dateList, new TypeRef<List<Date>>() {}.type(), String[].class, ConvertOption.timeFormatter(nowFormat)),
+                    dateList, new TypeRef<List<Date>>() {}.type(), String[].class, ConvertOption.dateFormatter(nowFormat)),
                 new String[]{nowStr, nowStr, nowStr}
             );
             assertArrayEquals(converter.convert(new Iterable<Date>() {
@@ -287,7 +287,7 @@ public class ConvertTest implements PrintTest {
                     public @Nonnull Iterator<Date> iterator() {
                         return dateList.iterator();
                     }
-                }, new TypeRef<Iterable<Date>>() {}.type(), String[].class, ConvertOption.timeFormatter(nowFormat)),
+                }, new TypeRef<Iterable<Date>>() {}.type(), String[].class, ConvertOption.dateFormatter(nowFormat)),
                 new String[]{nowStr, nowStr, nowStr}
             );
             // errors
@@ -318,12 +318,12 @@ public class ConvertTest implements PrintTest {
             GenericArrayType stringsType = TypeKit.arrayType(String.class);
             Date[] dateArray = new Date[]{now, now, now};
             assertArrayEquals(
-                (String[]) converter.convert(dateArray, stringsType, ConvertOption.timeFormatter(nowFormat)),
+                (String[]) converter.convert(dateArray, stringsType, ConvertOption.dateFormatter(nowFormat)),
                 new String[]{nowStr, nowStr, nowStr}
             );
             List<Date> dateList = ListKit.list(now, now, now);
             assertArrayEquals((String[]) converter.convert(
-                    dateList, new TypeRef<List<Date>>() {}.type(), stringsType, ConvertOption.timeFormatter(nowFormat)),
+                    dateList, new TypeRef<List<Date>>() {}.type(), stringsType, ConvertOption.dateFormatter(nowFormat)),
                 new String[]{nowStr, nowStr, nowStr}
             );
             assertArrayEquals((String[]) converter.convert(new Iterable<Date>() {
@@ -332,7 +332,7 @@ public class ConvertTest implements PrintTest {
                     public @Nonnull Iterator<Date> iterator() {
                         return dateList.iterator();
                     }
-                }, new TypeRef<Iterable<Date>>() {}.type(), stringsType, ConvertOption.timeFormatter(nowFormat)),
+                }, new TypeRef<Iterable<Date>>() {}.type(), stringsType, ConvertOption.dateFormatter(nowFormat)),
                 new String[]{nowStr, nowStr, nowStr}
             );
             // errors
@@ -363,12 +363,12 @@ public class ConvertTest implements PrintTest {
             Type stringsType = new TypeRef<List<String>>() {}.type();
             Date[] dateArray = new Date[]{now, now, now};
             assertEquals(
-                converter.convert(dateArray, stringsType, ConvertOption.timeFormatter(nowFormat)),
+                converter.convert(dateArray, stringsType, ConvertOption.dateFormatter(nowFormat)),
                 ListKit.list(nowStr, nowStr, nowStr)
             );
             List<Date> dateList = ListKit.list(now, now, now);
             assertEquals(converter.convert(
-                    dateList, new TypeRef<List<Date>>() {}.type(), stringsType, ConvertOption.timeFormatter(nowFormat)),
+                    dateList, new TypeRef<List<Date>>() {}.type(), stringsType, ConvertOption.dateFormatter(nowFormat)),
                 ListKit.list(nowStr, nowStr, nowStr)
             );
             assertEquals(converter.convert(new Iterable<Date>() {
@@ -377,7 +377,7 @@ public class ConvertTest implements PrintTest {
                     public @Nonnull Iterator<Date> iterator() {
                         return dateList.iterator();
                     }
-                }, new TypeRef<Iterable<Date>>() {}.type(), stringsType, ConvertOption.timeFormatter(nowFormat)),
+                }, new TypeRef<Iterable<Date>>() {}.type(), stringsType, ConvertOption.dateFormatter(nowFormat)),
                 ListKit.list(nowStr, nowStr, nowStr)
             );
             // errors
@@ -394,8 +394,8 @@ public class ConvertTest implements PrintTest {
         CA ca = new CA("1", ListKit.list("1", "2", "3"), new A("1", "2", "3"), DateKit.format(now));
         assertEquals(
             ObjectConverter.defaultConverter().convert(ca, CB.class,
-                ConvertOption.dataMapper(DataMapper.defaultMapper()),
-                ConvertOption.timeFormatter(DateFormatter.defaultFormatter()),
+                ConvertOption.dataMapper(PropertiesMapper.defaultMapper()),
+                ConvertOption.dateFormatter(DateFormatter.defaultFormatter()),
                 ConvertOption.ioOperator(IOOperator.defaultOperator())
             ),
             new CB(1, ListKit.list(1, 2, 3), new B(1L, 2L, 3L), DateKit.parse(ca.date, LocalDateTime.class))

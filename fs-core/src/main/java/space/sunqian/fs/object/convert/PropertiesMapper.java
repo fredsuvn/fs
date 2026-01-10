@@ -1,7 +1,6 @@
 package space.sunqian.fs.object.convert;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.object.data.DataSchema;
 import space.sunqian.fs.object.data.MapSchema;
@@ -16,12 +15,12 @@ import java.util.function.Function;
  * This interface is used to map data properties from an object to another object. The object should be a {@link Map} or
  * a non-map object which can be parsed to {@link MapSchema} and {@link ObjectSchema}.
  * <p>
- * A {@link DataMapper} typically uses a {@link SchemaCache} to cache the parsed {@link DataSchema}s, and the thread
- * safety is determined by the {@link SchemaCache}. By default, they are thread-safe.
+ * A {@link PropertiesMapper} typically uses a {@link SchemaCache} to cache the parsed {@link DataSchema}s, and the
+ * thread safety is determined by the {@link SchemaCache}. By default, they are thread-safe.
  *
  * @author sunqian
  */
-public interface DataMapper {
+public interface PropertiesMapper {
 
     /**
      * Returns the default data mapper.
@@ -31,8 +30,8 @@ public interface DataMapper {
      *
      * @return the default data mapper
      */
-    static @Nonnull DataMapper defaultMapper() {
-        return DataMapperImpl.DEFAULT;
+    static @Nonnull PropertiesMapper defaultMapper() {
+        return PropertiesMapperImpl.DEFAULT;
     }
 
     /**
@@ -41,8 +40,8 @@ public interface DataMapper {
      * @param schemaCache the given schema cache
      * @return a new data mapper with the given schema cache
      */
-    static @Nonnull DataMapper newMapper(@Nonnull SchemaCache schemaCache) {
-        return new DataMapperImpl(schemaCache);
+    static @Nonnull PropertiesMapper newMapper(@Nonnull SchemaCache schemaCache) {
+        return new PropertiesMapperImpl(schemaCache);
     }
 
     /**
@@ -51,7 +50,7 @@ public interface DataMapper {
      * @param map the given map as schema cache
      * @return a new data mapper with the given map as schema cache
      */
-    static @Nonnull DataMapper newMapper(@Nonnull Map<@Nonnull Type, @Nonnull DataSchema> map) {
+    static @Nonnull PropertiesMapper newMapper(@Nonnull Map<@Nonnull Type, @Nonnull DataSchema> map) {
         return newMapper(newSchemaCache(map));
     }
 
@@ -62,7 +61,7 @@ public interface DataMapper {
      * @return a new data schema cache with the given map
      */
     static @Nonnull SchemaCache newSchemaCache(@Nonnull Map<@Nonnull Type, @Nonnull DataSchema> map) {
-        return new DataMapperImpl.SchemaCacheImpl(map);
+        return new PropertiesMapperImpl.SchemaCacheImpl(map);
     }
 
     /**
@@ -179,40 +178,6 @@ public interface DataMapper {
             @Nonnull Type type,
             @Nonnull Function<? super @Nonnull Type, ? extends @Nonnull DataSchema> loader
         ) throws ObjectConvertException;
-    }
-
-    /**
-     * Property mapper for copying object property, this interface is called when copying each property.
-     */
-    interface PropertyMapper {
-
-        /**
-         * Maps the source property with the specified name. this method determines the name and value of the actual
-         * destination property that the specified property needs to be copied to. The returned entry's key and value
-         * are the name and value of the actual destination property. If this method returns {@code null}, then the
-         * specified property will not be copied.
-         * <p>
-         * This method is applicable to both {@link Map} and non-map object. For non-map objects, the type of property
-         * name must be {@link String}.
-         *
-         * @param propertyName the name of the specified property to be copied
-         * @param src          the source object
-         * @param srcSchema    the schema of the source object
-         * @param dst          the destination object
-         * @param dstSchema    the schema of the destination object
-         * @param converter    the converter used in the mapping process
-         * @param options      the options used in the mapping process
-         * @return the mapped name and value, may be {@code null} to ignore copy of this property
-         */
-        Map.@Nullable Entry<@Nonnull Object, Object> map(
-            @Nonnull Object propertyName,
-            @Nonnull Object src,
-            @Nonnull DataSchema srcSchema,
-            @Nonnull Object dst,
-            @Nonnull DataSchema dstSchema,
-            @Nonnull ObjectConverter converter,
-            @Nonnull Option<?, ?> @Nonnull ... options
-        );
     }
 
     /**
