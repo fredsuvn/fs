@@ -4,7 +4,9 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.collect.ListKit;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -41,15 +43,14 @@ final class SemVerImpl implements SemVer {
                     preReleaseIds[i] = ids[i];
                 }
             }
-            preRelease = new PreReleaseImpl(ListKit.list(preReleaseIds));
+            preRelease = new PreReleaseImpl(preReleaseIds);
         } else {
             preRelease = null;
         }
         String g5 = matcher.group(5);
         if (g5 != null) {
             String[] ids = g5.split("\\.");
-            List<String> buildMetaIds = ListKit.list(ids);
-            buildMeta = new BuildMetaImpl(buildMetaIds);
+            buildMeta = new BuildMetaImpl(ids);
         } else {
             buildMeta = null;
         }
@@ -89,7 +90,7 @@ final class SemVerImpl implements SemVer {
 
     @Override
     public int hashCode() {
-        return toString().hashCode();
+        return Objects.hash(major, minor, patch, preRelease, buildMeta);
     }
 
     @Override
@@ -144,25 +145,27 @@ final class SemVerImpl implements SemVer {
 
     private static final class PreReleaseImpl implements PreRelease {
 
-        private final @Nonnull List<@Nonnull Object> identifiers;
+        private final @Nonnull Object @Nonnull [] identifiers;
+        private final @Nonnull List<@Nonnull Object> identifierList;
 
-        PreReleaseImpl(@Nonnull List<@Nonnull Object> identifiers) {
+        private PreReleaseImpl(@Nonnull Object @Nonnull [] identifiers) {
             this.identifiers = identifiers;
+            this.identifierList = ListKit.list(identifiers);
         }
 
         @Override
         public @Nonnull List<@Nonnull Object> identifiers() {
-            return identifiers;
+            return identifierList;
         }
 
         @Override
         public @Nonnull String toString() {
-            return identifiers.stream().map(Object::toString).collect(Collectors.joining("."));
+            return identifierList.stream().map(Object::toString).collect(Collectors.joining("."));
         }
 
         @Override
         public int hashCode() {
-            return toString().hashCode();
+            return Arrays.hashCode(identifiers);
         }
 
         @Override
@@ -175,48 +178,53 @@ final class SemVerImpl implements SemVer {
 
         @Override
         public int compareTo(@Nonnull PreRelease o) {
-            int size = Math.min(identifiers.size(), o.identifiers().size());
+            int size = Math.min(identifiers.length, o.identifiers().size());
             for (int i = 0; i < size; i++) {
-                Object id = identifiers.get(i);
+                Object id = identifiers[i];
                 Object oId = o.identifiers().get(i);
-                // Identifiers consisting of only digits are compared numerically.
-                if (id instanceof Integer && oId instanceof Integer) {
-                    int cmp = ((Integer) id).compareTo((Integer) oId);
-                    if (cmp != 0) {
-                        return cmp;
+                if (id instanceof Integer) {
+                    if (oId instanceof Integer) {
+                        // Identifiers consisting of only digits are compared numerically.
+                        int cmp = ((Integer) id).compareTo((Integer) oId);
+                        if (cmp != 0) {
+                            return cmp;
+                        }
+                    } else {
+                        // Numeric identifiers always have lower precedence than non-numeric identifiers.
+                        return -1;
                     }
-                    continue;
-                }
-                // Numeric identifiers always have lower precedence than non-numeric identifiers.
-                if (id instanceof Integer && oId instanceof String) {
-                    return -1;
-                }
-                if (id instanceof String && oId instanceof Integer) {
-                    return 1;
-                }
-                // Identifiers with letters or hyphens are compared lexically in ASCII sort order.
-                @SuppressWarnings("DataFlowIssue")
-                int cmp = ((String) id).compareTo((String) oId);
-                if (cmp != 0) {
-                    return cmp;
+                } else {
+                    if (oId instanceof Integer) {
+                        // Identifiers consisting of only digits are compared numerically.
+                        return 1;
+                    } else {
+                        // Identifiers with letters or hyphens are compared lexically in ASCII sort order.
+                        int cmp = ((String) id).compareTo((String) oId);
+                        if (cmp != 0) {
+                            return cmp;
+                        }
+                    }
                 }
             }
             // A larger set of pre-release fields has a higher precedence than a smaller set,
             // if all of the preceding identifiers are equal.
-            return Integer.compare(identifiers.size(), o.identifiers().size());
+            return Integer.compare(identifiers.length, o.identifiers().size());
         }
     }
 
     private static final class BuildMetaImpl implements BuildMeta {
-        private final @Nonnull List<@Nonnull String> identifiers;
 
-        BuildMetaImpl(@Nonnull List<@Nonnull String> identifiers) {
+        private final @Nonnull String @Nonnull [] identifiers;
+        private final @Nonnull List<@Nonnull String> identifierList;
+
+        BuildMetaImpl(@Nonnull String @Nonnull [] identifiers) {
             this.identifiers = identifiers;
+            this.identifierList = ListKit.list(identifiers);
         }
 
         @Override
         public @Nonnull List<@Nonnull String> identifiers() {
-            return identifiers;
+            return identifierList;
         }
 
         @Override
@@ -226,7 +234,7 @@ final class SemVerImpl implements SemVer {
 
         @Override
         public int hashCode() {
-            return toString().hashCode();
+            return Arrays.hashCode(identifiers);
         }
 
         @Override
@@ -234,7 +242,7 @@ final class SemVerImpl implements SemVer {
             if (!(obj instanceof BuildMeta)) {
                 return false;
             }
-            return toString().equals(((BuildMeta) obj).toString());
+            return identifierList.equals(((BuildMeta) obj).identifiers());
         }
     }
 }
