@@ -619,6 +619,80 @@ public class Fs {
     //---------------- Object Conversion Begin ----------------//
 
     /**
+     * Converts the given source map from {@code Map<String, Object>} to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConvertOption} or other custom options for custom implementations.
+     * <p>
+     * This method is a shortcut to the {@link ObjectConverter#convertMap(Map, Class, Option[])}.
+     *
+     * @param src     the given source map
+     * @param target  the specified type of the target object
+     * @param options the other conversion options
+     * @param <T>     the target type
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConvertException if the conversion from {@code Map<String, Object>} to the target type
+     *                                           is not supported
+     * @throws ObjectConvertException            if the conversion failed
+     */
+    public static <T> T convertMap(
+        @Nonnull Map<String, Object> src,
+        @Nonnull Class<? extends T> target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
+        return ObjectConverter.defaultConverter().convertMap(src, target, options);
+    }
+
+    /**
+     * Converts the given source map from {@code Map<String, Object>} to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConvertOption} or other custom options for custom implementations.
+     * <p>
+     * This method is a shortcut to the {@link ObjectConverter#convertMap(Map, TypeRef, Option[])}.
+     *
+     * @param src     the given source map
+     * @param target  the specified type ref of the target object
+     * @param options the other conversion options
+     * @param <T>     the target type
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConvertException if the conversion from {@code Map<String, Object>} to the target type
+     *                                           is not supported
+     * @throws ObjectConvertException            if the conversion failed
+     */
+    public static <T> T convertMap(
+        @Nonnull Map<String, Object> src,
+        @Nonnull TypeRef<? extends T> target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
+        return ObjectConverter.defaultConverter().convertMap(src, target, options);
+    }
+
+    /**
+     * Converts the given source map from {@code Map<String, Object>} to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConvertOption} or other custom options for custom implementations.
+     * <p>
+     * This method is a shortcut to the {@link ObjectConverter#convertMap(Map, Type, Option[])}.
+     *
+     * @param src     the given source map
+     * @param target  the specified type of the target object
+     * @param options the other conversion options
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConvertException if the conversion from {@code Map<String, Object>} to the target type
+     *                                           is not supported
+     * @throws ObjectConvertException            if the conversion failed
+     */
+    public static Object convertMap(
+        @Nonnull Map<String, Object> src,
+        @Nonnull Type target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
+        return ObjectConverter.defaultConverter().convertMap(src, target, options);
+    }
+
+    /**
      * Converts the given source object from the specified type to the target type.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
@@ -634,7 +708,6 @@ public class Fs {
      * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
      *                                           supported
      * @throws ObjectConvertException            if the conversion failed
-     * @see ObjectConverter
      */
     public static <T> T convert(
         @Nullable Object src,
@@ -660,7 +733,6 @@ public class Fs {
      * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
      *                                           supported
      * @throws ObjectConvertException            if the conversion failed
-     * @see ObjectConverter
      */
     public static <T> T convert(
         @Nullable Object src,
@@ -676,7 +748,31 @@ public class Fs {
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link ConvertOption} or other custom options for custom implementations.
      * <p>
-     * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, Class, Option[])}.
+     * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, Option[])}.
+     *
+     * @param src     the given source object
+     * @param target  the specified type of the target object
+     * @param options the other conversion options
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
+     *                                           supported
+     * @throws ObjectConvertException            if the conversion failed
+     */
+    public static <T> T convert(
+        @Nullable Object src,
+        @Nonnull Type target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
+        return ObjectConverter.defaultConverter().convert(src, target, options);
+    }
+
+    /**
+     * Converts the given source object from the specified type to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConvertOption} or other custom options for custom implementations.
+     * <p>
+     * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, Type, Option[])}.
      *
      * @param src     the given source object
      * @param srcType the specified type of the given source object
@@ -692,35 +788,7 @@ public class Fs {
     public static <T> T convert(
         @Nullable Object src,
         @Nonnull Type srcType,
-        @Nonnull Class<? extends T> target,
-        @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return ObjectConverter.defaultConverter().convert(src, srcType, target, options);
-    }
-
-    /**
-     * Converts the given source object from the specified type to the target type.
-     * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
-     * <p>
-     * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, TypeRef, Option[])}.
-     *
-     * @param src     the given source object
-     * @param srcType the specified type of the given source object
-     * @param target  the specified type ref of the target object
-     * @param options the other conversion options
-     * @param <T>     the target type
-     * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
-     *                                           supported
-     * @throws ObjectConvertException            if the conversion failed
-     * @see ObjectConverter
-     */
-    public static <T> T convert(
-        @Nullable Object src,
-        @Nonnull Type srcType,
-        @Nonnull TypeRef<? extends T> target,
+        @Nonnull Type target,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
         return ObjectConverter.defaultConverter().convert(src, srcType, target, options);

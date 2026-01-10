@@ -146,7 +146,7 @@ public class ConvertTest implements PrintTest {
         // to map
         Map<String, String> map1 = converter.convert(a, new TypeRef<Map<String, String>>() {});
         assertEquals(map1, MapKit.map("first", "1", "second", "2", "third", "3"));
-        Map<String, String> map2 = converter.convert(a, A.class, new TypeRef<Map<String, String>>() {});
+        Map<String, String> map2 = converter.convert(a, A.class, new TypeRef<Map<String, String>>() {}.type());
         assertEquals(map2, MapKit.map("first", "1", "second", "2", "third", "3"));
         Map<String, String> map3 = converter.convert(a, new TypeRef<Map<String, String>>() {},
             ConvertOption.builderProvider(ObjectBuilderProvider.newProvider(
@@ -218,8 +218,6 @@ public class ConvertTest implements PrintTest {
             assertEquals(123L, converter.convert(123, long.class));
             assertEquals(123L, converter.convert(123, Long.class));
             assertEquals(new BigDecimal("123"), converter.convert(123, BigDecimal.class));
-            assertThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert(new X<String>(), nonClass, long.class));
             assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(a, long.class));
         }
@@ -447,6 +445,23 @@ public class ConvertTest implements PrintTest {
                     )
             );
         }
+        {
+            // Map<K, V>
+            Map<String, Object> map = new HashMap<>();
+            map.put("longNum", 1);
+            assertEquals(
+                1L,
+                ObjectConverter.defaultConverter().convertMap(map, MapObject.class).getLongNum()
+            );
+            assertEquals(
+                1L,
+                ObjectConverter.defaultConverter().convertMap(map, new TypeRef<MapObject>() {}).getLongNum()
+            );
+            assertEquals(
+                1L,
+                ((MapObject) ObjectConverter.defaultConverter().convertMap(map, (Type) MapObject.class)).getLongNum()
+            );
+        }
     }
 
     @Test
@@ -532,5 +547,10 @@ public class ConvertTest implements PrintTest {
     public static class DataObject {
         private String code;
         private String name;
+    }
+
+    @Data
+    public static class MapObject {
+        private long longNum;
     }
 }

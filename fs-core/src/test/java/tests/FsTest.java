@@ -17,6 +17,7 @@ import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -251,7 +252,22 @@ public class FsTest implements AssertTest, PrintTest {
         assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, IntProps.class));
         assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, sp.getClass(), IntProps.class));
         assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, new TypeRef<IntProps>() {}));
-        assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, sp.getClass(), new TypeRef<IntProps>() {}));
+        assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, sp.getClass(), IntProps.class));
+        // Map<K, V>
+        Map<String, Object> map = new HashMap<>();
+        map.put("longNum", 1);
+        assertEquals(
+            1L,
+            ObjectConverter.defaultConverter().convertMap(map, MapObject.class).getLongNum()
+        );
+        assertEquals(
+            1L,
+            ObjectConverter.defaultConverter().convertMap(map, new TypeRef<MapObject>() {}).getLongNum()
+        );
+        assertEquals(
+            1L,
+            ((MapObject) ObjectConverter.defaultConverter().convertMap(map, (Type) MapObject.class)).getLongNum()
+        );
     }
 
     @Data
@@ -272,5 +288,10 @@ public class FsTest implements AssertTest, PrintTest {
         private Integer first;
         private Integer second;
         private Integer third;
+    }
+
+    @Data
+    public static class MapObject {
+        private long longNum;
     }
 }

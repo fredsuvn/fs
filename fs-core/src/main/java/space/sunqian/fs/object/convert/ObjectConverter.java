@@ -13,6 +13,7 @@ import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This interface is used to convert an object from the specified type to the target type.
@@ -80,6 +81,74 @@ public interface ObjectConverter {
     }
 
     /**
+     * Converts the given source map from {@code Map<String, Object>} to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConvertOption} or other custom options for custom implementations.
+     *
+     * @param src     the given source map
+     * @param target  the specified type of the target object
+     * @param options the other conversion options
+     * @param <T>     the target type
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConvertException if the conversion from {@code Map<String, Object>} to the target type
+     *                                           is not supported
+     * @throws ObjectConvertException            if the conversion failed
+     */
+    default <T> T convertMap(
+        @Nonnull Map<String, Object> src,
+        @Nonnull Class<? extends T> target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
+        return convert(src, new TypeRef<Map<String, Object>>() {}.type(), target, options);
+    }
+
+    /**
+     * Converts the given source map from {@code Map<String, Object>} to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConvertOption} or other custom options for custom implementations.
+     *
+     * @param src     the given source map
+     * @param target  the specified type ref of the target object
+     * @param options the other conversion options
+     * @param <T>     the target type
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConvertException if the conversion from {@code Map<String, Object>} to the target type
+     *                                           is not supported
+     * @throws ObjectConvertException            if the conversion failed
+     */
+    default <T> T convertMap(
+        @Nonnull Map<String, Object> src,
+        @Nonnull TypeRef<? extends T> target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
+        return convert(src, new TypeRef<Map<String, Object>>() {}.type(), target.type(), options);
+    }
+
+    /**
+     * Converts the given source map from {@code Map<String, Object>} to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConvertOption} or other custom options for custom implementations.
+     *
+     * @param src     the given source map
+     * @param target  the specified type of the target object
+     * @param options the other conversion options
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConvertException if the conversion from {@code Map<String, Object>} to the target type
+     *                                           is not supported
+     * @throws ObjectConvertException            if the conversion failed
+     */
+    default Object convertMap(
+        @Nonnull Map<String, Object> src,
+        @Nonnull Type target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
+        return convert(src, new TypeRef<Map<String, Object>>() {}.type(), target, options);
+    }
+
+    /**
      * Converts the given source object from the specified type to the target type.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
@@ -99,7 +168,7 @@ public interface ObjectConverter {
         @Nonnull Class<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return Fs.as(convert(src, (Type) target, options));
+        return convert(src, (Type) target, options);
     }
 
     /**
@@ -122,7 +191,7 @@ public interface ObjectConverter {
         @Nonnull TypeRef<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return Fs.as(convert(src, target.type(), options));
+        return convert(src, target.type(), options);
     }
 
     /**
@@ -139,7 +208,7 @@ public interface ObjectConverter {
      *                                           supported
      * @throws ObjectConvertException            if the conversion failed
      */
-    default Object convert(
+    default <T> T convert(
         @Nullable Object src,
         @Nonnull Type target,
         @Nonnull Option<?, ?> @Nonnull ... options
@@ -157,62 +226,12 @@ public interface ObjectConverter {
      * @param srcType the specified type of the given source object
      * @param target  the specified type of the target object
      * @param options the other conversion options
-     * @param <T>     the target type
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
      *                                           supported
      * @throws ObjectConvertException            if the conversion failed
      */
     default <T> T convert(
-        @Nullable Object src,
-        @Nonnull Type srcType,
-        @Nonnull Class<? extends T> target,
-        @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return Fs.as(convert(src, srcType, (Type) target, options));
-    }
-
-    /**
-     * Converts the given source object from the specified type to the target type.
-     * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
-     *
-     * @param src     the given source object
-     * @param srcType the specified type of the given source object
-     * @param target  the specified type ref of the target object
-     * @param options the other conversion options
-     * @param <T>     the target type
-     * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
-     *                                           supported
-     * @throws ObjectConvertException            if the conversion failed
-     */
-    default <T> T convert(
-        @Nullable Object src,
-        @Nonnull Type srcType,
-        @Nonnull TypeRef<? extends T> target,
-        @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return Fs.as(convert(src, srcType, target.type(), options));
-    }
-
-    /**
-     * Converts the given source object from the specified type to the target type.
-     * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
-     *
-     * @param src     the given source object
-     * @param srcType the specified type of the given source object
-     * @param target  the specified type of the target object
-     * @param options the other conversion options
-     * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
-     *                                           supported
-     * @throws ObjectConvertException            if the conversion failed
-     */
-    default Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
         @Nonnull Type target,
@@ -231,7 +250,7 @@ public interface ObjectConverter {
             if (ret == Status.HANDLER_BREAK) {
                 throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
             }
-            return ret;
+            return Fs.as(ret);
         }
         throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
     }

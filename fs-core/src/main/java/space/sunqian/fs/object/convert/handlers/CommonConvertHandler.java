@@ -578,8 +578,12 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             if (src instanceof String) {
                 return NumKit.toNumber((String) src, target);
             }
-            if (!(srcType instanceof Class<?>)) {
-                return ObjectConverter.Status.HANDLER_CONTINUE;
+            if (
+                Number.class.isAssignableFrom(ClassKit.wrapperClass((Class<?>) srcType))
+                    || src instanceof Number
+            ) {
+                Number srcNum = (Number) src;
+                return NumKit.toNumber(srcNum, target);
             }
             if (target.equals(Long.class) || target.equals(long.class)) {
                 if (srcType.equals(Date.class)) {
@@ -594,10 +598,6 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                     Date date = dateFormatter.convert(ta, Date.class);
                     return date.getTime();
                 }
-            }
-            if (Number.class.isAssignableFrom(ClassKit.wrapperClass((Class<?>) srcType))) {
-                Number srcNum = (Number) src;
-                return NumKit.toNumber(srcNum, target);
             }
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
