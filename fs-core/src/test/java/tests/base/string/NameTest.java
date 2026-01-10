@@ -4,6 +4,7 @@ import internal.test.ErrorAppender;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.string.NameFormatException;
 import space.sunqian.fs.base.string.NameFormatter;
+import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.base.value.Span;
 import space.sunqian.fs.collect.ArrayKit;
 
@@ -11,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class NameFormatterTest {
+public class NameTest {
 
     @Test
     public void testSplit() {
@@ -26,7 +27,7 @@ public class NameFormatterTest {
         }
         {
             // delimiter "-"
-            NameFormatter format = NameFormatter.delimiterCase("-");
+            NameFormatter format = NameFormatter.delimiter("-");
             assertArrayEquals(format.parse("a-b-c"), ArrayKit.array("a", "b", "c"));
             assertArrayEquals(format.parse("a-b"), ArrayKit.array("a", "b"));
             assertArrayEquals(format.parse("a-b-"), ArrayKit.array("a", "b", ""));
@@ -37,7 +38,7 @@ public class NameFormatterTest {
         }
         {
             // delimiter "--"
-            NameFormatter format = NameFormatter.delimiterCase("--");
+            NameFormatter format = NameFormatter.delimiter("--");
             assertArrayEquals(format.parse("a--b--c"), ArrayKit.array("a", "b", "c"));
             assertArrayEquals(format.parse("a--b"), ArrayKit.array("a", "b"));
             assertArrayEquals(format.parse("a--b--"), ArrayKit.array("a", "b", ""));
@@ -50,7 +51,7 @@ public class NameFormatterTest {
         }
         {
             // delimiter error
-            assertThrows(IllegalArgumentException.class, () -> NameFormatter.delimiterCase(""));
+            assertThrows(IllegalArgumentException.class, () -> NameFormatter.delimiter(""));
         }
         {
             // lower camel
@@ -173,7 +174,7 @@ public class NameFormatterTest {
         }
         {
             // delimiter
-            NameFormatter format = NameFormatter.delimiterCase("-");
+            NameFormatter format = NameFormatter.delimiter("-");
             assertEquals(
                 "a-b-c",
                 format.format("a", "b", "c")
@@ -200,15 +201,15 @@ public class NameFormatterTest {
             );
             assertEquals(
                 "a.b.c",
-                format.format("a-b-c", NameFormatter.delimiterCase("."))
+                format.format("a-b-c", NameFormatter.delimiter("."))
             );
             assertEquals(
                 "a.b",
-                format.format("a-b", NameFormatter.delimiterCase("."))
+                format.format("a-b", NameFormatter.delimiter("."))
             );
             assertEquals(
                 "a",
-                format.format("a", NameFormatter.delimiterCase("."))
+                format.format("a", NameFormatter.delimiter("."))
             );
             assertEquals(
                 "a-b-c",
@@ -377,13 +378,26 @@ public class NameFormatterTest {
     public void testFormat() {
         NameFormatter lowerCase = NameFormatter.lowerCamel();
         NameFormatter upperCase = NameFormatter.upperCamel();
-        NameFormatter delimiterCase = NameFormatter.delimiterCase("-");
-        NameFormatter delimiterUpper = NameFormatter.delimiterCase("-",
+        NameFormatter delimiterCase = NameFormatter.delimiter("-");
+        NameFormatter delimiterLower = NameFormatter.delimiter("-", true);
+        NameFormatter delimiterUpper = NameFormatter.delimiter("_", false);
+        NameFormatter delimiterCustom = NameFormatter.delimiter("-",
             (dst, originalName, span, index) ->
                 dst.append(originalName.subSequence(span.startIndex(), span.endIndex()).toString().toUpperCase()));
         assertEquals("SomeName", lowerCase.format("someName", upperCase));
         assertEquals("some-Name", lowerCase.format("someName", delimiterCase));
-        assertEquals("SOME-NAME", lowerCase.format("someName", delimiterUpper));
+        assertEquals("some-name", lowerCase.format("someName", delimiterLower));
+        assertEquals("SOME_NAME", lowerCase.format("someName", delimiterUpper));
+        assertEquals("SOME-NAME", lowerCase.format("someName", delimiterCustom));
+    }
+
+    @Test
+    public void testMapper() {
+        NameMapper mapper = NameMapper.with(NameFormatter.lowerCamel(), NameFormatter.delimiter("-", true));
+        assertEquals(
+            "some-mapper",
+            mapper.map("someMapper")
+        );
     }
 
     @Test

@@ -8,24 +8,24 @@ import space.sunqian.fs.collect.ArrayKit;
 final class NameFormatterBack {
 
     static @Nonnull NameFormatter camelCase(boolean upperFirst) {
-        return new CamelCase(upperFirst);
+        return new CamelCaseFormatter(upperFirst);
     }
 
-    static @Nonnull NameFormatter delimiterCase(
+    static @Nonnull NameFormatter delimiter(
         @Nonnull CharSequence delimiter, @Nonnull NameFormatter.Appender appender
     ) throws IllegalArgumentException {
-        return new DelimiterCase(delimiter, appender);
+        return new DelimiterFormatter(delimiter, appender);
     }
 
     static @Nonnull NameFormatter fileNaming() {
-        return new FileNaming();
+        return new FileNamingFormatter();
     }
 
     static @Nonnull NameFormatter.Appender simpleAppender() {
         return SimpleAppender.INST;
     }
 
-    private static final class CamelCase implements NameFormatter {
+    private static final class CamelCaseFormatter implements NameFormatter {
 
         private static final int LOWER = 1;
         private static final int UPPER = 2;
@@ -34,7 +34,7 @@ final class NameFormatterBack {
 
         private final boolean upperFirst;
 
-        private CamelCase(boolean upperFirst) {
+        private CamelCaseFormatter(boolean upperFirst) {
             this.upperFirst = upperFirst;
         }
 
@@ -228,12 +228,12 @@ final class NameFormatterBack {
         }
     }
 
-    private static final class DelimiterCase implements NameFormatter {
+    private static final class DelimiterFormatter implements NameFormatter {
 
         private final @Nonnull CharSequence delimiter;
         private final @Nonnull NameFormatter.Appender appender;
 
-        private DelimiterCase(
+        private DelimiterFormatter(
             @Nonnull CharSequence delimiter, @Nonnull NameFormatter.Appender appender
         ) throws IllegalArgumentException {
             Checker.checkArgument(delimiter.length() > 0, "The delimiter must not be empty.");
@@ -334,9 +334,9 @@ final class NameFormatterBack {
         }
     }
 
-    private static final class FileNaming implements NameFormatter {
+    private static final class FileNamingFormatter implements NameFormatter {
 
-        private static final SimpleAppender appender = (SimpleAppender) simpleAppender();
+        private static final Appender appender = (SimpleAppender) simpleAppender();
 
         @Override
         public @Nonnull Span @Nonnull [] tokenize(@Nonnull CharSequence name) {
@@ -431,15 +431,39 @@ final class NameFormatterBack {
         }
     }
 
-    private enum SimpleAppender implements NameFormatter.Appender {
+    enum SimpleAppender implements NameFormatter.Appender {
 
         INST;
 
         @Override
         public void append(
-            @Nonnull Appendable dst, @Nonnull CharSequence originalName, @Nonnull Span span, int index
+            @Nonnull Appendable dst, @Nonnull CharSequence origin, @Nonnull Span span, int index
         ) throws Exception {
-            dst.append(originalName, span.startIndex(), span.endIndex());
+            dst.append(origin, span.startIndex(), span.endIndex());
+        }
+    }
+
+    enum LowerAppender implements NameFormatter.Appender {
+
+        INST;
+
+        @Override
+        public void append(
+            @Nonnull Appendable dst, @Nonnull CharSequence origin, @Nonnull Span span, int index
+        ) throws Exception {
+            dst.append(origin.subSequence(span.startIndex(), span.endIndex()).toString().toLowerCase());
+        }
+    }
+
+    enum UpperAppender implements NameFormatter.Appender {
+
+        INST;
+
+        @Override
+        public void append(
+            @Nonnull Appendable dst, @Nonnull CharSequence origin, @Nonnull Span span, int index
+        ) throws Exception {
+            dst.append(origin.subSequence(span.startIndex(), span.endIndex()).toString().toUpperCase());
         }
     }
 
