@@ -264,6 +264,21 @@ public interface ObjectConverter {
     List<@Nonnull Handler> handlers();
 
     /**
+     * Returns a new converter of which first handler is the given handler and the next handler is this converter as a
+     * {@link Handler}. This method is equivalent:
+     * <pre>{@code
+     * newConverter(firstHandler, this.asHandler())
+     * }</pre>
+     *
+     * @param firstHandler the first handler
+     * @return a new converter of which first handler is the given handler and the next handler is this converter as a
+     * {@link Handler}
+     */
+    default @Nonnull ObjectConverter withFirstHandler(@Nonnull Handler firstHandler) {
+        return newConverter(firstHandler, this.asHandler());
+    }
+
+    /**
      * Returns this converter as a {@link Handler}.
      *
      * @return this converter as a {@link Handler}

@@ -82,7 +82,7 @@ public class ConvertTest implements PrintTest {
                 (src, srcType, target, converter1, options) -> {
                     throw new UnreachablePointException();
                 };
-            ObjectConverter cvt = ObjectConverter.newConverter(handler, converter.asHandler());
+            ObjectConverter cvt = converter.withFirstHandler(handler);
             ObjectConvertException e = assertThrows(ObjectConvertException.class, () ->
                 cvt.convert(a, B.class));
             assertTrue(e.getCause() instanceof UnreachablePointException);
@@ -92,7 +92,7 @@ public class ConvertTest implements PrintTest {
             ObjectConverter.Handler handler =
                 (src, srcType, target, converter1, options) ->
                     ObjectConverter.Status.HANDLER_BREAK;
-            ObjectConverter cvt = ObjectConverter.newConverter(handler, converter.asHandler());
+            ObjectConverter cvt = converter.withFirstHandler(handler);
             UnsupportedObjectConvertException e = assertThrows(UnsupportedObjectConvertException.class, () ->
                 cvt.convert(a, B.class, ConvertOption.IGNORE_NULL));
             assertEquals(e.sourceObject(), a);
@@ -108,7 +108,7 @@ public class ConvertTest implements PrintTest {
                 (src, srcType, target, converter1, options) -> {
                     throw new UnreachablePointException();
                 };
-            ObjectConverter cvt = ObjectConverter.newConverter(converter.asHandler(), handler);
+            ObjectConverter cvt = converter.withFirstHandler(handler);
             ObjectConvertException e = assertThrows(ObjectConvertException.class, () ->
                 cvt.convert(a, X.class.getTypeParameters()[0], ConvertOption.STRICT_TYPE_MODE));
             assertTrue(e.getCause() instanceof UnreachablePointException);
