@@ -44,7 +44,7 @@ public class ProtobufTest implements PrintTest {
 
     @Test
     public void testSchemaHandler() throws Exception {
-        ObjectSchemaParser protoParser = ObjectSchemaParser.newParser(new ProtobufSchemaHandler());
+        ObjectSchemaParser protoParser = ObjectSchemaParser.newParser(ProtobufSchemaHandler.INSTANCE);
         Data.Builder builder = Data.newBuilder()
             .setStr("str")
             .setI32(1)

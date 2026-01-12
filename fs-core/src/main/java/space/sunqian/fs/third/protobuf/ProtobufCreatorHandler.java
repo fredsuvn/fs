@@ -18,11 +18,12 @@ import java.lang.reflect.Type;
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
- * ObjectBuilderProvider provider = ObjectBuilderProvider
- *     .defaultProvider()
- *     .withFirstHandler(new ProtobufBuilderHandler());
+ * ObjectBuilderProvider provider = ...;
+ * ObjectBuilderProvider protoProvider = provider
+ *     .withFirstHandler(ProtobufCreatorHandler.INSTANCE);
  * }</pre>
- * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment.
+ * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
+ * environment, the {@link ObjectCreatorProvider#defaultProvider()} will automatically load this handler.
  *
  * @author sunqian
  */

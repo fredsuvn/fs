@@ -29,11 +29,12 @@ import java.util.Objects;
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
- * ObjectSchemaParser parser = ObjectSchemaParser
- *     .defaultParser()
- *     .withFirstHandler(new ProtobufSchemaHandler());
+ * ObjectSchemaParser parser = ...;
+ * ObjectSchemaParser protoParser = parser
+ *     .withFirstHandler(ProtobufSchemaHandler.INSTANCE);
  * }</pre>
- * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment.
+ * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
+ * environment, the {@link ObjectSchemaParser#defaultParser()} will automatically load this handler.
  * <p>
  * Note:
  * <ul>
@@ -51,6 +52,11 @@ import java.util.Objects;
  * @author sunqian
  */
 public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
+
+    /**
+     * An instance of this handler.
+     */
+    public static final @Nonnull ProtobufSchemaHandler INSTANCE = new ProtobufSchemaHandler();
 
     static final class StringListTypeRef extends TypeRef<List<String>> {
         static final @Nonnull StringListTypeRef SINGLETON = new StringListTypeRef();

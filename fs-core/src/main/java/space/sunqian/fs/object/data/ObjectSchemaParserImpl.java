@@ -15,7 +15,7 @@ final class ObjectSchemaParserImpl implements ObjectSchemaParser, ObjectSchemaPa
             ThirdKit.thirdClassName("protobuf", "ProtobufSchemaHandler"),
             "com.google.protobuf.Message"
         ),
-        SimpleBeanSchemaHandler.class
+        SimpleBeanSchemaHandler.INSTANCE
     ));
 
     private final @Nonnull List<ObjectSchemaParser.@Nonnull Handler> handlers;

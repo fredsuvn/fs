@@ -18,14 +18,15 @@ import java.util.List;
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
- * ObjectConverter converter = ObjectConverter
- *     .defaultConverter()
- *     .withFirstHandler(new ProtobufConvertHandler());
+ * ObjectConverter converter = ...;
+ * ObjectConverter protoConverter = converter
+ *     .withFirstHandler(ProtobufConvertHandler.INSTANCE);
  * }</pre>
  * <p>
  * This handler provides support for {@link ProtocolStringList} and {@link ByteString}.
  * <p>
- * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment.
+ * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
+ * environment, the {@link ObjectConverter#defaultConverter()} will automatically load this handler.
  *
  * @author sunqian
  */

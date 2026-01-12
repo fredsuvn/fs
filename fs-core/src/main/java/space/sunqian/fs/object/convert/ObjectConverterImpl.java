@@ -19,8 +19,8 @@ final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Hand
             ThirdKit.thirdClassName("protobuf", "ProtobufConvertHandler"),
             "com.google.protobuf.Message"
         ),
-        new AssignableConvertHandler(),
-        new CommonConvertHandler()
+        AssignableConvertHandler.INSTANCE,
+        CommonConvertHandler.INSTANCE
     ));
 
     private final @Nonnull List<ObjectConverter.@Nonnull Handler> handlers;

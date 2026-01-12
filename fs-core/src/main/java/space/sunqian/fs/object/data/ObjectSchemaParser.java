@@ -16,7 +16,7 @@ import java.util.Map;
  * the specific parsing operations, where each {@link Handler} possesses its own specific parsing logic.
  * <p>
  * There is a skeletal handler implementation: {@link AbstractObjectSchemaHandler}. And the default parser is based on
- * {@link SimpleBeanSchemaHandler}.
+ * {@link SimpleBeanSchemaHandler#INSTANCE}.
  *
  * @author sunqian
  */
@@ -24,7 +24,8 @@ import java.util.Map;
 public interface ObjectSchemaParser {
 
     /**
-     * Returns the default {@link ObjectSchemaParser} with {@link SimpleBeanSchemaHandler} as the only handler.
+     * Returns the default {@link ObjectSchemaParser} with {@link SimpleBeanSchemaHandler#INSTANCE} as the only
+     * handler.
      *
      * @return the default {@link ObjectSchemaParser}
      */

@@ -16,10 +16,17 @@ import java.util.Objects;
  * <p>
  * This implementation resolves {@code getXxx} or {@code isXxx} methods as getters and {@code setXxx} methods as setters
  * according to lower camel case naming conventions.
+ * <p>
+ * An instance {@link #INSTANCE} is provided for convenience and less memory usage.
  *
  * @author sunqian
  */
 public class SimpleBeanSchemaHandler extends AbstractObjectSchemaHandler {
+
+    /**
+     * An instance of this handler.
+     */
+    public static final @Nonnull SimpleBeanSchemaHandler INSTANCE = new SimpleBeanSchemaHandler();
 
     @Override
     protected @Nullable AccessorInfo resolveAccessor(@Nonnull Method method) {
