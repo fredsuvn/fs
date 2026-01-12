@@ -758,7 +758,7 @@ public class Fs {
      *                                           supported
      * @throws ObjectConvertException            if the conversion failed
      */
-    public static <T> T convert(
+    public static Object convert(
         @Nullable Object src,
         @Nonnull Type target,
         @Nonnull Option<?, ?> @Nonnull ... options
@@ -778,14 +778,13 @@ public class Fs {
      * @param srcType the specified type of the given source object
      * @param target  the specified type of the target object
      * @param options the other conversion options
-     * @param <T>     the target type
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
      *                                           supported
      * @throws ObjectConvertException            if the conversion failed
      * @see ObjectConverter
      */
-    public static <T> T convert(
+    public static Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
         @Nonnull Type target,

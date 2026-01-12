@@ -100,7 +100,7 @@ public interface ObjectConverter {
         @Nonnull Class<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return convert(src, new TypeRef<Map<String, Object>>() {}.type(), target, options);
+        return Fs.as(convert(src, new TypeRef<Map<String, Object>>() {}.type(), target, options));
     }
 
     /**
@@ -123,7 +123,7 @@ public interface ObjectConverter {
         @Nonnull TypeRef<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return convert(src, new TypeRef<Map<String, Object>>() {}.type(), target.type(), options);
+        return Fs.as(convert(src, new TypeRef<Map<String, Object>>() {}.type(), target.type(), options));
     }
 
     /**
@@ -168,7 +168,7 @@ public interface ObjectConverter {
         @Nonnull Class<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return convert(src, (Type) target, options);
+        return Fs.as(convert(src, (Type) target, options));
     }
 
     /**
@@ -191,7 +191,7 @@ public interface ObjectConverter {
         @Nonnull TypeRef<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return convert(src, target.type(), options);
+        return Fs.as(convert(src, target.type(), options));
     }
 
     /**
@@ -208,7 +208,7 @@ public interface ObjectConverter {
      *                                           supported
      * @throws ObjectConvertException            if the conversion failed
      */
-    default <T> T convert(
+    default Object convert(
         @Nullable Object src,
         @Nonnull Type target,
         @Nonnull Option<?, ?> @Nonnull ... options
@@ -231,7 +231,7 @@ public interface ObjectConverter {
      *                                           supported
      * @throws ObjectConvertException            if the conversion failed
      */
-    default <T> T convert(
+    default Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
         @Nonnull Type target,

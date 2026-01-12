@@ -65,7 +65,8 @@ import java.util.function.IntFunction;
 
 /**
  * The common implementation of {@link ObjectConverter.Handler}, also be the default last handler of
- * {@link ObjectConverter#defaultConverter()}.
+ * {@link ObjectConverter#defaultConverter()}. An instance {@link #INSTANCE} is provided for convenience and less memory
+ * usage.
  * <p>
  * This handler providers the common conversion logic for all types. This is a table showing the conversion logic of
  * this handler for different target types:
@@ -162,7 +163,7 @@ import java.util.function.IntFunction;
  * </tr>
  * </table>
  * <p>
- * Note that this handler typically creates new objects and does not perform the same handing as
+ * Note that this handler typically creates new objects for each conversion, and does not perform the same handing as
  * {@link AssignableConvertHandler}.
  */
 public class CommonConvertHandler implements ObjectConverter.Handler {

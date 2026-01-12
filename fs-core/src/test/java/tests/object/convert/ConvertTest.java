@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.date.DateKit;
@@ -149,7 +150,7 @@ public class ConvertTest implements PrintTest {
         // to map
         Map<String, String> map1 = converter.convert(a, new TypeRef<Map<String, String>>() {});
         assertEquals(map1, MapKit.map("first", "1", "second", "2", "third", "3"));
-        Map<String, String> map2 = converter.convert(a, A.class, new TypeRef<Map<String, String>>() {}.type());
+        Map<String, String> map2 = Fs.as(converter.convert(a, A.class, new TypeRef<Map<String, String>>() {}.type()));
         assertEquals(map2, MapKit.map("first", "1", "second", "2", "third", "3"));
         Map<String, String> map3 = converter.convert(a, new TypeRef<Map<String, String>>() {},
             ConvertOption.creatorProvider(ObjectCreatorProvider.newProvider(
@@ -263,7 +264,7 @@ public class ConvertTest implements PrintTest {
             assertArrayEquals(new int[]{1, 2, 3}, converter.convert(strList, int[].class));
             assertArrayEquals(
                 new int[]{1, 2, 3},
-                converter.convert(strList, new TypeRef<List<String>>() {}.type(), int[].class)
+                Fs.as(converter.convert(strList, new TypeRef<List<String>>() {}.type(), int[].class))
             );
             assertArrayEquals(new int[]{1, 2, 3}, converter.convert(new Iterable<String>() {
                 @Override
@@ -278,17 +279,22 @@ public class ConvertTest implements PrintTest {
                 new String[]{nowStr, nowStr, nowStr}
             );
             List<Date> dateList = ListKit.list(now, now, now);
-            assertArrayEquals(converter.convert(
-                    dateList, new TypeRef<List<Date>>() {}.type(), String[].class, ConvertOption.dateFormatter(nowFormat)),
+            assertArrayEquals(Fs.as(converter.convert(
+                    dateList,
+                    new TypeRef<List<Date>>() {}.type(),
+                    String[].class,
+                    ConvertOption.dateFormatter(nowFormat))
+                ),
                 new String[]{nowStr, nowStr, nowStr}
             );
-            assertArrayEquals(converter.convert(new Iterable<Date>() {
+            assertArrayEquals(Fs.as(converter.convert(new Iterable<Date>() {
 
-                    @Override
-                    public @Nonnull Iterator<Date> iterator() {
-                        return dateList.iterator();
-                    }
-                }, new TypeRef<Iterable<Date>>() {}.type(), String[].class, ConvertOption.dateFormatter(nowFormat)),
+                        @Override
+                        public @Nonnull Iterator<Date> iterator() {
+                            return dateList.iterator();
+                        }
+                    }, new TypeRef<Iterable<Date>>() {}.type(), String[].class, ConvertOption.dateFormatter(nowFormat))
+                ),
                 new String[]{nowStr, nowStr, nowStr}
             );
             // errors

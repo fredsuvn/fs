@@ -14,8 +14,10 @@ import java.util.Objects;
 
 /**
  * The default first {@link ObjectConverter.Handler} of {@link ObjectConverter#defaultConverter()}, mainly used to
- * determine whether it is possible to return the source object directly without creating a new object. Its conversion
- * logic is:
+ * determine whether it is possible to return the source object directly without creating a new object. An instance
+ * {@link #INSTANCE} is provided for convenience and less memory usage.
+ * <p>
+ * Its conversion logic is:
  * <ol>
  *     <li>
  *         If the specified source type equals to the target type, returns the source object itself;
