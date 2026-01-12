@@ -2,7 +2,6 @@ package tests.base.function;
 
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.function.BooleanCallable;
-import space.sunqian.fs.base.function.CacheFunction;
 import space.sunqian.fs.base.function.DoubleCallable;
 import space.sunqian.fs.base.function.IntCallable;
 import space.sunqian.fs.base.function.LongCallable;
@@ -29,16 +28,5 @@ public class FunctionTest {
             DoubleCallable call = () -> 66;
             assertEquals(call.callAsDouble(), call.call());
         }
-    }
-
-    @Test
-    public void testCacheFunction() throws Exception {
-        assertEquals(
-            666,
-            (
-                (CacheFunction<Integer, Integer>) (key, loader) ->
-                    loader.apply(key)
-            ).get(66, k -> 666)
-        );
     }
 }

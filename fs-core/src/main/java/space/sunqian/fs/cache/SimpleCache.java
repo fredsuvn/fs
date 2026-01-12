@@ -3,7 +3,6 @@ package space.sunqian.fs.cache;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.ThreadSafe;
-import space.sunqian.fs.base.function.CacheFunction;
 import space.sunqian.fs.base.value.Val;
 
 import java.lang.ref.PhantomReference;

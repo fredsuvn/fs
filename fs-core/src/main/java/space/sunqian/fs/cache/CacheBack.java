@@ -10,6 +10,7 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Map;
+import java.util.function.Function;
 
 final class CacheBack {
 
@@ -27,6 +28,10 @@ final class CacheBack {
 
     static <K, V> @Nonnull SimpleCache<K, V> ofStrong() {
         return new StrongCache<>();
+    }
+
+    static <K, V> @Nonnull CacheFunction<K, V> ofMap(@Nonnull Map<K, V> map) {
+        return new CacheFunctionImpl<>(map);
     }
 
     private static <K, V> void compareAndRemove(@Nonnull Map<K, V> map, K key, V value) {
@@ -195,6 +200,20 @@ final class CacheBack {
                 value = null;
                 compareAndRemove(cacheMap, key(), StrongValue.this);
             }
+        }
+    }
+
+    private static final class CacheFunctionImpl<K, V> implements CacheFunction<K, V> {
+
+        private final @Nonnull Map<K, V> map;
+
+        CacheFunctionImpl(@Nonnull Map<K, V> map) {
+            this.map = map;
+        }
+
+        @Override
+        public V get(K key, Function<? super K, ? extends V> loader) {
+            return map.computeIfAbsent(key, loader);
         }
     }
 
