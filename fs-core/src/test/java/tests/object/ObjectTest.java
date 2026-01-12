@@ -4,6 +4,7 @@ import internal.test.AssertTest;
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.exception.UnknownArrayTypeException;
+import space.sunqian.fs.object.ObjectException;
 import space.sunqian.fs.object.ObjectKit;
 
 import java.lang.reflect.Method;
@@ -12,6 +13,7 @@ import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ObjectTest implements AssertTest, PrintTest {
@@ -149,5 +151,24 @@ public class ObjectTest implements AssertTest, PrintTest {
         // unknown:
         Method hashArray = ObjectKit.class.getDeclaredMethod("hashArray", Object.class, boolean.class);
         invokeThrows(UnknownArrayTypeException.class, hashArray, null, "str", true);
+    }
+
+    @Test
+    public void testException() {
+        {
+            // ObjectException
+            assertThrows(ObjectException.class, () -> {
+                throw new ObjectException();
+            });
+            assertThrows(ObjectException.class, () -> {
+                throw new ObjectException("");
+            });
+            assertThrows(ObjectException.class, () -> {
+                throw new ObjectException("", new RuntimeException());
+            });
+            assertThrows(ObjectException.class, () -> {
+                throw new ObjectException(new RuntimeException());
+            });
+        }
     }
 }
