@@ -9,13 +9,12 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnsupportedEnvException;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.data.ObjectBuilderProvider;
 
 import java.lang.reflect.Type;
 import java.util.List;
 
 /**
- * {@link ObjectBuilderProvider.Handler} implementation for
+ * {@link ObjectConverter.Handler} implementation for
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
@@ -31,6 +30,11 @@ import java.util.List;
  * @author sunqian
  */
 public class ProtobufConvertHandler implements ObjectConverter.Handler {
+
+    /**
+     * An instance of this handler.
+     */
+    public static final @Nonnull ProtobufConvertHandler INSTANCE = new ProtobufConvertHandler();
 
     /**
      * Constructs a new handler instance. This constructor will check whether the protobuf package is available in the

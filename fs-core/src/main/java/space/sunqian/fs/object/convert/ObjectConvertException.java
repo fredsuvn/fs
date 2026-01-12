@@ -2,7 +2,7 @@ package space.sunqian.fs.object.convert;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.base.exception.FsRuntimeException;
+import space.sunqian.fs.object.ObjectException;
 
 import java.lang.reflect.Type;
 
@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
  *
  * @author sunqian
  */
-public class ObjectConvertException extends FsRuntimeException {
+public class ObjectConvertException extends ObjectException {
 
     private static String toMessage(@Nonnull Type sourceType, @Nonnull Type targetType) {
         return "Conversion failed: " + sourceType.getTypeName() + " to " + targetType.getTypeName() + ".";

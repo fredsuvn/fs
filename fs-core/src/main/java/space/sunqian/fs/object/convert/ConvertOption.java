@@ -6,8 +6,8 @@ import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.io.IOOperator;
+import space.sunqian.fs.object.ObjectCreatorProvider;
 import space.sunqian.fs.object.data.MapSchemaParser;
-import space.sunqian.fs.object.data.ObjectBuilderProvider;
 import space.sunqian.fs.object.data.ObjectSchemaParser;
 
 import java.nio.charset.Charset;
@@ -66,9 +66,9 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     DATA_MAPPER,
 
     /**
-     * Key of {@link #builderProvider(ObjectBuilderProvider)}.
+     * Key of {@link #creatorProvider(ObjectCreatorProvider)}.
      */
-    BUILDER_PROVIDER,
+    CREATOR_PROVIDER,
 
     /**
      * Key of {@link #ioOperator(IOOperator)}.
@@ -171,17 +171,17 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     }
 
     /**
-     * Returns an option to specify the {@link ObjectBuilderProvider} to generate data object during the conversion.
+     * Returns an option to specify the {@link ObjectCreatorProvider} to generate data object during the conversion.
      * <p>
-     * By default, the {@link ObjectBuilderProvider#defaultProvider()} is used.
+     * By default, the {@link ObjectCreatorProvider#defaultProvider()} is used.
      *
-     * @param builderFactory the {@link ObjectBuilderProvider} to be specified
-     * @return an option to specify the {@link ObjectBuilderProvider} to generate data object during the conversion
+     * @param creatorFactory the {@link ObjectCreatorProvider} to be specified
+     * @return an option to specify the {@link ObjectCreatorProvider} to generate data object during the conversion
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectBuilderProvider> builderProvider(
-        @Nonnull ObjectBuilderProvider builderFactory
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectCreatorProvider> creatorProvider(
+        @Nonnull ObjectCreatorProvider creatorFactory
     ) {
-        return Option.of(BUILDER_PROVIDER, builderFactory);
+        return Option.of(CREATOR_PROVIDER, creatorFactory);
     }
 
     /**

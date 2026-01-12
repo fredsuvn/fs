@@ -37,6 +37,11 @@ import java.util.Objects;
  */
 public class AssignableConvertHandler implements ObjectConverter.Handler {
 
+    /**
+     * An instance of this handler.
+     */
+    public static final @Nonnull AssignableConvertHandler INSTANCE = new AssignableConvertHandler();
+
     @Override
     public Object convert(
         @Nullable Object src,

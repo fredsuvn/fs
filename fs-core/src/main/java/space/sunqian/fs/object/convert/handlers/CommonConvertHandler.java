@@ -13,11 +13,11 @@ import space.sunqian.fs.collect.ArrayOperator;
 import space.sunqian.fs.collect.CollectKit;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOOperator;
+import space.sunqian.fs.object.ObjectCreator;
+import space.sunqian.fs.object.ObjectCreatorProvider;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.PropertiesMapper;
-import space.sunqian.fs.object.data.ObjectBuilder;
-import space.sunqian.fs.object.data.ObjectBuilderProvider;
 import space.sunqian.fs.reflect.ClassKit;
 import space.sunqian.fs.reflect.ReflectionException;
 import space.sunqian.fs.reflect.TypeKit;
@@ -153,7 +153,7 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td>Map and Data Objects</td>
  *     <td>Any Objects</td>
- *     <td>Generating data object is based on {@link ConvertOption#builderProvider(ObjectBuilderProvider)} and
+ *     <td>Generating data object is based on {@link ConvertOption#creatorProvider(ObjectCreatorProvider)} and
  *     {@link ConvertOption#dataMapper(PropertiesMapper)}. Generating map using its constructor, and copying properties
  *     also using {@link ConvertOption#dataMapper(PropertiesMapper)}. The supported map types:
  *     {@link Map}, {@link AbstractMap}, {@link LinkedHashMap}, {@link HashMap}, {@link TreeMap}, {@link ConcurrentMap},
@@ -166,6 +166,11 @@ import java.util.function.IntFunction;
  * {@link AssignableConvertHandler}.
  */
 public class CommonConvertHandler implements ObjectConverter.Handler {
+
+    /**
+     * An instance of this handler.
+     */
+    public static final @Nonnull CommonConvertHandler INSTANCE = new CommonConvertHandler();
 
     @Override
     public Object convert(
@@ -392,17 +397,17 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             propertiesMapper.copyProperties(src, srcType, targetObject, target, converter, options);
             return targetObject;
         } else {
-            ObjectBuilderProvider builderProvider = Fs.nonnull(
-                Option.findValue(ConvertOption.BUILDER_PROVIDER, options),
-                ObjectBuilderProvider.defaultProvider()
+            ObjectCreatorProvider creatorProvider = Fs.nonnull(
+                Option.findValue(ConvertOption.CREATOR_PROVIDER, options),
+                ObjectCreatorProvider.defaultProvider()
             );
-            ObjectBuilder builder = builderProvider.builder(target);
-            if (builder == null) {
+            ObjectCreator creator = creatorProvider.creatorForType(target);
+            if (creator == null) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
             }
-            Object targetBuilder = builder.newBuilder();
-            propertiesMapper.copyProperties(src, srcType, targetBuilder, builder.builderType(), converter, options);
-            return builder.build(targetBuilder);
+            Object targetBuilder = creator.createBuilder();
+            propertiesMapper.copyProperties(src, srcType, targetBuilder, creator.builderType(), converter, options);
+            return creator.createTarget(targetBuilder);
         }
     }
 

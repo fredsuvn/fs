@@ -11,17 +11,18 @@ import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.date.DateKit;
 import space.sunqian.fs.base.exception.UnreachablePointException;
+import space.sunqian.fs.cache.CacheFunction;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.IOOperator;
+import space.sunqian.fs.object.ObjectCreatorProvider;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.PropertiesMapper;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
-import space.sunqian.fs.object.data.ObjectBuilderProvider;
 import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -76,20 +77,21 @@ public class ConvertTest implements PrintTest {
         assertThrows(UnsupportedObjectConvertException.class, () -> converter2.convert(null, B.class));
         {
             // error during handler
-            ObjectConverter cvt = converter.withFirstHandler(
+            ObjectConverter.Handler handler =
                 (src, srcType, target, converter1, options) -> {
                     throw new UnreachablePointException();
-                });
+                };
+            ObjectConverter cvt = ObjectConverter.newConverter(handler, converter.asHandler());
             ObjectConvertException e = assertThrows(ObjectConvertException.class, () ->
                 cvt.convert(a, B.class));
             assertTrue(e.getCause() instanceof UnreachablePointException);
         }
         {
             // break during handler
-            ObjectConverter cvt = converter.withFirstHandler(
+            ObjectConverter.Handler handler =
                 (src, srcType, target, converter1, options) ->
-                    ObjectConverter.Status.HANDLER_BREAK
-            );
+                    ObjectConverter.Status.HANDLER_BREAK;
+            ObjectConverter cvt = ObjectConverter.newConverter(handler, converter.asHandler());
             UnsupportedObjectConvertException e = assertThrows(UnsupportedObjectConvertException.class, () ->
                 cvt.convert(a, B.class, ConvertOption.IGNORE_NULL));
             assertEquals(e.sourceObject(), a);
@@ -101,10 +103,11 @@ public class ConvertTest implements PrintTest {
         {
             // withLastHandler
             class X<T> {}
-            ObjectConverter cvt = converter.withLastHandler(
+            ObjectConverter.Handler handler =
                 (src, srcType, target, converter1, options) -> {
                     throw new UnreachablePointException();
-                });
+                };
+            ObjectConverter cvt = ObjectConverter.newConverter(converter.asHandler(), handler);
             ObjectConvertException e = assertThrows(ObjectConvertException.class, () ->
                 cvt.convert(a, X.class.getTypeParameters()[0], ConvertOption.STRICT_TYPE_MODE));
             assertTrue(e.getCause() instanceof UnreachablePointException);
@@ -149,9 +152,9 @@ public class ConvertTest implements PrintTest {
         Map<String, String> map2 = converter.convert(a, A.class, new TypeRef<Map<String, String>>() {}.type());
         assertEquals(map2, MapKit.map("first", "1", "second", "2", "third", "3"));
         Map<String, String> map3 = converter.convert(a, new TypeRef<Map<String, String>>() {},
-            ConvertOption.builderProvider(ObjectBuilderProvider.newProvider(
-                ObjectBuilderProvider.newBuilderCache(new HashMap<>()),
-                ObjectBuilderProvider.defaultProvider().asHandler())
+            ConvertOption.creatorProvider(ObjectCreatorProvider.newProvider(
+                CacheFunction.ofMap(new HashMap<>()),
+                ObjectCreatorProvider.defaultProvider().asHandler())
             )
         );
         assertEquals(map3, MapKit.map("first", "1", "second", "2", "third", "3"));

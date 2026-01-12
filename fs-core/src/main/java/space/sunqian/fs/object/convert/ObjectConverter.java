@@ -6,9 +6,9 @@ import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.object.ObjectCreatorProvider;
 import space.sunqian.fs.object.convert.handlers.AssignableConvertHandler;
 import space.sunqian.fs.object.convert.handlers.CommonConvertHandler;
-import space.sunqian.fs.object.data.ObjectBuilderProvider;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
@@ -41,7 +41,7 @@ import java.util.Map;
  * }</pre>
  * <p>
  * The thread safety of the methods in this interface is determined by its dependent {@link PropertiesMapper},
- * {@link ObjectBuilderProvider}, and other objects. By default, they are all thread-safe.
+ * {@link ObjectCreatorProvider}, and other objects. By default, they are all thread-safe.
  *
  * @author sunqian
  */
@@ -50,8 +50,8 @@ public interface ObjectConverter {
     /**
      * Returns the default {@link ObjectConverter}, of which handlers are:
      * <ul>
-     *     <li>{@link AssignableConvertHandler};</li>
-     *     <li>{@link CommonConvertHandler};</li>
+     *     <li>{@link AssignableConvertHandler#INSTANCE};</li>
+     *     <li>{@link CommonConvertHandler#INSTANCE};</li>
      * </ul>
      *
      * @return the default converter
@@ -264,42 +264,6 @@ public interface ObjectConverter {
     List<@Nonnull Handler> handlers();
 
     /**
-     * Returns a new {@link ObjectConverter} of which handler list consists of the given handler as the first element,
-     * followed by {@link #handlers()} of the current converter.
-     *
-     * @param handler the given handler
-     * @return a new {@link ObjectConverter} of which handler list consists of the given handler as the first element,
-     * followed by {@link #handlers()} of the current converter
-     */
-    default @Nonnull ObjectConverter withFirstHandler(@Nonnull Handler handler) {
-        Handler[] newHandlers = new Handler[handlers().size() + 1];
-        int i = 0;
-        newHandlers[i++] = handler;
-        for (Handler h : handlers()) {
-            newHandlers[i++] = h;
-        }
-        return newConverter(newHandlers);
-    }
-
-    /**
-     * Returns a new {@link ObjectConverter} of which handler list consists of {@link #handlers()} of the current
-     * converter, followed by the given handler as the last element.
-     *
-     * @param handler the given handler
-     * @return a {@link ObjectConverter} of which handler list consists of {@link #handlers()} of the current converter,
-     * followed by the given handler as the last element
-     */
-    default @Nonnull ObjectConverter withLastHandler(@Nonnull Handler handler) {
-        Handler[] newHandlers = new Handler[handlers().size() + 1];
-        int i = 0;
-        for (Handler h : handlers()) {
-            newHandlers[i++] = h;
-        }
-        newHandlers[i] = handler;
-        return newConverter(newHandlers);
-    }
-
-    /**
      * Returns this converter as a {@link Handler}.
      *
      * @return this converter as a {@link Handler}
@@ -311,7 +275,7 @@ public interface ObjectConverter {
      * Handler for {@link ObjectConverter}, provides the specific conversion logic.
      * <p>
      * The thread safety of the methods in this interface is determined by its dependent {@link PropertiesMapper},
-     * {@link ObjectBuilderProvider}, and other objects. By default, they are all thread-safe.
+     * {@link ObjectCreatorProvider}, and other objects. By default, they are all thread-safe.
      *
      * @author sunqian
      */

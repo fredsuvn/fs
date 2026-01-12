@@ -2,7 +2,7 @@ package space.sunqian.fs.object.data;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.base.exception.FsRuntimeException;
+import space.sunqian.fs.object.ObjectException;
 
 import java.lang.reflect.Type;
 
@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
  *
  * @author sunqian
  */
-public class DataObjectException extends FsRuntimeException {
+public class DataObjectException extends ObjectException {
 
     private static String toMessage(@Nonnull Type type) {
         return "Parsing data schema failed: " + type.getTypeName() + "[" + type.getClass().getName() + "].";
