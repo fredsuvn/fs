@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnreachablePointException;
+import space.sunqian.fs.cache.CacheFunction;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
@@ -38,7 +39,7 @@ public class MapperTest implements PrintTest {
     @Test
     public void testMapping() {
         testMapping(PropertiesMapper.defaultMapper());
-        testMapping(PropertiesMapper.newMapper(new HashMap<>()));
+        testMapping(PropertiesMapper.newMapper(CacheFunction.ofMap(new HashMap<>())));
         {
             // default method
             ClsA a = new ClsA("1", "2", "3");

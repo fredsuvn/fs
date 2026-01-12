@@ -282,18 +282,10 @@ public class DataSchemaTest implements PrintTest {
                 return true;
             }
         }
-        ObjectSchemaParser lastParser = ObjectSchemaParser.defaultParser().withLastHandler(new LastHandler());
-        ObjectSchema lastSchema = lastParser.parse(Object.class);
-        assertEquals(Object.class, lastSchema.type());
-        assertEquals(lastSchema.properties().keySet(), SetKit.set("class", "test"));
         ObjectSchemaParser asPreParser = ObjectSchemaParser.newParser(preParser.asHandler());
         ObjectSchema asPreSchema = asPreParser.parse(Object.class);
         assertEquals(Object.class, asPreSchema.type());
         assertEquals(0, asPreSchema.properties().size());
-        ObjectSchemaParser asLastParser = ObjectSchemaParser.newParser(lastParser.asHandler());
-        ObjectSchema asLastSchema = asLastParser.parse(Object.class);
-        assertEquals(Object.class, asLastSchema.type());
-        assertEquals(asLastSchema.properties().keySet(), SetKit.set("class", "test"));
     }
 
     @Test

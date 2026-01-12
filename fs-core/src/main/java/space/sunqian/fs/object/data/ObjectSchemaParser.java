@@ -94,39 +94,18 @@ public interface ObjectSchemaParser {
     List<@Nonnull Handler> handlers();
 
     /**
-     * Returns a new {@link ObjectSchemaParser} of which handler list consists of the given handler as the first
-     * element, followed by {@link #handlers()} of the current parser.
+     * Returns a new parser of which first handler is the given handler and the next handler is this parser as a
+     * {@link Handler}. This method is equivalent:
+     * <pre>{@code
+     * newParser(firstHandler, this.asHandler())
+     * }</pre>
      *
-     * @param handler the given handler
-     * @return a new {@link ObjectSchemaParser} of which handler list consists of the given handler as the first
-     * element, followed by {@link #handlers()} of the current parser
+     * @param firstHandler the first handler
+     * @return a new parser of which first handler is the given handler and the next handler is this parser as a
+     * {@link Handler}
      */
-    default @Nonnull ObjectSchemaParser withFirstHandler(@Nonnull Handler handler) {
-        Handler[] newHandlers = new Handler[handlers().size() + 1];
-        int i = 0;
-        newHandlers[i++] = handler;
-        for (Handler h : handlers()) {
-            newHandlers[i++] = h;
-        }
-        return newParser(newHandlers);
-    }
-
-    /**
-     * Returns a new {@link ObjectSchemaParser} of which handler list consists of {@link #handlers()} of the current
-     * parser, followed by the given handler as the last element.
-     *
-     * @param handler the given handler
-     * @return a {@link ObjectSchemaParser} of which handler list consists of {@link #handlers()} of the current parser,
-     * followed by the given handler as the last element
-     */
-    default @Nonnull ObjectSchemaParser withLastHandler(@Nonnull Handler handler) {
-        Handler[] newHandlers = new Handler[handlers().size() + 1];
-        int i = 0;
-        for (Handler h : handlers()) {
-            newHandlers[i++] = h;
-        }
-        newHandlers[i] = handler;
-        return newParser(newHandlers);
+    default @Nonnull ObjectSchemaParser withFirstHandler(@Nonnull Handler firstHandler) {
+        return newParser(firstHandler, this.asHandler());
     }
 
     /**

@@ -2,6 +2,7 @@ package space.sunqian.fs.object.convert;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.cache.CacheFunction;
 import space.sunqian.fs.object.data.DataSchema;
 import space.sunqian.fs.object.data.MapSchema;
 import space.sunqian.fs.object.data.ObjectSchema;
@@ -9,14 +10,13 @@ import space.sunqian.fs.object.data.ObjectSchema;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 /**
  * This interface is used to map data properties from an object to another object. The object should be a {@link Map} or
  * a non-map object which can be parsed to {@link MapSchema} and {@link ObjectSchema}.
  * <p>
- * A {@link PropertiesMapper} typically uses a {@link SchemaCache} to cache the parsed {@link DataSchema}s, and the
- * thread safety is determined by the {@link SchemaCache}. By default, they are thread-safe.
+ * A {@link PropertiesMapper} typically uses a {@link CacheFunction} to cache the parsed {@link DataSchema}s, and the
+ * thread safety is determined by the {@link CacheFunction}. By default, they are thread-safe.
  *
  * @author sunqian
  */
@@ -25,8 +25,8 @@ public interface PropertiesMapper {
     /**
      * Returns the default data mapper.
      * <p>
-     * The default data mapper will cache the {@link DataSchema}s parsed into a {@link ConcurrentHashMap} if needed, so
-     * it is thread-safe.
+     * The default data mapper will cache the parsed {@link DataSchema}s by a cache function based on a
+     * {@link ConcurrentHashMap}, so it is thread-safe.
      *
      * @return the default data mapper
      */
@@ -35,33 +35,13 @@ public interface PropertiesMapper {
     }
 
     /**
-     * Returns a new data mapper with the given schema cache. The thread safety is determined by the given cache.
+     * Returns a new data mapper with the given cache function. The thread safety is determined by the given cache.
      *
-     * @param schemaCache the given schema cache
-     * @return a new data mapper with the given schema cache
+     * @param cache the given cache function
+     * @return a new data mapper with the given cache function
      */
-    static @Nonnull PropertiesMapper newMapper(@Nonnull SchemaCache schemaCache) {
-        return new PropertiesMapperImpl(schemaCache);
-    }
-
-    /**
-     * Returns a new data mapper with the given map as schema cache. The thread safety is determined by the given map.
-     *
-     * @param map the given map as schema cache
-     * @return a new data mapper with the given map as schema cache
-     */
-    static @Nonnull PropertiesMapper newMapper(@Nonnull Map<@Nonnull Type, @Nonnull DataSchema> map) {
-        return newMapper(newSchemaCache(map));
-    }
-
-    /**
-     * Returns a new data schema cache with the given map. The thread safety is determined by the given map.
-     *
-     * @param map the given map
-     * @return a new data schema cache with the given map
-     */
-    static @Nonnull SchemaCache newSchemaCache(@Nonnull Map<@Nonnull Type, @Nonnull DataSchema> map) {
-        return new PropertiesMapperImpl.SchemaCacheImpl(map);
+    static @Nonnull PropertiesMapper newMapper(@Nonnull CacheFunction<@Nonnull Type, @Nonnull DataSchema> cache) {
+        return new PropertiesMapperImpl(cache);
     }
 
     /**
@@ -158,27 +138,6 @@ public interface PropertiesMapper {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectConvertException;
-
-    /**
-     * Cache for {@link DataSchema}s parsed during the mapping process.
-     */
-    interface SchemaCache {
-
-        /**
-         * Returns the {@link DataSchema} for the given type. If the schema is not cached, it will be loaded by the
-         * given loader. The semantics of this method are the same as {@link Map#computeIfAbsent(Object, Function)}.
-         *
-         * @param type   the given type to be parsed to {@link DataSchema}
-         * @param loader the loader for loading new {@link DataSchema}
-         * @return the {@link DataSchema} for the given type
-         * @throws ObjectConvertException if an error occurs during parsing
-         */
-        @Nonnull
-        DataSchema get(
-            @Nonnull Type type,
-            @Nonnull Function<? super @Nonnull Type, ? extends @Nonnull DataSchema> loader
-        ) throws ObjectConvertException;
-    }
 
     /**
      * Exception handler for copying object property, used to handle exceptions thrown when copying a property.

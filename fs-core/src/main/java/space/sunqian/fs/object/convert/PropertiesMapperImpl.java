@@ -4,6 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.cache.CacheFunction;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.object.data.DataSchema;
 import space.sunqian.fs.object.data.MapSchema;
@@ -15,16 +16,16 @@ import space.sunqian.fs.object.data.ObjectSchemaParser;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 final class PropertiesMapperImpl implements PropertiesMapper {
 
-    static final @Nonnull PropertiesMapper DEFAULT = new PropertiesMapperImpl(new SchemaCacheImpl(new ConcurrentHashMap<>()));
+    static final @Nonnull PropertiesMapper DEFAULT =
+        new PropertiesMapperImpl(CacheFunction.ofMap(new ConcurrentHashMap<>()));
 
-    private final @Nonnull SchemaCache schemaCache;
+    private final @Nonnull CacheFunction<@Nonnull Type, @Nonnull DataSchema> cache;
 
-    PropertiesMapperImpl(@Nonnull SchemaCache schemaCache) {
-        this.schemaCache = schemaCache;
+    PropertiesMapperImpl(@Nonnull CacheFunction<@Nonnull Type, @Nonnull DataSchema> cache) {
+        this.cache = cache;
     }
 
     @Override
@@ -44,9 +45,9 @@ final class PropertiesMapperImpl implements PropertiesMapper {
                     Option.findValue(ConvertOption.MAP_SCHEMA_PARSER),
                     MapSchemaParser.defaultParser()
                 );
-                MapSchema srcSchema = schemaCache.get(srcType, mapSchemaParser::parse).asMapSchema();
+                MapSchema srcSchema = cache.get(srcType, mapSchemaParser::parse).asMapSchema();
                 if (dst instanceof Map) {
-                    MapSchema dstSchema = schemaCache.get(dstType, mapSchemaParser::parse).asMapSchema();
+                    MapSchema dstSchema = cache.get(dstType, mapSchemaParser::parse).asMapSchema();
                     mapToMap(
                         Fs.as(src), srcSchema, Fs.as(dst), dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
@@ -55,7 +56,7 @@ final class PropertiesMapperImpl implements PropertiesMapper {
                         Option.findValue(ConvertOption.OBJECT_SCHEMA_PARSER),
                         ObjectSchemaParser.defaultParser()
                     );
-                    ObjectSchema dstSchema = schemaCache.get(dstType, objectSchemaParser::parse).asObjectSchema();
+                    ObjectSchema dstSchema = cache.get(dstType, objectSchemaParser::parse).asObjectSchema();
                     mapToObject(
                         Fs.as(src), srcSchema, dst, dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
@@ -65,18 +66,18 @@ final class PropertiesMapperImpl implements PropertiesMapper {
                     Option.findValue(ConvertOption.OBJECT_SCHEMA_PARSER),
                     ObjectSchemaParser.defaultParser()
                 );
-                ObjectSchema srcSchema = schemaCache.get(srcType, objectSchemaParser::parse).asObjectSchema();
+                ObjectSchema srcSchema = cache.get(srcType, objectSchemaParser::parse).asObjectSchema();
                 if (dst instanceof Map) {
                     MapSchemaParser mapSchemaParser = Fs.nonnull(
                         Option.findValue(ConvertOption.MAP_SCHEMA_PARSER),
                         MapSchemaParser.defaultParser()
                     );
-                    MapSchema dstSchema = schemaCache.get(dstType, mapSchemaParser::parse).asMapSchema();
+                    MapSchema dstSchema = cache.get(dstType, mapSchemaParser::parse).asMapSchema();
                     objectToMap(
                         src, srcSchema, Fs.as(dst), dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
                 } else {
-                    ObjectSchema dstSchema = schemaCache.get(dstType, objectSchemaParser::parse).asObjectSchema();
+                    ObjectSchema dstSchema = cache.get(dstType, objectSchemaParser::parse).asObjectSchema();
                     objectToObject(
                         src, srcSchema, dst, dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
@@ -323,22 +324,5 @@ final class PropertiesMapperImpl implements PropertiesMapper {
 
     private boolean ignoredNull(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Option.containsKey(ConvertOption.IGNORE_NULL, options);
-    }
-
-    static final class SchemaCacheImpl implements SchemaCache {
-
-        private final @Nonnull Map<@Nonnull Type, @Nonnull DataSchema> map;
-
-        SchemaCacheImpl(@Nonnull Map<@Nonnull Type, @Nonnull DataSchema> map) {
-            this.map = map;
-        }
-
-        @Override
-        public @Nonnull DataSchema get(
-            @Nonnull Type type,
-            @Nonnull Function<? super @Nonnull Type, ? extends @Nonnull DataSchema> loader
-        ) throws ObjectConvertException {
-            return map.computeIfAbsent(type, loader);
-        }
     }
 }
