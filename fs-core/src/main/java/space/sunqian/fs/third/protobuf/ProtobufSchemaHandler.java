@@ -183,7 +183,7 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
         }
 
         @Override
-        public @Nullable Object invokeChecked(
+        public @Nullable Object invokeDirectly(
             @Nullable Object inst, @Nullable Object @Nonnull ... args
         ) throws Throwable {
             clearHandle.invoke(inst);
@@ -207,7 +207,7 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
         }
 
         @Override
-        public @Nullable Object invokeChecked(
+        public @Nullable Object invokeDirectly(
             @Nullable Object inst, @Nullable Object @Nonnull ... args
         ) throws Throwable {
             clearHandle.invoke(inst);

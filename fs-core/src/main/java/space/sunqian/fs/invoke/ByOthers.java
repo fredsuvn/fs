@@ -570,7 +570,7 @@ final class ByOthers {
         INST;
 
         @Override
-        public Object invokeChecked(@Nullable Object inst, Object @Nonnull ... args) {
+        public Object invokeDirectly(@Nullable Object inst, Object @Nonnull ... args) {
             return null;
         }
     }

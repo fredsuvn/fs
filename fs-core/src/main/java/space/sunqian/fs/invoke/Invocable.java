@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
  * scope or other similar entity.
  * <p>
  * This interface provides two equivalent methods: {@link #invoke(Object, Object...)} which declares an unchecked
- * exception, and {@link #invokeChecked(Object, Object...)} which declares a checked exception.
+ * exception, and {@link #invokeDirectly(Object, Object...)} which declares a checked exception.
  * <p>
  * The thread-safety of this interface depends on invocable entity it holds.
  *
@@ -123,24 +123,23 @@ public interface Invocable {
         @Nullable Object inst, Object @Nonnull ... args
     ) throws InvocationException {
         try {
-            return invokeChecked(inst, args);
+            return invokeDirectly(inst, args);
         } catch (Throwable e) {
             throw new InvocationException(e);
         }
     }
 
     /**
-     * Executes this invocable entity with an instance and the invocation arguments. The instance typically represents
-     * the owner object of a method or the scope of '{@code this}', and the arguments typically represent the actual
-     * arguments passed to the method or function. The instance can be {@code null} if this entity is a static method,
-     * constructor, or other similar entity.
-     * <p>
-     * This method directly throws any exception thrown from the underlying invocation.
+     * Executes this invocable entity with an instance and the invocation arguments, and directly throws any exception
+     * thrown from the underlying invocation (if any). The instance typically represents the owner object of a method or
+     * the scope of '{@code this}', and the arguments typically represent the actual arguments passed to the method or
+     * function. The instance can be {@code null} if this entity is a static method, constructor, or other similar
+     * entity.
      *
      * @param inst the instance
      * @param args the invocation arguments
      * @return the invocation result
-     * @throws Throwable directly throws any exception thrown from the underlying invocation
+     * @throws Throwable the exception directly thrown from the underlying invocation
      */
-    Object invokeChecked(@Nullable Object inst, Object @Nonnull ... args) throws Throwable;
+    Object invokeDirectly(@Nullable Object inst, Object @Nonnull ... args) throws Throwable;
 }

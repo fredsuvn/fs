@@ -41,7 +41,7 @@ public class InvokeTest {
     private void testInvokeConstructor(InvocationMode mode) throws Throwable {
         Constructor<?> pub = A.class.getConstructor();
         assertTrue(Invocable.of(pub, mode).invoke(null) instanceof A);
-        assertTrue(Invocable.of(pub, mode).invokeChecked(null) instanceof A);
+        assertTrue(Invocable.of(pub, mode).invokeDirectly(null) instanceof A);
         Constructor<?> pri = A.class.getDeclaredConstructor(int.class);
         assertThrows(InvocationException.class, () -> Invocable.of(pri, mode).invoke(null, 1));
         Constructor<?> err = A.class.getConstructor(long.class);
@@ -51,7 +51,7 @@ public class InvokeTest {
         } catch (InvocationException e) {
             assertTrue(e.getCause() instanceof InvokeTestException);
         }
-        assertThrows(InvokeTestException.class, () -> Invocable.of(err, mode).invokeChecked(null, 1L));
+        assertThrows(InvokeTestException.class, () -> Invocable.of(err, mode).invokeDirectly(null, 1L));
     }
 
     private void testInvokeMethod(InvocationMode mode) throws Throwable {
@@ -59,7 +59,7 @@ public class InvokeTest {
         // instance
         Method pub = A.class.getMethod("instanceMethod", String.class);
         assertEquals(Invocable.of(pub, mode).invoke(a, "aaa"), a.instanceMethod("aaa"));
-        assertEquals(Invocable.of(pub, mode).invokeChecked(a, "aaa"), a.instanceMethod("aaa"));
+        assertEquals(Invocable.of(pub, mode).invokeDirectly(a, "aaa"), a.instanceMethod("aaa"));
         assertThrows(InvocationException.class, () -> Invocable.of(pub, mode).invoke(null, "aaa"));
         Method pri = A.class.getDeclaredMethod("instancePrivateMethod", String.class);
         assertThrows(InvocationException.class, () -> Invocable.of(pri, mode).invoke(a, "aaa"));
@@ -70,7 +70,7 @@ public class InvokeTest {
         } catch (InvocationException e) {
             assertTrue(e.getCause() instanceof InvokeTestException);
         }
-        assertThrows(InvokeTestException.class, () -> Invocable.of(err, mode).invokeChecked(a, "aaa"));
+        assertThrows(InvokeTestException.class, () -> Invocable.of(err, mode).invokeDirectly(a, "aaa"));
         // static
         Method pubStatic = A.class.getMethod("staticMethod", String.class);
         assertEquals(Invocable.of(pubStatic, mode).invoke(null, "aaa"), A.staticMethod("aaa"));
@@ -83,7 +83,7 @@ public class InvokeTest {
         } catch (InvocationException e) {
             assertTrue(e.getCause() instanceof InvokeTestException);
         }
-        assertThrows(InvokeTestException.class, () -> Invocable.of(errStatic, mode).invokeChecked(null, "aaa"));
+        assertThrows(InvokeTestException.class, () -> Invocable.of(errStatic, mode).invokeDirectly(null, "aaa"));
     }
 
     @Test

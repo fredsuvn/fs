@@ -120,7 +120,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invokeWithArguments(args);
         }
     }
@@ -134,7 +134,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invokeWithArguments(InvokeKit.toInstanceArgs(inst, args));
         }
     }
@@ -147,7 +147,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke();
         }
     }
@@ -160,7 +160,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0]);
         }
     }
@@ -173,7 +173,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1]);
         }
     }
@@ -186,7 +186,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2]);
         }
     }
@@ -199,7 +199,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2], args[3]);
         }
     }
@@ -212,7 +212,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4]);
         }
     }
@@ -225,7 +225,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5]);
         }
     }
@@ -238,7 +238,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
         }
     }
@@ -251,7 +251,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
         }
     }
@@ -264,7 +264,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
         }
     }
@@ -277,7 +277,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
         }
     }
@@ -290,7 +290,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10]);
         }
     }
@@ -303,7 +303,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11]);
         }
     }
@@ -316,7 +316,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12]);
         }
     }
@@ -329,7 +329,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13]);
         }
     }
@@ -342,7 +342,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], args[14]);
         }
     }
@@ -355,7 +355,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], args[14], args[15]);
         }
     }
@@ -368,7 +368,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst);
         }
     }
@@ -381,7 +381,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0]);
         }
     }
@@ -394,7 +394,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1]);
         }
     }
@@ -407,7 +407,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1], args[2]);
         }
     }
@@ -420,7 +420,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1], args[2], args[3]);
         }
     }
@@ -433,7 +433,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4]);
         }
     }
@@ -446,7 +446,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5]);
         }
     }
@@ -459,7 +459,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
         }
     }
@@ -472,7 +472,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
         }
     }
@@ -485,7 +485,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
         }
     }
@@ -498,7 +498,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
         }
     }
@@ -511,7 +511,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10]);
         }
     }
@@ -524,7 +524,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11]);
         }
     }
@@ -537,7 +537,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12]);
         }
     }
@@ -550,7 +550,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13]);
         }
     }
@@ -563,7 +563,7 @@ final class ByMethodHandle {
         }
 
         @Override
-        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
+        public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             return methodHandle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], args[14]);
         }
     }

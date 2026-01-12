@@ -20,7 +20,7 @@ final class ByAsm {
     private static final @Nonnull String INVOCABLE_NAME = JvmKit.toInternalName(Invocable.class);
     private static final @Nonnull String @Nonnull [] INTERFACES = new String[]{INVOCABLE_NAME};
     private static final @Nonnull Method INVOKE_CHECKED = Fs.uncheck(
-        () -> Invocable.class.getMethod("invokeChecked", Object.class, Object[].class),
+        () -> Invocable.class.getMethod("invokeDirectly", Object.class, Object[].class),
         InvocationException::new
     );
     private static final @Nonnull String @Nonnull [] INVOKE_CHECKED_EXCEPTIONS = {JvmKit.toInternalName(Throwable.class)};

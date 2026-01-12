@@ -84,7 +84,7 @@ public class JdkProxyMaker implements ProxyMaker {
                     invocable = buildSuperInvoker(method);
                     invocableVar.set(invocable);
                 }
-                return invocable.invokeChecked(proxy, nonnullArgs);
+                return invocable.invokeDirectly(proxy, nonnullArgs);
             }
             @Nullable ProxyInvoker invoker = invokerVar.get();
             if (invoker == null) {
@@ -108,12 +108,12 @@ public class JdkProxyMaker implements ProxyMaker {
 
         @Override
         public @Nullable Object invoke(@Nonnull Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
-            return virtualInvoker.invokeChecked(inst, args);
+            return virtualInvoker.invokeDirectly(inst, args);
         }
 
         @Override
         public @Nullable Object invokeSuper(@Nonnull Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
-            return superInvoker.invokeChecked(inst, args);
+            return superInvoker.invokeDirectly(inst, args);
         }
     }
 
