@@ -71,7 +71,7 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
     }
 
     @Override
-    public @Nullable V get(@Nonnull K key, @Nonnull Function<? super @Nonnull K, ? extends @Nullable V> producer) {
+    public @Nullable V get(@Nonnull K key, @Nonnull Function<? super @Nonnull K, ? extends @Nullable V> loader) {
         clean();
         @Nullable Value<K> cv = cacheMap.get(key);
         if (cv != null) {
@@ -89,7 +89,7 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
                     return old;
                 }
             }
-            @Nullable V newV = producer.apply(key);
+            @Nullable V newV = loader.apply(key);
             value.set(newV);
             return generate(key, maskValue(newV));
         });
@@ -99,7 +99,7 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
     @Override
     public @Nullable Val<V> getVal(
         @Nonnull K key,
-        @Nonnull Function<? super @Nonnull K, ? extends @Nullable Val<? extends @Nullable V>> producer
+        @Nonnull Function<? super @Nonnull K, ? extends @Nullable Val<? extends @Nullable V>> loader
     ) {
         clean();
         @Nullable Value<K> cv = cacheMap.get(key);
@@ -118,7 +118,7 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
                     return old;
                 }
             }
-            @Nullable Val<? extends V> newV = producer.apply(key);
+            @Nullable Val<? extends V> newV = loader.apply(key);
             if (newV == null) {
                 value.set(NULL_VAL);
                 return null;
