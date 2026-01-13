@@ -2,38 +2,42 @@ package tests.object.pool;
 
 import internal.test.AssertTest;
 import internal.test.PrintTest;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
+import space.sunqian.fs.base.value.IntVar;
 import space.sunqian.fs.object.pool.SimplePool;
 
 import java.time.Duration;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class PoolTest implements AssertTest, PrintTest {
 
     @Test
     public void testSimplePool() throws Exception {
-        SimplePool<SimpleObject> pool = SimplePool.newBuilder()
+
+        IntVar counter = IntVar.of(0);
+        IntVar discardCounter = IntVar.of(0);
+        class X {
+        }
+
+        SimplePool<X> pool = SimplePool.newBuilder()
             .coreSize(2)
             .maxSize(5)
-            .idleTimeout(1000)
-            .supplier(SimpleObject::new)
+            .idleTimeout(Duration.ofHours(99))
+            .supplier(() -> {
+                counter.incrementAndGet();
+                return new X();
+            })
+            .discarder(t -> discardCounter.incrementAndGet())
             .build();
+        assertEquals(2, counter.get());
         for (int i = 0; i < 5; i++) {
-            SimpleObject obj = pool.get();
+            X obj = pool.get();
             assertNotNull(obj);
-            obj.discard = true;
-            pool.release(obj);
         }
-    }
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class SimpleObject {
-        private boolean discard = false;
+        assertEquals(5, counter.get());
+        //assertNull();
     }
 }

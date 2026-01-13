@@ -8,10 +8,10 @@ import space.sunqian.fs.Fs;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -38,7 +38,9 @@ public interface SimplePool<T> {
     /**
      * Acquires an object from the pool, or {@code null} if no object is available.
      * <p>
-     * If any exception occurs during the acquisition process, this pool will be closed.
+     * If any exception occurs during the acquisition process, {@link #close()} will be invoked to close this pool and
+     * the {@link #unreleasedObjects()} will return the list of unreleased objects, including idle objects and active
+     * objects.
      *
      * @return the acquired object, or {@code null} if no object is available
      * @throws ObjectPoolException if failed to acquire object
@@ -50,7 +52,9 @@ public interface SimplePool<T> {
      * Releases the given object to the pool. If the object is not acquired from this pool, this method will do
      * nothing.
      * <p>
-     * If any exception occurs during the release process, this pool will be closed.
+     * If any exception occurs during the release process, {@link #close()} will be invoked to close this pool and the
+     * {@link #unreleasedObjects()} will return the list of unreleased objects, including idle objects and active
+     * objects.
      *
      * @param obj the given object to release
      * @throws ObjectPoolException if failed to release object
@@ -58,22 +62,21 @@ public interface SimplePool<T> {
     void release(@Nonnull T obj) throws ObjectPoolException;
 
     /**
-     * Cleans the pool, removing idle objects that have been idle for longer than the idle timeout and over the core
-     * size, adding new objects to the core size if necessary. The active objects will not be cleaned.
+     * Cleans the pool, removing idle objects that idle timeout and over the core size, adding new objects up to the
+     * core size if necessary. The active objects will not be cleaned.
      * <p>
-     * If any exception occurs during the clean process, this pool will be closed.
-     *
-     * @throws ObjectPoolException if failed to clean the pool
+     * If any error occurs during the clean process, {@link #close()} will be invoked to close this pool and the
+     * {@link #unreleasedObjects()} will return the list of unreleased objects, including idle objects and active
+     * objects.
      */
-    void clean() throws ObjectPoolException;
+    void clean();
 
     /**
-     * Releases all objects and closes the pool. If this process is failed, the pool will be in a closed state, and the
-     * {@link #unreleasedObjects()} will return the list of unreleased objects.
-     *
-     * @throws ObjectPoolException if failed to close the pool
+     * Closes the pool. The idle objects will be discarded by configured discarder, and the active objects will not be
+     * discarded. If this process is failed, the pool will be in a closed state, and the {@link #unreleasedObjects()}
+     * will return the list of unreleased objects, including idle objects and active objects.
      */
-    void close() throws ObjectPoolException;
+    void close();
 
     /**
      * Returns whether the pool is closed.
@@ -83,8 +86,8 @@ public interface SimplePool<T> {
     boolean isClosed();
 
     /**
-     * Returns the list of unreleased objects after the pool is closed. If the pool is closed normally, or the pool is
-     * not closed, this method will return an empty list.
+     * Returns the list of unreleased objects after the pool is closed, including idle objects and active objects. If
+     * the pool is not closed, this method will return an empty list.
      *
      * @return the list of unreleased objects after the pool is closed, or an empty list if the pool is not closed
      */
@@ -250,12 +253,11 @@ public interface SimplePool<T> {
             private final @Nonnull Consumer<? super @Nonnull T> discarder;
 
             // objects
-            private final @Nonnull List<@Nonnull Wrapper> objectList = new ArrayList<>();
-            private final @Nonnull Map<@Nonnull T, @Nonnull Wrapper> objectMap = new ConcurrentHashMap<>();
+            private final @Nonnull Map<@Nonnull T, @Nonnull Wrapper> idleMap = new IdentityHashMap<>();
+            private final @Nonnull Map<@Nonnull T, @Nonnull Wrapper> activeMap = new IdentityHashMap<>();
+            private volatile int totalSize;
             // close state
             private volatile boolean closed = false;
-            // unreleased objects
-            private volatile @Nullable List<@Nonnull T> unreleasedObjects;
 
             private SimplePoolImpl(
                 int coreSize, int maxSize, long idleTimeoutMillis,
@@ -274,43 +276,49 @@ public interface SimplePool<T> {
                 try {
                     for (int i = 0; i < coreSize; i++) {
                         T obj = supplier.get();
-                        Wrapper wrapper = new Wrapper(obj);
-                        objectList.add(wrapper);
-                        objectMap.put(obj, wrapper);
+                        Wrapper wrapper = new Wrapper();
+                        idleMap.put(obj, wrapper);
                     }
                 } catch (Exception e) {
                     close();
                 }
+                this.totalSize = idleMap.size();
             }
 
             @Override
-            public synchronized T get() throws ObjectPoolException {
+            public synchronized @Nullable T get() throws ObjectPoolException {
                 checkClosed();
 
-                // get one
-                Iterator<Wrapper> iterator = objectList.iterator();
-                while (iterator.hasNext()) {
-                    Wrapper wrapper = iterator.next();
-                    T obj = wrapper.getObject();
-                    if (!validator.test(obj)) {
-                        destroyObject(obj);
-                        iterator.remove();
-                        objectMap.remove(obj);
+                try {
+                    // get one
+                    Iterator<Map.Entry<T, Wrapper>> idleIt = idleMap.entrySet().iterator();
+                    while (idleIt.hasNext()) {
+                        Map.Entry<T, Wrapper> entry = idleIt.next();
+                        T obj = entry.getKey();
+                        Wrapper wrapper = entry.getValue();
+                        if (!validator.test(obj)) {
+                            discarder.accept(obj);
+                            idleIt.remove();
+                            totalSize--;
+                        } else {
+                            wrapper.active();
+                            activeMap.put(obj, wrapper);
+                            idleIt.remove();
+                            return obj;
+                        }
                     }
-                    if (wrapper.isIdle()) {
-                        wrapper.active();
+
+                    // no idle objects available, try to create a new one
+                    if (totalSize < maxSize) {
+                        T obj = supplier.get();
+                        Wrapper newWrapper = new Wrapper();
+                        activeMap.put(obj, newWrapper);
+                        totalSize++;
                         return obj;
                     }
-                }
-
-                // no idle objects available, try to create a new one
-                if (objectList.size() < maxSize) {
-                    T obj = createObject();
-                    Wrapper newWrapper = new Wrapper(obj);
-                    objectList.add(newWrapper);
-                    objectMap.put(obj, newWrapper);
-                    newWrapper.active();
-                    return obj;
+                } catch (Exception e) {
+                    close();
+                    throw new ObjectPoolException("Failed to get object from pool.", e);
                 }
 
                 // cannot create new object (reached max size), return null
@@ -318,71 +326,77 @@ public interface SimplePool<T> {
             }
 
             @Override
-            public void release(@Nonnull T obj) throws ObjectPoolException {
-                Wrapper wrapper = objectMap.get(obj);
-                if (wrapper != null) {
-                    wrapper.release();
-                }
-            }
-
-            @Override
-            public synchronized void clean() throws ObjectPoolException {
+            public synchronized void release(@Nonnull T obj) throws ObjectPoolException {
                 checkClosed();
 
-                int size = objectList.size();
-                Iterator<Wrapper> iterator = objectList.iterator();
-                while (iterator.hasNext()) {
-                    Wrapper wrapper = iterator.next();
-                    if (wrapper.isActive()) {
+                try {
+                    Wrapper wrapper = activeMap.remove(obj);
+                    if (wrapper == null) {
                         return;
                     }
-                    T obj = wrapper.getObject();
-                    if (!validator.test(obj)) {
-                        destroyObject(obj);
-                        iterator.remove();
-                        objectMap.remove(obj);
-                        size--;
-                    }
-                    if (size > maxSize) {
-                        if (wrapper.isIdleTimeout()) {
-                            destroyObject(obj);
-                            iterator.remove();
-                            objectMap.remove(obj);
-                            size--;
-                        }
-                    }
-                }
-                if (size < coreSize) {
-                    for (int i = 0; i < coreSize; i++) {
-                        T obj = createObject();
-                        Wrapper newWrapper = new Wrapper(obj);
-                        objectList.add(newWrapper);
-                        objectMap.put(obj, newWrapper);
-                    }
+                    wrapper.idle();
+                    idleMap.put(obj, wrapper);
+                } catch (Exception e) {
+                    close();
+                    throw new ObjectPoolException("Failed to release object to pool.", e);
                 }
             }
 
             @Override
-            public synchronized void close() throws ObjectPoolException {
+            public synchronized void clean() {
+                checkClosed();
+
+                try {
+                    Iterator<Map.Entry<T, Wrapper>> idleIt = idleMap.entrySet().iterator();
+                    while (idleIt.hasNext()) {
+                        Map.Entry<T, Wrapper> entry = idleIt.next();
+                        Wrapper wrapper = entry.getValue();
+                        T obj = entry.getKey();
+                        if (!validator.test(obj)) {
+                            discarder.accept(obj);
+                            idleIt.remove();
+                            totalSize--;
+                            continue;
+                        }
+                        if (totalSize > maxSize) {
+                            if (wrapper.isIdleTimeout()) {
+                                discarder.accept(obj);
+                                idleIt.remove();
+                                totalSize--;
+                            }
+                        }
+                    }
+                    if (totalSize < coreSize) {
+                        for (int i = 0; i < coreSize - totalSize; i++) {
+                            T obj = supplier.get();
+                            Wrapper newWrapper = new Wrapper();
+                            idleMap.put(obj, newWrapper);
+                            totalSize++;
+                        }
+                    }
+                } catch (Exception e) {
+                    close();
+                }
+            }
+
+            @Override
+            public synchronized void close() {
                 if (closed) {
                     return;
                 }
-                List<T> failedObjects = null;
-                for (Wrapper wrapper : objectList) {
+
+                Iterator<Map.Entry<T, Wrapper>> idleIt = idleMap.entrySet().iterator();
+                while (idleIt.hasNext()) {
+                    Map.Entry<T, Wrapper> entry = idleIt.next();
+                    T obj = entry.getKey();
                     try {
-                        discarder.accept(wrapper.getObject());
-                    } catch (Exception discardException) {
-                        if (failedObjects == null) {
-                            failedObjects = new ArrayList<>();
-                        }
-                        failedObjects.add(wrapper.getObject());
+                        discarder.accept(obj);
+                        idleIt.remove();
+                        totalSize--;
+                    } catch (Exception e) {
+                        // do nothing
                     }
                 }
-                if (failedObjects != null) {
-                    this.unreleasedObjects = failedObjects;
-                }
-                objectList.clear();
-                objectMap.clear();
                 closed = true;
             }
 
@@ -392,24 +406,29 @@ public interface SimplePool<T> {
             }
 
             @Override
-            public @Nonnull List<T> unreleasedObjects() {
-                List<T> list = unreleasedObjects;
-                return list == null ? Collections.emptyList() : list;
+            public synchronized @Nonnull List<T> unreleasedObjects() {
+                if (closed) {
+                    return Collections.emptyList();
+                }
+                List<T> list = new ArrayList<>(totalSize);
+                list.addAll(idleMap.keySet());
+                list.addAll(activeMap.keySet());
+                return list;
             }
 
             @Override
             public int size() {
-                return objectList.size();
+                return totalSize;
             }
 
             @Override
             public synchronized int idleSize() {
-                return (int) objectList.stream().filter(Wrapper::isIdle).count();
+                return idleMap.size();
             }
 
             @Override
             public synchronized int activeSize() {
-                return (int) objectList.stream().filter(Wrapper::isActive).count();
+                return activeMap.size();
             }
 
             private void checkClosed() throws ObjectPoolException {
@@ -418,51 +437,16 @@ public interface SimplePool<T> {
                 }
             }
 
-            private T createObject() throws ObjectPoolException {
-                try {
-                    return supplier.get();
-                } catch (Exception e) {
-                    close();
-                    throw new ObjectPoolException("Failed to create new object.", e);
-                }
-            }
-
-            private void destroyObject(T obj) {
-                try {
-                    discarder.accept(obj);
-                } catch (Exception e) {
-                    close();
-                }
-            }
-
             private final class Wrapper {
-                private final @Nonnull T object;
-                private volatile long lastReleaseTime;
 
-                Wrapper(@Nonnull T object) {
-                    this.object = object;
-                    this.lastReleaseTime = System.currentTimeMillis();
-                }
-
-                @Nonnull
-                public T getObject() {
-                    return object;
-                }
+                private volatile long lastReleaseTime = System.currentTimeMillis();
 
                 public void active() {
                     lastReleaseTime = -1;
                 }
 
-                public void release() {
+                public void idle() {
                     lastReleaseTime = System.currentTimeMillis();
-                }
-
-                public boolean isActive() {
-                    return lastReleaseTime < 0;
-                }
-
-                public boolean isIdle() {
-                    return lastReleaseTime >= 0;
                 }
 
                 public boolean isIdleTimeout() {
