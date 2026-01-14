@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
+import space.sunqian.fs.object.ObjectCreator;
 import space.sunqian.fs.object.ObjectCreatorProvider;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
@@ -442,6 +443,15 @@ public class ProtobufTest implements PrintTest {
         ObjectSchemaParser parser = ObjectSchemaParser
             .defaultParser()
             .withFirstHandler(new ProtobufSchemaHandler());
+        {
+            // type
+            ObjectCreator messageCreator = provider.creatorForType(PbSimple.class);
+            assertEquals(PbSimple.class, messageCreator.targetType());
+            assertEquals(PbSimple.Builder.class, messageCreator.builderType());
+            ObjectCreator builderCreator = provider.creatorForType(PbSimple.Builder.class);
+            assertEquals(PbSimple.Builder.class, builderCreator.targetType());
+            assertEquals(PbSimple.Builder.class, builderCreator.builderType());
+        }
         {
             // java to pb
             JvSimple jvSimple = new JvSimple("123", 456);

@@ -95,6 +95,19 @@ public class TypeKit {
     }
 
     /**
+     * Returns the wrapper type if the given type is primitive, else return the given type itself.
+     *
+     * @param type the given type
+     * @return the wrapper type if the given type is primitive, else return the given type itself
+     */
+    public static @Nonnull Type wrapperType(@Nonnull Type type) {
+        if (type instanceof Class<?>) {
+            return ClassKit.wrapperClass((Class<?>) type);
+        }
+        return type;
+    }
+
+    /**
      * Returns the last name of the given type. The last name is sub-string after last dot(.) For example: the last name
      * of {@code java.lang.String} is {@code String}.
      *

@@ -180,8 +180,8 @@ tasks.test {
     excludeTags("J17Only")
   }
   javaLauncher = javaToolchains.launcherFor {
-    //languageVersion = javaVersionFrom
-    languageVersion = javaVersionTo
+    languageVersion = javaVersionFrom
+    //languageVersion = javaVersionTo
   }
   failOnNoDiscoveredTests = false
   reports {

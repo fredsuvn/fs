@@ -178,6 +178,23 @@ public class TypeTest {
     }
 
     @Test
+    public void testWrapper() throws Exception {
+        assertEquals(Boolean.class, TypeKit.wrapperType(boolean.class));
+        assertEquals(Byte.class, TypeKit.wrapperType(byte.class));
+        assertEquals(Short.class, TypeKit.wrapperType(short.class));
+        assertEquals(Character.class, TypeKit.wrapperType(char.class));
+        assertEquals(Integer.class, TypeKit.wrapperType(int.class));
+        assertEquals(Long.class, TypeKit.wrapperType(long.class));
+        assertEquals(Float.class, TypeKit.wrapperType(float.class));
+        assertEquals(Double.class, TypeKit.wrapperType(double.class));
+        assertEquals(Void.class, TypeKit.wrapperType(void.class));
+        assertEquals(Object.class, TypeKit.wrapperType(Object.class));
+        class X<T> {}
+        Type type = X.class.getTypeParameters()[0];
+        assertEquals(type, TypeKit.wrapperType(type));
+    }
+
+    @Test
     public void testRuntimeClass() throws Exception {
         assertEquals(int.class, TypeKit.toRuntimeClass(int.class));
         class X<T extends String, U extends List<? extends String>> {

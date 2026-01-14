@@ -1,5 +1,6 @@
 package tests.jdbc;
 
+import internal.test.J17Only;
 import lombok.Data;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,7 +19,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-//@J17Only
+@J17Only
 public class JdbcTest {
 
     private static final String DB_DRIVER = "org.h2.Driver";

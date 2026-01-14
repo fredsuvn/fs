@@ -18,7 +18,6 @@ import space.sunqian.fs.object.ObjectCreatorProvider;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.PropertiesMapper;
-import space.sunqian.fs.reflect.ClassKit;
 import space.sunqian.fs.reflect.ReflectionException;
 import space.sunqian.fs.reflect.TypeKit;
 
@@ -584,18 +583,12 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             if (src instanceof String) {
                 return NumKit.toNumber((String) src, target);
             }
-            if (
-                Number.class.isAssignableFrom(ClassKit.wrapperClass((Class<?>) srcType))
-                    || src instanceof Number
-            ) {
-                Number srcNum = (Number) src;
-                return NumKit.toNumber(srcNum, target);
-            }
+            // date to long
             if (target.equals(Long.class) || target.equals(long.class)) {
-                if (srcType.equals(Date.class)) {
+                if (src instanceof Date) {
                     return ((Date) src).getTime();
                 }
-                if (TemporalAccessor.class.isAssignableFrom((Class<?>) srcType)) {
+                if (src instanceof TemporalAccessor) {
                     TemporalAccessor ta = (TemporalAccessor) src;
                     DateFormatter dateFormatter = Fs.nonnull(
                         Option.findValue(ConvertOption.DATE_FORMATTER, options),
@@ -604,6 +597,10 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                     Date date = dateFormatter.convert(ta, Date.class);
                     return date.getTime();
                 }
+            }
+            if (src instanceof Number) {
+                Number srcNum = (Number) src;
+                return NumKit.toNumber(srcNum, target);
             }
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
