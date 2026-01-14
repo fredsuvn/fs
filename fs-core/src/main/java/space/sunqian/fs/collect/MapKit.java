@@ -55,8 +55,8 @@ public class MapKit {
      * <p>
      * The behavior of this method is equivalent to:
      * <pre>{@code
-     *  return Collections.unmodifiableMap(linkedHashMap(array));
-     *  }</pre>
+     * return Collections.unmodifiableMap(linkedHashMap(array));
+     * }</pre>
      *
      * @param array the given array
      * @param <K>   the key type

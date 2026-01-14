@@ -310,18 +310,18 @@ public class TypeKit {
      * Returns a map contains the mapping of type parameters for the given type, the key is type parameter, and the
      * value is the actual type argument or inherited type parameter. For example, these types:
      * <pre>{@code
-     *     class X extends Y<Integer, Long>
-     *     class Y<K, V> implements Z<Float, Double, V>
-     *     interface Z<T, U, R>
+     * class X extends Y<Integer, Long>
+     * class Y<K, V> implements Z<Float, Double, V>
+     * interface Z<T, U, R>
      * }</pre>
      * <p>
      * The result of {@code resolveTypeParameterMapping(X.class)} will be:
      * <pre>{@code
-     *     T -> Float
-     *     U -> Double
-     *     R -> V
-     *     K -> Integer
-     *     V -> Long
+     * T -> Float
+     * U -> Double
+     * R -> V
+     * K -> Integer
+     * V -> Long
      * }</pre>
      *
      * @param type the given type

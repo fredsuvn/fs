@@ -274,9 +274,9 @@ public interface CharProcessor {
     /**
      * Starts the processing, and returns the result as a new array. This method is equivalent to:
      * <pre>{@code
-     *     CharsBuilder builder = new CharsBuilder();
-     *     processeTo(builder);
-     *     return builder.toCharArray();
+     * CharsBuilder builder = new CharsBuilder();
+     * processeTo(builder);
+     * return builder.toCharArray();
      * }</pre>
      * <p>
      * The position of the data source, if any, will be incremented by the actual read number.
@@ -296,9 +296,9 @@ public interface CharProcessor {
     /**
      * Starts the processing, and returns the result as a new buffer. This method is equivalent to:
      * <pre>{@code
-     *     CharsBuilder builder = new CharsBuilder();
-     *     processeTo(builder);
-     *     return builder.toCharBuffer();
+     * CharsBuilder builder = new CharsBuilder();
+     * processeTo(builder);
+     * return builder.toCharBuffer();
      * }</pre>
      * <p>
      * The position of the data source, if any, will be incremented by the actual read number.
@@ -318,7 +318,7 @@ public interface CharProcessor {
     /**
      * Starts the processing, and returns the result as a new string. This method is equivalent to:
      * <pre>{@code
-     *     return new String(toCharArray());
+     * return new String(toCharArray());
      * }</pre>
      * <p>
      * The position of the data source, if any, will be incremented by the actual read number.

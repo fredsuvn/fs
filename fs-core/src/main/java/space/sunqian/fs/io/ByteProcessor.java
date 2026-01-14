@@ -267,9 +267,9 @@ public interface ByteProcessor {
     /**
      * Starts the processing, and returns the result as a new array. This method is equivalent to:
      * <pre>{@code
-     *     BytesBuilder builder = new BytesBuilder();
-     *     processeTo(builder);
-     *     return builder.toByteArray();
+     * BytesBuilder builder = new BytesBuilder();
+     * processeTo(builder);
+     * return builder.toByteArray();
      * }</pre>
      * <p>
      * The position of the data source, if any, will be incremented by the actual read number.
@@ -289,9 +289,9 @@ public interface ByteProcessor {
     /**
      * Starts the processing, and returns the result as a new buffer. This method is equivalent to:
      * <pre>{@code
-     *     BytesBuilder builder = new BytesBuilder();
-     *     processeTo(builder);
-     *     return builder.toByteBuffer();
+     * BytesBuilder builder = new BytesBuilder();
+     * processeTo(builder);
+     * return builder.toByteBuffer();
      * }</pre>
      * <p>
      * The position of the data source, if any, will be incremented by the actual read number.
@@ -312,7 +312,7 @@ public interface ByteProcessor {
      * Starts the processing, and returns the result as a new string with {@link CharsKit#defaultCharset()}. This method
      * is equivalent to:
      * <pre>{@code
-     *     return new String(toByteArray(), CharsKit.defaultCharset());
+     * return new String(toByteArray(), CharsKit.defaultCharset());
      * }</pre>
      * <p>
      * The position of the data source, if any, will be incremented by the actual read number.
@@ -331,7 +331,7 @@ public interface ByteProcessor {
      * Starts the processing, and returns the result as a new string with the specified charset. This method is
      * equivalent to:
      * <pre>{@code
-     *     return new String(toByteArray(), charset);
+     * return new String(toByteArray(), charset);
      * }</pre>
      * <p>
      * The position of the data source, if any, will be incremented by the actual read number.

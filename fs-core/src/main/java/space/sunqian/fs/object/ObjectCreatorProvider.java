@@ -47,7 +47,7 @@ public interface ObjectCreatorProvider {
      * Creates and returns a new {@link ObjectCreatorProvider} with a cache function based on a
      * {@link ConcurrentHashMap} and the given handlers. This method is equivalent to:
      * <pre>{@code
-     *     newProvider(CacheFunction.ofMap(new ConcurrentHashMap<>()), ListKit.list(handlers));
+     * newProvider(CacheFunction.ofMap(new ConcurrentHashMap<>()), ListKit.list(handlers));
      * }</pre>
      *
      * @param handlers the given handlers

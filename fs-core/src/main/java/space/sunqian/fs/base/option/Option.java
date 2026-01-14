@@ -11,15 +11,15 @@ import java.util.Objects;
 /**
  * This interface represents an option with a key and value. For example:
  * <pre>{@code
- *     //declaration:
- *     public void start(Option<?, ?>... options){...}
+ * //declaration:
+ * public void start(Option<?, ?>... options){...}
  *
- *     //usage:
- *     start(
- *         Option.of("server", null),
- *         Option.of("Xms", "1G"),
- *         Option.of("Xmx", "2G")
- *     );
+ * //usage:
+ * start(
+ *     Option.of("server", null),
+ *     Option.of("Xms", "1G"),
+ *     Option.of("Xmx", "2G")
+ * );
  * }</pre>
  *
  * @param <K> the key type

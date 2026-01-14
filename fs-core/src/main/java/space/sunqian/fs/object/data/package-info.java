@@ -28,8 +28,6 @@
  *     <li>{@link space.sunqian.fs.object.data.handlers.SimpleBeanSchemaHandler}</li>
  *     <li>{@link space.sunqian.fs.object.data.MapSchema}</li>
  *     <li>{@link space.sunqian.fs.object.data.MapSchemaParser}</li>
- *     <li>{@link space.sunqian.fs.object.data.ObjectBuilder}</li>
- *     <li>{@link space.sunqian.fs.object.data.ObjectBuilderProvider}</li>
  * </ul>
  * And utilities:
  * <ul>

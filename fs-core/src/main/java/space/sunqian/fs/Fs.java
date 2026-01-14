@@ -918,8 +918,8 @@ public class Fs {
      * <p>
      * The behavior of this method is equivalent to:
      * <pre>{@code
-     *  return Collections.unmodifiableMap(linkedHashMap(array));
-     *  }</pre>
+     * return Collections.unmodifiableMap(linkedHashMap(array));
+     * }</pre>
      * <p>
      * This method is a shortcut to the {@link MapKit#map(Object[])}.
      *
