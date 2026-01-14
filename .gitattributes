@@ -1,31 +1,30 @@
-# text to crlf
-# * text=auto
-* text eol=crlf
+* text=auto
+# * text eol=crlf
 
+*.txt eol=crlf
+*.java eol=crlf
+*.js eol=crlf
+*.html eol=crlf
+*.css eol=crlf
+*.svg eol=crlf
+*.xml eol=crlf
+*.kts eol=crlf
+*.bat eol=crlf
+*.gradle eol=crlf
+*.kts eol=crlf
+*.kt eol=crlf
+
+# shell scripts:
 *.sh eol=lf
 
-# text files:
-*.txt text
-*.java text
-*.js text
-*.html text
-*.css text
-*.svg text
-*.xml text
-*.kts text
-*.bat text
-*.gradle text
-*.kts text
-*.kt text
-
 # config files:
-*.json text
-*.yaml text
-*.yml text
-*.properties text
-*.md text
-*.adoc text
-*.toml text
+*.json eol=crlf
+*.yaml eol=crlf
+*.yml eol=crlf
+*.properties eol=crlf
+*.md eol=crlf
+*.adoc eol=crlf
+*.toml eol=crlf
 
 # binary files:
 *.class binary
