@@ -6,12 +6,7 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -62,14 +57,16 @@ public interface SimplePool<T> {
     void release(@Nonnull T obj) throws ObjectPoolException;
 
     /**
-     * Cleans the pool, removing idle objects that idle timeout and over the core size, adding new objects up to the
-     * core size if necessary. The active objects will not be cleaned.
+     * Cleans the pool, removing idle objects that idle timeout or invalidated by validator, or over the core size,
+     * adding new objects up to the core size if necessary. The active objects will not be cleaned.
      * <p>
-     * If any error occurs during the clean process, {@link #close()} will be invoked to close this pool and the
+     * If any exception occurs during the clean process, {@link #close()} will be invoked to close this pool and the
      * {@link #unreleasedObjects()} will return the list of unreleased objects, including idle objects and active
      * objects.
+     *
+     * @throws ObjectPoolException if any exception occurs during the clean process
      */
-    void clean();
+    void clean() throws ObjectPoolException;
 
     /**
      * Closes the pool. The idle objects will be discarded by configured discarder, and the active objects will not be
@@ -126,7 +123,7 @@ public interface SimplePool<T> {
         // size:
 
         private int coreSize = 1;
-        private int maxSize = coreSize;
+        private int maxSize = -1;
         private long idleTimeoutMillis = 60000;
 
         // actions:
@@ -240,219 +237,9 @@ public interface SimplePool<T> {
             if (supplier == null) {
                 throw new IllegalArgumentException("Supplier must be set.");
             }
-            return Fs.as(new SimplePoolImpl<>(coreSize, maxSize, idleTimeoutMillis, supplier, validator, discarder));
-        }
-
-        private static final class SimplePoolImpl<T> implements SimplePool<T> {
-
-            private final int coreSize;
-            private final int maxSize;
-            private final long idleTimeoutMillis;
-            private final @Nonnull Supplier<? extends @Nonnull T> supplier;
-            private final @Nonnull Predicate<? super @Nonnull T> validator;
-            private final @Nonnull Consumer<? super @Nonnull T> discarder;
-
-            // objects
-            private final @Nonnull Map<@Nonnull T, @Nonnull Wrapper> idleMap = new IdentityHashMap<>();
-            private final @Nonnull Map<@Nonnull T, @Nonnull Wrapper> activeMap = new IdentityHashMap<>();
-            private volatile int totalSize;
-            // close state
-            private volatile boolean closed = false;
-
-            private SimplePoolImpl(
-                int coreSize, int maxSize, long idleTimeoutMillis,
-                @Nonnull Supplier<? extends @Nonnull T> supplier,
-                @Nonnull Predicate<? super @Nonnull T> validator,
-                @Nonnull Consumer<? super @Nonnull T> discarder
-            ) throws ObjectPoolException {
-                this.coreSize = coreSize;
-                this.maxSize = maxSize;
-                this.idleTimeoutMillis = idleTimeoutMillis;
-                this.supplier = supplier;
-                this.validator = validator;
-                this.discarder = discarder;
-
-                // initialize core objects
-                try {
-                    for (int i = 0; i < coreSize; i++) {
-                        T obj = supplier.get();
-                        Wrapper wrapper = new Wrapper();
-                        idleMap.put(obj, wrapper);
-                    }
-                } catch (Exception e) {
-                    close();
-                }
-                this.totalSize = idleMap.size();
-            }
-
-            @Override
-            public synchronized @Nullable T get() throws ObjectPoolException {
-                checkClosed();
-
-                try {
-                    // get one
-                    Iterator<Map.Entry<T, Wrapper>> idleIt = idleMap.entrySet().iterator();
-                    while (idleIt.hasNext()) {
-                        Map.Entry<T, Wrapper> entry = idleIt.next();
-                        T obj = entry.getKey();
-                        Wrapper wrapper = entry.getValue();
-                        if (!validator.test(obj)) {
-                            discarder.accept(obj);
-                            idleIt.remove();
-                            totalSize--;
-                        } else {
-                            wrapper.active();
-                            activeMap.put(obj, wrapper);
-                            idleIt.remove();
-                            return obj;
-                        }
-                    }
-
-                    // no idle objects available, try to create a new one
-                    if (totalSize < maxSize) {
-                        T obj = supplier.get();
-                        Wrapper newWrapper = new Wrapper();
-                        activeMap.put(obj, newWrapper);
-                        totalSize++;
-                        return obj;
-                    }
-                } catch (Exception e) {
-                    close();
-                    throw new ObjectPoolException("Failed to get object from pool.", e);
-                }
-
-                // cannot create new object (reached max size), return null
-                return null;
-            }
-
-            @Override
-            public synchronized void release(@Nonnull T obj) throws ObjectPoolException {
-                checkClosed();
-
-                try {
-                    Wrapper wrapper = activeMap.remove(obj);
-                    if (wrapper == null) {
-                        return;
-                    }
-                    wrapper.idle();
-                    idleMap.put(obj, wrapper);
-                } catch (Exception e) {
-                    close();
-                    throw new ObjectPoolException("Failed to release object to pool.", e);
-                }
-            }
-
-            @Override
-            public synchronized void clean() {
-                checkClosed();
-
-                try {
-                    Iterator<Map.Entry<T, Wrapper>> idleIt = idleMap.entrySet().iterator();
-                    while (idleIt.hasNext()) {
-                        Map.Entry<T, Wrapper> entry = idleIt.next();
-                        Wrapper wrapper = entry.getValue();
-                        T obj = entry.getKey();
-                        if (!validator.test(obj)) {
-                            discarder.accept(obj);
-                            idleIt.remove();
-                            totalSize--;
-                            continue;
-                        }
-                        if (totalSize > maxSize) {
-                            if (wrapper.isIdleTimeout()) {
-                                discarder.accept(obj);
-                                idleIt.remove();
-                                totalSize--;
-                            }
-                        }
-                    }
-                    if (totalSize < coreSize) {
-                        for (int i = 0; i < coreSize - totalSize; i++) {
-                            T obj = supplier.get();
-                            Wrapper newWrapper = new Wrapper();
-                            idleMap.put(obj, newWrapper);
-                            totalSize++;
-                        }
-                    }
-                } catch (Exception e) {
-                    close();
-                }
-            }
-
-            @Override
-            public synchronized void close() {
-                if (closed) {
-                    return;
-                }
-
-                Iterator<Map.Entry<T, Wrapper>> idleIt = idleMap.entrySet().iterator();
-                while (idleIt.hasNext()) {
-                    Map.Entry<T, Wrapper> entry = idleIt.next();
-                    T obj = entry.getKey();
-                    try {
-                        discarder.accept(obj);
-                        idleIt.remove();
-                        totalSize--;
-                    } catch (Exception e) {
-                        // do nothing
-                    }
-                }
-                closed = true;
-            }
-
-            @Override
-            public boolean isClosed() {
-                return closed;
-            }
-
-            @Override
-            public synchronized @Nonnull List<T> unreleasedObjects() {
-                if (closed) {
-                    return Collections.emptyList();
-                }
-                List<T> list = new ArrayList<>(totalSize);
-                list.addAll(idleMap.keySet());
-                list.addAll(activeMap.keySet());
-                return list;
-            }
-
-            @Override
-            public int size() {
-                return totalSize;
-            }
-
-            @Override
-            public synchronized int idleSize() {
-                return idleMap.size();
-            }
-
-            @Override
-            public synchronized int activeSize() {
-                return activeMap.size();
-            }
-
-            private void checkClosed() throws ObjectPoolException {
-                if (closed) {
-                    throw new ObjectPoolException("Pool is closed.");
-                }
-            }
-
-            private final class Wrapper {
-
-                private volatile long lastReleaseTime = System.currentTimeMillis();
-
-                public void active() {
-                    lastReleaseTime = -1;
-                }
-
-                public void idle() {
-                    lastReleaseTime = System.currentTimeMillis();
-                }
-
-                public boolean isIdleTimeout() {
-                    return lastReleaseTime + idleTimeoutMillis < System.currentTimeMillis();
-                }
-            }
+            return Fs.as(new SimplePoolImpl<>(
+                coreSize, Math.max(coreSize, maxSize), idleTimeoutMillis, supplier, validator, discarder
+            ));
         }
     }
 }
