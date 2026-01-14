@@ -367,4 +367,23 @@ public class PoolTest implements AssertTest, PrintTest {
             });
         }
     }
+
+    @Test
+    public void testException() {
+        {
+            // ObjectPoolException
+            assertThrows(ObjectPoolException.class, () -> {
+                throw new ObjectPoolException();
+            });
+            assertThrows(ObjectPoolException.class, () -> {
+                throw new ObjectPoolException("");
+            });
+            assertThrows(ObjectPoolException.class, () -> {
+                throw new ObjectPoolException("", new RuntimeException());
+            });
+            assertThrows(ObjectPoolException.class, () -> {
+                throw new ObjectPoolException(new RuntimeException());
+            });
+        }
+    }
 }
