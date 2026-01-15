@@ -1,12 +1,31 @@
 package space.sunqian.fs.jdbc;
 
+import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
+import java.util.List;
 
 public interface PreparedSql {
+
+    /**
+     * Returns the SQL statement to be executed.
+     *
+     * @return the SQL statement to be executed
+     */
+    @Nonnull
+    String sql();
+
+    /**
+     * Returns the parameters to be bound to the SQL statement.
+     *
+     * @return the parameters to be bound to the SQL statement
+     */
+    @Nonnull
+    @Immutable
+    List<Object> parameters();
 
     /**
      * Executes the SQL query and returns the query object as a {@link SqlQuery}.
