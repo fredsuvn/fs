@@ -1,4 +1,4 @@
-package space.sunqian.fs.object.data;
+package space.sunqian.fs.object.schema;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -7,11 +7,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Utilities for data object.
+ * Utilities for data object schema.
  *
  * @author sunqian
  */
-public class DataObjectKit {
+public class DataSchemaKit {
 
     /**
      * The implementation of {@link ObjectSchema#equals(Object)}, and it works in conjunction with
@@ -149,6 +149,6 @@ public class DataObjectKit {
         return mapSchema.type().getTypeName();
     }
 
-    private DataObjectKit() {
+    private DataSchemaKit() {
     }
 }

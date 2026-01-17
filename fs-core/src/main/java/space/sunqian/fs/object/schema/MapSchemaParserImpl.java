@@ -1,4 +1,4 @@
-package space.sunqian.fs.object.data;
+package space.sunqian.fs.object.schema;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.reflect.ReflectionException;
@@ -13,11 +13,11 @@ enum MapSchemaParserImpl implements MapSchemaParser {
     INST;
 
     @Override
-    public @Nonnull MapSchema parse(@Nonnull Type type) throws DataObjectException {
+    public @Nonnull MapSchema parse(@Nonnull Type type) throws DataSchemaException {
         try {
             return new MapSchemaImpl(type);
         } catch (Exception e) {
-            throw new DataObjectException(e);
+            throw new DataSchemaException(e);
         }
     }
 
@@ -68,17 +68,17 @@ enum MapSchemaParserImpl implements MapSchemaParser {
         @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
         @Override
         public boolean equals(Object o) {
-            return DataObjectKit.equals(this, o);
+            return DataSchemaKit.equals(this, o);
         }
 
         @Override
         public int hashCode() {
-            return DataObjectKit.hashCode(this);
+            return DataSchemaKit.hashCode(this);
         }
 
         @Override
         public @Nonnull String toString() {
-            return DataObjectKit.toString(this);
+            return DataSchemaKit.toString(this);
         }
     }
 }

@@ -1,9 +1,9 @@
-package space.sunqian.fs.object.data;
+package space.sunqian.fs.object.schema;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.FsLoader;
-import space.sunqian.fs.object.data.handlers.SimpleBeanSchemaHandler;
+import space.sunqian.fs.object.schema.handlers.SimpleBeanSchemaHandler;
 import space.sunqian.fs.third.ThirdKit;
 
 import java.util.List;
@@ -20,7 +20,7 @@ final class ObjectSchemaParserImpl implements ObjectSchemaParser, ObjectSchemaPa
 
     private final @Nonnull List<ObjectSchemaParser.@Nonnull Handler> handlers;
 
-    ObjectSchemaParserImpl(@RetainedParam List<ObjectSchemaParser.@Nonnull Handler> handlers) {
+    ObjectSchemaParserImpl(@Nonnull @RetainedParam List<ObjectSchemaParser.@Nonnull Handler> handlers) {
         this.handlers = handlers;
     }
 

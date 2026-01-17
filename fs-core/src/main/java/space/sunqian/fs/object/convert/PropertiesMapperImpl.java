@@ -6,12 +6,12 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.cache.CacheFunction;
 import space.sunqian.fs.collect.ArrayKit;
-import space.sunqian.fs.object.data.DataSchema;
-import space.sunqian.fs.object.data.MapSchema;
-import space.sunqian.fs.object.data.MapSchemaParser;
-import space.sunqian.fs.object.data.ObjectProperty;
-import space.sunqian.fs.object.data.ObjectSchema;
-import space.sunqian.fs.object.data.ObjectSchemaParser;
+import space.sunqian.fs.object.schema.DataSchema;
+import space.sunqian.fs.object.schema.MapSchema;
+import space.sunqian.fs.object.schema.MapSchemaParser;
+import space.sunqian.fs.object.schema.ObjectProperty;
+import space.sunqian.fs.object.schema.ObjectSchema;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
 import java.lang.reflect.Type;
 import java.util.Map;

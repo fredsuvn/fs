@@ -16,10 +16,10 @@ import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.PropertiesMapper;
-import space.sunqian.fs.object.data.MapSchemaParser;
-import space.sunqian.fs.object.data.ObjectProperty;
-import space.sunqian.fs.object.data.ObjectSchema;
-import space.sunqian.fs.object.data.ObjectSchemaParser;
+import space.sunqian.fs.object.schema.MapSchemaParser;
+import space.sunqian.fs.object.schema.ObjectProperty;
+import space.sunqian.fs.object.schema.ObjectSchema;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.reflect.TypeRef;
 import tests.utils.ErrorMap;
 

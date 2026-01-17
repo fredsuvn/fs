@@ -1,12 +1,12 @@
-package space.sunqian.fs.object.data.handlers;
+package space.sunqian.fs.object.schema.handlers;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.data.ObjectPropertyBase;
-import space.sunqian.fs.object.data.ObjectSchemaParser;
+import space.sunqian.fs.object.schema.ObjectPropertyBase;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.reflect.TypeKit;
 
 import java.lang.reflect.Field;

@@ -3,7 +3,7 @@ package space.sunqian.fs.object.convert;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.option.Option;
-import space.sunqian.fs.object.data.DataSchema;
+import space.sunqian.fs.object.schema.DataSchema;
 
 import java.util.Map;
 

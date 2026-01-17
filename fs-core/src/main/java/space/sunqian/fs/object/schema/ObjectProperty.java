@@ -1,4 +1,4 @@
-package space.sunqian.fs.object.data;
+package space.sunqian.fs.object.schema;
 
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
@@ -47,12 +47,12 @@ public interface ObjectProperty extends ObjectPropertyBase {
      *
      * @param inst the specified instance
      * @return the property value of the specified instance
-     * @throws DataObjectException if this property is not readable
+     * @throws DataSchemaException if this property is not readable
      */
-    default @Nullable Object getValue(@Nonnull Object inst) throws DataObjectException {
+    default @Nullable Object getValue(@Nonnull Object inst) throws DataSchemaException {
         Invocable getter = getter();
         if (getter == null) {
-            throw new DataObjectException("The property is not readable: " + name() + ".");
+            throw new DataSchemaException("The property is not readable: " + name() + ".");
         }
         return getter.invoke(inst);
     }
@@ -62,12 +62,12 @@ public interface ObjectProperty extends ObjectPropertyBase {
      *
      * @param inst  the specified instance
      * @param value the property value
-     * @throws DataObjectException if this property is not writable
+     * @throws DataSchemaException if this property is not writable
      */
-    default void setValue(@Nonnull Object inst, @Nullable Object value) throws DataObjectException {
+    default void setValue(@Nonnull Object inst, @Nullable Object value) throws DataSchemaException {
         Invocable setter = setter();
         if (setter == null) {
-            throw new DataObjectException("The property is not writable: " + name() + ".");
+            throw new DataSchemaException("The property is not writable: " + name() + ".");
         }
         setter.invoke(inst, value);
     }

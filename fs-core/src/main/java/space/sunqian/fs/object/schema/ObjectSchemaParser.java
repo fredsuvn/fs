@@ -1,11 +1,11 @@
-package space.sunqian.fs.object.data;
+package space.sunqian.fs.object.schema;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.collect.ListKit;
-import space.sunqian.fs.object.data.handlers.AbstractObjectSchemaHandler;
-import space.sunqian.fs.object.data.handlers.SimpleBeanSchemaHandler;
+import space.sunqian.fs.object.schema.handlers.AbstractObjectSchemaHandler;
+import space.sunqian.fs.object.schema.handlers.SimpleBeanSchemaHandler;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -70,9 +70,9 @@ public interface ObjectSchemaParser {
      *
      * @param type the given type
      * @return the parsed {@link ObjectSchema}
-     * @throws DataObjectException if any problem occurs
+     * @throws DataSchemaException if any problem occurs
      */
-    default @Nonnull ObjectSchema parse(@Nonnull Type type) throws DataObjectException {
+    default @Nonnull ObjectSchema parse(@Nonnull Type type) throws DataSchemaException {
         try {
             ObjectSchemaBuilder builder = new ObjectSchemaBuilder(type);
             for (Handler handler : handlers()) {
@@ -82,7 +82,7 @@ public interface ObjectSchemaParser {
             }
             return builder.build(this);
         } catch (Exception e) {
-            throw new DataObjectException(type, e);
+            throw new DataSchemaException(type, e);
         }
     }
 

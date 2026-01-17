@@ -3,9 +3,9 @@ package space.sunqian.fs.object.convert;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.cache.CacheFunction;
-import space.sunqian.fs.object.data.DataSchema;
-import space.sunqian.fs.object.data.MapSchema;
-import space.sunqian.fs.object.data.ObjectSchema;
+import space.sunqian.fs.object.schema.DataSchema;
+import space.sunqian.fs.object.schema.MapSchema;
+import space.sunqian.fs.object.schema.ObjectSchema;
 
 import java.lang.reflect.Type;
 import java.util.Map;

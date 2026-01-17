@@ -25,7 +25,7 @@ import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.PropertiesMapper;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
-import space.sunqian.fs.object.data.ObjectSchema;
+import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;

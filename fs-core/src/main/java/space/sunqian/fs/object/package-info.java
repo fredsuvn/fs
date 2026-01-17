@@ -12,7 +12,7 @@
  * <p>
  * And its subpackages provide specific object related supports;
  * <ul>
- *     <li>{@link space.sunqian.fs.object.data}: Parses and manipulates objects as data entities;</li>
+ *     <li>{@link space.sunqian.fs.object.schema}: Parses and manipulates data object schemas;</li>
  *     <li>{@link space.sunqian.fs.object.convert}: Converts objects into different types;</li>
  * </ul>
  */

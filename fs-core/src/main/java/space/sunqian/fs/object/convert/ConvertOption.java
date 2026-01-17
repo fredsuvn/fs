@@ -7,8 +7,8 @@ import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.ObjectCreatorProvider;
-import space.sunqian.fs.object.data.MapSchemaParser;
-import space.sunqian.fs.object.data.ObjectSchemaParser;
+import space.sunqian.fs.object.schema.MapSchemaParser;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
 import java.nio.charset.Charset;
 

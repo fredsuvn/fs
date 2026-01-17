@@ -1,4 +1,4 @@
-package space.sunqian.fs.object.data;
+package space.sunqian.fs.object.schema;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -7,11 +7,11 @@ import space.sunqian.fs.object.ObjectException;
 import java.lang.reflect.Type;
 
 /**
- * Exception for data object.
+ * Exception for data object schema.
  *
  * @author sunqian
  */
-public class DataObjectException extends ObjectException {
+public class DataSchemaException extends ObjectException {
 
     private static String toMessage(@Nonnull Type type) {
         return "Parsing data schema failed: " + type.getTypeName() + "[" + type.getClass().getName() + "].";
@@ -20,7 +20,7 @@ public class DataObjectException extends ObjectException {
     /**
      * Empty constructor.
      */
-    public DataObjectException() {
+    public DataSchemaException() {
         super();
     }
 
@@ -29,7 +29,7 @@ public class DataObjectException extends ObjectException {
      *
      * @param message the message
      */
-    public DataObjectException(@Nullable String message) {
+    public DataSchemaException(@Nullable String message) {
         super(message);
     }
 
@@ -39,7 +39,7 @@ public class DataObjectException extends ObjectException {
      * @param message the message
      * @param cause   the cause
      */
-    public DataObjectException(@Nullable String message, @Nullable Throwable cause) {
+    public DataSchemaException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -48,7 +48,7 @@ public class DataObjectException extends ObjectException {
      *
      * @param cause the cause
      */
-    public DataObjectException(@Nullable Throwable cause) {
+    public DataSchemaException(@Nullable Throwable cause) {
         super(cause);
     }
 
@@ -57,7 +57,7 @@ public class DataObjectException extends ObjectException {
      *
      * @param type the type of specified data object
      */
-    public DataObjectException(@Nonnull Type type) {
+    public DataSchemaException(@Nonnull Type type) {
         this(toMessage(type));
     }
 
@@ -67,7 +67,7 @@ public class DataObjectException extends ObjectException {
      * @param type  the type of specified data object
      * @param cause the cause
      */
-    public DataObjectException(@Nonnull Type type, @Nullable Throwable cause) {
+    public DataSchemaException(@Nonnull Type type, @Nullable Throwable cause) {
         this(toMessage(type), cause);
     }
 }

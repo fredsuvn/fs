@@ -1,4 +1,4 @@
-package space.sunqian.fs.object.data;
+package space.sunqian.fs.object.schema;
 
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;

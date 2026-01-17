@@ -1,4 +1,4 @@
-package space.sunqian.fs.object.data;
+package space.sunqian.fs.object.schema;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.ThreadSafe;
@@ -29,10 +29,10 @@ public interface MapSchemaParser {
      *
      * @param type the given type
      * @return the parsed {@link MapSchemaParser}
-     * @throws DataObjectException if any problem occurs
+     * @throws DataSchemaException if any problem occurs
      */
     @Nonnull
-    MapSchema parse(@Nonnull Type type) throws DataObjectException;
+    MapSchema parse(@Nonnull Type type) throws DataSchemaException;
 
     /**
      * Parses the given type to an instance of {@link MapSchemaParser} with the specified key type and value type, and
@@ -44,8 +44,8 @@ public interface MapSchemaParser {
      * @param keyType   the specified key type
      * @param valueType the specified value type
      * @return the parsed {@link MapSchemaParser}
-     * @throws DataObjectException if any problem occurs
+     * @throws DataSchemaException if any problem occurs
      */
     @Nonnull
-    MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) throws DataObjectException;
+    MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) throws DataSchemaException;
 }

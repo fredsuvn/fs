@@ -1,4 +1,4 @@
-package space.sunqian.fs.object.data;
+package space.sunqian.fs.object.schema;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -16,7 +16,7 @@ final class ObjectSchemaBuilder implements ObjectSchemaParser.Context {
     private final @Nonnull Type type;
     private final @Nonnull Map<@Nonnull String, @Nonnull ObjectPropertyBase> properties = new LinkedHashMap<>();
 
-    ObjectSchemaBuilder(Type type) {
+    ObjectSchemaBuilder(@Nonnull Type type) {
         this.type = type;
     }
 
@@ -71,17 +71,17 @@ final class ObjectSchemaBuilder implements ObjectSchemaParser.Context {
         @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
         @Override
         public boolean equals(Object o) {
-            return DataObjectKit.equals(this, o);
+            return DataSchemaKit.equals(this, o);
         }
 
         @Override
         public int hashCode() {
-            return DataObjectKit.hashCode(this);
+            return DataSchemaKit.hashCode(this);
         }
 
         @Override
         public @Nonnull String toString() {
-            return DataObjectKit.toString(this);
+            return DataSchemaKit.toString(this);
         }
 
         private final class PropertyImpl implements ObjectProperty {
@@ -147,17 +147,17 @@ final class ObjectSchemaBuilder implements ObjectSchemaParser.Context {
             @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
             @Override
             public boolean equals(Object o) {
-                return DataObjectKit.equals(this, o);
+                return DataSchemaKit.equals(this, o);
             }
 
             @Override
             public int hashCode() {
-                return DataObjectKit.hashCode(this);
+                return DataSchemaKit.hashCode(this);
             }
 
             @Override
             public @Nonnull String toString() {
-                return DataObjectKit.toString(this);
+                return DataSchemaKit.toString(this);
             }
         }
     }
