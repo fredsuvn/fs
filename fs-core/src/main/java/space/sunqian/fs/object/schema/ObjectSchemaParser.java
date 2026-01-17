@@ -26,15 +26,19 @@ public interface ObjectSchemaParser {
     /**
      * Returns the default {@link ObjectSchemaParser} with {@link SimpleBeanSchemaHandler#INSTANCE} as the only
      * handler.
+     * <p>
+     * Note the default {@link ObjectSchemaParser} is singleton, and never caches the parsed results.
      *
      * @return the default {@link ObjectSchemaParser}
      */
     static @Nonnull ObjectSchemaParser defaultParser() {
-        return ObjectSchemaParserImpl.DEFAULT;
+        return SchemaBack.ObjectSchemaParserImpl.DEFAULT;
     }
 
     /**
      * Creates and returns a new {@link ObjectSchemaParser} with the given handlers.
+     * <p>
+     * Note the created {@link ObjectSchemaParser} never caches the parsed results.
      *
      * @param handlers the given handlers
      * @return a new {@link ObjectSchemaParser} with the given handlers
@@ -45,12 +49,14 @@ public interface ObjectSchemaParser {
 
     /**
      * Creates and returns a new {@link ObjectSchemaParser} with given handlers.
+     * <p>
+     * Note the created {@link ObjectSchemaParser} never caches the parsed results.
      *
      * @param handlers given handlers
      * @return a new {@link ObjectSchemaParser} with given handlers
      */
     static @Nonnull ObjectSchemaParser newParser(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
-        return new ObjectSchemaParserImpl(handlers);
+        return new SchemaBack.ObjectSchemaParserImpl(handlers);
     }
 
     /**

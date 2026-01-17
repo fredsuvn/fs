@@ -28,7 +28,7 @@ public interface ObjectSchema extends DataSchema {
     /**
      * Parse the given type to {@link ObjectSchema} using {@link ObjectSchemaParser#defaultParser()}.
      * <p>
-     * Note that this method does not cache the results and will generate new instances every invocation.
+     * Note this method never caches the parsed results.
      *
      * @param type the given type
      * @return the {@link ObjectSchema} parsed from the given type using {@link ObjectSchemaParser#defaultParser()}

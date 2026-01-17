@@ -15,6 +15,8 @@ public interface MapSchemaParser {
 
     /**
      * Returns the default {@link MapSchemaParser}.
+     * <p>
+     * Note the default {@link MapSchemaParser} is singleton, and never caches the parsed results.
      *
      * @return the default {@link MapSchemaParser}
      */
@@ -24,8 +26,6 @@ public interface MapSchemaParser {
 
     /**
      * Parses the given type to an instance of {@link MapSchemaParser}, and returns the parsed {@link MapSchemaParser}.
-     * <p>
-     * Note that this method does not cache the results and will generate new instances every invocation.
      *
      * @param type the given type
      * @return the parsed {@link MapSchemaParser}
@@ -37,8 +37,6 @@ public interface MapSchemaParser {
     /**
      * Parses the given type to an instance of {@link MapSchemaParser} with the specified key type and value type, and
      * returns the parsed {@link MapSchemaParser}.
-     * <p>
-     * Note that this method does not cache the results and will generate new instances every invocation.
      *
      * @param type      the given type
      * @param keyType   the specified key type

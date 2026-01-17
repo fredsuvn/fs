@@ -19,7 +19,7 @@ public interface MapSchema extends DataSchema {
     /**
      * Parse the given type to {@link MapSchema} using {@link MapSchemaParser#defaultParser()}.
      * <p>
-     * Note that this method does not cache the results and will generate new instances every invocation.
+     * Note this method never caches the parsed results.
      *
      * @param type the given type
      * @return the {@link MapSchema} parsed from the given type using {@link MapSchemaParser#defaultParser()}
@@ -32,7 +32,7 @@ public interface MapSchema extends DataSchema {
      * Parse the given type to {@link MapSchema} using {@link MapSchemaParser#defaultParser()}, with the specified key
      * type and value type.
      * <p>
-     * Note that this method does not cache the results and will generate new instances every invocation.
+     * Note this method never caches the parsed results.
      *
      * @param type      the given type
      * @param keyType   the specified key type
