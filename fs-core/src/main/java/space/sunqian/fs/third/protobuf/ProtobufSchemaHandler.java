@@ -9,9 +9,9 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnsupportedEnvException;
 import space.sunqian.fs.base.string.StringKit;
 import space.sunqian.fs.invoke.Invocable;
+import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectPropertyBase;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * {@link ObjectSchemaParser.Handler} implementation for
+ * {@link ObjectParser.Handler} implementation for
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
@@ -34,7 +34,7 @@ import java.util.Objects;
  *     .withFirstHandler(ProtobufSchemaHandler.INSTANCE);
  * }</pre>
  * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
- * environment, the {@link ObjectSchemaParser#defaultParser()} will automatically load this handler.
+ * environment, the {@link ObjectParser#defaultParser()} will automatically load this handler.
  * <p>
  * Note:
  * <ul>
@@ -51,7 +51,7 @@ import java.util.Objects;
  *
  * @author sunqian
  */
-public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
+public class ProtobufSchemaHandler implements ObjectParser.Handler {
 
     /**
      * An instance of this handler.
@@ -73,7 +73,7 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
     }
 
     @Override
-    public boolean parse(@Nonnull ObjectSchemaParser.Context context) throws Exception {
+    public boolean parse(@Nonnull ObjectParser.Context context) throws Exception {
         Class<?> rawType = TypeKit.getRawClass(context.dataType());
         if (rawType == null) {
             return true;

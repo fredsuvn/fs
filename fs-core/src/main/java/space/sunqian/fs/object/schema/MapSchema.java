@@ -17,39 +17,39 @@ import java.lang.reflect.Type;
 public interface MapSchema extends DataSchema {
 
     /**
-     * Parse the given type to {@link MapSchema} using {@link MapSchemaParser#defaultParser()}.
+     * Parse the given type to {@link MapSchema} using {@link MapParser#defaultParser()}.
      * <p>
      * Note this method never caches the parsed results.
      *
      * @param type the given type
-     * @return the {@link MapSchema} parsed from the given type using {@link MapSchemaParser#defaultParser()}
+     * @return the {@link MapSchema} parsed from the given type using {@link MapParser#defaultParser()}
      */
     static @Nonnull MapSchema parse(@Nonnull Type type) {
-        return MapSchemaParser.defaultParser().parse(type);
+        return MapParser.defaultParser().parse(type);
     }
 
     /**
-     * Parse the given type to {@link MapSchema} using {@link MapSchemaParser#defaultParser()}, with the specified key
-     * type and value type.
+     * Parse the given type to {@link MapSchema} using {@link MapParser#defaultParser()}, with the specified key type
+     * and value type.
      * <p>
      * Note this method never caches the parsed results.
      *
      * @param type      the given type
      * @param keyType   the specified key type
      * @param valueType the specified value type
-     * @return the {@link MapSchema} parsed from the given type using {@link MapSchemaParser#defaultParser()}
+     * @return the {@link MapSchema} parsed from the given type using {@link MapParser#defaultParser()}
      */
     static @Nonnull MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) {
-        return MapSchemaParser.defaultParser().parse(type, keyType, valueType);
+        return MapParser.defaultParser().parse(type, keyType, valueType);
     }
 
     /**
-     * Returns the {@link MapSchemaParser} of this {@link MapSchema}.
+     * Returns the {@link MapParser} of this {@link MapSchema}.
      *
-     * @return the {@link MapSchemaParser} of this {@link MapSchema}
+     * @return the {@link MapParser} of this {@link MapSchema}
      */
     @Nonnull
-    MapSchemaParser parser();
+    MapParser parser();
 
     /**
      * Returns the key type of this map type.

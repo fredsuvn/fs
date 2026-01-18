@@ -1,6 +1,6 @@
 /**
- * Package for data object schema. A data object schema may be an instance of
- * {@link space.sunqian.fs.object.schema.MapSchema} which is parsed from a map, or an instance of
+ * This package provides definitions and utilities for schemas about data object. A data object schema may be an
+ * instance of {@link space.sunqian.fs.object.schema.MapSchema} which is parsed from a map, or an instance of
  * {@link space.sunqian.fs.object.schema.ObjectSchema} which is parsed from a non-map object. Using codes similar to the
  * following to parse:
  * <pre>{@code
@@ -20,11 +20,11 @@
  *     <li>{@link space.sunqian.fs.object.schema.DataSchema}</li>
  *     <li>{@link space.sunqian.fs.object.schema.ObjectSchema}</li>
  *     <li>{@link space.sunqian.fs.object.schema.ObjectProperty}</li>
- *     <li>{@link space.sunqian.fs.object.schema.ObjectSchemaParser}</li>
+ *     <li>{@link space.sunqian.fs.object.schema.ObjectParser}</li>
  *     <li>{@link space.sunqian.fs.object.schema.handlers.AbstractObjectSchemaHandler}</li>
  *     <li>{@link space.sunqian.fs.object.schema.handlers.SimpleBeanSchemaHandler}</li>
  *     <li>{@link space.sunqian.fs.object.schema.MapSchema}</li>
- *     <li>{@link space.sunqian.fs.object.schema.MapSchemaParser}</li>
+ *     <li>{@link space.sunqian.fs.object.schema.MapParser}</li>
  * </ul>
  * And utilities:
  * <ul>

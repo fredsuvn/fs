@@ -3,13 +3,13 @@ package space.sunqian.fs.object.schema.handlers;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.schema.ObjectParser;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * This is an implementation of {@link ObjectSchemaParser.Handler} which basically follows the <a
+ * This is an implementation of {@link ObjectParser.Handler} which basically follows the <a
  * href="https://www.oracle.com/java/technologies/javase/javabeans-spec.html">JavaBeans</a> style, inheriting from
  * {@link AbstractObjectSchemaHandler} and overriding the {@link AbstractObjectSchemaHandler#resolveAccessor(Method)}
  * method.

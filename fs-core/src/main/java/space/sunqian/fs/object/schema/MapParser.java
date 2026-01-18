@@ -11,37 +11,37 @@ import java.lang.reflect.Type;
  * @author sunqian
  */
 @ThreadSafe
-public interface MapSchemaParser {
+public interface MapParser {
 
     /**
-     * Returns the default {@link MapSchemaParser}.
+     * Returns the default {@link MapParser}.
      * <p>
-     * Note the default {@link MapSchemaParser} is singleton, and never caches the parsed results.
+     * Note the default {@link MapParser} is singleton, and never caches the parsed results.
      *
-     * @return the default {@link MapSchemaParser}
+     * @return the default {@link MapParser}
      */
-    static @Nonnull MapSchemaParser defaultParser() {
-        return MapSchemaParserImpl.INST;
+    static @Nonnull MapParser defaultParser() {
+        return SchemaBack.MapParserImpl.INST;
     }
 
     /**
-     * Parses the given type to an instance of {@link MapSchemaParser}, and returns the parsed {@link MapSchemaParser}.
+     * Parses the given type to an instance of {@link MapParser}, and returns the parsed {@link MapParser}.
      *
      * @param type the given type
-     * @return the parsed {@link MapSchemaParser}
+     * @return the parsed {@link MapParser}
      * @throws DataSchemaException if any problem occurs
      */
     @Nonnull
     MapSchema parse(@Nonnull Type type) throws DataSchemaException;
 
     /**
-     * Parses the given type to an instance of {@link MapSchemaParser} with the specified key type and value type, and
-     * returns the parsed {@link MapSchemaParser}.
+     * Parses the given type to an instance of {@link MapParser} with the specified key type and value type, and returns
+     * the parsed {@link MapParser}.
      *
      * @param type      the given type
      * @param keyType   the specified key type
      * @param valueType the specified value type
-     * @return the parsed {@link MapSchemaParser}
+     * @return the parsed {@link MapParser}
      * @throws DataSchemaException if any problem occurs
      */
     @Nonnull

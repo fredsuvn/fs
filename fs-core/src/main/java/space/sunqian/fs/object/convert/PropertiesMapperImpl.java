@@ -7,11 +7,11 @@ import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.cache.CacheFunction;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.object.schema.DataSchema;
+import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.MapSchema;
-import space.sunqian.fs.object.schema.MapSchemaParser;
+import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -41,43 +41,43 @@ final class PropertiesMapperImpl implements PropertiesMapper {
             PropertyMapper propertyMapper = Option.findValue(ConvertOption.PROPERTY_MAPPER, options);
             PropertiesMapper.ExceptionHandler exceptionHandler = Option.findValue(ConvertOption.EXCEPTION_HANDLER, options);
             if (src instanceof Map) {
-                MapSchemaParser mapSchemaParser = Fs.nonnull(
+                MapParser mapParser = Fs.nonnull(
                     Option.findValue(ConvertOption.MAP_SCHEMA_PARSER),
-                    MapSchemaParser.defaultParser()
+                    MapParser.defaultParser()
                 );
-                MapSchema srcSchema = cache.get(srcType, mapSchemaParser::parse).asMapSchema();
+                MapSchema srcSchema = cache.get(srcType, mapParser::parse).asMapSchema();
                 if (dst instanceof Map) {
-                    MapSchema dstSchema = cache.get(dstType, mapSchemaParser::parse).asMapSchema();
+                    MapSchema dstSchema = cache.get(dstType, mapParser::parse).asMapSchema();
                     mapToMap(
                         Fs.as(src), srcSchema, Fs.as(dst), dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
                 } else {
-                    ObjectSchemaParser objectSchemaParser = Fs.nonnull(
+                    ObjectParser objectParser = Fs.nonnull(
                         Option.findValue(ConvertOption.OBJECT_SCHEMA_PARSER),
-                        ObjectSchemaParser.defaultParser()
+                        ObjectParser.defaultParser()
                     );
-                    ObjectSchema dstSchema = cache.get(dstType, objectSchemaParser::parse).asObjectSchema();
+                    ObjectSchema dstSchema = cache.get(dstType, objectParser::parse).asObjectSchema();
                     mapToObject(
                         Fs.as(src), srcSchema, dst, dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
                 }
             } else {
-                ObjectSchemaParser objectSchemaParser = Fs.nonnull(
+                ObjectParser objectParser = Fs.nonnull(
                     Option.findValue(ConvertOption.OBJECT_SCHEMA_PARSER),
-                    ObjectSchemaParser.defaultParser()
+                    ObjectParser.defaultParser()
                 );
-                ObjectSchema srcSchema = cache.get(srcType, objectSchemaParser::parse).asObjectSchema();
+                ObjectSchema srcSchema = cache.get(srcType, objectParser::parse).asObjectSchema();
                 if (dst instanceof Map) {
-                    MapSchemaParser mapSchemaParser = Fs.nonnull(
+                    MapParser mapParser = Fs.nonnull(
                         Option.findValue(ConvertOption.MAP_SCHEMA_PARSER),
-                        MapSchemaParser.defaultParser()
+                        MapParser.defaultParser()
                     );
-                    MapSchema dstSchema = cache.get(dstType, mapSchemaParser::parse).asMapSchema();
+                    MapSchema dstSchema = cache.get(dstType, mapParser::parse).asMapSchema();
                     objectToMap(
                         src, srcSchema, Fs.as(dst), dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
                 } else {
-                    ObjectSchema dstSchema = cache.get(dstType, objectSchemaParser::parse).asObjectSchema();
+                    ObjectSchema dstSchema = cache.get(dstType, objectParser::parse).asObjectSchema();
                     objectToObject(
                         src, srcSchema, dst, dstSchema, converter, propertyMapper, exceptionHandler, options
                     );

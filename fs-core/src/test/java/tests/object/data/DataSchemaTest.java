@@ -11,12 +11,12 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.invoke.Invocable;
 import space.sunqian.fs.object.schema.DataSchemaException;
+import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.MapSchema;
-import space.sunqian.fs.object.schema.MapSchemaParser;
+import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectPropertyBase;
 import space.sunqian.fs.object.schema.ObjectSchema;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.object.schema.handlers.SimpleBeanSchemaHandler;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -44,7 +44,7 @@ public class DataSchemaTest implements PrintTest {
     public void testObjectSchema() throws Exception {
         Type type = new TypeRef<TestData<CharSequence, String>>() {}.type();
         ObjectSchema schema = ObjectSchema.parse(type);
-        assertSame(schema.parser(), ObjectSchemaParser.defaultParser());
+        assertSame(schema.parser(), ObjectParser.defaultParser());
         assertEquals(schema.type(), type);
         assertEquals(TestData.class, schema.rawType());
         assertTrue(schema.isObjectSchema());
@@ -225,22 +225,22 @@ public class DataSchemaTest implements PrintTest {
 
     @Test
     public void testObjectParser() throws Exception {
-        class PreHandler implements ObjectSchemaParser.Handler {
+        class PreHandler implements ObjectParser.Handler {
             @Override
-            public boolean parse(@Nonnull ObjectSchemaParser.Context context) throws Exception {
+            public boolean parse(@Nonnull ObjectParser.Context context) throws Exception {
                 if (context.dataType().equals(Object.class)) {
                     return false;
                 }
                 return true;
             }
         }
-        ObjectSchemaParser preParser = ObjectSchemaParser.defaultParser().withFirstHandler(new PreHandler());
+        ObjectParser preParser = ObjectParser.defaultParser().withFirstHandler(new PreHandler());
         ObjectSchema preSchema = preParser.parse(Object.class);
         assertEquals(Object.class, preSchema.type());
         assertEquals(0, preSchema.properties().size());
-        class LastHandler implements ObjectSchemaParser.Handler {
+        class LastHandler implements ObjectParser.Handler {
             @Override
-            public boolean parse(@Nonnull ObjectSchemaParser.Context context) throws Exception {
+            public boolean parse(@Nonnull ObjectParser.Context context) throws Exception {
                 if (context.dataType().equals(Object.class)) {
                     context.propertyBaseMap().put("test", new ObjectPropertyBase() {
                         @Override
@@ -282,16 +282,16 @@ public class DataSchemaTest implements PrintTest {
                 return true;
             }
         }
-        ObjectSchemaParser lastParser = ObjectSchemaParser.newParser(
-            ObjectSchemaParser.defaultParser().asHandler(), new LastHandler());
+        ObjectParser lastParser = ObjectParser.newParser(
+            ObjectParser.defaultParser().asHandler(), new LastHandler());
         ObjectSchema lastSchema = lastParser.parse(Object.class);
         assertEquals(Object.class, lastSchema.type());
         assertEquals(lastSchema.properties().keySet(), SetKit.set("class", "test"));
-        ObjectSchemaParser asPreParser = ObjectSchemaParser.newParser(preParser.asHandler());
+        ObjectParser asPreParser = ObjectParser.newParser(preParser.asHandler());
         ObjectSchema asPreSchema = asPreParser.parse(Object.class);
         assertEquals(Object.class, asPreSchema.type());
         assertEquals(0, asPreSchema.properties().size());
-        ObjectSchemaParser asLastParser = ObjectSchemaParser.newParser(lastParser.asHandler());
+        ObjectParser asLastParser = ObjectParser.newParser(lastParser.asHandler());
         ObjectSchema asLastSchema = asLastParser.parse(Object.class);
         assertEquals(Object.class, asLastSchema.type());
         assertEquals(asLastSchema.properties().keySet(), SetKit.set("class", "test"));
@@ -303,7 +303,7 @@ public class DataSchemaTest implements PrintTest {
         ObjectSchema a1 = ObjectSchema.parse(A.class);
         ObjectSchema a2 = ObjectSchema.parse(A.class);
         ObjectSchema b1 = ObjectSchema.parse(B.class);
-        ObjectSchemaParser parser2 = ObjectSchemaParser.newParser(new SimpleBeanSchemaHandler());
+        ObjectParser parser2 = ObjectParser.newParser(new SimpleBeanSchemaHandler());
         ObjectSchema a3 = parser2.parse(A.class);
         assertEquals(a1, a1);
         assertFalse(a1.equals(""));
@@ -341,7 +341,7 @@ public class DataSchemaTest implements PrintTest {
     @Test
     public void testMapSchema() throws Exception {
         MapSchema schema = MapSchema.parse(HelloMap.class);
-        assertSame(schema.parser(), MapSchemaParser.defaultParser());
+        assertSame(schema.parser(), MapParser.defaultParser());
         assertEquals(HelloMap.class, schema.type());
         assertEquals(HelloMap.class, schema.rawType());
         assertTrue(schema.isMapSchema());
@@ -359,7 +359,7 @@ public class DataSchemaTest implements PrintTest {
         MapSchema schemaWithTypes = MapSchema.parse(Map.class, Object.class, Long.class);
         assertEquals(Map.class, schemaWithTypes.type());
         assertEquals(Map.class, schemaWithTypes.rawType());
-        assertSame(schemaWithTypes.parser(), MapSchemaParser.defaultParser());
+        assertSame(schemaWithTypes.parser(), MapParser.defaultParser());
         assertEquals(Object.class, schemaWithTypes.keyType());
         assertEquals(Long.class, schemaWithTypes.valueType());
         // schema equal
@@ -371,12 +371,12 @@ public class DataSchemaTest implements PrintTest {
         MapSchema m3 = MapSchema.parse(new TypeRef<Map<String, Integer>>() {}.type());
         assertNotEquals(m1, m3);
         assertNotEquals(m3, m1);
-        class Parser2 implements MapSchemaParser {
+        class Parser2 implements MapParser {
             @Override
             public @Nonnull MapSchema parse(@Nonnull Type type) throws DataSchemaException {
                 return new MapSchema() {
                     @Override
-                    public @Nonnull MapSchemaParser parser() {
+                    public @Nonnull MapParser parser() {
                         return Parser2.this;
                     }
 
@@ -404,7 +404,7 @@ public class DataSchemaTest implements PrintTest {
                 return null;
             }
         }
-        MapSchemaParser parser2 = new Parser2();
+        MapParser parser2 = new Parser2();
         MapSchema m4 = parser2.parse(Map.class);
         assertNotEquals(m1, m4);
         assertNotEquals(m4, m1);

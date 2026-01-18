@@ -7,8 +7,8 @@ import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.ObjectCreatorProvider;
-import space.sunqian.fs.object.schema.MapSchemaParser;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.schema.MapParser;
+import space.sunqian.fs.object.schema.ObjectParser;
 
 import java.nio.charset.Charset;
 
@@ -30,12 +30,12 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     STRICT_TYPE_MODE,
 
     /**
-     * Key of {@link #schemaParser(ObjectSchemaParser)}.
+     * Key of {@link #schemaParser(ObjectParser)}.
      */
     OBJECT_SCHEMA_PARSER,
 
     /**
-     * Key of {@link #schemaParser(MapSchemaParser)}.
+     * Key of {@link #schemaParser(MapParser)}.
      */
     MAP_SCHEMA_PARSER,
 
@@ -89,13 +89,13 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     /**
      * Returns an option to specify the object schema parser.
      * <p>
-     * By default, {@link ObjectSchemaParser#defaultParser()} is used.
+     * By default, {@link ObjectParser#defaultParser()} is used.
      *
      * @param schemaParser the specified object schema parser
      * @return an option to specify the object schema parser
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectSchemaParser> schemaParser(
-        @Nonnull ObjectSchemaParser schemaParser
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectParser> schemaParser(
+        @Nonnull ObjectParser schemaParser
     ) {
         return Option.of(OBJECT_SCHEMA_PARSER, schemaParser);
     }
@@ -103,13 +103,13 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     /**
      * Returns an option to specify the map schema parser.
      * <p>
-     * By default, {@link MapSchemaParser#defaultParser()} is used.
+     * By default, {@link MapParser#defaultParser()} is used.
      *
      * @param schemaParser the specified map schema parser
      * @return an option to specify the map schema parser
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull MapSchemaParser> schemaParser(
-        @Nonnull MapSchemaParser schemaParser
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull MapParser> schemaParser(
+        @Nonnull MapParser schemaParser
     ) {
         return Option.of(MAP_SCHEMA_PARSER, schemaParser);
     }

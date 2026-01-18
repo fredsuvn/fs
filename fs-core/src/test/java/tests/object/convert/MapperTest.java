@@ -16,10 +16,10 @@ import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.PropertiesMapper;
-import space.sunqian.fs.object.schema.MapSchemaParser;
+import space.sunqian.fs.object.schema.MapParser;
+import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.reflect.TypeRef;
 import tests.utils.ErrorMap;
 
@@ -60,7 +60,7 @@ public class MapperTest implements PrintTest {
             Map<String, String> mapA = MapKit.map("first", "1", "second", "2", "third", "3");
             Map<String, Integer> mapB = new HashMap<>();
             propertiesMapper.copyProperties(
-                mapA, typeA, mapB, typeB, ConvertOption.schemaParser(MapSchemaParser.defaultParser()));
+                mapA, typeA, mapB, typeB, ConvertOption.schemaParser(MapParser.defaultParser()));
             assertEquals(mapB, MapKit.map("first", 1, "second", 2, "third", 3));
             Map<String, String> mapA2 = new HashMap<>();
             propertiesMapper.copyProperties(mapA, typeA, mapA2, typeA, ConvertOption.propertyMapper(
@@ -130,7 +130,7 @@ public class MapperTest implements PrintTest {
             Map<String, String> mapA = MapKit.map("first", "1", "second", "2", "third", "3");
             ClsB clsB = new ClsB();
             propertiesMapper.copyProperties(
-                mapA, typeA, clsB, ClsB.class, ConvertOption.schemaParser(ObjectSchemaParser.defaultParser()));
+                mapA, typeA, clsB, ClsB.class, ConvertOption.schemaParser(ObjectParser.defaultParser()));
             assertEquals(new ClsB(1, 2, 3), clsB);
             ClsA2 clsA2 = new ClsA2();
             propertiesMapper.copyProperties(mapA, typeA, clsA2, ClsA2.class, ConvertOption.propertyMapper(

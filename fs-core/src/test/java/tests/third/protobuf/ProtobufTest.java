@@ -14,9 +14,9 @@ import space.sunqian.fs.object.ObjectCreatorProvider;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
+import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.reflect.TypeRef;
 import space.sunqian.fs.third.protobuf.ProtobufConvertHandler;
 import space.sunqian.fs.third.protobuf.ProtobufCreatorHandler;
@@ -45,7 +45,7 @@ public class ProtobufTest implements PrintTest {
 
     @Test
     public void testSchemaHandler() throws Exception {
-        ObjectSchemaParser protoParser = ObjectSchemaParser.newParser(ProtobufSchemaHandler.INSTANCE);
+        ObjectParser protoParser = ObjectParser.newParser(ProtobufSchemaHandler.INSTANCE);
         Data.Builder builder = Data.newBuilder()
             .setStr("str")
             .setI32(1)
@@ -440,7 +440,7 @@ public class ProtobufTest implements PrintTest {
         ObjectCreatorProvider defaultProvider = ObjectCreatorProvider.defaultProvider();
         ObjectCreatorProvider provider = ObjectCreatorProvider
             .newProvider(ProtobufCreatorHandler.INSTANCE, defaultProvider.asHandler());
-        ObjectSchemaParser parser = ObjectSchemaParser
+        ObjectParser parser = ObjectParser
             .defaultParser()
             .withFirstHandler(new ProtobufSchemaHandler());
         {
