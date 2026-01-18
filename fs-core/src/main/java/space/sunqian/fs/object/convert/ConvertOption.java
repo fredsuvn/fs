@@ -45,7 +45,7 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     PROPERTY_MAPPER,
 
     /**
-     * Key of {@link #exceptionHandler(PropertiesMapper.ExceptionHandler)}.
+     * Key of {@link #exceptionHandler(ObjectCopier.ExceptionHandler)}.
      */
     EXCEPTION_HANDLER,
 
@@ -61,7 +61,7 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     IGNORE_PROPERTIES,
 
     /**
-     * Key of {@link #dataMapper(PropertiesMapper)}.
+     * Key of {@link #dataMapper(ObjectCopier)}.
      */
     DATA_MAPPER,
 
@@ -129,15 +129,15 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     }
 
     /**
-     * Returns an option to specify the {@link PropertiesMapper.ExceptionHandler}.
+     * Returns an option to specify the {@link ObjectCopier.ExceptionHandler}.
      * <p>
      * By default, the exception will be thrown directly.
      *
-     * @param exceptionHandler the {@link PropertiesMapper.ExceptionHandler} to be specified
-     * @return an option to specify the {@link PropertiesMapper.ExceptionHandler}
+     * @param exceptionHandler the {@link ObjectCopier.ExceptionHandler} to be specified
+     * @return an option to specify the {@link ObjectCopier.ExceptionHandler}
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, PropertiesMapper.@Nonnull ExceptionHandler> exceptionHandler(
-        @Nonnull PropertiesMapper.ExceptionHandler exceptionHandler
+    public static @Nonnull Option<@Nonnull ConvertOption, ObjectCopier.@Nonnull ExceptionHandler> exceptionHandler(
+        @Nonnull ObjectCopier.ExceptionHandler exceptionHandler
     ) {
         return Option.of(EXCEPTION_HANDLER, exceptionHandler);
     }
@@ -157,17 +157,17 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     }
 
     /**
-     * Returns an option to specify the {@link PropertiesMapper}.
+     * Returns an option to specify the {@link ObjectCopier}.
      * <p>
-     * By default, the {@link PropertiesMapper#defaultMapper()} is used.
+     * By default, the {@link ObjectCopier#defaultCopier()} is used.
      *
-     * @param propertiesMapper the {@link PropertiesMapper} to be specified
-     * @return an option to specify the {@link PropertiesMapper}
+     * @param objectCopier the {@link ObjectCopier} to be specified
+     * @return an option to specify the {@link ObjectCopier}
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull PropertiesMapper> dataMapper(
-        @Nonnull PropertiesMapper propertiesMapper
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectCopier> dataMapper(
+        @Nonnull ObjectCopier objectCopier
     ) {
-        return Option.of(DATA_MAPPER, propertiesMapper);
+        return Option.of(DATA_MAPPER, objectCopier);
     }
 
     /**

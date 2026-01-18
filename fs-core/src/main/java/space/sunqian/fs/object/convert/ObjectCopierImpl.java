@@ -17,14 +17,14 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-final class PropertiesMapperImpl implements PropertiesMapper {
+final class ObjectCopierImpl implements ObjectCopier {
 
-    static final @Nonnull PropertiesMapper DEFAULT =
-        new PropertiesMapperImpl(CacheFunction.ofMap(new ConcurrentHashMap<>()));
+    static final @Nonnull ObjectCopier DEFAULT =
+        new ObjectCopierImpl(CacheFunction.ofMap(new ConcurrentHashMap<>()));
 
     private final @Nonnull CacheFunction<@Nonnull Type, @Nonnull DataSchema> cache;
 
-    PropertiesMapperImpl(@Nonnull CacheFunction<@Nonnull Type, @Nonnull DataSchema> cache) {
+    ObjectCopierImpl(@Nonnull CacheFunction<@Nonnull Type, @Nonnull DataSchema> cache) {
         this.cache = cache;
     }
 
@@ -39,7 +39,7 @@ final class PropertiesMapperImpl implements PropertiesMapper {
     ) throws ObjectConvertException {
         try {
             PropertyMapper propertyMapper = Option.findValue(ConvertOption.PROPERTY_MAPPER, options);
-            PropertiesMapper.ExceptionHandler exceptionHandler = Option.findValue(ConvertOption.EXCEPTION_HANDLER, options);
+            ObjectCopier.ExceptionHandler exceptionHandler = Option.findValue(ConvertOption.EXCEPTION_HANDLER, options);
             if (src instanceof Map) {
                 MapParser mapParser = Fs.nonnull(
                     Option.findValue(ConvertOption.MAP_SCHEMA_PARSER),
@@ -95,7 +95,7 @@ final class PropertiesMapperImpl implements PropertiesMapper {
         @Nonnull MapSchema dstSchema,
         @Nonnull ObjectConverter converter,
         @Nullable PropertyMapper propertyMapper,
-        @Nullable PropertiesMapper.ExceptionHandler exceptionHandler,
+        @Nullable ObjectCopier.ExceptionHandler exceptionHandler,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         src.forEach((srcKey, srcValue) -> {
@@ -145,7 +145,7 @@ final class PropertiesMapperImpl implements PropertiesMapper {
         @Nonnull ObjectSchema dstSchema,
         @Nonnull ObjectConverter converter,
         @Nullable PropertyMapper propertyMapper,
-        @Nullable PropertiesMapper.ExceptionHandler exceptionHandler,
+        @Nullable ObjectCopier.ExceptionHandler exceptionHandler,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         src.forEach((srcKey, srcValue) -> {
@@ -202,7 +202,7 @@ final class PropertiesMapperImpl implements PropertiesMapper {
         @Nonnull MapSchema dstSchema,
         @Nonnull ObjectConverter converter,
         @Nullable PropertyMapper propertyMapper,
-        @Nullable PropertiesMapper.ExceptionHandler exceptionHandler,
+        @Nullable ObjectCopier.ExceptionHandler exceptionHandler,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {
@@ -259,7 +259,7 @@ final class PropertiesMapperImpl implements PropertiesMapper {
         @Nonnull ObjectSchema dstSchema,
         @Nonnull ObjectConverter converter,
         @Nullable PropertyMapper propertyMapper,
-        @Nullable PropertiesMapper.ExceptionHandler exceptionHandler,
+        @Nullable ObjectCopier.ExceptionHandler exceptionHandler,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {

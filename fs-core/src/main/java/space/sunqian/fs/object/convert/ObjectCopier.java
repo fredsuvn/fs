@@ -15,12 +15,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * This interface is used to map data properties from an object to another object. The object should be a {@link Map} or
  * a non-map object which can be parsed to {@link MapSchema} and {@link ObjectSchema}.
  * <p>
- * A {@link PropertiesMapper} typically uses a {@link CacheFunction} to cache the parsed {@link DataSchema}s, and the
+ * A {@link ObjectCopier} typically uses a {@link CacheFunction} to cache the parsed {@link DataSchema}s, and the
  * thread safety is determined by the {@link CacheFunction}. By default, they are thread-safe.
  *
  * @author sunqian
  */
-public interface PropertiesMapper {
+public interface ObjectCopier {
 
     /**
      * Returns the default data mapper.
@@ -30,8 +30,8 @@ public interface PropertiesMapper {
      *
      * @return the default data mapper
      */
-    static @Nonnull PropertiesMapper defaultMapper() {
-        return PropertiesMapperImpl.DEFAULT;
+    static @Nonnull ObjectCopier defaultCopier() {
+        return ObjectCopierImpl.DEFAULT;
     }
 
     /**
@@ -40,8 +40,8 @@ public interface PropertiesMapper {
      * @param cache the given cache function
      * @return a new data mapper with the given cache function
      */
-    static @Nonnull PropertiesMapper newMapper(@Nonnull CacheFunction<@Nonnull Type, @Nonnull DataSchema> cache) {
-        return new PropertiesMapperImpl(cache);
+    static @Nonnull ObjectCopier newCopier(@Nonnull CacheFunction<@Nonnull Type, @Nonnull DataSchema> cache) {
+        return new ObjectCopierImpl(cache);
     }
 
     /**

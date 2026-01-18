@@ -1,30 +1,21 @@
 /**
- * Package for object conversion and data mapping.
- * <p>
- * Supports copying object properties, including instances of {@link java.util.Map} and non-map objects, using codes
- * similar to the following:
+ * This package provides core interfaces and utilities for object conversion and copying. Using codes similar to the
+ * following to convert object and copy object properties:
  * <pre>{@code
- * DataMapper dataMapper = DataMapper.defaultMapper();
- * dataMapper.copyProperties(src, dst, options);
- * }</pre>
- * The core interface for data mapping:
- * <ul>
- *     <li>{@link space.sunqian.fs.object.convert.PropertiesMapper}</li>
- * </ul>
- * <p>
- * Supports object type conversion, using codes similar to the following:
- * <pre>{@code
+ * // convert object
  * ObjectConverter converter = ObjectConverter.defaultConverter();
  * converter.convert(src, target, options);
+ * // copy object properties
+ * ObjectCopier copier = ObjectCopier.defaultCopier();
+ * copier.copyProperties(src, dst, options);
  * }</pre>
- * The core interface for object type conversion:
+ * The core interfaces of this package:
  * <ul>
  *     <li>{@link space.sunqian.fs.object.convert.ObjectConverter}</li>
- * </ul>
- * <p>
- * Other interfaces and classes:
- * <ul>
- *     <li>{@link space.sunqian.fs.object.convert.ConvertOption}</li>
+ *     <li>{@link space.sunqian.fs.object.convert.handlers.AssignableConvertHandler}</li>
+ *     <li>{@link space.sunqian.fs.object.convert.handlers.CommonConvertHandler}</li>
+ *     <li>{@link space.sunqian.fs.object.convert.ObjectCopier}</li>
+ *     <li>{@link space.sunqian.fs.object.convert.PropertyMapper}</li>
  * </ul>
  */
 package space.sunqian.fs.object.convert;

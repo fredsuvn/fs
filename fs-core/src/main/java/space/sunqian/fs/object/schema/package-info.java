@@ -15,7 +15,6 @@
  * // Get the key type of the map:
  * Type keyType = mapSchema.keyType();
  * }</pre>
- * <p>
  * The core interfaces of this package:
  * <ul>
  *     <li>{@link space.sunqian.fs.object.schema.DataSchema}</li>

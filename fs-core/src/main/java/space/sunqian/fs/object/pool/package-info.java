@@ -10,7 +10,6 @@
  *     .discarder(x -> x.close())
  *     .build();
  * }</pre>
- * <p>
  * The core interfaces of this package:
  * <ul>
  *     <li>{@link space.sunqian.fs.object.pool.SimplePool}</li>

@@ -15,7 +15,7 @@ import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.convert.PropertiesMapper;
+import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
@@ -34,39 +34,39 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MapperTest implements PrintTest {
+public class CopierTest implements PrintTest {
 
     @Test
-    public void testMapping() {
-        testMapping(PropertiesMapper.defaultMapper());
-        testMapping(PropertiesMapper.newMapper(CacheFunction.ofMap(new HashMap<>())));
+    public void testCopyProperties() {
+        testCopyProperties(ObjectCopier.defaultCopier());
+        testCopyProperties(ObjectCopier.newCopier(CacheFunction.ofMap(new HashMap<>())));
         {
             // default method
             ClsA a = new ClsA("1", "2", "3");
             ClsB b1 = new ClsB();
-            PropertiesMapper.defaultMapper().copyProperties(a, b1);
+            ObjectCopier.defaultCopier().copyProperties(a, b1);
             assertEquals(new ClsB(1, 2, 3), b1);
             ClsB b2 = new ClsB();
-            PropertiesMapper.defaultMapper().copyProperties(a, b2, ObjectConverter.defaultConverter());
+            ObjectCopier.defaultCopier().copyProperties(a, b2, ObjectConverter.defaultConverter());
             assertEquals(new ClsB(1, 2, 3), b2);
         }
     }
 
-    private void testMapping(PropertiesMapper propertiesMapper) {
+    private void testCopyProperties(ObjectCopier objectCopier) {
         Type typeA = new TypeRef<Map<String, String>>() {}.type();
         Type typeB = new TypeRef<Map<String, Integer>>() {}.type();
         {
             // map to map
             Map<String, String> mapA = MapKit.map("first", "1", "second", "2", "third", "3");
             Map<String, Integer> mapB = new HashMap<>();
-            propertiesMapper.copyProperties(
+            objectCopier.copyProperties(
                 mapA, typeA, mapB, typeB, ConvertOption.schemaParser(MapParser.defaultParser()));
             assertEquals(mapB, MapKit.map("first", 1, "second", 2, "third", 3));
             Map<String, String> mapA2 = new HashMap<>();
-            propertiesMapper.copyProperties(mapA, typeA, mapA2, typeA, ConvertOption.propertyMapper(
+            objectCopier.copyProperties(mapA, typeA, mapA2, typeA, ConvertOption.propertyMapper(
                 (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> null));
             assertTrue(mapA2.isEmpty());
-            propertiesMapper.copyProperties(mapA, typeA, mapA2, typeA, ConvertOption.propertyMapper(
+            objectCopier.copyProperties(mapA, typeA, mapA2, typeA, ConvertOption.propertyMapper(
                 (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                     Map<String, String> ma = Fs.as(src);
                     String key = (String) propertyName;
@@ -76,13 +76,13 @@ public class MapperTest implements PrintTest {
             // ignore
             Map<String, String> nullFrom = MapKit.map("first", "1", "second", null, "third", "3");
             Map<String, String> nullTo = new HashMap<>();
-            propertiesMapper.copyProperties(nullFrom, typeA, nullTo, typeA, ConvertOption.IGNORE_NULL);
+            objectCopier.copyProperties(nullFrom, typeA, nullTo, typeA, ConvertOption.IGNORE_NULL);
             assertEquals(nullTo, MapKit.map("first", "1", "third", "3"));
             nullTo.clear();
-            propertiesMapper.copyProperties(nullFrom, typeA, nullTo, typeA, ConvertOption.ignoreProperties("first"));
+            objectCopier.copyProperties(nullFrom, typeA, nullTo, typeA, ConvertOption.ignoreProperties("first"));
             assertEquals(nullTo, MapKit.map("second", null, "third", "3"));
             nullTo.clear();
-            propertiesMapper.copyProperties(nullFrom, typeA, nullTo, typeA, ConvertOption.IGNORE_NULL,
+            objectCopier.copyProperties(nullFrom, typeA, nullTo, typeA, ConvertOption.IGNORE_NULL,
                 ConvertOption.propertyMapper((propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                     if ("second".equals(propertyName)) {
                         return MapKit.entry(propertyName, "2");
@@ -93,18 +93,18 @@ public class MapperTest implements PrintTest {
             assertEquals(nullTo, MapKit.map("first", "1", "second", "2", "third", "1"));
             // errors
             ObjectConvertException oce1 = assertThrows(ObjectConvertException.class, () ->
-                propertiesMapper.copyProperties(new ErrorMap<>(), typeA, mapA2, typeA)
+                objectCopier.copyProperties(new ErrorMap<>(), typeA, mapA2, typeA)
             );
             assertTrue(oce1.getCause() instanceof UnsupportedOperationException);
             ObjectConvertException oce2 = assertThrows(ObjectConvertException.class, () ->
-                propertiesMapper.copyProperties(mapA, typeA, mapA2, typeA,
+                objectCopier.copyProperties(mapA, typeA, mapA2, typeA,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new UnreachablePointException();
                         })));
             assertTrue(oce2.getCause() instanceof UnreachablePointException);
             ObjectConvertException oce3 = assertThrows(ObjectConvertException.class, () ->
-                propertiesMapper.copyProperties(mapA, typeA, mapA2, typeA,
+                objectCopier.copyProperties(mapA, typeA, mapA2, typeA,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new RuntimeException();
@@ -115,7 +115,7 @@ public class MapperTest implements PrintTest {
                         })));
             assertTrue(oce3.getCause().getCause() instanceof UnreachablePointException);
             assertDoesNotThrow(() ->
-                propertiesMapper.copyProperties(mapA, typeA, mapA2, typeA,
+                objectCopier.copyProperties(mapA, typeA, mapA2, typeA,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new RuntimeException();
@@ -129,14 +129,14 @@ public class MapperTest implements PrintTest {
             // map to object
             Map<String, String> mapA = MapKit.map("first", "1", "second", "2", "third", "3");
             ClsB clsB = new ClsB();
-            propertiesMapper.copyProperties(
+            objectCopier.copyProperties(
                 mapA, typeA, clsB, ClsB.class, ConvertOption.schemaParser(ObjectParser.defaultParser()));
             assertEquals(new ClsB(1, 2, 3), clsB);
             ClsA2 clsA2 = new ClsA2();
-            propertiesMapper.copyProperties(mapA, typeA, clsA2, ClsA2.class, ConvertOption.propertyMapper(
+            objectCopier.copyProperties(mapA, typeA, clsA2, ClsA2.class, ConvertOption.propertyMapper(
                 (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> null));
             assertTrue(clsA2.getFirst2() == null && clsA2.getSecond2() == null);
-            propertiesMapper.copyProperties(mapA, typeA, clsA2, ClsA2.class, ConvertOption.propertyMapper(
+            objectCopier.copyProperties(mapA, typeA, clsA2, ClsA2.class, ConvertOption.propertyMapper(
                 (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                     Map<String, String> ma = Fs.as(src);
                     String key = (String) propertyName;
@@ -144,18 +144,18 @@ public class MapperTest implements PrintTest {
                 }));
             assertEquals(new ClsA2("1", null), clsA2);
             ClsA1 clsA12 = new ClsA1();
-            propertiesMapper.copyProperties(mapA, typeA, clsA12, ClsA1.class);
+            objectCopier.copyProperties(mapA, typeA, clsA12, ClsA1.class);
             assertEquals(new ClsA1("1", null), clsA12);
             // ignore
             Map<String, String> nullFrom = MapKit.map("first", "1", "second", null, "third", "3");
             ClsA nullTo = new ClsA();
-            propertiesMapper.copyProperties(nullFrom, typeA, nullTo, ClsA.class, ConvertOption.IGNORE_NULL);
+            objectCopier.copyProperties(nullFrom, typeA, nullTo, ClsA.class, ConvertOption.IGNORE_NULL);
             assertEquals(new ClsA("1", null, "3"), nullTo);
             nullTo.clear();
-            propertiesMapper.copyProperties(nullFrom, typeA, nullTo, ClsA.class, ConvertOption.ignoreProperties("first"));
+            objectCopier.copyProperties(nullFrom, typeA, nullTo, ClsA.class, ConvertOption.ignoreProperties("first"));
             assertEquals(new ClsA(null, null, "3"), nullTo);
             nullTo.clear();
-            propertiesMapper.copyProperties(nullFrom, typeA, nullTo, ClsA.class, ConvertOption.IGNORE_NULL,
+            objectCopier.copyProperties(nullFrom, typeA, nullTo, ClsA.class, ConvertOption.IGNORE_NULL,
                 ConvertOption.propertyMapper((propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                     if ("second".equals(propertyName)) {
                         return MapKit.entry(propertyName, "2");
@@ -166,18 +166,18 @@ public class MapperTest implements PrintTest {
             assertEquals(new ClsA("1", "2", "1"), nullTo);
             // errors
             ObjectConvertException oce1 = assertThrows(ObjectConvertException.class, () ->
-                propertiesMapper.copyProperties(new ErrorMap<>(), typeA, clsA2, ClsA2.class)
+                objectCopier.copyProperties(new ErrorMap<>(), typeA, clsA2, ClsA2.class)
             );
             assertTrue(oce1.getCause() instanceof UnsupportedOperationException);
             ObjectConvertException oce2 = assertThrows(ObjectConvertException.class, () ->
-                propertiesMapper.copyProperties(mapA, typeA, clsA2, ClsA2.class,
+                objectCopier.copyProperties(mapA, typeA, clsA2, ClsA2.class,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new UnreachablePointException();
                         })));
             assertTrue(oce2.getCause() instanceof UnreachablePointException);
             ObjectConvertException oce3 = assertThrows(ObjectConvertException.class, () ->
-                propertiesMapper.copyProperties(mapA, typeA, clsA2, ClsA2.class,
+                objectCopier.copyProperties(mapA, typeA, clsA2, ClsA2.class,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new RuntimeException();
@@ -188,7 +188,7 @@ public class MapperTest implements PrintTest {
                         })));
             assertTrue(oce3.getCause().getCause() instanceof UnreachablePointException);
             assertDoesNotThrow(() ->
-                propertiesMapper.copyProperties(mapA, typeA, clsA2, ClsA2.class,
+                objectCopier.copyProperties(mapA, typeA, clsA2, ClsA2.class,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new RuntimeException();
@@ -202,13 +202,13 @@ public class MapperTest implements PrintTest {
             // object to map
             ClsA clsA = new ClsA("1", "2", "3");
             Map<String, Integer> mapB = new HashMap<>();
-            propertiesMapper.copyProperties(clsA, ClsA.class, mapB, typeB);
+            objectCopier.copyProperties(clsA, ClsA.class, mapB, typeB);
             assertEquals(mapB, MapKit.map("first", 1, "second", 2, "third", 3));
             Map<String, String> mapA2 = new HashMap<>();
-            propertiesMapper.copyProperties(clsA, ClsA.class, mapA2, typeA, ConvertOption.propertyMapper(
+            objectCopier.copyProperties(clsA, ClsA.class, mapA2, typeA, ConvertOption.propertyMapper(
                 (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> null));
             assertTrue(mapA2.isEmpty());
-            propertiesMapper.copyProperties(clsA, ClsA.class, mapA2, typeA, ConvertOption.propertyMapper(
+            objectCopier.copyProperties(clsA, ClsA.class, mapA2, typeA, ConvertOption.propertyMapper(
                 (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                     ObjectSchema os = Fs.as(srcSchema);
                     String key = (String) propertyName;
@@ -222,13 +222,13 @@ public class MapperTest implements PrintTest {
             // ignore
             ClsA nullFrom = new ClsA("1", null, "3");
             Map<String, String> nullTo = new HashMap<>();
-            propertiesMapper.copyProperties(nullFrom, ClsA.class, nullTo, typeA, ConvertOption.IGNORE_NULL);
+            objectCopier.copyProperties(nullFrom, ClsA.class, nullTo, typeA, ConvertOption.IGNORE_NULL);
             assertEquals(nullTo, MapKit.map("first", "1", "third", "3"));
             nullTo.clear();
-            propertiesMapper.copyProperties(nullFrom, ClsA.class, nullTo, typeA, ConvertOption.ignoreProperties("first"));
+            objectCopier.copyProperties(nullFrom, ClsA.class, nullTo, typeA, ConvertOption.ignoreProperties("first"));
             assertEquals(nullTo, MapKit.map("second", null, "third", "3"));
             nullTo.clear();
-            propertiesMapper.copyProperties(nullFrom, ClsA.class, nullTo, typeA, ConvertOption.IGNORE_NULL,
+            objectCopier.copyProperties(nullFrom, ClsA.class, nullTo, typeA, ConvertOption.IGNORE_NULL,
                 ConvertOption.propertyMapper((propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                     if ("second".equals(propertyName)) {
                         return MapKit.entry(propertyName, "2");
@@ -243,14 +243,14 @@ public class MapperTest implements PrintTest {
             // );
             // assertTrue(oce1.getCause() instanceof UnsupportedOperationException);
             ObjectConvertException oce2 = assertThrows(ObjectConvertException.class, () ->
-                propertiesMapper.copyProperties(clsA, ClsA.class, mapA2, typeA,
+                objectCopier.copyProperties(clsA, ClsA.class, mapA2, typeA,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new UnreachablePointException();
                         })));
             assertTrue(oce2.getCause() instanceof UnreachablePointException);
             ObjectConvertException oce3 = assertThrows(ObjectConvertException.class, () ->
-                propertiesMapper.copyProperties(clsA, ClsA.class, mapA2, typeA,
+                objectCopier.copyProperties(clsA, ClsA.class, mapA2, typeA,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new RuntimeException();
@@ -261,7 +261,7 @@ public class MapperTest implements PrintTest {
                         })));
             assertTrue(oce3.getCause().getCause() instanceof UnreachablePointException);
             assertDoesNotThrow(() ->
-                propertiesMapper.copyProperties(clsA, ClsA.class, mapA2, typeA,
+                objectCopier.copyProperties(clsA, ClsA.class, mapA2, typeA,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new RuntimeException();
@@ -275,13 +275,13 @@ public class MapperTest implements PrintTest {
             // object to object
             ClsA clsA = new ClsA("1", "2", "3");
             ClsB clsB = new ClsB();
-            propertiesMapper.copyProperties(clsA, ClsA.class, clsB, ClsB.class);
+            objectCopier.copyProperties(clsA, ClsA.class, clsB, ClsB.class);
             assertEquals(new ClsB(1, 2, 3), clsB);
             ClsA2 clsA2 = new ClsA2();
-            propertiesMapper.copyProperties(clsA, ClsA.class, clsA2, ClsA2.class, ConvertOption.propertyMapper(
+            objectCopier.copyProperties(clsA, ClsA.class, clsA2, ClsA2.class, ConvertOption.propertyMapper(
                 (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> null));
             assertTrue(clsA2.getFirst2() == null && clsA2.getSecond2() == null);
-            propertiesMapper.copyProperties(clsA, ClsA.class, clsA2, ClsA2.class, ConvertOption.propertyMapper(
+            objectCopier.copyProperties(clsA, ClsA.class, clsA2, ClsA2.class, ConvertOption.propertyMapper(
                 (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                     ObjectSchema os = Fs.as(srcSchema);
                     String key = (String) propertyName;
@@ -293,18 +293,18 @@ public class MapperTest implements PrintTest {
                 }));
             assertEquals(new ClsA2("1", null), clsA2);
             ClsA1 clsA12 = new ClsA1();
-            propertiesMapper.copyProperties(clsA, ClsA.class, clsA12, ClsA1.class);
+            objectCopier.copyProperties(clsA, ClsA.class, clsA12, ClsA1.class);
             assertEquals(new ClsA1("1", null), clsA12);
             // ignore
             ClsA nullFrom = new ClsA("1", null, "3");
             ClsA nullTo = new ClsA();
-            propertiesMapper.copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, ConvertOption.IGNORE_NULL);
+            objectCopier.copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, ConvertOption.IGNORE_NULL);
             assertEquals(new ClsA("1", null, "3"), nullTo);
             nullTo.clear();
-            propertiesMapper.copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, ConvertOption.ignoreProperties("first"));
+            objectCopier.copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, ConvertOption.ignoreProperties("first"));
             assertEquals(new ClsA(null, null, "3"), nullTo);
             nullTo.clear();
-            propertiesMapper.copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, ConvertOption.IGNORE_NULL,
+            objectCopier.copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, ConvertOption.IGNORE_NULL,
                 ConvertOption.propertyMapper((propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                     if ("second".equals(propertyName)) {
                         return MapKit.entry(propertyName, "2");
@@ -319,14 +319,14 @@ public class MapperTest implements PrintTest {
             // );
             // assertTrue(oce1.getCause() instanceof UnsupportedOperationException);
             ObjectConvertException oce2 = assertThrows(ObjectConvertException.class, () ->
-                propertiesMapper.copyProperties(clsA, ClsA.class, clsA2, ClsA2.class,
+                objectCopier.copyProperties(clsA, ClsA.class, clsA2, ClsA2.class,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new UnreachablePointException();
                         })));
             assertTrue(oce2.getCause() instanceof UnreachablePointException);
             ObjectConvertException oce3 = assertThrows(ObjectConvertException.class, () ->
-                propertiesMapper.copyProperties(clsA, ClsA.class, clsA2, ClsA2.class,
+                objectCopier.copyProperties(clsA, ClsA.class, clsA2, ClsA2.class,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new RuntimeException();
@@ -336,7 +336,7 @@ public class MapperTest implements PrintTest {
                             throw new UnreachablePointException();
                         })));
             assertDoesNotThrow(() ->
-                propertiesMapper.copyProperties(clsA, ClsA.class, clsA2, ClsA2.class,
+                objectCopier.copyProperties(clsA, ClsA.class, clsA2, ClsA2.class,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new RuntimeException();
@@ -350,7 +350,7 @@ public class MapperTest implements PrintTest {
             // to raw map
             ClsB clsB = new ClsB(1, 2, 3);
             Map map = new HashMap();
-            propertiesMapper.copyProperties(clsB, map);
+            objectCopier.copyProperties(clsB, map);
             assertEquals(map, MapKit.map("first", 1, "second", 2, "third", 3));
         }
     }

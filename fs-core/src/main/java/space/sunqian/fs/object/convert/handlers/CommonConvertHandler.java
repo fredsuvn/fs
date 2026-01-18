@@ -17,7 +17,7 @@ import space.sunqian.fs.object.ObjectCreator;
 import space.sunqian.fs.object.ObjectCreatorProvider;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.convert.PropertiesMapper;
+import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.reflect.ReflectionException;
 import space.sunqian.fs.reflect.TypeKit;
 
@@ -154,8 +154,8 @@ import java.util.function.IntFunction;
  *     <td>Map and Data Objects</td>
  *     <td>Any Objects</td>
  *     <td>Generating data object is based on {@link ConvertOption#creatorProvider(ObjectCreatorProvider)} and
- *     {@link ConvertOption#dataMapper(PropertiesMapper)}. Generating map using its constructor, and copying properties
- *     also using {@link ConvertOption#dataMapper(PropertiesMapper)}. The supported map types:
+ *     {@link ConvertOption#dataMapper(ObjectCopier)}. Generating map using its constructor, and copying properties
+ *     also using {@link ConvertOption#dataMapper(ObjectCopier)}. The supported map types:
  *     {@link Map}, {@link AbstractMap}, {@link LinkedHashMap}, {@link HashMap}, {@link TreeMap}, {@link ConcurrentMap},
  *     {@link ConcurrentHashMap}, {@link Hashtable}, {@link ConcurrentSkipListMap}.
  *     </td>
@@ -388,13 +388,13 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
         IntFunction<Object> mapFunc = MapClasses.get(rawTarget);
-        PropertiesMapper propertiesMapper = Fs.nonnull(
+        ObjectCopier objectCopier = Fs.nonnull(
             Option.findValue(ConvertOption.DATA_MAPPER, options),
-            PropertiesMapper.defaultMapper()
+            ObjectCopier.defaultCopier()
         );
         if (mapFunc != null) {
             Object targetObject = mapFunc.apply(0);
-            propertiesMapper.copyProperties(src, srcType, targetObject, target, converter, options);
+            objectCopier.copyProperties(src, srcType, targetObject, target, converter, options);
             return targetObject;
         } else {
             ObjectCreatorProvider creatorProvider = Fs.nonnull(
@@ -406,7 +406,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
             }
             Object targetBuilder = creator.createBuilder();
-            propertiesMapper.copyProperties(src, srcType, targetBuilder, creator.builderType(), converter, options);
+            objectCopier.copyProperties(src, srcType, targetBuilder, creator.builderType(), converter, options);
             return creator.createTarget(targetBuilder);
         }
     }

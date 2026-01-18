@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * Property mapper for copying object property, this interface is typically called in {@code copyProperties} methods in
- * {@link PropertiesMapper}.
+ * {@link ObjectCopier}.
  *
  * @author sunqian
  */
