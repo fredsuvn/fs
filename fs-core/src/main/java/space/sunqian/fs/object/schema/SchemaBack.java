@@ -1,35 +1,62 @@
 package space.sunqian.fs.object.schema;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.FsLoader;
-import space.sunqian.fs.invoke.Invocable;
+import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.schema.handlers.SimpleBeanSchemaHandler;
 import space.sunqian.fs.reflect.ReflectionException;
 import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.third.ThirdKit;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 final class SchemaBack {
 
-    enum MapParserImpl implements MapParser {
+    static @Nonnull MapParser defaultMapParser() {
+        return DefaultMapParser.INST;
+    }
+
+    static @Nonnull MapParser cachedMapParser(
+        @Nonnull SimpleCache<@Nonnull Type, @Nonnull MapSchema> cache,
+        @Nonnull MapParser parser
+    ) {
+        return new CachedMapParser(cache, parser);
+    }
+
+    static @Nonnull ObjectParser defaultObjectParser() {
+        return ObjectParserImpl.DEFAULT;
+    }
+
+    static @Nonnull ObjectParser newObjectParser(
+        @Nonnull @RetainedParam List<ObjectParser.@Nonnull Handler> handlers
+    ) {
+        return new ObjectParserImpl(handlers);
+    }
+
+    static @Nonnull ObjectParser cachedObjectParser(
+        @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectSchema> cache,
+        @Nonnull ObjectParser parser
+    ) {
+        return new CachedObjectParser(cache, parser);
+    }
+
+    private enum DefaultMapParser implements MapParser {
 
         INST;
 
         @Override
-        public @Nonnull MapSchema parse(@Nonnull Type type) throws DataSchemaException {
+        public @Nonnull MapSchema parse(@Nonnull Type type) throws SchemaException {
             try {
                 return new MapSchemaImpl(type);
             } catch (Exception e) {
-                throw new DataSchemaException(e);
+                throw new SchemaException(e);
             }
         }
 
@@ -64,7 +91,7 @@ final class SchemaBack {
 
             @Override
             public @Nonnull MapParser parser() {
-                return MapParserImpl.this;
+                return DefaultMapParser.this;
             }
 
             @Override
@@ -80,24 +107,59 @@ final class SchemaBack {
             @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
             @Override
             public boolean equals(Object o) {
-                return DataSchemaKit.equals(this, o);
+                return SchemaKit.equals(this, o);
             }
 
             @Override
             public int hashCode() {
-                return DataSchemaKit.hashCode(this);
+                return SchemaKit.hashCode(this);
             }
 
             @Override
             public @Nonnull String toString() {
-                return DataSchemaKit.toString(this);
+                return SchemaKit.toString(this);
             }
         }
     }
 
-    static final class ObjectParserImpl implements ObjectParser, ObjectParser.Handler {
+    private static final class CachedMapParser implements MapParser {
 
-        static @Nonnull SchemaBack.ObjectParserImpl DEFAULT = new ObjectParserImpl(FsLoader.loadInstances(
+        private final @Nonnull SimpleCache<@Nonnull Type, @Nonnull MapSchema> cache;
+        private final @Nonnull MapParser parser;
+
+        private CachedMapParser(
+            @Nonnull SimpleCache<@Nonnull Type, @Nonnull MapSchema> cache,
+            @Nonnull MapParser parser
+        ) {
+            this.cache = cache;
+            this.parser = parser;
+        }
+
+        @Override
+        public @Nonnull MapSchema parse(@Nonnull Type type) {
+            return cache.get(type, parser::parse);
+        }
+
+        @Override
+        public @Nonnull MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) {
+            Type actualType = new MapType(type, keyType, valueType);
+            return cache.get(actualType, t -> parser.parse(t, keyType, valueType));
+        }
+
+        @Data
+        @AllArgsConstructor
+        @EqualsAndHashCode(callSuper = false)
+        @ToString
+        private static final class MapType implements Type {
+            private final @Nonnull Type mapType;
+            private final @Nonnull Type keyType;
+            private final @Nonnull Type valueType;
+        }
+    }
+
+    private static final class ObjectParserImpl implements ObjectParser, ObjectParser.Handler {
+
+        private static final @Nonnull ObjectParserImpl DEFAULT = new ObjectParserImpl(FsLoader.loadInstances(
             FsLoader.loadClassByDependent(
                 ThirdKit.thirdClassName("protobuf", "ProtobufSchemaHandler"),
                 "com.google.protobuf.Message"
@@ -107,7 +169,7 @@ final class SchemaBack {
 
         private final @Nonnull List<@Nonnull Handler> handlers;
 
-        ObjectParserImpl(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
+        private ObjectParserImpl(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
             this.handlers = handlers;
         }
 
@@ -132,155 +194,32 @@ final class SchemaBack {
         }
     }
 
-    static final class ObjectSchemaBuilder implements ObjectParser.Context {
+    private static final class CachedObjectParser implements ObjectParser {
 
-        private final @Nonnull Type type;
-        private final @Nonnull Map<@Nonnull String, @Nonnull ObjectPropertyBase> properties = new LinkedHashMap<>();
+        private final @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectSchema> cache;
+        private final @Nonnull ObjectParser parser;
 
-        ObjectSchemaBuilder(@Nonnull Type type) {
-            this.type = type;
+        private CachedObjectParser(
+            @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectSchema> cache,
+            @Nonnull ObjectParser parser
+        ) {
+            this.cache = cache;
+            this.parser = parser;
         }
 
         @Override
-        public @Nonnull Type dataType() {
-            return type;
+        public @Nonnull ObjectSchema parse(@Nonnull Type type) throws SchemaException {
+            return cache.get(type, parser::parse);
         }
 
         @Override
-        public @Nonnull Map<@Nonnull String, @Nonnull ObjectPropertyBase> propertyBaseMap() {
-            return properties;
+        public @Nonnull List<@Nonnull Handler> handlers() {
+            return parser.handlers();
         }
 
-        @Nonnull
-        ObjectSchema build(@Nonnull ObjectParser parser) {
-            return new ObjectSchemaImpl(parser, type, properties);
-        }
-
-        private static final class ObjectSchemaImpl implements ObjectSchema {
-
-            private final @Nonnull ObjectParser parser;
-            private final @Nonnull Type type;
-            private final @Nonnull Map<@Nonnull String, @Nonnull ObjectProperty> properties;
-
-            private ObjectSchemaImpl(
-                @Nonnull ObjectParser parser,
-                @Nonnull Type type,
-                @Nonnull Map<@Nonnull String, @Nonnull ObjectPropertyBase> propBases
-            ) {
-                this.parser = parser;
-                this.type = type;
-                Map<@Nonnull String, @Nonnull ObjectProperty> props = new LinkedHashMap<>();
-                propBases.forEach((name, propBase) -> props.put(name, new PropertyImpl(propBase)));
-                this.properties = Collections.unmodifiableMap(props);
-            }
-
-            @Override
-            public @Nonnull ObjectParser parser() {
-                return parser;
-            }
-
-            @Override
-            public @Nonnull Type type() {
-                return type;
-            }
-
-            @Override
-            public @Nonnull Map<@Nonnull String, @Nonnull ObjectProperty> properties() {
-                return properties;
-            }
-
-            @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-            @Override
-            public boolean equals(Object o) {
-                return DataSchemaKit.equals(this, o);
-            }
-
-            @Override
-            public int hashCode() {
-                return DataSchemaKit.hashCode(this);
-            }
-
-            @Override
-            public @Nonnull String toString() {
-                return DataSchemaKit.toString(this);
-            }
-
-            private final class PropertyImpl implements ObjectProperty {
-
-                private final @Nonnull String name;
-                private final @Nonnull Type type;
-                private final @Nullable Method getterMethod;
-                private final @Nullable Method setterMethod;
-                private final @Nullable Field field;
-                private final @Nullable Invocable getter;
-                private final @Nullable Invocable setter;
-
-                private PropertyImpl(@Nonnull ObjectPropertyBase propertyBase) {
-                    this.name = propertyBase.name();
-                    this.type = propertyBase.type();
-                    this.getterMethod = propertyBase.getterMethod();
-                    this.setterMethod = propertyBase.setterMethod();
-                    this.field = propertyBase.field();
-                    this.getter = propertyBase.getter();
-                    this.setter = propertyBase.setter();
-                }
-
-                @Override
-                public @Nonnull ObjectSchema owner() {
-                    return ObjectSchemaImpl.this;
-                }
-
-                @Override
-                public @Nonnull String name() {
-                    return name;
-                }
-
-                @Override
-                public @Nonnull Type type() {
-                    return type;
-                }
-
-                @Override
-                public @Nullable Method getterMethod() {
-                    return getterMethod;
-                }
-
-                @Override
-                public @Nullable Method setterMethod() {
-                    return setterMethod;
-                }
-
-                @Override
-                public @Nullable Field field() {
-                    return field;
-                }
-
-                @Override
-                public @Nullable Invocable getter() {
-                    return getter;
-                }
-
-                @Override
-                public @Nullable Invocable setter() {
-                    return setter;
-                }
-
-                @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-                @Override
-                public boolean equals(Object o) {
-                    return DataSchemaKit.equals(this, o);
-                }
-
-                @Override
-                public int hashCode() {
-                    return DataSchemaKit.hashCode(this);
-                }
-
-                @Override
-                public @Nonnull String toString() {
-                    return DataSchemaKit.toString(this);
-                }
-            }
+        @Override
+        public @Nonnull Handler asHandler() {
+            return parser.asHandler();
         }
     }
 }

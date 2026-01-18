@@ -1,4 +1,4 @@
-package tests.object.data;
+package tests.object.schema;
 
 import internal.test.PrintTest;
 import lombok.Data;
@@ -8,15 +8,16 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectPropertyBase;
 import space.sunqian.fs.object.schema.ObjectSchema;
+import space.sunqian.fs.object.schema.SchemaException;
 import space.sunqian.fs.object.schema.handlers.SimpleBeanSchemaHandler;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -38,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DataSchemaTest implements PrintTest {
+public class SchemaTest implements PrintTest {
 
     @Test
     public void testObjectSchema() throws Exception {
@@ -119,7 +120,7 @@ public class DataSchemaTest implements PrintTest {
         assertTrue(i.isReadable());
         assertEquals(0, i.getValue(instance));
         assertFalse(i.isWritable());
-        assertThrows(DataSchemaException.class, () -> i.setValue(instance, 1));
+        assertThrows(SchemaException.class, () -> i.setValue(instance, 1));
         // property strArray
         ObjectProperty strArray = schema.getProperty("strArray");
         assertSame(strArray.owner(), schema);
@@ -130,7 +131,7 @@ public class DataSchemaTest implements PrintTest {
         assertNull(strArray.getterMethod());
         assertEquals(strArray.setterMethod(), strArraySetter);
         assertFalse(strArray.isReadable());
-        assertThrows(DataSchemaException.class, () -> strArray.getValue(instance));
+        assertThrows(SchemaException.class, () -> strArray.getValue(instance));
         assertTrue(strArray.isWritable());
         strArray.setValue(instance, new String[]{"hello"});
         assertArrayEquals(new String[]{"hello"}, instance.strArray);
@@ -209,7 +210,7 @@ public class DataSchemaTest implements PrintTest {
         assertEquals(BB.getValue(instance), instance.isBB());
         assertFalse(BB.isWritable());
         // error type
-        assertThrows(DataSchemaException.class, () -> ObjectSchema.parse(TestData.class.getTypeParameters()[0]));
+        assertThrows(SchemaException.class, () -> ObjectSchema.parse(TestData.class.getTypeParameters()[0]));
         // raw type
         ObjectSchema raw = ObjectSchema.parse(TestData.class);
         assertEquals(raw.getProperty("t").type(), TestData.class.getTypeParameters()[0]);
@@ -355,7 +356,7 @@ public class DataSchemaTest implements PrintTest {
             schema.toString(),
             schema.type().getTypeName()
         );
-        assertThrows(DataSchemaException.class, () -> MapSchema.parse(String.class));
+        assertThrows(SchemaException.class, () -> MapSchema.parse(String.class));
         MapSchema schemaWithTypes = MapSchema.parse(Map.class, Object.class, Long.class);
         assertEquals(Map.class, schemaWithTypes.type());
         assertEquals(Map.class, schemaWithTypes.rawType());
@@ -373,7 +374,7 @@ public class DataSchemaTest implements PrintTest {
         assertNotEquals(m3, m1);
         class Parser2 implements MapParser {
             @Override
-            public @Nonnull MapSchema parse(@Nonnull Type type) throws DataSchemaException {
+            public @Nonnull MapSchema parse(@Nonnull Type type) throws SchemaException {
                 return new MapSchema() {
                     @Override
                     public @Nonnull MapParser parser() {
@@ -400,7 +401,7 @@ public class DataSchemaTest implements PrintTest {
             @Override
             public @Nonnull MapSchema parse(
                 @Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType
-            ) throws DataSchemaException {
+            ) throws SchemaException {
                 return null;
             }
         }
@@ -418,26 +419,52 @@ public class DataSchemaTest implements PrintTest {
     }
 
     @Test
+    public void testCachedParser() {
+        {
+            // MapParser
+            MapParser mapParser = MapParser.cachedParser(SimpleCache.ofStrong(), MapParser.defaultParser());
+            assertSame(mapParser.parse(Map.class), mapParser.parse(Map.class));
+            assertNotSame(MapSchema.parse(Map.class), MapSchema.parse(Map.class));
+            assertSame(
+                mapParser.parse(Map.class, String.class, Long.class),
+                mapParser.parse(Map.class, String.class, Long.class)
+            );
+            assertNotSame(
+                MapSchema.parse(Map.class, String.class, Long.class),
+                MapSchema.parse(Map.class, String.class, Long.class)
+            );
+        }
+        {
+            // ObjectParser
+            ObjectParser objectParser = ObjectParser.cachedParser(SimpleCache.ofStrong(), ObjectParser.defaultParser());
+            assertSame(objectParser.parse(A.class), objectParser.parse(A.class));
+            assertNotSame(ObjectSchema.parse(A.class), ObjectSchema.parse(A.class));
+            assertSame(ObjectParser.defaultParser().handlers(), objectParser.handlers());
+            assertSame(ObjectParser.defaultParser().asHandler(), objectParser.asHandler());
+        }
+    }
+
+    @Test
     public void testException() {
         {
             // DataObjectException
-            assertThrows(DataSchemaException.class, () -> {
-                throw new DataSchemaException();
+            assertThrows(SchemaException.class, () -> {
+                throw new SchemaException();
             });
-            assertThrows(DataSchemaException.class, () -> {
-                throw new DataSchemaException("");
+            assertThrows(SchemaException.class, () -> {
+                throw new SchemaException("");
             });
-            assertThrows(DataSchemaException.class, () -> {
-                throw new DataSchemaException("", new RuntimeException());
+            assertThrows(SchemaException.class, () -> {
+                throw new SchemaException("", new RuntimeException());
             });
-            assertThrows(DataSchemaException.class, () -> {
-                throw new DataSchemaException(new RuntimeException());
+            assertThrows(SchemaException.class, () -> {
+                throw new SchemaException(new RuntimeException());
             });
-            assertThrows(DataSchemaException.class, () -> {
-                throw new DataSchemaException(Object.class);
+            assertThrows(SchemaException.class, () -> {
+                throw new SchemaException(Object.class);
             });
-            assertThrows(DataSchemaException.class, () -> {
-                throw new DataSchemaException(Object.class, new RuntimeException());
+            assertThrows(SchemaException.class, () -> {
+                throw new SchemaException(Object.class, new RuntimeException());
             });
         }
     }
@@ -546,8 +573,6 @@ public class DataSchemaTest implements PrintTest {
 
     @Data
     public static class ForPublicFiled {
-
         public String publicField;
-
     }
 }

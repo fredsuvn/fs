@@ -47,12 +47,12 @@ public interface ObjectProperty extends ObjectPropertyBase {
      *
      * @param inst the specified instance
      * @return the property value of the specified instance
-     * @throws DataSchemaException if this property is not readable
+     * @throws SchemaException if this property is not readable
      */
-    default @Nullable Object getValue(@Nonnull Object inst) throws DataSchemaException {
+    default @Nullable Object getValue(@Nonnull Object inst) throws SchemaException {
         Invocable getter = getter();
         if (getter == null) {
-            throw new DataSchemaException("The property is not readable: " + name() + ".");
+            throw new SchemaException("The property is not readable: " + name() + ".");
         }
         return getter.invoke(inst);
     }
@@ -62,12 +62,12 @@ public interface ObjectProperty extends ObjectPropertyBase {
      *
      * @param inst  the specified instance
      * @param value the property value
-     * @throws DataSchemaException if this property is not writable
+     * @throws SchemaException if this property is not writable
      */
-    default void setValue(@Nonnull Object inst, @Nullable Object value) throws DataSchemaException {
+    default void setValue(@Nonnull Object inst, @Nullable Object value) throws SchemaException {
         Invocable setter = setter();
         if (setter == null) {
-            throw new DataSchemaException("The property is not writable: " + name() + ".");
+            throw new SchemaException("The property is not writable: " + name() + ".");
         }
         setter.invoke(inst, value);
     }

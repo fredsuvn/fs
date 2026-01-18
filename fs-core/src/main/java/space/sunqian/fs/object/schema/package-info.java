@@ -1,8 +1,9 @@
 /**
- * This package provides definitions and utilities for schemas about data object. A data object schema may be an
- * instance of {@link space.sunqian.fs.object.schema.MapSchema} which is parsed from a map, or an instance of
- * {@link space.sunqian.fs.object.schema.ObjectSchema} which is parsed from a non-map object. Using codes similar to the
- * following to parse:
+ * This package provides definitions and utilities for schemas, including map schema and non-map object schema. The top
+ * interface for a data schema is {@link space.sunqian.fs.object.schema.DataSchema}, and the two main sub-interfaces are
+ * {@link space.sunqian.fs.object.schema.MapSchema} which represents the schema for map, and
+ * {@link space.sunqian.fs.object.schema.ObjectSchema} which represents the schema for non-map object. Using codes
+ * similar to the following to parse:
  * <pre>{@code
  * // Parse a non-map object:
  * ObjectSchema objectSchema = ObjectSchema.parse(type);
@@ -21,14 +22,14 @@
  *     <li>{@link space.sunqian.fs.object.schema.ObjectSchema}</li>
  *     <li>{@link space.sunqian.fs.object.schema.ObjectProperty}</li>
  *     <li>{@link space.sunqian.fs.object.schema.ObjectParser}</li>
- *     <li>{@link space.sunqian.fs.object.schema.handlers.AbstractObjectSchemaHandler}</li>
- *     <li>{@link space.sunqian.fs.object.schema.handlers.SimpleBeanSchemaHandler}</li>
  *     <li>{@link space.sunqian.fs.object.schema.MapSchema}</li>
  *     <li>{@link space.sunqian.fs.object.schema.MapParser}</li>
+ *     <li>{@link space.sunqian.fs.object.schema.handlers.AbstractObjectSchemaHandler}</li>
+ *     <li>{@link space.sunqian.fs.object.schema.handlers.SimpleBeanSchemaHandler}</li>
  * </ul>
  * And utilities:
  * <ul>
- *     <li>{@link space.sunqian.fs.object.schema.DataSchemaKit}</li>
+ *     <li>{@link space.sunqian.fs.object.schema.SchemaKit}</li>
  * </ul>
  */
 package space.sunqian.fs.object.schema;

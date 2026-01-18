@@ -7,11 +7,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Utilities for data object schema.
+ * Utilities for object schema, including map schema and non-map object schema.
  *
  * @author sunqian
  */
-public class DataSchemaKit {
+public class SchemaKit {
 
     /**
      * The implementation of {@link ObjectSchema#equals(Object)}, and it works in conjunction with
@@ -149,6 +149,6 @@ public class DataSchemaKit {
         return mapSchema.type().getTypeName();
     }
 
-    private DataSchemaKit() {
+    private SchemaKit() {
     }
 }

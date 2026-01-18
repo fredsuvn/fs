@@ -7,11 +7,11 @@ import space.sunqian.fs.object.ObjectException;
 import java.lang.reflect.Type;
 
 /**
- * Exception for data object schema.
+ * Exception for object schema, including map schema and non-map object schema.
  *
  * @author sunqian
  */
-public class DataSchemaException extends ObjectException {
+public class SchemaException extends ObjectException {
 
     private static String toMessage(@Nonnull Type type) {
         return "Parsing data schema failed: " + type.getTypeName() + "[" + type.getClass().getName() + "].";
@@ -20,7 +20,7 @@ public class DataSchemaException extends ObjectException {
     /**
      * Empty constructor.
      */
-    public DataSchemaException() {
+    public SchemaException() {
         super();
     }
 
@@ -29,7 +29,7 @@ public class DataSchemaException extends ObjectException {
      *
      * @param message the message
      */
-    public DataSchemaException(@Nullable String message) {
+    public SchemaException(@Nullable String message) {
         super(message);
     }
 
@@ -39,7 +39,7 @@ public class DataSchemaException extends ObjectException {
      * @param message the message
      * @param cause   the cause
      */
-    public DataSchemaException(@Nullable String message, @Nullable Throwable cause) {
+    public SchemaException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -48,7 +48,7 @@ public class DataSchemaException extends ObjectException {
      *
      * @param cause the cause
      */
-    public DataSchemaException(@Nullable Throwable cause) {
+    public SchemaException(@Nullable Throwable cause) {
         super(cause);
     }
 
@@ -57,7 +57,7 @@ public class DataSchemaException extends ObjectException {
      *
      * @param type the type of specified data object
      */
-    public DataSchemaException(@Nonnull Type type) {
+    public SchemaException(@Nonnull Type type) {
         this(toMessage(type));
     }
 
@@ -67,7 +67,7 @@ public class DataSchemaException extends ObjectException {
      * @param type  the type of specified data object
      * @param cause the cause
      */
-    public DataSchemaException(@Nonnull Type type, @Nullable Throwable cause) {
+    public SchemaException(@Nonnull Type type, @Nullable Throwable cause) {
         this(toMessage(type), cause);
     }
 }

@@ -21,8 +21,7 @@ dependencies {
 
   compileOnly(platform(project(":fs-dependencies")))
   compileOnly(project(":fs-build"))
-
-  //compileOnly("org.projectlombok:lombok")
+  compileOnly("org.projectlombok:lombok")
   //compileOnly("org.springframework:spring-core")
   //compileOnly("cglib:cglib")
   compileOnly("com.google.protobuf:protobuf-java")

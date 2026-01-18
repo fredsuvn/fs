@@ -3,6 +3,7 @@ package space.sunqian.fs.object.schema;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.annotation.ThreadSafe;
+import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.schema.handlers.AbstractObjectSchemaHandler;
 import space.sunqian.fs.object.schema.handlers.SimpleBeanSchemaHandler;
@@ -31,7 +32,7 @@ public interface ObjectParser {
      * @return the default {@link ObjectParser}
      */
     static @Nonnull ObjectParser defaultParser() {
-        return SchemaBack.ObjectParserImpl.DEFAULT;
+        return SchemaBack.defaultObjectParser();
     }
 
     /**
@@ -55,7 +56,25 @@ public interface ObjectParser {
      * @return a new {@link ObjectParser} with given handlers
      */
     static @Nonnull ObjectParser newParser(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
-        return new SchemaBack.ObjectParserImpl(handlers);
+        return SchemaBack.newObjectParser(handlers);
+    }
+
+    /**
+     * Returns a new {@link ObjectParser} that caches the parsed results with the specified cache.
+     * <p>
+     * Note the behavior of the non-parsing methods of the returned {@link ObjectParser}, such as {@link #handlers()},
+     * {@link #asHandler()} and {@link #withFirstHandler(Handler)}, will directly invoke the underlying
+     * {@link ObjectParser}.
+     *
+     * @param cache  the specified cache to store the parsed results
+     * @param parser the underlying {@link ObjectParser} to parse the type
+     * @return a new {@link ObjectParser} that caches the parsed results with the specified cache
+     */
+    static @Nonnull ObjectParser cachedParser(
+        @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectSchema> cache,
+        @Nonnull ObjectParser parser
+    ) {
+        return SchemaBack.cachedObjectParser(cache, parser);
     }
 
     /**
@@ -70,16 +89,14 @@ public interface ObjectParser {
      *     }
      * }
      * }</pre>
-     * <p>
-     * Note that this method does not cache the results and will generate new instances every invocation.
      *
      * @param type the given type
      * @return the parsed {@link ObjectSchema}
-     * @throws DataSchemaException if any problem occurs
+     * @throws SchemaException if any problem occurs
      */
-    default @Nonnull ObjectSchema parse(@Nonnull Type type) throws DataSchemaException {
+    default @Nonnull ObjectSchema parse(@Nonnull Type type) throws SchemaException {
         try {
-            SchemaBack.ObjectSchemaBuilder builder = new SchemaBack.ObjectSchemaBuilder(type);
+            ObjectSchemaBuilder builder = new ObjectSchemaBuilder(type);
             for (Handler handler : handlers()) {
                 if (!handler.parse(builder)) {
                     break;
@@ -87,7 +104,7 @@ public interface ObjectParser {
             }
             return builder.build(this);
         } catch (Exception e) {
-            throw new DataSchemaException(type, e);
+            throw new SchemaException(type, e);
         }
     }
 
