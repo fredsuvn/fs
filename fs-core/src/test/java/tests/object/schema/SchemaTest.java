@@ -229,7 +229,7 @@ public class SchemaTest implements PrintTest {
         class PreHandler implements ObjectParser.Handler {
             @Override
             public boolean parse(@Nonnull ObjectParser.Context context) throws Exception {
-                if (context.dataType().equals(Object.class)) {
+                if (context.parsedType().equals(Object.class)) {
                     return false;
                 }
                 return true;
@@ -242,7 +242,7 @@ public class SchemaTest implements PrintTest {
         class LastHandler implements ObjectParser.Handler {
             @Override
             public boolean parse(@Nonnull ObjectParser.Context context) throws Exception {
-                if (context.dataType().equals(Object.class)) {
+                if (context.parsedType().equals(Object.class)) {
                     context.propertyBaseMap().put("test", new ObjectPropertyBase() {
                         @Override
                         public @Nonnull String name() {

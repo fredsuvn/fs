@@ -21,7 +21,7 @@ final class ObjectSchemaBuilder implements ObjectParser.Context {
     }
 
     @Override
-    public @Nonnull Type dataType() {
+    public @Nonnull Type parsedType() {
         return type;
     }
 

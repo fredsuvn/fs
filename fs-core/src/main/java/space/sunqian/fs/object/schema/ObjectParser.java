@@ -149,7 +149,7 @@ public interface ObjectParser {
 
         /**
          * Parses {@link Type} to {@link ObjectSchema} with its owner parsing logic. The {@link Type} is specified by
-         * {@link Context#dataType()} of the given context, and the parsed properties should be stored in
+         * {@link Context#parsedType()} of the given context, and the parsed properties should be stored in
          * {@link Context#propertyBaseMap()}. Returns {@code false} to prevent subsequent handlers to continue to parse,
          * otherwise returns {@code true}.
          *
@@ -168,12 +168,12 @@ public interface ObjectParser {
     interface Context {
 
         /**
-         * Returns the specified type.
+         * Returns the type to be parsed.
          *
-         * @return the specified type
+         * @return the type to be parsed
          */
         @Nonnull
-        Type dataType();
+        Type parsedType();
 
         /**
          * Returns a mutable map for storing property base infos.

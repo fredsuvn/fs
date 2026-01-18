@@ -74,7 +74,7 @@ public class ProtobufSchemaHandler implements ObjectParser.Handler {
 
     @Override
     public boolean parse(@Nonnull ObjectParser.Context context) throws Exception {
-        Class<?> rawType = TypeKit.getRawClass(context.dataType());
+        Class<?> rawType = TypeKit.getRawClass(context.parsedType());
         if (rawType == null) {
             return true;
         }

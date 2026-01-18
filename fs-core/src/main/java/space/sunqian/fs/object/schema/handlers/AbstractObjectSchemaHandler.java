@@ -64,8 +64,8 @@ public abstract class AbstractObjectSchemaHandler implements ObjectParser.Handle
     }
 
     @Override
-    public boolean parse(@Nonnull ObjectParser.Context context) throws Exception {
-        Type type = context.dataType();
+    public boolean parse(ObjectParser.@Nonnull Context context) throws Exception {
+        Type type = context.parsedType();
         Class<?> rawType = TypeKit.getRawClass(type);
         if (rawType == null) {
             throw new UnsupportedOperationException("Not a Class or ParameterizedType: " + type + ".");
@@ -94,7 +94,7 @@ public abstract class AbstractObjectSchemaHandler implements ObjectParser.Handle
         }
 
         // Builds property base for each property info.
-        Map<TypeVariable<?>, Type> typeParameterMapping = TypeKit.typeParametersMapping(context.dataType());
+        Map<TypeVariable<?>, Type> typeParameterMapping = TypeKit.typeParametersMapping(context.parsedType());
         Set<Type> stack = new HashSet<>();
         propertyInfoMap.forEach((propertyName, propertyInfo) -> {
             Method getterMethod = propertyInfo.getterMethod;
