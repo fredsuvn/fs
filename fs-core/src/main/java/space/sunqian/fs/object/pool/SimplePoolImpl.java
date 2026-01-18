@@ -98,14 +98,14 @@ final class SimplePoolImpl<T> implements SimplePool<T> {
     }
 
     @Override
-    public synchronized void release(@Nonnull T obj) throws ObjectPoolException {
+    public synchronized boolean release(@Nonnull T obj) throws ObjectPoolException {
 
         checkClosed();
 
         try {
             Status status = activeMap.remove(obj);
             if (status == null) {
-                return;
+                return false;
             }
             if (validator.test(obj)) {
                 status.idle();
@@ -114,6 +114,7 @@ final class SimplePoolImpl<T> implements SimplePool<T> {
                 discarder.accept(obj);
                 totalSize--;
             }
+            return true;
         } catch (Exception e) {
             close();
             throw new ObjectPoolException("Failed to release object to pool.", e);

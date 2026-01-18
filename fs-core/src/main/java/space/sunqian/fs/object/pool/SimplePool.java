@@ -44,17 +44,18 @@ public interface SimplePool<T> {
     T get() throws ObjectPoolException;
 
     /**
-     * Releases the given object to the pool. If the object is not acquired from this pool, this method will do
-     * nothing.
+     * Releases the given object to the pool. Returns {@code true} if the object is released successfully, {@code false}
+     * otherwise. If the object is not acquired from this pool, this method will do nothing just return {@code false}.
      * <p>
      * If any exception occurs during the release process, {@link #close()} will be invoked to close this pool and the
      * {@link #unreleasedObjects()} will return the list of unreleased objects, including idle objects and active
      * objects.
      *
      * @param obj the given object to release
+     * @return {@code true} if the object is released successfully, {@code false} otherwise
      * @throws ObjectPoolException if failed to release object
      */
-    void release(@Nonnull T obj) throws ObjectPoolException;
+    boolean release(@Nonnull T obj) throws ObjectPoolException;
 
     /**
      * Cleans the pool, removing idle objects that idle timeout or invalidated by validator, or over the core size,

@@ -63,13 +63,13 @@ public class PoolTest implements AssertTest, PrintTest {
             assertNull(pool.get());
             assertNull(pool.get());
             assertEquals(5, counter.get());
-            pool.release(xs[2]);
+            assertTrue(pool.release(xs[2]));
             assertEquals(1, pool.idleSize());
             assertEquals(4, pool.activeSize());
             assertEquals(5, pool.size());
             assertSame(xs[2], pool.get());
             assertNull(pool.get());
-            pool.release(new X());
+            assertFalse(pool.release(new X()));
             assertEquals(0, pool.idleSize());
             assertEquals(5, pool.activeSize());
             assertEquals(5, pool.size());
@@ -200,7 +200,7 @@ public class PoolTest implements AssertTest, PrintTest {
             assertEquals(5, pool.size());
             X x = pool.get();
             assertNotNull(x);
-            pool.release(x);
+            assertTrue(pool.release(x));
             assertEquals(4, pool.size());
         }
         {
@@ -245,7 +245,7 @@ public class PoolTest implements AssertTest, PrintTest {
             assertEquals(5, pool.size());
             assertEquals(0, pool.idleSize());
             assertEquals(5, pool.activeSize());
-            pool.release(xs[0]);
+            assertTrue(pool.release(xs[0]));
             assertEquals(5, pool.size());
             assertEquals(1, pool.idleSize());
             assertEquals(4, pool.activeSize());
@@ -254,8 +254,12 @@ public class PoolTest implements AssertTest, PrintTest {
             assertEquals(4, pool.size());
             assertEquals(0, pool.idleSize());
             assertEquals(4, pool.activeSize());
-            for (X x : xs) {
-                pool.release(x);
+            for (int i = 0; i < xs.length; i++) {
+                if (i > 0) {
+                    assertTrue(pool.release(xs[i]));
+                } else {
+                    assertFalse(pool.release(xs[i]));
+                }
             }
             Thread.sleep(10L);
             pool.clean();
@@ -306,7 +310,7 @@ public class PoolTest implements AssertTest, PrintTest {
                 assertNotNull(xs[i]);
             }
             for (X x : xs) {
-                pool.release(x);
+                assertTrue(pool.release(x));
             }
             assertFalse(pool.isClosed());
             assertEquals(5, pool.size());
