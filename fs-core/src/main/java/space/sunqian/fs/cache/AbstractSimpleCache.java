@@ -6,6 +6,8 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.value.Val;
 import space.sunqian.fs.base.value.Var;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -166,6 +168,19 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
             v.invalid();
         });
         clean();
+    }
+
+    @Override
+    public @Nonnull Map<K, V> copyEntries() {
+        clean();
+        Map<K, V> map = new LinkedHashMap<>(size());
+        cacheMap.forEach((k, v) -> {
+            Object raw = v.refValue();
+            if (raw != null) {
+                map.put(k, unmaskRawValue(raw));
+            }
+        });
+        return map;
     }
 
     private @Nonnull Object maskValue(@Nullable V value) {

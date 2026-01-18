@@ -166,4 +166,13 @@ public interface SimpleCache<K, V> extends CacheFunction<K, V> {
      * Tries to release invalid entries from this cache.
      */
     void clean();
+
+    /**
+     * Copies and returns all current entries in this cache. The result map is independent of the cache, so any changes
+     * to the cache, including status changes of this cache itself, are not reflected to the map, and vice versa.
+     *
+     * @return a {@link Map} contains the copy of the current entries in this cache
+     */
+    @Nonnull
+    Map<K, V> copyEntries();
 }

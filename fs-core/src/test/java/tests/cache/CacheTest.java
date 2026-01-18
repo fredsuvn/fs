@@ -9,6 +9,7 @@ import space.sunqian.fs.base.value.BooleanVar;
 import space.sunqian.fs.base.value.Val;
 import space.sunqian.fs.cache.AbstractSimpleCache;
 import space.sunqian.fs.cache.SimpleCache;
+import space.sunqian.fs.collect.MapKit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -36,9 +38,17 @@ public class CacheTest implements PrintTest, DataTest {
         assertNull(cache.get(1));
         assertNull(cache.getVal(1));
         cache.put(1, 1);
+        assertEquals(
+            MapKit.map(1, 1),
+            cache.copyEntries()
+        );
         assertEquals(1, cache.get(1));
         assertEquals(1, cache.getVal(1).get());
         cache.put(1, 2);
+        assertEquals(
+            MapKit.map(1, 2),
+            cache.copyEntries()
+        );
         assertEquals(2, cache.get(1));
         assertEquals(2, cache.getVal(1).get());
         assertNull(cache.getVal(2));
@@ -47,6 +57,16 @@ public class CacheTest implements PrintTest, DataTest {
         assertNotNull(cache.getVal(1));
         assertNull(cache.getVal(1).get());
         assertEquals(1, cache.size());
+        assertEquals(
+            MapKit.map(1, null),
+            cache.copyEntries()
+        );
+
+        // copyEntries
+        assertNotSame(
+            cache.copyEntries(),
+            cache.copyEntries()
+        );
 
         // remove
         cache.remove(0);
@@ -56,6 +76,10 @@ public class CacheTest implements PrintTest, DataTest {
         assertNull(cache.get(1));
         assertNull(cache.getVal(1));
         assertEquals(0, cache.size());
+        assertEquals(
+            MapKit.map(),
+            cache.copyEntries()
+        );
 
         // producer
         assertNull(cache.getVal(2));
@@ -69,6 +93,10 @@ public class CacheTest implements PrintTest, DataTest {
         assertNull(cache.getVal(4, k -> null));
         assertNull(cache.getVal(4));
         assertEquals(2, cache.size());
+        assertEquals(
+            MapKit.map(2, 2, 3, 3),
+            cache.copyEntries()
+        );
 
         // clear
         assertNotNull(cache.getVal(2));
@@ -78,6 +106,10 @@ public class CacheTest implements PrintTest, DataTest {
         assertNull(cache.getVal(3));
         assertNull(cache.getVal(4));
         assertEquals(0, cache.size());
+        assertEquals(
+            MapKit.map(),
+            cache.copyEntries()
+        );
     }
 
     @Test
@@ -125,6 +157,10 @@ public class CacheTest implements PrintTest, DataTest {
         cache.put(1, 1);
         assertNull(cache.get(1));
         assertNull(cache.getVal(1));
+        assertEquals(
+            MapKit.map(),
+            cache.copyEntries()
+        );
 
         // producer
         assertNull(cache.getVal(2));
@@ -137,11 +173,19 @@ public class CacheTest implements PrintTest, DataTest {
         assertEquals(3, cache.getVal(3, k -> Val.of(3)).get());
         assertNull(cache.get(3));
         assertNull(cache.getVal(3));
+        assertEquals(
+            MapKit.map(),
+            cache.copyEntries()
+        );
 
         // clean
         cache.put(1, 1);
         cache.remove(1);
         cache.clean();
+        assertEquals(
+            MapKit.map(),
+            cache.copyEntries()
+        );
     }
 
     @Test
