@@ -18,7 +18,7 @@ import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectPropertyBase;
 import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.object.schema.SchemaException;
-import space.sunqian.fs.object.schema.handlers.SimpleBeanSchemaHandler;
+import space.sunqian.fs.object.schema.handlers.CommonSchemaHandler;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Field;
@@ -304,7 +304,7 @@ public class SchemaTest implements PrintTest {
         ObjectSchema a1 = ObjectSchema.parse(A.class);
         ObjectSchema a2 = ObjectSchema.parse(A.class);
         ObjectSchema b1 = ObjectSchema.parse(B.class);
-        ObjectParser parser2 = ObjectParser.newParser(new SimpleBeanSchemaHandler());
+        ObjectParser parser2 = ObjectParser.newParser(new CommonSchemaHandler());
         ObjectSchema a3 = parser2.parse(A.class);
         assertEquals(a1, a1);
         assertFalse(a1.equals(""));

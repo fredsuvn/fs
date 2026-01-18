@@ -8,7 +8,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.FsLoader;
 import space.sunqian.fs.cache.SimpleCache;
-import space.sunqian.fs.object.schema.handlers.SimpleBeanSchemaHandler;
+import space.sunqian.fs.object.schema.handlers.CommonSchemaHandler;
 import space.sunqian.fs.reflect.ReflectionException;
 import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.third.ThirdKit;
@@ -164,7 +164,7 @@ final class SchemaBack {
                 ThirdKit.thirdClassName("protobuf", "ProtobufSchemaHandler"),
                 "com.google.protobuf.Message"
             ),
-            SimpleBeanSchemaHandler.INSTANCE
+            CommonSchemaHandler.INSTANCE
         ));
 
         private final @Nonnull List<@Nonnull Handler> handlers;

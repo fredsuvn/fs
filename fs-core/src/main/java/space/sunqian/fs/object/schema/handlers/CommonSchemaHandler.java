@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * This is an implementation of {@link ObjectParser.Handler} which basically follows the <a
+ * This is a common implementation of {@link ObjectParser.Handler} which basically follows the <a
  * href="https://www.oracle.com/java/technologies/javase/javabeans-spec.html">JavaBeans</a> style, inheriting from
  * {@link AbstractObjectSchemaHandler} and overriding the {@link AbstractObjectSchemaHandler#resolveAccessor(Method)}
  * method.
@@ -21,12 +21,12 @@ import java.util.Objects;
  *
  * @author sunqian
  */
-public class SimpleBeanSchemaHandler extends AbstractObjectSchemaHandler {
+public class CommonSchemaHandler extends AbstractObjectSchemaHandler {
 
     /**
      * An instance of this handler.
      */
-    public static final @Nonnull SimpleBeanSchemaHandler INSTANCE = new SimpleBeanSchemaHandler();
+    public static final @Nonnull CommonSchemaHandler INSTANCE = new CommonSchemaHandler();
 
     @Override
     protected @Nullable AccessorInfo resolveAccessor(@Nonnull Method method) {

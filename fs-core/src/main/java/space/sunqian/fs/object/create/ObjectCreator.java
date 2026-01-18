@@ -28,7 +28,7 @@ public interface ObjectCreator {
      * Returns an instance of {@link ObjectCreator} for the target type, or {@code null} if the target type is
      * unsupported, using {@link CreatorProvider#defaultProvider()}.
      * <p>
-     * Note this method never caches the results.
+     * Note this method never caches the returned {@link ObjectCreator} instances.
      *
      * @param target the target type
      * @return a new {@link ObjectCreator}, or {@code null} if the target type is unsupported

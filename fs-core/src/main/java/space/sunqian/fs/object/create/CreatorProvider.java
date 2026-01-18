@@ -23,7 +23,8 @@ public interface CreatorProvider {
     /**
      * Returns the default {@link CreatorProvider} with {@link CommonCreatorHandler#INSTANCE} as the only handler.
      * <p>
-     * Note the default {@link CreatorProvider} is singleton, and never caches the results.
+     * Note the default {@link CreatorProvider} is singleton, and never caches the returned {@link ObjectCreator}
+     * instances.
      *
      * @return the default {@link CreatorProvider}
      */
@@ -34,7 +35,7 @@ public interface CreatorProvider {
     /**
      * Creates and returns a new {@link CreatorProvider} with the given handlers.
      * <p>
-     * Note the created {@link CreatorProvider} never caches the results.
+     * Note the created {@link CreatorProvider} never caches the returned {@link ObjectCreator} instances.
      *
      * @param handlers the given handlers
      * @return a new {@link CreatorProvider} with the given handlers
@@ -46,7 +47,7 @@ public interface CreatorProvider {
     /**
      * Creates and returns a new {@link CreatorProvider} with given handlers.
      * <p>
-     * Note the created {@link CreatorProvider} never caches the results.
+     * Note the created {@link CreatorProvider} never caches the returned {@link ObjectCreator} instances.
      *
      * @param handlers given handlers
      * @return a new {@link CreatorProvider} with given handlers
@@ -56,7 +57,8 @@ public interface CreatorProvider {
     }
 
     /**
-     * Returns a new {@link CreatorProvider} that caches the results with the specified cache.
+     * Returns a new {@link CreatorProvider} that caches the returned {@link ObjectCreator} instances with the specified
+     * cache.
      * <p>
      * Note the behavior of the non-creating methods of the returned {@link CreatorProvider}, such as
      * {@link #handlers()}, {@link #asHandler()} and {@link #withFirstHandler(Handler)}, will directly invoke the

@@ -6,7 +6,7 @@ import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.schema.handlers.AbstractObjectSchemaHandler;
-import space.sunqian.fs.object.schema.handlers.SimpleBeanSchemaHandler;
+import space.sunqian.fs.object.schema.handlers.CommonSchemaHandler;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.Map;
  * the specific parsing operations, where each {@link Handler} possesses its own specific parsing logic.
  * <p>
  * There is a skeletal handler implementation: {@link AbstractObjectSchemaHandler}. And the default parser is based on
- * {@link SimpleBeanSchemaHandler#INSTANCE}.
+ * {@link CommonSchemaHandler#INSTANCE}.
  *
  * @author sunqian
  */
@@ -25,7 +25,7 @@ import java.util.Map;
 public interface ObjectParser {
 
     /**
-     * Returns the default {@link ObjectParser} with {@link SimpleBeanSchemaHandler#INSTANCE} as the only handler.
+     * Returns the default {@link ObjectParser} with {@link CommonSchemaHandler#INSTANCE} as the only handler.
      * <p>
      * Note the default {@link ObjectParser} is singleton, and never caches the parsed results.
      *
@@ -109,32 +109,32 @@ public interface ObjectParser {
     }
 
     /**
-     * Returns all handlers of this parser.
+     * Returns all handlers of this {@link ObjectParser}.
      *
-     * @return all handlers of this parser
+     * @return all handlers of this {@link ObjectParser}
      */
     @Nonnull
     List<@Nonnull Handler> handlers();
 
     /**
-     * Returns a new parser of which first handler is the given handler and the next handler is this parser as a
-     * {@link Handler}. This method is equivalent:
+     * Returns a new {@link ObjectParser} of which first handler is the given handler and the next handler is this
+     * {@link ObjectParser} as a {@link Handler}. This method is equivalent:
      * <pre>{@code
      * newParser(firstHandler, this.asHandler())
      * }</pre>
      *
      * @param firstHandler the first handler
-     * @return a new parser of which first handler is the given handler and the next handler is this parser as a
-     * {@link Handler}
+     * @return a new {@link ObjectParser} of which first handler is the given handler and the next handler is this
+     * {@link ObjectParser} as a {@link Handler}
      */
     default @Nonnull ObjectParser withFirstHandler(@Nonnull Handler firstHandler) {
         return newParser(firstHandler, this.asHandler());
     }
 
     /**
-     * Returns this parser as a {@link Handler}.
+     * Returns this {@link ObjectParser} as a {@link Handler}.
      *
-     * @return this parser as a {@link Handler}
+     * @return this {@link ObjectParser} as a {@link Handler}
      */
     @Nonnull
     Handler asHandler();

@@ -4,7 +4,7 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.exception.FsRuntimeException;
 
 /**
- * Exception for object operations.
+ * Base exception for object errors.
  *
  * @author sunqian
  */
