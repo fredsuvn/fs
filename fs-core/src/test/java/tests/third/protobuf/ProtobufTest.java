@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
-import space.sunqian.fs.object.ObjectCreator;
-import space.sunqian.fs.object.ObjectCreatorProvider;
+import space.sunqian.fs.object.create.ObjectCreator;
+import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
@@ -437,18 +437,18 @@ public class ProtobufTest implements PrintTest {
 
     @Test
     public void testCreatorHandler() {
-        ObjectCreatorProvider defaultProvider = ObjectCreatorProvider.defaultProvider();
-        ObjectCreatorProvider provider = ObjectCreatorProvider
+        CreatorProvider defaultProvider = CreatorProvider.defaultProvider();
+        CreatorProvider provider = CreatorProvider
             .newProvider(ProtobufCreatorHandler.INSTANCE, defaultProvider.asHandler());
         ObjectParser parser = ObjectParser
             .defaultParser()
             .withFirstHandler(new ProtobufSchemaHandler());
         {
             // type
-            ObjectCreator messageCreator = provider.creatorForType(PbSimple.class);
+            ObjectCreator messageCreator = provider.forType(PbSimple.class);
             assertEquals(PbSimple.class, messageCreator.targetType());
             assertEquals(PbSimple.Builder.class, messageCreator.builderType());
-            ObjectCreator builderCreator = provider.creatorForType(PbSimple.Builder.class);
+            ObjectCreator builderCreator = provider.forType(PbSimple.Builder.class);
             assertEquals(PbSimple.Builder.class, builderCreator.targetType());
             assertEquals(PbSimple.Builder.class, builderCreator.builderType());
         }

@@ -6,7 +6,7 @@ import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.io.IOOperator;
-import space.sunqian.fs.object.ObjectCreatorProvider;
+import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.ObjectParser;
 
@@ -66,7 +66,7 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     DATA_MAPPER,
 
     /**
-     * Key of {@link #creatorProvider(ObjectCreatorProvider)}.
+     * Key of {@link #creatorProvider(CreatorProvider)}.
      */
     CREATOR_PROVIDER,
 
@@ -171,15 +171,15 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     }
 
     /**
-     * Returns an option to specify the {@link ObjectCreatorProvider} to generate data object during the conversion.
+     * Returns an option to specify the {@link CreatorProvider} to generate data object during the conversion.
      * <p>
-     * By default, the {@link ObjectCreatorProvider#defaultProvider()} is used.
+     * By default, the {@link CreatorProvider#defaultProvider()} is used.
      *
-     * @param creatorFactory the {@link ObjectCreatorProvider} to be specified
-     * @return an option to specify the {@link ObjectCreatorProvider} to generate data object during the conversion
+     * @param creatorFactory the {@link CreatorProvider} to be specified
+     * @return an option to specify the {@link CreatorProvider} to generate data object during the conversion
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectCreatorProvider> creatorProvider(
-        @Nonnull ObjectCreatorProvider creatorFactory
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull CreatorProvider> creatorProvider(
+        @Nonnull CreatorProvider creatorFactory
     ) {
         return Option.of(CREATOR_PROVIDER, creatorFactory);
     }

@@ -222,4 +222,7 @@ final class SchemaBack {
             return parser.asHandler();
         }
     }
+
+    private SchemaBack() {
+    }
 }

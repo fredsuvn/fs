@@ -1,19 +1,15 @@
 /**
- * This package provides various object related supports:
+ * This package provides basic object related supports:
  * <ul>
- *     <li>
- *         {@link space.sunqian.fs.object.ObjectCreator}: Creates objects in following steps:
- *         {@code create builder -> configre builder -> create target from builder};
- *     </li>
- *     <li>
- *         {@link space.sunqian.fs.object.ObjectKit}: The utilities for objects;
- *     </li>
+ *     <li>{@link space.sunqian.fs.object.ObjectKit}: The utilities for objects;</li>
+ *     <li>{@link space.sunqian.fs.object.ObjectException}: Base exception for object related errors;</li>
  * </ul>
- * <p>
  * And its subpackages provide specific object related supports;
  * <ul>
- *     <li>{@link space.sunqian.fs.object.schema}: Parses and manipulates data object schemas;</li>
- *     <li>{@link space.sunqian.fs.object.convert}: Converts objects into different types;</li>
+ *     <li>{@link space.sunqian.fs.object.schema}: Defines schemas for data objects;</li>
+ *     <li>{@link space.sunqian.fs.object.create}: Defines steps for creating objects;</li>
+ *     <li>{@link space.sunqian.fs.object.convert}: Converts and copies objects and properties;</li>
+ *     <li>{@link space.sunqian.fs.object.pool}: Provides pool interfaces for objects;</li>
  * </ul>
  */
 package space.sunqian.fs.object;

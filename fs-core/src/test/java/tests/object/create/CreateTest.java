@@ -1,4 +1,4 @@
-package tests.object;
+package tests.object.create;
 
 import internal.test.AssertTest;
 import internal.test.PrintTest;
@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.cache.CacheFunction;
-import space.sunqian.fs.object.ObjectCreator;
-import space.sunqian.fs.object.ObjectCreatorProvider;
+import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.ObjectException;
+import space.sunqian.fs.object.create.CreatorProvider;
+import space.sunqian.fs.object.create.ObjectCreateException;
+import space.sunqian.fs.object.create.ObjectCreator;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,108 +25,150 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ObjectCreatorTest implements AssertTest, PrintTest {
+public class CreateTest implements AssertTest, PrintTest {
 
     @Test
     public void testCreator() throws Exception {
         {
-            ObjectCreatorProvider p1 = ObjectCreatorProvider.defaultProvider();
-            ObjectCreatorProvider p2 = ObjectCreatorProvider.defaultProvider();
-            ObjectCreatorProvider p3 = ObjectCreatorProvider.newProvider(ObjectCreatorProvider.defaultHandler());
+            // test default provider
+            CreatorProvider p1 = CreatorProvider.defaultProvider();
+            CreatorProvider p2 = CreatorProvider.defaultProvider();
+            CreatorProvider p3 = CreatorProvider.newProvider(CreatorProvider.defaultProvider().handlers());
             assertSame(p1, p2);
             assertNotSame(p1, p3);
         }
         {
-            ObjectCreator creator = ObjectCreatorProvider.defaultProvider().creatorForType(Info.class);
+            // test common
+            ObjectCreator creator = ObjectCreator.forType(Info.class);
             assertNotNull(creator);
             Info builder = Fs.as(creator.createBuilder());
             builder.setIntValue(6);
             builder.setStringValue("str666");
             assertEquals(
                 new Info(6, "str666"),
-                creator.createTarget(builder)
+                creator.buildTarget(builder)
             );
             assertEquals(Info.class, creator.targetType());
             assertEquals(Info.class, creator.builderType());
         }
         {
-            ObjectCreatorProvider.Handler handler1 = new ObjectCreatorProvider.Handler() {
+            // test with first handler
+            CreatorProvider.Handler handler1 = new CreatorProvider.Handler() {
                 @Override
                 public @Nullable ObjectCreator newCreator(@Nonnull Type target) throws Exception {
                     return null;
                 }
             };
-            ObjectCreator creator = ObjectCreatorProvider
-                .newProvider(CacheFunction.ofMap(new HashMap<>()), handler1, ObjectCreatorProvider.defaultHandler())
-                .creatorForType(Info.class);
+            ObjectCreator creator = CreatorProvider.defaultProvider()
+                .withFirstHandler(handler1)
+                .forType(Info.class);
             assertNotNull(creator);
             Info builder = Fs.as(creator.createBuilder());
             builder.setIntValue(6);
             builder.setStringValue("str666");
             assertEquals(
                 new Info(6, "str666"),
-                creator.createTarget(builder)
+                creator.buildTarget(builder)
             );
         }
         {
-            ObjectCreatorProvider.Handler handler1 = new ObjectCreatorProvider.Handler() {
+            // test with first handler and default provider
+            CreatorProvider.Handler handler1 = new CreatorProvider.Handler() {
                 @Override
                 public @Nullable ObjectCreator newCreator(@Nonnull Type target) throws Exception {
                     return null;
                 }
             };
-            ObjectCreator creator = ObjectCreatorProvider
-                .newProvider(handler1, ObjectCreatorProvider.defaultProvider().asHandler())
-                .creatorForType(Info.class);
+            ObjectCreator creator = CreatorProvider
+                .newProvider(handler1, CreatorProvider.defaultProvider().asHandler())
+                .forType(Info.class);
             assertNotNull(creator);
             Info builder = Fs.as(creator.createBuilder());
             builder.setIntValue(6);
             builder.setStringValue("str666");
             assertEquals(
                 new Info(6, "str666"),
-                creator.createTarget(builder)
+                creator.buildTarget(builder)
             );
         }
         {
-            ObjectCreatorProvider.Handler handler1 = new ObjectCreatorProvider.Handler() {
+            // test new provider
+            CreatorProvider.Handler handler1 = new CreatorProvider.Handler() {
                 @Override
                 public @Nullable ObjectCreator newCreator(@Nonnull Type target) throws Exception {
                     return null;
                 }
             };
-            ObjectCreator creator = ObjectCreatorProvider
+            ObjectCreator creator = CreatorProvider
                 .newProvider(handler1)
-                .creatorForType(Info.class);
+                .forType(Info.class);
             assertNull(creator);
         }
         {
-            ObjectCreatorProvider.Handler handler1 = new ObjectCreatorProvider.Handler() {
+            // test new provider with exception
+            CreatorProvider.Handler handler1 = new CreatorProvider.Handler() {
                 @Override
                 public @Nullable ObjectCreator newCreator(@Nonnull Type target) throws Exception {
                     throw new Exception();
                 }
             };
             assertThrows(ObjectException.class, () -> {
-                ObjectCreatorProvider
+                CreatorProvider
                     .newProvider(handler1)
-                    .creatorForType(Info.class);
+                    .forType(Info.class);
             });
         }
         {
+            // test wrong type
             class X<T> {}
-            ObjectCreator creator = ObjectCreatorProvider
+            ObjectCreator creator = CreatorProvider
                 .defaultProvider()
-                .creatorForType(X.class.getTypeParameters()[0]);
+                .forType(X.class.getTypeParameters()[0]);
             assertNull(creator);
-            creator = ObjectCreatorProvider
+            creator = CreatorProvider
                 .defaultProvider()
-                .creatorForType(X.class);
+                .forType(X.class);
             assertNull(creator);
-            ObjectCreator errCreator = ObjectCreatorProvider
+            ObjectCreator errCreator = CreatorProvider
                 .defaultProvider()
-                .creatorForType(Err.class);
+                .forType(Err.class);
             assertNotNull(errCreator);
             assertThrows(ObjectException.class, errCreator::createBuilder);
+        }
+        {
+            // test cache
+            CreatorProvider provider = CreatorProvider.cachedProvider(
+                SimpleCache.ofStrong(),
+                CreatorProvider.defaultProvider()
+            );
+            assertSame(provider.forType(SimpleCache.class), provider.forType(SimpleCache.class));
+            assertSame(
+                CreatorProvider.defaultProvider().handlers(),
+                provider.handlers()
+            );
+            assertSame(
+                CreatorProvider.defaultProvider().asHandler(),
+                provider.asHandler()
+            );
+        }
+    }
+
+    @Test
+    public void testException() {
+        {
+            // ObjectCreateException
+            assertThrows(ObjectCreateException.class, () -> {
+                throw new ObjectCreateException();
+            });
+            assertThrows(ObjectCreateException.class, () -> {
+                throw new ObjectCreateException("");
+            });
+            assertThrows(ObjectCreateException.class, () -> {
+                throw new ObjectCreateException("", new RuntimeException());
+            });
+            assertThrows(ObjectCreateException.class, () -> {
+                throw new ObjectCreateException(new RuntimeException());
+            });
         }
     }
 

@@ -18,7 +18,7 @@ import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.IOOperator;
-import space.sunqian.fs.object.ObjectCreatorProvider;
+import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
@@ -153,9 +153,8 @@ public class ConvertTest implements PrintTest {
         Map<String, String> map2 = Fs.as(converter.convert(a, A.class, new TypeRef<Map<String, String>>() {}.type()));
         assertEquals(map2, MapKit.map("first", "1", "second", "2", "third", "3"));
         Map<String, String> map3 = converter.convert(a, new TypeRef<Map<String, String>>() {},
-            ConvertOption.creatorProvider(ObjectCreatorProvider.newProvider(
-                CacheFunction.ofMap(new HashMap<>()),
-                ObjectCreatorProvider.defaultProvider().asHandler())
+            ConvertOption.creatorProvider(CreatorProvider.newProvider(
+                CreatorProvider.defaultProvider().asHandler())
             )
         );
         assertEquals(map3, MapKit.map("first", "1", "second", "2", "third", "3"));

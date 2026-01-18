@@ -6,7 +6,7 @@ import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
-import space.sunqian.fs.object.ObjectCreatorProvider;
+import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.object.convert.handlers.AssignableConvertHandler;
 import space.sunqian.fs.object.convert.handlers.CommonConvertHandler;
 import space.sunqian.fs.reflect.TypeRef;
@@ -41,7 +41,7 @@ import java.util.Map;
  * }</pre>
  * <p>
  * The thread safety of the methods in this interface is determined by its dependent {@link ObjectCopier},
- * {@link ObjectCreatorProvider}, and other objects. By default, they are all thread-safe.
+ * {@link CreatorProvider}, and other objects. By default, they are all thread-safe.
  *
  * @author sunqian
  */
@@ -290,7 +290,7 @@ public interface ObjectConverter {
      * Handler for {@link ObjectConverter}, provides the specific conversion logic.
      * <p>
      * The thread safety of the methods in this interface is determined by its dependent {@link ObjectCopier},
-     * {@link ObjectCreatorProvider}, and other objects. By default, they are all thread-safe.
+     * {@link CreatorProvider}, and other objects. By default, they are all thread-safe.
      *
      * @author sunqian
      */

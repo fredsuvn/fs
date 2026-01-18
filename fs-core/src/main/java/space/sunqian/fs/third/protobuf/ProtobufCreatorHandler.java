@@ -6,15 +6,15 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnsupportedEnvException;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.ObjectCreator;
-import space.sunqian.fs.object.ObjectCreatorProvider;
+import space.sunqian.fs.object.create.ObjectCreator;
+import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.object.ObjectException;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 /**
- * {@link ObjectCreatorProvider.Handler} implementation for
+ * {@link CreatorProvider.Handler} implementation for
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
@@ -23,11 +23,11 @@ import java.lang.reflect.Type;
  *     .withFirstHandler(ProtobufCreatorHandler.INSTANCE);
  * }</pre>
  * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
- * environment, the {@link ObjectCreatorProvider#defaultProvider()} will automatically load this handler.
+ * environment, the {@link CreatorProvider#defaultProvider()} will automatically load this handler.
  *
  * @author sunqian
  */
-public class ProtobufCreatorHandler implements ObjectCreatorProvider.Handler {
+public class ProtobufCreatorHandler implements CreatorProvider.Handler {
 
     /**
      * An instance of this handler.
@@ -102,7 +102,7 @@ public class ProtobufCreatorHandler implements ObjectCreatorProvider.Handler {
         }
 
         @Override
-        public @Nonnull Object createTarget(@Nonnull Object builder) throws ObjectException {
+        public @Nonnull Object buildTarget(@Nonnull Object builder) throws ObjectException {
             return builder;
         }
     }
@@ -139,7 +139,7 @@ public class ProtobufCreatorHandler implements ObjectCreatorProvider.Handler {
         }
 
         @Override
-        public @Nonnull Object createTarget(@Nonnull Object builder) throws ObjectException {
+        public @Nonnull Object buildTarget(@Nonnull Object builder) throws ObjectException {
             return Fs.uncheck(() -> build.invoke(builder), ObjectException::new);
         }
     }
