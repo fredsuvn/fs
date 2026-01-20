@@ -77,7 +77,7 @@ public interface HttpCaller {
          * @return a {@link HttpCaller} with the configurations
          */
         public @Nonnull HttpCaller build() throws HttpNetException {
-            return HttpCallerService.INST.newCaller(bufSize, proxy);
+            return HttpService.INST.newCaller(bufSize, proxy);
         }
     }
 }

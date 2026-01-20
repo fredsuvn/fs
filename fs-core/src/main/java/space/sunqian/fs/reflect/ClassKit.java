@@ -329,7 +329,7 @@ public class ClassKit {
      * @return the array class whose component type is the specified type, may be {@code null} if fails
      */
     public static @Nullable Class<?> arrayClass(@Nonnull Type componentType) {
-        return ArrayClassService.INST.arrayClass(componentType);
+        return ArrayService.INST.arrayClass(componentType);
     }
 
     /**

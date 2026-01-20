@@ -20,7 +20,7 @@ import java.nio.charset.Charset;
  *
  * @param <C> the type of the underlying channel
  * @author sunqian
- * @implSpec The default I/O methods of this interface use {@link IOKit} to read data from the underlying channel.
+ * @implNote The default I/O methods of this interface use {@link IOKit} to read data from the underlying channel.
  */
 public interface ChannelReader<C extends ReadableByteChannel> {
 

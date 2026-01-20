@@ -53,11 +53,11 @@ final class SchemaBack {
         INST;
 
         @Override
-        public @Nonnull MapSchema parse(@Nonnull Type type) throws SchemaException {
+        public @Nonnull MapSchema parse(@Nonnull Type type) throws DataSchemaException {
             try {
                 return new MapSchemaImpl(type);
             } catch (Exception e) {
-                throw new SchemaException(e);
+                throw new DataSchemaException(e);
             }
         }
 
@@ -212,7 +212,7 @@ final class SchemaBack {
         }
 
         @Override
-        public @Nonnull ObjectSchema parse(@Nonnull Type type) throws SchemaException {
+        public @Nonnull ObjectSchema parse(@Nonnull Type type) throws DataSchemaException {
             return cache.get(type, parser::parse);
         }
 

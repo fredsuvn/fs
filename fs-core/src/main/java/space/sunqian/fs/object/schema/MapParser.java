@@ -5,6 +5,7 @@ import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.cache.SimpleCache;
 
 import java.lang.reflect.Type;
+import java.util.Map;
 
 /**
  * This interface is used to parse {@link Type} to {@link MapSchema}.
@@ -44,10 +45,10 @@ public interface MapParser {
      *
      * @param type the given type
      * @return the parsed {@link MapParser}
-     * @throws SchemaException if any problem occurs
+     * @throws DataSchemaException if the given type is not a {@link Map} type, or any other problem occurs
      */
     @Nonnull
-    MapSchema parse(@Nonnull Type type) throws SchemaException;
+    MapSchema parse(@Nonnull Type type) throws DataSchemaException;
 
     /**
      * Parses the given type to an instance of {@link MapParser} with the specified key type and value type, and returns
@@ -57,8 +58,8 @@ public interface MapParser {
      * @param keyType   the specified key type
      * @param valueType the specified value type
      * @return the parsed {@link MapParser}
-     * @throws SchemaException if any problem occurs
+     * @throws DataSchemaException if the given type is not a {@link Map} type, or any other problem occurs
      */
     @Nonnull
-    MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) throws SchemaException;
+    MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) throws DataSchemaException;
 }

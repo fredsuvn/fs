@@ -85,9 +85,18 @@ public interface CreatorProvider {
      * @param target the target type
      * @return a new {@link ObjectCreator}, or {@code null} if the target type is unsupported
      * @throws ObjectCreateException if an error occurs while creating the {@link ObjectCreator}
-     * @implSpec The default implementation iterates all handlers of this {@link CreatorProvider} and calls
-     * {@link Handler#newCreator(Type)} for each handler. If a handler returns a non-{@code null} {@link ObjectCreator},
-     * it will be returned. Otherwise, {@code null} will be returned. The result value will not be cached.
+     * @implNote The default implementation of this method invokes the {@link Handler#newCreator(Type)} in the order of
+     * {@link #handlers()} until one of the handlers returns a non-{@code null} {@link ObjectCreator}. The codes are
+     * similar to:
+     * <pre>{@code
+     * for (Handler handler : handlers()) {
+     *     ObjectCreator creator = handler.newCreator(target);
+     *     if (creator != null) {
+     *         return creator;
+     *     }
+     * }
+     * return null;
+     * }</pre>
      */
     default @Nullable ObjectCreator forType(@Nonnull Type target) throws ObjectCreateException {
         try {

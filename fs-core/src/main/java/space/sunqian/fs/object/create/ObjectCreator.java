@@ -31,7 +31,7 @@ public interface ObjectCreator {
      * Note this method never caches the returned {@link ObjectCreator} instances.
      *
      * @param target the target type
-     * @return a new {@link ObjectCreator}, or {@code null} if the target type is unsupported
+     * @return a new {@link ObjectCreator}, or {@code null} if the target type is unsupported via the default provider
      * @throws ObjectCreateException if an error occurs while creating the {@link ObjectCreator}
      */
     static @Nullable ObjectCreator forType(@Nonnull Type target) throws ObjectCreateException {

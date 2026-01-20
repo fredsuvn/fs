@@ -6,10 +6,10 @@ import space.sunqian.fs.FsLoader;
 
 import java.lang.reflect.Type;
 
-interface ArrayClassService {
+interface ArrayService {
 
     @Nonnull
-    ArrayClassService INST = FsLoader.loadImplByJvm(ArrayClassService.class, 12);
+    ArrayService INST = FsLoader.loadImplByJvm(ArrayService.class, 12);
 
     @Nullable
     Class<?> arrayClass(@Nonnull Type componentType);

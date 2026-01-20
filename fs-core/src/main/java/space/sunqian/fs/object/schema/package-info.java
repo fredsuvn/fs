@@ -25,6 +25,7 @@
  *     <li>{@link space.sunqian.fs.object.schema.MapParser}</li>
  *     <li>{@link space.sunqian.fs.object.schema.handlers.AbstractObjectSchemaHandler}</li>
  *     <li>{@link space.sunqian.fs.object.schema.handlers.CommonSchemaHandler}</li>
+ *     <li>{@link space.sunqian.fs.object.schema.handlers.RecordSchemaHandler}(only loaded on JDK 16+)</li>
  * </ul>
  * And utilities:
  * <ul>

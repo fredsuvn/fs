@@ -5,7 +5,7 @@ import space.sunqian.annotation.Nullable;
 
 import java.lang.reflect.Type;
 
-enum ArrayClassServiceImpl implements ArrayClassService {
+enum ArrayServiceImpl implements ArrayService {
     INST;
 
     @Override

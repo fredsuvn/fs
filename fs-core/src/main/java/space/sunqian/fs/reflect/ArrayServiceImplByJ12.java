@@ -6,7 +6,7 @@ import space.sunqian.annotation.Nullable;
 import java.lang.reflect.Type;
 
 @SuppressWarnings("unused")
-enum ArrayClassServiceImplByJ12 implements ArrayClassService {
+enum ArrayServiceImplByJ12 implements ArrayService {
     INST;
 
     @Override

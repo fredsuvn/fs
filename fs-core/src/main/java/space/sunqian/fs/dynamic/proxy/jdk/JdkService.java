@@ -6,10 +6,10 @@ import space.sunqian.fs.invoke.Invocable;
 
 import java.lang.reflect.Method;
 
-interface DefaultMethodService {
+interface JdkService {
 
     @Nonnull
-    DefaultMethodService INST = FsLoader.loadImplByJvm(DefaultMethodService.class, 9);
+    JdkService INST = FsLoader.loadImplByJvm(JdkService.class, 9);
 
     @Nonnull
     Invocable getDefaultMethodInvocable(@Nonnull Method method) throws Exception;

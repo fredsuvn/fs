@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
  *
  * @author sunqian
  */
-public class SchemaException extends ObjectException {
+public class DataSchemaException extends ObjectException {
 
     private static String toMessage(@Nonnull Type type) {
         return "Parsing data schema failed: " + type.getTypeName() + "[" + type.getClass().getName() + "].";
@@ -20,7 +20,7 @@ public class SchemaException extends ObjectException {
     /**
      * Empty constructor.
      */
-    public SchemaException() {
+    public DataSchemaException() {
         super();
     }
 
@@ -29,7 +29,7 @@ public class SchemaException extends ObjectException {
      *
      * @param message the message
      */
-    public SchemaException(@Nullable String message) {
+    public DataSchemaException(@Nullable String message) {
         super(message);
     }
 
@@ -39,7 +39,7 @@ public class SchemaException extends ObjectException {
      * @param message the message
      * @param cause   the cause
      */
-    public SchemaException(@Nullable String message, @Nullable Throwable cause) {
+    public DataSchemaException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -48,7 +48,7 @@ public class SchemaException extends ObjectException {
      *
      * @param cause the cause
      */
-    public SchemaException(@Nullable Throwable cause) {
+    public DataSchemaException(@Nullable Throwable cause) {
         super(cause);
     }
 
@@ -57,7 +57,7 @@ public class SchemaException extends ObjectException {
      *
      * @param type the type of specified data object
      */
-    public SchemaException(@Nonnull Type type) {
+    public DataSchemaException(@Nonnull Type type) {
         this(toMessage(type));
     }
 
@@ -67,7 +67,7 @@ public class SchemaException extends ObjectException {
      * @param type  the type of specified data object
      * @param cause the cause
      */
-    public SchemaException(@Nonnull Type type, @Nullable Throwable cause) {
+    public DataSchemaException(@Nonnull Type type, @Nullable Throwable cause) {
         this(toMessage(type), cause);
     }
 }

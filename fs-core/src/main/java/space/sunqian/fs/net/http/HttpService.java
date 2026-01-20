@@ -5,10 +5,10 @@ import space.sunqian.fs.FsLoader;
 
 import java.net.Proxy;
 
-interface HttpCallerService {
+interface HttpService {
 
     @Nonnull
-    HttpCallerService INST = FsLoader.loadImplByJvm(HttpCallerService.class, 11);
+    HttpService INST = FsLoader.loadImplByJvm(HttpService.class, 11);
 
     @Nonnull
     HttpCaller newCaller(

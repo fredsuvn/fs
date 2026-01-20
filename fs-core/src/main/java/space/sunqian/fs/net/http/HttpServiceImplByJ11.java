@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-enum HttpCallerServiceImplByJ11 implements HttpCallerService {
+enum HttpServiceImplByJ11 implements HttpService {
     INST;
 
     @Override

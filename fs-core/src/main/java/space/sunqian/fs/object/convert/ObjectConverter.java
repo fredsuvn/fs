@@ -40,8 +40,8 @@ import java.util.Map;
  * throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
  * }</pre>
  * <p>
- * The thread safety of the methods in this interface is determined by its dependent {@link ObjectCopier},
- * {@link CreatorProvider}, and other objects. By default, they are all thread-safe.
+ * The thread safety of the methods in this interface is determined by its dependent option objects, such as
+ * {@link CreatorProvider}, {@link ObjectCopier}, and other objects. By default, they are all thread-safe.
  *
  * @author sunqian
  */

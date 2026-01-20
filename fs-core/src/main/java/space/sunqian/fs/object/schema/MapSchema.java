@@ -4,6 +4,7 @@ import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 
 import java.lang.reflect.Type;
+import java.util.Map;
 
 /**
  * This interface represents the schema of map, provides information about the map's entries.
@@ -23,9 +24,9 @@ public interface MapSchema extends DataSchema {
      *
      * @param type the given type
      * @return the {@link MapSchema} parsed from the given type using {@link MapParser#defaultParser()}
-     * @throws SchemaException if any problem occurs
+     * @throws DataSchemaException if the given type is not a {@link Map} type, or any other problem occurs
      */
-    static @Nonnull MapSchema parse(@Nonnull Type type) throws SchemaException {
+    static @Nonnull MapSchema parse(@Nonnull Type type) throws DataSchemaException {
         return MapParser.defaultParser().parse(type);
     }
 
@@ -39,13 +40,13 @@ public interface MapSchema extends DataSchema {
      * @param keyType   the specified key type
      * @param valueType the specified value type
      * @return the {@link MapSchema} parsed from the given type using {@link MapParser#defaultParser()}
-     * @throws SchemaException if any problem occurs
+     * @throws DataSchemaException if the given type is not a {@link Map} type, or any other problem occurs
      */
     static @Nonnull MapSchema parse(
         @Nonnull Type type,
         @Nonnull Type keyType,
         @Nonnull Type valueType
-    ) throws SchemaException {
+    ) throws DataSchemaException {
         return MapParser.defaultParser().parse(type, keyType, valueType);
     }
 

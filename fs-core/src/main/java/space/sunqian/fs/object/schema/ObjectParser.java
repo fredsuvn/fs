@@ -87,9 +87,12 @@ public interface ObjectParser {
 
     /**
      * Parses the given type to an instance of {@link ObjectSchema}, and returns the parsed {@link ObjectSchema}.
-     * <p>
-     * The parsing logic of the implementations must be: invokes the {@link Handler#parse(ObjectParser.Context)} in the
-     * order of {@link #handlers()} until one of the handlers returns {@code false}. The codes are similar to:
+     *
+     * @param type the given type
+     * @return the parsed {@link ObjectSchema}
+     * @throws DataSchemaException if any problem occurs
+     * @implNote The default implementation of this method invokes the {@link Handler#parse(ObjectParser.Context)} in
+     * the order of {@link #handlers()} until one of the handlers returns {@code false}. The codes are similar to:
      * <pre>{@code
      * for (Handler handler : handlers()) {
      *     if (!handler.parse(context)) {
@@ -97,12 +100,8 @@ public interface ObjectParser {
      *     }
      * }
      * }</pre>
-     *
-     * @param type the given type
-     * @return the parsed {@link ObjectSchema}
-     * @throws SchemaException if any problem occurs
      */
-    default @Nonnull ObjectSchema parse(@Nonnull Type type) throws SchemaException {
+    default @Nonnull ObjectSchema parse(@Nonnull Type type) throws DataSchemaException {
         try {
             ObjectSchemaBuilder builder = new ObjectSchemaBuilder(type);
             for (Handler handler : handlers()) {
@@ -112,7 +111,7 @@ public interface ObjectParser {
             }
             return builder.build(this);
         } catch (Exception e) {
-            throw new SchemaException(type, e);
+            throw new DataSchemaException(type, e);
         }
     }
 

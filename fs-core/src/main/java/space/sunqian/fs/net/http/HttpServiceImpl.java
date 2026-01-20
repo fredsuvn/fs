@@ -13,7 +13,7 @@ import java.net.Proxy;
 import java.util.List;
 import java.util.Map;
 
-enum HttpCallerServiceImpl implements HttpCallerService {
+enum HttpServiceImpl implements HttpService {
     INST;
 
     @Override

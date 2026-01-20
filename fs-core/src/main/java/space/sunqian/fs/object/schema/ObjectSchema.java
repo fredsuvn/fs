@@ -32,9 +32,9 @@ public interface ObjectSchema extends DataSchema {
      *
      * @param type the given type
      * @return the {@link ObjectSchema} parsed from the given type using {@link ObjectParser#defaultParser()}
-     * @throws SchemaException if any problem occurs
+     * @throws DataSchemaException if any problem occurs
      */
-    static @Nonnull ObjectSchema parse(@Nonnull Type type) throws SchemaException {
+    static @Nonnull ObjectSchema parse(@Nonnull Type type) throws DataSchemaException {
         return ObjectParser.defaultParser().parse(type);
     }
 

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
-import space.sunqian.fs.object.schema.SchemaException;
+import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.util.List;
@@ -105,7 +105,7 @@ public class SchemaImplByJ16Test {
             new InfoObject<>("hello", 18, List.of("friend1", "friend2"), 6L),
             infoObject
         );
-        assertThrows(SchemaException.class, () -> ObjectSchema.parse(InfoRecord.class.getTypeParameters()[0]));
+        assertThrows(DataSchemaException.class, () -> ObjectSchema.parse(InfoRecord.class.getTypeParameters()[0]));
     }
 
     public record InfoRecord<T>(String name, int age, List<String> friends, T t) {

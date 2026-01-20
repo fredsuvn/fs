@@ -16,7 +16,7 @@ import java.nio.channels.ByteChannel;
  *
  * @param <C> the type of the underlying channel
  * @author sunqian
- * @implSpec The default I/O methods of this interface use {@link IOKit} to read and write data from the underlying
+ * @implNote The default I/O methods of this interface use {@link IOKit} to read and write data from the underlying
  * channel, inherited from {@link ChannelReader} and {@link ChannelWriter}.
  */
 public interface ChannelContext<C extends ByteChannel> extends ChannelReader<C>, ChannelWriter<C> {

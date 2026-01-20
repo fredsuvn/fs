@@ -5,14 +5,23 @@ import space.sunqian.fs.invoke.Invocable;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-enum DefaultMethodServiceImplByJ9 implements DefaultMethodService {
+enum JdkServiceImpl implements JdkService {
     INST;
+
+    private Constructor<MethodHandles.Lookup> constructor;
 
     @Override
     public @Nonnull Invocable getDefaultMethodInvocable(@Nonnull Method method) throws Exception {
-        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        if (constructor == null) {
+            Constructor<MethodHandles.Lookup> c = MethodHandles.Lookup.class
+                .getDeclaredConstructor(Class.class);
+            c.setAccessible(true);
+            constructor = c;
+        }
+        MethodHandles.Lookup lookup = constructor.newInstance(method.getDeclaringClass());
         MethodHandle methodHandle = lookup.unreflectSpecial(method, method.getDeclaringClass());
         return Invocable.of(methodHandle, false);
     }
