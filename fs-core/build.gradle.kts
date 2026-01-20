@@ -79,6 +79,10 @@ val javaVersionTo = project.property("javaLangVersionTo") as JavaLanguageVersion
 val javaVerFrom = javaVersionFrom.asInt()
 val javaVerTo = javaVersionTo.asInt()
 
+// built classes for each java version
+val mainBuildDir = layout.buildDirectory.dir("classes/java-tmp/main")
+val testBuildDir = layout.buildDirectory.dir("classes/java-tmp/test")
+
 // java8 base
 tasks.register("compileJava${javaVerFrom}", JavaCompile::class) {
   group = "compile"
@@ -87,7 +91,8 @@ tasks.register("compileJava${javaVerFrom}", JavaCompile::class) {
   source = sourceSets.main.get().allJava
   classpath = sourceSets.main.get().compileClasspath
   exclude("**/*${implByJvm}*.java")
-  destinationDirectory = layout.buildDirectory.dir("classes/java/main").get().asFile
+  //destinationDirectory = layout.buildDirectory.dir("classes/java/main").get().asFile
+  destinationDirectory = mainBuildDir.map { it.dir("java$javaVerFrom") }.get().asFile
   javaCompiler = javaToolchains.compilerFor {
     languageVersion = javaVersionFrom
   }
@@ -102,9 +107,14 @@ tasks.register("compileJava${javaVerFrom}", JavaCompile::class) {
     val lastCompileTask = tasks.named<JavaCompile>("compileJava${javaVersion - 1}")
     dependsOn(lastCompileTask)
     source = sourceSets.main.get().allJava
-    classpath = sourceSets.main.get().compileClasspath + files(lastCompileTask.get().destinationDirectory)
+    //classpath = sourceSets.main.get().compileClasspath + files(lastCompileTask.get().destinationDirectory)
+    val previousOutputs = ((javaVerFrom) until javaVersion).map { prevVersion ->
+      tasks.named<JavaCompile>("compileJava$prevVersion").get().destinationDirectory
+    }
+    classpath = sourceSets.main.get().compileClasspath + files(previousOutputs)
     include("**/*${implByJvm + javaVersion}.java")
-    destinationDirectory = layout.buildDirectory.dir("classes/java/main").get().asFile
+    //destinationDirectory = layout.buildDirectory.dir("classes/java/main").get().asFile
+    destinationDirectory = mainBuildDir.map { it.dir("java$javaVersion") }.get().asFile
     javaCompiler = javaToolchains.compilerFor {
       languageVersion = javaVersionTo
     }
@@ -114,16 +124,26 @@ tasks.register("compileJava${javaVerFrom}", JavaCompile::class) {
   }
 }
 
+val mergeClasses by tasks.registering(Copy::class) {
+  group = "compile"
+  description = "Merge all version-specific class files"
+  ((javaVerFrom)..javaVerTo).forEach { version ->
+    from(tasks.named<JavaCompile>("compileJava$version").get().destinationDirectory)
+  }
+  into(layout.buildDirectory.dir("classes/java/main").get().asFile)
+  //duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
 val compileJavaHighest = tasks.named<JavaCompile>("compileJava$javaVerTo")
 
 tasks.compileJava {
   group = "compile"
   enabled = false
-  dependsOn(compileJavaHighest)
+  dependsOn(compileJavaHighest, mergeClasses)
 }
 
 tasks.named("classes") {
-  dependsOn(compileJavaHighest)
+  dependsOn(compileJavaHighest, mergeClasses)
 }
 
 // java8 base
@@ -133,7 +153,8 @@ tasks.register("compileTestJava$javaVerFrom", JavaCompile::class) {
   source = sourceSets.test.get().allJava
   classpath = sourceSets.test.get().compileClasspath
   exclude("**/*${implByJvm}*Test.java")
-  destinationDirectory = file(layout.buildDirectory.dir("classes/java/test"))
+  //destinationDirectory = file(layout.buildDirectory.dir("classes/java/test"))
+  destinationDirectory = testBuildDir.map { it.dir("java$javaVerFrom") }.get().asFile
   javaCompiler = javaToolchains.compilerFor {
     languageVersion = javaVersionFrom
   }
@@ -145,11 +166,17 @@ tasks.register("compileTestJava$javaVerFrom", JavaCompile::class) {
   val taskName = "compileTestJava$javaVersion"
   tasks.register(taskName, JavaCompile::class) {
     group = "compile"
-    dependsOn(tasks.named("compileTestJava${javaVersion - 1}"))
+    val lastCompileTask = tasks.named<JavaCompile>("compileJava${javaVersion - 1}")
+    dependsOn(lastCompileTask)
     source = sourceSets.test.get().allJava
-    classpath = sourceSets.test.get().compileClasspath
+    //classpath = sourceSets.test.get().compileClasspath + files(lastCompileTask.get().destinationDirectory)
+    val previousOutputs = ((javaVerFrom) until javaVersion).map { prevVersion ->
+      tasks.named<JavaCompile>("compileTestJava$prevVersion").get().destinationDirectory
+    }
+    classpath = sourceSets.test.get().compileClasspath + files(previousOutputs)
     include("**/*${implByJvm + javaVersion}Test.java")
-    destinationDirectory = file(layout.buildDirectory.dir("classes/java/test"))
+    //destinationDirectory = file(layout.buildDirectory.dir("classes/java/test"))
+    destinationDirectory = testBuildDir.map { it.dir("java$javaVersion") }.get().asFile
     javaCompiler = javaToolchains.compilerFor {
       languageVersion = javaVersionTo
     }
@@ -159,12 +186,26 @@ tasks.register("compileTestJava$javaVerFrom", JavaCompile::class) {
   }
 }
 
+val mergeTestClasses by tasks.registering(Copy::class) {
+  group = "compile"
+  description = "Merge all version-specific test class files"
+  ((javaVerFrom)..javaVerTo).forEach { version ->
+    from(tasks.named<JavaCompile>("compileTestJava$version").get().destinationDirectory)
+  }
+  into(layout.buildDirectory.dir("classes/java/test").get().asFile)
+  //duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
 val compileTestJavaHighest = tasks.named<JavaCompile>("compileTestJava$javaVerTo")
 
 tasks.compileTestJava {
   group = "compile"
   enabled = false
-  dependsOn(tasks.named("generateTestProto"), compileTestJavaHighest)
+  dependsOn(tasks.named("generateTestProto"), compileTestJavaHighest, mergeTestClasses)
+}
+
+tasks.named("testClasses") {
+  dependsOn(tasks.named("generateTestProto"), compileTestJavaHighest, mergeTestClasses)
 }
 
 tasks.named<Jar>("sourcesJar") {
