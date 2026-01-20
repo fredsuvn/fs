@@ -10,6 +10,7 @@ import space.sunqian.fs.reflect.ClassKit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Loader for implementations of this lib.
@@ -56,13 +57,14 @@ public class FsLoader {
     }
 
     /**
-     * This method is used to load a class that depends on another class.
+     * This method is used to load a class that depends on another class. May return {@code null} if the dependent class
+     * is not found.
      * <p>
      * This is a lib-internal method.
      *
      * @param className          the name of the class that needs to be loaded
      * @param dependentClassName the name of the dependent class
-     * @return the loaded class
+     * @return the loaded class, or {@code null} if the dependent class is not found
      */
     public static @Nullable Class<?> loadClassByDependent(
         @Nonnull String className, @Nonnull String dependentClassName
@@ -72,6 +74,30 @@ public class FsLoader {
             return null;
         }
         return ClassKit.classForName(className);
+    }
+
+    /**
+     * This method is used to load an instance from the supplier that depends on another class. May return {@code null}
+     * if the dependent class is not found or failed to load.
+     * <p>
+     * This is a lib-internal method.
+     *
+     * @param supplier           the supplier that provides the instance that needs to be loaded
+     * @param dependentClassName the name of the dependent class
+     * @return the loaded instance, or {@code null} if the dependent class is not found or failed to load
+     */
+    public static <T> @Nullable T supplyByDependent(
+        @Nonnull Supplier<T> supplier, @Nonnull String dependentClassName
+    ) {
+        try {
+            Class<?> dependentClass = ClassKit.classForName(dependentClassName);
+            if (dependentClass == null) {
+                return null;
+            }
+            return supplier.get();
+        } catch (Throwable e) {
+            return null;
+        }
     }
 
     /**
