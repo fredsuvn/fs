@@ -21,7 +21,10 @@ import java.util.List;
 public interface CreatorProvider {
 
     /**
-     * Returns the default {@link CreatorProvider} with {@link CommonCreatorHandler#INSTANCE} as the only handler.
+     * Returns the default {@link CreatorProvider}. Here are handlers in the default provider:
+     * <ul>
+     *     <li>{@link CommonCreatorHandler#INSTANCE}</li>
+     * </ul>
      * <p>
      * Note the default {@link CreatorProvider} is singleton, and never caches the returned {@link ObjectCreator}
      * instances.

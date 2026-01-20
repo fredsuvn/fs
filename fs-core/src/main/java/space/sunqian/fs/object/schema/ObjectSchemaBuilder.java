@@ -49,7 +49,7 @@ final class ObjectSchemaBuilder implements ObjectParser.Context {
             this.parser = parser;
             this.type = type;
             Map<@Nonnull String, @Nonnull ObjectProperty> props = new LinkedHashMap<>();
-            propBases.forEach((name, propBase) -> props.put(name, new ObjectSchemaImpl.PropertyImpl(propBase)));
+            propBases.forEach((name, propBase) -> props.put(name, new PropertyImpl(propBase)));
             this.properties = Collections.unmodifiableMap(props);
         }
 

@@ -32,8 +32,9 @@ public interface ObjectCreator {
      *
      * @param target the target type
      * @return a new {@link ObjectCreator}, or {@code null} if the target type is unsupported
+     * @throws ObjectCreateException if an error occurs while creating the {@link ObjectCreator}
      */
-    static @Nullable ObjectCreator forType(@Nonnull Type target) {
+    static @Nullable ObjectCreator forType(@Nonnull Type target) throws ObjectCreateException {
         return CreatorProvider.defaultProvider().forType(target);
     }
 

@@ -9,6 +9,7 @@ import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.FsLoader;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.schema.handlers.CommonSchemaHandler;
+import space.sunqian.fs.object.schema.handlers.RecordSchemaHandler;
 import space.sunqian.fs.reflect.ReflectionException;
 import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.third.ThirdKit;
@@ -163,6 +164,9 @@ final class SchemaBack {
             FsLoader.loadClassByDependent(
                 ThirdKit.thirdClassName("protobuf", "ProtobufSchemaHandler"),
                 "com.google.protobuf.Message"
+            ),
+            FsLoader.supplyByDependent(
+                RecordSchemaHandler::getInstance, RecordSchemaHandler.class.getName() + "ImplByJ16"
             ),
             CommonSchemaHandler.INSTANCE
         ));

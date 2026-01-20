@@ -6,9 +6,9 @@ import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
-import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.object.convert.handlers.AssignableConvertHandler;
 import space.sunqian.fs.object.convert.handlers.CommonConvertHandler;
+import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
@@ -48,7 +48,7 @@ import java.util.Map;
 public interface ObjectConverter {
 
     /**
-     * Returns the default {@link ObjectConverter}, of which handlers are:
+     * Returns the default {@link ObjectConverter}. Here are handlers in the default converter:
      * <ul>
      *     <li>{@link AssignableConvertHandler#INSTANCE};</li>
      *     <li>{@link CommonConvertHandler#INSTANCE};</li>

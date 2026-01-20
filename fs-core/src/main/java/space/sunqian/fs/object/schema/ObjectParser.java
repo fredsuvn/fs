@@ -7,6 +7,7 @@ import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.schema.handlers.AbstractObjectSchemaHandler;
 import space.sunqian.fs.object.schema.handlers.CommonSchemaHandler;
+import space.sunqian.fs.object.schema.handlers.RecordSchemaHandler;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -25,7 +26,14 @@ import java.util.Map;
 public interface ObjectParser {
 
     /**
-     * Returns the default {@link ObjectParser} with {@link CommonSchemaHandler#INSTANCE} as the only handler.
+     * Returns the default {@link ObjectParser}. Here are handlers in the default parser:
+     * <ul>
+     *     <li>
+     *         {@link RecordSchemaHandler#INSTANCE}, if the current JVM version supports {@code record} classes
+     *         ({@code >= 16});
+     *     </li>
+     *     <li>{@link CommonSchemaHandler#INSTANCE};</li>
+     * </ul>
      * <p>
      * Note the default {@link ObjectParser} is singleton, and never caches the parsed results.
      *

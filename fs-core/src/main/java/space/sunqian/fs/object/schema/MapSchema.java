@@ -23,8 +23,9 @@ public interface MapSchema extends DataSchema {
      *
      * @param type the given type
      * @return the {@link MapSchema} parsed from the given type using {@link MapParser#defaultParser()}
+     * @throws SchemaException if any problem occurs
      */
-    static @Nonnull MapSchema parse(@Nonnull Type type) {
+    static @Nonnull MapSchema parse(@Nonnull Type type) throws SchemaException {
         return MapParser.defaultParser().parse(type);
     }
 
@@ -38,8 +39,13 @@ public interface MapSchema extends DataSchema {
      * @param keyType   the specified key type
      * @param valueType the specified value type
      * @return the {@link MapSchema} parsed from the given type using {@link MapParser#defaultParser()}
+     * @throws SchemaException if any problem occurs
      */
-    static @Nonnull MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) {
+    static @Nonnull MapSchema parse(
+        @Nonnull Type type,
+        @Nonnull Type keyType,
+        @Nonnull Type valueType
+    ) throws SchemaException {
         return MapParser.defaultParser().parse(type, keyType, valueType);
     }
 
