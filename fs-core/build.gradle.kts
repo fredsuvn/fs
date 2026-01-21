@@ -147,13 +147,13 @@ tasks.named("classes") {
 }
 
 // java8 base
-tasks.register("compileTestJava$javaVerFrom", JavaCompile::class) {
+tasks.register("compileTestJava${javaVerFrom}", JavaCompile::class) {
   group = "compile"
-  dependsOn(compileJavaHighest)
+  dependsOn(tasks.compileJava)
   source = sourceSets.test.get().allJava
   classpath = sourceSets.test.get().compileClasspath
   exclude("**/*${implByJvm}*Test.java")
-  //destinationDirectory = file(layout.buildDirectory.dir("classes/java/test"))
+  //destinationDirectory = layout.buildDirectory.dir("classes/java/test").get().asFile
   destinationDirectory = testBuildDir.map { it.dir("java$javaVerFrom") }.get().asFile
   javaCompiler = javaToolchains.compilerFor {
     languageVersion = javaVersionFrom
@@ -166,7 +166,7 @@ tasks.register("compileTestJava$javaVerFrom", JavaCompile::class) {
   val taskName = "compileTestJava$javaVersion"
   tasks.register(taskName, JavaCompile::class) {
     group = "compile"
-    val lastCompileTask = tasks.named<JavaCompile>("compileJava${javaVersion - 1}")
+    val lastCompileTask = tasks.named<JavaCompile>("compileTestJava${javaVersion - 1}")
     dependsOn(lastCompileTask)
     source = sourceSets.test.get().allJava
     //classpath = sourceSets.test.get().compileClasspath + files(lastCompileTask.get().destinationDirectory)
@@ -175,7 +175,7 @@ tasks.register("compileTestJava$javaVerFrom", JavaCompile::class) {
     }
     classpath = sourceSets.test.get().compileClasspath + files(previousOutputs)
     include("**/*${implByJvm + javaVersion}Test.java")
-    //destinationDirectory = file(layout.buildDirectory.dir("classes/java/test"))
+    //destinationDirectory = layout.buildDirectory.dir("classes/java/test").get().asFile
     destinationDirectory = testBuildDir.map { it.dir("java$javaVersion") }.get().asFile
     javaCompiler = javaToolchains.compilerFor {
       languageVersion = javaVersionTo
