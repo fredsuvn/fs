@@ -1,5 +1,6 @@
 package tests.jdbc;
 
+import internal.test.J17Only;
 import lombok.Data;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,10 +19,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@J17Only
 public class JdbcTest {
 
     private static final String DB_DRIVER = "org.h2.Driver";
-    private static final String DB_URL = "jdbc:h2:./SqlTest.h2db";
+    private static final String DB_URL = "jdbc:h2:mem:" + JdbcTest.class.getName();//"jdbc:h2:./SqlTest.h2db";
     private static final String DB_USER = "sa";
     private static final String DB_PASSWORD = "";
 
