@@ -152,7 +152,11 @@ tasks.register("compileTestJava${javaVerFrom}", JavaCompile::class) {
   dependsOn(tasks.compileJava)
   source = sourceSets.test.get().allJava
   classpath = sourceSets.test.get().compileClasspath
-  exclude("**/*${implByJvm}*Test.java")
+  //exclude("**/*${implByJvm}*Test.java")
+  val excludeList = ((javaVerFrom + 1)..javaVerTo).map { version ->
+    "**/*TestJ${version}.java"
+  }
+  exclude(excludeList)
   //destinationDirectory = layout.buildDirectory.dir("classes/java/test").get().asFile
   destinationDirectory = testBuildDir.map { it.dir("java$javaVerFrom") }.get().asFile
   javaCompiler = javaToolchains.compilerFor {
@@ -174,7 +178,8 @@ tasks.register("compileTestJava${javaVerFrom}", JavaCompile::class) {
       tasks.named<JavaCompile>("compileTestJava$prevVersion").get().destinationDirectory
     }
     classpath = sourceSets.test.get().compileClasspath + files(previousOutputs)
-    include("**/*${implByJvm + javaVersion}Test.java")
+    //include("**/*${implByJvm + javaVersion}Test.java")
+    include("**/*TestJ${javaVersion}.java")
     //destinationDirectory = layout.buildDirectory.dir("classes/java/test").get().asFile
     destinationDirectory = testBuildDir.map { it.dir("java$javaVersion") }.get().asFile
     javaCompiler = javaToolchains.compilerFor {
@@ -214,32 +219,16 @@ tasks.named<Jar>("sourcesJar") {
 }
 
 tasks.test {
-  include("**/*Test.class", "**/*TestKt.class")
-  exclude("**/*${implByJvm}*Test.class")
-  useJUnitPlatform {
-    excludeTags("J17Only")
-  }
-  javaLauncher = javaToolchains.launcherFor {
-    languageVersion = javaVersionFrom
-  }
-  failOnNoDiscoveredTests = false
-  reports {
-    html.required = false
-  }
-}
-
-val testJavaHighest by tasks.registering(Test::class) {
   dependsOn(compileTestJavaHighest)
-  group = "verification"
+  val includeList = ((javaVerFrom + 1)..javaVerTo).map { version ->
+    "**/*TestJ${version}.class"
+  }
+  include("**/*Test.class", "**/*TestKt.class", *includeList.toTypedArray())
+  useJUnitPlatform {
+    //includeTags("J17Also", "J17Only")
+  }
   testClassesDirs = fileTree(layout.buildDirectory.dir("classes/java/test"))
   classpath = sourceSets.test.get().runtimeClasspath
-  ((javaVerFrom + 1)..javaVerTo).forEach { jv ->
-    classpath += files(tasks.named<JavaCompile>("compileJava$jv").get().destinationDirectory)
-    classpath += files(tasks.named<JavaCompile>("compileTestJava$jv").get().destinationDirectory)
-  }
-  useJUnitPlatform {
-    includeTags("J17Also", "J17Only")
-  }
   javaLauncher = javaToolchains.launcherFor {
     languageVersion = javaVersionTo
   }
@@ -249,7 +238,47 @@ val testJavaHighest by tasks.registering(Test::class) {
   }
 }
 
-tasks.check.get().dependsOn(tasks.test, testJavaHighest)
+val testByJava8 by tasks.registering(Test::class) {
+  dependsOn(compileTestJavaHighest)
+  group = "verification"
+  include("**/*Test.class", "**/*TestKt.class")
+  //exclude("**/*${implByJvm}*Test.class")
+  useJUnitPlatform {
+    excludeTags("J17Only")
+  }
+  testClassesDirs = fileTree(layout.buildDirectory.dir("classes/java/test"))
+  classpath = sourceSets.test.get().runtimeClasspath
+  javaLauncher = javaToolchains.launcherFor {
+    languageVersion = javaVersionFrom
+  }
+  failOnNoDiscoveredTests = false
+  reports {
+    html.required = false
+  }
+}
+
+val testByJava17 by tasks.registering(Test::class) {
+  dependsOn(compileTestJavaHighest)
+  group = "verification"
+  val includeList = ((javaVerFrom + 1)..javaVerTo).map { version ->
+    "**/*TestJ${version}.class"
+  }
+  include("**/*Test.class", "**/*TestKt.class", *includeList.toTypedArray())
+  useJUnitPlatform {
+    includeTags("J17Also", "J17Only")
+  }
+  testClassesDirs = fileTree(layout.buildDirectory.dir("classes/java/test"))
+  classpath = sourceSets.test.get().runtimeClasspath
+  javaLauncher = javaToolchains.launcherFor {
+    languageVersion = javaVersionTo
+  }
+  failOnNoDiscoveredTests = false
+  reports {
+    html.required = false
+  }
+}
+
+tasks.check.get().dependsOn(tasks.test, testByJava8, testByJava17)
 
 tasks.named<Javadoc>("javadoc") {
   val ops = options as StandardJavadocDocletOptions

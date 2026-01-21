@@ -10,11 +10,11 @@ val publishType by extra { "jar" }
 
 description = "Aggregation of fs, including fs-jsr305, fs-annotation and fs-core, without dependencies."
 
-val jsr305Project = project(":fs-jsr305")
-val annotationProject = project(":fs-annotation")
-val asmProject = project(":fs-asm")
-val coreProject = project(":fs-core")
-val internalProject = project(":fs-internal")
+val jsr305Project: Project = project(":fs-jsr305")
+val annotationProject: Project = project(":fs-annotation")
+val asmProject: Project = project(":fs-asm")
+val coreProject: Project = project(":fs-core")
+val internalProject: Project = project(":fs-internal")
 
 evaluationDependsOn(jsr305Project.path)
 evaluationDependsOn(annotationProject.path)
@@ -80,15 +80,17 @@ tasks.named<Javadoc>("javadoc") {
   //destinationDir = rootDir.resolve("docs/javadoc")
 }
 
-val testJavaHighest = coreProject.tasks.named("testJavaHighest")
+val testByJava8: TaskProvider<Task> = coreProject.tasks.named("testByJava8")
+val testByJava17: TaskProvider<Task> = coreProject.tasks.named("testByJava17")
 
 tasks.test {
   dependsOn(
     jsr305Project.tasks.test,
     annotationProject.tasks.test,
     asmProject.tasks.test,
-    coreProject.tasks.test,
-    testJavaHighest,
+    //coreProject.tasks.test,
+    testByJava8,
+    testByJava17,
     internalProject.tasks.test,
   )
   reports {
@@ -107,8 +109,9 @@ tasks.jacocoTestReport {
     jsr305Project.file("build/jacoco/test.exec"),
     annotationProject.file("build/jacoco/test.exec"),
     //asmProject.file("build/jacoco/test.exec"),
-    coreProject.file("build/jacoco/test.exec"),
-    coreProject.file("build/jacoco/${testJavaHighest.name}.exec"),
+    //coreProject.file("build/jacoco/test.exec"),
+    coreProject.file("build/jacoco/${testByJava8.name}.exec"),
+    coreProject.file("build/jacoco/${testByJava17.name}.exec"),
     internalProject.file("build/jacoco/test.exec"),
   )
   sourceSets(
@@ -135,10 +138,12 @@ tasks.testAggregateTestReport {
     annotationProject.layout.buildDirectory.dir("test-results/test/binary"),
     //asmProject.layout.buildDirectory.dir("test-results/test"),
     //asmProject.layout.buildDirectory.dir("test-results/test/binary"),
-    coreProject.layout.buildDirectory.dir("test-results/test"),
-    coreProject.layout.buildDirectory.dir("test-results/test/binary"),
-    coreProject.layout.buildDirectory.dir("test-results/${testJavaHighest.name}"),
-    coreProject.layout.buildDirectory.dir("test-results/${testJavaHighest.name}/binary"),
+    //coreProject.layout.buildDirectory.dir("test-results/test"),
+    //coreProject.layout.buildDirectory.dir("test-results/test/binary"),
+    coreProject.layout.buildDirectory.dir("test-results/${testByJava8.name}"),
+    coreProject.layout.buildDirectory.dir("test-results/${testByJava8.name}/binary"),
+    coreProject.layout.buildDirectory.dir("test-results/${testByJava17.name}"),
+    coreProject.layout.buildDirectory.dir("test-results/${testByJava17.name}/binary"),
     internalProject.layout.buildDirectory.dir("test-results/test"),
     internalProject.layout.buildDirectory.dir("test-results/test/binary"),
   )
