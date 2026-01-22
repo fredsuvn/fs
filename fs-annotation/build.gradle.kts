@@ -5,9 +5,8 @@ plugins {
   id("fs-publish")
 }
 
-val publishType by extra { "jar" }
-
 description = "Base annotations of fs, supporting static analyses and providing partial of jsr305."
+val publishType by extra { "jar" }
 
 dependencies {
   //implementation(platform(project(":fs-dependencies")))

@@ -5,9 +5,8 @@ plugins {
   id("fs-publish")
 }
 
-val publishType by extra { "jar" }
-
 description = "The built-in ASM framework for fs."
+val publishType by extra { "jar" }
 
 dependencies {
   testImplementation(platform(project(":fs-dependencies")))

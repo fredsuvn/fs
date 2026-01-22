@@ -6,9 +6,8 @@ plugins {
   id("fs-publish")
 }
 
-val publishType by extra { "jar" }
-
 description = "Aggregation of fs, including fs-jsr305, fs-annotation and fs-core, without dependencies."
+val publishType by extra { "jar" }
 
 val jsr305Project: Project = project(":fs-jsr305")
 val annotationProject: Project = project(":fs-annotation")

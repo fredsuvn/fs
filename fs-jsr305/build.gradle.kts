@@ -5,9 +5,8 @@ plugins {
   id("fs-publish")
 }
 
-val publishType by extra { "jar" }
-
 description = "Annotations for jsr305."
+val publishType by extra { "jar" }
 
 dependencies {
   testImplementation(platform(project(":fs-dependencies")))

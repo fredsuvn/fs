@@ -4,9 +4,8 @@ plugins {
   id("fs-publish")
 }
 
-val publishType by extra { "pom" }
-
 description = "Dependencies management of fs."
+val publishType by extra { "pom" }
 
 javaPlatform {
   allowDependencies()

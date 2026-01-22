@@ -6,9 +6,8 @@ plugins {
   id("fs-publish")
 }
 
-val publishType by extra { "jar" }
-
 description = "Core of fs, including core kits and interfaces with their default implementations."
+val publishType by extra { "jar" }
 
 val projectVersion: String by project
 val toJavaVersion: JavaLanguageVersion by project
