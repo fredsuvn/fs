@@ -18,6 +18,7 @@ import java.util.List;
  *
  * @author sunqian
  */
+@ThreadSafe
 public interface CreatorProvider {
 
     /**

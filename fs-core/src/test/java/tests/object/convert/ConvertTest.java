@@ -12,18 +12,20 @@ import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.date.DateKit;
 import space.sunqian.fs.base.exception.UnreachablePointException;
-import space.sunqian.fs.cache.CacheFunction;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.IOOperator;
-import space.sunqian.fs.object.create.CreatorProvider;
+import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.convert.ObjectCopier;
+import space.sunqian.fs.object.convert.PropertyCopier;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
+import space.sunqian.fs.object.create.CreatorProvider;
+import space.sunqian.fs.object.schema.MapParser;
+import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -55,6 +57,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -400,7 +403,7 @@ public class ConvertTest implements PrintTest {
         CA ca = new CA("1", ListKit.list("1", "2", "3"), new A("1", "2", "3"), DateKit.format(now));
         assertEquals(
             ObjectConverter.defaultConverter().convert(ca, CB.class,
-                ConvertOption.dataMapper(ObjectCopier.defaultCopier()),
+                ConvertOption.propertyCopier(PropertyCopier.defaultCopier()),
                 ConvertOption.dateFormatter(DateFormatter.defaultFormatter()),
                 ConvertOption.ioOperator(IOOperator.defaultOperator())
             ),
@@ -468,6 +471,49 @@ public class ConvertTest implements PrintTest {
             assertEquals(
                 1L,
                 ((MapObject) ObjectConverter.defaultConverter().convertMap(map, (Type) MapObject.class)).getLongNum()
+            );
+        }
+    }
+
+    @Test
+    public void testConvertKit() throws Exception {
+        {
+            // map parser
+            assertSame(ConvertKit.mapParser(), ConvertKit.mapParser());
+            assertSame(ConvertKit.mapParser(), ConvertKit.mapParser(ConvertOption.ignoreNull()));
+            assertNotEquals(
+                ConvertKit.mapParser(),
+                ConvertKit.mapParser(ConvertOption.schemaParser(MapParser.defaultParser()))
+            );
+            assertSame(
+                MapParser.defaultParser(),
+                ConvertKit.mapParser(ConvertOption.schemaParser(MapParser.defaultParser()))
+            );
+        }
+        {
+            // object parser
+            assertSame(ConvertKit.objectParser(), ConvertKit.objectParser());
+            assertSame(ConvertKit.objectParser(), ConvertKit.objectParser(ConvertOption.ignoreNull()));
+            assertNotEquals(
+                ConvertKit.objectParser(),
+                ConvertKit.objectParser(ConvertOption.schemaParser(ObjectParser.defaultParser()))
+            );
+            assertSame(
+                ObjectParser.defaultParser(),
+                ConvertKit.objectParser(ConvertOption.schemaParser(ObjectParser.defaultParser()))
+            );
+        }
+        {
+            // creator provider
+            assertSame(ConvertKit.creatorProvider(), ConvertKit.creatorProvider());
+            assertSame(ConvertKit.creatorProvider(), ConvertKit.creatorProvider(ConvertOption.ignoreNull()));
+            assertNotEquals(
+                ConvertKit.creatorProvider(),
+                ConvertKit.creatorProvider(ConvertOption.creatorProvider(CreatorProvider.defaultProvider()))
+            );
+            assertSame(
+                CreatorProvider.defaultProvider(),
+                ConvertKit.creatorProvider(ConvertOption.creatorProvider(CreatorProvider.defaultProvider()))
             );
         }
     }

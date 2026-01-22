@@ -7,9 +7,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
-import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.util.List;

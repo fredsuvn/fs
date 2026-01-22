@@ -43,6 +43,18 @@ public interface Option<K, V> {
     }
 
     /**
+     * Returns an {@link Option} with the specified key and {@code null} value.
+     *
+     * @param key the specified key
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return an {@link Option} with the specified key and {@code null} value
+     */
+    static <K, V> @Nonnull Option<K, V> of(@Nonnull K key) {
+        return of(key, null);
+    }
+
+    /**
      * Returns an empty {@link Option} array;
      *
      * @param <K> the key type

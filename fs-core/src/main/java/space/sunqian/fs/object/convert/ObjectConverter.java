@@ -41,7 +41,7 @@ import java.util.Map;
  * }</pre>
  * <p>
  * The thread safety of the methods in this interface is determined by its dependent option objects, such as
- * {@link CreatorProvider}, {@link ObjectCopier}, and other objects. By default, they are all thread-safe.
+ * {@link CreatorProvider}, {@link PropertyCopier}, and other objects. By default, they are all thread-safe.
  *
  * @author sunqian
  */
@@ -289,7 +289,7 @@ public interface ObjectConverter {
     /**
      * Handler for {@link ObjectConverter}, provides the specific conversion logic.
      * <p>
-     * The thread safety of the methods in this interface is determined by its dependent {@link ObjectCopier},
+     * The thread safety of the methods in this interface is determined by its dependent {@link PropertyCopier},
      * {@link CreatorProvider}, and other objects. By default, they are all thread-safe.
      *
      * @author sunqian

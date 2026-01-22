@@ -1,9 +1,5 @@
 package space.sunqian.fs.object.schema;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.FsLoader;
@@ -143,18 +139,8 @@ final class SchemaBack {
 
         @Override
         public @Nonnull MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) {
-            Type actualType = new MapType(type, keyType, valueType);
+            Type actualType = MapType.of(type, keyType, valueType);
             return cache.get(actualType, t -> parser.parse(t, keyType, valueType));
-        }
-
-        @Data
-        @AllArgsConstructor
-        @EqualsAndHashCode(callSuper = false)
-        @ToString
-        private static final class MapType implements Type {
-            private final @Nonnull Type mapType;
-            private final @Nonnull Type keyType;
-            private final @Nonnull Type valueType;
         }
     }
 

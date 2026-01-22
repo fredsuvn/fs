@@ -40,20 +40,14 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     MAP_SCHEMA_PARSER,
 
     /**
-     * Key of {@link #propertyMapper(PropertyMapper)}.
+     * Key of {@link #creatorProvider(CreatorProvider)}.
      */
-    PROPERTY_MAPPER,
+    CREATOR_PROVIDER,
 
     /**
-     * Key of {@link #exceptionHandler(ObjectCopier.ExceptionHandler)}.
+     * Key of {@link #propertyCopier(PropertyCopier)}.
      */
-    EXCEPTION_HANDLER,
-
-    /**
-     * Option to ignore copy properties with {@code null} values. If a {@link #PROPERTY_MAPPER} is set, this option
-     * becomes invalid. This option is disabled by default.
-     */
-    IGNORE_NULL,
+    PROPERTY_COPIER,
 
     /**
      * Key of {@link #ignoreProperties(Object...)}.
@@ -61,14 +55,9 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     IGNORE_PROPERTIES,
 
     /**
-     * Key of {@link #dataMapper(ObjectCopier)}.
+     * Key of {@link #ignoreNull()}.
      */
-    DATA_MAPPER,
-
-    /**
-     * Key of {@link #creatorProvider(CreatorProvider)}.
-     */
-    CREATOR_PROVIDER,
+    IGNORE_NULL,
 
     /**
      * Key of {@link #ioOperator(IOOperator)}.
@@ -89,7 +78,7 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     /**
      * Returns an option to specify the object schema parser.
      * <p>
-     * By default, {@link ObjectParser#defaultParser()} is used.
+     * By default, {@link ConvertKit#objectParser()} is used.
      *
      * @param schemaParser the specified object schema parser
      * @return an option to specify the object schema parser
@@ -103,7 +92,7 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     /**
      * Returns an option to specify the map schema parser.
      * <p>
-     * By default, {@link MapParser#defaultParser()} is used.
+     * By default, {@link ConvertKit#mapParser()} is used.
      *
      * @param schemaParser the specified map schema parser
      * @return an option to specify the map schema parser
@@ -115,31 +104,31 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     }
 
     /**
-     * Returns an option to specify the {@link PropertyMapper}.
+     * Returns an option to specify the {@link CreatorProvider} to generate data object during the conversion.
      * <p>
-     * By default, all properties which is both readable and writable will be copied with their original names.
+     * By default, the {@link ConvertKit#creatorProvider()} is used.
      *
-     * @param propertyMapper the {@link PropertyMapper} to be specified
-     * @return an option to specify the {@link PropertyMapper}
+     * @param creatorProvider the {@link CreatorProvider} to be specified
+     * @return an option to specify the {@link CreatorProvider} to generate data object during the conversion
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull PropertyMapper> propertyMapper(
-        @Nonnull PropertyMapper propertyMapper
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull CreatorProvider> creatorProvider(
+        @Nonnull CreatorProvider creatorProvider
     ) {
-        return Option.of(PROPERTY_MAPPER, propertyMapper);
+        return Option.of(CREATOR_PROVIDER, creatorProvider);
     }
 
     /**
-     * Returns an option to specify the {@link ObjectCopier.ExceptionHandler}.
+     * Returns an option to specify the {@link PropertyCopier}.
      * <p>
-     * By default, the exception will be thrown directly.
+     * By default, the {@link PropertyCopier#defaultCopier()} is used.
      *
-     * @param exceptionHandler the {@link ObjectCopier.ExceptionHandler} to be specified
-     * @return an option to specify the {@link ObjectCopier.ExceptionHandler}
+     * @param propertyCopier the {@link PropertyCopier} to be specified
+     * @return an option to specify the {@link PropertyCopier}
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, ObjectCopier.@Nonnull ExceptionHandler> exceptionHandler(
-        @Nonnull ObjectCopier.ExceptionHandler exceptionHandler
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull PropertyCopier> propertyCopier(
+        @Nonnull PropertyCopier propertyCopier
     ) {
-        return Option.of(EXCEPTION_HANDLER, exceptionHandler);
+        return Option.of(PROPERTY_COPIER, propertyCopier);
     }
 
     /**
@@ -157,31 +146,15 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     }
 
     /**
-     * Returns an option to specify the {@link ObjectCopier}.
+     * Returns an option to specify to ignore null properties from the source object. If there exists a
+     * {@link PropertyCopier.PropertyMapper} in the current {@link PropertyCopier}, this option will be ignored.
      * <p>
-     * By default, the {@link ObjectCopier#defaultCopier()} is used.
+     * By default, this option is disabled, the value of {@link #IGNORE_NULL} is {@code null}.
      *
-     * @param objectCopier the {@link ObjectCopier} to be specified
-     * @return an option to specify the {@link ObjectCopier}
+     * @return an option to specify to ignore null properties from the source object
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectCopier> dataMapper(
-        @Nonnull ObjectCopier objectCopier
-    ) {
-        return Option.of(DATA_MAPPER, objectCopier);
-    }
-
-    /**
-     * Returns an option to specify the {@link CreatorProvider} to generate data object during the conversion.
-     * <p>
-     * By default, the {@link CreatorProvider#defaultProvider()} is used.
-     *
-     * @param creatorFactory the {@link CreatorProvider} to be specified
-     * @return an option to specify the {@link CreatorProvider} to generate data object during the conversion
-     */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull CreatorProvider> creatorProvider(
-        @Nonnull CreatorProvider creatorFactory
-    ) {
-        return Option.of(CREATOR_PROVIDER, creatorFactory);
+    public static @Nonnull Option<@Nonnull ConvertOption, ?> ignoreNull() {
+        return IGNORE_NULL;
     }
 
     /**

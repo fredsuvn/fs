@@ -4,9 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
-import space.sunqian.fs.cache.CacheFunction;
 import space.sunqian.fs.collect.ArrayKit;
-import space.sunqian.fs.object.schema.DataSchema;
 import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.ObjectParser;
@@ -15,17 +13,21 @@ import space.sunqian.fs.object.schema.ObjectSchema;
 
 import java.lang.reflect.Type;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-final class ObjectCopierImpl implements ObjectCopier {
+final class PropertyCopierImpl implements PropertyCopier {
 
-    static final @Nonnull ObjectCopier DEFAULT =
-        new ObjectCopierImpl(CacheFunction.ofMap(new ConcurrentHashMap<>()));
+    static final @Nonnull PropertyCopier DEFAULT =
+        new PropertyCopierImpl(null, null);
 
-    private final @Nonnull CacheFunction<@Nonnull Type, @Nonnull DataSchema> cache;
+    private final @Nullable PropertyMapper propertyMapper;
+    private final @Nullable ExceptionHandler exceptionHandler;
 
-    ObjectCopierImpl(@Nonnull CacheFunction<@Nonnull Type, @Nonnull DataSchema> cache) {
-        this.cache = cache;
+    PropertyCopierImpl(
+        @Nullable PropertyMapper propertyMapper,
+        @Nullable ExceptionHandler exceptionHandler
+    ) {
+        this.propertyMapper = propertyMapper;
+        this.exceptionHandler = exceptionHandler;
     }
 
     @Override
@@ -36,56 +38,44 @@ final class ObjectCopierImpl implements ObjectCopier {
         @Nonnull Type dstType,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws ObjectConvertException {
+    ) throws ObjectCopyException {
         try {
-            PropertyMapper propertyMapper = Option.findValue(ConvertOption.PROPERTY_MAPPER, options);
-            ObjectCopier.ExceptionHandler exceptionHandler = Option.findValue(ConvertOption.EXCEPTION_HANDLER, options);
             if (src instanceof Map) {
-                MapParser mapParser = Fs.nonnull(
-                    Option.findValue(ConvertOption.MAP_SCHEMA_PARSER),
-                    MapParser.defaultParser()
-                );
-                MapSchema srcSchema = cache.get(srcType, mapParser::parse).asMapSchema();
+                MapParser mapParser = ConvertKit.mapParser(options);
+                MapSchema srcSchema = mapParser.parse(srcType);
                 if (dst instanceof Map) {
-                    MapSchema dstSchema = cache.get(dstType, mapParser::parse).asMapSchema();
-                    mapToMap(
-                        Fs.as(src), srcSchema, Fs.as(dst), dstSchema, converter, propertyMapper, exceptionHandler, options
-                    );
+                    MapSchema dstSchema = mapParser.parse(dstType);
+                    mapToMap(Fs.as(src), srcSchema, Fs.as(dst), dstSchema, converter, options);
                 } else {
-                    ObjectParser objectParser = Fs.nonnull(
-                        Option.findValue(ConvertOption.OBJECT_SCHEMA_PARSER),
-                        ObjectParser.defaultParser()
-                    );
-                    ObjectSchema dstSchema = cache.get(dstType, objectParser::parse).asObjectSchema();
-                    mapToObject(
-                        Fs.as(src), srcSchema, dst, dstSchema, converter, propertyMapper, exceptionHandler, options
-                    );
+                    ObjectParser objectParser = ConvertKit.objectParser(options);
+                    ObjectSchema dstSchema = objectParser.parse(dstType);
+                    mapToObject(Fs.as(src), srcSchema, dst, dstSchema, converter, options);
                 }
             } else {
-                ObjectParser objectParser = Fs.nonnull(
-                    Option.findValue(ConvertOption.OBJECT_SCHEMA_PARSER),
-                    ObjectParser.defaultParser()
-                );
-                ObjectSchema srcSchema = cache.get(srcType, objectParser::parse).asObjectSchema();
+                ObjectParser objectParser = ConvertKit.objectParser(options);
+                ObjectSchema srcSchema = objectParser.parse(srcType);
                 if (dst instanceof Map) {
-                    MapParser mapParser = Fs.nonnull(
-                        Option.findValue(ConvertOption.MAP_SCHEMA_PARSER),
-                        MapParser.defaultParser()
-                    );
-                    MapSchema dstSchema = cache.get(dstType, mapParser::parse).asMapSchema();
-                    objectToMap(
-                        src, srcSchema, Fs.as(dst), dstSchema, converter, propertyMapper, exceptionHandler, options
-                    );
+                    MapParser mapParser = ConvertKit.mapParser(options);
+                    MapSchema dstSchema = mapParser.parse(dstType);
+                    objectToMap(src, srcSchema, Fs.as(dst), dstSchema, converter, options);
                 } else {
-                    ObjectSchema dstSchema = cache.get(dstType, objectParser::parse).asObjectSchema();
-                    objectToObject(
-                        src, srcSchema, dst, dstSchema, converter, propertyMapper, exceptionHandler, options
-                    );
+                    ObjectSchema dstSchema = objectParser.parse(dstType);
+                    objectToObject(src, srcSchema, dst, dstSchema, converter, options);
                 }
             }
         } catch (Exception e) {
-            throw new ObjectConvertException(e);
+            throw new ObjectCopyException(e);
         }
+    }
+
+    @Override
+    public @Nullable PropertyMapper propertyMapper() {
+        return propertyMapper;
+    }
+
+    @Override
+    public @Nullable ExceptionHandler exceptionHandler() {
+        return exceptionHandler;
     }
 
     void mapToMap(
@@ -94,8 +84,6 @@ final class ObjectCopierImpl implements ObjectCopier {
         @Nonnull Map<Object, Object> dst,
         @Nonnull MapSchema dstSchema,
         @Nonnull ObjectConverter converter,
-        @Nullable PropertyMapper propertyMapper,
-        @Nullable ObjectCopier.ExceptionHandler exceptionHandler,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         src.forEach((srcKey, srcValue) -> {
@@ -115,7 +103,7 @@ final class ObjectCopierImpl implements ObjectCopier {
                     dstPropertyName = entry.getKey();
                     dstPropertyValue = entry.getValue();
                 } else {
-                    if (srcValue == null && ignoredNull(options)) {
+                    if (srcValue == null && ignoreNull(options)) {
                         return;
                     }
                     dstPropertyName = converter.convert(
@@ -129,7 +117,7 @@ final class ObjectCopierImpl implements ObjectCopier {
                     try {
                         exceptionHandler.handle(e, srcKey, src, srcSchema, dst, dstSchema, converter, options);
                     } catch (Exception ex) {
-                        throw new ObjectConvertException(ex);
+                        throw new ObjectCopyException(ex);
                     }
                 } else {
                     throw e;
@@ -144,8 +132,6 @@ final class ObjectCopierImpl implements ObjectCopier {
         @Nonnull Object dst,
         @Nonnull ObjectSchema dstSchema,
         @Nonnull ObjectConverter converter,
-        @Nullable PropertyMapper propertyMapper,
-        @Nullable ObjectCopier.ExceptionHandler exceptionHandler,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         src.forEach((srcKey, srcValue) -> {
@@ -170,7 +156,7 @@ final class ObjectCopierImpl implements ObjectCopier {
                         return;
                     }
                 } else {
-                    if (srcValue == null && ignoredNull(options)) {
+                    if (srcValue == null && ignoreNull(options)) {
                         return;
                     }
                     dstPropertyName = converter.convert(srcKey, srcSchema.keyType(), String.class, options);
@@ -186,7 +172,7 @@ final class ObjectCopierImpl implements ObjectCopier {
                     try {
                         exceptionHandler.handle(e, srcKey, src, srcSchema, dst, dstSchema, converter, options);
                     } catch (Exception ex) {
-                        throw new ObjectConvertException(ex);
+                        throw new ObjectCopyException(ex);
                     }
                 } else {
                     throw e;
@@ -201,8 +187,6 @@ final class ObjectCopierImpl implements ObjectCopier {
         @Nonnull Map<Object, Object> dst,
         @Nonnull MapSchema dstSchema,
         @Nonnull ObjectConverter converter,
-        @Nullable PropertyMapper propertyMapper,
-        @Nullable ObjectCopier.ExceptionHandler exceptionHandler,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {
@@ -230,7 +214,7 @@ final class ObjectCopierImpl implements ObjectCopier {
                     dstPropertyValue = entry.getValue();
                 } else {
                     Object srcPropertyValue = srcProperty.getValue(src);
-                    if (srcPropertyValue == null && ignoredNull(options)) {
+                    if (srcPropertyValue == null && ignoreNull(options)) {
                         return;
                     }
                     dstPropertyName = converter.convert(srcPropertyName, String.class, dstSchema.keyType(), options);
@@ -243,7 +227,7 @@ final class ObjectCopierImpl implements ObjectCopier {
                     try {
                         exceptionHandler.handle(e, srcPropertyName, src, srcSchema, dst, dstSchema, converter, options);
                     } catch (Exception ex) {
-                        throw new ObjectConvertException(ex);
+                        throw new ObjectCopyException(ex);
                     }
                 } else {
                     throw e;
@@ -258,8 +242,6 @@ final class ObjectCopierImpl implements ObjectCopier {
         @Nonnull Object dst,
         @Nonnull ObjectSchema dstSchema,
         @Nonnull ObjectConverter converter,
-        @Nullable PropertyMapper propertyMapper,
-        @Nullable ObjectCopier.ExceptionHandler exceptionHandler,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {
@@ -288,7 +270,7 @@ final class ObjectCopierImpl implements ObjectCopier {
                     }
                 } else {
                     Object srcPropertyValue = srcProperty.getValue(src);
-                    if (srcPropertyValue == null && ignoredNull(options)) {
+                    if (srcPropertyValue == null && ignoreNull(options)) {
                         return;
                     }
                     dstPropertyName = srcPropertyName;
@@ -305,7 +287,7 @@ final class ObjectCopierImpl implements ObjectCopier {
                     try {
                         exceptionHandler.handle(e, srcPropertyName, src, srcSchema, dst, dstSchema, converter, options);
                     } catch (Exception ex) {
-                        throw new ObjectConvertException(ex);
+                        throw new ObjectCopyException(ex);
                     }
                 } else {
                     throw e;
@@ -322,7 +304,7 @@ final class ObjectCopierImpl implements ObjectCopier {
         return ArrayKit.indexOf(ignoredProperties, propertyName) >= 0;
     }
 
-    private boolean ignoredNull(@Nonnull Option<?, ?> @Nonnull ... options) {
+    private boolean ignoreNull(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Option.containsKey(ConvertOption.IGNORE_NULL, options);
     }
 }

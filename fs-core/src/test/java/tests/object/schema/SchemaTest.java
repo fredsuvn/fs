@@ -11,13 +11,14 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.invoke.Invocable;
+import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.MapSchema;
+import space.sunqian.fs.object.schema.MapType;
 import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectPropertyBase;
 import space.sunqian.fs.object.schema.ObjectSchema;
-import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.handlers.CommonSchemaHandler;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -25,6 +26,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -442,6 +444,31 @@ public class SchemaTest implements PrintTest {
             assertSame(ObjectParser.defaultParser().handlers(), objectParser.handlers());
             assertSame(ObjectParser.defaultParser().asHandler(), objectParser.asHandler());
         }
+    }
+
+    @Test
+    public void testMapType() {
+        MapType mapType = MapType.of(Map.class, String.class, Long.class);
+        assertEquals(Map.class, mapType.mapType());
+        assertEquals(String.class, mapType.keyType());
+        assertEquals(Long.class, mapType.valueType());
+        assertEquals(
+            Map.class.getName() + "<" + String.class.getName() + ", " + Long.class.getName() + ">",
+            mapType.toString()
+        );
+        assertEquals(mapType, mapType);
+        assertEquals(mapType, MapType.of(Map.class, String.class, Long.class));
+        assertNotEquals(mapType, MapType.of(Map.class, String.class, Integer.class));
+        assertNotEquals(mapType, MapType.of(Map.class, Integer.class, Long.class));
+        assertNotEquals(mapType, MapType.of(HashMap.class, String.class, Long.class));
+        assertNotEquals(mapType, String.class);
+        assertEquals(
+            mapType.hashCode(),
+            MapType.of(Map.class, String.class, Long.class).hashCode()
+        );
+        class X<T> {}
+        assertThrows(IllegalArgumentException.class, () ->
+            MapType.of(X.class.getTypeParameters()[0], String.class, Long.class));
     }
 
     @Test

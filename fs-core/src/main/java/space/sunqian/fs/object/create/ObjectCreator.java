@@ -2,6 +2,7 @@ package space.sunqian.fs.object.create;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.annotation.ThreadSafe;
 
 import java.lang.reflect.Type;
 
@@ -22,6 +23,7 @@ import java.lang.reflect.Type;
  *
  * @author sunqian
  */
+@ThreadSafe
 public interface ObjectCreator {
 
     /**
