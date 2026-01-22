@@ -1,8 +1,8 @@
 package tests.base.version;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.fs.base.version.SemVer;
 import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.utils.version.SemVer;
 
 import java.util.Arrays;
 import java.util.List;

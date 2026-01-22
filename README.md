@@ -7,19 +7,20 @@
 _fs_ is a lightweight, multi-version JDK support, high-performance, zero-dependency tool lib for java. It provides:
 
 - Annotations that can be used for code analysis;
-- Common utilities and interfaces for bytes, chars, coding, date, enum, exception, logging, math, number, process,
-  random, resource, string, system, thread;
-  reflect, etc.;
+- Core class `space.sunqian.fs.Fs`;
+- Base and core utilities and interfaces for bytes, chars, coding, date, enum, exception, logging, math, number,
+  process, random, resource, string, system, thread and checker;
 - Extensions for functions, values, and options;
 - I/O kits and interfaces;
 - More light and fast cache interfaces and implementations;
 - Kits for collections, maps, arrays, etc.;
-- Kits for codec;
 - Concurrent supports;
 - Network kits and interfaces for http, tcp, udp, etc.;
-- Object parsing and conversion;
+- Object parsing, creating, and conversion;
 - Dynamic invocation, supporting reflection, method-handle and [asm](https://asm.ow2.io);
 - Dynamic proxy and aspect, supporting JDK dynamic proxy and [asm](https://asm.ow2.io);
+- Reflection;
+- Utilities for codec, dependency injection, eventbus, jdbc, semantic version, etc.;
 - Third-party supporting: [asm](https://asm.ow2.io), [protobuf](https://github.com/protocolbuffers/protobuf);
 
 ## Multi-Version JDK Support
@@ -113,14 +114,14 @@ cd fs && gradle clean build
 
 _fs_ needs multi JDK versions to build: from `1.8` to `17`.
 
-> The root `gradle` properties file ([gradle.properties](gradle.properties)) configures the multi JDK versions in:
+> The root `gradle` properties file ([gradle.properties](gradle.properties)) can configure the multi JDK versions like:
 > ```
 > org.gradle.java.installations.paths=\
 >   ~/.jdks/azul-1.8.0_462,\
 >   ~/.jdks/azul-17.0.17,\
 >   ~/.jdks/openjdk-25,
 > ```
-> Change this property to your local JDK paths, or let `gradle` automatically download required JDK versions without
+> Add/Change this property to your local JDK paths, or let `gradle` automatically download required JDK versions without
 > manual configuration.
 
 ## Contact

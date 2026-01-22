@@ -6,7 +6,7 @@ import space.sunqian.fs.invoke.Invocable;
 import space.sunqian.fs.invoke.InvocationException;
 import space.sunqian.fs.invoke.InvocationMode;
 import space.sunqian.fs.invoke.InvokeKit;
-import tests.utils.LotsOfMethods;
+import utils.LotsOfMethods;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;

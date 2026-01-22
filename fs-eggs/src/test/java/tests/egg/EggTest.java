@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.egg.FsEgg;
 import space.sunqian.egg.FsEggImpl;
 import space.sunqian.egg.FsEggLoader;
-import space.sunqian.fs.codec.Base64Kit;
+import space.sunqian.fs.utils.codec.Base64Kit;
 
 public class EggTest {
 

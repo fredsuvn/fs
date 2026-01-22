@@ -12,7 +12,7 @@ import space.sunqian.fs.dynamic.proxy.ProxyInvoker;
 import space.sunqian.fs.dynamic.proxy.ProxyMaker;
 import space.sunqian.fs.dynamic.proxy.ProxySpec;
 import space.sunqian.fs.dynamic.proxy.asm.AsmProxyMaker;
-import tests.utils.LotsOfMethods;
+import utils.LotsOfMethods;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

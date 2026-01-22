@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnknownPrimitiveTypeException;
 import space.sunqian.fs.reflect.ClassKit;
-import tests.utils.ErrorConstructor;
+import utils.ErrorConstructor;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

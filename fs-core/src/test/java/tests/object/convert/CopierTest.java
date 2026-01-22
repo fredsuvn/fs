@@ -21,7 +21,7 @@ import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.reflect.TypeRef;
-import tests.utils.ErrorMap;
+import utils.ErrorMap;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;

@@ -35,7 +35,7 @@ _fs_ uses `gradle` to build, and it needs multi JDK versions to build: from `1.8
 
 [NOTE]
 ====
-The root `gradle` properties file link:../gradle.properties[gradle.properties] configures the multi JDK versions in:
+The root `gradle` properties file link:../gradle.properties[gradle.properties] can configure the multi JDK versions like:
 
 [source,properties]
 ----
@@ -45,7 +45,7 @@ org.gradle.java.installations.paths=\
   ~/.jdks/openjdk-25,
 ----
 
-Change this property to your local JDK paths, or let `gradle` automatically download required JDK versions without manual configuration.
+Add/Change this property to your local JDK paths, or let `gradle` automatically download required JDK versions without manual configuration.
 ====
 
 [[chapter-dependencies]]
