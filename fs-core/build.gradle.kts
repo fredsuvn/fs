@@ -123,9 +123,9 @@ tasks.register("compileJava${javaVerFrom}", JavaCompile::class) {
   }
 }
 
-val mergeClasses by tasks.registering(Copy::class) {
+val syncClasses by tasks.registering(Sync::class) {
   group = "compile"
-  description = "Merge all version-specific class files"
+  description = "Sync all version-specific class files to the main build directory"
   ((javaVerFrom)..javaVerTo).forEach { version ->
     from(tasks.named<JavaCompile>("compileJava$version").get().destinationDirectory)
   }
@@ -138,11 +138,11 @@ val compileJavaHighest = tasks.named<JavaCompile>("compileJava$javaVerTo")
 tasks.compileJava {
   group = "compile"
   enabled = false
-  dependsOn(compileJavaHighest, mergeClasses)
+  dependsOn(compileJavaHighest, syncClasses)
 }
 
 tasks.named("classes") {
-  dependsOn(compileJavaHighest, mergeClasses)
+  dependsOn(compileJavaHighest, syncClasses)
 }
 
 // java8 base
@@ -190,9 +190,9 @@ tasks.register("compileTestJava${javaVerFrom}", JavaCompile::class) {
   }
 }
 
-val mergeTestClasses by tasks.registering(Copy::class) {
+val syncTestClasses by tasks.registering(Sync::class) {
   group = "compile"
-  description = "Merge all version-specific test class files"
+  description = "Sync all version-specific test class files to the test build directory"
   ((javaVerFrom)..javaVerTo).forEach { version ->
     from(tasks.named<JavaCompile>("compileTestJava$version").get().destinationDirectory)
   }
@@ -205,11 +205,11 @@ val compileTestJavaHighest = tasks.named<JavaCompile>("compileTestJava$javaVerTo
 tasks.compileTestJava {
   group = "compile"
   enabled = false
-  dependsOn(tasks.named("generateTestProto"), compileTestJavaHighest, mergeTestClasses)
+  dependsOn(tasks.named("generateTestProto"), compileTestJavaHighest, syncTestClasses)
 }
 
 tasks.named("testClasses") {
-  dependsOn(tasks.named("generateTestProto"), compileTestJavaHighest, mergeTestClasses)
+  dependsOn(tasks.named("generateTestProto"), compileTestJavaHighest, syncTestClasses)
 }
 
 tasks.named<Jar>("sourcesJar") {
