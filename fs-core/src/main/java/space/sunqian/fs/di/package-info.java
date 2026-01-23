@@ -158,7 +158,7 @@
  * {@code javax.annotation.PreDestroy}/{@code jakarta.annotation.PreDestroy}. {@code componentTypes} method specifies
  * the root component types.
  * <p>
- * After configuration is complete, the {@code build} method returns a new {@link space.sunqian.fs.utils.di.DIContainer}
+ * After configuration is complete, the {@code build} method returns a new {@link space.sunqian.fs.di.DIContainer}
  * instance to assign to the {@code diContainer} variable. The {@code build} method executes the following process:
  * <ol>
  *   <li>
@@ -175,7 +175,7 @@
  *   </li>
  *   <li>
  *       After injection completes, find out all component instances that implement the
- *       {@link space.sunqian.fs.utils.di.DIAspectHandler} interface as AOP handlers.
+ *       {@link space.sunqian.fs.di.DIAspectHandler} interface as AOP handlers.
  *   </li>
  *   <li>
  *       Pass the remaining component instances to each AOP handler sequentially to determine if they need to
@@ -189,7 +189,7 @@
  *   </li>
  * </ol>
  * Note the {@code build} method only instantiates and injects component instances, and does not initialize them
- * (post-construct methods are not executed). Call {@link space.sunqian.fs.utils.di.DIContainer#initialize()} to initialize
+ * (post-construct methods are not executed). Call {@link space.sunqian.fs.di.DIContainer#initialize()} to initialize
  * the components.
  * <p>
  * When {@code initialize} method is executed, all {@code post-construct} methods in the container will be executed
@@ -223,13 +223,13 @@
  * <p>
  * Core interface of this package:
  * <ul>
- *     <li>{@link space.sunqian.fs.utils.di.DIContainer}</li>
- *     <li>{@link space.sunqian.fs.utils.di.DIComponent}</li>
- *     <li>{@link space.sunqian.fs.utils.di.DIAspectHandler}</li>
+ *     <li>{@link space.sunqian.fs.di.DIContainer}</li>
+ *     <li>{@link space.sunqian.fs.di.DIComponent}</li>
+ *     <li>{@link space.sunqian.fs.di.DIAspectHandler}</li>
  * </ul>
  * Utilities of this package:
  * <ul>
- *     <li>{@link space.sunqian.fs.utils.di.DIKit}</li>
+ *     <li>{@link space.sunqian.fs.di.DIKit}</li>
  * </ul>
  */
-package space.sunqian.fs.utils.di;
+package space.sunqian.fs.di;

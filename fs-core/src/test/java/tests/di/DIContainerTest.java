@@ -1,4 +1,4 @@
-package tests.utils.di;
+package tests.di;
 
 import internal.test.FsTestException;
 import internal.test.PrintTest;
@@ -10,13 +10,13 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.SetKit;
+import space.sunqian.fs.di.DIAspectHandler;
+import space.sunqian.fs.di.DIComponent;
+import space.sunqian.fs.di.DIContainer;
+import space.sunqian.fs.di.DIException;
+import space.sunqian.fs.di.DIInitializeException;
+import space.sunqian.fs.di.DIShutdownException;
 import space.sunqian.fs.reflect.TypeRef;
-import space.sunqian.fs.utils.di.DIAspectHandler;
-import space.sunqian.fs.utils.di.DIComponent;
-import space.sunqian.fs.utils.di.DIContainer;
-import space.sunqian.fs.utils.di.DIException;
-import space.sunqian.fs.utils.di.DIInitializeException;
-import space.sunqian.fs.utils.di.DIShutdownException;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;

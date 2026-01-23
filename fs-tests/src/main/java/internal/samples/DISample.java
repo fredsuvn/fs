@@ -2,8 +2,8 @@ package internal.samples;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.utils.di.DIAspectHandler;
-import space.sunqian.fs.utils.di.DIContainer;
+import space.sunqian.fs.di.DIAspectHandler;
+import space.sunqian.fs.di.DIContainer;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

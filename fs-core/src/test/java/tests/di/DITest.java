@@ -1,10 +1,10 @@
-package tests.utils.di;
+package tests.di;
 
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.fs.utils.di.DIException;
-import space.sunqian.fs.utils.di.DIKit;
+import space.sunqian.fs.di.DIException;
+import space.sunqian.fs.di.DIKit;
 
 import java.util.ArrayList;
 import java.util.List;

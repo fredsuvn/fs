@@ -1,4 +1,4 @@
-package space.sunqian.fs.utils.di;
+package space.sunqian.fs.di;
 
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
