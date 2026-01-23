@@ -18,36 +18,18 @@ import java.util.Map;
 public interface MapSchema extends DataSchema {
 
     /**
-     * Parse the given type to {@link MapSchema} using {@link MapParser#defaultParser()}.
+     * Parse the given {@link Map} type or {@link MapType} to {@link MapSchema} using
+     * {@link MapParser#defaultParser()}.
      * <p>
      * Note this method never caches the parsed results.
      *
      * @param type the given type
      * @return the {@link MapSchema} parsed from the given type using {@link MapParser#defaultParser()}
-     * @throws DataSchemaException if the given type is not a {@link Map} type, or any other problem occurs
+     * @throws DataSchemaException if the given type is not a {@link Map} type or {@link MapType}, or any other problem
+     *                             occurs
      */
     static @Nonnull MapSchema parse(@Nonnull Type type) throws DataSchemaException {
         return MapParser.defaultParser().parse(type);
-    }
-
-    /**
-     * Parse the given type to {@link MapSchema} using {@link MapParser#defaultParser()}, with the specified key type
-     * and value type.
-     * <p>
-     * Note this method never caches the parsed results.
-     *
-     * @param type      the given type
-     * @param keyType   the specified key type
-     * @param valueType the specified value type
-     * @return the {@link MapSchema} parsed from the given type using {@link MapParser#defaultParser()}
-     * @throws DataSchemaException if the given type is not a {@link Map} type, or any other problem occurs
-     */
-    static @Nonnull MapSchema parse(
-        @Nonnull Type type,
-        @Nonnull Type keyType,
-        @Nonnull Type valueType
-    ) throws DataSchemaException {
-        return MapParser.defaultParser().parse(type, keyType, valueType);
     }
 
     /**

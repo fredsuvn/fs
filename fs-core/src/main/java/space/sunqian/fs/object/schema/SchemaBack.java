@@ -57,11 +57,6 @@ final class SchemaBack {
             }
         }
 
-        @Override
-        public @Nonnull MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) {
-            return new MapSchemaImpl(type, keyType, valueType);
-        }
-
         private final class MapSchemaImpl implements MapSchema {
 
             private final @Nonnull Type type;
@@ -69,16 +64,17 @@ final class SchemaBack {
             private final @Nonnull Type valueType;
 
             private MapSchemaImpl(@Nonnull Type type) throws ReflectionException {
-                this.type = type;
-                List<Type> actualTypes = TypeKit.resolveActualTypeArguments(type, Map.class);
-                this.keyType = actualTypes.get(0);
-                this.valueType = actualTypes.get(1);
-            }
-
-            private MapSchemaImpl(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) {
-                this.type = type;
-                this.keyType = keyType;
-                this.valueType = valueType;
+                if (type instanceof MapType) {
+                    MapType mapType = (MapType) type;
+                    this.type = mapType.mapType();
+                    this.keyType = mapType.keyType();
+                    this.valueType = mapType.valueType();
+                } else {
+                    this.type = type;
+                    List<Type> actualTypes = TypeKit.resolveActualTypeArguments(type, Map.class);
+                    this.keyType = actualTypes.get(0);
+                    this.valueType = actualTypes.get(1);
+                }
             }
 
             @Override
@@ -135,12 +131,6 @@ final class SchemaBack {
         @Override
         public @Nonnull MapSchema parse(@Nonnull Type type) {
             return cache.get(type, parser::parse);
-        }
-
-        @Override
-        public @Nonnull MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) {
-            Type actualType = MapType.of(type, keyType, valueType);
-            return cache.get(actualType, t -> parser.parse(t, keyType, valueType));
         }
     }
 

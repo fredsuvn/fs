@@ -5,8 +5,13 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.create.CreatorProvider;
+import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.MapParser;
+import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.ObjectParser;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 /**
  * Utilities for object conversion.
@@ -15,21 +20,6 @@ import space.sunqian.fs.object.schema.ObjectParser;
  */
 public class ConvertKit {
 
-    private static final @Nonnull MapParser MAP_PARSER = MapParser.cachedParser(
-        SimpleCache.ofSoft(),
-        MapParser.defaultParser()
-    );
-
-    private static final @Nonnull ObjectParser OBJECT_PARSER = ObjectParser.cachedParser(
-        SimpleCache.ofSoft(),
-        ObjectParser.defaultParser()
-    );
-
-    private static final @Nonnull CreatorProvider CREATOR_PROVIDER = CreatorProvider.cachedProvider(
-        SimpleCache.ofSoft(),
-        CreatorProvider.defaultProvider()
-    );
-
     /**
      * Returns the default {@link MapParser} for object conversion. The returned object is same one and based on
      * {@link MapParser#defaultParser()}, and its results are cached with {@link SimpleCache#ofSoft()}.
@@ -37,7 +27,7 @@ public class ConvertKit {
      * @return the default {@link MapParser}
      */
     public static @Nonnull MapParser mapParser() {
-        return MAP_PARSER;
+        return CachedMapParser.INST;
     }
 
     /**
@@ -59,7 +49,7 @@ public class ConvertKit {
      * @return the default {@link ObjectParser}
      */
     public static @Nonnull ObjectParser objectParser() {
-        return OBJECT_PARSER;
+        return CachedObjectParser.INST;
     }
 
     /**
@@ -81,7 +71,7 @@ public class ConvertKit {
      * @return the default {@link CreatorProvider} with caching for object creation
      */
     public static @Nonnull CreatorProvider creatorProvider() {
-        return CREATOR_PROVIDER;
+        return CachedCreator.INST;
     }
 
     /**
@@ -97,5 +87,57 @@ public class ConvertKit {
     }
 
     private ConvertKit() {
+    }
+
+    private enum CachedMapParser implements MapParser {
+        INST;
+
+        private final @Nonnull MapParser delegate = MapParser.cachedParser(
+            SimpleCache.ofSoft(),
+            MapParser.defaultParser()
+        );
+
+        @Override
+        public @Nonnull MapSchema parse(@Nonnull Type type) throws DataSchemaException {
+            return delegate.parse(type);
+        }
+    }
+
+    private enum CachedObjectParser implements ObjectParser {
+        INST;
+
+        private final @Nonnull ObjectParser delegate = ObjectParser.cachedParser(
+            SimpleCache.ofSoft(),
+            ObjectParser.defaultParser()
+        );
+
+        @Override
+        public @Nonnull List<@Nonnull Handler> handlers() {
+            return delegate.handlers();
+        }
+
+        @Override
+        public @Nonnull Handler asHandler() {
+            return delegate.asHandler();
+        }
+    }
+
+    private enum CachedCreator implements CreatorProvider {
+        INST;
+
+        private final @Nonnull CreatorProvider delegate = CreatorProvider.cachedProvider(
+            SimpleCache.ofSoft(),
+            CreatorProvider.defaultProvider()
+        );
+
+        @Override
+        public @Nonnull List<@Nonnull Handler> handlers() {
+            return delegate.handlers();
+        }
+
+        @Override
+        public @Nonnull Handler asHandler() {
+            return delegate.asHandler();
+        }
     }
 }

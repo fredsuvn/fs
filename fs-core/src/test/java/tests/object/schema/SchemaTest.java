@@ -11,6 +11,7 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.invoke.Invocable;
+import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.MapSchema;
@@ -228,6 +229,11 @@ public class SchemaTest implements PrintTest {
 
     @Test
     public void testObjectParser() throws Exception {
+        testObjectParser(ObjectParser.defaultParser());
+        testObjectParser(ConvertKit.objectParser());
+    }
+
+    private void testObjectParser(ObjectParser parser) throws Exception {
         class PreHandler implements ObjectParser.Handler {
             @Override
             public boolean parse(@Nonnull ObjectParser.Context context) throws Exception {
@@ -237,7 +243,7 @@ public class SchemaTest implements PrintTest {
                 return true;
             }
         }
-        ObjectParser preParser = ObjectParser.defaultParser().withFirstHandler(new PreHandler());
+        ObjectParser preParser = parser.withFirstHandler(new PreHandler());
         ObjectSchema preSchema = preParser.parse(Object.class);
         assertEquals(Object.class, preSchema.type());
         assertEquals(0, preSchema.properties().size());
@@ -286,7 +292,7 @@ public class SchemaTest implements PrintTest {
             }
         }
         ObjectParser lastParser = ObjectParser.newParser(
-            ObjectParser.defaultParser().asHandler(), new LastHandler());
+            parser.asHandler(), new LastHandler());
         ObjectSchema lastSchema = lastParser.parse(Object.class);
         assertEquals(Object.class, lastSchema.type());
         assertEquals(lastSchema.properties().keySet(), SetKit.set("class", "test"));
@@ -359,7 +365,7 @@ public class SchemaTest implements PrintTest {
             schema.type().getTypeName()
         );
         assertThrows(DataSchemaException.class, () -> MapSchema.parse(String.class));
-        MapSchema schemaWithTypes = MapSchema.parse(Map.class, Object.class, Long.class);
+        MapSchema schemaWithTypes = MapSchema.parse(MapType.of(Map.class, Object.class, Long.class));
         assertEquals(Map.class, schemaWithTypes.type());
         assertEquals(Map.class, schemaWithTypes.rawType());
         assertSame(schemaWithTypes.parser(), MapParser.defaultParser());
@@ -399,12 +405,82 @@ public class SchemaTest implements PrintTest {
                     }
                 };
             }
+        }
+        MapParser parser2 = new Parser2();
+        MapSchema m4 = parser2.parse(Map.class);
+        assertNotEquals(m1, m4);
+        assertNotEquals(m4, m1);
+        // hash code
+        {
+            int result = 1;
+            result = 31 * result + m1.type().hashCode();
+            result = 31 * result + m1.parser().hashCode();
+            assertEquals(m1.hashCode(), result);
+        }
+    }
 
+    @Test
+    public void testMapParser() throws Exception {
+        testMapParser(MapParser.defaultParser());
+        testMapParser(ConvertKit.mapParser());
+    }
+
+    private void testMapParser(MapParser parser) throws Exception {
+        MapSchema schema = parser.parse(HelloMap.class);
+        assertSame(schema.parser(), MapParser.defaultParser());
+        assertEquals(HelloMap.class, schema.type());
+        assertEquals(HelloMap.class, schema.rawType());
+        assertTrue(schema.isMapSchema());
+        assertFalse(schema.isObjectSchema());
+        assertSame(schema.asMapSchema(), schema);
+        assertThrows(ClassCastException.class, schema::asObjectSchema);
+        assertEquals(String.class, schema.keyType());
+        assertEquals(Long.class, schema.valueType());
+        printFor("MapSchema toString", schema);
+        assertEquals(
+            schema.toString(),
+            schema.type().getTypeName()
+        );
+        assertThrows(DataSchemaException.class, () -> parser.parse(String.class));
+        MapSchema schemaWithTypes = parser.parse(MapType.of(Map.class, Object.class, Long.class));
+        assertEquals(Map.class, schemaWithTypes.type());
+        assertEquals(Map.class, schemaWithTypes.rawType());
+        assertSame(schemaWithTypes.parser(), MapParser.defaultParser());
+        assertEquals(Object.class, schemaWithTypes.keyType());
+        assertEquals(Long.class, schemaWithTypes.valueType());
+        // schema equal
+        MapSchema m1 = parser.parse(Map.class);
+        MapSchema m2 = parser.parse(Map.class);
+        assertEquals(m1, m2);
+        assertTrue(m1.equals(m1));
+        assertFalse(m1.equals(""));
+        MapSchema m3 = parser.parse(new TypeRef<Map<String, Integer>>() {}.type());
+        assertNotEquals(m1, m3);
+        assertNotEquals(m3, m1);
+        class Parser2 implements MapParser {
             @Override
-            public @Nonnull MapSchema parse(
-                @Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType
-            ) throws DataSchemaException {
-                return null;
+            public @Nonnull MapSchema parse(@Nonnull Type type) throws DataSchemaException {
+                return new MapSchema() {
+                    @Override
+                    public @Nonnull MapParser parser() {
+                        return Parser2.this;
+                    }
+
+                    @Override
+                    public @Nonnull Type keyType() {
+                        return Object.class;
+                    }
+
+                    @Override
+                    public @Nonnull Type valueType() {
+                        return Object.class;
+                    }
+
+                    @Override
+                    public @Nonnull Type type() {
+                        return type;
+                    }
+                };
             }
         }
         MapParser parser2 = new Parser2();
@@ -428,12 +504,12 @@ public class SchemaTest implements PrintTest {
             assertSame(mapParser.parse(Map.class), mapParser.parse(Map.class));
             assertNotSame(MapSchema.parse(Map.class), MapSchema.parse(Map.class));
             assertSame(
-                mapParser.parse(Map.class, String.class, Long.class),
-                mapParser.parse(Map.class, String.class, Long.class)
+                mapParser.parse(MapType.of(Map.class, String.class, Long.class)),
+                mapParser.parse(MapType.of(Map.class, String.class, Long.class))
             );
             assertNotSame(
-                MapSchema.parse(Map.class, String.class, Long.class),
-                MapSchema.parse(Map.class, String.class, Long.class)
+                MapSchema.parse(MapType.of(Map.class, String.class, Long.class)),
+                MapSchema.parse(MapType.of(Map.class, String.class, Long.class))
             );
         }
         {

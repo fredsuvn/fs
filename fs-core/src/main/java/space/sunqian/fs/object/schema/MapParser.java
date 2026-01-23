@@ -41,25 +41,14 @@ public interface MapParser {
     }
 
     /**
-     * Parses the given type to an instance of {@link MapParser}, and returns the parsed {@link MapParser}.
+     * Parses the given {@link Map} type or {@link MapType} to an instance of {@link MapParser}, and returns the parsed
+     * {@link MapParser}.
      *
      * @param type the given type
      * @return the parsed {@link MapParser}
-     * @throws DataSchemaException if the given type is not a {@link Map} type, or any other problem occurs
+     * @throws DataSchemaException if the given type is not a {@link Map} type or {@link MapType}, or any other problem
+     *                             occurs
      */
     @Nonnull
     MapSchema parse(@Nonnull Type type) throws DataSchemaException;
-
-    /**
-     * Parses the given type to an instance of {@link MapParser} with the specified key type and value type, and returns
-     * the parsed {@link MapParser}.
-     *
-     * @param type      the given type
-     * @param keyType   the specified key type
-     * @param valueType the specified value type
-     * @return the parsed {@link MapParser}
-     * @throws DataSchemaException if the given type is not a {@link Map} type, or any other problem occurs
-     */
-    @Nonnull
-    MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) throws DataSchemaException;
 }
