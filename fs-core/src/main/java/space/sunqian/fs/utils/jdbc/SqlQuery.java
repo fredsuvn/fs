@@ -13,12 +13,12 @@ import java.sql.ResultSet;
 import java.util.List;
 
 /**
- * This interface represents the query for a SQL statement.
+ * This interface represents the query result of a SQL execution.
  *
  * @param <T> the type mapped to the data row of the query result set
  * @author sunqian
  */
-public interface SqlQuery<T> extends SqlOperation {
+public interface SqlQuery<T> extends SqlResult {
 
     /**
      * Executes the result set of this query.

@@ -66,7 +66,7 @@ public class JdbcTest {
     }
 
     @Test
-    public void testQuery() throws Exception {
+    public void testJdbcQuery() throws Exception {
         PreparedStatement preparedStatement = h2Connection.prepareStatement(
             "select * from test_table;"
         );

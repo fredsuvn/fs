@@ -6,12 +6,12 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 
 /**
- * This interface represents the operation for a SQL statement, it is the base interface for {@link SqlQuery},
+ * This interface represents the operation result of a SQL execution. It is the base interface for {@link SqlQuery},
  * {@link SqlUpdate} and {@link SqlInsert}.
  *
  * @author sunqian
  */
-public interface SqlOperation {
+public interface SqlResult {
 
     /**
      * Returns the statement of this operation.
@@ -30,8 +30,7 @@ public interface SqlOperation {
     PreparedStatement preparedStatement();
 
     /**
-     * Releases this operation object's database and JDBC resources immediately instead of waiting for this to happen
-     * when it is automatically closed.
+     * Releases the JDBC resources of this operation including the connection, statement and result set.
      *
      * @throws JdbcException if any error occurs
      */

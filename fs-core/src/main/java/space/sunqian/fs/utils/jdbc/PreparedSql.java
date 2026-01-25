@@ -5,23 +5,29 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.List;
 
+/**
+ * This interface represents a prepared SQL string with the specified parameters to be bound.
+ *
+ * @author sunqian
+ */
 public interface PreparedSql {
 
     /**
-     * Returns the SQL statement to be executed.
+     * Returns this prepared SQL string.
      *
-     * @return the SQL statement to be executed
+     * @return this prepared SQL string
      */
     @Nonnull
-    String sql();
+    String preparedSql();
 
     /**
-     * Returns the parameters to be bound to the SQL statement.
+     * Returns the parameters to be bound to this prepared SQL.
      *
-     * @return the parameters to be bound to the SQL statement
+     * @return the parameters to be bound to this prepared SQL
      */
     @Nonnull
     @Immutable
@@ -87,4 +93,14 @@ public interface PreparedSql {
      */
     @Nonnull
     SqlInsert insert() throws JdbcException;
+
+    /**
+     * Sets the connection for this prepared SQL, then returns this prepared SQL itself.
+     *
+     * @param connection the connection to be set
+     * @return this prepared SQL itself
+     * @throws JdbcException if any error occurs
+     */
+    @Nonnull
+    PreparedSql connection(@Nonnull Connection connection) throws JdbcException;
 }

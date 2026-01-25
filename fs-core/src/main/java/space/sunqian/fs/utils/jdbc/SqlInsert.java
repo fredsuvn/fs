@@ -6,11 +6,11 @@ import space.sunqian.annotation.Nonnull;
 import java.util.List;
 
 /**
- * This interface represents the insert for a SQL statement.
+ * This interface represents the insert result of a SQL execution.
  *
  * @author sunqian
  */
-public interface SqlInsert extends SqlOperation {
+public interface SqlInsert extends SqlResult {
 
     /**
      * Returns the number of rows inserted by this SQL statement.
