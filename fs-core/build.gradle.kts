@@ -224,8 +224,8 @@ tasks.test {
   }
   include("**/*Test.class", "**/*TestKt.class", *includeList.toTypedArray())
   useJUnitPlatform()
-  testClassesDirs = fileTree(layout.buildDirectory.dir("classes/java/test"))
-  classpath = sourceSets.test.get().runtimeClasspath
+  //testClassesDirs = fileTree(layout.buildDirectory.dir("classes/java/test"))
+  //classpath = sourceSets.test.get().runtimeClasspath
   javaLauncher = javaToolchains.launcherFor {
     languageVersion = javaVersionTo
   }
