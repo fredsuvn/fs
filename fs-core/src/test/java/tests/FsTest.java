@@ -100,6 +100,58 @@ public class FsTest implements AssertTest, PrintTest {
                 return 2;
             }));
         }
+        {
+            // uncheck actions
+            int[] i = {0};
+            assertEquals(0, i[0]);
+            Fs.uncheck(Arrays.asList(
+                () -> i[0]++,
+                () -> i[0]++,
+                () -> i[0]++
+            ), UnreachablePointException::new);
+            assertEquals(3, i[0]);
+
+            int[] j = {0};
+            assertThrows(ArrayIndexOutOfBoundsException.class, () -> Fs.uncheck(Arrays.asList(
+                () -> i[1]++,
+                () -> {
+                    j[0]++;
+                    i[1]++;
+                },
+                () -> i[1]++
+            ), e -> {
+                assertInstanceOf(ArrayIndexOutOfBoundsException.class, e);
+                Throwable[] suppressed = e.getSuppressed();
+                assertEquals(2, suppressed.length);
+                assertInstanceOf(ArrayIndexOutOfBoundsException.class, suppressed[0]);
+                assertInstanceOf(ArrayIndexOutOfBoundsException.class, suppressed[1]);
+                return (ArrayIndexOutOfBoundsException) e;
+            }));
+            assertEquals(1, j[0]);
+
+            Fs.uncheck(Arrays.asList(
+                () -> i[0]++,
+                () -> i[0]++,
+                () -> i[0]++
+            ), UnreachablePointException::new, true);
+            assertEquals(6, i[0]);
+
+            assertThrows(ArrayIndexOutOfBoundsException.class, () -> Fs.uncheck(Arrays.asList(
+                    () -> i[1]++,
+                    () -> {
+                        j[0]++;
+                        i[1]++;
+                    },
+                    () -> i[1]++
+                ), e -> {
+                    assertInstanceOf(ArrayIndexOutOfBoundsException.class, e);
+                    assertEquals(0, e.getSuppressed().length);
+                    return (ArrayIndexOutOfBoundsException) e;
+                },
+                true
+            ));
+            assertEquals(1, j[0]);
+        }
     }
 
     private int throwEx(Exception cause) throws Exception {
