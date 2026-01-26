@@ -3,16 +3,18 @@ package space.sunqian.fs.utils.jdbc;
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.base.option.Option;
-import space.sunqian.fs.base.string.NameMapper;
-import space.sunqian.fs.object.convert.ConvertOption;
-import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.reflect.TypeRef;
+import space.sunqian.fs.collect.ListKit;
 
 import java.lang.reflect.Type;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,15 +25,47 @@ import java.util.List;
  */
 final class SqlBack {
 
-    private SqlBack() {
+    @SuppressWarnings("resource")
+    static @Nonnull PreparedStatement createPreparedStatement(@Nonnull PreparedSql preparedSql) throws SQLException {
+        Connection connection = preparedSql.connection();
+        if (connection == null) {
+            throw new SQLException("Connection is not set");
+        }
+        PreparedStatement statement =
+            connection.prepareStatement(preparedSql.preparedSql(), Statement.RETURN_GENERATED_KEYS);
+        List<Object> parameters = preparedSql.parameters();
+        for (int i = 0; i < parameters.size(); i++) {
+            statement.setObject(i + 1, parameters.get(i));
+        }
+        return statement;
     }
 
-    /**
-     * Implementation of SqlBuilder interface.
-     */
-    static final class SqlBuilderImpl implements SqlBuilder {
-        private final StringBuilder sqlBuilder = new StringBuilder();
-        private final List<Object> parameters = new ArrayList<>();
+    static @Nonnull SqlBuilder newBuilder() {
+        return new SqlBuilderImpl();
+    }
+
+    static <T> @Nonnull SqlQuery<T> newQuery(
+        @Nonnull PreparedStatement statement,
+        @Nonnull ResultSet resultSet,
+        @Nonnull Type type
+    ) {
+        return new SqlQueryImpl<>(statement, resultSet, type);
+    }
+
+    static @Nonnull SqlUpdate newUpdate(@Nonnull PreparedStatement statement) {
+        return new SqlUpdateImpl(statement);
+    }
+
+    static @Nonnull SqlInsert newInsert(
+        @Nonnull PreparedStatement statement
+    ) {
+        return new SqlInsertImpl(statement);
+    }
+
+    private static final class SqlBuilderImpl implements SqlBuilder {
+
+        private final @Nonnull StringBuilder sqlBuilder = new StringBuilder();
+        private @Nullable List<Object> parameters;
 
         @Override
         public @Nonnull SqlBuilder append(@Nonnull String sql) {
@@ -42,60 +76,63 @@ final class SqlBack {
         @Override
         public @Nonnull SqlBuilder append(@Nonnull String sql, @Nullable Object param) {
             sqlBuilder.append(sql);
-            if (param instanceof Iterable && !(param instanceof String)) {
-                // Handle iterable parameters (like lists)
+            if (param instanceof Collection<?>) {
+                Collection<?> collection = (Collection<?>) param;
+                parameters().addAll(collection);
+                sqlBuilder.append(join(collection));
+            }
+
+            if (param instanceof Iterable<?>) {
                 Iterable<?> iterable = (Iterable<?>) param;
-                boolean first = true;
-                for (Object ignored : iterable) {
-                    if (!first) {
-                        sqlBuilder.append(",");
-                    }
-                    sqlBuilder.append("?");
-                    first = false;
-                }
-                // Add all iterable elements as parameters
-                for (Object item : iterable) {
-                    parameters.add(item);
-                }
+                Collection<?> collection = ListKit.toList(iterable);
+                parameters().addAll(collection);
+                sqlBuilder.append(join(collection));
             } else {
                 // Handle single parameter
                 sqlBuilder.append("?");
-                parameters.add(param);
+                parameters().add(param);
             }
             return this;
         }
 
-        @Override
-        public @Nonnull SqlBuilder appendIf(boolean condition, @Nonnull String sql) {
-            if (condition) {
-                sqlBuilder.append(sql);
+        private @Nonnull List<Object> parameters() {
+            if (parameters == null) {
+                parameters = new ArrayList<>();
             }
-            return this;
+            return parameters;
         }
 
-        @Override
-        public @Nonnull SqlBuilder appendIf(boolean condition, @Nonnull String sql, @Nullable Object param) {
-            if (condition) {
-                return append(sql, param);
+        private @Nonnull String join(Collection<?> collection) {
+            if (collection.isEmpty()) {
+                return "";
             }
-            return this;
+            int size = collection.size();
+            char[] chars = new char[size * 2 - 1];
+            chars[0] = '?';
+            for (int i = 1; i < chars.length; i += 2) {
+                chars[i] = ',';
+                chars[i] = '?';
+            }
+            return new String(chars);
         }
 
         @Override
         public @Nonnull PreparedSql build() {
-            return new PreparedSqlImpl(sqlBuilder.toString(), Collections.unmodifiableList(new ArrayList<>(parameters)));
+            return new SimplePreparedSql(
+                sqlBuilder.toString(),
+                parameters == null ? Collections.emptyList() : parameters
+            );
         }
     }
 
-    /**
-     * Implementation of PreparedSql interface.
-     */
-    static final class PreparedSqlImpl implements PreparedSql {
-        private final String preparedSql;
-        private final List<Object> parameters;
-        private Connection connection;
+    private static final class SimplePreparedSql implements PreparedSql {
 
-        PreparedSqlImpl(@Nonnull String preparedSql, @Nonnull List<Object> parameters) {
+        private final @Nonnull String preparedSql;
+        private final @Nonnull List<Object> parameters;
+
+        private @Nullable Connection connection;
+
+        private SimplePreparedSql(@Nonnull String preparedSql, @Nonnull @RetainedParam List<Object> parameters) {
             this.preparedSql = preparedSql;
             this.parameters = parameters;
         }
@@ -111,68 +148,8 @@ final class SqlBack {
         }
 
         @Override
-        public <T> @Nonnull SqlQuery<T> query(Type type) throws JdbcException {
-            return Fs.uncheck(() -> {
-                PreparedStatement statement = createPreparedStatement();
-                boolean isResultSet = statement.execute();
-
-                if (!isResultSet) {
-                    throw new SQLException("Expected a result set, but got an update count");
-                }
-
-                ResultSet resultSet = statement.getResultSet();
-                return new SqlQueryImpl<>(statement, resultSet, type);
-            }, JdbcException::new);
-        }
-
-        @Override
-        public @Nonnull ResultSet query() throws JdbcException {
-            return Fs.uncheck(() -> {
-                PreparedStatement statement = createPreparedStatement();
-                boolean isResultSet = statement.execute();
-
-                if (!isResultSet) {
-                    throw new SQLException("Expected a result set, but got an update count");
-                }
-
-                return statement.getResultSet();
-            }, JdbcException::new);
-        }
-
-        @Override
-        public @Nonnull SqlUpdate update() throws JdbcException {
-            return Fs.uncheck(() -> {
-                PreparedStatement statement = createPreparedStatement();
-                boolean isResultSet = statement.execute();
-
-                if (isResultSet) {
-                    throw new SQLException("Expected an update count, but got a result set");
-                }
-
-                return new SqlUpdateImpl(statement);
-            }, JdbcException::new);
-        }
-
-        @Override
-        public @Nonnull SqlInsert insert() throws JdbcException {
-            return Fs.uncheck(() -> {
-                PreparedStatement statement = createPreparedStatement();
-                boolean isResultSet = statement.execute();
-
-                if (isResultSet) {
-                    throw new SQLException("Expected an update count, but got a result set");
-                }
-
-                // Get auto-generated keys
-                ResultSet generatedKeys = statement.getGeneratedKeys();
-                List<Object> keys = new ArrayList<>();
-                while (generatedKeys.next()) {
-                    keys.add(generatedKeys.getObject(1));
-                }
-                generatedKeys.close();
-
-                return new SqlInsertImpl(statement, keys);
-            }, JdbcException::new);
+        public @Nullable Connection connection() {
+            return connection;
         }
 
         @Override
@@ -180,32 +157,19 @@ final class SqlBack {
             this.connection = connection;
             return this;
         }
-
-        private PreparedStatement createPreparedStatement() throws SQLException {
-            if (connection == null) {
-                throw new SQLException("Connection is not set");
-            }
-
-            PreparedStatement statement = connection.prepareStatement(preparedSql, Statement.RETURN_GENERATED_KEYS);
-
-            // Bind parameters
-            for (int i = 0; i < parameters.size(); i++) {
-                statement.setObject(i + 1, parameters.get(i));
-            }
-
-            return statement;
-        }
     }
 
-    /**
-     * Implementation of SqlQuery interface.
-     */
-    static final class SqlQueryImpl<T> implements SqlQuery<T> {
-        private final PreparedStatement statement;
-        private final ResultSet resultSet;
-        private final Type type;
+    private static final class SqlQueryImpl<T> implements SqlQuery<T> {
 
-        SqlQueryImpl(@Nonnull PreparedStatement statement, @Nonnull ResultSet resultSet, @Nonnull Type type) {
+        private final @Nonnull PreparedStatement statement;
+        private final @Nonnull ResultSet resultSet;
+        private final @Nonnull Type type;
+
+        private SqlQueryImpl(
+            @Nonnull PreparedStatement statement,
+            @Nonnull ResultSet resultSet,
+            @Nonnull Type type
+        ) {
             this.statement = statement;
             this.resultSet = resultSet;
             this.type = type;
@@ -230,57 +194,19 @@ final class SqlBack {
         public @Nonnull PreparedStatement preparedStatement() {
             return statement;
         }
-
-        @Override
-        public void close() throws JdbcException {
-            Fs.uncheck(() -> {
-                try {
-                    if (resultSet != null && !resultSet.isClosed()) {
-                        resultSet.close();
-                    }
-                } finally {
-                    if (statement != null && !statement.isClosed()) {
-                        statement.close();
-                    }
-                }
-            }, JdbcException::new);
-        }
-
-        @Override
-        public @Nonnull List<@Nonnull T> resultList(
-            @Nullable NameMapper columnMapper,
-            @Nullable ObjectConverter converter,
-            @Nonnull Option<?, ?> @Nonnull ... options
-        ) throws JdbcException {
-            return JdbcKit.toObject(
-                resultSet(),
-                type(),
-                columnMapper,
-                Fs.nonnull(converter, ObjectConverter.defaultConverter()),
-                options
-            );
-        }
     }
 
-    /**
-     * Implementation of SqlUpdate interface.
-     */
-    static final class SqlUpdateImpl implements SqlUpdate {
-        private final PreparedStatement statement;
+    private static final class SqlUpdateImpl implements SqlUpdate {
 
-        SqlUpdateImpl(@Nonnull PreparedStatement statement) {
+        private final @Nonnull PreparedStatement statement;
+
+        private SqlUpdateImpl(@Nonnull PreparedStatement statement) {
             this.statement = statement;
         }
 
         @Override
         public long affectedRows() throws JdbcException {
-            return Fs.uncheck(() -> {
-                try {
-                    return statement.getUpdateCount();
-                } catch (SQLException e) {
-                    throw new JdbcException("Failed to get update count", e);
-                }
-            }, JdbcException::new);
+            return Fs.uncheck(statement::getUpdateCount, JdbcException::new);
         }
 
         @Override
@@ -291,44 +217,15 @@ final class SqlBack {
         @Override
         public @Nonnull PreparedStatement preparedStatement() {
             return statement;
-        }
-
-        @Override
-        public void close() throws JdbcException {
-            Fs.uncheck(() -> {
-                if (statement != null && !statement.isClosed()) {
-                    statement.close();
-                }
-            }, JdbcException::new);
         }
     }
 
-    /**
-     * Implementation of SqlInsert interface.
-     */
-    static final class SqlInsertImpl implements SqlInsert {
-        private final PreparedStatement statement;
-        private final List<Object> autoGeneratedKeys;
+    private static final class SqlInsertImpl implements SqlInsert {
 
-        SqlInsertImpl(@Nonnull PreparedStatement statement, @Nonnull List<Object> autoGeneratedKeys) {
+        private final @Nonnull PreparedStatement statement;
+
+        private SqlInsertImpl(@Nonnull PreparedStatement statement) {
             this.statement = statement;
-            this.autoGeneratedKeys = Collections.unmodifiableList(autoGeneratedKeys);
-        }
-
-        @Override
-        public long insertedRows() throws JdbcException {
-            return Fs.uncheck(() -> {
-                try {
-                    return statement.getUpdateCount();
-                } catch (SQLException e) {
-                    throw new JdbcException("Failed to get update count", e);
-                }
-            }, JdbcException::new);
-        }
-
-        @Override
-        public @Immutable @Nonnull List<@Nonnull Object> autoGeneratedKeys() {
-            return autoGeneratedKeys;
         }
 
         @Override
@@ -340,14 +237,8 @@ final class SqlBack {
         public @Nonnull PreparedStatement preparedStatement() {
             return statement;
         }
+    }
 
-        @Override
-        public void close() throws JdbcException {
-            Fs.uncheck(() -> {
-                if (statement != null && !statement.isClosed()) {
-                    statement.close();
-                }
-            }, JdbcException::new);
-        }
+    private SqlBack() {
     }
 }

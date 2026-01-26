@@ -223,9 +223,7 @@ tasks.test {
     "**/*TestJ${version}.class"
   }
   include("**/*Test.class", "**/*TestKt.class", *includeList.toTypedArray())
-  useJUnitPlatform {
-    //includeTags("J17Also", "J17Only")
-  }
+  useJUnitPlatform()
   testClassesDirs = fileTree(layout.buildDirectory.dir("classes/java/test"))
   classpath = sourceSets.test.get().runtimeClasspath
   javaLauncher = javaToolchains.launcherFor {

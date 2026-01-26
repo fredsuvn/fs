@@ -26,7 +26,7 @@ public interface SqlBuilder {
      * @return a new instance of {@link SqlBuilder}
      */
     static @Nonnull SqlBuilder newBuilder() {
-        return new SqlBack.SqlBuilderImpl();
+        return SqlBack.newBuilder();
     }
 
     /**
@@ -62,8 +62,12 @@ public interface SqlBuilder {
      * @param sql       the given raw string to append if condition is {@code true}
      * @return this builder
      */
-    @Nonnull
-    SqlBuilder appendIf(boolean condition, @Nonnull String sql);
+    default @Nonnull SqlBuilder appendIf(boolean condition, @Nonnull String sql) {
+        if (condition) {
+            append(sql);
+        }
+        return this;
+    }
 
     /**
      * Conditionally appends a parameterized string to the current SQL.
@@ -79,8 +83,12 @@ public interface SqlBuilder {
      * @param param     the given parameter value to bind if condition is {@code true}
      * @return this builder
      */
-    @Nonnull
-    SqlBuilder appendIf(boolean condition, @Nonnull String sql, @Nullable Object param);
+    default @Nonnull SqlBuilder appendIf(boolean condition, @Nonnull String sql, @Nullable Object param) {
+        if (condition) {
+            append(sql, param);
+        }
+        return this;
+    }
 
     /**
      * Builds and returns the final prepared SQL.

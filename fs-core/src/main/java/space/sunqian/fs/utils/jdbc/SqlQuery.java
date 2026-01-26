@@ -10,6 +10,8 @@ import space.sunqian.fs.object.convert.ObjectConverter;
 
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -110,6 +112,20 @@ public interface SqlQuery<T> extends SqlResult {
             columnMapper,
             Fs.nonnull(converter, ObjectConverter.defaultConverter()),
             options
+        );
+    }
+
+    @Override
+    @SuppressWarnings("resource")
+    default void close() throws JdbcException {
+        Statement statement = statement();
+        ResultSet resultSet = resultSet();
+        Fs.uncheck(Arrays.asList(
+                () -> statement.getConnection().close(),
+                statement::close,
+                resultSet::close
+            ),
+            JdbcException::new
         );
     }
 }
