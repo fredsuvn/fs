@@ -8,7 +8,13 @@
 // import org.junit.jupiter.api.AfterAll;
 // import org.junit.jupiter.api.BeforeAll;
 // import org.junit.jupiter.api.Test;
-// import space.sunqian.fs.utils.jdbc.*;
+// import space.sunqian.fs.utils.jdbc.BatchSql;
+// import space.sunqian.fs.utils.jdbc.PreparedSql;
+// import space.sunqian.fs.utils.jdbc.SqlBatchResult;
+// import space.sunqian.fs.utils.jdbc.SqlBuilder;
+// import space.sunqian.fs.utils.jdbc.SqlInsert;
+// import space.sunqian.fs.utils.jdbc.SqlQuery;
+// import space.sunqian.fs.utils.jdbc.SqlUpdate;
 //
 // import java.sql.Connection;
 // import java.sql.DriverManager;
@@ -63,9 +69,9 @@
 //             // Insert data
 //             PreparedSql insertSql = SqlBuilder.newBuilder()
 //                 .append("INSERT INTO test_table (name, age, birthday) VALUES (?, ?, ?)")
-//                 .append("", "Alice")
-//                 .append("", 25)
-//                 .append("", ZonedDateTime.now())
+//                 .append("?", "Alice")
+//                 .append("?", 25)
+//                 .append("?", ZonedDateTime.now())
 //                 .build()
 //                 .connection(h2Connection);
 //
@@ -101,9 +107,9 @@
 //             // Insert test data
 //             SqlBuilder.newBuilder()
 //                 .append("INSERT INTO test_table (name, age, birthday) VALUES (?, ?, ?)")
-//                 .append("", "Bob")
-//                 .append("", 30)
-//                 .append("", ZonedDateTime.now())
+//                 .append("?", "Bob")
+//                 .append("?", 30)
+//                 .append("?", ZonedDateTime.now())
 //                 .build()
 //                 .connection(h2Connection)
 //                 .insert();

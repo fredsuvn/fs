@@ -90,7 +90,7 @@ public interface PreparedSql {
     default <T> @Nonnull SqlQuery<T> query(Type type) throws JdbcException {
         return Fs.uncheck(() -> {
             PreparedStatement statement = SqlBack.createPreparedStatement(this);
-            ResultSet resultSet = statement.getResultSet();
+            ResultSet resultSet = statement.executeQuery();
             return SqlBack.newQuery(statement, resultSet, type);
         }, JdbcException::new);
     }

@@ -48,6 +48,7 @@ final class SqlBack {
         }
         PreparedStatement statement =
             connection.prepareStatement(batchSql.preparedSql(), Statement.RETURN_GENERATED_KEYS);
+        statement.clearBatch();
         List<List<Object>> batchParameters = batchSql.batchParameters();
         for (List<Object> batchParameter : batchParameters) {
             for (int i = 0; i < batchParameter.size(); i++) {
@@ -104,9 +105,7 @@ final class SqlBack {
                 Collection<?> collection = (Collection<?>) param;
                 parameters().addAll(collection);
                 sqlBuilder.append(join(collection));
-            }
-
-            if (param instanceof Iterable<?>) {
+            } else if (param instanceof Iterable<?>) {
                 Iterable<?> iterable = (Iterable<?>) param;
                 Collection<?> collection = ListKit.toList(iterable);
                 parameters().addAll(collection);
@@ -280,7 +279,10 @@ final class SqlBack {
 
         @Override
         public long affectedRows() throws JdbcException {
-            return Fs.uncheck(statement::getUpdateCount, JdbcException::new);
+            return Fs.uncheck(() -> {
+                statement.executeUpdate();
+                return statement.getUpdateCount();
+            }, JdbcException::new);
         }
 
         @Override
@@ -300,6 +302,14 @@ final class SqlBack {
 
         private SqlInsertImpl(@Nonnull PreparedStatement statement) {
             this.statement = statement;
+        }
+
+        @Override
+        public long insertedRows() throws JdbcException {
+            return Fs.uncheck(() -> {
+                statement.executeUpdate();
+                return statement.getUpdateCount();
+            }, JdbcException::new);
         }
 
         @Override

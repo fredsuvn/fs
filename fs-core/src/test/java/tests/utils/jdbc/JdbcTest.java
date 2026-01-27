@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class JdbcTest {
 
     private static final String DB_DRIVER = "org.h2.Driver";
-    private static final String DB_URL = "jdbc:h2:mem:" + JdbcTest.class.getName();//"jdbc:h2:./SqlTest.h2db";
+    private static final String DB_URL = "jdbc:h2:mem:" + JdbcTest.class.getName();
     private static final String DB_USER = "sa";
     private static final String DB_PASSWORD = "";
 
@@ -34,22 +34,22 @@ public class JdbcTest {
         Class.forName(DB_DRIVER);
         h2Connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
 
-        // create table `test_table`
+        // create table `user`
         // `id` (auto increment), `name`, `age`
         PreparedStatement preparedStatement = h2Connection.prepareStatement(
-            "create table if not exists test_table (id int primary key auto_increment, name varchar(255), age int);"
+            "create table if not exists user (id int primary key auto_increment, name varchar(255), age int)"
         );
         preparedStatement.execute();
         // insert data: `test`, 18
         preparedStatement = h2Connection.prepareStatement(
-            "insert into test_table (name, age) values (?, ?);"
+            "insert into user (name, age) values (?, ?)"
         );
         preparedStatement.setString(1, "test");
         preparedStatement.setInt(2, 18);
         preparedStatement.execute();
         // insert data: `test2`, 20
         preparedStatement = h2Connection.prepareStatement(
-            "insert into test_table (name, age) values (?, ?);"
+            "insert into user (name, age) values (?, ?)"
         );
         preparedStatement.setString(1, "test2");
         preparedStatement.setInt(2, 20);
@@ -58,9 +58,9 @@ public class JdbcTest {
 
     @AfterAll
     public static void destroy() throws SQLException, ClassNotFoundException {
-        // drop table `test_table`
+        // drop table `user`
         PreparedStatement preparedStatement = h2Connection.prepareStatement(
-            "drop table if exists test_table;"
+            "drop table if exists user"
         );
         preparedStatement.execute();
     }
@@ -68,26 +68,26 @@ public class JdbcTest {
     @Test
     public void testJdbcQuery() throws Exception {
         PreparedStatement preparedStatement = h2Connection.prepareStatement(
-            "select * from test_table;"
+            "select * from user"
         );
         ResultSet resultSet = preparedStatement.executeQuery();
-        List<TestTable> testTables = JdbcKit.toObject(
+        List<User> users = JdbcKit.toObject(
             resultSet,
-            TestTable.class,
+            User.class,
             String::toLowerCase,
             ObjectConverter.defaultConverter()
         );
-        assertEquals(2, testTables.size());
+        assertEquals(2, users.size());
         // test, 18
-        TestTable testTable = testTables.get(0);
-        assertEquals(1, testTable.getId());
-        assertEquals("test", testTable.getName());
-        assertEquals(18, testTable.getAge());
+        User user = users.get(0);
+        assertEquals(1, user.getId());
+        assertEquals("test", user.getName());
+        assertEquals(18, user.getAge());
         // test2, 20
-        testTable = testTables.get(1);
-        assertEquals(2, testTable.getId());
-        assertEquals("test2", testTable.getName());
-        assertEquals(20, testTable.getAge());
+        user = users.get(1);
+        assertEquals(2, user.getId());
+        assertEquals("test2", user.getName());
+        assertEquals(20, user.getAge());
     }
 
     @Test
@@ -110,7 +110,7 @@ public class JdbcTest {
     }
 
     @Data
-    public static class TestTable {
+    public static class User {
         private long id;
         private String name;
         private int age;
