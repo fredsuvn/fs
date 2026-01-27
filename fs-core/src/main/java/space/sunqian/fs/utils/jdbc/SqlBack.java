@@ -40,6 +40,24 @@ final class SqlBack {
         return statement;
     }
 
+    @SuppressWarnings("resource")
+    static @Nonnull PreparedStatement createPreparedStatement(@Nonnull BatchSql batchSql) throws SQLException {
+        Connection connection = batchSql.connection();
+        if (connection == null) {
+            throw new SQLException("Connection is not set");
+        }
+        PreparedStatement statement =
+            connection.prepareStatement(batchSql.preparedSql(), Statement.RETURN_GENERATED_KEYS);
+        List<List<Object>> batchParameters = batchSql.batchParameters();
+        for (List<Object> batchParameter : batchParameters) {
+            for (int i = 0; i < batchParameter.size(); i++) {
+                statement.setObject(i + 1, batchParameter.get(i));
+            }
+            statement.addBatch();
+        }
+        return statement;
+    }
+
     static @Nonnull SqlBuilder newBuilder() {
         return new SqlBuilderImpl();
     }
@@ -60,6 +78,12 @@ final class SqlBack {
         @Nonnull PreparedStatement statement
     ) {
         return new SqlInsertImpl(statement);
+    }
+
+    static @Nonnull SqlBatchResult newBatchResult(
+        @Nonnull PreparedStatement statement
+    ) {
+        return new SqlBatchResultImpl(statement);
     }
 
     private static final class SqlBuilderImpl implements SqlBuilder {
@@ -118,21 +142,26 @@ final class SqlBack {
 
         @Override
         public @Nonnull PreparedSql build() {
-            return new SimplePreparedSql(
+            return new PreparedSqlImpl(
                 sqlBuilder.toString(),
                 parameters == null ? Collections.emptyList() : parameters
             );
         }
+
+        @Override
+        public @Nonnull BatchSql buildBatch() {
+            return new BatchSqlImpl(sqlBuilder.toString());
+        }
     }
 
-    private static final class SimplePreparedSql implements PreparedSql {
+    private static final class PreparedSqlImpl implements PreparedSql {
 
         private final @Nonnull String preparedSql;
         private final @Nonnull List<Object> parameters;
 
         private @Nullable Connection connection;
 
-        private SimplePreparedSql(@Nonnull String preparedSql, @Nonnull @RetainedParam List<Object> parameters) {
+        private PreparedSqlImpl(@Nonnull String preparedSql, @Nonnull @RetainedParam List<Object> parameters) {
             this.preparedSql = preparedSql;
             this.parameters = parameters;
         }
@@ -155,6 +184,51 @@ final class SqlBack {
         @Override
         public @Nonnull PreparedSql connection(@Nonnull Connection connection) throws JdbcException {
             this.connection = connection;
+            return this;
+        }
+    }
+
+    private static final class BatchSqlImpl implements BatchSql {
+
+        private final @Nonnull String preparedSql;
+        private final @Nonnull List<List<Object>> batchedParameters = new ArrayList<>();
+
+        private @Nullable Connection connection;
+
+        private BatchSqlImpl(@Nonnull String preparedSql) {
+            this.preparedSql = preparedSql;
+        }
+
+        @Override
+        public @Nonnull String preparedSql() {
+            return preparedSql;
+        }
+
+        @Override
+        public @Nonnull @Immutable List<@Nonnull List<Object>> batchParameters() {
+            return Collections.unmodifiableList(batchedParameters);
+        }
+
+        @Override
+        public @Nullable Connection connection() {
+            return connection;
+        }
+
+        @Override
+        public @Nonnull BatchSql connection(@Nonnull Connection connection) throws JdbcException {
+            this.connection = connection;
+            return this;
+        }
+
+        @Override
+        public @Nonnull BatchSql batchParameters(@Nonnull List<@Nonnull List<Object>> batchParameters) {
+            batchedParameters.addAll(batchParameters);
+            return this;
+        }
+
+        @Override
+        public @Nonnull BatchSql parameters(@Nonnull List<Object> parameters) {
+            batchedParameters.add(parameters);
             return this;
         }
     }
@@ -225,6 +299,25 @@ final class SqlBack {
         private final @Nonnull PreparedStatement statement;
 
         private SqlInsertImpl(@Nonnull PreparedStatement statement) {
+            this.statement = statement;
+        }
+
+        @Override
+        public @Nonnull Statement statement() {
+            return statement;
+        }
+
+        @Override
+        public @Nonnull PreparedStatement preparedStatement() {
+            return statement;
+        }
+    }
+
+    private static final class SqlBatchResultImpl implements SqlBatchResult {
+
+        private final @Nonnull PreparedStatement statement;
+
+        private SqlBatchResultImpl(@Nonnull PreparedStatement statement) {
             this.statement = statement;
         }
 

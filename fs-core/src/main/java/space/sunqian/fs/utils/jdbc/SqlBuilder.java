@@ -3,9 +3,12 @@ package space.sunqian.fs.utils.jdbc;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 
+import java.util.List;
+
 /**
  * This interface is used for building SQL in method chaining. For example:
  * <pre>{@code
+ * // simple sql:
  * List<User> users = SqlBuilder.newBuilder()
  *     .append("SELECT * FROM users WHERE 1=1)
  *     .append(" AND gender = ", gender)
@@ -13,6 +16,13 @@ import space.sunqian.annotation.Nullable;
  *     .build()
  *     .connection(connection)
  *     .query(User.class);
+ * // batch sql:
+ * BatchSql batchSql = SqlBuilder.newBuilder()
+ *     .append("INSERT INTO users (name, age) VALUES (?, ?);")
+ *     .buildBatch()
+ *     .batchParameters(batchParams)
+ *     .connection(connection)
+ *     .execute();
  * }</pre>
  *
  * @author sunqian
@@ -97,4 +107,14 @@ public interface SqlBuilder {
      */
     @Nonnull
     PreparedSql build();
+
+    /**
+     * Builds and returns the final prepared SQL for batch execution. The returned {@link BatchSql} object is only built
+     * from the current prepared SQL string, and the previously added parameters will be discarded. The actual batch
+     * parameters should be added by {@link BatchSql#batchParameters(List)} or {@link BatchSql#parameters(List)}.
+     *
+     * @return the prepared SQL ready for execution for batch execution
+     */
+    @Nonnull
+    BatchSql buildBatch();
 }

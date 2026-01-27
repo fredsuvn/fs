@@ -13,7 +13,8 @@ import java.sql.ResultSet;
 import java.util.List;
 
 /**
- * This interface represents a prepared SQL string with the specified parameters to be bound.
+ * This interface represents a prepared SQL string with the specified parameters to be bound. It can be built from
+ * {@link SqlBuilder}.
  *
  * @author sunqian
  */
