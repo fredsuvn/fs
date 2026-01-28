@@ -1,19 +1,21 @@
-package space.sunqian.fs.utils.jdbc;
+package space.sunqian.fs.utils.sql;
 
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.exception.FsRuntimeException;
 
+import java.sql.SQLException;
+
 /**
- * Exception for jdbc.
+ * This is the runtime version of {@link SQLException}.
  *
  * @author sunqian
  */
-public class JdbcException extends FsRuntimeException {
+public class SqlRuntimeException extends FsRuntimeException {
 
     /**
      * Empty constructor.
      */
-    public JdbcException() {
+    public SqlRuntimeException() {
         super();
     }
 
@@ -22,7 +24,7 @@ public class JdbcException extends FsRuntimeException {
      *
      * @param message the message
      */
-    public JdbcException(@Nullable String message) {
+    public SqlRuntimeException(@Nullable String message) {
         super(message);
     }
 
@@ -32,7 +34,7 @@ public class JdbcException extends FsRuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public JdbcException(@Nullable String message, @Nullable Throwable cause) {
+    public SqlRuntimeException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -41,7 +43,7 @@ public class JdbcException extends FsRuntimeException {
      *
      * @param cause the cause
      */
-    public JdbcException(@Nullable Throwable cause) {
+    public SqlRuntimeException(@Nullable Throwable cause) {
         super(cause);
     }
 }

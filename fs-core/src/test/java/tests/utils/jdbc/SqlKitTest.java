@@ -6,8 +6,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.utils.jdbc.JdbcException;
-import space.sunqian.fs.utils.jdbc.JdbcKit;
+import space.sunqian.fs.utils.sql.SqlKit;
+import space.sunqian.fs.utils.sql.SqlRuntimeException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -20,10 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @J17Only
-public class JdbcTest {
+public class SqlKitTest {
 
     private static final String DB_DRIVER = "org.h2.Driver";
-    private static final String DB_URL = "jdbc:h2:mem:" + JdbcTest.class.getName();
+    private static final String DB_URL = "jdbc:h2:mem:" + SqlKitTest.class.getName();
     private static final String DB_USER = "sa";
     private static final String DB_PASSWORD = "";
 
@@ -37,19 +37,19 @@ public class JdbcTest {
         // create table `user`
         // `id` (auto increment), `name`, `age`
         PreparedStatement preparedStatement = h2Connection.prepareStatement(
-            "create table if not exists user (id int primary key auto_increment, name varchar(255), age int)"
+            "create table if not exists `user` (id int primary key auto_increment, name varchar(255), age int)"
         );
         preparedStatement.execute();
         // insert data: `test`, 18
         preparedStatement = h2Connection.prepareStatement(
-            "insert into user (name, age) values (?, ?)"
+            "insert into `user` (name, age) values (?, ?)"
         );
         preparedStatement.setString(1, "test");
         preparedStatement.setInt(2, 18);
         preparedStatement.execute();
         // insert data: `test2`, 20
         preparedStatement = h2Connection.prepareStatement(
-            "insert into user (name, age) values (?, ?)"
+            "insert into `user` (name, age) values (?, ?)"
         );
         preparedStatement.setString(1, "test2");
         preparedStatement.setInt(2, 20);
@@ -60,7 +60,7 @@ public class JdbcTest {
     public static void destroy() throws SQLException, ClassNotFoundException {
         // drop table `user`
         PreparedStatement preparedStatement = h2Connection.prepareStatement(
-            "drop table if exists user"
+            "drop table if exists `user`"
         );
         preparedStatement.execute();
     }
@@ -68,15 +68,34 @@ public class JdbcTest {
     @Test
     public void testJdbcQuery() throws Exception {
         PreparedStatement preparedStatement = h2Connection.prepareStatement(
-            "select * from user"
+            "select * from `user`"
         );
-        ResultSet resultSet = preparedStatement.executeQuery();
-        List<User> users = JdbcKit.toObject(
-            resultSet,
-            User.class,
-            String::toLowerCase,
-            ObjectConverter.defaultConverter()
-        );
+        {
+            // no name mapper
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<User> users = SqlKit.toObject(
+                resultSet,
+                User.class,
+                ObjectConverter.defaultConverter()
+            );
+            checkQueryResult(users);
+            resultSet.close();
+        }
+        {
+            // lower case name mapper
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<User> users = SqlKit.toObject(
+                resultSet,
+                User.class,
+                String::toLowerCase,
+                ObjectConverter.defaultConverter()
+            );
+            checkQueryResult(users);
+            resultSet.close();
+        }
+    }
+
+    private void checkQueryResult(List<User> users) {
         assertEquals(2, users.size());
         // test, 18
         User user = users.get(0);
@@ -94,17 +113,17 @@ public class JdbcTest {
     public void testException() throws Exception {
         {
             // JdbcException
-            assertThrows(JdbcException.class, () -> {
-                throw new JdbcException();
+            assertThrows(SqlRuntimeException.class, () -> {
+                throw new SqlRuntimeException();
             });
-            assertThrows(JdbcException.class, () -> {
-                throw new JdbcException("");
+            assertThrows(SqlRuntimeException.class, () -> {
+                throw new SqlRuntimeException("");
             });
-            assertThrows(JdbcException.class, () -> {
-                throw new JdbcException("", new RuntimeException());
+            assertThrows(SqlRuntimeException.class, () -> {
+                throw new SqlRuntimeException("", new RuntimeException());
             });
-            assertThrows(JdbcException.class, () -> {
-                throw new JdbcException(new RuntimeException());
+            assertThrows(SqlRuntimeException.class, () -> {
+                throw new SqlRuntimeException(new RuntimeException());
             });
         }
     }

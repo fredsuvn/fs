@@ -1,4 +1,4 @@
-package space.sunqian.fs.utils.jdbc;
+package space.sunqian.fs.utils.sql;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -109,12 +109,13 @@ public interface SqlBuilder {
     PreparedSql build();
 
     /**
-     * Builds and returns the final prepared SQL for batch execution. The returned {@link BatchSql} object is only built
-     * from the current prepared SQL string, and the previously added parameters will be discarded. The actual batch
-     * parameters should be added by {@link BatchSql#batchParameters(List)} or {@link BatchSql#parameters(List)}.
+     * Builds and returns the final prepared SQL for batch execution. The returned {@link PreparedBatchSql} object is
+     * only built from the current prepared SQL string, and the previously added parameters will be discarded. The
+     * actual batch parameters should be added by {@link PreparedBatchSql#batchParameters(List)} or
+     * {@link PreparedBatchSql#parameters(List)}.
      *
      * @return the prepared SQL ready for execution for batch execution
      */
     @Nonnull
-    BatchSql buildBatch();
+    PreparedBatchSql buildBatch();
 }

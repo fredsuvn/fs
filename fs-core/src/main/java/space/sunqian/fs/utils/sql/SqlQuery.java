@@ -1,4 +1,4 @@
-package space.sunqian.fs.utils.jdbc;
+package space.sunqian.fs.utils.sql;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -15,20 +15,22 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * This interface represents the query result of a SQL execution.
+ * This interface represents the query operation of a SQL statement.
  *
  * @param <T> the type mapped to the data row of the query result set
  * @author sunqian
  */
-public interface SqlQuery<T> extends SqlResult {
+public interface SqlQuery<T> extends SqlOperation {
 
     /**
-     * Executes the result set of this query.
+     * Executes this query and returns the result set.
      *
      * @return the result set of this query
      */
-    @Nonnull
-    ResultSet resultSet();
+    @SuppressWarnings("resource")
+    default @Nonnull ResultSet execute() {
+        return Fs.uncheck(() -> preparedStatement().executeQuery(), SqlRuntimeException::new);
+    }
 
     /**
      * Returns the type mapped to the data row of the query result set.
@@ -39,75 +41,77 @@ public interface SqlQuery<T> extends SqlResult {
     Type type();
 
     /**
-     * Returns the result set of this query as a list.
+     * Executes this query and returns the first row maps to the type {@link T} of the result set of this query. The
+     * name mapper to map the column name to the field name of the element type is {@link SqlKit#defaultNameMapper()}.
      *
      * @return the list of objects
-     * @throws JdbcException if any error occurs
+     * @throws SqlRuntimeException if any error occurs
      */
     default @Nullable T first(
-    ) throws JdbcException {
-        List<T> result = resultList(null, null);
-        return result.isEmpty() ? null : result.get(0);
+    ) throws SqlRuntimeException {
+        List<T> result = list(SqlKit.defaultNameMapper(), null);
+        return result.stream().findFirst().orElse(null);
     }
 
     /**
-     * Returns the result set of this query as a list.
+     * Executes this query and returns the first row maps to the type {@link T} of the result set of this query.
      *
      * @param columnMapper the name mapper to map the column name to the field name of the element type, may be
      *                     {@code null} if the column name is the same as the field name
      * @return the list of objects
-     * @throws JdbcException if any error occurs
+     * @throws SqlRuntimeException if any error occurs
      */
     default @Nullable T first(
         @Nullable NameMapper columnMapper
-    ) throws JdbcException {
-        List<T> result = resultList(columnMapper, null);
-        return result.isEmpty() ? null : result.get(0);
+    ) throws SqlRuntimeException {
+        List<T> result = list(columnMapper, null);
+        return result.stream().findFirst().orElse(null);
     }
 
     /**
-     * Returns the result set of this query as a list.
+     * Executes this query and returns the result set of this query as a list of type {@link T}. The name mapper to map
+     * the column name to the field name of the element type is {@link SqlKit#defaultNameMapper()}.
      *
      * @return the list of objects
-     * @throws JdbcException if any error occurs
+     * @throws SqlRuntimeException if any error occurs
      */
-    default @Nonnull List<@Nonnull T> resultList(
-    ) throws JdbcException {
-        return resultList(null, null);
+    default @Nonnull List<@Nonnull T> list(
+    ) throws SqlRuntimeException {
+        return list(SqlKit.defaultNameMapper(), null);
     }
 
     /**
-     * Returns the result set of this query as a list.
+     * Executes this query and returns the result set of this query as a list of type {@link T}.
      *
      * @param columnMapper the name mapper to map the column name to the field name of the element type, may be
      *                     {@code null} if the column name is the same as the field name
      * @return the list of objects
-     * @throws JdbcException if any error occurs
+     * @throws SqlRuntimeException if any error occurs
      */
-    default @Nonnull List<@Nonnull T> resultList(
+    default @Nonnull List<@Nonnull T> list(
         @Nullable NameMapper columnMapper
-    ) throws JdbcException {
-        return resultList(columnMapper, null);
+    ) throws SqlRuntimeException {
+        return list(columnMapper, null);
     }
 
     /**
-     * Returns the result set of this query as a list.
+     * Executes this query and returns the result set of this query as a list of type {@link T}.
      *
      * @param columnMapper the name mapper to map the column name to the field name of the element type, may be
      *                     {@code null} if the column name is the same as the field name
-     * @param converter    the converter to convert the JDBC type to the java type, may be {@code null} if it uses the
+     * @param converter    the converter to convert the SQL type to the java type, may be {@code null} if it uses the
      *                     default converter
      * @param options      the options for converting, e.g. the {@link ConvertOption} for the converter
      * @return the list of objects
-     * @throws JdbcException if any error occurs
+     * @throws SqlRuntimeException if any error occurs
      */
-    default @Nonnull List<@Nonnull T> resultList(
+    default @Nonnull List<@Nonnull T> list(
         @Nullable NameMapper columnMapper,
         @Nullable ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws JdbcException {
-        return JdbcKit.toObject(
-            resultSet(),
+    ) throws SqlRuntimeException {
+        return SqlKit.toObject(
+            execute(),
             type(),
             columnMapper,
             Fs.nonnull(converter, ObjectConverter.defaultConverter()),
@@ -117,15 +121,14 @@ public interface SqlQuery<T> extends SqlResult {
 
     @Override
     @SuppressWarnings("resource")
-    default void close() throws JdbcException {
+    default void close() throws SqlRuntimeException {
         Statement statement = statement();
-        ResultSet resultSet = resultSet();
+        ResultSet resultSet = execute();
         Fs.uncheck(Arrays.asList(
-                () -> statement.getConnection().close(),
-                statement::close,
-                resultSet::close
+                resultSet::close,
+                statement::close
             ),
-            JdbcException::new
+            SqlRuntimeException::new
         );
     }
 }
