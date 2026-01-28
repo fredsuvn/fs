@@ -304,21 +304,21 @@ public class FsTest implements AssertTest, PrintTest {
         assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, IntProps.class));
         assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, sp.getClass(), IntProps.class));
         assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, new TypeRef<IntProps>() {}));
-        assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, sp.getClass(), IntProps.class));
+        assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, (Type) IntProps.class));
         // Map<K, V>
         Map<String, Object> map = new HashMap<>();
         map.put("longNum", 1);
         assertEquals(
             1L,
-            ObjectConverter.defaultConverter().convertMap(map, MapObject.class).getLongNum()
+            Fs.convertMap(map, MapObject.class).getLongNum()
         );
         assertEquals(
             1L,
-            ObjectConverter.defaultConverter().convertMap(map, new TypeRef<MapObject>() {}).getLongNum()
+            Fs.convertMap(map, new TypeRef<MapObject>() {}).getLongNum()
         );
         assertEquals(
             1L,
-            ((MapObject) ObjectConverter.defaultConverter().convertMap(map, (Type) MapObject.class)).getLongNum()
+            ((MapObject) Fs.convertMap(map, (Type) MapObject.class)).getLongNum()
         );
     }
 
