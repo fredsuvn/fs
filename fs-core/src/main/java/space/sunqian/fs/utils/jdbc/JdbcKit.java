@@ -1,4 +1,4 @@
-package space.sunqian.fs.utils.sql;
+package space.sunqian.fs.utils.jdbc;
 
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Utilities for SQL.
+ * Utilities for JDBC and SQL.
  *
  * @author sunqian
  */
-public class SqlKit {
+public class JdbcKit {
 
     /**
      * Return the default name mapper to map the column name to the field name of the element type. The default name
@@ -43,7 +43,7 @@ public class SqlKit {
      *
      * @param resultSet the result set
      * @param javaType  the element java type of the returned list
-     * @param converter the converter to convert the SQL type to the java type
+     * @param converter the converter to convert the JDBC type to the java type
      * @param options   the options for converting, e.g. the {@link ConvertOption#} for the converter
      * @param <T>       the element type of the returned list
      * @return the list of objects
@@ -65,7 +65,7 @@ public class SqlKit {
      * @param javaType   the element java type of the returned list
      * @param nameMapper the name mapper to map the column name to the field name of the element type, may be
      *                   {@code null} if let this method use {@link #defaultNameMapper()}
-     * @param converter  the converter to convert the SQL type to the java type
+     * @param converter  the converter to convert the JDBC type to the java type
      * @param options    the options for converting, e.g. the {@link ConvertOption#} for the converter
      * @param <T>        the element type of the returned list
      * @return the list of objects
@@ -88,7 +88,7 @@ public class SqlKit {
      * @param javaType   the element java type of the returned list
      * @param nameMapper the name mapper to map the column name to the field name of the element type, may be
      *                   {@code null} if let this method use {@link #defaultNameMapper()}
-     * @param converter  the converter to convert the SQL type to the java type
+     * @param converter  the converter to convert the JDBC type to the java type
      * @param options    the options for converting, e.g. the {@link ConvertOption#} for the converter
      * @param <T>        the element type of the returned list
      * @return the list of objects
@@ -119,8 +119,8 @@ public class SqlKit {
             rowMap.clear();
             for (int column = 0; column < metaData.getColumnCount(); column++) {
                 String columnName = metaData.getColumnName(column + 1);
-                Object sqlObject = resultSet.getObject(column + 1);
-                rowMap.put(toName.map(columnName), sqlObject);
+                Object jdbcObject = resultSet.getObject(column + 1);
+                rowMap.put(toName.map(columnName), jdbcObject);
             }
             Object element = converter.convertMap(rowMap, javaType, options);
             objects.add(Fs.as(element));
@@ -143,6 +143,6 @@ public class SqlKit {
         }
     }
 
-    private SqlKit() {
+    private JdbcKit() {
     }
 }

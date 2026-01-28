@@ -6,8 +6,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.utils.sql.SqlKit;
-import space.sunqian.fs.utils.sql.SqlRuntimeException;
+import space.sunqian.fs.utils.jdbc.JdbcKit;
+import space.sunqian.fs.utils.jdbc.SqlRuntimeException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -20,10 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @J17Only
-public class SqlKitTest {
+public class JdbcTest {
 
     private static final String DB_DRIVER = "org.h2.Driver";
-    private static final String DB_URL = "jdbc:h2:mem:" + SqlKitTest.class.getName();
+    private static final String DB_URL = "jdbc:h2:mem:" + JdbcTest.class.getName();
     private static final String DB_USER = "sa";
     private static final String DB_PASSWORD = "";
 
@@ -73,7 +73,7 @@ public class SqlKitTest {
         {
             // no name mapper
             ResultSet resultSet = preparedStatement.executeQuery();
-            List<User> users = SqlKit.toObject(
+            List<User> users = JdbcKit.toObject(
                 resultSet,
                 User.class,
                 ObjectConverter.defaultConverter()
@@ -84,7 +84,7 @@ public class SqlKitTest {
         {
             // lower case name mapper
             ResultSet resultSet = preparedStatement.executeQuery();
-            List<User> users = SqlKit.toObject(
+            List<User> users = JdbcKit.toObject(
                 resultSet,
                 User.class,
                 String::toLowerCase,

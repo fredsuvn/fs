@@ -1,4 +1,4 @@
-package space.sunqian.fs.utils.sql;
+package space.sunqian.fs.utils.jdbc;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.Fs;

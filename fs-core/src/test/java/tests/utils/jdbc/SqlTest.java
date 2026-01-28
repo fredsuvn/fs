@@ -10,15 +10,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.reflect.TypeRef;
-import space.sunqian.fs.utils.sql.PreparedBatchSql;
-import space.sunqian.fs.utils.sql.PreparedSql;
-import space.sunqian.fs.utils.sql.SqlBatch;
-import space.sunqian.fs.utils.sql.SqlBuilder;
-import space.sunqian.fs.utils.sql.SqlInsert;
-import space.sunqian.fs.utils.sql.SqlKit;
-import space.sunqian.fs.utils.sql.SqlQuery;
-import space.sunqian.fs.utils.sql.SqlRuntimeException;
-import space.sunqian.fs.utils.sql.SqlUpdate;
+import space.sunqian.fs.utils.jdbc.PreparedBatchSql;
+import space.sunqian.fs.utils.jdbc.PreparedSql;
+import space.sunqian.fs.utils.jdbc.SqlBatch;
+import space.sunqian.fs.utils.jdbc.SqlBuilder;
+import space.sunqian.fs.utils.jdbc.SqlInsert;
+import space.sunqian.fs.utils.jdbc.JdbcKit;
+import space.sunqian.fs.utils.jdbc.SqlQuery;
+import space.sunqian.fs.utils.jdbc.SqlRuntimeException;
+import space.sunqian.fs.utils.jdbc.SqlUpdate;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -253,14 +253,14 @@ public class SqlTest {
             .append("SELECT * FROM `user` WHERE id = ", 1L)
             .build()
             .query(User.class, h2Connection);
-        assertNull(deletedQuery.first(SqlKit.defaultNameMapper()));
+        assertNull(deletedQuery.first(JdbcKit.defaultNameMapper()));
 
         // Query id = 2L
         User bob = SqlBuilder.newBuilder()
             .append("SELECT * FROM `user` WHERE id = ", 2L)
             .build()
             .query(new TypeRef<User>() {}, h2Connection)
-            .list(SqlKit.defaultNameMapper())
+            .list(JdbcKit.defaultNameMapper())
             .get(0);
         assertEquals(2L, bob.getId());
         assertEquals("Bob", bob.getName());
