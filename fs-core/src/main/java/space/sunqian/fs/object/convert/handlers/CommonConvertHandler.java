@@ -493,13 +493,13 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             HANDLER_MAP.put(BigInteger.class, NumberClassHandler.INST);
             HANDLER_MAP.put(BigDecimal.class, NumberClassHandler.INST);
             HANDLER_MAP.put(Number.class, NumberClassHandler.INST);
-            HANDLER_MAP.put(Date.class, TimeClassHandler.INST);
-            HANDLER_MAP.put(Instant.class, TimeClassHandler.INST);
-            HANDLER_MAP.put(LocalDateTime.class, TimeClassHandler.INST);
-            HANDLER_MAP.put(ZonedDateTime.class, TimeClassHandler.INST);
-            HANDLER_MAP.put(OffsetDateTime.class, TimeClassHandler.INST);
-            HANDLER_MAP.put(LocalDate.class, TimeClassHandler.INST);
-            HANDLER_MAP.put(LocalTime.class, TimeClassHandler.INST);
+            HANDLER_MAP.put(Date.class, DateClassHandler.INST);
+            HANDLER_MAP.put(Instant.class, DateClassHandler.INST);
+            HANDLER_MAP.put(LocalDateTime.class, DateClassHandler.INST);
+            HANDLER_MAP.put(ZonedDateTime.class, DateClassHandler.INST);
+            HANDLER_MAP.put(OffsetDateTime.class, DateClassHandler.INST);
+            HANDLER_MAP.put(LocalDate.class, DateClassHandler.INST);
+            HANDLER_MAP.put(LocalTime.class, DateClassHandler.INST);
         }
 
         public static @Nullable CommonConvertHandler.ClassHandler get(@Nonnull Class<?> target) {
@@ -629,7 +629,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         }
     }
 
-    private enum TimeClassHandler implements ClassHandler {
+    private enum DateClassHandler implements ClassHandler {
 
         INST;
 
@@ -645,20 +645,18 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 Option.findValue(ConvertOption.DATE_FORMATTER, options),
                 DateFormatter.defaultFormatter()
             );
-            if (srcType.equals(String.class)) {
+            if (src instanceof String) {
                 return dateFormatter.parse((String) src, target);
             }
-            if (srcType.equals(Date.class)) {
+            if (src instanceof Date) {
                 return dateFormatter.convert((Date) src, target);
             }
-            if (srcType.equals(long.class) || srcType.equals(Long.class)) {
+            if (src instanceof Long) {
                 Date date = new Date((Long) src);
                 return dateFormatter.convert(date, target);
             }
-            if (srcType instanceof Class<?>) {
-                if (TemporalAccessor.class.isAssignableFrom((Class<?>) srcType)) {
-                    return dateFormatter.convert((TemporalAccessor) src, target);
-                }
+            if (src instanceof TemporalAccessor) {
+                return dateFormatter.convert((TemporalAccessor) src, target);
             }
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }

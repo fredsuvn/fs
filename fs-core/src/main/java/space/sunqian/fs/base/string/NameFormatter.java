@@ -178,33 +178,33 @@ public interface NameFormatter {
      * that define the range of each word within the given original name. The joined name will be appended to the
      * specified destination appendable.
      *
-     * @param originalName the given original name where the word spans are derived
-     * @param wordSpans    the array of {@link Span} that define the range of each word within the given original name
-     * @param dst          the specified destination appendable
+     * @param origin    the given original name where the word spans are derived
+     * @param wordSpans the array of {@link Span} that define the range of each word within the given original name
+     * @param dst       the specified destination appendable
      * @throws NameFormatException if failed to join the words
      */
     void format(
-        @Nonnull CharSequence originalName,
+        @Nonnull CharSequence origin,
         @Nonnull Span @Nonnull [] wordSpans,
         @Nonnull Appendable dst
     ) throws NameFormatException;
 
     /**
-     * Converts the given name from this name formatter to the other specified name formatter. This method is equivalent
-     * to: {@code otherFormatter.format(name, tokenize(name))}.
+     * Converts the given original name from this name formatter to the specified name formatter. This method is
+     * equivalent to: {@code toFormatter.format(origin, tokenize(name))}.
      *
-     * @param name           the given name
-     * @param otherFormatter the other specified name formatter
+     * @param origin      the given name
+     * @param toFormatter the specified name formatter to convert to
      * @return the converted name
      * @throws NameFormatException if the conversion is not supported for the given name
      */
     default @Nonnull String format(
-        @Nonnull CharSequence name, @Nonnull NameFormatter otherFormatter
+        @Nonnull CharSequence origin, @Nonnull NameFormatter toFormatter
     ) throws NameFormatException {
-        if (Objects.equals(this, otherFormatter)) {
-            return name.toString();
+        if (Objects.equals(this, toFormatter)) {
+            return origin.toString();
         }
-        return otherFormatter.format(name, tokenize(name));
+        return toFormatter.format(origin, tokenize(origin));
     }
 
     /**

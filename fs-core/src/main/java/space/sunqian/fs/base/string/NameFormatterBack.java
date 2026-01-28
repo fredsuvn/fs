@@ -140,7 +140,7 @@ final class NameFormatterBack {
 
         @Override
         public void format(
-            @Nonnull CharSequence originalName,
+            @Nonnull CharSequence origin,
             @Nonnull Span @Nonnull [] wordSpans,
             @Nonnull Appendable dst
         ) throws NameFormatException {
@@ -148,7 +148,7 @@ final class NameFormatterBack {
                 return;
             }
             try {
-                format0(originalName, wordSpans, dst);
+                format0(origin, wordSpans, dst);
             } catch (Exception e) {
                 throw new NameFormatException(e);
             }
@@ -302,7 +302,7 @@ final class NameFormatterBack {
 
         @Override
         public void format(
-            @Nonnull CharSequence originalName,
+            @Nonnull CharSequence origin,
             @Nonnull Span @Nonnull [] wordSpans,
             @Nonnull Appendable dst
         ) throws NameFormatException {
@@ -310,7 +310,7 @@ final class NameFormatterBack {
                 return;
             }
             try {
-                format0(originalName, wordSpans, dst);
+                format0(origin, wordSpans, dst);
             } catch (Exception e) {
                 throw new NameFormatException(e);
             }
@@ -390,7 +390,7 @@ final class NameFormatterBack {
 
         @Override
         public void format(
-            @Nonnull CharSequence originalName,
+            @Nonnull CharSequence origin,
             @Nonnull Span @Nonnull [] wordSpans,
             @Nonnull Appendable dst
         ) throws NameFormatException {
@@ -398,7 +398,7 @@ final class NameFormatterBack {
                 return;
             }
             try {
-                format0(originalName, wordSpans, dst);
+                format0(origin, wordSpans, dst);
             } catch (Exception e) {
                 throw new NameFormatException(e);
             }

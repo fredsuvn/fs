@@ -25,7 +25,7 @@ import java.util.Objects;
  *     <li>
  *         If the {@link ConvertOption#STRICT_TYPE_MODE} option is enabled, returns
  *         {@link ObjectConverter.Status#HANDLER_CONTINUE} for target type of {@link WildcardType};
- *         Otherwise, recursively convert their bounds type using the {@code converter} parameter;
+ *         Otherwise, recursively convert their lower/upper bounds type via the {@code converter} parameter;
  *     </li>
  *     <li>
  *         If the target type is assignable from the specified source type, returns the source object itself;
