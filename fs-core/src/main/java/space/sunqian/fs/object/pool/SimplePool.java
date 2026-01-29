@@ -108,7 +108,8 @@ public interface SimplePool<T> {
     int idleSize();
 
     /**
-     * Returns the number of active objects in the pool.
+     * Returns the number of active objects in the pool. If the pool is closed, this method will return the number of
+     * unreleased active objects.
      *
      * @return the number of active objects in the pool
      */
