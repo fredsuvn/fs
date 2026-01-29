@@ -43,7 +43,7 @@ final class SimpleJdbcPoolImpl implements SimpleJdbcPool {
     @Override
     public @Nullable Connection getConnection() throws SqlRuntimeException {
         Connection connection = pool.get();
-        return connection == null ? null : new PooledConnection(connection, pool);
+        return connection == null ? null : ConnectionService.INST.newConnection(connection, pool);
     }
 
     @Override

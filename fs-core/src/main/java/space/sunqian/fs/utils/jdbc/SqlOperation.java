@@ -37,6 +37,8 @@ public interface SqlOperation {
     /**
      * Releases the {@link Statement}/{@link PreparedStatement} and {@link ResultSet} (if it has) resources of this
      * operation.
+     * <p>
+     * Note this method only closes the statement and result set, not the connection.
      *
      * @throws SqlRuntimeException if any error occurs
      */
