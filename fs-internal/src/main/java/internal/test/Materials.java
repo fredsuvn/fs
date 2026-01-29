@@ -15,7 +15,7 @@ import java.nio.file.Path;
  *
  * @author sunqian
  */
-public class MaterialBox {
+public class Materials {
 
     /**
      * Returns a buffer backed by the middle of an extended array. The extended array is longer than and copied from the
@@ -240,6 +240,6 @@ public class MaterialBox {
         }
     }
 
-    private MaterialBox() {
+    private Materials() {
     }
 }

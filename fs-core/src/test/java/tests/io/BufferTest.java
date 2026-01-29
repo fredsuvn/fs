@@ -3,7 +3,7 @@ package tests.io;
 import internal.test.DataTest;
 import internal.test.ErrorAppender;
 import internal.test.ErrorOutputStream;
-import internal.test.MaterialBox;
+import internal.test.Materials;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.bytes.BytesBuilder;
 import space.sunqian.fs.base.chars.CharsBuilder;
@@ -34,7 +34,7 @@ public class BufferTest implements DataTest {
     @Test
     public void testIndex() {
         byte[] bytes = new byte[100];
-        ByteBuffer buffer = MaterialBox.copyPadding(bytes);
+        ByteBuffer buffer = Materials.copyPadding(bytes);
         buffer.get();
         assertEquals(10, buffer.arrayOffset());
         assertEquals(1, buffer.position());

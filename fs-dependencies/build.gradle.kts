@@ -33,7 +33,8 @@ dependencies {
     //api("org.testng:testng:7.5.1")
     api("org.openjdk.jmh:jmh-core:1.37")
     api("org.openjdk.jmh:jmh-generator-annprocess:1.37")
-    api("org.mockito:mockito-core:5.5.0")
+    //api("org.mockito:mockito-core:5.21.0")
+    api("org.mockito:mockito-core:4.11.0")
 
     //commons
     api("org.apache.commons:commons-lang3:3.13.0")

@@ -2,7 +2,7 @@ package tests.internal;
 
 import internal.test.AssertTest;
 import internal.test.FsTestException;
-import internal.test.MaterialBox;
+import internal.test.Materials;
 import internal.test.TestIOException;
 import org.junit.jupiter.api.Test;
 
@@ -15,11 +15,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
-import static internal.test.MaterialBox.copyBuffer;
-import static internal.test.MaterialBox.copyBytes;
-import static internal.test.MaterialBox.copyChars;
-import static internal.test.MaterialBox.copyDirect;
-import static internal.test.MaterialBox.newFile;
+import static internal.test.Materials.copyBuffer;
+import static internal.test.Materials.copyBytes;
+import static internal.test.Materials.copyChars;
+import static internal.test.Materials.copyDirect;
+import static internal.test.Materials.newFile;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -68,7 +68,7 @@ public class AssertTestTest implements AssertTest {
             // padding
             byte[] bytes = new byte[1024];
             Arrays.fill(bytes, (byte) 66);
-            ByteBuffer bb = MaterialBox.copyPadding(bytes);
+            ByteBuffer bb = Materials.copyPadding(bytes);
             assertEquals(10, bb.arrayOffset());
             assertEquals(0, bb.position());
             assertEquals(bb.limit(), bytes.length);
@@ -78,10 +78,10 @@ public class AssertTestTest implements AssertTest {
             // bytes copy
             byte[] bytes = new byte[1024];
             Arrays.fill(bytes, (byte) 66);
-            ByteBuffer directBuffer = MaterialBox.copyDirect(bytes);
+            ByteBuffer directBuffer = Materials.copyDirect(bytes);
             assertEquals(directBuffer, ByteBuffer.wrap(bytes));
             assertTrue(directBuffer.isDirect());
-            ByteBuffer heapBuffer = MaterialBox.copyHeap(bytes);
+            ByteBuffer heapBuffer = Materials.copyHeap(bytes);
             assertEquals(heapBuffer, ByteBuffer.wrap(bytes));
             assertFalse(heapBuffer.isDirect());
             assertArrayEquals(bytes, copyBytes(ByteBuffer.wrap(bytes)));
@@ -91,10 +91,10 @@ public class AssertTestTest implements AssertTest {
             byte[] bytes = new byte[1024];
             Arrays.fill(bytes, (byte) 66);
             ByteBuffer buffer = ByteBuffer.wrap(bytes);
-            ByteBuffer directBuffer = MaterialBox.copyDirect(buffer);
+            ByteBuffer directBuffer = Materials.copyDirect(buffer);
             assertEquals(directBuffer, ByteBuffer.wrap(bytes));
             assertTrue(directBuffer.isDirect());
-            ByteBuffer heapBuffer = MaterialBox.copyHeap(buffer);
+            ByteBuffer heapBuffer = Materials.copyHeap(buffer);
             assertEquals(heapBuffer, ByteBuffer.wrap(bytes));
             assertFalse(heapBuffer.isDirect());
             assertArrayEquals(bytes, copyBytes(ByteBuffer.wrap(bytes)));
@@ -118,7 +118,7 @@ public class AssertTestTest implements AssertTest {
             // padding
             char[] chars = new char[1024];
             Arrays.fill(chars, (char) 66);
-            CharBuffer bb = MaterialBox.copyPadding(chars);
+            CharBuffer bb = Materials.copyPadding(chars);
             assertEquals(10, bb.arrayOffset());
             assertEquals(0, bb.position());
             assertEquals(bb.limit(), chars.length);
@@ -128,10 +128,10 @@ public class AssertTestTest implements AssertTest {
             // chars copy
             char[] chars = new char[1024];
             Arrays.fill(chars, (char) 66);
-            CharBuffer directBuffer = MaterialBox.copyDirect(chars);
+            CharBuffer directBuffer = Materials.copyDirect(chars);
             assertEquals(directBuffer, CharBuffer.wrap(chars));
             assertTrue(directBuffer.isDirect());
-            CharBuffer heapBuffer = MaterialBox.copyHeap(chars);
+            CharBuffer heapBuffer = Materials.copyHeap(chars);
             assertEquals(heapBuffer, CharBuffer.wrap(chars));
             assertFalse(heapBuffer.isDirect());
             assertArrayEquals(chars, copyChars(CharBuffer.wrap(chars)));
@@ -141,10 +141,10 @@ public class AssertTestTest implements AssertTest {
             char[] chars = new char[1024];
             Arrays.fill(chars, (char) 66);
             CharBuffer buffer = CharBuffer.wrap(chars);
-            CharBuffer directBuffer = MaterialBox.copyDirect(buffer);
+            CharBuffer directBuffer = Materials.copyDirect(buffer);
             assertEquals(directBuffer, CharBuffer.wrap(chars));
             assertTrue(directBuffer.isDirect());
-            CharBuffer heapBuffer = MaterialBox.copyHeap(buffer);
+            CharBuffer heapBuffer = Materials.copyHeap(buffer);
             assertEquals(heapBuffer, CharBuffer.wrap(chars));
             assertFalse(heapBuffer.isDirect());
             assertArrayEquals(chars, copyChars(CharBuffer.wrap(chars)));
