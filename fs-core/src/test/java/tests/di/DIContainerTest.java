@@ -198,6 +198,23 @@ public class DIContainerTest implements PrintTest {
         assertEquals(100, starter.genericInter(100));
     }
 
+    @Test
+    public void testRootAspect() {
+        DIContainer container = DIContainer.newBuilder()
+            .componentTypes(AspectService2.class, AspectHandler.class, InterServiceImpl.class, AspectService1Impl.class)
+            .componentAnnotation(TestRes.class)
+            .build();
+        container.initialize();
+        AspectService2 service2 = container.getObject(AspectService2.class);
+        assertNotNull(service2);
+        assertEquals(
+            service2.aspectService2(),
+            "call: "
+                + new AspectService1Impl().aspectService1() + ";" + InterServiceImpl.class.getName()
+                + ";" + InterServiceImpl.class.getName()
+        );
+    }
+
     public static class Starter {
 
         @TestRes
