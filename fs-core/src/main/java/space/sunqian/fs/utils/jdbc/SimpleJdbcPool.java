@@ -7,7 +7,9 @@ import space.sunqian.fs.base.Checker;
 import space.sunqian.fs.object.pool.SimplePool;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.time.Duration;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -107,12 +109,39 @@ public interface SimpleJdbcPool {
     int activeSize();
 
     /**
+     * Factory interface for creating database connections.
+     */
+    interface ConnectionFactory {
+
+        /**
+         * Creates a new connection.
+         *
+         * @param driverClassName the driver class name
+         * @param url             the JDBC URL
+         * @param username        the username, default is {@code null}
+         * @param password        the password, default is {@code null}
+         * @return a new connection
+         * @throws SqlRuntimeException if failed to create connection
+         */
+        @Nonnull
+        Connection create(
+            @Nonnull String driverClassName,
+            @Nonnull String url,
+            @Nullable String username,
+            @Nullable String password
+        ) throws SqlRuntimeException;
+    }
+
+    /**
      * Builder class for {@link SimpleJdbcPool}.
      */
     class Builder {
 
-        // Connection validation
-        private static @Nonnull Predicate<@Nonnull Connection> VALIDATOR = connection ->
+        // default connection closer
+        private static final @Nonnull Consumer<@Nonnull Connection> CLOSER = connection ->
+            Fs.uncheck(connection::close, SqlRuntimeException::new);
+        // default connection validation
+        private static final @Nonnull Predicate<@Nonnull Connection> VALIDATOR = connection ->
             Fs.uncheck(() -> connection.isValid(1), SqlRuntimeException::new);
 
         // JDBC configuration
@@ -125,6 +154,8 @@ public interface SimpleJdbcPool {
         private int coreSize = 5;
         private int maxSize = 10;
         private @Nonnull Duration idleTimeout = Duration.ofMinutes(5);
+        private @Nullable ConnectionFactory connectionFactory = null;
+        private @Nonnull Consumer<@Nonnull Connection> closer = CLOSER;
         private @Nonnull Predicate<@Nonnull Connection> validator = VALIDATOR;
 
         /**
@@ -214,6 +245,34 @@ public interface SimpleJdbcPool {
         }
 
         /**
+         * Sets the connection factory for creating new database connections. By default, connections are created using
+         * <pre>{@code
+         * DriverManager.getConnection(url, username, password);
+         * }</pre>.
+         *
+         * @param connectionFactory the connection factory for creating new database connections
+         * @return this builder
+         */
+        public @Nonnull Builder connectionFactory(@Nonnull ConnectionFactory connectionFactory) {
+            this.connectionFactory = connectionFactory;
+            return this;
+        }
+
+        /**
+         * Sets the closer for closing database connections. By default, connections are closed using
+         * <pre>{@code
+         * connection.close();
+         * }</pre>.
+         *
+         * @param closer the closer for closing database connections
+         * @return this builder
+         */
+        public @Nonnull Builder closer(@Nonnull Consumer<@Nonnull Connection> closer) {
+            this.closer = closer;
+            return this;
+        }
+
+        /**
          * Sets the validator for checking connection validity. By default, connections are validated if
          * <pre>{@code
          * connection.isValid(1);
@@ -242,8 +301,40 @@ public interface SimpleJdbcPool {
                 throw new IllegalArgumentException("The driver class name for JDBC connection must be set.");
             }
             return new SimpleJdbcPoolImpl(
-                url, username, password, driver, validator, coreSize, maxSize, idleTimeout
+                url, username, password, driver,
+                connectionFactory == null ? new ConnectionFactoryImpl() : connectionFactory,
+                closer, validator, coreSize, maxSize, idleTimeout
             );
+        }
+
+        private static final class ConnectionFactoryImpl implements ConnectionFactory {
+
+            private volatile @Nullable Class<?> driverClass;
+
+            @Override
+            public synchronized @Nonnull Connection create(
+                @Nonnull String driverClassName,
+                @Nonnull String url,
+                @Nullable String username,
+                @Nullable String password
+            ) throws SqlRuntimeException {
+
+                if (driverClass == null) {
+                    driverClass = Fs.uncheck(() -> Class.forName(driverClassName), SqlRuntimeException::new);
+                }
+                return Fs.uncheck(() -> {
+                        Connection realConnection;
+                        if (username != null && password != null) {
+                            realConnection = DriverManager.getConnection(url, username, password);
+                        } else if (username != null) {
+                            realConnection = DriverManager.getConnection(url, username, null);
+                        } else {
+                            realConnection = DriverManager.getConnection(url);
+                        }
+                        return realConnection;
+                    },
+                    SqlRuntimeException::new);
+            }
         }
     }
 }

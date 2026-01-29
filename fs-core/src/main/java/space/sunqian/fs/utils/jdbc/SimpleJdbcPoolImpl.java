@@ -7,12 +7,10 @@ import space.sunqian.fs.base.function.VoidCallable;
 import space.sunqian.fs.object.pool.SimplePool;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.time.Duration;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 final class SimpleJdbcPoolImpl implements SimpleJdbcPool {
@@ -24,33 +22,21 @@ final class SimpleJdbcPoolImpl implements SimpleJdbcPool {
         @Nullable String username,
         @Nullable String password,
         @Nonnull String driver,
+        @Nonnull ConnectionFactory connectionFactory,
+        @Nonnull Consumer<@Nonnull Connection> closer,
         @Nonnull Predicate<@Nonnull Connection> validator,
         int coreSize,
         int maxSize,
         @Nonnull Duration idleTimeout
     ) {
         Fs.uncheck(() -> Class.forName(driver));
-        Supplier<Connection> supplier = () -> Fs.uncheck(() -> {
-                Connection realConnection;
-                if (username != null && password != null) {
-                    realConnection = DriverManager.getConnection(url, username, password);
-                } else if (username != null) {
-                    realConnection = DriverManager.getConnection(url, username, null);
-                } else {
-                    realConnection = DriverManager.getConnection(url);
-                }
-                return realConnection;
-            },
-            SqlRuntimeException::new);
-        Consumer<Connection> discarder = connection ->
-            Fs.uncheck(connection::close, SqlRuntimeException::new);
         pool = SimplePool.<Connection>newBuilder()
             .coreSize(coreSize)
             .maxSize(maxSize)
             .idleTimeout(idleTimeout)
+            .supplier(() -> connectionFactory.create(driver, url, username, password))
+            .discarder(closer)
             .validator(validator)
-            .supplier(supplier)
-            .discarder(discarder)
             .build();
     }
 
