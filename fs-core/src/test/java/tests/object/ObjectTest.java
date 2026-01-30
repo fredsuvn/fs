@@ -2,17 +2,21 @@ package tests.object;
 
 import internal.test.AssertTest;
 import internal.test.PrintTest;
+import lombok.Data;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.exception.UnknownArrayTypeException;
+import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.object.ObjectException;
 import space.sunqian.fs.object.ObjectKit;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -154,6 +158,19 @@ public class ObjectTest implements AssertTest, PrintTest {
     }
 
     @Test
+    public void testGetPropertyValue() {
+        Z z = new Z();
+        Map<?, ?> map = MapKit.hashMap("zzz", z);
+        assertEquals("v", ObjectKit.getPropertyValue(map, "zzz.y.x.v"));
+        assertNull(ObjectKit.getPropertyValue(map, "zzz.y.w.v"));
+        assertNull(ObjectKit.getPropertyValue(null, "zzz.y.x.v"));
+        z.y.x = null;
+        assertNull(ObjectKit.getPropertyValue(map, "zzz.y.x.v"));
+        map.clear();
+        assertNull(ObjectKit.getPropertyValue(map, "zzz.y.x.v"));
+    }
+
+    @Test
     public void testException() {
         {
             // ObjectException
@@ -170,5 +187,20 @@ public class ObjectTest implements AssertTest, PrintTest {
                 throw new ObjectException(new RuntimeException());
             });
         }
+    }
+
+    @Data
+    public static class X {
+        private String v = "v";
+    }
+
+    @Data
+    public static class Y {
+        private X x = new X();
+    }
+
+    @Data
+    public static class Z {
+        private Y y = new Y();
     }
 }

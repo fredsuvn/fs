@@ -3,8 +3,13 @@ package space.sunqian.fs.object;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.exception.UnknownArrayTypeException;
+import space.sunqian.fs.object.convert.ConvertKit;
+import space.sunqian.fs.object.schema.ObjectParser;
+import space.sunqian.fs.object.schema.ObjectProperty;
+import space.sunqian.fs.object.schema.ObjectSchema;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -210,6 +215,79 @@ public class ObjectKit {
      */
     public static int id(@Nullable Object obj) {
         return System.identityHashCode(obj);
+    }
+
+    /**
+     * Returns the value of the specified property from the given object.
+     * <p>
+     * This method supports nested property access using dot notation (e.g., "parent.child.property"). If any part of
+     * the property path is not found or is {@code null}, this method returns {@code null}.
+     * <p>
+     * Note this method use {@link ConvertKit#objectParser()} to parse object schemas, it is equivalent to:
+     * <pre>{@code
+     * ObjectKit.getPropertyValue(object, propertyName, ConvertKit.objectParser());
+     * }</pre>
+     *
+     * @param object       the given object from which to retrieve the property value
+     * @param propertyName the name of the property to retrieve, supporting dot notation for nested properties
+     * @return the value of the specified property, or {@code null} if the property path is not found or is {@code null}
+     */
+    public static @Nullable Object getPropertyValue(
+        @Nullable Object object,
+        @Nonnull String propertyName
+    ) {
+        return getPropertyValue(object, propertyName, ConvertKit.objectParser());
+    }
+
+    /**
+     * Returns the value of the specified property from the given object.
+     * <p>
+     * This method supports nested property access using dot notation (e.g., "parent.child.property"). If any part of
+     * the property path is not found or is {@code null}, this method returns {@code null}.
+     *
+     * @param object       the given object from which to retrieve the property value
+     * @param propertyName the name of the property to retrieve, supporting dot notation for nested properties
+     * @param objectParser the parser used to resolve object schemas
+     * @return the value of the specified property, or {@code null} if the property path is not found or is {@code null}
+     */
+    public static @Nullable Object getPropertyValue(
+        @Nullable Object object,
+        @Nonnull String propertyName,
+        @Nonnull ObjectParser objectParser
+    ) {
+        if (object == null) {
+            return null;
+        }
+        int start = 0;
+        Object cur = object;
+        while (true) {
+            int nextDotIndex = propertyName.indexOf('.', start);
+            if (nextDotIndex == -1) {
+                return getPropertyValue0(cur, propertyName.substring(start), objectParser);
+            } else {
+                cur = getPropertyValue0(cur, propertyName.substring(start, nextDotIndex), objectParser);
+                start = nextDotIndex + 1;
+            }
+        }
+    }
+
+    private static @Nullable Object getPropertyValue0(
+        @Nullable Object object,
+        @Nonnull String propertyName,
+        @Nonnull ObjectParser objectParser
+    ) {
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof Map<?, ?>) {
+            return ((Map<?, ?>) object).get(propertyName);
+        }
+        ObjectSchema schema = objectParser.parse(object.getClass());
+        ObjectProperty property = schema.getProperty(propertyName);
+        if (property == null) {
+            return null;
+        }
+        return property.getValue(object);
     }
 
     private ObjectKit() {

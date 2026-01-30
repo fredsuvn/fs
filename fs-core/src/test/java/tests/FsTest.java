@@ -14,6 +14,7 @@ import space.sunqian.fs.base.exception.UnreachablePointException;
 import space.sunqian.fs.base.system.OSKit;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.io.InputStream;
@@ -274,6 +275,12 @@ public class FsTest implements AssertTest, PrintTest {
                 process.destroyForcibly();
             }
         }
+        {
+            // getting property
+            MapProps mapProps = new MapProps(111L);
+            assertEquals(111L, Fs.get(mapProps, "longNum"));
+            assertEquals(111L, Fs.get(mapProps, "longNum", ObjectParser.defaultParser()));
+        }
     }
 
     private void printProcess(String title, Process process) {
@@ -310,15 +317,15 @@ public class FsTest implements AssertTest, PrintTest {
         map.put("longNum", 1);
         assertEquals(
             1L,
-            Fs.convertMap(map, MapObject.class).getLongNum()
+            Fs.convertMap(map, MapProps.class).getLongNum()
         );
         assertEquals(
             1L,
-            Fs.convertMap(map, new TypeRef<MapObject>() {}).getLongNum()
+            Fs.convertMap(map, new TypeRef<MapProps>() {}).getLongNum()
         );
         assertEquals(
             1L,
-            ((MapObject) Fs.convertMap(map, (Type) MapObject.class)).getLongNum()
+            ((MapProps) Fs.convertMap(map, (Type) MapProps.class)).getLongNum()
         );
     }
 
@@ -343,7 +350,10 @@ public class FsTest implements AssertTest, PrintTest {
     }
 
     @Data
-    public static class MapObject {
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class MapProps {
         private long longNum;
     }
 }

@@ -25,6 +25,7 @@ import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.PropertyCopier;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
+import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -895,6 +896,52 @@ public class Fs {
     }
 
     //---------------- Object Conversion End ----------------//
+
+    //---------------- Object Getting Property Begin ----------------//
+
+    /**
+     * Returns the value of the specified property in the given object.
+     * <p>
+     * This method supports nested property access using dot notation (e.g., "parent.child.property"). If any part of
+     * the property path is not found or is {@code null}, this method returns {@code null}.
+     * <p>
+     * This method is a shortcut to the {@link ObjectKit#getPropertyValue(Object, String)}.
+     *
+     * @param obj          the given object
+     * @param propertyName the specified property name
+     * @return the value of the specified property in the given object, {@code null} is permitted
+     * @see ObjectKit
+     */
+    public static @Nullable Object get(
+        @Nullable Object obj,
+        @Nonnull String propertyName
+    ) {
+        return ObjectKit.getPropertyValue(obj, propertyName);
+    }
+
+    /**
+     * Returns the value of the specified property in the given object.
+     * <p>
+     * This method supports nested property access using dot notation (e.g., "parent.child.property"). If any part of
+     * the property path is not found or is {@code null}, this method returns {@code null}.
+     * <p>
+     * This method is a shortcut to the {@link ObjectKit#getPropertyValue(Object, String, ObjectParser)}.
+     *
+     * @param obj          the given object
+     * @param propertyName the specified property name
+     * @param objectParser the object parser to parse the property value
+     * @return the value of the specified property in the given object, {@code null} is permitted
+     * @see ObjectKit
+     */
+    public static @Nullable Object get(
+        @Nullable Object obj,
+        @Nonnull String propertyName,
+        @Nonnull ObjectParser objectParser
+    ) {
+        return ObjectKit.getPropertyValue(obj, propertyName, objectParser);
+    }
+
+    //---------------- Object Getting Property End ----------------//
 
     //---------------- Collection Begin ----------------//
 
