@@ -24,7 +24,7 @@ public class PropertiesTest implements PrintTest {
     public void testPropertiesData() throws Exception {
         {
             // common
-            PropertiesData properties = PropertiesData.load(ResKit.findResource("data/x.properties").openStream());
+            PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
             printFor("x.properties", properties.asMap());
             assertEquals(1, properties.getInt("x1"));
             assertEquals(100, properties.getInt("x100", 100));
