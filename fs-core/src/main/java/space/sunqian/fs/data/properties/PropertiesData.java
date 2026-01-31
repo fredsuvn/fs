@@ -10,7 +10,6 @@ import space.sunqian.fs.io.IORuntimeException;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -25,40 +24,41 @@ public interface PropertiesData extends OutputableData {
 
     /**
      * Loads properties from the given input stream, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
      *
      * @param in the input stream to read from
      * @return a new {@link PropertiesData} wraps the loaded properties
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs while loading the properties
      */
     static @Nonnull PropertiesData load(@Nonnull InputStream in) throws IORuntimeException {
-        return load(in, CharsKit.defaultCharset());
+        return PropertiesParser.defaultParser().parse(in);
     }
 
     /**
      * Loads properties from the given input stream, using the specified charset.
+     * <p>
+     * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
      *
      * @param in      the input stream to read from
      * @param charset the charset to use
      * @return a new {@link PropertiesData} wraps the loaded properties
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs while loading the properties
      */
     static @Nonnull PropertiesData load(@Nonnull InputStream in, @Nonnull Charset charset) throws IORuntimeException {
-        return Fs.uncheck(() -> {
-            Reader reader = IOKit.newReader(in, charset);
-            Properties properties = new Properties();
-            properties.load(reader);
-            return wrap(properties);
-        }, IORuntimeException::new);
+        return PropertiesParser.defaultParser().parse(in, charset);
     }
 
     /**
      * Returns a new {@link PropertiesData} wraps the given {@link Properties}.
+     * <p>
+     * This method uses {@link PropertiesParser#defaultParser()} to wrap the properties.
      *
      * @param properties the {@link Properties} to wrap
      * @return a new {@link PropertiesData} wraps the given {@link Properties}
      */
     static @Nonnull PropertiesData wrap(@Nonnull Properties properties) {
-        return () -> properties;
+        return PropertiesParser.defaultParser().wrap(properties);
     }
 
     /**

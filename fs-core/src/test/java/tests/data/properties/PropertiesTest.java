@@ -26,28 +26,7 @@ public class PropertiesTest implements PrintTest {
             // common
             PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
             printFor("x.properties", properties.asMap());
-            assertEquals(1, properties.getInt("x1"));
-            assertEquals(100, properties.getInt("x100", 100));
-            assertEquals(2L, properties.getLong("x2"));
-            assertEquals(200L, properties.getLong("x200", 200L));
-            assertEquals(3.3f, properties.getFloat("x3"));
-            assertEquals(300.0f, properties.getFloat("x300", 300.0f));
-            assertEquals(4.4, properties.getDouble("x4"));
-            assertEquals(400.0, properties.getDouble("x400", 400.0));
-            assertEquals(true, properties.getBoolean("x5"));
-            assertEquals(false, properties.getBoolean("x6"));
-            assertEquals("hello", properties.getString("x7"));
-            assertEquals("world", properties.getString("x700", "world"));
-            assertEquals("hello", properties.getString("x7", "world"));
-            assertEquals(false, properties.getBoolean("x7"));
-            assertEquals(true, properties.getBoolean("x8"));
-            assertEquals(true, properties.getBoolean("x9"));
-            assertEquals(true, properties.getBoolean("x10"));
-            assertEquals(false, properties.getBoolean("x11"));
-            assertEquals(false, properties.getBoolean("x1100"));
-            assertEquals(true, properties.getBoolean("x1"));
-            assertEquals(null, properties.getString("x100"));
-            assertEquals("中文", properties.getString("x12"));
+            checkProperties(properties);
 
             // update
             properties.set("x1", "1000");
@@ -67,6 +46,45 @@ public class PropertiesTest implements PrintTest {
             checkOutput(output);
             output.reset();
         }
+        {
+            // with charset
+            PropertiesData properties = PropertiesData.load(
+                ResKit.findStream("data/x.properties"), CharsKit.defaultCharset()
+            );
+            checkProperties(properties);
+        }
+        {
+            // wrapper
+            PropertiesData properties = PropertiesData.load(
+                ResKit.findStream("data/x.properties"), CharsKit.defaultCharset()
+            );
+            checkProperties(PropertiesData.wrap(properties.asProperties()));
+        }
+    }
+
+    private void checkProperties(PropertiesData properties) {
+        assertEquals(1, properties.getInt("x1"));
+        assertEquals(100, properties.getInt("x100", 100));
+        assertEquals(2L, properties.getLong("x2"));
+        assertEquals(200L, properties.getLong("x200", 200L));
+        assertEquals(3.3f, properties.getFloat("x3"));
+        assertEquals(300.0f, properties.getFloat("x300", 300.0f));
+        assertEquals(4.4, properties.getDouble("x4"));
+        assertEquals(400.0, properties.getDouble("x400", 400.0));
+        assertEquals(true, properties.getBoolean("x5"));
+        assertEquals(false, properties.getBoolean("x6"));
+        assertEquals("hello", properties.getString("x7"));
+        assertEquals("world", properties.getString("x700", "world"));
+        assertEquals("hello", properties.getString("x7", "world"));
+        assertEquals(false, properties.getBoolean("x7"));
+        assertEquals(true, properties.getBoolean("x8"));
+        assertEquals(true, properties.getBoolean("x9"));
+        assertEquals(true, properties.getBoolean("x10"));
+        assertEquals(false, properties.getBoolean("x11"));
+        assertEquals(false, properties.getBoolean("x1100"));
+        assertEquals(true, properties.getBoolean("x1"));
+        assertEquals(null, properties.getString("x100"));
+        assertEquals("中文", properties.getString("x12"));
     }
 
     private void checkOutput(ByteArrayOutputStream output) throws Exception {
