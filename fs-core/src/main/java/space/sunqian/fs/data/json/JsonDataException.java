@@ -8,12 +8,12 @@ import space.sunqian.fs.data.DataException;
  *
  * @author sunqian
  */
-public class JsonException extends DataException {
+public class JsonDataException extends DataException {
 
     /**
      * Empty constructor.
      */
-    public JsonException() {
+    public JsonDataException() {
         super();
     }
 
@@ -22,7 +22,7 @@ public class JsonException extends DataException {
      *
      * @param message the message
      */
-    public JsonException(@Nullable String message) {
+    public JsonDataException(@Nullable String message) {
         super(message);
     }
 
@@ -32,7 +32,7 @@ public class JsonException extends DataException {
      * @param message the message
      * @param cause   the cause
      */
-    public JsonException(@Nullable String message, @Nullable Throwable cause) {
+    public JsonDataException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -41,7 +41,7 @@ public class JsonException extends DataException {
      *
      * @param cause the cause
      */
-    public JsonException(@Nullable Throwable cause) {
+    public JsonDataException(@Nullable Throwable cause) {
         super(cause);
     }
 }

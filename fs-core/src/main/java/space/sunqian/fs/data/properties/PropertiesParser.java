@@ -28,6 +28,17 @@ public interface PropertiesParser extends DataParser<PropertiesData> {
      * @return the wrapped {@link PropertiesData} object
      */
     default @Nonnull PropertiesData wrap(@Nonnull Properties properties) {
-        return () -> properties;
+        return new PropertiesData() {
+
+            @Override
+            public @Nonnull Properties asProperties() {
+                return properties;
+            }
+
+            @Override
+            public String toString() {
+                return properties.toString();
+            }
+        };
     }
 }

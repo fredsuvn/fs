@@ -79,7 +79,7 @@ public interface PropertiesData extends OutputableData {
      * @param defaultValue the default value
      * @return the string value of the property, or {@code defaultValue} if not found
      */
-    default @Nonnull String getString(@Nonnull String name, @Nonnull String defaultValue) {
+    default String getString(@Nonnull String name, String defaultValue) {
         String value = getString(name);
         return value == null ? defaultValue : value;
     }

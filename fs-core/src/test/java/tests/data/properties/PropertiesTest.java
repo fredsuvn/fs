@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.system.ResKit;
 import space.sunqian.fs.data.properties.PropertiesData;
-import space.sunqian.fs.data.properties.PropertiesException;
+import space.sunqian.fs.data.properties.PropertiesDataException;
 import space.sunqian.fs.io.IOKit;
 
 import java.io.ByteArrayInputStream;
@@ -25,7 +25,7 @@ public class PropertiesTest implements PrintTest {
         {
             // common
             PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
-            printFor("x.properties", properties.asMap());
+            printFor("x.properties", properties);
             checkProperties(properties);
 
             // update
@@ -35,7 +35,7 @@ public class PropertiesTest implements PrintTest {
             assertEquals(1000, properties.getInt("x100"));
             properties.remove("x2");
             assertNull(properties.getString("x2"));
-            printFor("x.properties - modified", properties.asMap());
+            printFor("x.properties - modified", properties);
 
             // write
             ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -111,18 +111,18 @@ public class PropertiesTest implements PrintTest {
     @Test
     public void testException() throws Exception {
         {
-            // PropertiesException
-            assertThrows(PropertiesException.class, () -> {
-                throw new PropertiesException();
+            // PropertiesDataException
+            assertThrows(PropertiesDataException.class, () -> {
+                throw new PropertiesDataException();
             });
-            assertThrows(PropertiesException.class, () -> {
-                throw new PropertiesException("");
+            assertThrows(PropertiesDataException.class, () -> {
+                throw new PropertiesDataException("");
             });
-            assertThrows(PropertiesException.class, () -> {
-                throw new PropertiesException("", new RuntimeException());
+            assertThrows(PropertiesDataException.class, () -> {
+                throw new PropertiesDataException("", new RuntimeException());
             });
-            assertThrows(PropertiesException.class, () -> {
-                throw new PropertiesException(new RuntimeException());
+            assertThrows(PropertiesDataException.class, () -> {
+                throw new PropertiesDataException(new RuntimeException());
             });
         }
     }

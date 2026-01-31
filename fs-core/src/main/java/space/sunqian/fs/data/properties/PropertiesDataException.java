@@ -8,12 +8,12 @@ import space.sunqian.fs.data.DataException;
  *
  * @author sunqian
  */
-public class PropertiesException extends DataException {
+public class PropertiesDataException extends DataException {
 
     /**
      * Empty constructor.
      */
-    public PropertiesException() {
+    public PropertiesDataException() {
         super();
     }
 
@@ -22,7 +22,7 @@ public class PropertiesException extends DataException {
      *
      * @param message the message
      */
-    public PropertiesException(@Nullable String message) {
+    public PropertiesDataException(@Nullable String message) {
         super(message);
     }
 
@@ -32,7 +32,7 @@ public class PropertiesException extends DataException {
      * @param message the message
      * @param cause   the cause
      */
-    public PropertiesException(@Nullable String message, @Nullable Throwable cause) {
+    public PropertiesDataException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -41,7 +41,7 @@ public class PropertiesException extends DataException {
      *
      * @param cause the cause
      */
-    public PropertiesException(@Nullable Throwable cause) {
+    public PropertiesDataException(@Nullable Throwable cause) {
         super(cause);
     }
 }

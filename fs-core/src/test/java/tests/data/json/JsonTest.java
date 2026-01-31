@@ -1,7 +1,7 @@
 package tests.data.json;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.fs.data.json.JsonException;
+import space.sunqian.fs.data.json.JsonDataException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -10,18 +10,18 @@ public class JsonTest {
     @Test
     public void testException() throws Exception {
         {
-            // JsonException
-            assertThrows(JsonException.class, () -> {
-                throw new JsonException();
+            // JsonDataException
+            assertThrows(JsonDataException.class, () -> {
+                throw new JsonDataException();
             });
-            assertThrows(JsonException.class, () -> {
-                throw new JsonException("");
+            assertThrows(JsonDataException.class, () -> {
+                throw new JsonDataException("");
             });
-            assertThrows(JsonException.class, () -> {
-                throw new JsonException("", new RuntimeException());
+            assertThrows(JsonDataException.class, () -> {
+                throw new JsonDataException("", new RuntimeException());
             });
-            assertThrows(JsonException.class, () -> {
-                throw new JsonException(new RuntimeException());
+            assertThrows(JsonDataException.class, () -> {
+                throw new JsonDataException(new RuntimeException());
             });
         }
     }
