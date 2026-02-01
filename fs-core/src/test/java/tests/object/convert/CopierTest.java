@@ -366,6 +366,45 @@ public class CopierTest implements PrintTest {
     }
 
     @Test
+    public void testPropertyNameMapper() {
+        {
+            // map to
+            Map<String, String> map1 = MapKit.map("1", "1", "2", "2");
+            Map<String, String> map2 = new HashMap<>();
+            PropertyCopier.defaultCopier().copyProperties(map1, map2, ConvertOption.propertyNameMapper(
+                (name, type) -> name + "1"));
+            assertEquals(MapKit.map("11", "1", "21", "2"), map2);
+            Map<Integer, String> map3 = MapKit.map(1, "1", 2, "2");
+            Map<Integer, String> map4 = new HashMap<>();
+            PropertyCopier.defaultCopier().copyProperties(map3, map4, ConvertOption.propertyNameMapper(
+                (name, type) -> name + "1"));
+            assertEquals(MapKit.map(1, "1", 2, "2"), map4);
+            Map<String, String> map5 = MapKit.map("first", "1", "second", "2", "third", "3");
+            ClsA3 cls6 = new ClsA3();
+            PropertyCopier.defaultCopier().copyProperties(map5, cls6, ConvertOption.propertyNameMapper(
+                (name, type) -> name + "1"));
+            assertEquals(new ClsA3("1", "2", "3"), cls6);
+            Map<Integer, String> map7 = MapKit.map(1, "1", 2, "2", 3, "3");
+            ClsA3 cls8 = new ClsA3();
+            PropertyCopier.defaultCopier().copyProperties(map7, cls8, ConvertOption.propertyNameMapper(
+                (name, type) -> name + "1"));
+            assertEquals(new ClsA3(), cls8);
+        }
+        {
+            // object to
+            ClsA cls1 = new ClsA("1", "2", "3");
+            Map<String, String> map2 = new HashMap<>();
+            PropertyCopier.defaultCopier().copyProperties(cls1, map2, ConvertOption.propertyNameMapper(
+                (name, type) -> name + "1"));
+            assertEquals(MapKit.map("first1", "1", "second1", "2", "third1", "3"), map2);
+            ClsA3 cls3 = new ClsA3();
+            PropertyCopier.defaultCopier().copyProperties(cls1, cls3, ConvertOption.propertyNameMapper(
+                (name, type) -> name + "1"));
+            assertEquals(new ClsA3("1", "2", "3"), cls3);
+        }
+    }
+
+    @Test
     public void testException() {
         {
             // ObjectCopyException
@@ -426,6 +465,16 @@ public class CopierTest implements PrintTest {
         @Getter
         private String second2;
         // private String third2;
+    }
+
+    @Data
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ClsA3 {
+        private String first1;
+        private String second1;
+        private String third1;
     }
 
     @Data

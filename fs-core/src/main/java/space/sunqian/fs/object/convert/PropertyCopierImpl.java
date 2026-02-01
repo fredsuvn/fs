@@ -91,6 +91,9 @@ final class PropertyCopierImpl implements PropertyCopier {
                 if (ignored(srcKey, options)) {
                     return;
                 }
+                if (srcKey instanceof String) {
+                    srcKey = getNameMapper(options).map((String) srcKey, srcSchema.type());
+                }
                 Object dstPropertyName;
                 Object dstPropertyValue;
                 if (propertyMapper != null) {
@@ -138,6 +141,9 @@ final class PropertyCopierImpl implements PropertyCopier {
             try {
                 if (ignored(srcKey, options)) {
                     return;
+                }
+                if (srcKey instanceof String) {
+                    srcKey = getNameMapper(options).map((String) srcKey, srcSchema.type());
                 }
                 Object dstPropertyName;
                 Object dstPropertyValue;
@@ -201,6 +207,7 @@ final class PropertyCopierImpl implements PropertyCopier {
                 if ("class".equals(srcPropertyName)) {
                     return;
                 }
+                srcPropertyName = getNameMapper(options).map(srcPropertyName, srcSchema.type());
                 Object dstPropertyName;
                 Object dstPropertyValue;
                 if (propertyMapper != null) {
@@ -252,6 +259,11 @@ final class PropertyCopierImpl implements PropertyCopier {
                 if (!srcProperty.isReadable()) {
                     return;
                 }
+                // do not map "class"
+                if ("class".equals(srcPropertyName)) {
+                    return;
+                }
+                srcPropertyName = getNameMapper(options).map(srcPropertyName, srcSchema.type());
                 Object dstPropertyName;
                 Object dstPropertyValue;
                 ObjectProperty dstProperty;
@@ -306,5 +318,10 @@ final class PropertyCopierImpl implements PropertyCopier {
 
     private boolean ignoreNull(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Option.containsKey(ConvertOption.IGNORE_NULL, options);
+    }
+
+    private @Nonnull PropertyNameMapper getNameMapper(@Nonnull Option<?, ?> @Nonnull ... options) {
+        PropertyNameMapper mapper = Option.findValue(ConvertOption.PROPERTY_NAME_MAPPER, options);
+        return mapper != null ? mapper : PropertyNameMapper.defaultMapper();
     }
 }

@@ -11,6 +11,7 @@ import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.ObjectParser;
 
 import java.nio.charset.Charset;
+import java.util.Map;
 
 /**
  * Option for object conversion and data mapping.
@@ -48,6 +49,11 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
      * Key of {@link #propertyCopier(PropertyCopier)}.
      */
     PROPERTY_COPIER,
+
+    /**
+     * Key of {@link #propertyNameMapper(PropertyNameMapper)}.
+     */
+    PROPERTY_NAME_MAPPER,
 
     /**
      * Key of {@link #ignoreProperties(Object...)}.
@@ -129,6 +135,26 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
         @Nonnull PropertyCopier propertyCopier
     ) {
         return Option.of(PROPERTY_COPIER, propertyCopier);
+    }
+
+    /**
+     * Returns an option to specify the {@link PropertyNameMapper}.
+     * <p>
+     * Note that this configuration is only valid for the {@link String} type property names (both source and target),
+     * and executed before the configured {@link PropertyCopier.PropertyMapper} (if any, and it means the property name
+     * received by the property mapper will be the mapped name by the property name mapper). For property names whose
+     * type is not {@link String}, such as non-{@link String} keys of a {@link Map}, this configuration will not take
+     * effect.
+     * <p>
+     * By default, this option is disabled.
+     *
+     * @param propertyNameMapper the {@link PropertyNameMapper} to be specified
+     * @return an option to specify the {@link PropertyNameMapper}
+     */
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull PropertyNameMapper> propertyNameMapper(
+        @Nonnull PropertyNameMapper propertyNameMapper
+    ) {
+        return Option.of(PROPERTY_NAME_MAPPER, propertyNameMapper);
     }
 
     /**
