@@ -27,7 +27,7 @@ import java.util.Map;
  *
  * @author sunqian
  */
-public interface JsonMap extends Map<String, Object>, JsonData {
+public interface JsonMap extends Map<String, Object>, JsonOutputableData {
 
     /**
      * Gets the string value for the specified key, or {@code null} if the key is not found or the value is JSON null.
@@ -230,7 +230,7 @@ public interface JsonMap extends Map<String, Object>, JsonData {
      * null
      * @throws JsonDataException if the value is not a JSON object
      */
-    default @Nullable JsonMap getJsonObject(@Nonnull String key) throws JsonDataException {
+    default @Nullable JsonMap getObject(@Nonnull String key) throws JsonDataException {
         Object value = get(key);
         if (JsonBack.isNullValue(value)) {
             return null;
@@ -250,7 +250,7 @@ public interface JsonMap extends Map<String, Object>, JsonData {
      * null
      * @throws JsonDataException if the value is not a JSON array
      */
-    default @Nullable JsonList getJsonArray(@Nonnull String key) throws JsonDataException {
+    default @Nullable JsonList getArray(@Nonnull String key) throws JsonDataException {
         Object value = get(key);
         if (JsonBack.isNullValue(value)) {
             return null;

@@ -26,7 +26,7 @@ import java.util.Map;
  *
  * @author sunqian
  */
-public interface JsonList extends List<Object>, JsonData {
+public interface JsonList extends List<Object>, JsonOutputableData {
 
     /**
      * Gets the string value for the specified index, or {@code null} if the value is JSON null.
@@ -232,7 +232,7 @@ public interface JsonList extends List<Object>, JsonData {
      * @throws IndexOutOfBoundsException if the index is out of bounds
      * @throws JsonDataException         if the value is not a JSON object
      */
-    default @Nullable JsonMap getJsonObject(int index) throws IndexOutOfBoundsException, JsonDataException {
+    default @Nullable JsonMap getObject(int index) throws IndexOutOfBoundsException, JsonDataException {
         Object value = get(index);
         if (JsonBack.isNullValue(value)) {
             return null;
@@ -251,7 +251,7 @@ public interface JsonList extends List<Object>, JsonData {
      * @throws IndexOutOfBoundsException if the index is out of bounds
      * @throws JsonDataException         if the value is not a JSON array
      */
-    default @Nullable JsonList getJsonArray(int index) throws IndexOutOfBoundsException, JsonDataException {
+    default @Nullable JsonList getArray(int index) throws IndexOutOfBoundsException, JsonDataException {
         Object value = get(index);
         if (JsonBack.isNullValue(value)) {
             return null;
