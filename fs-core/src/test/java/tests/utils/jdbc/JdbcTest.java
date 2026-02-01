@@ -5,7 +5,9 @@ import lombok.Data;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.reflect.TypeRef;
 import space.sunqian.fs.utils.jdbc.JdbcKit;
 import space.sunqian.fs.utils.jdbc.SqlRuntimeException;
 
@@ -71,12 +73,25 @@ public class JdbcTest {
             "select * from `user`"
         );
         {
-            // no name mapper
+            // default name mapper for Class<User>
             ResultSet resultSet = preparedStatement.executeQuery();
             List<User> users = JdbcKit.toObject(
                 resultSet,
                 User.class,
-                ObjectConverter.defaultConverter()
+                ObjectConverter.defaultConverter(),
+                ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper())
+            );
+            checkQueryResult(users);
+            resultSet.close();
+        }
+        {
+            // default name mapper for TypeRef<User>
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<User> users = JdbcKit.toObject(
+                resultSet,
+                new TypeRef<User>() {},
+                ObjectConverter.defaultConverter(),
+                ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper())
             );
             checkQueryResult(users);
             resultSet.close();
@@ -87,8 +102,8 @@ public class JdbcTest {
             List<User> users = JdbcKit.toObject(
                 resultSet,
                 User.class,
-                String::toLowerCase,
-                ObjectConverter.defaultConverter()
+                ObjectConverter.defaultConverter(),
+                ConvertOption.propertyNameMapper((s, t) -> s.toLowerCase())
             );
             checkQueryResult(users);
             resultSet.close();

@@ -2,13 +2,13 @@ package space.sunqian.fs.utils.jdbc;
 
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.string.NameFormatter;
-import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.object.convert.PropertyNameMapper;
+import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
@@ -33,20 +33,21 @@ public class JdbcKit {
      *
      * @return the default name mapper
      */
-    public static @Nonnull NameMapper defaultNameMapper() {
+    public static @Nonnull PropertyNameMapper defaultNameMapper() {
         return DbNameMapper.INST;
     }
 
     /**
-     * Convert the result set to a list of objects. The name mapper to map the column name to the field name of the
-     * element type is {@link #defaultNameMapper()}.
+     * Convert the result set to a list of objects.
      *
      * @param resultSet the result set
      * @param javaType  the element java type of the returned list
      * @param converter the converter to convert the JDBC type to the java type
-     * @param options   the options for converting, e.g. the {@link ConvertOption#} for the converter
+     * @param options   the options for converting, e.g. the
+     *                  {@link ConvertOption#propertyNameMapper(PropertyNameMapper)} for mapping the column name to the
+     *                  field name of the element type during converting
      * @param <T>       the element type of the returned list
-     * @return the list of objects
+     * @return the row list of the result set of which each row is mapped to the type {@link T}
      * @throws SqlRuntimeException if any error occurs
      */
     public static <T> @Immutable @Nonnull List<@Nonnull T> toObject(
@@ -55,72 +56,68 @@ public class JdbcKit {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SqlRuntimeException {
-        return toObject(resultSet, (Type) javaType, defaultNameMapper(), converter, options);
+        return toObject(resultSet, (Type) javaType, converter, options);
     }
 
     /**
      * Convert the result set to a list of objects.
      *
-     * @param resultSet  the result set
-     * @param javaType   the element java type of the returned list
-     * @param nameMapper the name mapper to map the column name to the field name of the element type, may be
-     *                   {@code null} if let this method use {@link #defaultNameMapper()}
-     * @param converter  the converter to convert the JDBC type to the java type
-     * @param options    the options for converting, e.g. the {@link ConvertOption#} for the converter
-     * @param <T>        the element type of the returned list
-     * @return the list of objects
+     * @param resultSet   the result set
+     * @param javaTypeRef the element java type reference of the returned list
+     * @param converter   the converter to convert the JDBC type to the java type
+     * @param options     the options for converting, e.g. the
+     *                    {@link ConvertOption#propertyNameMapper(PropertyNameMapper)} for mapping the column name to
+     *                    the field name of the element type during converting
+     * @param <T>         the element type of the returned list
+     * @return the row list of the result set of which each row is mapped to the type {@link T}
      * @throws SqlRuntimeException if any error occurs
      */
     public static <T> @Immutable @Nonnull List<@Nonnull T> toObject(
         @Nonnull ResultSet resultSet,
-        @Nonnull Class<T> javaType,
-        @Nullable NameMapper nameMapper,
+        @Nonnull TypeRef<T> javaTypeRef,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SqlRuntimeException {
-        return toObject(resultSet, (Type) javaType, nameMapper, converter, options);
+        return toObject(resultSet, javaTypeRef.type(), converter, options);
     }
 
     /**
      * Convert the result set to a list of objects.
      *
-     * @param resultSet  the result set
-     * @param javaType   the element java type of the returned list
-     * @param nameMapper the name mapper to map the column name to the field name of the element type, may be
-     *                   {@code null} if let this method use {@link #defaultNameMapper()}
-     * @param converter  the converter to convert the JDBC type to the java type
-     * @param options    the options for converting, e.g. the {@link ConvertOption#} for the converter
-     * @param <T>        the element type of the returned list
-     * @return the list of objects
+     * @param resultSet the result set
+     * @param javaType  the element java type of the returned list
+     * @param converter the converter to convert the JDBC type to the java type
+     * @param options   the options for converting, e.g. the
+     *                  {@link ConvertOption#propertyNameMapper(PropertyNameMapper)} for mapping the column name to the
+     *                  field name of the element type during converting
+     * @param <T>       the element type of the returned list
+     * @return the row list of the result set of which each row is mapped to the type {@link T}
      * @throws SqlRuntimeException if any error occurs
      */
     public static <T> @Immutable @Nonnull List<@Nonnull T> toObject(
         @Nonnull ResultSet resultSet,
         @Nonnull Type javaType,
-        @Nullable NameMapper nameMapper,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SqlRuntimeException {
-        return Fs.uncheck(() -> resultToObject(resultSet, javaType, nameMapper, converter, options), SqlRuntimeException::new);
+        return Fs.uncheck(() -> resultToObject(resultSet, javaType, converter, options), SqlRuntimeException::new);
     }
 
     private static <T> @Immutable @Nonnull List<@Nonnull T> resultToObject(
         @Nonnull ResultSet resultSet,
         @Nonnull Type javaType,
-        @Nullable NameMapper nameMapper,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SQLException {
         ResultSetMetaData metaData = resultSet.getMetaData();
         ArrayList<T> objects = new ArrayList<>();
         Map<String, Object> rowMap = new HashMap<>();
-        NameMapper toName = Fs.nonnull(nameMapper, defaultNameMapper());
         while (resultSet.next()) {
             rowMap.clear();
             for (int column = 0; column < metaData.getColumnCount(); column++) {
                 String columnName = metaData.getColumnName(column + 1);
                 Object jdbcObject = resultSet.getObject(column + 1);
-                rowMap.put(toName.map(columnName), jdbcObject);
+                rowMap.put(columnName, jdbcObject);
             }
             Object element = converter.convertMap(rowMap, javaType, options);
             objects.add(Fs.as(element));
@@ -129,15 +126,14 @@ public class JdbcKit {
         return objects;
     }
 
-    private enum DbNameMapper implements NameMapper {
-
+    private enum DbNameMapper implements PropertyNameMapper {
         INST;
 
         private final @Nonnull NameFormatter from = NameFormatter.delimiter("_");
         private final @Nonnull NameFormatter to = NameFormatter.lowerCamel();
 
         @Override
-        public @Nonnull String map(@Nonnull String name) {
+        public @Nonnull String map(@Nonnull String name, @Nonnull Type srcType) {
             String lowerName = name.toLowerCase();
             return from.format(lowerName, to);
         }

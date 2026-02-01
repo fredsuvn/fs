@@ -4,9 +4,9 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
-import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.object.convert.PropertyNameMapper;
 
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
@@ -41,79 +41,72 @@ public interface SqlQuery<T> extends SqlOperation {
     Type type();
 
     /**
-     * Executes this query and returns the first row maps to the type {@link T} of the result set of this query. The
-     * name mapper to map the column name to the field name of the element type is {@link JdbcKit#defaultNameMapper()}.
+     * Executes this query and returns the first row maps to the type {@link T} of the result set of this query.
+     * <p>
+     * This method uses {@link ObjectConverter#defaultConverter()} with the option {@link JdbcKit#defaultNameMapper()}
+     * to convert the result set. It is equivalent to:
+     * <pre>{@code
+     * first(ObjectConverter.defaultConverter(), ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper()))
+     * }</pre>
      *
-     * @return the list of objects
+     * @return the first row of the result set of which row is mapped to the type {@link T}
      * @throws SqlRuntimeException if any error occurs
      */
-    default @Nullable T first(
-    ) throws SqlRuntimeException {
-        List<T> result = list(JdbcKit.defaultNameMapper(), null);
-        return result.stream().findFirst().orElse(null);
+    default @Nullable T first() throws SqlRuntimeException {
+        return first(ObjectConverter.defaultConverter(), ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper()));
     }
 
     /**
      * Executes this query and returns the first row maps to the type {@link T} of the result set of this query.
      *
-     * @param columnMapper the name mapper to map the column name to the field name of the element type, may be
-     *                     {@code null} if the column name is the same as the field name
-     * @return the list of objects
+     * @param converter the converter to convert the JDBC type to the java type
+     * @param options   the options for converting, e.g. the
+     *                  {@link ConvertOption#propertyNameMapper(PropertyNameMapper)} for mapping the column name to the
+     *                  field name of the element type during converting
+     * @return the first row of the result set of which row is mapped to the type {@link T}
      * @throws SqlRuntimeException if any error occurs
      */
     default @Nullable T first(
-        @Nullable NameMapper columnMapper
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SqlRuntimeException {
-        List<T> result = list(columnMapper, null);
+        List<T> result = list(converter, options);
         return result.stream().findFirst().orElse(null);
     }
 
     /**
-     * Executes this query and returns the result set of this query as a list of type {@link T}. The name mapper to map
-     * the column name to the field name of the element type is {@link JdbcKit#defaultNameMapper()}.
+     * Executes this query and returns the result set of this query as a list of type {@link T}.
+     * <p>
+     * This method uses {@link ObjectConverter#defaultConverter()} with the option {@link JdbcKit#defaultNameMapper()}
+     * to convert the result set. It is equivalent to:
+     * <pre>{@code
+     * list(ObjectConverter.defaultConverter(), ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper()))
+     * }</pre>
      *
-     * @return the list of objects
+     * @return the row list of the result set of which each row is mapped to the type {@link T}
      * @throws SqlRuntimeException if any error occurs
      */
-    default @Nonnull List<@Nonnull T> list(
-    ) throws SqlRuntimeException {
-        return list(JdbcKit.defaultNameMapper(), null);
+    default @Nonnull List<@Nonnull T> list() throws SqlRuntimeException {
+        return list(ObjectConverter.defaultConverter(), ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper()));
     }
 
     /**
      * Executes this query and returns the result set of this query as a list of type {@link T}.
      *
-     * @param columnMapper the name mapper to map the column name to the field name of the element type, may be
-     *                     {@code null} if the column name is the same as the field name
-     * @return the list of objects
+     * @param converter the converter to convert the JDBC type to the java type
+     * @param options   the options for converting, e.g. the
+     *                  {@link ConvertOption#propertyNameMapper(PropertyNameMapper)} for mapping the column name to the
+     *                  field name of the element type during converting
+     * @return the row list of the result set of which each row is mapped to the type {@link T}
      * @throws SqlRuntimeException if any error occurs
      */
     default @Nonnull List<@Nonnull T> list(
-        @Nullable NameMapper columnMapper
-    ) throws SqlRuntimeException {
-        return list(columnMapper, null);
-    }
-
-    /**
-     * Executes this query and returns the result set of this query as a list of type {@link T}.
-     *
-     * @param columnMapper the name mapper to map the column name to the field name of the element type, may be
-     *                     {@code null} if the column name is the same as the field name
-     * @param converter    the converter to convert the JDBC type to the java type, may be {@code null} if it uses the
-     *                     default converter
-     * @param options      the options for converting, e.g. the {@link ConvertOption} for the converter
-     * @return the list of objects
-     * @throws SqlRuntimeException if any error occurs
-     */
-    default @Nonnull List<@Nonnull T> list(
-        @Nullable NameMapper columnMapper,
-        @Nullable ObjectConverter converter,
+        @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SqlRuntimeException {
         return JdbcKit.toObject(
             execute(),
             type(),
-            columnMapper,
             Fs.nonnull(converter, ObjectConverter.defaultConverter()),
             options
         );

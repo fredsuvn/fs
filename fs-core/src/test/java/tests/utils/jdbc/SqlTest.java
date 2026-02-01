@@ -9,6 +9,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.object.convert.ConvertOption;
+import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.reflect.TypeRef;
 import space.sunqian.fs.utils.jdbc.JdbcKit;
 import space.sunqian.fs.utils.jdbc.PreparedBatchSql;
@@ -253,14 +255,20 @@ public class SqlTest {
             .append("SELECT * FROM `user` WHERE id = ", 1L)
             .build()
             .query(User.class, h2Connection);
-        assertNull(deletedQuery.first(JdbcKit.defaultNameMapper()));
+        assertNull(deletedQuery.first(
+            ObjectConverter.defaultConverter(),
+            ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper())
+        ));
 
         // Query id = 2L
         User bob = SqlBuilder.newBuilder()
             .append("SELECT * FROM `user` WHERE id = ", 2L)
             .build()
             .query(new TypeRef<User>() {}, h2Connection)
-            .list(JdbcKit.defaultNameMapper())
+            .list(
+                ObjectConverter.defaultConverter(),
+                ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper())
+            )
             .get(0);
         assertEquals(2L, bob.getId());
         assertEquals("Bob", bob.getName());
