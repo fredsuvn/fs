@@ -114,7 +114,24 @@ final class AssignBack {
 
     private static boolean isAssignable(@Nonnull ParameterizedType assigned, @Nonnull Class<?> assignee) {
         Class<?> assignedRaw = (Class<?>) assigned.getRawType();
-        return assignedRaw.isAssignableFrom(assignee);
+        if (!assignedRaw.isAssignableFrom(assignee)) {
+            return false;
+        }
+        List<Type> assigneeArgs = TypeKit.resolveActualTypeArguments(assignee, assignedRaw);
+        if (isAllTypeVariables(assigneeArgs)) {
+            return true;
+        }
+        ParameterizedType assigneeParam = TypeKit.parameterizedType(assignedRaw, assigneeArgs.toArray(new Type[0]));
+        return isAssignable(assigned, assigneeParam);
+    }
+
+    private static boolean isAllTypeVariables(List<Type> types) {
+        for (Type type : types) {
+            if (!(type instanceof TypeVariable<?>)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean isAssignable(@Nonnull ParameterizedType assigned, @Nonnull ParameterizedType assignee) {

@@ -9,11 +9,13 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AssignTest {
 
@@ -56,6 +58,31 @@ public class AssignTest {
         ParameterizedType p1 = TypeKit.parameterizedType(List.class, new Type[]{String.class, String.class});
         ParameterizedType p2 = TypeKit.parameterizedType(List.class, new Type[]{String.class});
         assertFalse(TypeKit.isAssignable(p1, p2));
+    }
+
+    @Test
+    public void testClassToParam() {
+        class XMap extends HashMap<Object, Object> {}
+
+        Type mapType = new TypeRef<Map<String, Object>>() {}.type();
+        XMap xMap = new XMap();
+
+        // OK:
+        // Map map = xMap;
+        assertTrue(TypeKit.isAssignable(Map.class, xMap.getClass()));
+        // error:
+        // Map<String, Object> map = xMap; error
+        assertFalse(TypeKit.isAssignable(mapType, xMap.getClass()));
+
+        // OK:
+        // HashMap rawMap = new HashMap();
+        // Map<String, Object> map = rawMap;
+        assertTrue(TypeKit.isAssignable(mapType, HashMap.class));
+
+        // error:
+        // HashMap<?,?> rawMap = new HashMap();
+        // Map<String, Object> map = rawMap;
+        assertFalse(TypeKit.isAssignable(mapType, new TypeRef<Map<?, ?>>() {}.type()));
     }
 
     public static class ClassTester<
