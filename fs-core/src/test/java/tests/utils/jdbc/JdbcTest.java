@@ -17,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,22 +40,29 @@ public class JdbcTest {
         // create table `user`
         // `id` (auto increment), `name`, `age`
         PreparedStatement preparedStatement = h2Connection.prepareStatement(
-            "create table if not exists `user` (id int primary key auto_increment, name varchar(255), age int)"
+            "create table if not exists `user` (" +
+                "id int primary key auto_increment, " +
+                "first_name varchar(255), " +
+                "last_name varchar(255), " +
+                "age int" +
+                ")"
         );
         preparedStatement.execute();
         // insert data: `test`, 18
         preparedStatement = h2Connection.prepareStatement(
-            "insert into `user` (name, age) values (?, ?)"
+            "insert into `user` (first_name, last_name, age) values (?, ?, ?)"
         );
-        preparedStatement.setString(1, "test");
-        preparedStatement.setInt(2, 18);
+        preparedStatement.setString(1, "first1");
+        preparedStatement.setString(2, "last1");
+        preparedStatement.setInt(3, 18);
         preparedStatement.execute();
         // insert data: `test2`, 20
         preparedStatement = h2Connection.prepareStatement(
-            "insert into `user` (name, age) values (?, ?)"
+            "insert into `user` (first_name, last_name, age) values (?, ?, ?)"
         );
-        preparedStatement.setString(1, "test2");
-        preparedStatement.setInt(2, 20);
+        preparedStatement.setString(1, "first2");
+        preparedStatement.setString(2, "last2");
+        preparedStatement.setInt(3, 20);
         preparedStatement.execute();
     }
 
@@ -87,13 +95,13 @@ public class JdbcTest {
         {
             // default name mapper for TypeRef<User>
             ResultSet resultSet = preparedStatement.executeQuery();
-            List<User> users = JdbcKit.toObject(
+            List<Map<String, Object>> users = JdbcKit.toObject(
                 resultSet,
-                new TypeRef<User>() {},
+                new TypeRef<Map<String, Object>>() {},
                 ObjectConverter.defaultConverter(),
                 ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper())
             );
-            checkQueryResult(users);
+            checkQueryMapResult(users);
             resultSet.close();
         }
         {
@@ -103,8 +111,11 @@ public class JdbcTest {
                 resultSet,
                 User.class,
                 ObjectConverter.defaultConverter(),
-                ConvertOption.propertyNameMapper((s, t) -> s.toLowerCase())
-            );
+                ConvertOption.propertyNameMapper((s, t) ->
+                    s.toLowerCase()
+                        .replace("_", "")
+                        .replace("n", "N")
+                ));
             checkQueryResult(users);
             resultSet.close();
         }
@@ -115,13 +126,31 @@ public class JdbcTest {
         // test, 18
         User user = users.get(0);
         assertEquals(1, user.getId());
-        assertEquals("test", user.getName());
+        assertEquals("first1", user.getFirstName());
+        assertEquals("last1", user.getLastName());
         assertEquals(18, user.getAge());
         // test2, 20
         user = users.get(1);
         assertEquals(2, user.getId());
-        assertEquals("test2", user.getName());
+        assertEquals("first2", user.getFirstName());
+        assertEquals("last2", user.getLastName());
         assertEquals(20, user.getAge());
+    }
+
+    private void checkQueryMapResult(List<Map<String, Object>> users) {
+        assertEquals(2, users.size());
+        // test, 18
+        Map<String, Object> user = users.get(0);
+        assertEquals(1, user.get("id"));
+        assertEquals("first1", user.get("firstName"));
+        assertEquals("last1", user.get("lastName"));
+        assertEquals(18, user.get("age"));
+        // test2, 20
+        Map<String, Object> user2 = users.get(1);
+        assertEquals(2, user2.get("id"));
+        assertEquals("first2", user2.get("firstName"));
+        assertEquals("last2", user2.get("lastName"));
+        assertEquals(20, user2.get("age"));
     }
 
     @Test
@@ -146,7 +175,8 @@ public class JdbcTest {
     @Data
     public static class User {
         private long id;
-        private String name;
+        private String firstName;
+        private String lastName;
         private int age;
     }
 }
