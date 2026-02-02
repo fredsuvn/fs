@@ -37,6 +37,72 @@ public class JdbcKit {
     }
 
     /**
+     * Convert the result set to a list of objects. This method uses the {@link ObjectConverter#defaultConverter()} and
+     * the {@link #defaultNameMapper()} to convert.
+     *
+     * @param resultSet the result set
+     * @param javaType  the element java type of the returned list
+     * @param <T>       the element type of the returned list
+     * @return the row list of the result set of which each row is mapped to the type {@link T}
+     * @throws SqlRuntimeException if any error occurs
+     */
+    public static <T> @Immutable @Nonnull List<@Nonnull T> toObject(
+        @Nonnull ResultSet resultSet,
+        @Nonnull Class<T> javaType
+    ) throws SqlRuntimeException {
+        return toObject(
+            resultSet,
+            javaType,
+            ObjectConverter.defaultConverter(),
+            ConvertOption.propertyNameMapper(defaultNameMapper())
+        );
+    }
+
+    /**
+     * Convert the result set to a list of objects. This method uses the {@link ObjectConverter#defaultConverter()} and
+     * the {@link #defaultNameMapper()} to convert.
+     *
+     * @param resultSet the result set
+     * @param javaType  the element java type reference of the returned list
+     * @param <T>       the element type of the returned list
+     * @return the row list of the result set of which each row is mapped to the type {@link T}
+     * @throws SqlRuntimeException if any error occurs
+     */
+    public static <T> @Immutable @Nonnull List<@Nonnull T> toObject(
+        @Nonnull ResultSet resultSet,
+        @Nonnull TypeRef<T> javaType
+    ) throws SqlRuntimeException {
+        return toObject(
+            resultSet,
+            javaType,
+            ObjectConverter.defaultConverter(),
+            ConvertOption.propertyNameMapper(defaultNameMapper())
+        );
+    }
+
+    /**
+     * Convert the result set to a list of objects. This method uses the {@link ObjectConverter#defaultConverter()} and
+     * the {@link #defaultNameMapper()} to convert.
+     *
+     * @param resultSet the result set
+     * @param javaType  the element java type of the returned list
+     * @param <T>       the element type of the returned list
+     * @return the row list of the result set of which each row is mapped to the type {@link T}
+     * @throws SqlRuntimeException if any error occurs
+     */
+    public static <T> @Immutable @Nonnull List<@Nonnull T> toObject(
+        @Nonnull ResultSet resultSet,
+        @Nonnull Type javaType
+    ) throws SqlRuntimeException {
+        return toObject(
+            resultSet,
+            javaType,
+            ObjectConverter.defaultConverter(),
+            ConvertOption.propertyNameMapper(defaultNameMapper())
+        );
+    }
+
+    /**
      * Convert the result set to a list of objects.
      *
      * @param resultSet the result set

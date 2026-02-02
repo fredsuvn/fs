@@ -44,16 +44,14 @@ public interface SqlQuery<T> extends SqlOperation {
      * Executes this query and returns the first row maps to the type {@link T} of the result set of this query.
      * <p>
      * This method uses {@link ObjectConverter#defaultConverter()} with the option {@link JdbcKit#defaultNameMapper()}
-     * to convert the result set. It is equivalent to:
-     * <pre>{@code
-     * first(ObjectConverter.defaultConverter(), ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper()))
-     * }</pre>
+     * to convert the result set.
      *
      * @return the first row of the result set of which row is mapped to the type {@link T}
      * @throws SqlRuntimeException if any error occurs
      */
     default @Nullable T first() throws SqlRuntimeException {
-        return first(ObjectConverter.defaultConverter(), ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper()));
+        List<T> result = list();
+        return result.stream().findFirst().orElse(null);
     }
 
     /**
@@ -78,16 +76,13 @@ public interface SqlQuery<T> extends SqlOperation {
      * Executes this query and returns the result set of this query as a list of type {@link T}.
      * <p>
      * This method uses {@link ObjectConverter#defaultConverter()} with the option {@link JdbcKit#defaultNameMapper()}
-     * to convert the result set. It is equivalent to:
-     * <pre>{@code
-     * list(ObjectConverter.defaultConverter(), ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper()))
-     * }</pre>
+     * to convert the result set.
      *
      * @return the row list of the result set of which each row is mapped to the type {@link T}
      * @throws SqlRuntimeException if any error occurs
      */
     default @Nonnull List<@Nonnull T> list() throws SqlRuntimeException {
-        return list(ObjectConverter.defaultConverter(), ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper()));
+        return JdbcKit.toObject(execute(), type());
     }
 
     /**

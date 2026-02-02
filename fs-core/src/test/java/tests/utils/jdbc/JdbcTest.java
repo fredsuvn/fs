@@ -85,9 +85,7 @@ public class JdbcTest {
             ResultSet resultSet = preparedStatement.executeQuery();
             List<User> users = JdbcKit.toObject(
                 resultSet,
-                User.class,
-                ObjectConverter.defaultConverter(),
-                ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper())
+                User.class
             );
             checkQueryResult(users);
             resultSet.close();
@@ -97,9 +95,17 @@ public class JdbcTest {
             ResultSet resultSet = preparedStatement.executeQuery();
             List<Map<String, Object>> users = JdbcKit.toObject(
                 resultSet,
-                new TypeRef<Map<String, Object>>() {},
-                ObjectConverter.defaultConverter(),
-                ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper())
+                new TypeRef<Map<String, Object>>() {}
+            );
+            checkQueryMapResult(users);
+            resultSet.close();
+        }
+        {
+            // default name mapper for Type
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Map<String, Object>> users = JdbcKit.toObject(
+                resultSet,
+                new TypeRef<Map<String, Object>>() {}.type()
             );
             checkQueryMapResult(users);
             resultSet.close();
