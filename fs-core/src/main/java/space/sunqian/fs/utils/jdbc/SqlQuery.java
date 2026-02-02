@@ -82,7 +82,7 @@ public interface SqlQuery<T> extends SqlOperation {
      * @throws SqlRuntimeException if any error occurs
      */
     default @Nonnull List<@Nonnull T> list() throws SqlRuntimeException {
-        return JdbcKit.toObject(execute(), type());
+        return Fs.as(JdbcKit.toObject(execute(), type()));
     }
 
     /**
@@ -99,12 +99,12 @@ public interface SqlQuery<T> extends SqlOperation {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SqlRuntimeException {
-        return JdbcKit.toObject(
+        return Fs.as(JdbcKit.toObject(
             execute(),
             type(),
             Fs.nonnull(converter, ObjectConverter.defaultConverter()),
             options
-        );
+        ));
     }
 
     @Override

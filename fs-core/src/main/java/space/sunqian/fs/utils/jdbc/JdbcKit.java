@@ -86,11 +86,10 @@ public class JdbcKit {
      *
      * @param resultSet the result set
      * @param javaType  the element java type of the returned list
-     * @param <T>       the element type of the returned list
-     * @return the row list of the result set of which each row is mapped to the type {@link T}
+     * @return the row list of the result set of which each row is mapped to the specified java type
      * @throws SqlRuntimeException if any error occurs
      */
-    public static <T> @Immutable @Nonnull List<@Nonnull T> toObject(
+    public static @Immutable @Nonnull List<@Nonnull Object> toObject(
         @Nonnull ResultSet resultSet,
         @Nonnull Type javaType
     ) throws SqlRuntimeException {
@@ -121,7 +120,7 @@ public class JdbcKit {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SqlRuntimeException {
-        return toObject(resultSet, (Type) javaType, converter, options);
+        return Fs.as(toObject(resultSet, (Type) javaType, converter, options));
     }
 
     /**
@@ -143,7 +142,7 @@ public class JdbcKit {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SqlRuntimeException {
-        return toObject(resultSet, javaTypeRef.type(), converter, options);
+        return Fs.as(toObject(resultSet, javaTypeRef.type(), converter, options));
     }
 
     /**
@@ -155,11 +154,10 @@ public class JdbcKit {
      * @param options   the options for converting, e.g. the
      *                  {@link ConvertOption#propertyNameMapper(PropertyNameMapper)} for mapping the column name to the
      *                  field name of the element type during converting
-     * @param <T>       the element type of the returned list
-     * @return the row list of the result set of which each row is mapped to the type {@link T}
+     * @return the row list of the result set of which each row is mapped to the specified java type
      * @throws SqlRuntimeException if any error occurs
      */
-    public static <T> @Immutable @Nonnull List<@Nonnull T> toObject(
+    public static @Immutable @Nonnull List<@Nonnull Object> toObject(
         @Nonnull ResultSet resultSet,
         @Nonnull Type javaType,
         @Nonnull ObjectConverter converter,

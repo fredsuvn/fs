@@ -5,6 +5,7 @@ import lombok.Data;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import space.sunqian.fs.Fs;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.reflect.TypeRef;
@@ -103,10 +104,10 @@ public class JdbcTest {
         {
             // default name mapper for Type
             ResultSet resultSet = preparedStatement.executeQuery();
-            List<Map<String, Object>> users = JdbcKit.toObject(
+            List<Map<String, Object>> users = Fs.as(JdbcKit.toObject(
                 resultSet,
                 new TypeRef<Map<String, Object>>() {}.type()
-            );
+            ));
             checkQueryMapResult(users);
             resultSet.close();
         }
