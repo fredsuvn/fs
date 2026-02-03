@@ -5,7 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.function.IntFunction;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -39,6 +43,9 @@ public class MockTest {
         assertNull(Mocker.mock(E1.class));
         assertEquals(E2.E, Mocker.mock(E2.class));
         assertNull(Mocker.mock(C.class));
+        assertEquals(Collections.emptyList(), Mocker.mock(Collection.class));
+        assertArrayEquals(new Object[0], Mocker.mock(Object[].class));
+        assertArrayEquals(new Object[0], (Object[]) Mocker.mock(IntFunction.class).apply(0));
     }
 
     public enum E1 {}

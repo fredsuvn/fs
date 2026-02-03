@@ -1,12 +1,16 @@
 package internal.test;
 
 import org.mockito.Mockito;
+import space.sunqian.annotation.Nonnull;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.function.IntFunction;
 
 /**
  * Mocker to mock classes.
@@ -22,11 +26,11 @@ public class Mocker {
      * @return the mocked class
      */
     @SuppressWarnings("unchecked")
-    public static <T> T mock(Class<T> clazz) {
+    public static <T> T mock(@Nonnull Class<T> clazz) {
         return (T) mock0(clazz);
     }
 
-    private static Object mock0(Class<?> clazz) {
+    private static Object mock0(@Nonnull Class<?> clazz) {
         if (clazz.isPrimitive() || Number.class.isAssignableFrom(clazz)) {
             if (Objects.equals(clazz, int.class) || Objects.equals(clazz, Integer.class)) {
                 return 0;
@@ -75,6 +79,12 @@ public class Mocker {
         if (clazz.isEnum()) {
             Object[] constants = clazz.getEnumConstants();
             return constants.length > 0 ? constants[0] : null;
+        }
+        if (Objects.equals(clazz, Collection.class)) {
+            return Collections.emptyList();
+        }
+        if (Objects.equals(clazz, IntFunction.class)) {
+            return (IntFunction<Object>) Object[]::new;
         }
         if (Modifier.isFinal(clazz.getModifiers())) {
             return null;
