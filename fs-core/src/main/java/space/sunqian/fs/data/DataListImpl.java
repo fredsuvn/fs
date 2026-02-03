@@ -14,18 +14,17 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Spliterator;
 import java.util.function.Consumer;
-import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-public class DataListImpl implements DataList {
+final class DataListImpl implements DataList {
 
     private final @Nonnull List<Object> delegate;
     private final @Nonnull ObjectConverter converter;
     private final @Nonnull Option<?, ?> @Nonnull [] options;
 
-    public DataListImpl(
+    DataListImpl(
         @Nonnull List<?> delegate,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull [] options
@@ -37,10 +36,10 @@ public class DataListImpl implements DataList {
 
     @Override
     public <T> T get(int index, @Nonnull Type type, T defaultValue) throws DataException {
-        if (index < 0 || index >= this.delegate.size()) {
-            return defaultValue;
-        }
         try {
+            if (index < 0 || index >= this.delegate.size()) {
+                return defaultValue;
+            }
             return Fs.as(converter.convert(this.delegate.get(index), type, options));
         } catch (Exception e) {
             throw new DataException(e);
@@ -175,11 +174,6 @@ public class DataListImpl implements DataList {
     @Override
     public Spliterator<Object> spliterator() {
         return delegate.spliterator();
-    }
-
-    @Override
-    public <T> T[] toArray(IntFunction<T[]> generator) {
-        return delegate.toArray(generator);
     }
 
     @Override

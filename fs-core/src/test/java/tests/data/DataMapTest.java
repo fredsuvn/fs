@@ -57,7 +57,7 @@ public class DataMapTest {
     }
 
     @Test
-    public void testMapWrapper() throws Exception {
+    public void testWrapper() throws Exception {
         DataMap dataMap = DataMap.newMap();
         Type[] mapTypes = Map.class.getTypeParameters();
         for (Method method : DataMap.class.getMethods()) {

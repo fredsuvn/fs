@@ -35,18 +35,18 @@ final class DataMapImpl implements DataMap {
 
     @Override
     public <T> T get(@Nonnull String key, @Nonnull Type type, T defaultValue) throws DataException {
-        Var<Object> var = Var.of(NONE);
-        Object object = this.delegate.computeIfAbsent(
-            key,
-            k -> {
-                var.set(defaultValue);
-                return null;
-            }
-        );
-        if (var.get() != NONE) {
-            return defaultValue;
-        }
         try {
+            Var<Object> var = Var.of(NONE);
+            Object object = this.delegate.computeIfAbsent(
+                key,
+                k -> {
+                    var.set(defaultValue);
+                    return null;
+                }
+            );
+            if (var.get() != NONE) {
+                return defaultValue;
+            }
             return Fs.as(converter.convert(object, type, options));
         } catch (Exception e) {
             throw new DataException(e);
