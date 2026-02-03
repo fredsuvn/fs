@@ -1,5 +1,6 @@
 package tests.object.convert;
 
+import internal.test.ErrorMap;
 import internal.test.PrintTest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +22,6 @@ import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.reflect.TypeRef;
-import utils.ErrorMap;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
