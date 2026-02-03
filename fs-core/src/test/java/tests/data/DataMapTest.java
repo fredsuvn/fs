@@ -1,8 +1,10 @@
 package tests.data;
 
+import internal.test.ErrorMap;
 import internal.test.Mocker;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.collect.MapKit;
+import space.sunqian.fs.data.DataException;
 import space.sunqian.fs.data.DataMap;
 import space.sunqian.fs.reflect.TypeKit;
 
@@ -14,6 +16,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DataMapTest {
@@ -48,6 +51,9 @@ public class DataMapTest {
         assertEquals(2222.0, dataMap.getDouble("2", 2222.0));
         assertEquals(new BigDecimal("1111"), dataMap.getBigDecimal("1"));
         assertEquals(new BigDecimal("1222"), dataMap.getBigDecimal("2", new BigDecimal("1222")));
+        assertThrows(DataException.class, () -> {
+            DataMap.wrap(new ErrorMap<>()).getBigDecimal("2");
+        });
     }
 
     @Test

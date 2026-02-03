@@ -237,11 +237,11 @@ public interface DataMap extends Map<String, Object> {
     }
 
     /**
-     * Returns {@code true} if the given object is an instance of {@link DataMap} their contents are equal,
+     * Returns {@code true} if the given object is an instance of {@link DataMap } and their contents are equal,
      * {@code false} otherwise.
      *
      * @param o object to be compared for equality with this
-     * @return {@code true} if the given object is an instance of {@link DataMap} their contents are equal,
+     * @return {@code true} if the given object is an instance of {@link DataMap } and their contents are equal,
      * {@code false} otherwise.
      */
     @Override

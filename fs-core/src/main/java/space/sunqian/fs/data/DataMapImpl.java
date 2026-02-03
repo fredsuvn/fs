@@ -46,7 +46,11 @@ final class DataMapImpl implements DataMap {
         if (var.get() != NONE) {
             return defaultValue;
         }
-        return Fs.as(converter.convert(object, type, options));
+        try {
+            return Fs.as(converter.convert(object, type, options));
+        } catch (Exception e) {
+            throw new DataException(e);
+        }
     }
 
     @Override
