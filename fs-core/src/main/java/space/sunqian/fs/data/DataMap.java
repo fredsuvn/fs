@@ -2,9 +2,12 @@ package space.sunqian.fs.data;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.object.convert.ObjectConverter;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -15,6 +18,43 @@ import java.util.Map;
  * @author sunqian
  */
 public interface DataMap extends Map<String, Object> {
+
+    /**
+     * Returns a new {@link DataMap} based on the {@link LinkedHashMap} with the
+     * {@link ObjectConverter#defaultConverter()} to use for conversion values and empty options.
+     *
+     * @return the wrapped {@link DataMap}
+     */
+    static @Nonnull DataMap newMap() {
+        return wrap(new LinkedHashMap<>());
+    }
+
+    /**
+     * Wraps the given {@link Map} to a {@link DataMap} with the {@link ObjectConverter#defaultConverter()} to use for
+     * conversion values and empty options.
+     *
+     * @param map the {@link Map} to wrap
+     * @return the wrapped {@link DataMap}
+     */
+    static @Nonnull DataMap wrap(@Nonnull Map<String, Object> map) {
+        return wrap(map, ObjectConverter.defaultConverter(), Option.emptyOptions());
+    }
+
+    /**
+     * Wraps the given {@link Map} to a {@link DataMap} with the given {@link ObjectConverter} and options.
+     *
+     * @param map       the {@link Map} to wrap
+     * @param converter the {@link ObjectConverter} to use for conversion values
+     * @param options   the options to use for conversion
+     * @return the wrapped {@link DataMap}
+     */
+    static @Nonnull DataMap wrap(
+        @Nonnull Map<String, Object> map,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option<?, ?> @Nonnull [] options
+    ) {
+        return new DataMapImpl(map, converter, options);
+    }
 
     /**
      * Gets the value for the specified key, then converts it to the type of the default value. If the key is not found,
@@ -90,7 +130,9 @@ public interface DataMap extends Map<String, Object> {
      * @return the converted int value of the specified key, or {@code defaultValue} if the key is not found
      * @throws DataException if an error occurs during the search or conversion
      */
-    int getInt(@Nonnull String key, int defaultValue) throws DataException;
+    default int getInt(@Nonnull String key, int defaultValue) throws DataException {
+        return get(key, int.class, defaultValue);
+    }
 
     /**
      * Gets the value for the specified key, then converts it to the long type. If the key is not found, returns
@@ -113,7 +155,9 @@ public interface DataMap extends Map<String, Object> {
      * @return the converted long value of the specified key, or {@code defaultValue} if the key is not found
      * @throws DataException if an error occurs during the search or conversion
      */
-    long getLong(@Nonnull String key, long defaultValue) throws DataException;
+    default long getLong(@Nonnull String key, long defaultValue) throws DataException {
+        return get(key, long.class, defaultValue);
+    }
 
     /**
      * Gets the value for the specified key, then converts it to the float type. If the key is not found, returns
@@ -136,7 +180,9 @@ public interface DataMap extends Map<String, Object> {
      * @return the converted float value of the specified key, or {@code defaultValue} if the key is not found
      * @throws DataException if an error occurs during the search or conversion
      */
-    float getFloat(@Nonnull String key, float defaultValue) throws DataException;
+    default float getFloat(@Nonnull String key, float defaultValue) throws DataException {
+        return get(key, float.class, defaultValue);
+    }
 
     /**
      * Gets the value for the specified key, then converts it to the double type. If the key is not found, returns
@@ -159,7 +205,9 @@ public interface DataMap extends Map<String, Object> {
      * @return the converted double value of the specified key, or {@code defaultValue} if the key is not found
      * @throws DataException if an error occurs during the search or conversion
      */
-    double getDouble(@Nonnull String key, double defaultValue) throws DataException;
+    default double getDouble(@Nonnull String key, double defaultValue) throws DataException {
+        return get(key, double.class, defaultValue);
+    }
 
     /**
      * Gets the value for the specified key, then converts it to the {@link BigDecimal} type. If the key is not found,
@@ -182,5 +230,30 @@ public interface DataMap extends Map<String, Object> {
      * @return the converted BigDecimal value of the specified key, or {@code defaultValue} if the key is not found
      * @throws DataException if an error occurs during the search or conversion
      */
-    BigDecimal getBigDecimal(@Nonnull String key, BigDecimal defaultValue) throws DataException;
+    default @Nullable BigDecimal getBigDecimal(
+        @Nonnull String key, @Nullable BigDecimal defaultValue
+    ) throws DataException {
+        return get(key, BigDecimal.class, defaultValue);
+    }
+
+    /**
+     * Returns {@code true} if the given object is an instance of {@link DataMap} their contents are equal,
+     * {@code false} otherwise.
+     *
+     * @param o object to be compared for equality with this
+     * @return {@code true} if the given object is an instance of {@link DataMap} their contents are equal,
+     * {@code false} otherwise.
+     */
+    @Override
+    boolean equals(Object o);
+
+    /**
+     * Returns {@code true} if the content of this {@link DataMap } are equal to the content of the given map,
+     * {@code false} otherwise.
+     *
+     * @param o the given map to be compared with this
+     * @return {@code true} if the content of this {@link DataMap } are equal to the content of the given map,
+     * {@code false} otherwise.
+     */
+    boolean contentEquals(@Nullable Map<String, Object> o);
 }
