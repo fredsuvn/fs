@@ -7,6 +7,7 @@ import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.value.Var;
 import space.sunqian.fs.object.ObjectException;
 import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -18,6 +19,7 @@ import java.util.function.Function;
 
 final class DataMapImpl implements DataMap {
 
+    private static final @Nonnull Type MAP_OBJECT_TYPE = new TypeRef<Map<String, Object>>() {}.type();
     private static final @Nonnull Object NONE = new Object();
 
     private final @Nonnull Map<String, Object> delegate;
@@ -48,7 +50,7 @@ final class DataMapImpl implements DataMap {
             if (var.get() != NONE) {
                 return defaultValue;
             }
-            return Fs.as(converter.convert(object, type, options));
+            return Fs.as(converter.convert(object, MAP_OBJECT_TYPE, type, options));
         } catch (Exception e) {
             throw new DataException(e);
         }

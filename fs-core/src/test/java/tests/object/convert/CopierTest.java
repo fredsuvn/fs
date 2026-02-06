@@ -11,6 +11,7 @@ import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnreachablePointException;
+import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
@@ -25,6 +26,7 @@ import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -402,6 +404,17 @@ public class CopierTest implements PrintTest {
                 (name, type) -> name + "1"));
             assertEquals(new ClsA3("1", "2", "3"), cls3);
         }
+    }
+
+    @Test
+    public void testSpecifyObjectType() {
+        assertEquals(
+            ListKit.list(new ClsA("1", "2", "3")),
+            ObjectConverter.defaultConverter().convert(
+                ListKit.list(MapKit.map("first", "1", "second", "2", "third", "3")),
+                new TypeRef<List<ClsA>>() {}.type()
+            )
+        );
     }
 
     @Test

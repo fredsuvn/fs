@@ -8,6 +8,7 @@ import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.object.ObjectException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.reflect.TypeKit;
+import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -23,6 +24,8 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 final class DataListImpl implements DataList {
+
+    private static final @Nonnull Type LIST_OBJECT_TYPE = new TypeRef<List<Object>>() {}.type();
 
     private final @Nonnull List<Object> delegate;
     private final @Nonnull ObjectConverter converter;
@@ -53,7 +56,7 @@ final class DataListImpl implements DataList {
     @Override
     public @Nonnull List<Object> toObject(Type type) throws ObjectException {
         ParameterizedType listType = TypeKit.parameterizedType(List.class, new Type[]{type});
-        return Fs.as(converter.convert(this, listType, options));
+        return Fs.as(converter.convert(this, LIST_OBJECT_TYPE, listType, options));
     }
 
     @Override

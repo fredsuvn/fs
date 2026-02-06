@@ -476,6 +476,26 @@ public class ConvertTest implements PrintTest {
     }
 
     @Test
+    public void testCollections() {
+        assertEquals(
+            ListKit.list(1, 2),
+            ObjectConverter.defaultConverter().convert(
+                ListKit.list("1", "2"),
+                new TypeRef<List<String>>() {}.type(),
+                new TypeRef<List<Integer>>() {}.type()
+            )
+        );
+        assertEquals(
+            ListKit.list(new MapObject(1L), new MapObject(2L)),
+            ObjectConverter.defaultConverter().convert(
+                ListKit.list(MapKit.map("longNum", "1"), MapKit.map("longNum", "2")),
+                new TypeRef<List<Map<String, String>>>() {}.type(),
+                new TypeRef<List<MapObject>>() {}.type()
+            )
+        );
+    }
+
+    @Test
     public void testConvertKit() throws Exception {
         {
             // map parser
@@ -604,6 +624,8 @@ public class ConvertTest implements PrintTest {
     }
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class MapObject {
         private long longNum;
     }

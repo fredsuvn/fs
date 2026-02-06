@@ -13,6 +13,7 @@ import space.sunqian.fs.object.schema.ObjectSchema;
 
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.Objects;
 
 final class PropertyCopierImpl implements PropertyCopier {
 
@@ -42,9 +43,9 @@ final class PropertyCopierImpl implements PropertyCopier {
         try {
             if (src instanceof Map) {
                 MapParser mapParser = ConvertKit.mapParser(options);
-                MapSchema srcSchema = mapParser.parse(srcType);
+                MapSchema srcSchema = parseMapSchema(mapParser, srcType);
                 if (dst instanceof Map) {
-                    MapSchema dstSchema = mapParser.parse(dstType);
+                    MapSchema dstSchema = parseMapSchema(mapParser, dstType);
                     mapToMap(Fs.as(src), srcSchema, Fs.as(dst), dstSchema, converter, options);
                 } else {
                     ObjectParser objectParser = ConvertKit.objectParser(options);
@@ -56,7 +57,7 @@ final class PropertyCopierImpl implements PropertyCopier {
                 ObjectSchema srcSchema = objectParser.parse(srcType);
                 if (dst instanceof Map) {
                     MapParser mapParser = ConvertKit.mapParser(options);
-                    MapSchema dstSchema = mapParser.parse(dstType);
+                    MapSchema dstSchema = parseMapSchema(mapParser, dstType);
                     objectToMap(src, srcSchema, Fs.as(dst), dstSchema, converter, options);
                 } else {
                     ObjectSchema dstSchema = objectParser.parse(dstType);
@@ -66,6 +67,10 @@ final class PropertyCopierImpl implements PropertyCopier {
         } catch (Exception e) {
             throw new ObjectCopyException(e);
         }
+    }
+
+    private @Nonnull MapSchema parseMapSchema(@Nonnull MapParser mapParser, @Nonnull Type type) {
+        return mapParser.parse(Objects.equals(type, Object.class) ? Map.class : type);
     }
 
     @Override
