@@ -2,11 +2,15 @@ package tests.data;
 
 import internal.test.ErrorMap;
 import internal.test.Mocker;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.data.DataException;
 import space.sunqian.fs.data.DataMap;
 import space.sunqian.fs.reflect.TypeKit;
+import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -54,6 +58,12 @@ public class DataMapTest {
         assertThrows(DataException.class, () -> {
             DataMap.wrap(new ErrorMap<>()).getBigDecimal("2");
         });
+
+        // to object
+        dataMap.clear();
+        dataMap.put("str111", "1111");
+        assertEquals(new Cls("1111"), dataMap.toObject(Cls.class));
+        assertEquals(new Cls("1111"), dataMap.toObject(new TypeRef<Cls>() {}));
     }
 
     @Test
@@ -80,5 +90,12 @@ public class DataMapTest {
             // method.setAccessible(true);
             method.invoke(dataMap, args);
         }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Cls {
+        private String str111;
     }
 }

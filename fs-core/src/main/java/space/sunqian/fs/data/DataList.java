@@ -2,8 +2,11 @@ package space.sunqian.fs.data;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.object.ObjectException;
 import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -236,6 +239,40 @@ public interface DataList extends List<Object> {
     ) throws DataException {
         return get(index, BigDecimal.class, defaultValue);
     }
+
+    /**
+     * Converts this {@link DataList} to a new list of which elements' type is the specified class.
+     *
+     * @param cls the specified class
+     * @param <T> the type of the object to be returned`
+     * @return a new list of which elements' type is the specified class
+     * @throws ObjectException if an error occurs during the conversion
+     */
+    default <T> @Nonnull List<T> toObject(Class<T> cls) throws ObjectException {
+        return Fs.as(toObject((Type) cls));
+    }
+
+    /**
+     * Converts this {@link DataList} to a new list of which elements' type is the specified class.
+     *
+     * @param typeRef the reference of the specified class
+     * @param <T>     the type of the object to be returned`
+     * @return a new list of which elements' type is the specified class
+     * @throws ObjectException if an error occurs during the conversion
+     */
+    default <T> @Nonnull List<T> toObject(TypeRef<T> typeRef) throws ObjectException {
+        return Fs.as(toObject(typeRef.type()));
+    }
+
+    /**
+     * Converts this {@link DataList} to a new list of which elements' type is the specified type.
+     *
+     * @param type the specified type
+     * @return a new list of which elements' type is the specified type
+     * @throws ObjectException if an error occurs during the conversion
+     */
+    @Nonnull
+    List<Object> toObject(Type type) throws ObjectException;
 
     /**
      * Returns {@code true} if the given object is an instance of {@link DataList} and their contents are equal,

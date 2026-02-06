@@ -2,8 +2,11 @@ package space.sunqian.fs.data;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.object.ObjectException;
 import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -235,6 +238,40 @@ public interface DataMap extends Map<String, Object> {
     ) throws DataException {
         return get(key, BigDecimal.class, defaultValue);
     }
+
+    /**
+     * Converts this {@link DataMap} to a new object of the specified class.
+     *
+     * @param cls the specified class
+     * @param <T> the type of the object to be returned`
+     * @return a new object of the specified class
+     * @throws ObjectException if an error occurs during the conversion
+     */
+    default <T> @Nonnull T toObject(Class<T> cls) throws ObjectException {
+        return Fs.as(toObject((Type) cls));
+    }
+
+    /**
+     * Converts this {@link DataMap} to a new object of the specified class.
+     *
+     * @param typeRef the reference of the specified class
+     * @param <T>     the type of the object to be returned`
+     * @return a new object of the specified class
+     * @throws ObjectException if an error occurs during the conversion
+     */
+    default <T> @Nonnull T toObject(TypeRef<T> typeRef) throws ObjectException {
+        return Fs.as(toObject(typeRef.type()));
+    }
+
+    /**
+     * Converts this {@link DataMap} to a new object of the specified type.
+     *
+     * @param type the specified type
+     * @return a new object of the specified type
+     * @throws ObjectException if an error occurs during the conversion
+     */
+    @Nonnull
+    Object toObject(Type type) throws ObjectException;
 
     /**
      * Returns {@code true} if the given object is an instance of {@link DataMap } and their contents are equal,

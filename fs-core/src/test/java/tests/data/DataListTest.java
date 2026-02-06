@@ -2,10 +2,15 @@ package tests.data;
 
 import internal.test.ErrorList;
 import internal.test.Mocker;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.data.DataException;
 import space.sunqian.fs.data.DataList;
+import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -51,6 +56,13 @@ public class DataListTest {
         assertThrows(DataException.class, () -> {
             DataList.wrap(new ErrorList<>()).getBigDecimal(1);
         });
+
+        // to list
+        dataList.clear();
+        dataList.add(MapKit.map("str111", "1111"));
+        dataList.add(MapKit.map("str111", "2222"));
+        assertEquals(new Cls("1111"), dataList.toObject(Cls.class).get(0));
+        assertEquals(new Cls("2222"), dataList.toObject(new TypeRef<Cls>() {}).get(1));
     }
 
     @Test
@@ -69,5 +81,12 @@ public class DataListTest {
             dataList.add(1);
             method.invoke(dataList, args);
         }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Cls {
+        private String str111;
     }
 }

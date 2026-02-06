@@ -3,9 +3,13 @@ package space.sunqian.fs.data;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.base.Checker;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.object.ObjectException;
 import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.reflect.TypeKit;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Comparator;
@@ -37,13 +41,19 @@ final class DataListImpl implements DataList {
     @Override
     public <T> T get(int index, @Nonnull Type type, T defaultValue) throws DataException {
         try {
-            if (index < 0 || index >= this.delegate.size()) {
+            if (!Checker.isInBounds(index, 0, delegate.size())) {
                 return defaultValue;
             }
-            return Fs.as(converter.convert(this.delegate.get(index), type, options));
+            return Fs.as(converter.convert(delegate.get(index), type, options));
         } catch (Exception e) {
             throw new DataException(e);
         }
+    }
+
+    @Override
+    public @Nonnull List<Object> toObject(Type type) throws ObjectException {
+        ParameterizedType listType = TypeKit.parameterizedType(List.class, new Type[]{type});
+        return Fs.as(converter.convert(this, listType, options));
     }
 
     @Override

@@ -5,6 +5,7 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.value.Var;
+import space.sunqian.fs.object.ObjectException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 
 import java.lang.reflect.Type;
@@ -51,6 +52,11 @@ final class DataMapImpl implements DataMap {
         } catch (Exception e) {
             throw new DataException(e);
         }
+    }
+
+    @Override
+    public @Nonnull Object toObject(Type type) throws ObjectException {
+        return converter.convertMap(this, type, options);
     }
 
     @Override
