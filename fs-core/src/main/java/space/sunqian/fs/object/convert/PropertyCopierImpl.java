@@ -5,6 +5,7 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ArrayKit;
+import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.ObjectParser;
@@ -42,25 +43,25 @@ final class PropertyCopierImpl implements PropertyCopier {
     ) throws ObjectCopyException {
         try {
             if (src instanceof Map) {
-                MapParser mapParser = ConvertKit.mapParser(options);
-                MapSchema srcSchema = parseMapSchema(mapParser, srcType);
+                MapParser srcParser = ConvertKit.mapParser(options);
+                MapSchema srcSchema = parseMapSchema(src, srcParser, srcType, options);
                 if (dst instanceof Map) {
-                    MapSchema dstSchema = parseMapSchema(mapParser, dstType);
-                    mapToMap(Fs.as(src), srcSchema, Fs.as(dst), dstSchema, converter, options);
+                    MapSchema dstParser = parseMapSchema(dst, srcParser, dstType, options);
+                    mapToMap(Fs.as(src), srcSchema, Fs.as(dst), dstParser, converter, options);
                 } else {
                     ObjectParser objectParser = ConvertKit.objectParser(options);
-                    ObjectSchema dstSchema = objectParser.parse(dstType);
+                    ObjectSchema dstSchema = parseObjectSchema(dst, objectParser, dstType, options);
                     mapToObject(Fs.as(src), srcSchema, dst, dstSchema, converter, options);
                 }
             } else {
-                ObjectParser objectParser = ConvertKit.objectParser(options);
-                ObjectSchema srcSchema = objectParser.parse(srcType);
+                ObjectParser srcParser = ConvertKit.objectParser(options);
+                ObjectSchema srcSchema = parseObjectSchema(src, srcParser, srcType, options);
                 if (dst instanceof Map) {
-                    MapParser mapParser = ConvertKit.mapParser(options);
-                    MapSchema dstSchema = parseMapSchema(mapParser, dstType);
+                    MapParser dstParser = ConvertKit.mapParser(options);
+                    MapSchema dstSchema = parseMapSchema(dst, dstParser, dstType, options);
                     objectToMap(src, srcSchema, Fs.as(dst), dstSchema, converter, options);
                 } else {
-                    ObjectSchema dstSchema = objectParser.parse(dstType);
+                    ObjectSchema dstSchema = srcParser.parse(dstType);
                     objectToObject(src, srcSchema, dst, dstSchema, converter, options);
                 }
             }
@@ -69,8 +70,44 @@ final class PropertyCopierImpl implements PropertyCopier {
         }
     }
 
-    private @Nonnull MapSchema parseMapSchema(@Nonnull MapParser mapParser, @Nonnull Type type) {
-        return mapParser.parse(Objects.equals(type, Object.class) ? Map.class : type);
+    private @Nonnull ObjectSchema parseObjectSchema(
+        @Nonnull Object object,
+        @Nonnull ObjectParser parser,
+        @Nonnull Type type,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) {
+        try {
+            return parser.parse(type);
+        } catch (DataSchemaException e) {
+            if (Option.containsKey(ConvertOption.STRICT_SOURCE_TYPE, options)) {
+                throw e;
+            }
+            Type objType = object.getClass();
+            if (Objects.equals(objType, type)) {
+                throw e;
+            }
+            return parser.parse(objType);
+        }
+    }
+
+    private @Nonnull MapSchema parseMapSchema(
+        @Nonnull Object object,
+        @Nonnull MapParser parser,
+        @Nonnull Type type,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) {
+        try {
+            return parser.parse(type);
+        } catch (DataSchemaException e) {
+            if (Option.containsKey(ConvertOption.STRICT_SOURCE_TYPE, options)) {
+                throw e;
+            }
+            Type objType = object.getClass();
+            if (Objects.equals(objType, type)) {
+                throw e;
+            }
+            return parser.parse(objType);
+        }
     }
 
     @Override

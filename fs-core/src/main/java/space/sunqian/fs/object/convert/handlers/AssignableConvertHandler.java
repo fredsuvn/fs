@@ -23,8 +23,8 @@ import java.util.Objects;
  *         If the specified source type equals to the target type, returns the source object itself;
  *     </li>
  *     <li>
- *         If the {@link ConvertOption#STRICT_TYPE_MODE} option is enabled, returns
- *         {@link ObjectConverter.Status#HANDLER_CONTINUE} for target type of {@link WildcardType};
+ *         If the conversion options contains {@link ConvertOption#STRICT_TARGET_TYPE} (means strict target type mode
+ *         is enabled), returns {@link ObjectConverter.Status#HANDLER_CONTINUE} for target type of {@link WildcardType};
  *         Otherwise, recursively convert their lower/upper bounds type via the {@code converter} parameter;
  *     </li>
  *     <li>
@@ -56,7 +56,7 @@ public class AssignableConvertHandler implements ObjectConverter.Handler {
         if (Objects.equals(target, srcType)) {
             return src;
         }
-        if (Option.containsKey(ConvertOption.STRICT_TYPE_MODE, options)) {
+        if (Option.containsKey(ConvertOption.STRICT_TARGET_TYPE, options)) {
             // strict mode, wildcard is unsupported
             if (target instanceof WildcardType) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;

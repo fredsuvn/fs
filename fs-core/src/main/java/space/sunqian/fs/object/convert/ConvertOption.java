@@ -21,14 +21,23 @@ import java.util.Map;
 public enum ConvertOption implements Option<ConvertOption, Object> {
 
     /**
-     * Option to enable strict type mode. In strict type mode, the target type for wildcard and type variables will be
-     * strictly converted.
+     * Option to enable strict source type mode. In strict type mode, the conversion will strictly treat the source
+     * object as the specified source type.
      * <p>
-     * This option is disabled by default, in this case, the target type for wildcard and type variables will be
-     * converted as their bounds type. For example, the target type of {@code ? extends String} will be treated as
+     * By default, this option is disabled. In this case, if some error occurs when parsing the source type, the
+     * conversion will try again with the {@link Object#getClass()} as the source type.
+     */
+    STRICT_SOURCE_TYPE,
+
+    /**
+     * Option to enable strict target type mode. In strict type mode, the conversion will strictly convert the source
+     * object to the target type, especially for target wildcard type and type variables.
+     * <p>
+     * By default, this option is disabled. In this case, the target type for wildcard and type variables will be
+     * treated as their bounds type. For example, the target type of {@code ? extends String} will be treated as
      * {@code String}.
      */
-    STRICT_TYPE_MODE,
+    STRICT_TARGET_TYPE,
 
     /**
      * Key of {@link #schemaParser(ObjectParser)}.

@@ -113,7 +113,7 @@ public class ConvertTest implements PrintTest {
                 };
             ObjectConverter cvt = converter.withFirstHandler(handler);
             ObjectConvertException e = assertThrows(ObjectConvertException.class, () ->
-                cvt.convert(a, X.class.getTypeParameters()[0], ConvertOption.STRICT_TYPE_MODE));
+                cvt.convert(a, X.class.getTypeParameters()[0], ConvertOption.STRICT_TARGET_TYPE));
             assertTrue(e.getCause() instanceof UnreachablePointException);
         }
         {
@@ -128,16 +128,16 @@ public class ConvertTest implements PrintTest {
                 .getActualTypeArguments()[0];
             Object obj = new Object();
             assertThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert(obj, wildLower, ConvertOption.STRICT_TYPE_MODE));
+                converter.convert(obj, wildLower, ConvertOption.STRICT_TARGET_TYPE));
             assertEquals(converter.convert(obj, wildLower), obj.toString());
             Type upperLower = ((ParameterizedType) (F.class.getField("l2").getGenericType()))
                 .getActualTypeArguments()[0];
             assertThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert(obj, upperLower, ConvertOption.STRICT_TYPE_MODE));
+                converter.convert(obj, upperLower, ConvertOption.STRICT_TARGET_TYPE));
             assertEquals(converter.convert(obj, upperLower), obj.toString());
             class X<T> {}
             assertThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert(obj, X.class.getTypeParameters()[0], ConvertOption.STRICT_TYPE_MODE));
+                converter.convert(obj, X.class.getTypeParameters()[0], ConvertOption.STRICT_TARGET_TYPE));
             assertSame(converter.convert(obj, X.class.getTypeParameters()[0]), obj);
         }
 
@@ -481,7 +481,7 @@ public class ConvertTest implements PrintTest {
             ListKit.list(1, 2),
             ObjectConverter.defaultConverter().convert(
                 ListKit.list("1", "2"),
-                new TypeRef<List<String>>() {}.type(),
+                // new TypeRef<List<String>>() {}.type(),
                 new TypeRef<List<Integer>>() {}.type()
             )
         );
@@ -489,7 +489,7 @@ public class ConvertTest implements PrintTest {
             ListKit.list(new MapObject(1L), new MapObject(2L)),
             ObjectConverter.defaultConverter().convert(
                 ListKit.list(MapKit.map("longNum", "1"), MapKit.map("longNum", "2")),
-                new TypeRef<List<Map<String, String>>>() {}.type(),
+                // new TypeRef<List<Map<String, String>>>() {}.type(),
                 new TypeRef<List<MapObject>>() {}.type()
             )
         );

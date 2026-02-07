@@ -11,7 +11,6 @@ import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnreachablePointException;
-import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
@@ -407,12 +406,51 @@ public class CopierTest implements PrintTest {
     }
 
     @Test
-    public void testSpecifyObjectType() {
+    public void testStrictSourceType() {
         assertEquals(
-            ListKit.list(new ClsA("1", "2", "3")),
+            new ClsA("1", "2", "3"),
             ObjectConverter.defaultConverter().convert(
-                ListKit.list(MapKit.map("first", "1", "second", "2", "third", "3")),
-                new TypeRef<List<ClsA>>() {}.type()
+                MapKit.map("first", "1", "second", "2", "third", "3"),
+                Object.class,
+                ClsA.class
+            )
+        );
+        assertEquals(
+            new ClsA("1", "2", "3"),
+            ObjectConverter.defaultConverter().convert(
+                MapKit.map("first", "1", "second", "2", "third", "3"),
+                List.class.getTypeParameters()[0],
+                ClsA.class
+            )
+        );
+        assertEquals(
+            new ClsA("1", "2", "3"),
+            ObjectConverter.defaultConverter().convert(
+                MapKit.map("first", "1", "second", "2", "third", "3"),
+                ClsA.class
+            )
+        );
+        assertEquals(
+            new ClsA("1", "2", "3"),
+            ObjectConverter.defaultConverter().convert(
+                MapKit.map("first", "1", "second", "2", "third", "3"),
+                ClsA.class
+            )
+        );
+        assertThrows(ObjectConvertException.class, () ->
+            ObjectConverter.defaultConverter().convert(
+                MapKit.map("first", "1", "second", "2", "third", "3"),
+                Object.class,
+                ClsA.class,
+                ConvertOption.STRICT_SOURCE_TYPE
+            )
+        );
+        assertThrows(ObjectConvertException.class, () ->
+            ObjectConverter.defaultConverter().convert(
+                MapKit.map("first", "1", "second", "2", "third", "3"),
+                List.class.getTypeParameters()[0],
+                ClsA.class,
+                ConvertOption.STRICT_SOURCE_TYPE
             )
         );
     }

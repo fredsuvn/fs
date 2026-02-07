@@ -29,7 +29,7 @@ public interface ObjectParser {
      * Returns the default {@link ObjectParser}. Here are handlers in the default parser:
      * <ul>
      *     <li>
-     *         {@link RecordSchemaHandler#INSTANCE}, if the current JVM version supports {@code record} classes
+     *         {@link RecordSchemaHandler#getInstance()}, if the current JVM version supports {@code record} classes
      *         ({@code >= 16});
      *     </li>
      *     <li>{@link CommonSchemaHandler#INSTANCE};</li>
