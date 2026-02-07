@@ -241,13 +241,43 @@ public class TypeKit {
      * Returns whether a type can be assigned by another type. This method is {@link Type} version of
      * {@link Class#isAssignableFrom(Class)}, supporting {@link Class}, {@link ParameterizedType}, {@link WildcardType},
      * {@link TypeVariable} and {@link GenericArrayType}.
+     * <p>
+     * This method is equivalent to {@link #isAssignable(Type, Type, boolean)} with {@code rawCompatible} set to
+     * {@code true}:
+     * <pre>{@code
+     * return isAssignable(assigned, assignee, true);
+     * }</pre>
      *
      * @param assigned the type to be assigned
      * @param assignee the assignee type
      * @return whether a type can be assigned by another type
      */
     public static boolean isAssignable(@Nonnull Type assigned, @Nonnull Type assignee) {
-        return AssignBack.isAssignable(assigned, assignee);
+        return isAssignable(assigned, assignee, true);
+    }
+
+    /**
+     * Returns whether a type can be assigned by another type. This method is {@link Type} version of
+     * {@link Class#isAssignableFrom(Class)}, supporting {@link Class}, {@link ParameterizedType}, {@link WildcardType},
+     * {@link TypeVariable} and {@link GenericArrayType}.
+     * <p>
+     * The parameter {@code rawCompatible} specifies if it is compatible to assign a generic declaration from its raw
+     * type, for example:
+     * <pre>{@code
+     * ArrayList list = new ArrayList();
+     * List<String> strList = list;
+     * }</pre>
+     * Note that the above code is legal and can be compiled successfully (because it needs to be compatible with the
+     * old version codes which is {@code <= 1.5}). Setting {@code rawCompatible} to {@code false} will disable this
+     * feature.
+     *
+     * @param assigned      the type to be assigned
+     * @param assignee      the assignee type
+     * @param rawCompatible whether it is compatible to assign a generic declaration from its raw type
+     * @return whether a type can be assigned by another type
+     */
+    public static boolean isAssignable(@Nonnull Type assigned, @Nonnull Type assignee, boolean rawCompatible) {
+        return AssignBack.isAssignable(assigned, assignee, rawCompatible);
     }
 
     /**

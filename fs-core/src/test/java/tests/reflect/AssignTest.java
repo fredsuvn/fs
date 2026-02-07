@@ -61,7 +61,17 @@ public class AssignTest {
     }
 
     @Test
-    public void testClassToParam() {
+    public void testRawCompatible() {
+        // ArrayList arrayList = new ArrayList();
+        // List list = new ArrayList();
+        // List<String> strList = arrayList;
+        // strList = list;
+        Type strListType = new TypeRef<List<String>>() {}.type();
+        assertTrue(TypeKit.isAssignable(strListType, ArrayList.class));
+        assertTrue(TypeKit.isAssignable(strListType, List.class));
+        assertFalse(TypeKit.isAssignable(strListType, ArrayList.class, false));
+        assertFalse(TypeKit.isAssignable(strListType, List.class, false));
+
         class XMap extends HashMap<Object, Object> {}
 
         Type mapType = new TypeRef<Map<String, Object>>() {}.type();
