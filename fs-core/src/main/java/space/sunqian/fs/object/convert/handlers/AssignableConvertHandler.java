@@ -28,7 +28,8 @@ import java.util.Objects;
  *         Otherwise, recursively convert their lower/upper bounds type via the {@code converter} parameter;
  *     </li>
  *     <li>
- *         If the target type is assignable from the specified source type, returns the source object itself;
+ *         Using {@link TypeKit#isCompatible(Type, Type)} to check if the target type is compatible with the specified
+ *         source type, and returns the source object itself if it is compatible;
  *     </li>
  *     <li>
  *         Otherwise, returns {@link ObjectConverter.Status#HANDLER_CONTINUE}.
@@ -74,7 +75,7 @@ public class AssignableConvertHandler implements ObjectConverter.Handler {
                 return converter.convert(src, srcType, ((TypeVariable<?>) target).getBounds()[0], options);
             }
         }
-        if (TypeKit.isAssignable(target, srcType)) {
+        if (TypeKit.isCompatible(target, srcType)) {
             return src;
         }
         return ObjectConverter.Status.HANDLER_CONTINUE;

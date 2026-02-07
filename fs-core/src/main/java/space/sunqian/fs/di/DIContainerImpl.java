@@ -307,7 +307,7 @@ final class DIContainerImpl implements DIContainer {
             return res;
         }
         for (Res resource : componentMap.values()) {
-            if (TypeKit.isAssignable(type, resource.type)) {
+            if (TypeKit.isCompatible(type, resource.type)) {
                 return resource;
             }
         }
@@ -431,7 +431,7 @@ final class DIContainerImpl implements DIContainer {
             return component;
         }
         for (DIComponent sr : components.values()) {
-            if (TypeKit.isAssignable(type, sr.type())) {
+            if (TypeKit.isCompatible(type, sr.type())) {
                 return sr;
             }
         }
