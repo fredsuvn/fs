@@ -238,7 +238,7 @@ public class TypeKit {
     }
 
     /**
-     * Returns whether a type can be assigned by another type. This method is {@link Type} version of
+     * Returns whether a type can be assigned by another type, it is {@link Type} version of
      * {@link Class#isAssignableFrom(Class)}, supporting {@link Class}, {@link ParameterizedType}, {@link WildcardType},
      * {@link TypeVariable} and {@link GenericArrayType}.
      * <p>
@@ -257,7 +257,26 @@ public class TypeKit {
     }
 
     /**
-     * Returns whether a type can be assigned by another type. This method is {@link Type} version of
+     * Returns whether a type can be assigned by another type in compatibility, it is {@link Type} version of
+     * {@link Class#isAssignableFrom(Class)}, supporting {@link Class}, {@link ParameterizedType}, {@link WildcardType},
+     * {@link TypeVariable} and {@link GenericArrayType}.
+     * <p>
+     * This method doesn't support assign a generic declaration from its raw type, it is equivalent to
+     * {@link #isAssignable(Type, Type, boolean)} with {@code rawCompatible} set to {@code false}:
+     * <pre>{@code
+     * return isAssignable(assigned, assignee, false);
+     * }</pre>
+     *
+     * @param assigned the type to be assigned
+     * @param assignee the assignee type
+     * @return whether a type can be assigned by another type
+     */
+    public static boolean isCompatible(@Nonnull Type assigned, @Nonnull Type assignee) {
+        return isAssignable(assigned, assignee, false);
+    }
+
+    /**
+     * Returns whether a type can be assigned by another type, it is {@link Type} version of
      * {@link Class#isAssignableFrom(Class)}, supporting {@link Class}, {@link ParameterizedType}, {@link WildcardType},
      * {@link TypeVariable} and {@link GenericArrayType}.
      * <p>

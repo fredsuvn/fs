@@ -71,6 +71,8 @@ public class AssignTest {
         assertTrue(TypeKit.isAssignable(strListType, List.class));
         assertFalse(TypeKit.isAssignable(strListType, ArrayList.class, false));
         assertFalse(TypeKit.isAssignable(strListType, List.class, false));
+        assertFalse(TypeKit.isCompatible(strListType, ArrayList.class));
+        assertFalse(TypeKit.isCompatible(strListType, List.class));
 
         class XMap extends HashMap<Object, Object> {}
 
@@ -80,6 +82,7 @@ public class AssignTest {
         // OK:
         // Map map = xMap;
         assertTrue(TypeKit.isAssignable(Map.class, xMap.getClass()));
+        assertTrue(TypeKit.isCompatible(Map.class, xMap.getClass()));
         // error:
         // Map<String, Object> map = xMap; error
         assertFalse(TypeKit.isAssignable(mapType, xMap.getClass()));
@@ -88,6 +91,7 @@ public class AssignTest {
         // HashMap rawMap = new HashMap();
         // Map<String, Object> map = rawMap;
         assertTrue(TypeKit.isAssignable(mapType, HashMap.class));
+        assertFalse(TypeKit.isCompatible(mapType, HashMap.class));
 
         // error:
         // HashMap<?,?> rawMap = new HashMap();
