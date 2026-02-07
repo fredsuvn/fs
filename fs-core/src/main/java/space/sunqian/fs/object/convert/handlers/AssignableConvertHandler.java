@@ -20,6 +20,10 @@ import java.util.Objects;
  * Its conversion logic is:
  * <ol>
  *     <li>
+ *         If the conversion options contains {@link ConvertOption#NEW_INSTANCE} (means new instance mode is enabled),
+ *         returns {@link ObjectConverter.Status#HANDLER_CONTINUE} for any source type;
+ *     </li>
+ *     <li>
  *         If the specified source type equals to the target type, returns the source object itself;
  *     </li>
  *     <li>
@@ -53,6 +57,9 @@ public class AssignableConvertHandler implements ObjectConverter.Handler {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
+        if (Option.containsKey(ConvertOption.NEW_INSTANCE, options)) {
+            return ObjectConverter.Status.HANDLER_CONTINUE;
+        }
         if (Objects.equals(target, srcType)) {
             return src;
         }

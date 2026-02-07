@@ -58,6 +58,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -493,6 +494,15 @@ public class ConvertTest implements PrintTest {
                 new TypeRef<List<MapObject>>() {}.type()
             )
         );
+    }
+
+    @Test
+    public void testNewInstance() {
+        Object str1 = new Object();
+        Object str2 = ObjectConverter.defaultConverter().convert(str1, Object.class, ConvertOption.NEW_INSTANCE);
+        assertNotSame(str1, str2);
+        Object str3 = ObjectConverter.defaultConverter().convert(str1, Object.class);
+        assertSame(str1, str3);
     }
 
     @Test

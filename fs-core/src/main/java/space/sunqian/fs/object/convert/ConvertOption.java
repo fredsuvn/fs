@@ -40,6 +40,15 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     STRICT_TARGET_TYPE,
 
     /**
+     * Option to enable new instance mode. In new instance mode, the conversion will always create a new instance of the
+     * target type even if the target type is assignable from the source type.
+     * <p>
+     * By default, this option is disabled. In this case, the conversion could return the source object if the target
+     * type is assignable from the source type.
+     */
+    NEW_INSTANCE,
+
+    /**
      * Key of {@link #schemaParser(ObjectParser)}.
      */
     OBJECT_SCHEMA_PARSER,

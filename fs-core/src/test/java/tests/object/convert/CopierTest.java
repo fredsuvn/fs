@@ -453,6 +453,52 @@ public class CopierTest implements PrintTest {
                 ConvertOption.STRICT_SOURCE_TYPE
             )
         );
+
+        class XMap extends HashMap<String, String> {
+        }
+        XMap xmap = new XMap();
+        xmap.put("first", "1");
+        xmap.put("second", "2");
+        xmap.put("third", "3");
+        assertEquals(
+            new ClsA("1", "2", "3"),
+            ObjectConverter.defaultConverter().convert(
+                xmap,
+                Object.class,
+                ClsA.class
+            )
+        );
+        @Data
+        @EqualsAndHashCode
+        @AllArgsConstructor
+        @NoArgsConstructor
+        class XObject {
+            private Integer first;
+            private Integer second;
+            private Integer third;
+        }
+        assertThrows(ObjectConvertException.class, () ->
+            ObjectConverter.defaultConverter().convert(
+                new XObject(1, 2, 3),
+                ClsA.class
+            )
+        );
+        assertEquals(
+            new ClsA("1", "2", "3"),
+            ObjectConverter.defaultConverter().convert(
+                new ClsB(1, 2, 3),
+                XObject.class,
+                ClsA.class
+            )
+        );
+        assertThrows(ObjectConvertException.class, () ->
+            ObjectConverter.defaultConverter().convert(
+                new ClsB(1, 2, 3),
+                XObject.class,
+                ClsA.class,
+                ConvertOption.STRICT_SOURCE_TYPE
+            )
+        );
     }
 
     @Test

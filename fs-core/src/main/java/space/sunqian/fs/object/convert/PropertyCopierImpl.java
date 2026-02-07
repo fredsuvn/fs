@@ -44,9 +44,9 @@ final class PropertyCopierImpl implements PropertyCopier {
         try {
             if (src instanceof Map) {
                 MapParser srcParser = ConvertKit.mapParser(options);
-                MapSchema srcSchema = parseMapSchema(src, srcParser, srcType, options);
+                MapSchema srcSchema = parseMapSchema((Map<?, ?>) src, srcParser, srcType, options);
                 if (dst instanceof Map) {
-                    MapSchema dstParser = parseMapSchema(dst, srcParser, dstType, options);
+                    MapSchema dstParser = parseMapSchema((Map<?, ?>) dst, srcParser, dstType, options);
                     mapToMap(Fs.as(src), srcSchema, Fs.as(dst), dstParser, converter, options);
                 } else {
                     ObjectParser objectParser = ConvertKit.objectParser(options);
@@ -58,7 +58,7 @@ final class PropertyCopierImpl implements PropertyCopier {
                 ObjectSchema srcSchema = parseObjectSchema(src, srcParser, srcType, options);
                 if (dst instanceof Map) {
                     MapParser dstParser = ConvertKit.mapParser(options);
-                    MapSchema dstSchema = parseMapSchema(dst, dstParser, dstType, options);
+                    MapSchema dstSchema = parseMapSchema((Map<?, ?>) dst, dstParser, dstType, options);
                     objectToMap(src, srcSchema, Fs.as(dst), dstSchema, converter, options);
                 } else {
                     ObjectSchema dstSchema = srcParser.parse(dstType);
@@ -91,7 +91,7 @@ final class PropertyCopierImpl implements PropertyCopier {
     }
 
     private @Nonnull MapSchema parseMapSchema(
-        @Nonnull Object object,
+        @Nonnull Map<?, ?> object,
         @Nonnull MapParser parser,
         @Nonnull Type type,
         @Nonnull Option<?, ?> @Nonnull ... options
@@ -102,11 +102,14 @@ final class PropertyCopierImpl implements PropertyCopier {
             if (Option.containsKey(ConvertOption.STRICT_SOURCE_TYPE, options)) {
                 throw e;
             }
-            Type objType = object.getClass();
-            if (Objects.equals(objType, type)) {
-                throw e;
-            }
-            return parser.parse(objType);
+            /*
+            this never happen:
+              Type objType = object.getClass();
+              if (Objects.equals(objType, type)) {
+                  throw e;
+              }
+             */
+            return parser.parse(object.getClass());
         }
     }
 
