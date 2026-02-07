@@ -319,25 +319,24 @@ public class TypeKit {
      * @param type     the given type to be resolved
      * @param baseType the specified base type
      * @return the actual type arguments of the given type, based on the type parameters of the specified base type, in
-     * order of those type parameters
-     * @throws ReflectionException if the given type cannot be resolved
+     * order of those type parameters, may return {@code null} if the given type cannot be resolved
      */
-    public static @Nonnull List<@Nonnull Type> resolveActualTypeArguments(
+    public static @Nullable List<@Nonnull Type> getActualTypeArguments(
         @Nonnull Type type, @Nonnull Class<?> baseType
-    ) throws ReflectionException {
+    ) {
         if (baseType.isArray()) {
             Type componentType = TypeKit.getComponentType(type);
             if (componentType == null) {
-                throw new ReflectionException("Unsupported resolving between " + type + " and " + baseType);
+                return null;
             }
             return resolveActualTypeArguments(componentType, baseType.getComponentType());
         }
         @Nullable Class<?> cls = TypeKit.toRuntimeClass(type);
         if (cls == null) {
-            throw new ReflectionException("Unsupported type: " + type + ".");
+            return null;
         }
         if (!baseType.isAssignableFrom(cls)) {
-            throw new ReflectionException("Unsupported resolving between " + type + " and " + baseType);
+            return null;
         }
         // Resolves:
         TypeVariable<?>[] typeParameters = baseType.getTypeParameters();
@@ -353,6 +352,41 @@ public class TypeKit {
                 return Fs.nonnull(actualType, typeVariable);
             })
             .collect(Collectors.toList());
+    }
+
+    /**
+     * Resolves and returns the actual type arguments of the given type, based on the type parameters of the specified
+     * base type, in order of those type parameters.
+     * <p>
+     * For example, here is a base type: {@code interface Base<A, B, C>}, and a subtype to be resolved:
+     * {@code class Sub implements Base<String, Integer, Long>}. The result of the
+     * {@code resolveActualTypeArguments(subtype, base)} will be the list of:
+     * {@code [String.class, Integer.class, Long.class]}.
+     * <p>
+     * The given type to be resolved must be a {@link Class}, {@link ParameterizedType} or array. If it is a
+     * {@link Class}, it must be a sub or same type of the base type; if it is a {@link ParameterizedType}, its raw type
+     * must be a sub or same type of the base type; if it is an array, the base type must also be an array, and this
+     * method calls itself with their component types.
+     * <p>
+     * Note this method does not guarantee that all type parameters can be resolved, and unresolved type parameters will
+     * be directly returned to the list at the corresponding index.
+     *
+     * @param type     the given type to be resolved
+     * @param baseType the specified base type
+     * @return the actual type arguments of the given type, based on the type parameters of the specified base type, in
+     * order of those type parameters
+     * @throws ReflectionException if the given type cannot be resolved
+     */
+    public static @Nonnull List<@Nonnull Type> resolveActualTypeArguments(
+        @Nonnull Type type, @Nonnull Class<?> baseType
+    ) throws ReflectionException {
+        List<Type> ret = getActualTypeArguments(type, baseType);
+        if (ret == null) {
+            throw new ReflectionException(
+                "Resolving actual type arguments failed for [" + type + "] with base type [" + baseType + "]."
+            );
+        }
+        return ret;
     }
 
     /**
