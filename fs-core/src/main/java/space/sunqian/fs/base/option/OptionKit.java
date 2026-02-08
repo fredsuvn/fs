@@ -2,9 +2,13 @@ package space.sunqian.fs.base.option;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.base.exception.FsException;
+import space.sunqian.fs.base.exception.FsRuntimeException;
 import space.sunqian.fs.collect.ArrayKit;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -64,6 +68,39 @@ public class OptionKit {
      */
     public static boolean containsKey(@Nonnull Object key, @Nonnull Option<?, ?> @Nonnull ... options) {
         return OptionKit.findOption(key, options) != null;
+    }
+
+    /**
+     * Merges the additional options to the default options.
+     * <p>
+     * All additional options whose key equals the key of the default options will override the corresponding option in
+     * the default options array. All additional options whose key does not exist in the default options array will be
+     * added to the returned options array.
+     * <p>
+     * For the default options array, if there is no new option added, the default options array itself will be the
+     * returned array, otherwise a new array will be created and returned.
+     *
+     * @param defaultOptions    the default options
+     * @param additionalOptions the additional options
+     * @return the merged options
+     */
+    public static <K, V> @Nonnull Option<K, V> @Nonnull [] mergeOptions(
+        @Nonnull Option<K, V> @Nonnull @RetainedParam [] defaultOptions,
+        @Nonnull Option<K, V> @Nonnull [] additionalOptions
+    ) {
+        if (additionalOptions.length == 0) {
+            return defaultOptions;
+        }
+        int newCount = 0;
+        for (Option<K, V> additionalOption : additionalOptions) {
+            for (Option<K, V> defaultOption : defaultOptions) {
+                if (Objects.equals(defaultOption.key(), additionalOption.key())) {
+                    continue;
+                }
+            }
+            newCount++;
+        }
+        throw new FsRuntimeException("todo...");
     }
 
     private OptionKit() {
