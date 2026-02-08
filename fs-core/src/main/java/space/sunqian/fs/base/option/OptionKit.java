@@ -4,8 +4,6 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.base.exception.FsException;
-import space.sunqian.fs.base.exception.FsRuntimeException;
 import space.sunqian.fs.collect.ArrayKit;
 
 import java.util.Arrays;
@@ -82,6 +80,8 @@ public class OptionKit {
      *
      * @param defaultOptions    the default options
      * @param additionalOptions the additional options
+     * @param <K>               the key type
+     * @param <V>               the value type
      * @return the merged options
      */
     public static <K, V> @Nonnull Option<K, V> @Nonnull [] mergeOptions(
@@ -92,15 +92,35 @@ public class OptionKit {
             return defaultOptions;
         }
         int newCount = 0;
+        ADDITIONAL:
         for (Option<K, V> additionalOption : additionalOptions) {
             for (Option<K, V> defaultOption : defaultOptions) {
                 if (Objects.equals(defaultOption.key(), additionalOption.key())) {
-                    continue;
+                    continue ADDITIONAL;
                 }
             }
             newCount++;
         }
-        throw new FsRuntimeException("todo...");
+        Option<K, V>[] result;
+        if (newCount == 0) {
+            result = defaultOptions;
+        } else {
+            result = Arrays.copyOf(defaultOptions, newCount);
+        }
+        int lastIndex = result.length - 1;
+        ADDITIONAL:
+        for (Option<K, V> additionalOption : additionalOptions) {
+            for (int i = 0; i < defaultOptions.length; i++) {
+                Option<K, V> defaultOption = defaultOptions[i];
+                if (Objects.equals(defaultOption.key(), additionalOption.key())) {
+                    result[i] = additionalOption;
+                    continue ADDITIONAL;
+                }
+                // new option
+                result[lastIndex--] = additionalOption;
+            }
+        }
+        return result;
     }
 
     private OptionKit() {

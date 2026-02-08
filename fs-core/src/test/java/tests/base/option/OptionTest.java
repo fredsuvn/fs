@@ -7,6 +7,7 @@ import space.sunqian.fs.base.option.OptionKit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static space.sunqian.fs.collect.ArrayKit.array;
 
@@ -24,5 +25,19 @@ public class OptionTest {
         Option<String, ?> strOpt = Option.of("a");
         assertEquals("a", strOpt.key());
         assertNull(strOpt.value());
+    }
+
+    @Test
+    public void testMergeOption() {
+        Option<String, String>[] defaultOptions = array(Option.of("a", "1"), Option.of("b", "2"), Option.of("c", "3"));
+        Option<String, String>[] additionalOptions = array();
+        assertSame(
+            defaultOptions,
+            OptionKit.mergeOptions(defaultOptions, additionalOptions)
+        );
+        assertSame(
+            defaultOptions,
+            OptionKit.mergeOptions(defaultOptions, defaultOptions)
+        );
     }
 }
