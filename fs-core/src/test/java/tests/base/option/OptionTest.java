@@ -2,6 +2,7 @@ package tests.base.option;
 
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.base.option.OptionKit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -14,12 +15,12 @@ public class OptionTest {
     @Test
     public void testOption() {
         Option<?, ?>[] opts = array(Option.of("a", "1"), Option.of("b", "2"), Option.of("c", "3"));
-        assertEquals("2", Option.findValue("b", opts));
-        assertEquals((String) null, Option.findValue("d", opts));
-        assertEquals((String) null, Option.findValue("d", Option.emptyOptions()));
-        assertEquals("2", Option.findValue("b", opts));
-        assertTrue(Option.containsKey("a", opts));
-        assertFalse(Option.containsKey("d", opts));
+        assertEquals("2", OptionKit.findValue("b", opts));
+        assertEquals((String) null, OptionKit.findValue("d", opts));
+        assertEquals((String) null, OptionKit.findValue("d", Option.emptyOptions()));
+        assertEquals("2", OptionKit.findValue("b", opts));
+        assertTrue(OptionKit.containsKey("a", opts));
+        assertFalse(OptionKit.containsKey("d", opts));
         Option<String, ?> strOpt = Option.of("a");
         assertEquals("a", strOpt.key());
         assertNull(strOpt.value());

@@ -3,6 +3,7 @@ package space.sunqian.fs.object.convert.handlers;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.reflect.TypeKit;
@@ -61,13 +62,13 @@ public class AssignableConvertHandler implements ObjectConverter.Handler {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
-        if (Option.containsKey(ConvertOption.NEW_INSTANCE, options)) {
+        if (OptionKit.containsKey(ConvertOption.NEW_INSTANCE, options)) {
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
         if (Objects.equals(target, srcType)) {
             return src;
         }
-        if (Option.containsKey(ConvertOption.STRICT_TARGET_TYPE, options)) {
+        if (OptionKit.containsKey(ConvertOption.STRICT_TARGET_TYPE, options)) {
             // strict mode, wildcard is unsupported
             if (target instanceof WildcardType) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;

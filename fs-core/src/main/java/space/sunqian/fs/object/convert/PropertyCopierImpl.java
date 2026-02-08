@@ -4,6 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.MapParser;
@@ -79,7 +80,7 @@ final class PropertyCopierImpl implements PropertyCopier {
         try {
             return parser.parse(type);
         } catch (DataSchemaException e) {
-            if (Option.containsKey(ConvertOption.STRICT_SOURCE_TYPE, options)) {
+            if (OptionKit.containsKey(ConvertOption.STRICT_SOURCE_TYPE, options)) {
                 throw e;
             }
             Type objType = object.getClass();
@@ -99,7 +100,7 @@ final class PropertyCopierImpl implements PropertyCopier {
         try {
             return parser.parse(type);
         } catch (DataSchemaException e) {
-            if (Option.containsKey(ConvertOption.STRICT_SOURCE_TYPE, options)) {
+            if (OptionKit.containsKey(ConvertOption.STRICT_SOURCE_TYPE, options)) {
                 throw e;
             }
             /*
@@ -354,7 +355,7 @@ final class PropertyCopierImpl implements PropertyCopier {
     }
 
     private boolean ignored(@Nonnull Object propertyName, @Nonnull Option<?, ?> @Nonnull ... options) {
-        Object[] ignoredProperties = Option.findValue(ConvertOption.IGNORE_PROPERTIES, options);
+        Object[] ignoredProperties = OptionKit.findValue(ConvertOption.IGNORE_PROPERTIES, options);
         if (ignoredProperties == null) {
             return false;
         }
@@ -362,11 +363,11 @@ final class PropertyCopierImpl implements PropertyCopier {
     }
 
     private boolean ignoreNull(@Nonnull Option<?, ?> @Nonnull ... options) {
-        return Option.containsKey(ConvertOption.IGNORE_NULL, options);
+        return OptionKit.containsKey(ConvertOption.IGNORE_NULL, options);
     }
 
     private @Nonnull PropertyNameMapper getNameMapper(@Nonnull Option<?, ?> @Nonnull ... options) {
-        PropertyNameMapper mapper = Option.findValue(ConvertOption.PROPERTY_NAME_MAPPER, options);
+        PropertyNameMapper mapper = OptionKit.findValue(ConvertOption.PROPERTY_NAME_MAPPER, options);
         return mapper != null ? mapper : PropertyNameMapper.defaultMapper();
     }
 }

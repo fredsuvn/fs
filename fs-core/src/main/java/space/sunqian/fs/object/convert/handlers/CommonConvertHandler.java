@@ -8,6 +8,7 @@ import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.lang.EnumKit;
 import space.sunqian.fs.base.number.NumKit;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ArrayOperator;
 import space.sunqian.fs.collect.CollectKit;
@@ -198,7 +199,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             if (srcType.equals(String.class)) {
                 if (target.equals(byte[].class) || target.equals(ByteBuffer.class)) {
                     Charset charset = Fs.nonnull(
-                        Option.findValue(ConvertOption.CHARSET, options),
+                        OptionKit.findValue(ConvertOption.CHARSET, options),
                         CharsKit.defaultCharset()
                     );
                     byte[] bytes = ((String) src).getBytes(charset);
@@ -394,7 +395,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
     ) throws Exception {
         IntFunction<Object> mapFunc = MapClasses.get(rawTarget);
         PropertyCopier propertyCopier = Fs.nonnull(
-            Option.findValue(ConvertOption.PROPERTY_COPIER, options),
+            OptionKit.findValue(ConvertOption.PROPERTY_COPIER, options),
             PropertyCopier.defaultCopier()
         );
         if (mapFunc != null) {
@@ -531,20 +532,20 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             }
             if (src instanceof Date) {
                 DateFormatter dateFormatter = Fs.nonnull(
-                    Option.findValue(ConvertOption.DATE_FORMATTER, options),
+                    OptionKit.findValue(ConvertOption.DATE_FORMATTER, options),
                     DateFormatter.defaultFormatter()
                 );
                 return dateFormatter.format((Date) src);
             }
             if (src instanceof TemporalAccessor) {
                 DateFormatter dateFormatter = Fs.nonnull(
-                    Option.findValue(ConvertOption.DATE_FORMATTER, options),
+                    OptionKit.findValue(ConvertOption.DATE_FORMATTER, options),
                     DateFormatter.defaultFormatter()
                 );
                 return dateFormatter.format((TemporalAccessor) src);
             }
             Charset charset = Fs.nonnull(
-                Option.findValue(ConvertOption.CHARSET, options),
+                OptionKit.findValue(ConvertOption.CHARSET, options),
                 CharsKit.defaultCharset()
             );
             if (src instanceof byte[]) {
@@ -554,7 +555,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 return BufferKit.string((ByteBuffer) src, charset);
             }
             IOOperator ioOperator = Fs.nonnull(
-                Option.findValue(ConvertOption.IO_OPERATOR, options),
+                OptionKit.findValue(ConvertOption.IO_OPERATOR, options),
                 IOOperator.defaultOperator()
             );
             if (src instanceof Reader) {
@@ -593,7 +594,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 if (src instanceof TemporalAccessor) {
                     TemporalAccessor ta = (TemporalAccessor) src;
                     DateFormatter dateFormatter = Fs.nonnull(
-                        Option.findValue(ConvertOption.DATE_FORMATTER, options),
+                        OptionKit.findValue(ConvertOption.DATE_FORMATTER, options),
                         DateFormatter.defaultFormatter()
                     );
                     Date date = dateFormatter.convert(ta, Date.class);
@@ -646,7 +647,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @Nonnull Option<?, ?> @Nonnull ... options
         ) {
             DateFormatter dateFormatter = Fs.nonnull(
-                Option.findValue(ConvertOption.DATE_FORMATTER, options),
+                OptionKit.findValue(ConvertOption.DATE_FORMATTER, options),
                 DateFormatter.defaultFormatter()
             );
             if (src instanceof String) {

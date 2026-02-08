@@ -3,6 +3,7 @@ package space.sunqian.fs.object.convert;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.object.schema.DataSchemaException;
@@ -39,7 +40,7 @@ public class ConvertKit {
      * not contain a {@link ConvertOption#MAP_SCHEMA_PARSER}
      */
     public static @Nonnull MapParser mapParser(@Nonnull Option<?, ?> @Nonnull ... options) {
-        return Fs.nonnull(Option.findValue(ConvertOption.MAP_SCHEMA_PARSER, options), mapParser());
+        return Fs.nonnull(OptionKit.findValue(ConvertOption.MAP_SCHEMA_PARSER, options), mapParser());
     }
 
     /**
@@ -61,7 +62,7 @@ public class ConvertKit {
      * does not contain a {@link ConvertOption#OBJECT_SCHEMA_PARSER}
      */
     public static @Nonnull ObjectParser objectParser(@Nonnull Option<?, ?> @Nonnull ... options) {
-        return Fs.nonnull(Option.findValue(ConvertOption.OBJECT_SCHEMA_PARSER, options), objectParser());
+        return Fs.nonnull(OptionKit.findValue(ConvertOption.OBJECT_SCHEMA_PARSER, options), objectParser());
     }
 
     /**
@@ -83,7 +84,7 @@ public class ConvertKit {
      * options does not contain a {@link ConvertOption#CREATOR_PROVIDER}
      */
     public static @Nonnull CreatorProvider creatorProvider(@Nonnull Option<?, ?> @Nonnull ... options) {
-        return Fs.nonnull(Option.findValue(ConvertOption.CREATOR_PROVIDER, options), creatorProvider());
+        return Fs.nonnull(OptionKit.findValue(ConvertOption.CREATOR_PROVIDER, options), creatorProvider());
     }
 
     private ConvertKit() {
