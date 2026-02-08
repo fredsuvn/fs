@@ -85,23 +85,23 @@ public class OptionKit {
      * @return the merged options
      */
     public static <K, V> @Nonnull Option<K, V> @Nonnull [] mergeOptions(
-        @Nonnull Option<K, V> @Nonnull @RetainedParam [] defaultOptions,
-        @Nonnull Option<K, V> @Nonnull [] additionalOptions
+        @Nonnull Option<?, ?> @Nonnull @RetainedParam [] defaultOptions,
+        @Nonnull Option<?, ?> @Nonnull [] additionalOptions
     ) {
         if (additionalOptions.length == 0) {
-            return defaultOptions;
+            return Fs.as(defaultOptions);
         }
         int newCount = 0;
         ADDITIONAL:
-        for (Option<K, V> additionalOption : additionalOptions) {
-            for (Option<K, V> defaultOption : defaultOptions) {
+        for (Option<?, ?> additionalOption : additionalOptions) {
+            for (Option<?, ?> defaultOption : defaultOptions) {
                 if (Objects.equals(defaultOption.key(), additionalOption.key())) {
                     continue ADDITIONAL;
                 }
             }
             newCount++;
         }
-        Option<K, V>[] result;
+        Option<?, ?>[] result;
         if (newCount == 0) {
             result = defaultOptions;
         } else {
@@ -109,9 +109,9 @@ public class OptionKit {
         }
         int lastIndex = result.length - 1;
         ADDITIONAL:
-        for (Option<K, V> additionalOption : additionalOptions) {
+        for (Option<?, ?> additionalOption : additionalOptions) {
             for (int i = 0; i < defaultOptions.length; i++) {
-                Option<K, V> defaultOption = defaultOptions[i];
+                Option<?, ?> defaultOption = defaultOptions[i];
                 if (Objects.equals(defaultOption.key(), additionalOption.key())) {
                     result[i] = additionalOption;
                     continue ADDITIONAL;
@@ -120,7 +120,7 @@ public class OptionKit {
             // new option
             result[lastIndex--] = additionalOption;
         }
-        return result;
+        return Fs.as(result);
     }
 
     private OptionKit() {

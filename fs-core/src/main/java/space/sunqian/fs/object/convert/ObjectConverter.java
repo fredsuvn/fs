@@ -1,5 +1,6 @@
 package space.sunqian.fs.object.convert;
 
+import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
@@ -12,6 +13,7 @@ import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +41,9 @@ import java.util.Map;
  * }
  * throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
  * }</pre>
+ * <p>
+ * A converter can have default options. The options parameter of a conversion method (such as
+ * {@link #convert(Object, Type, Type, Option[])}) will be merged with the default options when the method is called.
  * <p>
  * The thread safety of the methods in this interface is determined by its dependent option objects, such as
  * {@link CreatorProvider}, {@link PropertyCopier}, and other objects. By default, they are all thread-safe.
@@ -77,7 +82,21 @@ public interface ObjectConverter {
      * @return a new {@link ObjectConverter} with given handlers
      */
     static @Nonnull ObjectConverter newConverter(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
-        return new ObjectConverterImpl(handlers);
+        return newConverter(handlers, Collections.emptyList());
+    }
+
+    /**
+     * Creates and returns a new {@link ObjectConverter} with given handlers and default options.
+     *
+     * @param handlers       given handlers
+     * @param defaultOptions given default options
+     * @return a new {@link ObjectConverter} with given handlers and default options
+     */
+    static @Nonnull ObjectConverter newConverter(
+        @Nonnull @RetainedParam List<@Nonnull Handler> handlers,
+        @Nonnull @RetainedParam List<@Nonnull Option<?, ?>> defaultOptions
+    ) {
+        return new ObjectConverterImpl(handlers, defaultOptions);
     }
 
     /**
@@ -231,57 +250,60 @@ public interface ObjectConverter {
      *                                           supported
      * @throws ObjectConvertException            if the conversion failed
      */
-    default Object convert(
+    Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
         @Nonnull Type target,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        for (Handler handler : handlers()) {
-            Object ret;
-            try {
-                ret = handler.convert(src, srcType, target, this, options);
-            } catch (Exception e) {
-                throw new ObjectConvertException(e);
-            }
-            if (ret == Status.HANDLER_CONTINUE) {
-                continue;
-            }
-            if (ret == Status.HANDLER_BREAK) {
-                throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
-            }
-            return Fs.as(ret);
-        }
-        throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
-    }
+    ) throws UnsupportedObjectConvertException, ObjectConvertException;
 
     /**
-     * Returns all handlers of this converter.
+     * Returns all handlers of this {@link ObjectConverter}.
      *
-     * @return all handlers of this converter
+     * @return all handlers of this {@link ObjectConverter}
      */
     @Nonnull
+    @Immutable
     List<@Nonnull Handler> handlers();
 
     /**
-     * Returns a new converter of which first handler is the given handler and the next handler is this converter as a
-     * {@link Handler}. This method is equivalent:
+     * Returns the default options of this {@link ObjectConverter}.
+     *
+     * @return the default options of this {@link ObjectConverter}
+     */
+    @Nonnull
+    @Immutable
+    List<@Nonnull Option<?, ?>> defaultOptions();
+
+    /**
+     * Returns a new {@link ObjectConverter} of which first handler is the given handler and the next handler is this
+     * {@link ObjectConverter} as a {@link Handler}. This method is equivalent:
      * <pre>{@code
      * newConverter(firstHandler, this.asHandler())
      * }</pre>
      *
      * @param firstHandler the first handler
-     * @return a new converter of which first handler is the given handler and the next handler is this converter as a
-     * {@link Handler}
+     * @return a new {@link ObjectConverter} of which first handler is the given handler and the next handler is this
+     * {@link ObjectConverter} as a {@link Handler}
      */
     default @Nonnull ObjectConverter withFirstHandler(@Nonnull Handler firstHandler) {
         return newConverter(firstHandler, this.asHandler());
     }
 
     /**
-     * Returns this converter as a {@link Handler}.
+     * Returns a new {@link ObjectConverter} of which default options are the given options.
      *
-     * @return this converter as a {@link Handler}
+     * @param defaultOptions the default options
+     * @return a new {@link ObjectConverter} of which default options are the given options
+     */
+    default @Nonnull ObjectConverter withDefaultOptions(@Nonnull Option<?, ?> @Nonnull ... defaultOptions) {
+        return newConverter(handlers(), ListKit.list(defaultOptions));
+    }
+
+    /**
+     * Returns this {@link ObjectConverter} as a {@link Handler}.
+     *
+     * @return this {@link ObjectConverter} as a {@link Handler}
      */
     @Nonnull
     Handler asHandler();

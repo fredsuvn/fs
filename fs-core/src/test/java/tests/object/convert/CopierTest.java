@@ -11,6 +11,7 @@ import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnreachablePointException;
+import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
@@ -24,12 +25,14 @@ import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -403,6 +406,29 @@ public class CopierTest implements PrintTest {
                 (name, type) -> name + "1"));
             assertEquals(new ClsA3("1", "2", "3"), cls3);
         }
+    }
+
+    @Test
+    public void testDefaultOptions() {
+        PropertyCopier copier = PropertyCopier.defaultCopier();
+        PropertyCopier copierOps = copier.withDefaultOptions(
+            ConvertOption.ignoreNull()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            copier.defaultOptions()
+        );
+        assertEquals(
+            ListKit.list(ConvertOption.ignoreNull()),
+            copierOps.defaultOptions()
+        );
+        ClsA source = new ClsA("1", null, "3");
+        Map<String, Object> dst1 = new HashMap<>();
+        copier.copyProperties(source, dst1);
+        assertTrue(dst1.containsKey("second"));
+        Map<String, Object> dst2 = new HashMap<>();
+        copierOps.copyProperties(source, dst2);
+        assertFalse(dst2.containsKey("second"));
     }
 
     @Test

@@ -42,6 +42,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -57,6 +58,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -410,6 +412,27 @@ public class ConvertTest implements PrintTest {
             ),
             new CB(1, ListKit.list(1, 2, 3), new B(1L, 2L, 3L), DateKit.parse(ca.date, LocalDateTime.class))
         );
+    }
+
+    @Test
+    public void testDefaultOptions() {
+        ObjectConverter converter = ObjectConverter.defaultConverter();
+        ObjectConverter converterOps = converter.withDefaultOptions(
+            ConvertOption.ignoreNull()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            converter.defaultOptions()
+        );
+        assertEquals(
+            ListKit.list(ConvertOption.ignoreNull()),
+            converterOps.defaultOptions()
+        );
+        DataObject source = new DataObject("code", null);
+        Map<String, Object> dst1 = converter.convert(source, new TypeRef<Map<String, Object>>() {});
+        assertTrue(dst1.containsKey("name"));
+        Map<String, Object> dst2 = converterOps.convert(source, new TypeRef<Map<String, Object>>() {});
+        assertFalse(dst2.containsKey("name"));
     }
 
     @Test

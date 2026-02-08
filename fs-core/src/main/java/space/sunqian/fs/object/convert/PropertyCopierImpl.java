@@ -2,6 +2,7 @@ package space.sunqian.fs.object.convert;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.option.OptionKit;
@@ -14,23 +15,30 @@ import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
 
 import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 final class PropertyCopierImpl implements PropertyCopier {
 
     static final @Nonnull PropertyCopier DEFAULT =
-        new PropertyCopierImpl(null, null);
+        new PropertyCopierImpl(null, null, Collections.emptyList());
 
     private final @Nullable PropertyMapper propertyMapper;
     private final @Nullable ExceptionHandler exceptionHandler;
+    private final @Nonnull List<@Nonnull Option<?, ?>> defaultOptions;
+    private final @Nonnull Option<?, ?> @Nonnull [] defaultOptionsArray;
 
     PropertyCopierImpl(
         @Nullable PropertyMapper propertyMapper,
-        @Nullable ExceptionHandler exceptionHandler
+        @Nullable ExceptionHandler exceptionHandler,
+        @Nonnull @RetainedParam List<@Nonnull Option<?, ?>> defaultOptions
     ) {
         this.propertyMapper = propertyMapper;
         this.exceptionHandler = exceptionHandler;
+        this.defaultOptions = Collections.unmodifiableList(defaultOptions);
+        this.defaultOptionsArray = defaultOptions.toArray(new Option[0]);
     }
 
     @Override
@@ -42,28 +50,29 @@ final class PropertyCopierImpl implements PropertyCopier {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectCopyException {
+        @Nonnull Option<?, ?> @Nonnull [] actualOptions = OptionKit.mergeOptions(defaultOptionsArray, options);
         try {
             if (src instanceof Map) {
-                MapParser srcParser = ConvertKit.mapParser(options);
-                MapSchema srcSchema = parseMapSchema((Map<?, ?>) src, srcParser, srcType, options);
+                MapParser srcParser = ConvertKit.mapParser(actualOptions);
+                MapSchema srcSchema = parseMapSchema((Map<?, ?>) src, srcParser, srcType, actualOptions);
                 if (dst instanceof Map) {
-                    MapSchema dstParser = parseMapSchema((Map<?, ?>) dst, srcParser, dstType, options);
-                    mapToMap(Fs.as(src), srcSchema, Fs.as(dst), dstParser, converter, options);
+                    MapSchema dstParser = parseMapSchema((Map<?, ?>) dst, srcParser, dstType, actualOptions);
+                    mapToMap(Fs.as(src), srcSchema, Fs.as(dst), dstParser, converter, actualOptions);
                 } else {
-                    ObjectParser objectParser = ConvertKit.objectParser(options);
-                    ObjectSchema dstSchema = parseObjectSchema(dst, objectParser, dstType, options);
-                    mapToObject(Fs.as(src), srcSchema, dst, dstSchema, converter, options);
+                    ObjectParser objectParser = ConvertKit.objectParser(actualOptions);
+                    ObjectSchema dstSchema = parseObjectSchema(dst, objectParser, dstType, actualOptions);
+                    mapToObject(Fs.as(src), srcSchema, dst, dstSchema, converter, actualOptions);
                 }
             } else {
-                ObjectParser srcParser = ConvertKit.objectParser(options);
-                ObjectSchema srcSchema = parseObjectSchema(src, srcParser, srcType, options);
+                ObjectParser srcParser = ConvertKit.objectParser(actualOptions);
+                ObjectSchema srcSchema = parseObjectSchema(src, srcParser, srcType, actualOptions);
                 if (dst instanceof Map) {
-                    MapParser dstParser = ConvertKit.mapParser(options);
-                    MapSchema dstSchema = parseMapSchema((Map<?, ?>) dst, dstParser, dstType, options);
-                    objectToMap(src, srcSchema, Fs.as(dst), dstSchema, converter, options);
+                    MapParser dstParser = ConvertKit.mapParser(actualOptions);
+                    MapSchema dstSchema = parseMapSchema((Map<?, ?>) dst, dstParser, dstType, actualOptions);
+                    objectToMap(src, srcSchema, Fs.as(dst), dstSchema, converter, actualOptions);
                 } else {
                     ObjectSchema dstSchema = srcParser.parse(dstType);
-                    objectToObject(src, srcSchema, dst, dstSchema, converter, options);
+                    objectToObject(src, srcSchema, dst, dstSchema, converter, actualOptions);
                 }
             }
         } catch (Exception e) {
@@ -122,6 +131,11 @@ final class PropertyCopierImpl implements PropertyCopier {
     @Override
     public @Nullable ExceptionHandler exceptionHandler() {
         return exceptionHandler;
+    }
+
+    @Override
+    public @Nonnull List<@Nonnull Option<?, ?>> defaultOptions() {
+        return defaultOptions;
     }
 
     void mapToMap(
