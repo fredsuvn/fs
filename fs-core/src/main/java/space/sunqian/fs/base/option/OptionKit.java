@@ -105,7 +105,7 @@ public class OptionKit {
         if (newCount == 0) {
             result = defaultOptions;
         } else {
-            result = Arrays.copyOf(defaultOptions, newCount);
+            result = Arrays.copyOf(defaultOptions, defaultOptions.length + newCount);
         }
         int lastIndex = result.length - 1;
         ADDITIONAL:
@@ -116,9 +116,9 @@ public class OptionKit {
                     result[i] = additionalOption;
                     continue ADDITIONAL;
                 }
-                // new option
-                result[lastIndex--] = additionalOption;
             }
+            // new option
+            result[lastIndex--] = additionalOption;
         }
         return result;
     }

@@ -36,7 +36,7 @@ public interface Option<K, V> {
      * @return an {@link Option} with the specified key and value
      */
     static <K, V> @Nonnull Option<K, V> of(@Nonnull K key, @Nullable V value) {
-        return OptionImpl.of(key, value);
+        return new OptionImpl<>(key, value);
     }
 
     /**
@@ -77,4 +77,29 @@ public interface Option<K, V> {
      */
     @Nullable
     V value();
+
+    /**
+     * Returns {@code true} if the specified object is equal to this option: both key and value are equal.
+     *
+     * @param obj the object with which to compare.
+     * @return {@code true} if the specified object is equal to this option.
+     */
+    @Override
+    boolean equals(Object obj);
+
+    /**
+     * Returns the hash code for this option.
+     *
+     * @return the hash code for this option.
+     */
+    @Override
+    int hashCode();
+
+    /**
+     * Returns a string to describe this option in format: {@code [key: value]}.
+     *
+     * @return assertEquals(Option.of("a", "1"), defaultOptions[0]);
+     */
+    @Nonnull
+    String toString();
 }
