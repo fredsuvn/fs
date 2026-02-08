@@ -4,6 +4,7 @@ import internal.test.ErrorAppender;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.string.NameFormatException;
 import space.sunqian.fs.base.string.NameFormatter;
+import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.base.value.Span;
 import space.sunqian.fs.collect.ArrayKit;
 
@@ -388,6 +389,15 @@ public class NameTest {
         assertEquals("some-name", lowerCase.format("someName", delimiterLower));
         assertEquals("SOME_NAME", lowerCase.format("someName", delimiterUpper));
         assertEquals("SOME-NAME", lowerCase.format("someName", delimiterCustom));
+    }
+
+    @Test
+    public void testMapper() {
+        NameMapper mapper = NameMapper.with(NameFormatter.lowerCamel(), NameFormatter.delimiter("-", true));
+        assertEquals(
+            "some-mapper",
+            mapper.map("someMapper")
+        );
     }
 
     @Test
