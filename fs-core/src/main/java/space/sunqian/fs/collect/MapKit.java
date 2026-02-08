@@ -6,13 +6,21 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.OutParam;
 import space.sunqian.fs.Fs;
 
+import java.lang.reflect.Type;
+import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -312,6 +320,35 @@ public class MapKit {
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    /**
+     * Returns a new map instance with the given map type and initial capacity. If the given map type is unsupported,
+     * returns {@code null}. The supported map types are:
+     * <ul>
+     *     <li>{@link Map}</li>
+     *     <li>{@link AbstractMap}</li>
+     *     <li>{@link LinkedHashMap}</li>
+     *     <li>{@link HashMap}</li>
+     *     <li>{@link TreeMap}</li>
+     *     <li>{@link ConcurrentMap}</li>
+     *     <li>{@link ConcurrentHashMap}</li>
+     *     <li>{@link Hashtable}</li>
+     *     <li>{@link ConcurrentSkipListMap}</li>
+     * </ul>
+     *
+     * @param mapType         the given map type
+     * @param initialCapacity the initial capacity
+     * @param <K>             the type of the map keys
+     * @param <V>             the type of the map values
+     * @return a new map instance, or {@code null} if the given map type is unsupported
+     */
+    public static <K, V> @Nullable Map<K, V> newMap(@Nonnull Type mapType, int initialCapacity) {
+        IntFunction<@Nonnull Map<?, ?>> mapFunction = CollectBack.mapFunction(mapType);
+        if (mapFunction == null) {
+            return null;
+        }
+        return Fs.as(mapFunction.apply(initialCapacity));
     }
 
     private MapKit() {

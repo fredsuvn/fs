@@ -4,17 +4,24 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.collect.MapKit;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -55,6 +62,18 @@ public class MapTest {
         assertEquals(HashMap.class, MapKit.hashMap(1, 2, 3, 4, 5, 6).getClass());
         assertEquals(MapKit.linkedHashMap(1, 2, 3, 4, 5, 6), new LinkedHashMap<>(map));
         assertEquals(LinkedHashMap.class, MapKit.linkedHashMap(1, 2, 3, 4, 5, 6).getClass());
+
+        // newMap
+        assertInstanceOf(HashMap.class, MapKit.newMap(Map.class, 10));
+        assertInstanceOf(HashMap.class, MapKit.newMap(AbstractMap.class, 10));
+        assertInstanceOf(LinkedHashMap.class, MapKit.newMap(LinkedHashMap.class, 10));
+        assertInstanceOf(HashMap.class, MapKit.newMap(HashMap.class, 10));
+        assertInstanceOf(TreeMap.class, MapKit.newMap(TreeMap.class, 10));
+        assertInstanceOf(ConcurrentHashMap.class, MapKit.newMap(ConcurrentMap.class, 10));
+        assertInstanceOf(ConcurrentHashMap.class, MapKit.newMap(ConcurrentHashMap.class, 10));
+        assertInstanceOf(Hashtable.class, MapKit.newMap(Hashtable.class, 10));
+        assertInstanceOf(ConcurrentSkipListMap.class, MapKit.newMap(ConcurrentSkipListMap.class, 10));
+        assertNull(MapKit.newMap(Object.class, 10));
     }
 
     @Test

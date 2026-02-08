@@ -2,14 +2,21 @@ package space.sunqian.fs.collect;
 
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 
+import java.lang.reflect.Type;
+import java.util.AbstractSet;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.IntFunction;
 
 /**
  * Utilities for {@link Set}.
@@ -99,6 +106,34 @@ public class SetKit {
             return new LinkedHashSet<>((Collection<T>) it);
         }
         return CollectKit.addAll(new LinkedHashSet<>(), it);
+    }
+
+    /**
+     * Returns a new set instance with the given set type and initial capacity. If the given set type is unsupported,
+     * returns {@code null}. The supported set types are:
+     * <ul>
+     *     <li>{@link Iterable}</li>
+     *     <li>{@link Collection}</li>
+     *     <li>{@link Set}</li>
+     *     <li>{@link AbstractSet}</li>
+     *     <li>{@link HashSet}</li>
+     *     <li>{@link LinkedHashSet}</li>
+     *     <li>{@link TreeSet}</li>
+     *     <li>{@link CopyOnWriteArraySet}</li>
+     *     <li>{@link ConcurrentSkipListSet}</li>
+     * </ul>
+     *
+     * @param setType         the given set type
+     * @param initialCapacity the initial capacity
+     * @param <T>             the type of the set elements
+     * @return a new set instance, or {@code null} if the given set type is unsupported
+     */
+    public static <T> @Nullable Set<T> newSet(@Nonnull Type setType, int initialCapacity) {
+        IntFunction<@Nonnull Set<?>> setFunction = CollectBack.setFunction(setType);
+        if (setFunction == null) {
+            return null;
+        }
+        return Fs.as(setFunction.apply(initialCapacity));
     }
 
     private SetKit() {

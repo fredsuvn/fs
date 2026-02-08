@@ -3,14 +3,19 @@ package tests.collect;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.collect.ListKit;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ListTest {
@@ -98,6 +103,16 @@ public class ListTest {
         assertEquals(ArrayList.class, ListKit.arrayList(1, 2, 3).getClass());
         assertEquals(ListKit.linkedList(1, 2, 3), Arrays.asList(1, 2, 3));
         assertEquals(LinkedList.class, ListKit.linkedList(1, 2, 3).getClass());
+
+        // newList
+        assertInstanceOf(ArrayList.class, ListKit.newList(Iterable.class, 10));
+        assertInstanceOf(ArrayList.class, ListKit.newList(Collection.class, 10));
+        assertInstanceOf(ArrayList.class, ListKit.newList(List.class, 10));
+        assertInstanceOf(ArrayList.class, ListKit.newList(AbstractList.class, 10));
+        assertInstanceOf(ArrayList.class, ListKit.newList(ArrayList.class, 10));
+        assertInstanceOf(LinkedList.class, ListKit.newList(LinkedList.class, 10));
+        assertInstanceOf(CopyOnWriteArrayList.class, ListKit.newList(CopyOnWriteArrayList.class, 10));
+        assertNull(ListKit.newList(Object.class, 10));
     }
 
     @Test
