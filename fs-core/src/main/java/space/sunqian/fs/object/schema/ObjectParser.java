@@ -18,7 +18,7 @@ import java.util.Map;
  * the specific parsing operations, where each {@link Handler} possesses its own specific parsing logic.
  * <p>
  * There is a skeletal handler implementation: {@link AbstractObjectSchemaHandler}. And the default parser is based on
- * {@link CommonSchemaHandler#INSTANCE}.
+ * {@link CommonSchemaHandler#getInstance()}.
  *
  * @author sunqian
  */
@@ -32,7 +32,7 @@ public interface ObjectParser {
      *         {@link RecordSchemaHandler#getInstance()}, if the current JVM version supports {@code record} classes
      *         ({@code >= 16});
      *     </li>
-     *     <li>{@link CommonSchemaHandler#INSTANCE};</li>
+     *     <li>{@link CommonSchemaHandler#getInstance()};</li>
      * </ul>
      * <p>
      * Note the default {@link ObjectParser} is singleton, and never caches the parsed results.

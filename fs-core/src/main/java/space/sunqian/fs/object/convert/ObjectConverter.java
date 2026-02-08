@@ -50,8 +50,8 @@ public interface ObjectConverter {
     /**
      * Returns the default {@link ObjectConverter}. Here are handlers in the default converter:
      * <ul>
-     *     <li>{@link AssignableConvertHandler#INSTANCE};</li>
-     *     <li>{@link CommonConvertHandler#INSTANCE};</li>
+     *     <li>{@link AssignableConvertHandler#getInstance()};</li>
+     *     <li>{@link CommonConvertHandler#getInstance()};</li>
      * </ul>
      *
      * @return the default converter

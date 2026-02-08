@@ -20,7 +20,7 @@ import java.lang.reflect.Type;
  * <pre>{@code
  * ObjectBuilderProvider provider = ...;
  * ObjectBuilderProvider protoProvider = provider
- *     .withFirstHandler(ProtobufCreatorHandler.INSTANCE);
+ *     .withFirstHandler(ProtobufCreatorHandler.getInstance());
  * }</pre>
  * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
  * environment, the {@link CreatorProvider#defaultProvider()} will automatically load this handler.
@@ -29,10 +29,14 @@ import java.lang.reflect.Type;
  */
 public class ProtobufCreatorHandler implements CreatorProvider.Handler {
 
+    private static final @Nonnull ProtobufCreatorHandler INST = new ProtobufCreatorHandler();
+
     /**
-     * An instance of this handler.
+     * Returns a same one instance of this handler.
      */
-    public static final @Nonnull ProtobufCreatorHandler INSTANCE = new ProtobufCreatorHandler();
+    public static @Nonnull ProtobufCreatorHandler getInstance() {
+        return INST;
+    }
 
     /**
      * Constructs a new handler instance. This constructor will check whether the protobuf package is available in the

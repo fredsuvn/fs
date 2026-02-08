@@ -14,7 +14,7 @@ import space.sunqian.fs.object.schema.ObjectParser;
  */
 public class RecordSchemaHandler implements ObjectParser.Handler {
 
-    private static final @Nonnull RecordSchemaHandler INSTANCE = new RecordSchemaHandler();
+    private static final @Nonnull RecordSchemaHandler INST = new RecordSchemaHandler();
 
     private static final ObjectParser.@Nonnull Handler HANDLER = FsLoader.loadImplByJvm(
         RecordSchemaHandler.class, 16
@@ -26,7 +26,7 @@ public class RecordSchemaHandler implements ObjectParser.Handler {
      * @return an instance of this handler
      */
     public static @Nonnull RecordSchemaHandler getInstance() {
-        return INSTANCE;
+        return INST;
     }
 
     @Override

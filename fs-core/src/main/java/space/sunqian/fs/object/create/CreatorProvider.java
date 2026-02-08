@@ -24,7 +24,7 @@ public interface CreatorProvider {
     /**
      * Returns the default {@link CreatorProvider}. Here are handlers in the default provider:
      * <ul>
-     *     <li>{@link CommonCreatorHandler#INSTANCE}</li>
+     *     <li>{@link CommonCreatorHandler#getInstance()}</li>
      * </ul>
      * <p>
      * Note the default {@link CreatorProvider} is singleton, and never caches the returned {@link ObjectCreator}

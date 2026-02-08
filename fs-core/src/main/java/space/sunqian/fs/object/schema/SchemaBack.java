@@ -144,7 +144,7 @@ final class SchemaBack {
             FsLoader.supplyByDependent(
                 RecordSchemaHandler::getInstance, RecordSchemaHandler.class.getName() + "ImplByJ16"
             ),
-            CommonSchemaHandler.INSTANCE
+            CommonSchemaHandler.getInstance()
         ));
 
         private final @Nonnull List<@Nonnull Handler> handlers;

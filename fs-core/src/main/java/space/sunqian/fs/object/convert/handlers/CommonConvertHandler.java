@@ -65,8 +65,8 @@ import java.util.function.IntFunction;
 
 /**
  * The common implementation of {@link ObjectConverter.Handler}, also be the default last handler of
- * {@link ObjectConverter#defaultConverter()}. An instance {@link #INSTANCE} is provided for convenience and less memory
- * usage.
+ * {@link ObjectConverter#defaultConverter()}. Using {@link #getInstance()} can get a same one instance of this
+ * handler.
  * <p>
  * This handler providers the common conversion logic for all types. This is a table showing the conversion logic of
  * this handler for different target types:
@@ -168,10 +168,14 @@ import java.util.function.IntFunction;
  */
 public class CommonConvertHandler implements ObjectConverter.Handler {
 
+    private static final @Nonnull CommonConvertHandler INST = new CommonConvertHandler();
+
     /**
-     * An instance of this handler.
+     * Returns a same one instance of this handler.
      */
-    public static final @Nonnull CommonConvertHandler INSTANCE = new CommonConvertHandler();
+    public static @Nonnull CommonConvertHandler getInstance() {
+        return INST;
+    }
 
     @Override
     public Object convert(

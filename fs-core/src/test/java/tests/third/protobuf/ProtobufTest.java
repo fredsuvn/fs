@@ -45,7 +45,7 @@ public class ProtobufTest implements PrintTest {
 
     @Test
     public void testSchemaHandler() throws Exception {
-        ObjectParser protoParser = ObjectParser.newParser(ProtobufSchemaHandler.INSTANCE);
+        ObjectParser protoParser = ObjectParser.newParser(ProtobufSchemaHandler.getInstance());
         Data.Builder builder = Data.newBuilder()
             .setStr("str")
             .setI32(1)
@@ -439,7 +439,7 @@ public class ProtobufTest implements PrintTest {
     public void testCreatorHandler() {
         CreatorProvider defaultProvider = CreatorProvider.defaultProvider();
         CreatorProvider provider = CreatorProvider
-            .newProvider(ProtobufCreatorHandler.INSTANCE, defaultProvider.asHandler());
+            .newProvider(ProtobufCreatorHandler.getInstance(), defaultProvider.asHandler());
         ObjectParser parser = ObjectParser
             .defaultParser()
             .withFirstHandler(new ProtobufSchemaHandler());
@@ -513,7 +513,7 @@ public class ProtobufTest implements PrintTest {
     public void testConvertHandler() {
         ObjectConverter defaultConverter = ObjectConverter.defaultConverter();
         ObjectConverter converter = ObjectConverter
-            .newConverter(ProtobufConvertHandler.INSTANCE, defaultConverter.asHandler());
+            .newConverter(ProtobufConvertHandler.getInstance(), defaultConverter.asHandler());
         String str = "12313213213";
         ByteString byteString = converter.convert(str, ByteString.class);
         assertEquals(str, byteString.toStringUtf8());

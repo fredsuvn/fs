@@ -31,7 +31,7 @@ import java.util.Objects;
  * <pre>{@code
  * ObjectSchemaParser parser = ...;
  * ObjectSchemaParser protoParser = parser
- *     .withFirstHandler(ProtobufSchemaHandler.INSTANCE);
+ *     .withFirstHandler(ProtobufSchemaHandler.getInstance());
  * }</pre>
  * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
  * environment, the {@link ObjectParser#defaultParser()} will automatically load this handler.
@@ -53,10 +53,14 @@ import java.util.Objects;
  */
 public class ProtobufSchemaHandler implements ObjectParser.Handler {
 
+    private static final @Nonnull ProtobufSchemaHandler INST = new ProtobufSchemaHandler();
+
     /**
-     * An instance of this handler.
+     * Returns a same one instance of this handler.
      */
-    public static final @Nonnull ProtobufSchemaHandler INSTANCE = new ProtobufSchemaHandler();
+    public static @Nonnull ProtobufSchemaHandler getInstance() {
+        return INST;
+    }
 
     static final class StringListTypeRef extends TypeRef<List<String>> {
         static final @Nonnull StringListTypeRef SINGLETON = new StringListTypeRef();

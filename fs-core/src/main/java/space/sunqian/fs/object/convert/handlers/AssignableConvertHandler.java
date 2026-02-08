@@ -14,8 +14,8 @@ import java.util.Objects;
 
 /**
  * The default first {@link ObjectConverter.Handler} of {@link ObjectConverter#defaultConverter()}, mainly used to
- * determine whether it is possible to return the source object directly without creating a new object. An instance
- * {@link #INSTANCE} is provided for convenience and less memory usage.
+ * determine whether it is possible to return the source object directly without creating a new object. Using
+ * {@link #getInstance()} can get a same one instance of this handler.
  * <p>
  * Its conversion logic is:
  * <ol>
@@ -44,10 +44,14 @@ import java.util.Objects;
  */
 public class AssignableConvertHandler implements ObjectConverter.Handler {
 
+    private static final @Nonnull AssignableConvertHandler INST = new AssignableConvertHandler();
+
     /**
-     * An instance of this handler.
+     * Returns a same one instance of this handler.
      */
-    public static final @Nonnull AssignableConvertHandler INSTANCE = new AssignableConvertHandler();
+    public static @Nonnull AssignableConvertHandler getInstance() {
+        return INST;
+    }
 
     @Override
     public Object convert(

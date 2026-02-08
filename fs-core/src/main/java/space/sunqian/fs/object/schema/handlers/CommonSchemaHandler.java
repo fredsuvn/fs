@@ -17,16 +17,20 @@ import java.util.Objects;
  * This implementation resolves {@code getXxx} or {@code isXxx} methods as getters and {@code setXxx} methods as setters
  * according to lower camel case naming conventions.
  * <p>
- * An instance {@link #INSTANCE} is provided for convenience and less memory usage.
+ * Using {@link #getInstance()} can get a same one instance of this handler.
  *
  * @author sunqian
  */
 public class CommonSchemaHandler extends AbstractObjectSchemaHandler {
 
+    private static final @Nonnull CommonSchemaHandler INST = new CommonSchemaHandler();
+
     /**
-     * An instance of this handler.
+     * Returns a same one instance of this handler.
      */
-    public static final @Nonnull CommonSchemaHandler INSTANCE = new CommonSchemaHandler();
+    public static @Nonnull CommonSchemaHandler getInstance() {
+        return INST;
+    }
 
     @Override
     protected @Nullable AccessorInfo resolveAccessor(@Nonnull Method method) {

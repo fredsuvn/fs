@@ -16,16 +16,20 @@ import java.lang.reflect.Type;
  * handler using the empty constructor of the target class to create the builder instance, and returns builder instance
  * itself as the final target object.
  * <p>
- * An instance {@link #INSTANCE} is provided for convenience and less memory usage.
+ * Using {@link #getInstance()} can get a same one instance of this handler.
  *
  * @author sunqian
  */
 public class CommonCreatorHandler implements CreatorProvider.Handler {
 
+    private static final @Nonnull CommonCreatorHandler INST = new CommonCreatorHandler();
+
     /**
-     * An instance of this handler.
+     * Returns a same one instance of this handler.
      */
-    public static final @Nonnull CommonCreatorHandler INSTANCE = new CommonCreatorHandler();
+    public static @Nonnull CommonCreatorHandler getInstance() {
+        return INST;
+    }
 
     @Override
     public @Nullable ObjectCreator newCreator(@Nonnull Type target) throws Exception {

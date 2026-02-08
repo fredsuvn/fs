@@ -51,7 +51,7 @@ final class CreateBack {
                     ThirdKit.thirdClassName("protobuf", "ProtobufCreatorHandler"),
                     "com.google.protobuf.Message"
                 ),
-                CommonCreatorHandler.INSTANCE
+                CommonCreatorHandler.getInstance()
             )
         );
 

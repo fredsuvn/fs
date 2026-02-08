@@ -20,7 +20,7 @@ import java.util.List;
  * <pre>{@code
  * ObjectConverter converter = ...;
  * ObjectConverter protoConverter = converter
- *     .withFirstHandler(ProtobufConvertHandler.INSTANCE);
+ *     .withFirstHandler(ProtobufConvertHandler.getInstance());
  * }</pre>
  * <p>
  * This handler provides support for {@link ProtocolStringList} and {@link ByteString}.
@@ -32,10 +32,14 @@ import java.util.List;
  */
 public class ProtobufConvertHandler implements ObjectConverter.Handler {
 
+    private static final @Nonnull ProtobufConvertHandler INST = new ProtobufConvertHandler();
+
     /**
-     * An instance of this handler.
+     * Returns a same one instance of this handler.
      */
-    public static final @Nonnull ProtobufConvertHandler INSTANCE = new ProtobufConvertHandler();
+    public static @Nonnull ProtobufConvertHandler getInstance() {
+        return INST;
+    }
 
     /**
      * Constructs a new handler instance. This constructor will check whether the protobuf package is available in the
