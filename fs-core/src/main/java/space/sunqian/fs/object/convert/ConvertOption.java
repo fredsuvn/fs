@@ -64,9 +64,9 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     CREATOR_PROVIDER,
 
     /**
-     * Key of {@link #propertyCopier(PropertyCopier)}.
+     * Key of {@link #objectCopier(ObjectCopier)}.
      */
-    PROPERTY_COPIER,
+    OBJECT_COPIER,
 
     /**
      * Key of {@link #propertyNameMapper(PropertyNameMapper)}.
@@ -142,24 +142,24 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     }
 
     /**
-     * Returns an option to specify the {@link PropertyCopier}.
+     * Returns an option to specify the {@link ObjectCopier}.
      * <p>
-     * By default, the {@link PropertyCopier#defaultCopier()} is used.
+     * By default, the {@link ObjectCopier#defaultCopier()} is used.
      *
-     * @param propertyCopier the {@link PropertyCopier} to be specified
-     * @return an option to specify the {@link PropertyCopier}
+     * @param objectCopier the {@link ObjectCopier} to be specified
+     * @return an option to specify the {@link ObjectCopier}
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull PropertyCopier> propertyCopier(
-        @Nonnull PropertyCopier propertyCopier
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectCopier> objectCopier(
+        @Nonnull ObjectCopier objectCopier
     ) {
-        return Option.of(PROPERTY_COPIER, propertyCopier);
+        return Option.of(OBJECT_COPIER, objectCopier);
     }
 
     /**
      * Returns an option to specify the {@link PropertyNameMapper}.
      * <p>
      * Note that this configuration is only valid for the {@link String} type property names (both source and target),
-     * and executed before the configured {@link PropertyCopier.PropertyMapper} (if any, and it means the property name
+     * and executed before the configured {@link ObjectCopier.PropertyMapper} (if any, and it means the property name
      * received by the property mapper will be the mapped name by the property name mapper). For property names whose
      * type is not {@link String}, such as non-{@link String} keys of a {@link Map}, this configuration will not take
      * effect.
@@ -191,7 +191,7 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
 
     /**
      * Returns an option to specify to ignore null properties from the source object. If there exists a
-     * {@link PropertyCopier.PropertyMapper} in the current {@link PropertyCopier}, this option will be ignored.
+     * {@link ObjectCopier.PropertyMapper} in the current {@link ObjectCopier}, this option will be ignored.
      * <p>
      * By default, this option is disabled, the value of {@link #IGNORE_NULL} is {@code null}.
      *

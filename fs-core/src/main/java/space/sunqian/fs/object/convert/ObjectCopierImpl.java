@@ -20,17 +20,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-final class PropertyCopierImpl implements PropertyCopier {
+final class ObjectCopierImpl implements ObjectCopier {
 
-    static final @Nonnull PropertyCopier DEFAULT =
-        new PropertyCopierImpl(null, null, Collections.emptyList());
+    static final @Nonnull ObjectCopier DEFAULT =
+        new ObjectCopierImpl(null, null, Collections.emptyList());
 
     private final @Nullable PropertyMapper propertyMapper;
     private final @Nullable ExceptionHandler exceptionHandler;
     private final @Nonnull List<@Nonnull Option<?, ?>> defaultOptions;
     private final @Nonnull Option<?, ?> @Nonnull [] defaultOptionsArray;
 
-    PropertyCopierImpl(
+    ObjectCopierImpl(
         @Nullable PropertyMapper propertyMapper,
         @Nullable ExceptionHandler exceptionHandler,
         @Nonnull @RetainedParam List<@Nonnull Option<?, ?>> defaultOptions

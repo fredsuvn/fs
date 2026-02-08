@@ -28,15 +28,15 @@ import java.util.Map;
  * @author sunqian
  */
 @ThreadSafe
-public interface PropertyCopier {
+public interface ObjectCopier {
 
     /**
-     * Returns the default {@link PropertyCopier}.
+     * Returns the default {@link ObjectCopier}.
      *
      * @return the default data mapper
      */
-    static @Nonnull PropertyCopier defaultCopier() {
-        return PropertyCopierImpl.DEFAULT;
+    static @Nonnull ObjectCopier defaultCopier() {
+        return ObjectCopierImpl.DEFAULT;
     }
 
     /**
@@ -152,22 +152,22 @@ public interface PropertyCopier {
     ExceptionHandler exceptionHandler();
 
     /**
-     * Returns the default options of this {@link PropertyCopier}.
+     * Returns the default options of this {@link ObjectCopier}.
      *
-     * @return the default options of this {@link PropertyCopier}
+     * @return the default options of this {@link ObjectCopier}
      */
     @Nonnull
     @Immutable
     List<@Nonnull Option<?, ?>> defaultOptions();
 
     /**
-     * Returns a new {@link PropertyCopier} based on this copier but with the specified property mapper.
+     * Returns a new {@link ObjectCopier} based on this copier but with the specified property mapper.
      *
      * @param propertyMapper the property mapper for copying each object property, may be {@code null} to use the
      *                       default mapping logic
-     * @return a new {@link PropertyCopier} based on this copier but with the specified property mapper
+     * @return a new {@link ObjectCopier} based on this copier but with the specified property mapper
      */
-    default @Nonnull PropertyCopier withPropertyMapper(@Nullable PropertyMapper propertyMapper) {
+    default @Nonnull ObjectCopier withPropertyMapper(@Nullable PropertyMapper propertyMapper) {
         return new Builder()
             .propertyMapper(propertyMapper)
             .exceptionHandler(exceptionHandler())
@@ -176,13 +176,13 @@ public interface PropertyCopier {
     }
 
     /**
-     * Returns a new {@link PropertyCopier} based on this copier but with the specified exception handler.
+     * Returns a new {@link ObjectCopier} based on this copier but with the specified exception handler.
      *
      * @param exceptionHandler the exception handler for handling exceptions that occur during copying properties, may
      *                         be {@code null} to use the default exception handling logic
-     * @return a new {@link PropertyCopier} based on this copier but with the specified exception handler
+     * @return a new {@link ObjectCopier} based on this copier but with the specified exception handler
      */
-    default @Nonnull PropertyCopier withExceptionHandler(@Nullable ExceptionHandler exceptionHandler) {
+    default @Nonnull ObjectCopier withExceptionHandler(@Nullable ExceptionHandler exceptionHandler) {
         return new Builder()
             .propertyMapper(propertyMapper())
             .exceptionHandler(exceptionHandler)
@@ -191,12 +191,12 @@ public interface PropertyCopier {
     }
 
     /**
-     * Returns a new {@link PropertyCopier} of which default options are the given options.
+     * Returns a new {@link ObjectCopier} of which default options are the given options.
      *
      * @param defaultOptions the default options
-     * @return a new {@link PropertyCopier} of which default options are the given options
+     * @return a new {@link ObjectCopier} of which default options are the given options
      */
-    default @Nonnull PropertyCopier withDefaultOptions(@Nonnull Option<?, ?> @Nonnull ... defaultOptions) {
+    default @Nonnull ObjectCopier withDefaultOptions(@Nonnull Option<?, ?> @Nonnull ... defaultOptions) {
         return new Builder()
             .propertyMapper(propertyMapper())
             .exceptionHandler(exceptionHandler())
@@ -273,7 +273,7 @@ public interface PropertyCopier {
     }
 
     /**
-     * Builder for {@link PropertyCopier}.
+     * Builder for {@link ObjectCopier}.
      */
     class Builder {
 
@@ -282,10 +282,10 @@ public interface PropertyCopier {
         private @Nullable List<@Nonnull Option<?, ?>> defaultOptions;
 
         /**
-         * Sets the {@link PropertyMapper} for the {@link PropertyCopier}.
+         * Sets the {@link PropertyMapper} for the {@link ObjectCopier}.
          * <p>
-         * The default {@link PropertyMapper} is {@code null}, in which case the {@link PropertyCopier} follows the
-         * given options and default mapping logic.
+         * The default {@link PropertyMapper} is {@code null}, in which case the {@link ObjectCopier} follows the given
+         * options and default mapping logic.
          *
          * @param propertyMapper the given {@link PropertyMapper}
          * @return this builder
@@ -296,9 +296,9 @@ public interface PropertyCopier {
         }
 
         /**
-         * Sets the {@link ExceptionHandler} for the {@link PropertyCopier}.
+         * Sets the {@link ExceptionHandler} for the {@link ObjectCopier}.
          * <p>
-         * The default {@link ExceptionHandler} is {@code null}, in which case the {@link PropertyCopier} throws the
+         * The default {@link ExceptionHandler} is {@code null}, in which case the {@link ObjectCopier} throws the
          * exception directly.
          *
          * @param exceptionHandler the given {@link ExceptionHandler}
@@ -310,7 +310,7 @@ public interface PropertyCopier {
         }
 
         /**
-         * Sets the default options for the {@link PropertyCopier}.
+         * Sets the default options for the {@link ObjectCopier}.
          * <p>
          * By default, it is empty.
          *
@@ -323,12 +323,12 @@ public interface PropertyCopier {
         }
 
         /**
-         * Builds and returns a new {@link PropertyCopier} with the configured options.
+         * Builds and returns a new {@link ObjectCopier} with the configured options.
          *
-         * @return a new {@link PropertyCopier} with the configured options
+         * @return a new {@link ObjectCopier} with the configured options
          */
-        public PropertyCopier build() {
-            return new PropertyCopierImpl(
+        public ObjectCopier build() {
+            return new ObjectCopierImpl(
                 propertyMapper,
                 exceptionHandler,
                 Fs.nonnull(defaultOptions, Collections.emptyList())

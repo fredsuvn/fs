@@ -3,8 +3,6 @@ package space.sunqian.fs.data.json;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.data.DataParser;
 
-import java.util.List;
-
 /**
  * Represents the parser that parses properties data a {@code PropertiesData} object.
  *

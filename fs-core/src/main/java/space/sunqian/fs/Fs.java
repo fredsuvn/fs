@@ -23,7 +23,7 @@ import space.sunqian.fs.object.ObjectKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.convert.PropertyCopier;
+import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
 import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectSchema;
@@ -606,18 +606,18 @@ public class Fs {
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link ConvertOption} or other custom options for custom implementations.
      * <p>
-     * This method is a shortcut to the {@link PropertyCopier#copyProperties(Object, Object, Option[])}.
+     * This method is a shortcut to the {@link ObjectCopier#copyProperties(Object, Object, Option[])}.
      *
      * @param src     the given source object
      * @param dst     the given destination object
      * @param options the options for copying properties
      * @throws ObjectConvertException if an error occurs during copying properties
-     * @see PropertyCopier
+     * @see ObjectCopier
      */
     public static void copyProperties(
         @Nonnull Object src, @Nonnull Object dst, @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectConvertException {
-        PropertyCopier.defaultCopier().copyProperties(src, dst, options);
+        ObjectCopier.defaultCopier().copyProperties(src, dst, options);
     }
 
     /**
@@ -627,15 +627,14 @@ public class Fs {
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link ConvertOption} or other custom options for custom implementations.
      * <p>
-     * This method is a shortcut to the
-     * {@link PropertyCopier#copyProperties(Object, Object, ObjectConverter, Option[])}.
+     * This method is a shortcut to the {@link ObjectCopier#copyProperties(Object, Object, ObjectConverter, Option[])}.
      *
      * @param src       the given source object
      * @param dst       the given destination object
      * @param converter the converter for converting values of the properties if needed
      * @param options   the options for copying properties
      * @throws ObjectConvertException if an error occurs during copying properties
-     * @see PropertyCopier
+     * @see ObjectCopier
      */
     public static void copyProperties(
         @Nonnull Object src,
@@ -643,7 +642,7 @@ public class Fs {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectConvertException {
-        PropertyCopier.defaultCopier().copyProperties(src, dst, converter, options);
+        ObjectCopier.defaultCopier().copyProperties(src, dst, converter, options);
     }
 
     /**
@@ -653,7 +652,7 @@ public class Fs {
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link ConvertOption} or other custom options for custom implementations.
      * <p>
-     * This method is a shortcut to the {@link PropertyCopier#copyProperties(Object, Type, Object, Type, Option[])}.
+     * This method is a shortcut to the {@link ObjectCopier#copyProperties(Object, Type, Object, Type, Option[])}.
      *
      * @param src     the given source object
      * @param srcType specifies the type of the given source object
@@ -661,7 +660,7 @@ public class Fs {
      * @param dstType specifies the type of the given destination object
      * @param options the options for copying properties
      * @throws ObjectConvertException if an error occurs during copying properties
-     * @see PropertyCopier
+     * @see ObjectCopier
      */
     public static void copyProperties(
         @Nonnull Object src,
@@ -670,7 +669,7 @@ public class Fs {
         @Nonnull Type dstType,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectConvertException {
-        PropertyCopier.defaultCopier().copyProperties(
+        ObjectCopier.defaultCopier().copyProperties(
             src,
             srcType,
             dst,
@@ -687,7 +686,7 @@ public class Fs {
      * {@link ConvertOption} or other custom options for custom implementations.
      * <p>
      * This method is a shortcut to the
-     * {@link PropertyCopier#copyProperties(Object, Type, Object, Type, ObjectConverter, Option[])}.
+     * {@link ObjectCopier#copyProperties(Object, Type, Object, Type, ObjectConverter, Option[])}.
      *
      * @param src       the given source object
      * @param srcType   specifies the type of the given source object
@@ -696,7 +695,7 @@ public class Fs {
      * @param converter the converter for converting values of the properties if needed
      * @param options   the options for copying properties
      * @throws ObjectConvertException if an error occurs during copying properties
-     * @see PropertyCopier
+     * @see ObjectCopier
      */
     public static void copyProperties(
         @Nonnull Object src,
@@ -706,7 +705,7 @@ public class Fs {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectConvertException {
-        PropertyCopier.defaultCopier().copyProperties(
+        ObjectCopier.defaultCopier().copyProperties(
             src,
             srcType,
             dst,

@@ -21,7 +21,7 @@ import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.convert.PropertyCopier;
+import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
 import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.object.schema.MapParser;
@@ -406,7 +406,7 @@ public class ConvertTest implements PrintTest {
         CA ca = new CA("1", ListKit.list("1", "2", "3"), new A("1", "2", "3"), DateKit.format(now));
         assertEquals(
             ObjectConverter.defaultConverter().convert(ca, CB.class,
-                ConvertOption.propertyCopier(PropertyCopier.defaultCopier()),
+                ConvertOption.objectCopier(ObjectCopier.defaultCopier()),
                 ConvertOption.dateFormatter(DateFormatter.defaultFormatter()),
                 ConvertOption.ioOperator(IOOperator.defaultOperator())
             ),
