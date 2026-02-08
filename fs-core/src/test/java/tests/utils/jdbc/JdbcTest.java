@@ -6,8 +6,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.object.convert.ConvertOption;
-import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.reflect.TypeRef;
 import space.sunqian.fs.utils.jdbc.JdbcKit;
 import space.sunqian.fs.utils.jdbc.SqlRuntimeException;
@@ -117,12 +115,11 @@ public class JdbcTest {
             List<User> users = JdbcKit.toObject(
                 resultSet,
                 User.class,
-                ObjectConverter.defaultConverter(),
-                ConvertOption.propertyNameMapper((s, t) ->
+                s ->
                     s.toLowerCase()
                         .replace("_", "")
                         .replace("n", "N")
-                ));
+            );
             checkQueryResult(users);
             resultSet.close();
         }

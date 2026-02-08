@@ -9,7 +9,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.collect.ListKit;
-import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.reflect.TypeRef;
 import space.sunqian.fs.utils.jdbc.JdbcKit;
@@ -232,11 +231,12 @@ public class SqlTest {
             .build()
             .update(h2Connection);
         assertEquals(1, update.execute());
+        // Query updated row
         User eve = SqlBuilder.newBuilder()
             .append("SELECT * FROM `user` WHERE id = ", 1L)
             .build()
             .query(User.class, h2Connection)
-            .first();
+            .first(JdbcKit.defaultNameMapper());
         assertEquals(1L, eve.getId());
         assertEquals("Eve", eve.getName());
         assertEquals(28, eve.getAge());
@@ -249,15 +249,14 @@ public class SqlTest {
             .build()
             .update(h2Connection);
         assertEquals(1, delete.execute());
-
         // Query deleted row
         SqlQuery<User> deletedQuery = SqlBuilder.newBuilder()
             .append("SELECT * FROM `user` WHERE id = ", 1L)
             .build()
             .query(User.class, h2Connection);
         assertNull(deletedQuery.first(
-            ObjectConverter.defaultConverter(),
-            ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper())
+            JdbcKit.defaultNameMapper(),
+            ObjectConverter.defaultConverter()
         ));
 
         // Query id = 2L
@@ -266,8 +265,7 @@ public class SqlTest {
             .build()
             .query(new TypeRef<User>() {}, h2Connection)
             .list(
-                ObjectConverter.defaultConverter(),
-                ConvertOption.propertyNameMapper(JdbcKit.defaultNameMapper())
+                JdbcKit.defaultNameMapper()
             )
             .get(0);
         assertEquals(2L, bob.getId());
