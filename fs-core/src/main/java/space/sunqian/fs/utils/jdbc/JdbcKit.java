@@ -5,9 +5,8 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.string.NameFormatter;
-import space.sunqian.fs.object.convert.ConvertOption;
+import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.convert.PropertyNameMapper;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
@@ -27,18 +26,18 @@ public class JdbcKit {
 
     /**
      * Return the default name mapper to map the column name to the field name of the element type. The default name
-     * mapper assume the column name is in underscore case (e.g. {@code user_id}) and the field name is in lower camel
+     * mapper assume the column name is in underscore case (e.g. {@code USER_ID}) and the field name is in lower camel
      * case (e.g. {@code userId}).
      *
      * @return the default name mapper
      */
-    public static @Nonnull PropertyNameMapper defaultNameMapper() {
+    public static @Nonnull NameMapper defaultNameMapper() {
         return DbNameMapper.INST;
     }
 
     /**
-     * Convert the result set to a list of objects. This method uses the {@link ObjectConverter#defaultConverter()} and
-     * the {@link #defaultNameMapper()} to convert.
+     * Convert the result set to a list of objects, using {@link #defaultNameMapper()} and
+     * }{@link ObjectConverter#defaultConverter()} to convert the object of the JDBC type to the java type.
      *
      * @param resultSet the result set
      * @param javaType  the element java type of the returned list
@@ -53,14 +52,13 @@ public class JdbcKit {
         return toObject(
             resultSet,
             javaType,
-            ObjectConverter.defaultConverter(),
-            ConvertOption.propertyNameMapper(defaultNameMapper())
+            defaultNameMapper()
         );
     }
 
     /**
-     * Convert the result set to a list of objects. This method uses the {@link ObjectConverter#defaultConverter()} and
-     * the {@link #defaultNameMapper()} to convert.
+     * Convert the result set to a list of objects, using {@link #defaultNameMapper()} and
+     * {@link ObjectConverter#defaultConverter()} to convert the object of the JDBC type to the java type.
      *
      * @param resultSet the result set
      * @param javaType  the element java type reference of the returned list
@@ -75,14 +73,13 @@ public class JdbcKit {
         return toObject(
             resultSet,
             javaType,
-            ObjectConverter.defaultConverter(),
-            ConvertOption.propertyNameMapper(defaultNameMapper())
+            defaultNameMapper()
         );
     }
 
     /**
-     * Convert the result set to a list of objects. This method uses the {@link ObjectConverter#defaultConverter()} and
-     * the {@link #defaultNameMapper()} to convert.
+     * Convert the result set to a list of objects, using {@link #defaultNameMapper()} and
+     * {@link ObjectConverter#defaultConverter()} to convert the object of the JDBC type to the java type.
      *
      * @param resultSet the result set
      * @param javaType  the element java type of the returned list
@@ -96,42 +93,41 @@ public class JdbcKit {
         return toObject(
             resultSet,
             javaType,
-            ObjectConverter.defaultConverter(),
-            ConvertOption.propertyNameMapper(defaultNameMapper())
+            defaultNameMapper()
         );
     }
 
     /**
-     * Convert the result set to a list of objects.
+     * Convert the result set to a list of objects, using {@link ObjectConverter#defaultConverter()} to convert the
+     * object of the JDBC type to the java type.
      *
-     * @param resultSet the result set
-     * @param javaType  the element java type of the returned list
-     * @param converter the converter to convert the JDBC type to the java type
-     * @param options   the options for converting, e.g. the
-     *                  {@link ConvertOption#propertyNameMapper(PropertyNameMapper)} for mapping the column name to the
-     *                  field name of the element type during converting
-     * @param <T>       the element type of the returned list
+     * @param resultSet  the result set
+     * @param javaType   the element java type of the returned list
+     * @param nameMapper the name mapper to map the column name to the field name of the element type
+     * @param <T>        the element type of the returned list
      * @return the row list of the result set of which each row is mapped to the type {@link T}
      * @throws SqlRuntimeException if any error occurs
      */
     public static <T> @Immutable @Nonnull List<@Nonnull T> toObject(
         @Nonnull ResultSet resultSet,
         @Nonnull Class<T> javaType,
-        @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull ... options
+        @Nonnull NameMapper nameMapper
     ) throws SqlRuntimeException {
-        return Fs.as(toObject(resultSet, (Type) javaType, converter, options));
+        return toObject(
+            resultSet,
+            javaType,
+            nameMapper,
+            ObjectConverter.defaultConverter()
+        );
     }
 
     /**
-     * Convert the result set to a list of objects.
+     * Convert the result set to a list of objects, using {@link ObjectConverter#defaultConverter()} to convert the
+     * object of the JDBC type to the java type.
      *
      * @param resultSet   the result set
      * @param javaTypeRef the element java type reference of the returned list
-     * @param converter   the converter to convert the JDBC type to the java type
-     * @param options     the options for converting, e.g. the
-     *                    {@link ConvertOption#propertyNameMapper(PropertyNameMapper)} for mapping the column name to
-     *                    the field name of the element type during converting
+     * @param nameMapper  the name mapper to map the column name to the field name of the element type
      * @param <T>         the element type of the returned list
      * @return the row list of the result set of which each row is mapped to the type {@link T}
      * @throws SqlRuntimeException if any error occurs
@@ -139,36 +135,108 @@ public class JdbcKit {
     public static <T> @Immutable @Nonnull List<@Nonnull T> toObject(
         @Nonnull ResultSet resultSet,
         @Nonnull TypeRef<T> javaTypeRef,
-        @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull ... options
+        @Nonnull NameMapper nameMapper
     ) throws SqlRuntimeException {
-        return Fs.as(toObject(resultSet, javaTypeRef.type(), converter, options));
+        return toObject(
+            resultSet,
+            javaTypeRef,
+            nameMapper,
+            ObjectConverter.defaultConverter()
+        );
     }
 
     /**
-     * Convert the result set to a list of objects.
+     * Convert the result set to a list of objects, using {@link ObjectConverter#defaultConverter()} to convert the
+     * object of the JDBC type to the java type.
      *
-     * @param resultSet the result set
-     * @param javaType  the element java type of the returned list
-     * @param converter the converter to convert the JDBC type to the java type
-     * @param options   the options for converting, e.g. the
-     *                  {@link ConvertOption#propertyNameMapper(PropertyNameMapper)} for mapping the column name to the
-     *                  field name of the element type during converting
+     * @param resultSet  the result set
+     * @param javaType   the element java type of the returned list
+     * @param nameMapper the name mapper to map the column name to the field name of the element type
      * @return the row list of the result set of which each row is mapped to the specified java type
      * @throws SqlRuntimeException if any error occurs
      */
     public static @Immutable @Nonnull List<@Nonnull Object> toObject(
         @Nonnull ResultSet resultSet,
         @Nonnull Type javaType,
+        @Nonnull NameMapper nameMapper
+    ) throws SqlRuntimeException {
+        return toObject(
+            resultSet,
+            javaType,
+            nameMapper,
+            ObjectConverter.defaultConverter()
+        );
+    }
+
+    /**
+     * Convert the result set to a list of objects.
+     *
+     * @param resultSet  the result set
+     * @param javaType   the element java type of the returned list
+     * @param nameMapper the name mapper to map the column name to the field name of the element type
+     * @param converter  the converter to convert the object of the JDBC type to the java type
+     * @param options    the options for converting
+     * @param <T>        the element type of the returned list
+     * @return the row list of the result set of which each row is mapped to the type {@link T}
+     * @throws SqlRuntimeException if any error occurs
+     */
+    public static <T> @Immutable @Nonnull List<@Nonnull T> toObject(
+        @Nonnull ResultSet resultSet,
+        @Nonnull Class<T> javaType,
+        @Nonnull NameMapper nameMapper,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SqlRuntimeException {
-        return Fs.uncheck(() -> resultToObject(resultSet, javaType, converter, options), SqlRuntimeException::new);
+        return Fs.as(toObject(resultSet, (Type) javaType, nameMapper, converter, options));
+    }
+
+    /**
+     * Convert the result set to a list of objects.
+     *
+     * @param resultSet   the result set
+     * @param javaTypeRef the element java type reference of the returned list
+     * @param nameMapper  the name mapper to map the column name to the field name of the element type
+     * @param converter   the converter to convert the object of the JDBC type to the java type
+     * @param options     the options for converting
+     * @param <T>         the element type of the returned list
+     * @return the row list of the result set of which each row is mapped to the type {@link T}
+     * @throws SqlRuntimeException if any error occurs
+     */
+    public static <T> @Immutable @Nonnull List<@Nonnull T> toObject(
+        @Nonnull ResultSet resultSet,
+        @Nonnull TypeRef<T> javaTypeRef,
+        @Nonnull NameMapper nameMapper,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws SqlRuntimeException {
+        return Fs.as(toObject(resultSet, javaTypeRef.type(), nameMapper, converter, options));
+    }
+
+    /**
+     * Convert the result set to a list of objects.
+     *
+     * @param resultSet  the result set
+     * @param javaType   the element java type of the returned list
+     * @param nameMapper the name mapper to map the column name to the field name of the element type
+     * @param converter  the converter to convert the object of the JDBC type to the java type
+     * @param options    the options for converting
+     * @return the row list of the result set of which each row is mapped to the specified java type
+     * @throws SqlRuntimeException if any error occurs
+     */
+    public static @Immutable @Nonnull List<@Nonnull Object> toObject(
+        @Nonnull ResultSet resultSet,
+        @Nonnull Type javaType,
+        @Nonnull NameMapper nameMapper,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws SqlRuntimeException {
+        return Fs.uncheck(() -> resultToObject(resultSet, javaType, nameMapper, converter, options), SqlRuntimeException::new);
     }
 
     private static <T> @Immutable @Nonnull List<@Nonnull T> resultToObject(
         @Nonnull ResultSet resultSet,
         @Nonnull Type javaType,
+        @Nonnull NameMapper nameMapper,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SQLException {
@@ -180,13 +248,13 @@ public class JdbcKit {
 
         ResultSetMetaData metaData = resultSet.getMetaData();
         ArrayList<T> objects = new ArrayList<>();
-        RowMap rowMap = new RowMap();
         while (resultSet.next()) {
-            rowMap.clear();
+            RowMap rowMap = new RowMap();
             for (int column = 0; column < metaData.getColumnCount(); column++) {
                 String columnName = metaData.getColumnName(column + 1);
                 Object jdbcObject = resultSet.getObject(column + 1);
-                rowMap.put(columnName, jdbcObject);
+                String fieldName = nameMapper.map(columnName);
+                rowMap.put(fieldName, jdbcObject);
             }
             Object element = converter.convert(rowMap, javaType, options);
             objects.add(Fs.as(element));
@@ -195,14 +263,14 @@ public class JdbcKit {
         return objects;
     }
 
-    private enum DbNameMapper implements PropertyNameMapper {
+    private enum DbNameMapper implements NameMapper {
         INST;
 
         private final @Nonnull NameFormatter from = NameFormatter.delimiter("_");
         private final @Nonnull NameFormatter to = NameFormatter.lowerCamel();
 
         @Override
-        public @Nonnull String map(@Nonnull String name, @Nonnull Type srcType) {
+        public @Nonnull String map(@Nonnull String name) {
             String lowerName = name.toLowerCase();
             return from.format(lowerName, to);
         }
