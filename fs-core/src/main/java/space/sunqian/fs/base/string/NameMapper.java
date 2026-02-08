@@ -4,6 +4,8 @@ import space.sunqian.annotation.Nonnull;
 
 /**
  * Mapper for mapping name to another string.
+ *
+ * @author sunqian
  */
 public interface NameMapper {
 
