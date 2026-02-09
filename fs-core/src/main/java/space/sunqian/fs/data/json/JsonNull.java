@@ -9,11 +9,17 @@ import space.sunqian.annotation.Nonnull;
  */
 public final class JsonNull {
 
-    /**
-     * The singleton instance of {@link JsonNull}.
-     */
     @SuppressWarnings("InstantiationOfUtilityClass")
-    public static final @Nonnull JsonNull INSTANCE = new JsonNull();
+    private static final @Nonnull JsonNull INSTANCE = new JsonNull();
+
+    /**
+     * Returns the singleton instance of {@link JsonNull}.
+     *
+     * @return the singleton instance of {@link JsonNull}
+     */
+    public static @Nonnull JsonNull getInstance() {
+        return INSTANCE;
+    }
 
     private JsonNull() {
     }

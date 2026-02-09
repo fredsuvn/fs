@@ -37,7 +37,7 @@ final class JsonParserImpl implements JsonParser {
     }
 
     @Override
-    public JsonData parse(@Nonnull Reader reader) throws IORuntimeException {
+    public @Nonnull JsonData parse(@Nonnull Reader reader) throws IORuntimeException {
         throw new IORuntimeException();
     }
 

@@ -6,8 +6,8 @@ import space.sunqian.fs.base.value.Span;
 import java.util.Objects;
 
 /**
- * Name formatter, used to parse or format a given name. A name formatter represents a formatting scheme, such as
- * {@code Camel Case}, {@code Snake Case}, {@code File Naming}, etc.
+ * Name formatter, which is used to parse or format a given name. A name formatter represents a formatting scheme, such
+ * as {@code Camel Case}, {@code Snake Case}, {@code File Naming}, etc.
  *
  * @author sunqian
  */

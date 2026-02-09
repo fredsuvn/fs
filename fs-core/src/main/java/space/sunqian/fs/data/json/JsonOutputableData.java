@@ -4,9 +4,6 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.data.OutputableData;
 import space.sunqian.fs.io.IOKit;
 
-import java.io.OutputStream;
-import java.io.StringWriter;
-
 /**
  * This interface represents a JSON data, which can be formatted to a string.
  *
@@ -21,9 +18,8 @@ public interface JsonOutputableData extends OutputableData {
      * @throws JsonDataException if the current JSON data is not a valid JSON
      */
     default @Nonnull String toJsonString() throws JsonDataException {
-        StringWriter stringWriter = new StringWriter();
-        OutputStream out = IOKit.newOutputStream(stringWriter);
-        writeTo(out);
-        return stringWriter.toString();
+        StringBuilder sb = new StringBuilder();
+        writeTo(IOKit.newOutputStream(sb));
+        return sb.toString();
     }
 }
