@@ -24,16 +24,16 @@ final class DataMapImpl implements DataMap {
 
     private final @Nonnull Map<String, Object> delegate;
     private final @Nonnull ObjectConverter converter;
-    private final @Nonnull Option<?, ?> @Nonnull [] options;
+    private final @Nonnull Option<?, ?> @Nonnull [] defaultOptions;
 
     DataMapImpl(
         @Nonnull Map<String, Object> delegate,
         @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull [] options
+        @Nonnull Option<?, ?> @Nonnull [] defaultOptions
     ) {
         this.delegate = delegate;
         this.converter = converter;
-        this.options = options;
+        this.defaultOptions = defaultOptions;
     }
 
     @Override
@@ -50,7 +50,7 @@ final class DataMapImpl implements DataMap {
             if (var.get() != NONE) {
                 return defaultValue;
             }
-            return Fs.as(converter.convert(object, MAP_OBJECT_TYPE, type, options));
+            return Fs.as(converter.convert(object, MAP_OBJECT_TYPE, type, defaultOptions));
         } catch (Exception e) {
             throw new DataException(e);
         }
@@ -58,7 +58,7 @@ final class DataMapImpl implements DataMap {
 
     @Override
     public @Nonnull Object toObject(Type type) throws ObjectException {
-        return converter.convertMap(this, type, options);
+        return converter.convertMap(this, type, defaultOptions);
     }
 
     @Override

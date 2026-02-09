@@ -44,19 +44,19 @@ public interface DataList extends List<Object> {
     }
 
     /**
-     * Wraps the given {@link List} to a {@link DataList} with the given {@link ObjectConverter} and options.
+     * Wraps the given {@link List} to a {@link DataList} with the given {@link ObjectConverter} and default options.
      *
-     * @param list      the {@link List} to wrap
-     * @param converter the {@link ObjectConverter} to use for conversion values
-     * @param options   the options to use for conversion
+     * @param list           the {@link List} to wrap
+     * @param converter      the {@link ObjectConverter} to use for conversion values
+     * @param defaultOptions the default options to use for conversion
      * @return the wrapped {@link DataList}
      */
     static @Nonnull DataList wrap(
         @Nonnull List<?> list,
         @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull [] options
+        @Nonnull Option<?, ?> @Nonnull ... defaultOptions
     ) {
-        return new DataListImpl(list, converter, options);
+        return new DataListImpl(list, converter, defaultOptions);
     }
 
     /**
@@ -248,8 +248,8 @@ public interface DataList extends List<Object> {
      * @return a new list of which elements' type is the specified class
      * @throws ObjectException if an error occurs during the conversion
      */
-    default <T> @Nonnull List<T> toObject(Class<T> cls) throws ObjectException {
-        return Fs.as(toObject((Type) cls));
+    default <T> @Nonnull List<T> toObjectList(Class<T> cls) throws ObjectException {
+        return Fs.as(toObjectList((Type) cls));
     }
 
     /**
@@ -260,8 +260,8 @@ public interface DataList extends List<Object> {
      * @return a new list of which elements' type is the specified class
      * @throws ObjectException if an error occurs during the conversion
      */
-    default <T> @Nonnull List<T> toObject(TypeRef<T> typeRef) throws ObjectException {
-        return Fs.as(toObject(typeRef.type()));
+    default <T> @Nonnull List<T> toObjectList(TypeRef<T> typeRef) throws ObjectException {
+        return Fs.as(toObjectList(typeRef.type()));
     }
 
     /**
@@ -272,7 +272,7 @@ public interface DataList extends List<Object> {
      * @throws ObjectException if an error occurs during the conversion
      */
     @Nonnull
-    List<Object> toObject(Type type) throws ObjectException;
+    List<Object> toObjectList(Type type) throws ObjectException;
 
     /**
      * Returns {@code true} if the given object is an instance of {@link DataList} and their contents are equal,

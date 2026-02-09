@@ -29,16 +29,16 @@ final class DataListImpl implements DataList {
 
     private final @Nonnull List<Object> delegate;
     private final @Nonnull ObjectConverter converter;
-    private final @Nonnull Option<?, ?> @Nonnull [] options;
+    private final @Nonnull Option<?, ?> @Nonnull [] defaultOptions;
 
     DataListImpl(
         @Nonnull List<?> delegate,
         @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull [] options
+        @Nonnull Option<?, ?> @Nonnull [] defaultOptions
     ) {
         this.delegate = Fs.as(delegate);
         this.converter = converter;
-        this.options = options;
+        this.defaultOptions = defaultOptions;
     }
 
     @Override
@@ -47,16 +47,16 @@ final class DataListImpl implements DataList {
             if (!Checker.isInBounds(index, 0, delegate.size())) {
                 return defaultValue;
             }
-            return Fs.as(converter.convert(delegate.get(index), type, options));
+            return Fs.as(converter.convert(delegate.get(index), type, defaultOptions));
         } catch (Exception e) {
             throw new DataException(e);
         }
     }
 
     @Override
-    public @Nonnull List<Object> toObject(Type type) throws ObjectException {
+    public @Nonnull List<Object> toObjectList(Type type) throws ObjectException {
         ParameterizedType listType = TypeKit.parameterizedType(List.class, new Type[]{type});
-        return Fs.as(converter.convert(this, LIST_OBJECT_TYPE, listType, options));
+        return Fs.as(converter.convert(this, LIST_OBJECT_TYPE, listType, defaultOptions));
     }
 
     @Override

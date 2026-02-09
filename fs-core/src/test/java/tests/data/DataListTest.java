@@ -61,8 +61,8 @@ public class DataListTest {
         dataList.clear();
         dataList.add(MapKit.map("str111", "1111"));
         dataList.add(MapKit.map("str111", "2222"));
-        assertEquals(new Cls("1111"), dataList.toObject(Cls.class).get(0));
-        assertEquals(new Cls("2222"), dataList.toObject(new TypeRef<Cls>() {}).get(1));
+        assertEquals(new Cls("1111"), dataList.toObjectList(Cls.class).get(0));
+        assertEquals(new Cls("2222"), dataList.toObjectList(new TypeRef<Cls>() {}).get(1));
     }
 
     @Test

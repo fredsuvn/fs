@@ -27,6 +27,10 @@ public class PropertiesTest implements PrintTest {
             PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
             printFor("x.properties", properties);
             checkProperties(properties);
+            assertEquals(
+                properties.asMap(),
+                properties.asDataMap()
+            );
 
             // update
             properties.set("x1", "1000");

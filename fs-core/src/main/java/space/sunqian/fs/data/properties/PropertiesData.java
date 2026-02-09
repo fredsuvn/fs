@@ -4,6 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.data.DataMap;
 import space.sunqian.fs.data.OutputableData;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;
@@ -227,6 +228,16 @@ public interface PropertiesData extends OutputableData {
      */
     default @Nonnull Map<@Nonnull String, @Nonnull Object> asMap() {
         return Fs.as(asProperties());
+    }
+
+    /**
+     * Returns a {@link DataMap} view of the properties, any changes to the map will be reflected in the properties, and
+     * vice versa.
+     *
+     * @return a {@link DataMap} view of the properties
+     */
+    default @Nonnull DataMap asDataMap() {
+        return DataMap.wrap(asMap());
     }
 
     @Override

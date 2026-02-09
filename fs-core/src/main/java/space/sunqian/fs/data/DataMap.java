@@ -44,19 +44,19 @@ public interface DataMap extends Map<String, Object> {
     }
 
     /**
-     * Wraps the given {@link Map} to a {@link DataMap} with the given {@link ObjectConverter} and options.
+     * Wraps the given {@link Map} to a {@link DataMap} with the given {@link ObjectConverter} and default options.
      *
-     * @param map       the {@link Map} to wrap
-     * @param converter the {@link ObjectConverter} to use for conversion values
-     * @param options   the options to use for conversion
+     * @param map            the {@link Map} to wrap
+     * @param converter      the {@link ObjectConverter} to use for conversion values
+     * @param defaultOptions the default options to use for conversion
      * @return the wrapped {@link DataMap}
      */
     static @Nonnull DataMap wrap(
         @Nonnull Map<String, Object> map,
         @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull [] options
+        @Nonnull Option<?, ?> @Nonnull ... defaultOptions
     ) {
-        return new DataMapImpl(map, converter, options);
+        return new DataMapImpl(map, converter, defaultOptions);
     }
 
     /**
