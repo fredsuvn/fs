@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Utilities for JDBC and SQL.
@@ -240,16 +241,10 @@ public class JdbcKit {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SQLException {
-
-        // use RowMap to store the result set rows
-        // to avoid the problem that the default converter will not convert Map<String, Object> to the same type
-        // caused by AssignableConvertHandler
-        class RowMap extends HashMap<Object, Object> {}
-
         ResultSetMetaData metaData = resultSet.getMetaData();
         ArrayList<T> objects = new ArrayList<>();
         while (resultSet.next()) {
-            RowMap rowMap = new RowMap();
+            Map<String, Object> rowMap = new HashMap<>();
             for (int column = 0; column < metaData.getColumnCount(); column++) {
                 String columnName = metaData.getColumnName(column + 1);
                 Object jdbcObject = resultSet.getObject(column + 1);
