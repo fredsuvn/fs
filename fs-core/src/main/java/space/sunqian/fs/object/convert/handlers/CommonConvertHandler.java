@@ -12,6 +12,9 @@ import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ArrayOperator;
 import space.sunqian.fs.collect.CollectKit;
+import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.collect.MapKit;
+import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.convert.ConvertKit;
@@ -41,27 +44,12 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAccessor;
-import java.util.AbstractList;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.IntFunction;
 
 /**
@@ -145,11 +133,9 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td>Array and Collection Objects</td>
  *     <td>Array or Iterable Objects</td>
- *     <td>Array created using reflection. Collection created using its constructor, the supported collection types:
- *     {@link Iterable}, {@link Collection}, {@link List}, {@link AbstractList}, {@link ArrayList}, {@link LinkedList},
- *     {@link CopyOnWriteArrayList}, {@link Set}, {@link LinkedHashSet}, {@link HashSet}, {@link TreeSet},
- *     {@link ConcurrentSkipListSet}. After creating the container, uses the {@code converter} parameter to handle
- *     component types.
+ *     <td>Array created using reflection. Collection created using its constructor, the supported collection types
+ *     follow the {@link SetKit#setFunction(Type)} and {@link ListKit#listFunction(Type)}. After creating the container,
+ *     uses the {@code converter} parameter to handle component types.
  *     </td>
  * </tr>
  * <tr>
@@ -157,9 +143,8 @@ import java.util.function.IntFunction;
  *     <td>Any Objects</td>
  *     <td>Generating data object is based on {@link ConvertOption#creatorProvider(CreatorProvider)} and
  *     {@link ConvertOption#objectCopier(ObjectCopier)}. Generating map using its constructor, and copying properties
- *     also using {@link ConvertOption#objectCopier(ObjectCopier)}. The supported map types:
- *     {@link Map}, {@link AbstractMap}, {@link LinkedHashMap}, {@link HashMap}, {@link TreeMap}, {@link ConcurrentMap},
- *     {@link ConcurrentHashMap}, {@link Hashtable}, {@link ConcurrentSkipListMap}.
+ *     also using {@link ConvertOption#objectCopier(ObjectCopier)}. The supported map types follow the
+ *     {@link MapKit#mapFunction(Type)}.
  *     </td>
  * </tr>
  * </table>
@@ -191,11 +176,12 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         }
         if (target instanceof Class<?>) {
             Class<?> targetClass = (Class<?>) target;
+            // to enum:
             if (targetClass.isEnum()) {
-                // to enum:
                 String name = src.toString();
                 return EnumKit.findEnum(Fs.as(targetClass), name);
             }
+            // string to byte[], char[], ByteBuffer, CharBuffer:
             if (srcType.equals(String.class)) {
                 if (target.equals(byte[].class) || target.equals(ByteBuffer.class)) {
                     Charset charset = Fs.nonnull(
@@ -212,40 +198,48 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                     return CharBuffer.wrap((String) src);
                 }
             }
+            // to array:
             if (targetClass.isArray()) {
-                // to array
                 return toArray(src, srcType, targetClass, converter, options);
             }
             ClassHandler classHandler = TargetClasses.get(targetClass);
+            // to target class:
             if (classHandler != null) {
                 return classHandler.convert(src, srcType, targetClass, converter, options);
             }
-            IntFunction<Collection<Object>> collectionFunc = CollectionClasses.get(targetClass);
+            IntFunction<Collection<Object>> collectionFunc = collectionFunction(targetClass);
+            // to collection:
             if (collectionFunc != null) {
-                // to collection
                 return toCollection(
                     src, srcType, collectionFunc, targetClass.getTypeParameters()[0], converter, options
                 );
             }
-            // to map or data object
+            // to map or data object:
             return toDataObject(src, srcType, targetClass, target, converter, options);
         } else if (target instanceof GenericArrayType) {
-            // to generic array
+            // to generic array:
             return toArray(src, srcType, (GenericArrayType) target, converter, options);
         } else if (target instanceof ParameterizedType) {
             ParameterizedType paramType = (ParameterizedType) target;
             Class<?> rawTarget = (Class<?>) paramType.getRawType();
-            IntFunction<Collection<Object>> collectionFunc = CollectionClasses.get(rawTarget);
+            IntFunction<Collection<Object>> collectionFunc = collectionFunction(rawTarget);
+            // to collection:
             if (collectionFunc != null) {
-                // to collection
                 return toCollection(
                     src, srcType, collectionFunc, paramType.getActualTypeArguments()[0], converter, options
                 );
             }
-            // to map or data object
+            // to map or data object:
             return toDataObject(src, srcType, rawTarget, target, converter, options);
         }
         return ObjectConverter.Status.HANDLER_CONTINUE;
+    }
+
+    private @Nullable IntFunction<Collection<Object>> collectionFunction(@Nonnull Class<?> collectionType) {
+        if (Set.class.isAssignableFrom(collectionType)) {
+            return Fs.as(SetKit.setFunction(collectionType));
+        }
+        return Fs.as(ListKit.listFunction(collectionType));
     }
 
     private Object toArray(
@@ -393,7 +387,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
-        IntFunction<Object> mapFunc = MapClasses.get(rawTarget);
+        IntFunction<Map<Object, Object>> mapFunc = MapKit.mapFunction(rawTarget);
         ObjectCopier objectCopier = Fs.nonnull(
             OptionKit.findValue(ConvertOption.OBJECT_COPIER, options),
             ObjectCopier.defaultCopier()
@@ -411,53 +405,6 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             Object targetBuilder = creator.createBuilder();
             objectCopier.copyProperties(src, srcType, targetBuilder, creator.builderType(), converter, options);
             return creator.buildTarget(targetBuilder);
-        }
-    }
-
-    private static final class CollectionClasses {
-
-        private static final @Nonnull Map<@Nonnull Type, @Nonnull IntFunction<@Nonnull Collection<Object>>> CLASS_MAP;
-
-        static {
-            CLASS_MAP = new HashMap<>();
-            CLASS_MAP.put(Iterable.class, ArrayList::new);
-            CLASS_MAP.put(Collection.class, HashSet::new);
-            CLASS_MAP.put(List.class, ArrayList::new);
-            CLASS_MAP.put(AbstractList.class, ArrayList::new);
-            CLASS_MAP.put(ArrayList.class, ArrayList::new);
-            CLASS_MAP.put(LinkedList.class, size -> new LinkedList<>());
-            CLASS_MAP.put(CopyOnWriteArrayList.class, size -> new CopyOnWriteArrayList<>());
-            CLASS_MAP.put(Set.class, HashSet::new);
-            CLASS_MAP.put(LinkedHashSet.class, LinkedHashSet::new);
-            CLASS_MAP.put(HashSet.class, HashSet::new);
-            CLASS_MAP.put(TreeSet.class, size -> new TreeSet<>());
-            CLASS_MAP.put(ConcurrentSkipListSet.class, size -> new ConcurrentSkipListSet<>());
-        }
-
-        public static @Nullable IntFunction<@Nonnull Collection<Object>> get(@Nonnull Class<?> target) {
-            return CLASS_MAP.get(target);
-        }
-    }
-
-    private static final class MapClasses {
-
-        private static final @Nonnull Map<@Nonnull Type, @Nonnull IntFunction<@Nonnull Object>> CLASS_MAP;
-
-        static {
-            CLASS_MAP = new HashMap<>();
-            CLASS_MAP.put(Map.class, HashMap::new);
-            CLASS_MAP.put(AbstractMap.class, HashMap::new);
-            CLASS_MAP.put(LinkedHashMap.class, LinkedHashMap::new);
-            CLASS_MAP.put(HashMap.class, HashMap::new);
-            CLASS_MAP.put(TreeMap.class, size -> new TreeMap<>());
-            CLASS_MAP.put(ConcurrentMap.class, ConcurrentHashMap::new);
-            CLASS_MAP.put(ConcurrentHashMap.class, ConcurrentHashMap::new);
-            CLASS_MAP.put(Hashtable.class, Hashtable::new);
-            CLASS_MAP.put(ConcurrentSkipListMap.class, size -> new ConcurrentSkipListMap<>());
-        }
-
-        public static @Nullable IntFunction<@Nonnull Object> get(@Nonnull Class<?> target) {
-            return CLASS_MAP.get(target);
         }
     }
 
