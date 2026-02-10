@@ -21,15 +21,15 @@ import java.util.Objects;
  * Its conversion logic is:
  * <ol>
  *     <li>
- *         If the conversion options contains {@link ConvertOption#NEW_INSTANCE} (means new instance mode is enabled),
- *         returns {@link ObjectConverter.Status#HANDLER_CONTINUE} for any source type;
+ *         If the conversion enables {@link ConvertOption#NEW_INSTANCE_MODE}, returns
+ *         {@link ObjectConverter.Status#HANDLER_CONTINUE} for any source type;
  *     </li>
  *     <li>
  *         If the specified source type equals to the target type, returns the source object itself;
  *     </li>
  *     <li>
- *         If the conversion options contains {@link ConvertOption#STRICT_TARGET_TYPE} (means strict target type mode
- *         is enabled), returns {@link ObjectConverter.Status#HANDLER_CONTINUE} for target type of {@link WildcardType};
+ *         If the conversion enables {@link ConvertOption#STRICT_TARGET_TYPE_MODE}, returns
+ *         {@link ObjectConverter.Status#HANDLER_CONTINUE} for target type of {@link WildcardType};
  *         Otherwise, recursively convert their lower/upper bounds type via the {@code converter} parameter;
  *     </li>
  *     <li>
@@ -62,13 +62,13 @@ public class AssignableConvertHandler implements ObjectConverter.Handler {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
-        if (OptionKit.containsKey(ConvertOption.NEW_INSTANCE, options)) {
+        if (OptionKit.isEnabled(ConvertOption.NEW_INSTANCE_MODE, options)) {
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
         if (Objects.equals(target, srcType)) {
             return src;
         }
-        if (OptionKit.containsKey(ConvertOption.STRICT_TARGET_TYPE, options)) {
+        if (OptionKit.isEnabled(ConvertOption.STRICT_TARGET_TYPE_MODE, options)) {
             // strict mode, wildcard is unsupported
             if (target instanceof WildcardType) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;

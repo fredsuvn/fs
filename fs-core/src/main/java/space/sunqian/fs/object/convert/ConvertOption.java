@@ -1,7 +1,6 @@
 package space.sunqian.fs.object.convert;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.option.Option;
@@ -18,18 +17,22 @@ import java.util.Map;
  *
  * @author sunqian
  */
-public enum ConvertOption implements Option<ConvertOption, Object> {
+public enum ConvertOption {
 
     /**
+     * Key of {@link #strictSourceTypeMode(boolean)}.
+     * <p>
      * Option to enable strict source type mode. In strict type mode, the conversion will strictly treat the source
      * object as the specified source type.
      * <p>
      * By default, this option is disabled. In this case, if some error occurs when parsing the source type, the
      * conversion will try again with the {@link Object#getClass()} as the source type.
      */
-    STRICT_SOURCE_TYPE,
+    STRICT_SOURCE_TYPE_MODE,
 
     /**
+     * Key of {@link #strictTargetTypeMode(boolean)}.
+     * <p>
      * Option to enable strict target type mode. In strict type mode, the conversion will strictly convert the source
      * object to the target type, especially for target wildcard type and type variables.
      * <p>
@@ -37,16 +40,18 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
      * treated as their bounds type. For example, the target type of {@code ? extends String} will be treated as
      * {@code String}.
      */
-    STRICT_TARGET_TYPE,
+    STRICT_TARGET_TYPE_MODE,
 
     /**
+     * Key of {@link #newInstanceMode(boolean)}.
+     * <p>
      * Option to enable new instance mode. In new instance mode, the conversion will always create a new instance of the
      * target type even if the target type is assignable from the source type.
      * <p>
      * By default, this option is disabled. In this case, the conversion could return the source object if the target
      * type is assignable from the source type.
      */
-    NEW_INSTANCE,
+    NEW_INSTANCE_MODE,
 
     /**
      * Key of {@link #schemaParser(ObjectParser)}.
@@ -79,7 +84,7 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     IGNORE_PROPERTIES,
 
     /**
-     * Key of {@link #ignoreNull()}.
+     * Key of {@link #ignoreNull(boolean)}.
      */
     IGNORE_NULL,
 
@@ -98,6 +103,48 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
      */
     DATE_FORMATTER,
     ;
+
+    /**
+     * Sets option to enable strict source type mode. In strict type mode, the conversion will strictly treat the source
+     * object as the specified source type.
+     * <p>
+     * By default, this option is disabled. In this case, if some error occurs when parsing the source type, the
+     * conversion will try again with the {@link Object#getClass()} as the source type.
+     *
+     * @param strictSourceType whether to enable strict source type mode
+     * @return an option to specify to enable/disable strict source type mode
+     */
+    public static @Nonnull Option<@Nonnull ConvertOption, ?> strictSourceTypeMode(boolean strictSourceType) {
+        return Option.of(STRICT_SOURCE_TYPE_MODE, strictSourceType);
+    }
+
+    /**
+     * Sets option to enable new instance mode. In new instance mode, the conversion will always create a new instance
+     * of the target type even if the target type is assignable from the source type.
+     * <p>
+     * By default, this option is disabled. In this case, the conversion could return the source object if the target
+     * type is assignable from the source type.
+     *
+     * @param strictTargetType whether to enable strict target type mode
+     * @return an option to specify to enable/disable strict target type mode
+     */
+    public static @Nonnull Option<@Nonnull ConvertOption, ?> strictTargetTypeMode(boolean strictTargetType) {
+        return Option.of(STRICT_TARGET_TYPE_MODE, strictTargetType);
+    }
+
+    /**
+     * Sets option to enable new instance mode. In new instance mode, the conversion will always create a new instance
+     * of the target type even if the target type is assignable from the source type.
+     * <p>
+     * By default, this option is disabled. In this case, the conversion could return the source object if the target
+     * type is assignable from the source type.
+     *
+     * @param newInstanceMode whether to enable new instance mode
+     * @return an option to specify to enable/disable new instance mode
+     */
+    public static @Nonnull Option<@Nonnull ConvertOption, ?> newInstanceMode(boolean newInstanceMode) {
+        return Option.of(NEW_INSTANCE_MODE, newInstanceMode);
+    }
 
     /**
      * Returns an option to specify the object schema parser.
@@ -190,15 +237,16 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     }
 
     /**
-     * Returns an option to specify to ignore null properties from the source object. If there exists a
+     * Returns an option to specify whether ignores {@code null} properties from the source object. If there exists a
      * {@link ObjectCopier.PropertyMapper} in the current {@link ObjectCopier}, this option will be ignored.
      * <p>
-     * By default, this option is disabled, the value of {@link #IGNORE_NULL} is {@code null}.
+     * By default, this option is disabled.
      *
+     * @param ignoreNull whether ignores {@code null} properties from the source object
      * @return an option to specify to ignore null properties from the source object
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, ?> ignoreNull() {
-        return IGNORE_NULL;
+    public static @Nonnull Option<@Nonnull ConvertOption, ?> ignoreNull(boolean ignoreNull) {
+        return Option.of(IGNORE_NULL, ignoreNull);
     }
 
     /**
@@ -241,15 +289,5 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
         @Nonnull DateFormatter dateFormatter
     ) {
         return Option.of(DATE_FORMATTER, dateFormatter);
-    }
-
-    @Override
-    public @Nonnull ConvertOption key() {
-        return this;
-    }
-
-    @Override
-    public @Nullable Object value() {
-        return null;
     }
 }

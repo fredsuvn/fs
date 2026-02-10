@@ -89,7 +89,7 @@ final class ObjectCopierImpl implements ObjectCopier {
         try {
             return parser.parse(type);
         } catch (DataSchemaException e) {
-            if (OptionKit.containsKey(ConvertOption.STRICT_SOURCE_TYPE, options)) {
+            if (OptionKit.isEnabled(ConvertOption.STRICT_SOURCE_TYPE_MODE, options)) {
                 throw e;
             }
             Type objType = object.getClass();
@@ -109,7 +109,7 @@ final class ObjectCopierImpl implements ObjectCopier {
         try {
             return parser.parse(type);
         } catch (DataSchemaException e) {
-            if (OptionKit.containsKey(ConvertOption.STRICT_SOURCE_TYPE, options)) {
+            if (OptionKit.isEnabled(ConvertOption.STRICT_SOURCE_TYPE_MODE, options)) {
                 throw e;
             }
             /*

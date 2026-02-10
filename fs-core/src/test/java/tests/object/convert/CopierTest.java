@@ -33,8 +33,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -81,7 +79,7 @@ public class CopierTest implements PrintTest {
             // ignore
             Map<String, String> nullFrom = MapKit.map("first", "1", "second", null, "third", "3");
             Map<String, String> nullTo = new HashMap<>();
-            objectCopier.copyProperties(nullFrom, typeA, nullTo, typeA, ConvertOption.IGNORE_NULL);
+            objectCopier.copyProperties(nullFrom, typeA, nullTo, typeA, ConvertOption.ignoreNull(true));
             assertEquals(MapKit.map("first", "1", "third", "3"), nullTo);
             nullTo.clear();
             objectCopier.copyProperties(nullFrom, typeA, nullTo, typeA, ConvertOption.ignoreProperties("first"));
@@ -95,7 +93,7 @@ public class CopierTest implements PrintTest {
                         return MapKit.entry(propertyName, "1");
                     }
                 })
-                .copyProperties(nullFrom, typeA, nullTo, typeA, ConvertOption.ignoreNull());
+                .copyProperties(nullFrom, typeA, nullTo, typeA, ConvertOption.ignoreNull(true));
             assertEquals(MapKit.map("first", "1", "second", "2", "third", "1"), nullTo);
             // errors
             ObjectConvertException oce1 = assertThrows(ObjectConvertException.class, () ->
@@ -155,7 +153,7 @@ public class CopierTest implements PrintTest {
             // ignore
             Map<String, String> nullFrom = MapKit.map("first", "1", "second", null, "third", "3");
             ClsA nullTo = new ClsA();
-            objectCopier.copyProperties(nullFrom, typeA, nullTo, ClsA.class, ConvertOption.IGNORE_NULL);
+            objectCopier.copyProperties(nullFrom, typeA, nullTo, ClsA.class, ConvertOption.ignoreNull(true));
             assertEquals(new ClsA("1", null, "3"), nullTo);
             nullTo.clear();
             objectCopier.copyProperties(nullFrom, typeA, nullTo, ClsA.class, ConvertOption.ignoreProperties("first"));
@@ -169,7 +167,7 @@ public class CopierTest implements PrintTest {
                         return MapKit.entry(propertyName, "1");
                     }
                 })
-                .copyProperties(nullFrom, typeA, nullTo, ClsA.class, ConvertOption.IGNORE_NULL);
+                .copyProperties(nullFrom, typeA, nullTo, ClsA.class, ConvertOption.ignoreNull(true));
             assertEquals(new ClsA("1", "2", "1"), nullTo);
             // errors
             ObjectConvertException oce1 = assertThrows(ObjectConvertException.class, () ->
@@ -229,7 +227,7 @@ public class CopierTest implements PrintTest {
             // ignore
             ClsA nullFrom = new ClsA("1", null, "3");
             Map<String, String> nullTo = new HashMap<>();
-            objectCopier.copyProperties(nullFrom, ClsA.class, nullTo, typeA, ConvertOption.IGNORE_NULL);
+            objectCopier.copyProperties(nullFrom, ClsA.class, nullTo, typeA, ConvertOption.ignoreNull(true));
             assertEquals(MapKit.map("first", "1", "third", "3"), nullTo);
             nullTo.clear();
             objectCopier.copyProperties(nullFrom, ClsA.class, nullTo, typeA, ConvertOption.ignoreProperties("first"));
@@ -243,7 +241,7 @@ public class CopierTest implements PrintTest {
                         return MapKit.entry(propertyName, "1");
                     }
                 })
-                .copyProperties(nullFrom, ClsA.class, nullTo, typeA, ConvertOption.IGNORE_NULL);
+                .copyProperties(nullFrom, ClsA.class, nullTo, typeA, ConvertOption.ignoreNull(true));
             assertEquals(MapKit.map("first", "1", "second", "2", "third", "1"), nullTo);
             // errors
             // ObjectConversionException oce1 = assertThrows(ObjectConversionException.class, () ->
@@ -306,7 +304,7 @@ public class CopierTest implements PrintTest {
             // ignore
             ClsA nullFrom = new ClsA("1", null, "3");
             ClsA nullTo = new ClsA();
-            objectCopier.copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, ConvertOption.IGNORE_NULL);
+            objectCopier.copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, ConvertOption.ignoreNull(true));
             assertEquals(new ClsA("1", null, "3"), nullTo);
             nullTo.clear();
             objectCopier.copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, ConvertOption.ignoreProperties("first"));
@@ -320,7 +318,7 @@ public class CopierTest implements PrintTest {
                         return MapKit.entry(propertyName, "1");
                     }
                 })
-                .copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, ConvertOption.IGNORE_NULL);
+                .copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, ConvertOption.ignoreNull(true));
             assertEquals(new ClsA("1", "2", "1"), nullTo);
             // errors
             // ObjectConversionException oce1 = assertThrows(ObjectConversionException.class, () ->
@@ -360,13 +358,6 @@ public class CopierTest implements PrintTest {
             objectCopier.copyProperties(clsB, map);
             assertEquals(MapKit.map("first", 1, "second", 2, "third", 3), map);
         }
-    }
-
-    @Test
-    public void testOptions() {
-        assertSame(ConvertOption.IGNORE_NULL, ConvertOption.IGNORE_NULL.key());
-        assertNull(ConvertOption.IGNORE_NULL.value());
-        assertSame(ConvertOption.IGNORE_NULL, ConvertOption.ignoreNull());
     }
 
     @Test
@@ -412,14 +403,14 @@ public class CopierTest implements PrintTest {
     public void testDefaultOptions() {
         ObjectCopier copier = ObjectCopier.defaultCopier();
         ObjectCopier copierOps = copier.withDefaultOptions(
-            ConvertOption.ignoreNull()
+            ConvertOption.ignoreNull(true)
         );
         assertEquals(
             Collections.emptyList(),
             copier.defaultOptions()
         );
         assertEquals(
-            ListKit.list(ConvertOption.ignoreNull()),
+            ListKit.list(ConvertOption.ignoreNull(true)),
             copierOps.defaultOptions()
         );
         ClsA source = new ClsA("1", null, "3");
@@ -445,8 +436,26 @@ public class CopierTest implements PrintTest {
             new ClsA("1", "2", "3"),
             ObjectConverter.defaultConverter().convert(
                 MapKit.map("first", "1", "second", "2", "third", "3"),
+                Object.class,
+                ClsA.class,
+                ConvertOption.strictSourceTypeMode(false)
+            )
+        );
+        assertEquals(
+            new ClsA("1", "2", "3"),
+            ObjectConverter.defaultConverter().convert(
+                MapKit.map("first", "1", "second", "2", "third", "3"),
                 List.class.getTypeParameters()[0],
                 ClsA.class
+            )
+        );
+        assertEquals(
+            new ClsA("1", "2", "3"),
+            ObjectConverter.defaultConverter().convert(
+                MapKit.map("first", "1", "second", "2", "third", "3"),
+                List.class.getTypeParameters()[0],
+                ClsA.class,
+                ConvertOption.strictSourceTypeMode(false)
             )
         );
         assertEquals(
@@ -468,7 +477,7 @@ public class CopierTest implements PrintTest {
                 MapKit.map("first", "1", "second", "2", "third", "3"),
                 Object.class,
                 ClsA.class,
-                ConvertOption.STRICT_SOURCE_TYPE
+                ConvertOption.strictSourceTypeMode(true)
             )
         );
         assertThrows(ObjectConvertException.class, () ->
@@ -476,7 +485,7 @@ public class CopierTest implements PrintTest {
                 MapKit.map("first", "1", "second", "2", "third", "3"),
                 List.class.getTypeParameters()[0],
                 ClsA.class,
-                ConvertOption.STRICT_SOURCE_TYPE
+                ConvertOption.strictSourceTypeMode(true)
             )
         );
 
@@ -522,7 +531,7 @@ public class CopierTest implements PrintTest {
                 new ClsB(1, 2, 3),
                 XObject.class,
                 ClsA.class,
-                ConvertOption.STRICT_SOURCE_TYPE
+                ConvertOption.strictSourceTypeMode(true)
             )
         );
     }

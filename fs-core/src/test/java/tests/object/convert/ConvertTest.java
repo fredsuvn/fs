@@ -100,12 +100,12 @@ public class ConvertTest implements PrintTest {
                     ObjectConverter.Status.HANDLER_BREAK;
             ObjectConverter cvt = converter.withFirstHandler(handler);
             UnsupportedObjectConvertException e = assertThrows(UnsupportedObjectConvertException.class, () ->
-                cvt.convert(a, B.class, ConvertOption.IGNORE_NULL));
+                cvt.convert(a, B.class, ConvertOption.ignoreNull(true)));
             assertEquals(e.sourceObject(), a);
             assertEquals(A.class, e.sourceObjectType());
             assertEquals(B.class, e.targetType());
             assertSame(e.converter(), cvt);
-            assertArrayEquals(e.options(), ArrayKit.array(ConvertOption.IGNORE_NULL));
+            assertArrayEquals(e.options(), ArrayKit.array(ConvertOption.ignoreNull(true)));
         }
         {
             // withLastHandler
@@ -116,7 +116,7 @@ public class ConvertTest implements PrintTest {
                 };
             ObjectConverter cvt = converter.withFirstHandler(handler);
             ObjectConvertException e = assertThrows(ObjectConvertException.class, () ->
-                cvt.convert(a, X.class.getTypeParameters()[0], ConvertOption.STRICT_TARGET_TYPE));
+                cvt.convert(a, X.class.getTypeParameters()[0], ConvertOption.strictTargetTypeMode(true)));
             assertTrue(e.getCause() instanceof UnreachablePointException);
         }
         {
@@ -126,21 +126,29 @@ public class ConvertTest implements PrintTest {
             assertSame(hello, cs);
         }
         {
-            // strict type
+            // strict target type
             Type wildLower = ((ParameterizedType) (F.class.getField("l1").getGenericType()))
                 .getActualTypeArguments()[0];
             Object obj = new Object();
+            assertEquals(
+                obj.toString(),
+                converter.convert(obj, wildLower, ConvertOption.strictTargetTypeMode(false))
+            );
             assertThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert(obj, wildLower, ConvertOption.STRICT_TARGET_TYPE));
+                converter.convert(obj, wildLower, ConvertOption.strictTargetTypeMode(true)));
             assertEquals(converter.convert(obj, wildLower), obj.toString());
             Type upperLower = ((ParameterizedType) (F.class.getField("l2").getGenericType()))
                 .getActualTypeArguments()[0];
+            assertEquals(
+                obj.toString(),
+                converter.convert(obj, upperLower, ConvertOption.strictTargetTypeMode(false))
+            );
             assertThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert(obj, upperLower, ConvertOption.STRICT_TARGET_TYPE));
+                converter.convert(obj, upperLower, ConvertOption.strictTargetTypeMode(true)));
             assertEquals(converter.convert(obj, upperLower), obj.toString());
             class X<T> {}
             assertThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert(obj, X.class.getTypeParameters()[0], ConvertOption.STRICT_TARGET_TYPE));
+                converter.convert(obj, X.class.getTypeParameters()[0], ConvertOption.strictTargetTypeMode(true)));
             assertSame(converter.convert(obj, X.class.getTypeParameters()[0]), obj);
         }
 
@@ -418,14 +426,14 @@ public class ConvertTest implements PrintTest {
     public void testDefaultOptions() {
         ObjectConverter converter = ObjectConverter.defaultConverter();
         ObjectConverter converterOps = converter.withDefaultOptions(
-            ConvertOption.ignoreNull()
+            ConvertOption.ignoreNull(true)
         );
         assertEquals(
             Collections.emptyList(),
             converter.defaultOptions()
         );
         assertEquals(
-            ListKit.list(ConvertOption.ignoreNull()),
+            ListKit.list(ConvertOption.ignoreNull(true)),
             converterOps.defaultOptions()
         );
         DataObject source = new DataObject("code", null);
@@ -522,10 +530,12 @@ public class ConvertTest implements PrintTest {
     @Test
     public void testNewInstance() {
         Object str1 = new Object();
-        Object str2 = ObjectConverter.defaultConverter().convert(str1, Object.class, ConvertOption.NEW_INSTANCE);
+        Object str2 = ObjectConverter.defaultConverter().convert(str1, Object.class, ConvertOption.newInstanceMode(true));
         assertNotSame(str1, str2);
         Object str3 = ObjectConverter.defaultConverter().convert(str1, Object.class);
         assertSame(str1, str3);
+        Object str4 = ObjectConverter.defaultConverter().convert(str1, Object.class, ConvertOption.newInstanceMode(false));
+        assertSame(str1, str4);
     }
 
     @Test
@@ -533,7 +543,7 @@ public class ConvertTest implements PrintTest {
         {
             // map parser
             assertSame(ConvertKit.mapParser(), ConvertKit.mapParser());
-            assertSame(ConvertKit.mapParser(), ConvertKit.mapParser(ConvertOption.ignoreNull()));
+            assertSame(ConvertKit.mapParser(), ConvertKit.mapParser(ConvertOption.ignoreNull(true)));
             assertNotEquals(
                 ConvertKit.mapParser(),
                 ConvertKit.mapParser(ConvertOption.schemaParser(MapParser.defaultParser()))
@@ -546,7 +556,7 @@ public class ConvertTest implements PrintTest {
         {
             // object parser
             assertSame(ConvertKit.objectParser(), ConvertKit.objectParser());
-            assertSame(ConvertKit.objectParser(), ConvertKit.objectParser(ConvertOption.ignoreNull()));
+            assertSame(ConvertKit.objectParser(), ConvertKit.objectParser(ConvertOption.ignoreNull(true)));
             assertNotEquals(
                 ConvertKit.objectParser(),
                 ConvertKit.objectParser(ConvertOption.schemaParser(ObjectParser.defaultParser()))
@@ -559,7 +569,7 @@ public class ConvertTest implements PrintTest {
         {
             // creator provider
             assertSame(ConvertKit.creatorProvider(), ConvertKit.creatorProvider());
-            assertSame(ConvertKit.creatorProvider(), ConvertKit.creatorProvider(ConvertOption.ignoreNull()));
+            assertSame(ConvertKit.creatorProvider(), ConvertKit.creatorProvider(ConvertOption.ignoreNull(true)));
             assertNotEquals(
                 ConvertKit.creatorProvider(),
                 ConvertKit.creatorProvider(ConvertOption.creatorProvider(CreatorProvider.defaultProvider()))
