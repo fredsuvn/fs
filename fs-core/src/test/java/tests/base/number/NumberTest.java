@@ -1,14 +1,19 @@
 package tests.base.number;
 
 import internal.test.DataTest;
+import internal.test.ErrorNumber;
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
+import space.sunqian.fs.base.number.NumException;
+import space.sunqian.fs.base.number.NumFormatter;
 import space.sunqian.fs.base.number.NumKit;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NumberTest implements DataTest, PrintTest {
@@ -31,8 +36,8 @@ public class NumberTest implements DataTest, PrintTest {
         assertEquals(123.0, NumKit.toNumber("123", Double.class));
         assertEquals(new BigInteger("123"), NumKit.toNumber("123", BigInteger.class));
         assertEquals(new BigDecimal("123"), NumKit.toNumber("123", BigDecimal.class));
-        assertThrows(NumberFormatException.class, () -> NumKit.toNumber("kkk", Integer.class));
-        assertThrows(UnsupportedOperationException.class, () -> NumKit.toNumber("kkk", String.class));
+        assertThrows(NumException.class, () -> NumKit.toNumber("kkk", Integer.class));
+        assertThrows(NumException.class, () -> NumKit.toNumber("kkk", String.class));
     }
 
     @Test
@@ -45,7 +50,8 @@ public class NumberTest implements DataTest, PrintTest {
         testNumberToNumber(123d);
         testNumberToNumber(new BigInteger("123"));
         testNumberToNumber(new BigDecimal("123"));
-        assertThrows(NumberFormatException.class, () -> NumKit.toNumber(new Number() {
+        assertEquals(123, NumKit.toNumber(123, Number.class));
+        assertThrows(NumException.class, () -> NumKit.toNumber(new Number() {
             @Override
             public int intValue() {
                 return 0;
@@ -71,7 +77,6 @@ public class NumberTest implements DataTest, PrintTest {
                 return "anonymous Number{}";
             }
         }, BigInteger.class));
-        assertThrows(UnsupportedOperationException.class, () -> NumKit.toNumber(123, Number.class));
     }
 
     public void testNumberToNumber(Number number) {
@@ -93,5 +98,56 @@ public class NumberTest implements DataTest, PrintTest {
             assertEquals(NumKit.toNumber(number, BigInteger.class), new BigInteger(number.toString()));
         }
         assertEquals(NumKit.toNumber(number, BigDecimal.class), new BigDecimal(number.toString()));
+    }
+
+    @Test
+    public void testFormat() {
+        NumFormatter formatter = NumFormatter.of("#.00");
+        Double number = formatter.parseSafe("123.123456", Double.class);
+        assertNotNull(number);
+        assertEquals(123.123456, number);
+        assertEquals(
+            "123.12",
+            formatter.format(number)
+        );
+        assertEquals(
+            "123.12",
+            formatter.formatSafe(number)
+        );
+        BigDecimal decimal = formatter.parseSafe("123.123456", BigDecimal.class);
+        assertNotNull(decimal);
+        assertEquals(new BigDecimal("123.123456"), decimal);
+        assertEquals(
+            "123.12",
+            formatter.format(decimal)
+        );
+        assertEquals(
+            "123.12",
+            formatter.formatSafe(decimal)
+        );
+        assertNull(formatter.parseSafe("123.123", String.class));
+        assertNull(formatter.formatSafe(null));
+        assertNull(formatter.parseSafe("XXXXX", int.class));
+        assertNull(formatter.parseSafe(null, int.class));
+        assertNull(formatter.formatSafe(new ErrorNumber()));
+    }
+
+    @Test
+    public void testException() throws Exception {
+        {
+            // NumException
+            assertThrows(NumException.class, () -> {
+                throw new NumException();
+            });
+            assertThrows(NumException.class, () -> {
+                throw new NumException("");
+            });
+            assertThrows(NumException.class, () -> {
+                throw new NumException("", new RuntimeException());
+            });
+            assertThrows(NumException.class, () -> {
+                throw new NumException(new RuntimeException());
+            });
+        }
     }
 }

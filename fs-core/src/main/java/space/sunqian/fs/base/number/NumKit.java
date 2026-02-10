@@ -31,42 +31,45 @@ public class NumKit {
      * @param numType the specified number type
      * @param <T>     the number type
      * @return the converted number object
-     * @throws NumberFormatException         if the given string can't be converted to the specified number type
-     * @throws UnsupportedOperationException if the given number type is not supported
+     * @throws NumException if any error occurs during the conversion
      */
     public static <T> @Nonnull T toNumber(
         @Nonnull CharSequence str, Class<T> numType
-    ) throws NumberFormatException, UnsupportedOperationException {
-        if (byte.class.equals(numType) || Byte.class.equals(numType)) {
-            return Fs.as(Byte.parseByte(str.toString()));
+    ) throws NumException {
+        try {
+            if (byte.class.equals(numType) || Byte.class.equals(numType)) {
+                return Fs.as(Byte.parseByte(str.toString()));
+            }
+            if (short.class.equals(numType) || Short.class.equals(numType)) {
+                return Fs.as(Short.parseShort(str.toString()));
+            }
+            if (char.class.equals(numType) || Character.class.equals(numType)) {
+                int i = Integer.parseInt(str.toString());
+                char c = (char) i;
+                return Fs.as(c);
+            }
+            if (int.class.equals(numType) || Integer.class.equals(numType)) {
+                return Fs.as(Integer.parseInt(str.toString()));
+            }
+            if (long.class.equals(numType) || Long.class.equals(numType)) {
+                return Fs.as(Long.parseLong(str.toString()));
+            }
+            if (float.class.equals(numType) || Float.class.equals(numType)) {
+                return Fs.as(Float.parseFloat(str.toString()));
+            }
+            if (double.class.equals(numType) || Double.class.equals(numType)) {
+                return Fs.as(Double.parseDouble(str.toString()));
+            }
+            if (BigInteger.class.equals(numType)) {
+                return Fs.as(new BigInteger(str.toString()));
+            }
+            if (BigDecimal.class.equals(numType)) {
+                return Fs.as(new BigDecimal(str.toString()));
+            }
+        } catch (Exception e) {
+            throw new NumException(e);
         }
-        if (short.class.equals(numType) || Short.class.equals(numType)) {
-            return Fs.as(Short.parseShort(str.toString()));
-        }
-        if (char.class.equals(numType) || Character.class.equals(numType)) {
-            int i = Integer.parseInt(str.toString());
-            char c = (char) i;
-            return Fs.as(c);
-        }
-        if (int.class.equals(numType) || Integer.class.equals(numType)) {
-            return Fs.as(Integer.parseInt(str.toString()));
-        }
-        if (long.class.equals(numType) || Long.class.equals(numType)) {
-            return Fs.as(Long.parseLong(str.toString()));
-        }
-        if (float.class.equals(numType) || Float.class.equals(numType)) {
-            return Fs.as(Float.parseFloat(str.toString()));
-        }
-        if (double.class.equals(numType) || Double.class.equals(numType)) {
-            return Fs.as(Double.parseDouble(str.toString()));
-        }
-        if (BigInteger.class.equals(numType)) {
-            return Fs.as(new BigInteger(str.toString()));
-        }
-        if (BigDecimal.class.equals(numType)) {
-            return Fs.as(new BigDecimal(str.toString()));
-        }
-        throw new UnsupportedOperationException("Unsupported number type: " + numType);
+        throw new NumException("Failed to convert " + str + " to " + numType + ".");
     }
 
     /**
@@ -87,56 +90,56 @@ public class NumKit {
      * @param numType the specified other number type
      * @param <T>     the number type
      * @return the converted number object
-     * @throws NumberFormatException         if the given number can't be converted to the specified number type
-     * @throws UnsupportedOperationException if the given number type is not supported
+     * @throws NumException if any error occurs during the conversion
      */
     public static <T> @Nonnull T toNumber(
         @Nonnull Number num, Class<T> numType
-    ) throws NumberFormatException, UnsupportedOperationException {
-        if (byte.class.equals(numType) || Byte.class.equals(numType)) {
-            return Fs.as(num.byteValue());
-        }
-        if (short.class.equals(numType) || Short.class.equals(numType)) {
-            return Fs.as(num.shortValue());
-        }
-        if (char.class.equals(numType) || Character.class.equals(numType)) {
-            int i = num.intValue();
-            char c = (char) i;
-            return Fs.as(c);
-        }
-        if (int.class.equals(numType) || Integer.class.equals(numType)) {
-            return Fs.as(num.intValue());
-        }
-        if (long.class.equals(numType) || Long.class.equals(numType)) {
-            return Fs.as(num.longValue());
-        }
-        if (float.class.equals(numType) || Float.class.equals(numType)) {
-            return Fs.as(num.floatValue());
-        }
-        if (double.class.equals(numType) || Double.class.equals(numType)) {
-            return Fs.as(num.doubleValue());
-        }
-        if (BigInteger.class.equals(numType)) {
-            if (num instanceof BigInteger) {
-                return Fs.as(num);
+    ) throws NumException {
+        try {
+            if (numType.isAssignableFrom(num.getClass())) {
+                return numType.cast(num);
             }
-            if (num instanceof BigDecimal) {
-                BigDecimal decimal = (BigDecimal) num;
-                return Fs.as(decimal.toBigInteger());
+            if (byte.class.equals(numType) || Byte.class.equals(numType)) {
+                return Fs.as(num.byteValue());
             }
-            return Fs.as(new BigInteger(num.toString()));
+            if (short.class.equals(numType) || Short.class.equals(numType)) {
+                return Fs.as(num.shortValue());
+            }
+            if (char.class.equals(numType) || Character.class.equals(numType)) {
+                int i = num.intValue();
+                char c = (char) i;
+                return Fs.as(c);
+            }
+            if (int.class.equals(numType) || Integer.class.equals(numType)) {
+                return Fs.as(num.intValue());
+            }
+            if (long.class.equals(numType) || Long.class.equals(numType)) {
+                return Fs.as(num.longValue());
+            }
+            if (float.class.equals(numType) || Float.class.equals(numType)) {
+                return Fs.as(num.floatValue());
+            }
+            if (double.class.equals(numType) || Double.class.equals(numType)) {
+                return Fs.as(num.doubleValue());
+            }
+            if (BigInteger.class.equals(numType)) {
+                if (num instanceof BigDecimal) {
+                    BigDecimal decimal = (BigDecimal) num;
+                    return Fs.as(decimal.toBigInteger());
+                }
+                return Fs.as(new BigInteger(num.toString()));
+            }
+            if (BigDecimal.class.equals(numType)) {
+                if (num instanceof BigInteger) {
+                    BigInteger integer = (BigInteger) num;
+                    return Fs.as(new BigDecimal(integer));
+                }
+                return Fs.as(new BigDecimal(num.toString()));
+            }
+        } catch (Exception e) {
+            throw new NumException(e);
         }
-        if (BigDecimal.class.equals(numType)) {
-            if (num instanceof BigDecimal) {
-                return Fs.as(num);
-            }
-            if (num instanceof BigInteger) {
-                BigInteger integer = (BigInteger) num;
-                return Fs.as(new BigDecimal(integer));
-            }
-            return Fs.as(new BigDecimal(num.toString()));
-        }
-        throw new UnsupportedOperationException("Unsupported number type: " + numType);
+        throw new NumException("Failed to convert " + num + " to type: " + numType + ".");
     }
 
     private NumKit() {

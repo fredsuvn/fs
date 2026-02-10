@@ -1,4 +1,4 @@
-package tests.base.time;
+package tests.base.date;
 
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TimeTest implements PrintTest {
+public class DateTest implements PrintTest {
 
     @Test
     public void testTime() {
