@@ -728,6 +728,32 @@ public class StringKit {
         }
     }
 
+    /**
+     * Returns {@code true} if the given {@link CharSequence} is enabled, otherwise {@code false}.
+     * <p>
+     * A {@link CharSequence} is enabled if it is equal-case-insensitive to any of the following strings:
+     * <ul>
+     *     <li>{@code true}</li>
+     *     <li>{@code on}</li>
+     *     <li>{@code enabled}</li>
+     *     <li>{@code yes}</li>
+     *     <li>{@code y}</li>
+     *     <li>{@code 1}</li>
+     * </ul>
+     *
+     * @param cs the given {@link CharSequence} to check
+     * @return {@code true} if the given {@link CharSequence} is enabled, otherwise {@code false}
+     */
+    public static boolean isEnabled(@Nonnull CharSequence cs) {
+        String str = cs.toString();
+        return str.equalsIgnoreCase("true")
+            || str.equalsIgnoreCase("on")
+            || str.equalsIgnoreCase("enabled")
+            || str.equalsIgnoreCase("yes")
+            || str.equalsIgnoreCase("y")
+            || str.equalsIgnoreCase("1");
+    }
+
     private StringKit() {
     }
 }

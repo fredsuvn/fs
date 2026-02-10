@@ -290,4 +290,25 @@ public class StringTest implements DataTest, PrintTest {
         assertEquals("aBc", StringKit.uncapitalize("ABc"));
         assertEquals("ABC", StringKit.uncapitalize("ABC"));
     }
+
+    @Test
+    public void testEnabled() {
+        assertTrue(StringKit.isEnabled("true"));
+        assertTrue(StringKit.isEnabled("True"));
+        assertTrue(StringKit.isEnabled("on"));
+        assertTrue(StringKit.isEnabled("On"));
+        assertTrue(StringKit.isEnabled("enabled"));
+        assertTrue(StringKit.isEnabled("Enabled"));
+        assertTrue(StringKit.isEnabled("yes"));
+        assertTrue(StringKit.isEnabled("Yes"));
+        assertTrue(StringKit.isEnabled("y"));
+        assertTrue(StringKit.isEnabled("Y"));
+        assertTrue(StringKit.isEnabled("1"));
+        assertFalse(StringKit.isEnabled("false"));
+        assertFalse(StringKit.isEnabled("off"));
+        assertFalse(StringKit.isEnabled("disabled"));
+        assertFalse(StringKit.isEnabled("no"));
+        assertFalse(StringKit.isEnabled("0"));
+        assertFalse(StringKit.isEnabled(""));
+    }
 }

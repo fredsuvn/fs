@@ -4,6 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.base.string.StringKit;
 import space.sunqian.fs.data.DataMap;
 import space.sunqian.fs.data.OutputableData;
 import space.sunqian.fs.io.IOKit;
@@ -174,22 +175,16 @@ public interface PropertiesData extends OutputableData {
     }
 
     /**
-     * Returns {@code true} if the property value is one of "true", "1", "yes", "y", or "enabled" (case-insensitive),
+     * Returns {@code true} if the property value is enabled checked by {@link StringKit#isEnabled(CharSequence)},
      * otherwise {@code false}.
      *
      * @param name the name of the property
-     * @return {@code true} if the property value is one of "true", "1", "yes", "y", or "enabled" (case-insensitive),
+     * @return {@code true} if the property value is enabled checked by {@link StringKit#isEnabled(CharSequence)},
      * otherwise {@code false}.
      */
-    default boolean getBoolean(String name) {
+    default boolean getBoolean(@Nonnull String name) {
         String value = getString(name);
-        return value != null && (
-            value.equalsIgnoreCase("true")
-                || value.equals("1")
-                || value.equalsIgnoreCase("yes")
-                || value.equalsIgnoreCase("y")
-                || value.equalsIgnoreCase("enabled")
-        );
+        return value != null && StringKit.isEnabled(value);
     }
 
     /**
