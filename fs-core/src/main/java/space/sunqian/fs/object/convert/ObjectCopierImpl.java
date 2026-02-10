@@ -10,7 +10,6 @@ import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.ObjectParser;
-import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
 
 import java.lang.reflect.Type;
@@ -19,16 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static space.sunqian.fs.object.convert.ConvertBack.getNameMapper;
-import static space.sunqian.fs.object.convert.ConvertBack.ignoreNull;
-import static space.sunqian.fs.object.convert.ConvertBack.ignored;
-
 final class ObjectCopierImpl implements ObjectCopier {
 
     static final @Nonnull ObjectCopier DEFAULT =
         new ObjectCopierImpl(null, null, Collections.emptyList());
 
-    private final @Nullable PropertyMapper propertyMapper;
+    private final @Nonnull PropertyMapper propertyMapper;
     private final @Nullable ExceptionHandler exceptionHandler;
     private final @Nonnull List<@Nonnull Option<?, ?>> defaultOptions;
     private final @Nonnull Option<?, ?> @Nonnull [] defaultOptionsArray;
@@ -38,7 +33,7 @@ final class ObjectCopierImpl implements ObjectCopier {
         @Nullable ExceptionHandler exceptionHandler,
         @Nonnull @RetainedParam List<@Nonnull Option<?, ?>> defaultOptions
     ) {
-        this.propertyMapper = propertyMapper;
+        this.propertyMapper = Fs.nonnull(propertyMapper, ObjectCopier.defaultPropertyMapper());
         this.exceptionHandler = exceptionHandler;
         this.defaultOptions = Collections.unmodifiableList(defaultOptions);
         this.defaultOptionsArray = defaultOptions.toArray(new Option[0]);
@@ -151,33 +146,9 @@ final class ObjectCopierImpl implements ObjectCopier {
     ) {
         src.forEach((srcKey, srcValue) -> {
             try {
-                if (ignored(srcKey, options)) {
-                    return;
-                }
-                if (srcKey instanceof String) {
-                    srcKey = getNameMapper(options).map((String) srcKey, srcSchema.type());
-                }
-                Object dstPropertyName;
-                Object dstPropertyValue;
-                if (propertyMapper != null) {
-                    Map.Entry<Object, Object> entry = propertyMapper.map(
-                        srcKey, src, srcSchema, dst, dstSchema, converter, options
-                    );
-                    if (entry == null) {
-                        return;
-                    }
-                    dstPropertyName = entry.getKey();
-                    dstPropertyValue = entry.getValue();
-                } else {
-                    if (srcValue == null && ignoreNull(options)) {
-                        return;
-                    }
-                    dstPropertyName = converter.convert(
-                        srcKey, srcSchema.keyType(), dstSchema.keyType(), options);
-                    dstPropertyValue = converter.convert(
-                        srcValue, srcSchema.valueType(), dstSchema.valueType(), options);
-                }
-                dst.put(dstPropertyName, dstPropertyValue);
+                propertyMapper.map(
+                    srcKey, srcValue, src, srcSchema, dst, dstSchema, converter, options
+                );
             } catch (Exception e) {
                 if (exceptionHandler != null) {
                     try {
@@ -186,7 +157,7 @@ final class ObjectCopierImpl implements ObjectCopier {
                         throw new ObjectCopyException(ex);
                     }
                 } else {
-                    throw e;
+                    throw new ObjectCopyException(e);
                 }
             }
         });
@@ -202,40 +173,7 @@ final class ObjectCopierImpl implements ObjectCopier {
     ) {
         src.forEach((srcKey, srcValue) -> {
             try {
-                if (ignored(srcKey, options)) {
-                    return;
-                }
-                if (srcKey instanceof String) {
-                    srcKey = getNameMapper(options).map((String) srcKey, srcSchema.type());
-                }
-                Object dstPropertyName;
-                Object dstPropertyValue;
-                ObjectProperty dstProperty;
-                if (propertyMapper != null) {
-                    Map.Entry<Object, Object> entry = propertyMapper.map(
-                        srcKey, src, srcSchema, dst, dstSchema, converter, options
-                    );
-                    if (entry == null) {
-                        return;
-                    }
-                    dstPropertyName = entry.getKey();
-                    dstPropertyValue = entry.getValue();
-                    dstProperty = dstSchema.getProperty((String) dstPropertyName);
-                    if (dstProperty == null || !dstProperty.isWritable()) {
-                        return;
-                    }
-                } else {
-                    if (srcValue == null && ignoreNull(options)) {
-                        return;
-                    }
-                    dstPropertyName = converter.convert(srcKey, srcSchema.keyType(), String.class, options);
-                    dstProperty = dstSchema.getProperty((String) dstPropertyName);
-                    if (dstProperty == null || !dstProperty.isWritable()) {
-                        return;
-                    }
-                    dstPropertyValue = converter.convert(srcValue, srcSchema.valueType(), dstProperty.type(), options);
-                }
-                dstProperty.setValue(dst, dstPropertyValue);
+                propertyMapper.map(srcKey, srcValue, src, srcSchema, dst, dstSchema, converter, options);
             } catch (Exception e) {
                 if (exceptionHandler != null) {
                     try {
@@ -244,7 +182,7 @@ final class ObjectCopierImpl implements ObjectCopier {
                         throw new ObjectCopyException(ex);
                     }
                 } else {
-                    throw e;
+                    throw new ObjectCopyException(e);
                 }
             }
         });
@@ -260,38 +198,7 @@ final class ObjectCopierImpl implements ObjectCopier {
     ) {
         srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {
             try {
-                if (ignored(srcPropertyName, options)) {
-                    return;
-                }
-                if (!srcProperty.isReadable()) {
-                    return;
-                }
-                // do not map "class"
-                if ("class".equals(srcPropertyName)) {
-                    return;
-                }
-                srcPropertyName = getNameMapper(options).map(srcPropertyName, srcSchema.type());
-                Object dstPropertyName;
-                Object dstPropertyValue;
-                if (propertyMapper != null) {
-                    Map.Entry<Object, Object> entry = propertyMapper.map(
-                        srcPropertyName, src, srcSchema, dst, dstSchema, converter, options
-                    );
-                    if (entry == null) {
-                        return;
-                    }
-                    dstPropertyName = entry.getKey();
-                    dstPropertyValue = entry.getValue();
-                } else {
-                    Object srcPropertyValue = srcProperty.getValue(src);
-                    if (srcPropertyValue == null && ignoreNull(options)) {
-                        return;
-                    }
-                    dstPropertyName = converter.convert(srcPropertyName, String.class, dstSchema.keyType(), options);
-                    dstPropertyValue = converter.convert(
-                        srcPropertyValue, srcProperty.type(), dstSchema.valueType(), options);
-                }
-                dst.put(dstPropertyName, dstPropertyValue);
+                propertyMapper.map(srcProperty, src, srcSchema, dst, dstSchema, converter, options);
             } catch (Exception e) {
                 if (exceptionHandler != null) {
                     try {
@@ -300,7 +207,7 @@ final class ObjectCopierImpl implements ObjectCopier {
                         throw new ObjectCopyException(ex);
                     }
                 } else {
-                    throw e;
+                    throw new ObjectCopyException(e);
                 }
             }
         });
@@ -316,47 +223,7 @@ final class ObjectCopierImpl implements ObjectCopier {
     ) {
         srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {
             try {
-                if (ignored(srcPropertyName, options)) {
-                    return;
-                }
-                if (!srcProperty.isReadable()) {
-                    return;
-                }
-                // do not map "class"
-                if ("class".equals(srcPropertyName)) {
-                    return;
-                }
-                srcPropertyName = getNameMapper(options).map(srcPropertyName, srcSchema.type());
-                Object dstPropertyName;
-                Object dstPropertyValue;
-                ObjectProperty dstProperty;
-                if (propertyMapper != null) {
-                    Map.Entry<Object, Object> entry = propertyMapper.map(
-                        srcPropertyName, src, srcSchema, dst, dstSchema, converter, options
-                    );
-                    if (entry == null) {
-                        return;
-                    }
-                    dstPropertyName = entry.getKey();
-                    dstPropertyValue = entry.getValue();
-                    dstProperty = dstSchema.getProperty((String) dstPropertyName);
-                    if (dstProperty == null || !dstProperty.isWritable()) {
-                        return;
-                    }
-                } else {
-                    Object srcPropertyValue = srcProperty.getValue(src);
-                    if (srcPropertyValue == null && ignoreNull(options)) {
-                        return;
-                    }
-                    dstPropertyName = srcPropertyName;
-                    dstProperty = dstSchema.getProperty((String) dstPropertyName);
-                    if (dstProperty == null || !dstProperty.isWritable()) {
-                        return;
-                    }
-                    dstPropertyValue = converter.convert(
-                        srcPropertyValue, srcProperty.type(), dstProperty.type(), options);
-                }
-                dstProperty.setValue(dst, dstPropertyValue);
+                propertyMapper.map(srcProperty, src, srcSchema, dst, dstSchema, converter, options);
             } catch (Exception e) {
                 if (exceptionHandler != null) {
                     try {
@@ -365,11 +232,9 @@ final class ObjectCopierImpl implements ObjectCopier {
                         throw new ObjectCopyException(ex);
                     }
                 } else {
-                    throw e;
+                    throw new ObjectCopyException(e);
                 }
             }
         });
     }
-
-
 }

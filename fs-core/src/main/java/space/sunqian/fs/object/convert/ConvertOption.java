@@ -4,6 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.object.schema.MapParser;
@@ -74,7 +75,7 @@ public enum ConvertOption {
     OBJECT_COPIER,
 
     /**
-     * Key of {@link #propertyNameMapper(PropertyNameMapper)}.
+     * Key of {@link #propertyNameMapper(NameMapper)}.
      */
     PROPERTY_NAME_MAPPER,
 
@@ -203,23 +204,22 @@ public enum ConvertOption {
     }
 
     /**
-     * Returns an option to specify the {@link PropertyNameMapper}.
+     * Returns an option to specify the {@link NameMapper}.
      * <p>
      * Note that this configuration is only valid for the {@link String} type property names (both source and target),
      * and executed before the configured {@link ObjectCopier.PropertyMapper} (if any, and it means the property name
-     * received by the property mapper will be the mapped name by the property name mapper). For property names whose
-     * type is not {@link String}, such as non-{@link String} keys of a {@link Map}, this configuration will not take
-     * effect.
+     * received by the property mapper will be mapped by the name mapper first). For property names whose type is not
+     * {@link String}, such as non-{@link String} keys of a {@link Map}, this configuration will not take effect.
      * <p>
      * By default, this option is disabled.
      *
-     * @param propertyNameMapper the {@link PropertyNameMapper} to be specified
+     * @param nameMapper the {@link NameMapper} to be specified
      * @return an option to specify the {@link PropertyNameMapper}
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull PropertyNameMapper> propertyNameMapper(
-        @Nonnull PropertyNameMapper propertyNameMapper
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NameMapper> propertyNameMapper(
+        @Nonnull NameMapper nameMapper
     ) {
-        return Option.of(PROPERTY_NAME_MAPPER, propertyNameMapper);
+        return Option.of(PROPERTY_NAME_MAPPER, nameMapper);
     }
 
     /**

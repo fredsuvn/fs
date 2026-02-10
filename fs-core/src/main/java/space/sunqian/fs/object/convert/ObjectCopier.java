@@ -34,10 +34,19 @@ public interface ObjectCopier {
     /**
      * Returns the default {@link ObjectCopier}.
      *
-     * @return the default data mapper
+     * @return the default {@link ObjectCopier}
      */
     static @Nonnull ObjectCopier defaultCopier() {
         return ObjectCopierImpl.DEFAULT;
+    }
+
+    /**
+     * Returns the default {@link ObjectCopier.PropertyMapper}.
+     *
+     * @return the default {@link ObjectCopier.PropertyMapper}
+     */
+    static @Nonnull ObjectCopier.PropertyMapper defaultPropertyMapper() {
+        return ConvertBack.DEFAULT_PROPERTY_MAPPER;
     }
 
     /**
@@ -206,38 +215,30 @@ public interface ObjectCopier {
     }
 
     /**
-     * Property mapper for copying each object property.
+     * Property mapper for copying each object property to the destination object. It has 4 methods:
+     * <ul>
+     *     <li>
+     *         {@link #map(Object, Object, Map, MapSchema, Map, MapSchema, ObjectConverter, Option[])}:
+     *         from source map entry to destination map entry;
+     *     </li>
+     *     <li>
+     *         {@link #map(Object, Object, Map, MapSchema, Object, ObjectSchema, ObjectConverter, Option[])}:
+     *         from source map entry to destination object property;
+     *     </li>
+     *     <li>
+     *         {@link #map(ObjectProperty, Object, ObjectSchema, Map, MapSchema, ObjectConverter, Option[])}:
+     *         from source object property to destination map entry;
+     *     </li>
+     *     <li>
+     *         {@link #map(ObjectProperty, Object, ObjectSchema, Map, MapSchema, ObjectConverter, Option[])}:
+     *         from source object property to destination object property;
+     *     </li>
+     * </ul>
+     * All those methods have default implementations.
+     *
+     * @author sunqian
      */
     interface PropertyMapper {
-
-        /**
-         * Maps the source property with the specified name. this method determines the name and value of the actual
-         * destination property that the specified property needs to be copied to. The returned entry's key and value
-         * are the name and value of the actual destination property. If this method returns {@code null}, then the
-         * specified property will not be copied.
-         * <p>
-         * This method is applicable to both {@link Map} and non-map object. For non-map objects, the type of property
-         * name must be {@link String}.
-         *
-         * @param propertyName the name of the specified property to be copied
-         * @param src          the source object
-         * @param srcSchema    the schema of the source object
-         * @param dst          the destination object
-         * @param dstSchema    the schema of the destination object
-         * @param converter    the converter used in the mapping process
-         * @param options      the options used in the mapping process
-         * @return the mapped name and value, may be {@code null} to ignore copy of this property
-         */
-        Map.@Nullable Entry<@Nonnull Object, @Nullable Object> map(
-            @Nonnull Object propertyName,
-            @Nonnull Object src,
-            @Nonnull DataSchema srcSchema,
-            @Nonnull Object dst,
-            @Nonnull DataSchema dstSchema,
-            @Nonnull ObjectConverter converter,
-            @Nonnull Option<?, ?> @Nonnull ... options
-        );
-
 
         /**
          * This method will be invoked when copy an entry from the source map to a destination map.
@@ -268,11 +269,11 @@ public interface ObjectCopier {
             if (ConvertBack.ignored(srcKey, options)) {
                 return;
             }
-            // if (srcKey instanceof String) {
-            //     srcKey = ConvertBack.getNameMapper(options).map((String) srcKey, srcSchema.type());
-            // }
             if (srcValue == null && ConvertBack.ignoreNull(options)) {
                 return;
+            }
+            if (srcKey instanceof String) {
+                srcKey = Fs.as(ConvertBack.getNameMapper(options).map((String) srcKey));
             }
             K2 dstKey = Fs.as(converter.convert(srcKey, srcSchema.keyType(), dstSchema.keyType(), options));
             V2 dstValue = Fs.as(converter.convert(srcValue, srcSchema.valueType(), dstSchema.valueType(), options));
@@ -306,11 +307,11 @@ public interface ObjectCopier {
             if (ConvertBack.ignored(srcKey, options)) {
                 return;
             }
-            // if (srcKey instanceof String) {
-            //     srcKey = ConvertBack.getNameMapper(options).map((String) srcKey, srcSchema.type());
-            // }
             if (srcValue == null && ConvertBack.ignoreNull(options)) {
                 return;
+            }
+            if (srcKey instanceof String) {
+                srcKey = Fs.as(ConvertBack.getNameMapper(options).map((String) srcKey));
             }
             String dstPropertyName = Fs.as(converter.convert(srcKey, srcSchema.keyType(), String.class, options));
             ObjectProperty dstProperty = dstSchema.getProperty(dstPropertyName);
@@ -318,6 +319,98 @@ public interface ObjectCopier {
                 return;
             }
             Object dstPropertyValue = converter.convert(srcValue, srcSchema.valueType(), dstProperty.type(), options);
+            dstProperty.setValue(dst, dstPropertyValue);
+        }
+
+        /**
+         * This method will be invoked when copy a property from the source object to a destination map.
+         *
+         * @param srcProperty the property to be copied
+         * @param src         the source object
+         * @param srcSchema   the schema of the source object
+         * @param dst         the destination map
+         * @param dstSchema   the schema of the destination map
+         * @param converter   the converter used in the mapping process
+         * @param options     the options used in the mapping process
+         * @param <K2>        the type of the key of the destination map
+         * @param <V2>        the type of the value of the destination map
+         * @throws Exception any exception can be thrown here
+         */
+        default <K2, V2> void map(
+            @Nonnull ObjectProperty srcProperty,
+            @Nonnull Object src,
+            @Nonnull ObjectSchema srcSchema,
+            @Nonnull Map<K2, V2> dst,
+            @Nonnull MapSchema dstSchema,
+            @Nonnull ObjectConverter converter,
+            @Nonnull Option<?, ?> @Nonnull ... options
+        ) throws Exception {
+            if (ConvertBack.ignored(srcProperty.name(), options)) {
+                return;
+            }
+            if (!srcProperty.isReadable()) {
+                return;
+            }
+            String srcPropertyName = srcProperty.name();
+            // do not map "class"
+            if ("class".equals(srcPropertyName)) {
+                return;
+            }
+            srcPropertyName = ConvertBack.getNameMapper(options).map(srcPropertyName);
+            Object srcPropertyValue = srcProperty.getValue(src);
+            if (srcPropertyValue == null && ConvertBack.ignoreNull(options)) {
+                return;
+            }
+            K2 dstKey = Fs.as(converter.convert(srcPropertyName, String.class, dstSchema.keyType(), options));
+            V2 dstValue = Fs.as(converter.convert(srcPropertyValue, srcProperty.type(), dstSchema.valueType(), options));
+            dst.put(dstKey, dstValue);
+        }
+
+        /**
+         * This method will be invoked when copy a property from the source object to a destination object.
+         *
+         * @param srcProperty the property to be copied
+         * @param src         the source object
+         * @param srcSchema   the schema of the source object
+         * @param dst         the destination object
+         * @param dstSchema   the schema of the destination object
+         * @param converter   the converter used in the mapping process
+         * @param options     the options used in the mapping process
+         * @throws Exception any exception can be thrown here
+         */
+        default void map(
+            @Nonnull ObjectProperty srcProperty,
+            @Nonnull Object src,
+            @Nonnull ObjectSchema srcSchema,
+            @Nonnull Object dst,
+            @Nonnull ObjectSchema dstSchema,
+            @Nonnull ObjectConverter converter,
+            @Nonnull Option<?, ?> @Nonnull ... options
+        ) throws Exception {
+            if (ConvertBack.ignored(srcProperty.name(), options)) {
+                return;
+            }
+            if (!srcProperty.isReadable()) {
+                return;
+            }
+            String srcPropertyName = srcProperty.name();
+            // do not map "class"
+            if ("class".equals(srcPropertyName)) {
+                return;
+            }
+            srcPropertyName = ConvertBack.getNameMapper(options).map(srcPropertyName);
+            Object srcPropertyValue = srcProperty.getValue(src);
+            if (srcPropertyValue == null && ConvertBack.ignoreNull(options)) {
+                return;
+            }
+            String dstPropertyName = Fs.as(converter.convert(srcPropertyName, String.class, String.class, options));
+            ObjectProperty dstProperty = dstSchema.getProperty(dstPropertyName);
+            if (dstProperty == null || !dstProperty.isWritable()) {
+                return;
+            }
+            Object dstPropertyValue = converter.convert(
+                srcPropertyValue, srcProperty.type(), dstProperty.type(), options
+            );
             dstProperty.setValue(dst, dstPropertyValue);
         }
     }
