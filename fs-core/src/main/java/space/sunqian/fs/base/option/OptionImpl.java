@@ -28,7 +28,7 @@ final class OptionImpl<K, V> implements Option<K, V> {
     }
 
     @Override
-    public boolean equals(Object object) {
+    public boolean equals(@Nullable Object object) {
         if (!(object instanceof Option)) {
             return false;
         }

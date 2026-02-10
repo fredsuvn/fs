@@ -85,7 +85,7 @@ public interface Option<K, V> {
      * @return {@code true} if the specified object is equal to this option.
      */
     @Override
-    boolean equals(Object obj);
+    boolean equals(@Nullable Object obj);
 
     /**
      * Returns the hash code for this option.

@@ -4,6 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.base.string.StringKit;
 import space.sunqian.fs.collect.ArrayKit;
 
 import java.util.Arrays;
@@ -121,6 +122,36 @@ public class OptionKit {
             result[lastIndex--] = additionalOption;
         }
         return Fs.as(result);
+    }
+
+    /**
+     * Returns {@code true} if the given options contains an option whose key equals the specified key and the value of
+     * the option is enabled checked by {@link StringKit#isEnabled(CharSequence)}.
+     *
+     * @param key     the specified key
+     * @param options the given options
+     * @return {@code true} if the given options contains an option whose key equals the specified key and the value of
+     * the option is enabled checked by {@link StringKit#isEnabled(CharSequence)}
+     */
+    public static boolean isEnabled(@Nonnull Object key, @Nonnull Option<?, ?> @Nonnull ... options) {
+        @Nullable Option<?, ?> option = OptionKit.findOption(key, options);
+        if (option == null) {
+            return false;
+        }
+        Object value = option.value();
+        if (value == null) {
+            return false;
+        }
+        if (value instanceof Boolean) {
+            return (boolean) value;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).intValue() == 1;
+        }
+        if (value instanceof String) {
+            return StringKit.isEnabled((String) value);
+        }
+        return false;
     }
 
     private OptionKit() {

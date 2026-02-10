@@ -100,4 +100,17 @@ public class OptionTest {
             OptionKit.mergeOptions(defaultOptions, additionalOptions4)
         );
     }
+
+    @Test
+    public void testEnable() {
+        assertTrue(OptionKit.isEnabled("a", Option.of("a", "1"), Option.of("b", "2")));
+        assertTrue(OptionKit.isEnabled("a", Option.of("a", 1), Option.of("b", "2")));
+        assertTrue(OptionKit.isEnabled("a", Option.of("a", true), Option.of("b", "2")));
+        assertFalse(OptionKit.isEnabled("b", Option.of("a", "1"), Option.of("b", "2")));
+        assertFalse(OptionKit.isEnabled("b", Option.of("a", "1"), Option.of("b", 2)));
+        assertFalse(OptionKit.isEnabled("b", Option.of("a", "1"), Option.of("b", false)));
+        assertFalse(OptionKit.isEnabled("b", Option.of("a", "1"), Option.of("b", new Object())));
+        assertFalse(OptionKit.isEnabled("b", Option.of("a", "1"), Option.of("b", null)));
+        assertFalse(OptionKit.isEnabled("c", Option.of("a", "1"), Option.of("b", "2")));
+    }
 }
