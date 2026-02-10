@@ -2,13 +2,16 @@ package space.sunqian.fs.object.schema;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.invoke.Invocable;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 final class ObjectSchemaBuilder implements ObjectParser.Context {
@@ -94,6 +97,11 @@ final class ObjectSchemaBuilder implements ObjectParser.Context {
             private final @Nullable Invocable getter;
             private final @Nullable Invocable setter;
 
+            // annotations:
+            private final @Nonnull List<@Nonnull Annotation> fieldAnnotations;
+            private final @Nonnull List<@Nonnull Annotation> getterAnnotations;
+            private final @Nonnull List<@Nonnull Annotation> setterAnnotations;
+
             private PropertyImpl(@Nonnull ObjectPropertyBase propertyBase) {
                 this.name = propertyBase.name();
                 this.type = propertyBase.type();
@@ -102,6 +110,12 @@ final class ObjectSchemaBuilder implements ObjectParser.Context {
                 this.field = propertyBase.field();
                 this.getter = propertyBase.getter();
                 this.setter = propertyBase.setter();
+                this.fieldAnnotations = field == null ?
+                    Collections.emptyList() : ListKit.list(field.getAnnotations());
+                this.getterAnnotations = getterMethod == null ?
+                    Collections.emptyList() : ListKit.list(getterMethod.getAnnotations());
+                this.setterAnnotations = setterMethod == null ?
+                    Collections.emptyList() : ListKit.list(setterMethod.getAnnotations());
             }
 
             @Override
@@ -142,6 +156,21 @@ final class ObjectSchemaBuilder implements ObjectParser.Context {
             @Override
             public @Nullable Invocable setter() {
                 return setter;
+            }
+
+            @Override
+            public @Nonnull List<@Nonnull Annotation> fieldAnnotations() {
+                return fieldAnnotations;
+            }
+
+            @Override
+            public @Nonnull List<@Nonnull Annotation> getterAnnotations() {
+                return getterAnnotations;
+            }
+
+            @Override
+            public @Nonnull List<@Nonnull Annotation> setterAnnotations() {
+                return setterAnnotations;
             }
 
             @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")

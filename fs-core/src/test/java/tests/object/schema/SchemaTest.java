@@ -3,6 +3,7 @@ package tests.object.schema;
 import internal.test.PrintTest;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Immutable;
@@ -36,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -548,6 +550,47 @@ public class SchemaTest implements PrintTest {
     }
 
     @Test
+    public void testAnnotation() {
+        ObjectSchema schema = ObjectSchema.parse(ForAnnotation.class);
+        // prop1
+        ObjectProperty prop1 = schema.getProperty("prop1");
+        assertNotNull(prop1);
+        Nonnull a1 = prop1.getAnnotation(Nonnull.class);
+        assertNotNull(a1);
+        assertEquals(
+            Nonnull.class,
+            a1.annotationType()
+        );
+        assertNull(prop1.getAnnotation(Nullable.class));
+        // prop2
+        ObjectProperty prop2 = schema.getProperty("prop2");
+        assertNotNull(prop2);
+        Nonnull a2 = prop2.getAnnotation(Nonnull.class);
+        assertNotNull(a2);
+        assertEquals(
+            Nonnull.class,
+            a2.annotationType()
+        );
+        assertNull(prop2.getAnnotation(Nullable.class));
+        // prop3
+        ObjectProperty prop3 = schema.getProperty("prop3");
+        assertNotNull(prop3);
+        Nonnull a3 = prop3.getAnnotation(Nonnull.class);
+        assertNotNull(a3);
+        assertEquals(
+            Nonnull.class,
+            a3.annotationType()
+        );
+        assertNull(prop3.getAnnotation(Nullable.class));
+        // prop4
+        ObjectProperty prop4 = schema.getProperty("prop4");
+        assertNotNull(prop4);
+        Nonnull a4 = prop4.getAnnotation(Nonnull.class);
+        assertNull(a4);
+        assertNull(prop4.getAnnotation(Nullable.class));
+    }
+
+    @Test
     public void testException() {
         {
             // DataObjectException
@@ -677,5 +720,26 @@ public class SchemaTest implements PrintTest {
     @Data
     public static class ForPublicFiled {
         public String publicField;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class ForAnnotation {
+
+        @Nonnull
+        private String prop1;
+        private String prop2;
+        private String prop3;
+        private String prop4;
+
+        @Nonnull
+        public String getProp2() {
+            return prop2;
+        }
+
+        @Nonnull
+        public void setProp3(String prop3) {
+            this.prop3 = prop3;
+        }
     }
 }

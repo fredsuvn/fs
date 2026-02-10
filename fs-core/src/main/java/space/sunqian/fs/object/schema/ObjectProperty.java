@@ -5,6 +5,9 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.invoke.Invocable;
 
+import java.lang.annotation.Annotation;
+import java.util.List;
+
 /**
  * This interface represents the property info of {@link ObjectSchema}. It is very similar to the simple property of
  * <a href="https://www.oracle.com/java/technologies/javase/javabeans-spec.html">JavaBeans</a>.
@@ -43,6 +46,36 @@ public interface ObjectProperty extends ObjectPropertyBase {
     }
 
     /**
+     * Returns the annotations on the backing field of this property. If this property doesn't have a backing field, an
+     * empty list will be returned.
+     *
+     * @return the annotations on the backing field of this property
+     */
+    @Nonnull
+    @Immutable
+    List<@Nonnull Annotation> fieldAnnotations();
+
+    /**
+     * Returns the annotations on the getter method of this property. If this property doesn't have a getter method, an
+     * empty list will be returned.
+     *
+     * @return the annotations on the getter method of this property
+     */
+    @Nonnull
+    @Immutable
+    List<@Nonnull Annotation> getterAnnotations();
+
+    /**
+     * Returns the annotations on the setter method of this property. If this property doesn't have a setter method, an
+     * empty list will be returned.
+     *
+     * @return the annotations on the setter method of this property
+     */
+    @Nonnull
+    @Immutable
+    List<@Nonnull Annotation> setterAnnotations();
+
+    /**
      * Returns the property value of the specified instance.
      *
      * @param inst the specified instance
@@ -70,6 +103,35 @@ public interface ObjectProperty extends ObjectPropertyBase {
             throw new DataSchemaException("The property is not writable: " + name() + ".");
         }
         setter.invoke(inst, value);
+    }
+
+    /**
+     * Finds and returns the annotation of the specified type on getter method, setter method or backing field of this
+     * property, the searching order is that order. If the annotation is not found, {@code null} will be returned.
+     *
+     * @param annotationType the specified annotation type
+     * @return the annotation of the specified type on this property, or {@code null} if not found
+     */
+    default <T extends Annotation> @Nullable T getAnnotation(@Nonnull Class<T> annotationType) {
+        List<Annotation> getters = getterAnnotations();
+        for (Annotation g : getters) {
+            if (annotationType.isAssignableFrom(g.getClass())) {
+                return annotationType.cast(g);
+            }
+        }
+        List<Annotation> setters = setterAnnotations();
+        for (Annotation s : setters) {
+            if (annotationType.isAssignableFrom(s.getClass())) {
+                return annotationType.cast(s);
+            }
+        }
+        List<Annotation> fields = fieldAnnotations();
+        for (Annotation f : fields) {
+            if (annotationType.isAssignableFrom(f.getClass())) {
+                return annotationType.cast(f);
+            }
+        }
+        return null;
     }
 
     /**
