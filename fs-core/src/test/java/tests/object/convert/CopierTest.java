@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.exception.UnreachablePointException;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
@@ -24,8 +25,13 @@ import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.reflect.TypeRef;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -537,6 +543,33 @@ public class CopierTest implements PrintTest {
     }
 
     @Test
+    public void testForAnnotations() {
+        Date now = new Date();
+        Map<String, String> map = new HashMap<>();
+        ClsDates dates = new ClsDates(now, now);
+        ObjectCopier.defaultCopier().withPropertyMapper(
+            (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
+                ObjectSchema schema = (ObjectSchema) srcSchema;
+                ObjectProperty property = schema.getProperty(propertyName.toString());
+                Date srcValue = (Date) property.getValue(src);
+                String format = schema
+                    .getProperty(propertyName.toString())
+                    .getAnnotation(Format.class)
+                    .value();
+                return MapKit.entry(propertyName, DateFormatter.ofPattern(format).format(srcValue));
+            }
+        ).copyProperties(dates, map);
+        assertEquals(
+            map.get("first"),
+            DateFormatter.ofPattern("yyyy-MM-dd").format(now)
+        );
+        assertEquals(
+            map.get("second"),
+            DateFormatter.ofPattern("HH:mm:ss").format(now)
+        );
+    }
+
+    @Test
     public void testException() {
         {
             // ObjectCopyException
@@ -617,5 +650,24 @@ public class CopierTest implements PrintTest {
         private Integer first;
         private Integer second;
         private Integer third;
+    }
+
+    @Data
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ClsDates {
+        @Format("yyyy-MM-dd")
+        private Date first;
+        @Format("HH:mm:ss")
+        private Date second;
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({
+        ElementType.FIELD,
+    })
+    public @interface Format {
+        String value();
     }
 }

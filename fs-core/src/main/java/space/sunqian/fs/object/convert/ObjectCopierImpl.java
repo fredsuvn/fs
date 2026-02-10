@@ -6,7 +6,6 @@ import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.option.OptionKit;
-import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.MapSchema;
@@ -19,6 +18,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static space.sunqian.fs.object.convert.ConvertBack.getNameMapper;
+import static space.sunqian.fs.object.convert.ConvertBack.ignoreNull;
+import static space.sunqian.fs.object.convert.ConvertBack.ignored;
 
 final class ObjectCopierImpl implements ObjectCopier {
 
@@ -368,20 +371,5 @@ final class ObjectCopierImpl implements ObjectCopier {
         });
     }
 
-    private boolean ignored(@Nonnull Object propertyName, @Nonnull Option<?, ?> @Nonnull ... options) {
-        Object[] ignoredProperties = OptionKit.findValue(ConvertOption.IGNORE_PROPERTIES, options);
-        if (ignoredProperties == null) {
-            return false;
-        }
-        return ArrayKit.indexOf(ignoredProperties, propertyName) >= 0;
-    }
 
-    private boolean ignoreNull(@Nonnull Option<?, ?> @Nonnull ... options) {
-        return OptionKit.containsKey(ConvertOption.IGNORE_NULL, options);
-    }
-
-    private @Nonnull PropertyNameMapper getNameMapper(@Nonnull Option<?, ?> @Nonnull ... options) {
-        PropertyNameMapper mapper = OptionKit.findValue(ConvertOption.PROPERTY_NAME_MAPPER, options);
-        return mapper != null ? mapper : PropertyNameMapper.defaultMapper();
-    }
 }

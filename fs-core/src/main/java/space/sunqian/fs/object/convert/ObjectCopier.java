@@ -10,6 +10,7 @@ import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.schema.DataSchema;
 import space.sunqian.fs.object.schema.MapSchema;
+import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
 
 import java.lang.reflect.Type;
@@ -227,7 +228,7 @@ public interface ObjectCopier {
          * @param options      the options used in the mapping process
          * @return the mapped name and value, may be {@code null} to ignore copy of this property
          */
-        Map.@Nullable Entry<@Nonnull Object, Object> map(
+        Map.@Nullable Entry<@Nonnull Object, @Nullable Object> map(
             @Nonnull Object propertyName,
             @Nonnull Object src,
             @Nonnull DataSchema srcSchema,
@@ -236,6 +237,89 @@ public interface ObjectCopier {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         );
+
+
+        /**
+         * This method will be invoked when copy an entry from the source map to a destination map.
+         *
+         * @param srcKey    the key of the entry to be copied
+         * @param srcValue  the value of the entry to be copied
+         * @param srcSchema the schema of the source map
+         * @param dst       the destination map
+         * @param dstSchema the schema of the destination map
+         * @param converter the converter used in the mapping process
+         * @param options   the options used in the mapping process
+         * @param <K1>      the type of the key of the source map
+         * @param <V1>      the type of the value of the source map
+         * @param <K2>      the type of the key of the destination map
+         * @param <V2>      the type of the value of the destination map
+         * @throws Exception any exception can be thrown here
+         */
+        default <K1, V1, K2, V2> void map(
+            @Nonnull K1 srcKey,
+            @Nullable V1 srcValue,
+            @Nonnull Map<K1, V1> src,
+            @Nonnull MapSchema srcSchema,
+            @Nonnull Map<K2, V2> dst,
+            @Nonnull MapSchema dstSchema,
+            @Nonnull ObjectConverter converter,
+            @Nonnull Option<?, ?> @Nonnull ... options
+        ) throws Exception {
+            if (ConvertBack.ignored(srcKey, options)) {
+                return;
+            }
+            // if (srcKey instanceof String) {
+            //     srcKey = ConvertBack.getNameMapper(options).map((String) srcKey, srcSchema.type());
+            // }
+            if (srcValue == null && ConvertBack.ignoreNull(options)) {
+                return;
+            }
+            K2 dstKey = Fs.as(converter.convert(srcKey, srcSchema.keyType(), dstSchema.keyType(), options));
+            V2 dstValue = Fs.as(converter.convert(srcValue, srcSchema.valueType(), dstSchema.valueType(), options));
+            dst.put(dstKey, dstValue);
+        }
+
+        /**
+         * This method will be invoked when copy an entry from the source map to a destination object.
+         *
+         * @param srcKey    the key of the entry to be copied
+         * @param srcValue  the value of the entry to be copied
+         * @param srcSchema the schema of the source map
+         * @param dst       the destination object
+         * @param dstSchema the schema of the destination object
+         * @param converter the converter used in the mapping process
+         * @param options   the options used in the mapping process
+         * @param <K1>      the type of the key of the source map
+         * @param <V1>      the type of the value of the source map
+         * @throws Exception any exception can be thrown here
+         */
+        default <K1, V1> void map(
+            @Nonnull K1 srcKey,
+            @Nullable V1 srcValue,
+            @Nonnull Map<K1, V1> src,
+            @Nonnull MapSchema srcSchema,
+            @Nonnull Object dst,
+            @Nonnull ObjectSchema dstSchema,
+            @Nonnull ObjectConverter converter,
+            @Nonnull Option<?, ?> @Nonnull ... options
+        ) throws Exception {
+            if (ConvertBack.ignored(srcKey, options)) {
+                return;
+            }
+            // if (srcKey instanceof String) {
+            //     srcKey = ConvertBack.getNameMapper(options).map((String) srcKey, srcSchema.type());
+            // }
+            if (srcValue == null && ConvertBack.ignoreNull(options)) {
+                return;
+            }
+            String dstPropertyName = Fs.as(converter.convert(srcKey, srcSchema.keyType(), String.class, options));
+            ObjectProperty dstProperty = dstSchema.getProperty(dstPropertyName);
+            if (dstProperty == null || !dstProperty.isWritable()) {
+                return;
+            }
+            Object dstPropertyValue = converter.convert(srcValue, srcSchema.valueType(), dstProperty.type(), options);
+            dstProperty.setValue(dst, dstPropertyValue);
+        }
     }
 
     /**
