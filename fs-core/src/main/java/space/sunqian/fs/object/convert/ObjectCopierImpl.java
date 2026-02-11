@@ -1,15 +1,17 @@
 package space.sunqian.fs.object.convert;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.option.OptionKit;
+import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.ObjectParser;
+import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
 
 import java.lang.reflect.Type;
@@ -18,23 +20,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-final class ObjectCopierImpl implements ObjectCopier {
+final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
 
-    static final @Nonnull ObjectCopier DEFAULT =
-        new ObjectCopierImpl(null, null, Collections.emptyList());
+    static final @Nonnull ObjectCopier DEFAULT = new ObjectCopierImpl(
+        ListKit.list(CommonCopierHandler.getInstance()),
+        Collections.emptyList()
+    );
 
-    private final @Nonnull PropertyMapper propertyMapper;
-    private final @Nullable ExceptionHandler exceptionHandler;
+    private final @Nonnull List<@Nonnull Handler> handlers;
     private final @Nonnull List<@Nonnull Option<?, ?>> defaultOptions;
     private final @Nonnull Option<?, ?> @Nonnull [] defaultOptionsArray;
 
     ObjectCopierImpl(
-        @Nullable PropertyMapper propertyMapper,
-        @Nullable ExceptionHandler exceptionHandler,
+        @Nonnull @RetainedParam List<@Nonnull Handler> handlers,
         @Nonnull @RetainedParam List<@Nonnull Option<?, ?>> defaultOptions
     ) {
-        this.propertyMapper = Fs.nonnull(propertyMapper, ObjectCopier.defaultPropertyMapper());
-        this.exceptionHandler = exceptionHandler;
+        this.handlers = Collections.unmodifiableList(handlers);
         this.defaultOptions = Collections.unmodifiableList(defaultOptions);
         this.defaultOptionsArray = defaultOptions.toArray(new Option[0]);
     }
@@ -48,8 +49,8 @@ final class ObjectCopierImpl implements ObjectCopier {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectCopyException {
-        @Nonnull Option<?, ?> @Nonnull [] actualOptions = OptionKit.mergeOptions(defaultOptionsArray, options);
         try {
+            @Nonnull Option<?, ?> @Nonnull [] actualOptions = OptionKit.mergeOptions(defaultOptionsArray, options);
             if (src instanceof Map) {
                 MapParser srcParser = ConvertKit.mapParser(actualOptions);
                 MapSchema srcSchema = parseMapSchema((Map<?, ?>) src, srcParser, srcType, actualOptions);
@@ -122,18 +123,18 @@ final class ObjectCopierImpl implements ObjectCopier {
     }
 
     @Override
-    public @Nullable PropertyMapper propertyMapper() {
-        return propertyMapper;
-    }
-
-    @Override
-    public @Nullable ExceptionHandler exceptionHandler() {
-        return exceptionHandler;
+    public @Nonnull List<@Nonnull Handler> handlers() {
+        return handlers;
     }
 
     @Override
     public @Nonnull List<@Nonnull Option<?, ?>> defaultOptions() {
         return defaultOptions;
+    }
+
+    @Override
+    public @Nonnull Handler asHandler() {
+        return this;
     }
 
     void mapToMap(
@@ -143,24 +144,19 @@ final class ObjectCopierImpl implements ObjectCopier {
         @Nonnull MapSchema dstSchema,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) {
-        src.forEach((srcKey, srcValue) -> {
-            try {
-                propertyMapper.map(
+    ) throws Exception {
+        for (Map.Entry<Object, Object> entry : src.entrySet()) {
+            Object srcKey = entry.getKey();
+            Object srcValue = entry.getValue();
+            for (Handler handler : handlers) {
+                boolean goon = handler.copyProperty(
                     srcKey, srcValue, src, srcSchema, dst, dstSchema, converter, options
                 );
-            } catch (Exception e) {
-                if (exceptionHandler != null) {
-                    try {
-                        exceptionHandler.handle(e, srcKey, src, srcSchema, dst, dstSchema, converter, options);
-                    } catch (Exception ex) {
-                        throw new ObjectCopyException(ex);
-                    }
-                } else {
-                    throw new ObjectCopyException(e);
+                if (!goon) {
+                    break;
                 }
             }
-        });
+        }
     }
 
     void mapToObject(
@@ -170,22 +166,19 @@ final class ObjectCopierImpl implements ObjectCopier {
         @Nonnull ObjectSchema dstSchema,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) {
-        src.forEach((srcKey, srcValue) -> {
-            try {
-                propertyMapper.map(srcKey, srcValue, src, srcSchema, dst, dstSchema, converter, options);
-            } catch (Exception e) {
-                if (exceptionHandler != null) {
-                    try {
-                        exceptionHandler.handle(e, srcKey, src, srcSchema, dst, dstSchema, converter, options);
-                    } catch (Exception ex) {
-                        throw new ObjectCopyException(ex);
-                    }
-                } else {
-                    throw new ObjectCopyException(e);
+    ) throws Exception {
+        for (Map.Entry<Object, Object> entry : src.entrySet()) {
+            Object srcKey = entry.getKey();
+            Object srcValue = entry.getValue();
+            for (Handler handler : handlers) {
+                boolean goon = handler.copyProperty(
+                    srcKey, srcValue, src, srcSchema, dst, dstSchema, converter, options
+                );
+                if (!goon) {
+                    break;
                 }
             }
-        });
+        }
     }
 
     void objectToMap(
@@ -195,22 +188,19 @@ final class ObjectCopierImpl implements ObjectCopier {
         @Nonnull MapSchema dstSchema,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) {
-        srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {
-            try {
-                propertyMapper.map(srcProperty, src, srcSchema, dst, dstSchema, converter, options);
-            } catch (Exception e) {
-                if (exceptionHandler != null) {
-                    try {
-                        exceptionHandler.handle(e, srcPropertyName, src, srcSchema, dst, dstSchema, converter, options);
-                    } catch (Exception ex) {
-                        throw new ObjectCopyException(ex);
-                    }
-                } else {
-                    throw new ObjectCopyException(e);
+    ) throws Exception {
+        for (Map.Entry<@Nonnull String, @Nonnull ObjectProperty> entry : srcSchema.properties().entrySet()) {
+            // String srcPropertyName = entry.getKey();
+            ObjectProperty srcProperty = entry.getValue();
+            for (Handler handler : handlers) {
+                boolean goon = handler.copyProperty(
+                    srcProperty.name(), srcProperty, src, srcSchema, dst, dstSchema, converter, options
+                );
+                if (!goon) {
+                    break;
                 }
             }
-        });
+        }
     }
 
     void objectToObject(
@@ -220,21 +210,18 @@ final class ObjectCopierImpl implements ObjectCopier {
         @Nonnull ObjectSchema dstSchema,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) {
-        srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {
-            try {
-                propertyMapper.map(srcProperty, src, srcSchema, dst, dstSchema, converter, options);
-            } catch (Exception e) {
-                if (exceptionHandler != null) {
-                    try {
-                        exceptionHandler.handle(e, srcPropertyName, src, srcSchema, dst, dstSchema, converter, options);
-                    } catch (Exception ex) {
-                        throw new ObjectCopyException(ex);
-                    }
-                } else {
-                    throw new ObjectCopyException(e);
+    ) throws Exception {
+        for (Map.Entry<@Nonnull String, @Nonnull ObjectProperty> entry : srcSchema.properties().entrySet()) {
+            // String srcPropertyName = entry.getKey();
+            ObjectProperty srcProperty = entry.getValue();
+            for (Handler handler : handlers) {
+                boolean goon = handler.copyProperty(
+                    srcProperty.name(), srcProperty, src, srcSchema, dst, dstSchema, converter, options
+                );
+                if (!goon) {
+                    break;
                 }
             }
-        });
+        }
     }
 }

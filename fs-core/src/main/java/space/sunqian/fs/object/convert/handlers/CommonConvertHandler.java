@@ -151,6 +151,8 @@ import java.util.function.IntFunction;
  * <p>
  * Note that this handler typically creates new objects for each conversion, and does not perform the same handing as
  * {@link AssignableConvertHandler}.
+ *
+ * @author SunQian
  */
 public class CommonConvertHandler implements ObjectConverter.Handler {
 

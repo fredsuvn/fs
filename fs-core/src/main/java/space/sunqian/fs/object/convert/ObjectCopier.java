@@ -8,7 +8,7 @@ import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
-import space.sunqian.fs.object.schema.DataSchema;
+import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
@@ -32,21 +32,50 @@ import java.util.Map;
 public interface ObjectCopier {
 
     /**
-     * Returns the default {@link ObjectCopier}.
+     * Returns the default {@link ObjectCopier}. Here are handlers in the default converter:
+     * <ul>
+     *     <li>{@link CommonCopierHandler#getInstance()};</li>
+     * </ul>
      *
      * @return the default {@link ObjectCopier}
+     * @see CommonCopierHandler
      */
     static @Nonnull ObjectCopier defaultCopier() {
         return ObjectCopierImpl.DEFAULT;
     }
 
     /**
-     * Returns the default {@link ObjectCopier.PropertyMapper}.
+     * Creates and returns a new {@link ObjectCopier} with the given handlers.
      *
-     * @return the default {@link ObjectCopier.PropertyMapper}
+     * @param handlers the given handlers
+     * @return a new {@link ObjectCopier} with the given handlers
      */
-    static @Nonnull ObjectCopier.PropertyMapper defaultPropertyMapper() {
-        return ConvertBack.DEFAULT_PROPERTY_MAPPER;
+    static @Nonnull ObjectCopier newCopier(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
+        return newCopier(ListKit.list(handlers));
+    }
+
+    /**
+     * Creates and returns a new {@link ObjectCopier} with given handlers.
+     *
+     * @param handlers given handlers
+     * @return a new {@link ObjectCopier} with given handlers
+     */
+    static @Nonnull ObjectCopier newCopier(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
+        return newCopier(handlers, Collections.emptyList());
+    }
+
+    /**
+     * Creates and returns a new {@link ObjectCopier} with given handlers and default options.
+     *
+     * @param handlers       given handlers
+     * @param defaultOptions given default options
+     * @return a new {@link ObjectCopier} with given handlers and default options
+     */
+    static @Nonnull ObjectCopier newCopier(
+        @Nonnull @RetainedParam List<@Nonnull Handler> handlers,
+        @Nonnull @RetainedParam List<@Nonnull Option<?, ?>> defaultOptions
+    ) {
+        return new ObjectCopierImpl(handlers, defaultOptions);
     }
 
     /**
@@ -145,21 +174,13 @@ public interface ObjectCopier {
     ) throws ObjectCopyException;
 
     /**
-     * Returns the {@link PropertyMapper} of this copier.
+     * Returns all handlers of this {@link ObjectCopier}.
      *
-     * @return the {@link PropertyMapper} of this copier, may be {@code null} if the default mapping logic is used
+     * @return all handlers of this {@link ObjectCopier}
      */
-    @Nullable
-    PropertyMapper propertyMapper();
-
-    /**
-     * Returns the {@link ExceptionHandler} of this copier.
-     *
-     * @return the {@link ExceptionHandler} of this copier, may be {@code null} if the default exception handling logic
-     * is used
-     */
-    @Nullable
-    ExceptionHandler exceptionHandler();
+    @Nonnull
+    @Immutable
+    List<@Nonnull Handler> handlers();
 
     /**
      * Returns the default options of this {@link ObjectCopier}.
@@ -171,33 +192,18 @@ public interface ObjectCopier {
     List<@Nonnull Option<?, ?>> defaultOptions();
 
     /**
-     * Returns a new {@link ObjectCopier} based on this copier but with the specified property mapper.
+     * Returns a new {@link ObjectCopier} of which first handler is the given handler and the next handler is this
+     * {@link ObjectCopier} as a {@link Handler}. This method is equivalent:
+     * <pre>{@code
+     * newConverter(firstHandler, this.asHandler())
+     * }</pre>
      *
-     * @param propertyMapper the property mapper for copying each object property, may be {@code null} to use the
-     *                       default mapping logic
-     * @return a new {@link ObjectCopier} based on this copier but with the specified property mapper
+     * @param firstHandler the first handler
+     * @return a new {@link ObjectCopier} of which first handler is the given handler and the next handler is this
+     * {@link ObjectCopier} as a {@link Handler}
      */
-    default @Nonnull ObjectCopier withPropertyMapper(@Nullable PropertyMapper propertyMapper) {
-        return new Builder()
-            .propertyMapper(propertyMapper)
-            .exceptionHandler(exceptionHandler())
-            .defaultOptions(defaultOptions())
-            .build();
-    }
-
-    /**
-     * Returns a new {@link ObjectCopier} based on this copier but with the specified exception handler.
-     *
-     * @param exceptionHandler the exception handler for handling exceptions that occur during copying properties, may
-     *                         be {@code null} to use the default exception handling logic
-     * @return a new {@link ObjectCopier} based on this copier but with the specified exception handler
-     */
-    default @Nonnull ObjectCopier withExceptionHandler(@Nullable ExceptionHandler exceptionHandler) {
-        return new Builder()
-            .propertyMapper(propertyMapper())
-            .exceptionHandler(exceptionHandler)
-            .defaultOptions(defaultOptions())
-            .build();
+    default @Nonnull ObjectCopier withFirstHandler(@Nonnull Handler firstHandler) {
+        return newCopier(firstHandler, this.asHandler());
     }
 
     /**
@@ -207,41 +213,48 @@ public interface ObjectCopier {
      * @return a new {@link ObjectCopier} of which default options are the given options
      */
     default @Nonnull ObjectCopier withDefaultOptions(@Nonnull Option<?, ?> @Nonnull ... defaultOptions) {
-        return new Builder()
-            .propertyMapper(propertyMapper())
-            .exceptionHandler(exceptionHandler())
-            .defaultOptions(ListKit.list(defaultOptions))
-            .build();
+        return newCopier(handlers(), ListKit.list(defaultOptions));
     }
+
+    /**
+     * Returns this {@link ObjectCopier} as a {@link Handler}.
+     *
+     * @return this {@link ObjectCopier} as a {@link Handler}
+     */
+    @Nonnull
+    Handler asHandler();
 
     /**
      * Property mapper for copying each object property to the destination object. It has 4 methods:
      * <ul>
      *     <li>
-     *         {@link #map(Object, Object, Map, MapSchema, Map, MapSchema, ObjectConverter, Option[])}:
+     *         {@link #copyProperty(Object, Object, Map, MapSchema, Map, MapSchema, ObjectConverter, Option[])}:
      *         from source map entry to destination map entry;
      *     </li>
      *     <li>
-     *         {@link #map(Object, Object, Map, MapSchema, Object, ObjectSchema, ObjectConverter, Option[])}:
+     *         {@link #copyProperty(Object, Object, Map, MapSchema, Object, ObjectSchema, ObjectConverter, Option[])}:
      *         from source map entry to destination object property;
      *     </li>
      *     <li>
-     *         {@link #map(ObjectProperty, Object, ObjectSchema, Map, MapSchema, ObjectConverter, Option[])}:
+     *         {@link #copyProperty(String, ObjectProperty, Object, ObjectSchema, Map, MapSchema, ObjectConverter, Option[])}:
      *         from source object property to destination map entry;
      *     </li>
      *     <li>
-     *         {@link #map(ObjectProperty, Object, ObjectSchema, Map, MapSchema, ObjectConverter, Option[])}:
+     *         {@link #copyProperty(String, ObjectProperty, Object, ObjectSchema, Map, MapSchema, ObjectConverter, Option[])}:
      *         from source object property to destination object property;
      *     </li>
      * </ul>
-     * All those methods have default implementations.
+     * All those methods have default implementations, which directly copy properties from the source object to the
+     * target object, following the rules of the specified options defined in {@link ConvertOption}.
      *
      * @author sunqian
      */
-    interface PropertyMapper {
+    interface Handler {
 
         /**
-         * This method will be invoked when copy an entry from the source map to a destination map.
+         * This method will be invoked when copy an entry from the source map to a destination map. Returns
+         * {@code false} to prevent subsequent handlers to continue to copy, otherwise returns {@code true} to continue
+         * to copy.
          *
          * @param srcKey    the key of the entry to be copied
          * @param srcValue  the value of the entry to be copied
@@ -250,38 +263,38 @@ public interface ObjectCopier {
          * @param dstSchema the schema of the destination map
          * @param converter the converter used in the mapping process
          * @param options   the options used in the mapping process
-         * @param <K1>      the type of the key of the source map
-         * @param <V1>      the type of the value of the source map
-         * @param <K2>      the type of the key of the destination map
-         * @param <V2>      the type of the value of the destination map
+         * @return whether to continue to copy
          * @throws Exception any exception can be thrown here
          */
-        default <K1, V1, K2, V2> void map(
-            @Nonnull K1 srcKey,
-            @Nullable V1 srcValue,
-            @Nonnull Map<K1, V1> src,
+        default boolean copyProperty(
+            @Nonnull Object srcKey,
+            @Nullable Object srcValue,
+            @Nonnull Map<Object, Object> src,
             @Nonnull MapSchema srcSchema,
-            @Nonnull Map<K2, V2> dst,
+            @Nonnull Map<Object, Object> dst,
             @Nonnull MapSchema dstSchema,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception {
             if (ConvertBack.ignored(srcKey, options)) {
-                return;
+                return false;
             }
             if (srcValue == null && ConvertBack.ignoreNull(options)) {
-                return;
+                return false;
             }
             if (srcKey instanceof String) {
                 srcKey = Fs.as(ConvertBack.getNameMapper(options).map((String) srcKey));
             }
-            K2 dstKey = Fs.as(converter.convert(srcKey, srcSchema.keyType(), dstSchema.keyType(), options));
-            V2 dstValue = Fs.as(converter.convert(srcValue, srcSchema.valueType(), dstSchema.valueType(), options));
+            Object dstKey = converter.convert(srcKey, srcSchema.keyType(), dstSchema.keyType(), options);
+            Object dstValue = converter.convert(srcValue, srcSchema.valueType(), dstSchema.valueType(), options);
             dst.put(dstKey, dstValue);
+            return false;
         }
 
         /**
-         * This method will be invoked when copy an entry from the source map to a destination object.
+         * This method will be invoked when copy an entry from the source map to a destination object. Returns
+         * {@code false} to prevent subsequent handlers to continue to copy, otherwise returns {@code true} to continue
+         * to copy.
          *
          * @param srcKey    the key of the entry to be copied
          * @param srcValue  the value of the entry to be copied
@@ -290,14 +303,13 @@ public interface ObjectCopier {
          * @param dstSchema the schema of the destination object
          * @param converter the converter used in the mapping process
          * @param options   the options used in the mapping process
-         * @param <K1>      the type of the key of the source map
-         * @param <V1>      the type of the value of the source map
+         * @return whether to continue to copy
          * @throws Exception any exception can be thrown here
          */
-        default <K1, V1> void map(
-            @Nonnull K1 srcKey,
-            @Nullable V1 srcValue,
-            @Nonnull Map<K1, V1> src,
+        default boolean copyProperty(
+            @Nonnull Object srcKey,
+            @Nullable Object srcValue,
+            @Nonnull Map<Object, Object> src,
             @Nonnull MapSchema srcSchema,
             @Nonnull Object dst,
             @Nonnull ObjectSchema dstSchema,
@@ -305,80 +317,89 @@ public interface ObjectCopier {
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception {
             if (ConvertBack.ignored(srcKey, options)) {
-                return;
+                return false;
             }
             if (srcValue == null && ConvertBack.ignoreNull(options)) {
-                return;
+                return false;
             }
             if (srcKey instanceof String) {
-                srcKey = Fs.as(ConvertBack.getNameMapper(options).map((String) srcKey));
+                srcKey = ConvertBack.getNameMapper(options).map((String) srcKey);
             }
             String dstPropertyName = Fs.as(converter.convert(srcKey, srcSchema.keyType(), String.class, options));
             ObjectProperty dstProperty = dstSchema.getProperty(dstPropertyName);
             if (dstProperty == null || !dstProperty.isWritable()) {
-                return;
+                return false;
             }
             Object dstPropertyValue = converter.convert(srcValue, srcSchema.valueType(), dstProperty.type(), options);
             dstProperty.setValue(dst, dstPropertyValue);
+            return false;
         }
 
         /**
-         * This method will be invoked when copy a property from the source object to a destination map.
+         * This method will be invoked when copy a property from the source object to a destination map. Returns
+         * {@code false} to prevent subsequent handlers to continue to copy, otherwise returns {@code true} to continue
+         * to copy.
          *
-         * @param srcProperty the property to be copied
-         * @param src         the source object
-         * @param srcSchema   the schema of the source object
-         * @param dst         the destination map
-         * @param dstSchema   the schema of the destination map
-         * @param converter   the converter used in the mapping process
-         * @param options     the options used in the mapping process
-         * @param <K2>        the type of the key of the destination map
-         * @param <V2>        the type of the value of the destination map
+         * @param srcPropertyName the name of the property to be copied
+         * @param srcProperty     the property to be copied
+         * @param src             the source object
+         * @param srcSchema       the schema of the source object
+         * @param dst             the destination map
+         * @param dstSchema       the schema of the destination map
+         * @param converter       the converter used in the mapping process
+         * @param options         the options used in the mapping process
+         * @return whether to continue to copy
          * @throws Exception any exception can be thrown here
          */
-        default <K2, V2> void map(
+        default boolean copyProperty(
+            @Nonnull String srcPropertyName,
             @Nonnull ObjectProperty srcProperty,
             @Nonnull Object src,
             @Nonnull ObjectSchema srcSchema,
-            @Nonnull Map<K2, V2> dst,
+            @Nonnull Map<Object, Object> dst,
             @Nonnull MapSchema dstSchema,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception {
             if (ConvertBack.ignored(srcProperty.name(), options)) {
-                return;
+                return false;
             }
             if (!srcProperty.isReadable()) {
-                return;
+                return false;
             }
-            String srcPropertyName = srcProperty.name();
             // do not map "class"
             if ("class".equals(srcPropertyName)) {
-                return;
+                return false;
             }
-            srcPropertyName = ConvertBack.getNameMapper(options).map(srcPropertyName);
+            String actualSrcPropertyName = ConvertBack.getNameMapper(options).map(srcPropertyName);
             Object srcPropertyValue = srcProperty.getValue(src);
             if (srcPropertyValue == null && ConvertBack.ignoreNull(options)) {
-                return;
+                return false;
             }
-            K2 dstKey = Fs.as(converter.convert(srcPropertyName, String.class, dstSchema.keyType(), options));
-            V2 dstValue = Fs.as(converter.convert(srcPropertyValue, srcProperty.type(), dstSchema.valueType(), options));
+            Object dstKey = converter.convert(actualSrcPropertyName, String.class, dstSchema.keyType(), options);
+            Object dstValue = converter.convert(srcPropertyValue, srcProperty.type(), dstSchema.valueType(), options);
             dst.put(dstKey, dstValue);
+            return false;
         }
 
         /**
-         * This method will be invoked when copy a property from the source object to a destination object.
+         * This method will be invoked when copy a property from the source object to a destination object. Returns
+         * {@code false} to prevent subsequent handlers to continue to copy, otherwise returns {@code true} to continue
+         * to copy.
          *
-         * @param srcProperty the property to be copied
-         * @param src         the source object
-         * @param srcSchema   the schema of the source object
-         * @param dst         the destination object
-         * @param dstSchema   the schema of the destination object
-         * @param converter   the converter used in the mapping process
-         * @param options     the options used in the mapping process
+         * @param srcPropertyName the name of the property to be copied
+         * @param srcProperty     the property to be copied
+         * @param src             the source object
+         * @param srcSchema       the schema of the source object
+         * @param dst             the destination object
+         * @param dstSchema       the schema of the destination object
+         * @param converter       the converter used in the mapping process
+         * @param options         the options used in the mapping process
+         * @return whether to continue to copy
          * @throws Exception any exception can be thrown here
          */
-        default void map(
+        default boolean copyProperty(
+            @Nonnull String srcPropertyName,
             @Nonnull ObjectProperty srcProperty,
             @Nonnull Object src,
             @Nonnull ObjectSchema srcSchema,
@@ -388,128 +409,30 @@ public interface ObjectCopier {
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception {
             if (ConvertBack.ignored(srcProperty.name(), options)) {
-                return;
+                return false;
             }
             if (!srcProperty.isReadable()) {
-                return;
+                return false;
             }
-            String srcPropertyName = srcProperty.name();
             // do not map "class"
             if ("class".equals(srcPropertyName)) {
-                return;
+                return false;
             }
-            srcPropertyName = ConvertBack.getNameMapper(options).map(srcPropertyName);
+            String actualSrcPropertyName = ConvertBack.getNameMapper(options).map(srcPropertyName);
             Object srcPropertyValue = srcProperty.getValue(src);
             if (srcPropertyValue == null && ConvertBack.ignoreNull(options)) {
-                return;
+                return false;
             }
-            String dstPropertyName = Fs.as(converter.convert(srcPropertyName, String.class, String.class, options));
+            String dstPropertyName = Fs.as(converter.convert(actualSrcPropertyName, String.class, String.class, options));
             ObjectProperty dstProperty = dstSchema.getProperty(dstPropertyName);
             if (dstProperty == null || !dstProperty.isWritable()) {
-                return;
+                return false;
             }
             Object dstPropertyValue = converter.convert(
                 srcPropertyValue, srcProperty.type(), dstProperty.type(), options
             );
             dstProperty.setValue(dst, dstPropertyValue);
-        }
-    }
-
-    /**
-     * Exception handler for copying object property, used to handle exceptions thrown when copying a property.
-     */
-    interface ExceptionHandler {
-
-        /**
-         * Handles the exception thrown when copying a source property to a destination property, can throw an exception
-         * directly here.
-         * <p>
-         * This method is applicable to both {@link Map} and non-map object. For non-map objects, the type of property
-         * name must be {@link String}.
-         *
-         * @param e            the exception thrown when copying a source property to a destination property
-         * @param propertyName the name of the specified property to be copied
-         * @param src          the source object
-         * @param srcSchema    the schema of the source object
-         * @param dst          the destination object
-         * @param dstSchema    the schema of the destination object
-         * @param converter    the converter used in the mapping process
-         * @param options      the options used in the mapping process
-         * @throws Exception any exception can be thrown here
-         */
-        void handle(
-            @Nonnull Throwable e,
-            @Nonnull Object propertyName,
-            @Nonnull Object src,
-            @Nonnull DataSchema srcSchema,
-            @Nonnull Object dst,
-            @Nonnull DataSchema dstSchema,
-            @Nonnull ObjectConverter converter,
-            @Nonnull Option<?, ?> @Nonnull ... options
-        ) throws Exception;
-    }
-
-    /**
-     * Builder for {@link ObjectCopier}.
-     */
-    class Builder {
-
-        private @Nullable PropertyMapper propertyMapper;
-        private @Nullable ExceptionHandler exceptionHandler;
-        private @Nullable List<@Nonnull Option<?, ?>> defaultOptions;
-
-        /**
-         * Sets the {@link PropertyMapper} for the {@link ObjectCopier}.
-         * <p>
-         * The default {@link PropertyMapper} is {@code null}, in which case the {@link ObjectCopier} follows the given
-         * options and default mapping logic.
-         *
-         * @param propertyMapper the given {@link PropertyMapper}
-         * @return this builder
-         */
-        public @Nonnull Builder propertyMapper(@Nullable PropertyMapper propertyMapper) {
-            this.propertyMapper = propertyMapper;
-            return this;
-        }
-
-        /**
-         * Sets the {@link ExceptionHandler} for the {@link ObjectCopier}.
-         * <p>
-         * The default {@link ExceptionHandler} is {@code null}, in which case the {@link ObjectCopier} throws the
-         * exception directly.
-         *
-         * @param exceptionHandler the given {@link ExceptionHandler}
-         * @return this builder
-         */
-        public @Nonnull Builder exceptionHandler(@Nullable ExceptionHandler exceptionHandler) {
-            this.exceptionHandler = exceptionHandler;
-            return this;
-        }
-
-        /**
-         * Sets the default options for the {@link ObjectCopier}.
-         * <p>
-         * By default, it is empty.
-         *
-         * @param defaultOptions the default options
-         * @return this builder
-         */
-        public @Nonnull Builder defaultOptions(@Nullable @RetainedParam List<@Nonnull Option<?, ?>> defaultOptions) {
-            this.defaultOptions = defaultOptions;
-            return this;
-        }
-
-        /**
-         * Builds and returns a new {@link ObjectCopier} with the configured options.
-         *
-         * @return a new {@link ObjectCopier} with the configured options
-         */
-        public ObjectCopier build() {
-            return new ObjectCopierImpl(
-                propertyMapper,
-                exceptionHandler,
-                Fs.nonnull(defaultOptions, Collections.emptyList())
-            );
+            return false;
         }
     }
 }

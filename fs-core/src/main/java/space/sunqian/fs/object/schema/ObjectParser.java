@@ -38,6 +38,8 @@ public interface ObjectParser {
      * Note the default {@link ObjectParser} is singleton, and never caches the parsed results.
      *
      * @return the default {@link ObjectParser}
+     * @see CommonSchemaHandler
+     * @see RecordSchemaHandler
      */
     static @Nonnull ObjectParser defaultParser() {
         return SchemaBack.defaultObjectParser();
@@ -158,7 +160,7 @@ public interface ObjectParser {
          * Parses {@link Type} to {@link ObjectSchema} with its owner parsing logic. The {@link Type} is specified by
          * {@link Context#parsedType()} of the given context, and the parsed properties should be stored in
          * {@link Context#propertyBaseMap()}. Returns {@code false} to prevent subsequent handlers to continue to parse,
-         * otherwise returns {@code true}.
+         * otherwise returns {@code true} to continue to parse.
          *
          * @param context the given context
          * @return whether to continue to parse

@@ -207,7 +207,7 @@ public enum ConvertOption {
      * Returns an option to specify the {@link NameMapper}.
      * <p>
      * Note that this configuration is only valid for the {@link String} type property names (both source and target),
-     * and executed before the configured {@link ObjectCopier.PropertyMapper} (if any, and it means the property name
+     * and executed before the configured {@link ObjectCopier.Handler} (if any, and it means the property name
      * received by the property mapper will be mapped by the name mapper first). For property names whose type is not
      * {@link String}, such as non-{@link String} keys of a {@link Map}, this configuration will not take effect.
      * <p>
@@ -238,7 +238,7 @@ public enum ConvertOption {
 
     /**
      * Returns an option to specify whether ignores {@code null} properties from the source object. If there exists a
-     * {@link ObjectCopier.PropertyMapper} in the current {@link ObjectCopier}, this option will be ignored.
+     * {@link ObjectCopier.Handler} in the current {@link ObjectCopier}, this option will be ignored.
      * <p>
      * By default, this option is disabled.
      *

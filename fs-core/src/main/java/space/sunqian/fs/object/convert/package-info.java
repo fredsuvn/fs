@@ -15,7 +15,7 @@
  *     <li>{@link space.sunqian.fs.object.convert.handlers.AssignableConvertHandler}</li>
  *     <li>{@link space.sunqian.fs.object.convert.handlers.CommonConvertHandler}</li>
  *     <li>{@link space.sunqian.fs.object.convert.ObjectCopier}</li>
- *     <li>{@link space.sunqian.fs.object.convert.ObjectCopier.PropertyMapper}</li>
+ *     <li>{@link space.sunqian.fs.object.convert.ObjectCopier.Handler}</li>
  * </ul>
  */
 package space.sunqian.fs.object.convert;

@@ -60,6 +60,8 @@ public interface ObjectConverter {
      * </ul>
      *
      * @return the default converter
+     * @see AssignableConvertHandler
+     * @see CommonConvertHandler
      */
     static @Nonnull ObjectConverter defaultConverter() {
         return ObjectConverterImpl.DEFAULT;

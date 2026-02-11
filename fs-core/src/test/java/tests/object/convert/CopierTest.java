@@ -9,9 +9,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
+import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.exception.UnreachablePointException;
+import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.object.convert.ConvertOption;
@@ -20,6 +21,7 @@ import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.convert.ObjectCopyException;
 import space.sunqian.fs.object.schema.MapParser;
+import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
@@ -62,6 +64,57 @@ public class CopierTest implements PrintTest {
     private void testCopyProperties(ObjectCopier objectCopier) {
         Type typeA = new TypeRef<Map<String, String>>() {}.type();
         Type typeB = new TypeRef<Map<String, Integer>>() {}.type();
+
+        // no copy
+        ObjectCopier.Handler noCopyHandler = new ObjectCopier.Handler() {
+            @Override
+            public <K1, V1, K2, V2> boolean copyProperty(K1 srcKey, V1 srcValue, @Nonnull Map<K1, V1> src, @Nonnull MapSchema srcSchema, @Nonnull Map<K2, V2> dst, @Nonnull MapSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                return false;
+            }
+
+            @Override
+            public <K1, V1> boolean copyProperty(K1 srcKey, V1 srcValue, @Nonnull Map<K1, V1> src, @Nonnull MapSchema srcSchema, @Nonnull Object dst, @Nonnull ObjectSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                return false;
+            }
+
+            @Override
+            public <K2, V2> boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull ObjectProperty srcProperty, @Nonnull Object src, @Nonnull ObjectSchema srcSchema, @Nonnull Map<K2, V2> dst, @Nonnull MapSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                return false;
+            }
+
+            @Override
+            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull ObjectProperty srcProperty, @Nonnull Object src, @Nonnull ObjectSchema srcSchema, @Nonnull Object dst, @Nonnull ObjectSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                return false;
+            }
+        };
+
+        // key + "2"
+        ObjectCopier.Handler keyPlusHandler = new ObjectCopier.Handler() {
+            @Override
+            public <K1, V1, K2, V2> boolean copyProperty(K1 srcKey, V1 srcValue, @Nonnull Map<K1, V1> src, @Nonnull MapSchema srcSchema, @Nonnull Map<K2, V2> dst, @Nonnull MapSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                return ObjectCopier.Handler.super.copyProperty(
+                    (K1) (srcKey + "2"), srcValue, src, srcSchema, dst, dstSchema, converter, options);
+            }
+
+            @Override
+            public <K1, V1> boolean copyProperty(K1 srcKey, V1 srcValue, @Nonnull Map<K1, V1> src, @Nonnull MapSchema srcSchema, @Nonnull Object dst, @Nonnull ObjectSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                return ObjectCopier.Handler.super.copyProperty(
+                    (K1) (srcKey + "2"), srcValue, src, srcSchema, dst, dstSchema, converter, options);
+            }
+
+            @Override
+            public <K2, V2> boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull ObjectProperty srcProperty, @Nonnull Object src, @Nonnull ObjectSchema srcSchema, @Nonnull Map<K2, V2> dst, @Nonnull MapSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                return ObjectCopier.Handler.super.copyProperty(
+                    srcPropertyName + "2", srcProperty, src, srcSchema, dst, dstSchema, converter, options);
+            }
+
+            @Override
+            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull ObjectProperty srcProperty, @Nonnull Object src, @Nonnull ObjectSchema srcSchema, @Nonnull Object dst, @Nonnull ObjectSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                return ObjectCopier.Handler.super.copyProperty(
+                    srcPropertyName + "2", srcProperty, src, srcSchema, dst, dstSchema, converter, options);
+            }
+        };
+
         {
             // map to map
             Map<String, String> mapA = MapKit.map("first", "1", "second", "2", "third", "3");
@@ -71,7 +124,7 @@ public class CopierTest implements PrintTest {
             assertEquals(MapKit.map("first", 1, "second", 2, "third", 3), mapB);
             Map<String, String> mapA2 = new HashMap<>();
             objectCopier
-                .withPropertyMapper((propertyName, src, srcSchema, dst, dstSchema, converter, options) -> null)
+                .withFirstHandler(noCopyHandler)
                 .copyProperties(mapA, typeA, mapA2, typeA);
             assertTrue(mapA2.isEmpty());
             objectCopier
@@ -539,33 +592,6 @@ public class CopierTest implements PrintTest {
                 ClsA.class,
                 ConvertOption.strictSourceTypeMode(true)
             )
-        );
-    }
-
-    @Test
-    public void testForAnnotations() {
-        Date now = new Date();
-        Map<String, String> map = new HashMap<>();
-        ClsDates dates = new ClsDates(now, now);
-        ObjectCopier.defaultCopier().withPropertyMapper(
-            (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
-                ObjectSchema schema = (ObjectSchema) srcSchema;
-                ObjectProperty property = schema.getProperty(propertyName.toString());
-                Date srcValue = (Date) property.getValue(src);
-                String format = schema
-                    .getProperty(propertyName.toString())
-                    .getAnnotation(Format.class)
-                    .value();
-                return MapKit.entry(propertyName, DateFormatter.ofPattern(format).format(srcValue));
-            }
-        ).copyProperties(dates, map);
-        assertEquals(
-            map.get("first"),
-            DateFormatter.ofPattern("yyyy-MM-dd").format(now)
-        );
-        assertEquals(
-            map.get("second"),
-            DateFormatter.ofPattern("HH:mm:ss").format(now)
         );
     }
 

@@ -10,8 +10,6 @@ final class ConvertBack {
 
     private static final @Nonnull NameMapper EMPTY_NAME_MAPPER = name -> name;
 
-    static final @Nonnull ObjectCopier.PropertyMapper DEFAULT_PROPERTY_MAPPER = new ObjectCopier.PropertyMapper() {};
-
     static boolean ignored(@Nonnull Object propertyName, @Nonnull Option<?, ?> @Nonnull ... options) {
         Object[] ignoredProperties = OptionKit.findValue(ConvertOption.IGNORE_PROPERTIES, options);
         if (ignoredProperties == null) {
