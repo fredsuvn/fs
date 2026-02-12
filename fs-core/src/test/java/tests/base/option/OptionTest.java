@@ -64,22 +64,22 @@ public class OptionTest {
             array(Option.of("a", "1"), Option.of("b", "2"), Option.of("c", "3")),
             defaultOptions
         );
-        assertSame(
+        assertNotSame(
             defaultOptions,
             OptionKit.mergeOptions(defaultOptions, defaultOptions)
         );
         assertArrayEquals(
             array(Option.of("a", "1"), Option.of("b", "2"), Option.of("c", "3")),
-            defaultOptions
+            OptionKit.mergeOptions(defaultOptions, defaultOptions)
         );
         Option<String, String>[] additionalOptions2 = array(Option.of("b", "22"));
-        assertSame(
+        assertNotSame(
             defaultOptions,
             OptionKit.mergeOptions(defaultOptions, additionalOptions2)
         );
         assertArrayEquals(
             array(Option.of("a", "1"), Option.of("b", "22"), Option.of("c", "3")),
-            defaultOptions
+            OptionKit.mergeOptions(defaultOptions, additionalOptions2)
         );
         Option<String, String>[] additionalOptions3 = array(Option.of("d", "4"), Option.of("e", "5"));
         assertNotSame(
@@ -87,7 +87,7 @@ public class OptionTest {
             OptionKit.mergeOptions(defaultOptions, additionalOptions3)
         );
         assertArrayEquals(
-            array(Option.of("a", "1"), Option.of("b", "22"), Option.of("c", "3"), Option.of("e", "5"), Option.of("d", "4")),
+            array(Option.of("a", "1"), Option.of("b", "2"), Option.of("c", "3"), Option.of("e", "5"), Option.of("d", "4")),
             OptionKit.mergeOptions(defaultOptions, additionalOptions3)
         );
         Option<String, String>[] additionalOptions4 = array(Option.of("c", "3"), Option.of("d", "4"));
@@ -96,7 +96,7 @@ public class OptionTest {
             OptionKit.mergeOptions(defaultOptions, additionalOptions4)
         );
         assertArrayEquals(
-            array(Option.of("a", "1"), Option.of("b", "22"), Option.of("c", "3"), Option.of("d", "4")),
+            array(Option.of("a", "1"), Option.of("b", "2"), Option.of("c", "3"), Option.of("d", "4")),
             OptionKit.mergeOptions(defaultOptions, additionalOptions4)
         );
     }

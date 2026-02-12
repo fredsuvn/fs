@@ -72,12 +72,10 @@ public class OptionKit {
     /**
      * Merges the additional options to the default options.
      * <p>
-     * All additional options whose key equals the key of the default options will override the corresponding option in
-     * the default options array. All additional options whose key does not exist in the default options array will be
-     * added to the returned options array.
-     * <p>
-     * For the default options array, if there is no new option added, the default options array itself will be the
-     * returned array, otherwise a new array will be created and returned.
+     * If the additional options array is empty, the default options array will be returned. Otherwise, a new array will
+     * be copied from the default options array with the new length and returned. Any additional option whose key equals
+     * the key of the default option will override the default option in the returned array. Any new additional option
+     * whose key does not exist in the default options array will be added to the returned array.
      *
      * @param defaultOptions    the default options
      * @param additionalOptions the additional options
@@ -89,7 +87,7 @@ public class OptionKit {
         @Nonnull Option<?, ?> @Nonnull @RetainedParam [] defaultOptions,
         @Nonnull Option<?, ?> @Nonnull [] additionalOptions
     ) {
-        if (additionalOptions.length == 0) {
+        if (ArrayKit.isEmpty(additionalOptions)) {
             return Fs.as(defaultOptions);
         }
         int newCount = 0;
@@ -102,12 +100,7 @@ public class OptionKit {
             }
             newCount++;
         }
-        Option<?, ?>[] result;
-        if (newCount == 0) {
-            result = defaultOptions;
-        } else {
-            result = Arrays.copyOf(defaultOptions, defaultOptions.length + newCount);
-        }
+        Option<?, ?>[] result = Arrays.copyOf(defaultOptions, defaultOptions.length + newCount);
         int lastIndex = result.length - 1;
         ADDITIONAL:
         for (Option<?, ?> additionalOption : additionalOptions) {
