@@ -10,6 +10,7 @@ import space.sunqian.fs.collect.ArrayKit;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NameTest {
@@ -397,6 +398,10 @@ public class NameTest {
         assertEquals(
             "some-mapper",
             mapper.map("someMapper")
+        );
+        assertSame(
+            "1qaz!QAZ",
+            NameMapper.keep().map("1qaz!QAZ")
         );
     }
 

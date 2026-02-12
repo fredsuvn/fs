@@ -10,6 +10,15 @@ import space.sunqian.annotation.Nonnull;
 public interface NameMapper {
 
     /**
+     * Returns a name mapper that keeps the name as it is, the logic is {@code name -> name}.
+     *
+     * @return a name mapper that keeps the name as it is
+     */
+    static @Nonnull NameMapper keep() {
+        return NameMapperBack.KEEP;
+    }
+
+    /**
      * Creates a name mapper from the specified source formatter to the destination formatter.
      *
      * @param src the source formatter
