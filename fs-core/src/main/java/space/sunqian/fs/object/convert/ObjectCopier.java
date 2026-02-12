@@ -9,6 +9,7 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
+import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
@@ -45,31 +46,37 @@ public interface ObjectCopier {
     }
 
     /**
-     * Creates and returns a new {@link ObjectCopier} with the given handlers.
+     * Creates and returns a default implementation of {@link ObjectCopier} with the given handlers, the default
+     * implementation and the default handler ({@link CommonCopierHandler}) follow the options from
+     * {@link ConvertOption}.
      *
      * @param handlers the given handlers
-     * @return a new {@link ObjectCopier} with the given handlers
+     * @return a default implementation of {@link ObjectCopier} with the given handlers
      */
     static @Nonnull ObjectCopier newCopier(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
         return newCopier(ListKit.list(handlers));
     }
 
     /**
-     * Creates and returns a new {@link ObjectCopier} with given handlers.
+     * Creates and returns a default implementation of {@link ObjectCopier} with the given handlers, the default
+     * implementation and the default handler ({@link CommonCopierHandler}) follow the options from
+     * {@link ConvertOption}.
      *
      * @param handlers given handlers
-     * @return a new {@link ObjectCopier} with given handlers
+     * @return a default implementation of {@link ObjectCopier} with the given handlers
      */
     static @Nonnull ObjectCopier newCopier(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
         return newCopier(handlers, Collections.emptyList());
     }
 
     /**
-     * Creates and returns a new {@link ObjectCopier} with given handlers and default options.
+     * Creates and returns a default implementation of {@link ObjectCopier} with the given handlers and default options,
+     * the default implementation and the default handler ({@link CommonCopierHandler}) follow the options from
+     * {@link ConvertOption}.
      *
      * @param handlers       given handlers
      * @param defaultOptions given default options
-     * @return a new {@link ObjectCopier} with given handlers and default options
+     * @return a default implementation of {@link ObjectCopier} with the given handlers and default options
      */
     static @Nonnull ObjectCopier newCopier(
         @Nonnull @RetainedParam List<@Nonnull Handler> handlers,
@@ -225,7 +232,8 @@ public interface ObjectCopier {
     Handler asHandler();
 
     /**
-     * Property mapper for copying each object property to the destination object. It has 4 methods:
+     * Handler for {@link ObjectCopier}, provides the specific copy logic for copying each object property to the
+     * destination object. It has 4 methods:
      * <ul>
      *     <li>
      *         {@link #copyProperty(Object, Object, Map, MapSchema, Map, MapSchema, ObjectConverter, Option[])}:
@@ -246,6 +254,9 @@ public interface ObjectCopier {
      * </ul>
      * All those methods have default implementations, which directly copy properties from the source object to the
      * target object, following the rules of the specified options defined in {@link ConvertOption}.
+     * <p>
+     * The thread safety of the methods in this interface is determined by its dependent {@link ObjectConverter},
+     * {@link CreatorProvider}, and other objects. By default, they are all thread-safe.
      *
      * @author sunqian
      */
@@ -276,14 +287,14 @@ public interface ObjectCopier {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception {
-            if (ConvertBack.ignored(srcKey, options)) {
+            if (ConvertOption.ignoresProperty(srcKey, options)) {
                 return false;
             }
-            if (srcValue == null && ConvertBack.ignoreNull(options)) {
+            if (srcValue == null && ConvertOption.ignoresNull(options)) {
                 return false;
             }
             if (srcKey instanceof String) {
-                srcKey = Fs.as(ConvertBack.getNameMapper(options).map((String) srcKey));
+                srcKey = Fs.as(ConvertOption.getNameMapper(options).map((String) srcKey));
             }
             Object dstKey = converter.convert(srcKey, srcSchema.keyType(), dstSchema.keyType(), options);
             Object dstValue = converter.convert(srcValue, srcSchema.valueType(), dstSchema.valueType(), options);
@@ -316,14 +327,14 @@ public interface ObjectCopier {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception {
-            if (ConvertBack.ignored(srcKey, options)) {
+            if (ConvertOption.ignoresProperty(srcKey, options)) {
                 return false;
             }
-            if (srcValue == null && ConvertBack.ignoreNull(options)) {
+            if (srcValue == null && ConvertOption.ignoresNull(options)) {
                 return false;
             }
             if (srcKey instanceof String) {
-                srcKey = ConvertBack.getNameMapper(options).map((String) srcKey);
+                srcKey = ConvertOption.getNameMapper(options).map((String) srcKey);
             }
             String dstPropertyName = Fs.as(converter.convert(srcKey, srcSchema.keyType(), String.class, options));
             ObjectProperty dstProperty = dstSchema.getProperty(dstPropertyName);
@@ -361,19 +372,18 @@ public interface ObjectCopier {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception {
-            if (ConvertBack.ignored(srcProperty.name(), options)) {
+            if (ConvertOption.ignoresProperty(srcProperty.name(), options)) {
                 return false;
             }
             if (!srcProperty.isReadable()) {
                 return false;
             }
-            // do not map "class"
-            if ("class".equals(srcPropertyName)) {
+            if ("class".equals(srcPropertyName) && !ConvertOption.includesClass(options)) {
                 return false;
             }
-            String actualSrcPropertyName = ConvertBack.getNameMapper(options).map(srcPropertyName);
+            String actualSrcPropertyName = ConvertOption.getNameMapper(options).map(srcPropertyName);
             Object srcPropertyValue = srcProperty.getValue(src);
-            if (srcPropertyValue == null && ConvertBack.ignoreNull(options)) {
+            if (srcPropertyValue == null && ConvertOption.ignoresNull(options)) {
                 return false;
             }
             Object dstKey = converter.convert(actualSrcPropertyName, String.class, dstSchema.keyType(), options);
@@ -408,19 +418,18 @@ public interface ObjectCopier {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception {
-            if (ConvertBack.ignored(srcProperty.name(), options)) {
+            if (ConvertOption.ignoresProperty(srcProperty.name(), options)) {
                 return false;
             }
             if (!srcProperty.isReadable()) {
                 return false;
             }
-            // do not map "class"
-            if ("class".equals(srcPropertyName)) {
+            if ("class".equals(srcPropertyName) && !ConvertOption.includesClass(options)) {
                 return false;
             }
-            String actualSrcPropertyName = ConvertBack.getNameMapper(options).map(srcPropertyName);
+            String actualSrcPropertyName = ConvertOption.getNameMapper(options).map(srcPropertyName);
             Object srcPropertyValue = srcProperty.getValue(src);
-            if (srcPropertyValue == null && ConvertBack.ignoreNull(options)) {
+            if (srcPropertyValue == null && ConvertOption.ignoresNull(options)) {
                 return false;
             }
             String dstPropertyName = Fs.as(converter.convert(actualSrcPropertyName, String.class, String.class, options));

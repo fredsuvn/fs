@@ -4,7 +4,9 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.base.string.NameMapper;
+import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.object.schema.MapParser;
@@ -90,6 +92,11 @@ public enum ConvertOption {
     IGNORE_NULL,
 
     /**
+     * Key of {@link #includeClass(boolean)}.
+     */
+    INCLUDE_CLASS,
+
+    /**
      * Key of {@link #ioOperator(IOOperator)}.
      */
     IO_OPERATOR,
@@ -104,6 +111,56 @@ public enum ConvertOption {
      */
     DATE_FORMATTER,
     ;
+
+    /**
+     * Check whether the property is specified to ignore by the options. The related option
+     * {@link #ignoreProperties(Object...)}.
+     *
+     * @param propertyName the property name to check
+     * @param options      the options to check
+     * @return {@code true} if the property is specified to ignore, {@code false} otherwise
+     */
+    public static boolean ignoresProperty(@Nonnull Object propertyName, @Nonnull Option<?, ?> @Nonnull [] options) {
+        Object[] ignoredProperties = OptionKit.findValue(ConvertOption.IGNORE_PROPERTIES, options);
+        if (ignoredProperties == null) {
+            return false;
+        }
+        return ArrayKit.indexOf(ignoredProperties, propertyName) >= 0;
+    }
+
+    /**
+     * Check whether the option specifies to enable to ignore null values. The related option
+     * {@link #ignoreNull(boolean)}.
+     *
+     * @param options the options to check
+     * @return {@code true} if the option specifies to enable to ignore null values, {@code false} otherwise
+     */
+    public static boolean ignoresNull(@Nonnull Option<?, ?> @Nonnull [] options) {
+        return OptionKit.isEnabled(ConvertOption.IGNORE_NULL, options);
+    }
+
+    /**
+     * Check whether the option specifies to enable to include class. The related option
+     * {@link #includeClass(boolean)}.
+     *
+     * @param options the options to check
+     * @return {@code true} if the option specifies to enable to include class, {@code false} otherwise
+     */
+    public static boolean includesClass(@Nonnull Option<?, ?> @Nonnull [] options) {
+        return OptionKit.isEnabled(ConvertOption.INCLUDE_CLASS, options);
+    }
+
+    /**
+     * Returns the {@link NameMapper}specified by the options. The related option
+     * {@link #propertyNameMapper(NameMapper)}.
+     *
+     * @param options the options to check
+     * @return the {@link NameMapper} specified by the options, or {@link NameMapper#keep()} if not specified
+     */
+    public static @Nonnull NameMapper getNameMapper(@Nonnull Option<?, ?> @Nonnull [] options) {
+        NameMapper mapper = OptionKit.findValue(ConvertOption.PROPERTY_NAME_MAPPER, options);
+        return mapper != null ? mapper : NameMapper.keep();
+    }
 
     /**
      * Sets option to enable strict source type mode. In strict type mode, the conversion will strictly treat the source
@@ -207,8 +264,8 @@ public enum ConvertOption {
      * Returns an option to specify the {@link NameMapper}.
      * <p>
      * Note that this configuration is only valid for the {@link String} type property names (both source and target),
-     * and executed before the configured {@link ObjectCopier.Handler} (if any, and it means the property name
-     * received by the property mapper will be mapped by the name mapper first). For property names whose type is not
+     * and executed before the configured {@link ObjectCopier.Handler} (if any, and it means the property name received
+     * by the property mapper will be mapped by the name mapper first). For property names whose type is not
      * {@link String}, such as non-{@link String} keys of a {@link Map}, this configuration will not take effect.
      * <p>
      * By default, this option is disabled.
@@ -237,16 +294,27 @@ public enum ConvertOption {
     }
 
     /**
-     * Returns an option to specify whether ignores {@code null} properties from the source object. If there exists a
-     * {@link ObjectCopier.Handler} in the current {@link ObjectCopier}, this option will be ignored.
+     * Returns an option to specify whether ignores {@code null} properties from the source object in the conversion.
      * <p>
      * By default, this option is disabled.
      *
      * @param ignoreNull whether ignores {@code null} properties from the source object
-     * @return an option to specify to ignore null properties from the source object
+     * @return an option to specify to ignore null properties from the source object in the conversion
      */
     public static @Nonnull Option<@Nonnull ConvertOption, ?> ignoreNull(boolean ignoreNull) {
         return Option.of(IGNORE_NULL, ignoreNull);
+    }
+
+    /**
+     * Returns an option to specify whether includes {@code class} properties from the source object in the conversion.
+     * <p>
+     * By default, this option is disabled.
+     *
+     * @param includeClass whether includes {@code class} properties from the source object
+     * @return an option to specify to include class properties from the source object in the conversion
+     */
+    public static @Nonnull Option<@Nonnull ConvertOption, ?> includeClass(boolean includeClass) {
+        return Option.of(INCLUDE_CLASS, includeClass);
     }
 
     /**
