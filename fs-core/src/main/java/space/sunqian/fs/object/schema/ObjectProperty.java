@@ -6,6 +6,8 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.invoke.Invocable;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -113,23 +115,23 @@ public interface ObjectProperty extends ObjectPropertyBase {
      * @return the annotation of the specified type on this property, or {@code null} if not found
      */
     default <T extends Annotation> @Nullable T getAnnotation(@Nonnull Class<T> annotationType) {
-        List<Annotation> getters = getterAnnotations();
-        for (Annotation g : getters) {
-            if (annotationType.isAssignableFrom(g.getClass())) {
-                return annotationType.cast(g);
+        Method getterMethod = getterMethod();
+        if (getterMethod != null) {
+            T annotation = getterMethod.getAnnotation(annotationType);
+            if (annotation != null) {
+                return annotation;
             }
         }
-        List<Annotation> setters = setterAnnotations();
-        for (Annotation s : setters) {
-            if (annotationType.isAssignableFrom(s.getClass())) {
-                return annotationType.cast(s);
+        Method setterMethod = setterMethod();
+        if (setterMethod != null) {
+            T annotation = setterMethod.getAnnotation(annotationType);
+            if (annotation != null) {
+                return annotation;
             }
         }
-        List<Annotation> fields = fieldAnnotations();
-        for (Annotation f : fields) {
-            if (annotationType.isAssignableFrom(f.getClass())) {
-                return annotationType.cast(f);
-            }
+        Field field = field();
+        if (field != null) {
+            return field.getAnnotation(annotationType);
         }
         return null;
     }

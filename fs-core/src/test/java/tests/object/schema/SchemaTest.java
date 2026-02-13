@@ -588,6 +588,18 @@ public class SchemaTest implements PrintTest {
         Nonnull a4 = prop4.getAnnotation(Nonnull.class);
         assertNull(a4);
         assertNull(prop4.getAnnotation(Nullable.class));
+        // prop5
+        ObjectProperty prop5 = schema.getProperty("prop5");
+        assertNotNull(prop5);
+        Nonnull a5 = prop5.getAnnotation(Nonnull.class);
+        assertNull(a5);
+        assertNull(prop5.getAnnotation(Nullable.class));
+        // prop6
+        ObjectProperty prop6 = schema.getProperty("prop6");
+        assertNotNull(prop6);
+        Nonnull a6 = prop6.getAnnotation(Nonnull.class);
+        assertNull(a6);
+        assertNull(prop6.getAnnotation(Nullable.class));
     }
 
     @Test
@@ -740,6 +752,13 @@ public class SchemaTest implements PrintTest {
         @Nonnull
         public void setProp3(String prop3) {
             this.prop3 = prop3;
+        }
+
+        public String getProp5() {
+            return null;
+        }
+
+        public void setProp6(String prop6) {
         }
     }
 }
