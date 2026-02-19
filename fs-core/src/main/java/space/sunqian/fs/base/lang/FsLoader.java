@@ -1,9 +1,9 @@
-package space.sunqian.fs;
+package space.sunqian.fs.base.lang;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnknownTypeException;
-import space.sunqian.fs.base.lang.EnumKit;
 import space.sunqian.fs.base.system.JvmKit;
 import space.sunqian.fs.reflect.ClassKit;
 
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Loader for implementations of this lib.
+ * Loader for various implementations of this lib.
  *
  * @author sunqian
  */

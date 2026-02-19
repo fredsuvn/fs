@@ -4,8 +4,8 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.base.Checker;
 import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.base.lang.Checker;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOKit;
 

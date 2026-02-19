@@ -3,8 +3,8 @@ package space.sunqian.fs.base.string;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.annotation.ValueClass;
-import space.sunqian.fs.base.Checker;
 import space.sunqian.fs.base.exception.UnreachablePointException;
+import space.sunqian.fs.base.lang.Checker;
 
 final class StringViewBack {
 

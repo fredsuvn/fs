@@ -1,4 +1,4 @@
-package space.sunqian.fs.base;
+package space.sunqian.fs.base.lang;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.exception.UnreachablePointException;
@@ -6,7 +6,7 @@ import space.sunqian.fs.base.exception.UnreachablePointException;
 import java.util.NoSuchElementException;
 
 /**
- * This class is the core utilities for checking and verifying parameters.
+ * This class is the global checking utilities for checking and verifying parameters.
  *
  * @author sunqian
  */

@@ -2,9 +2,9 @@ package space.sunqian.fs.base.string;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.base.Checker;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.exception.UnknownArrayTypeException;
+import space.sunqian.fs.base.lang.Checker;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;

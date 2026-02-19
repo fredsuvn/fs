@@ -3,8 +3,8 @@ package space.sunqian.fs.base.random;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.base.Checker;
 import space.sunqian.fs.base.exception.UnreachablePointException;
+import space.sunqian.fs.base.lang.Checker;
 
 import java.util.ArrayList;
 import java.util.List;

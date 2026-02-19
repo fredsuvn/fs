@@ -1,10 +1,9 @@
 /**
  * The root package of fs, provides root supports for fs:
  * <p>
- * Global kits:
+ * Global core kits:
  * <ul>
- *     <li>{@link space.sunqian.fs.Fs}: the core utilities kit;</li>
- *     <li>{@link space.sunqian.fs.FsLoader}: the loader for implementations of fs;</li>
+ *     <li>{@link space.sunqian.fs.Fs}: the core utilities of this lib;</li>
  * </ul>
  * Sub-packages for specific functions:
  * <ul>

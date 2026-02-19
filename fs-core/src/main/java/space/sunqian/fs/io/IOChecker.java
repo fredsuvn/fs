@@ -1,6 +1,6 @@
 package space.sunqian.fs.io;
 
-import space.sunqian.fs.base.Checker;
+import space.sunqian.fs.base.lang.Checker;
 
 final class IOChecker {
 

@@ -3,7 +3,7 @@ package space.sunqian.fs.data;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.base.Checker;
+import space.sunqian.fs.base.lang.Checker;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.object.ObjectException;
 import space.sunqian.fs.object.convert.ObjectConverter;

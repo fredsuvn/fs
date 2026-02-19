@@ -1,7 +1,7 @@
 package space.sunqian.fs.base.string;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.fs.base.Checker;
+import space.sunqian.fs.base.lang.Checker;
 import space.sunqian.fs.base.value.Span;
 import space.sunqian.fs.collect.ArrayKit;
 

@@ -1,8 +1,8 @@
 package space.sunqian.fs.base.bytes;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.fs.base.Checker;
 import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.base.lang.Checker;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;

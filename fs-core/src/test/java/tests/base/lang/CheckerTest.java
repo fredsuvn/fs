@@ -1,8 +1,8 @@
-package tests.base;
+package tests.base.lang;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.fs.base.Checker;
 import space.sunqian.fs.base.exception.UnreachablePointException;
+import space.sunqian.fs.base.lang.Checker;
 
 import java.util.NoSuchElementException;
 
