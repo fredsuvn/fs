@@ -11,12 +11,13 @@ import java.util.function.Function;
  *
  * @param <K> the type of the key
  * @param <V> the type of the value
+ * @implNote The {@link SimpleCache} extends this interface and provides more caching methods.
  */
 public interface CacheFunction<K, V> {
 
     /**
      * Create a new {@link CacheFunction} using {@link Map#computeIfAbsent(Object, Function)} of the given map to
-     * implement the cache function.
+     * implement the cache function. This method is equivalent to {@link SimpleCache#ofMap(Map)}.
      *
      * @param map the given map to cache the value
      * @param <K> the type of the key
@@ -24,7 +25,7 @@ public interface CacheFunction<K, V> {
      * @return a new {@link CacheFunction} using the given map to cache the value
      */
     static <K, V> @Nonnull CacheFunction<K, V> ofMap(@Nonnull Map<K, V> map) {
-        return CacheBack.ofMap(map);
+        return SimpleCache.ofMap(map);
     }
 
     /**

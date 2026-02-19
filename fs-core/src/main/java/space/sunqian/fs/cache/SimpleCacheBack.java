@@ -3,16 +3,20 @@ package space.sunqian.fs.cache;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.base.value.Val;
+import space.sunqian.fs.base.value.Var;
 
 import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-final class CacheBack {
+final class SimpleCacheBack {
 
     static <K, V> @Nonnull SimpleCache<K, V> ofWeak() {
         return new WeakCache<>();
@@ -30,8 +34,8 @@ final class CacheBack {
         return new StrongCache<>();
     }
 
-    static <K, V> @Nonnull CacheFunction<K, V> ofMap(@Nonnull Map<K, V> map) {
-        return new CacheFunctionImpl<>(map);
+    static <K, V> @Nonnull SimpleCache<K, V> ofMap(@Nonnull Map<K, V> map) {
+        return new MapCache<>(map);
     }
 
     private static <K, V> void compareAndRemove(@Nonnull Map<K, V> map, K key, V value) {
@@ -51,6 +55,10 @@ final class CacheBack {
     private static abstract class ReferenceCache<K, V> extends AbstractSimpleCache<K, V> {
 
         protected final @Nonnull ReferenceQueue<Object> queue = new ReferenceQueue<>();
+
+        private ReferenceCache() {
+            super(new ConcurrentHashMap<>());
+        }
 
         @Override
         public void clean() {
@@ -166,6 +174,10 @@ final class CacheBack {
 
     private static final class StrongCache<K, V> extends AbstractSimpleCache<K, V> {
 
+        private StrongCache() {
+            super(new ConcurrentHashMap<>());
+        }
+
         @Override
         public void clean() {
         }
@@ -203,20 +215,89 @@ final class CacheBack {
         }
     }
 
-    private static final class CacheFunctionImpl<K, V> implements CacheFunction<K, V> {
+    private static final class MapCache<K, V> implements SimpleCache<K, V> {
 
-        private final @Nonnull Map<K, V> map;
+        private static final @Nonnull Object NONE = new Object();
+        private final @Nonnull Map<K, V> cacheMap;
 
-        CacheFunctionImpl(@Nonnull Map<K, V> map) {
-            this.map = map;
+        private MapCache(@Nonnull Map<K, V> cacheMap) {
+            this.cacheMap = cacheMap;
         }
 
         @Override
-        public V get(K key, Function<? super K, ? extends V> loader) {
-            return map.computeIfAbsent(key, loader);
+        public V get(@Nonnull K key) {
+            return cacheMap.get(key);
+        }
+
+        @Override
+        public @Nullable Val<V> getVal(@Nonnull K key) {
+            Var<Object> var = Var.of(null);
+            V v = cacheMap.computeIfAbsent(key, k -> {
+                var.set(NONE);
+                return null;
+            });
+            if (var.get() == NONE) {
+                return null;
+            }
+            return Val.of(v);
+        }
+
+        @Override
+        public V get(@Nonnull K key, @Nonnull Function<? super @Nonnull K, ? extends V> loader) {
+            return cacheMap.computeIfAbsent(key, loader);
+        }
+
+        @Override
+        public @Nullable Val<V> getVal(
+            @Nonnull K key,
+            @Nonnull Function<? super @Nonnull K, ? extends @Nullable Val<? extends V>> loader
+        ) {
+            Var<Object> var = Var.of(null);
+            V v = cacheMap.computeIfAbsent(key, k -> {
+                Val<? extends V> newV = loader.apply(key);
+                if (newV == null) {
+                    var.set(NONE);
+                    return null;
+                } else {
+                    return newV.get();
+                }
+            });
+            if (var.get() == NONE) {
+                return null;
+            }
+            return Val.of(v);
+        }
+
+        @Override
+        public void put(@Nonnull K key, V value) {
+            cacheMap.put(key, value);
+        }
+
+        @Override
+        public void remove(@Nonnull K key) {
+            cacheMap.remove(key);
+        }
+
+        @Override
+        public int size() {
+            return cacheMap.size();
+        }
+
+        @Override
+        public void clear() {
+            cacheMap.clear();
+        }
+
+        @Override
+        public void clean() {
+        }
+
+        @Override
+        public @Nonnull Map<K, V> copyEntries() {
+            return new LinkedHashMap<>(cacheMap);
         }
     }
 
-    private CacheBack() {
+    private SimpleCacheBack() {
     }
 }

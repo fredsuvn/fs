@@ -13,7 +13,9 @@ import space.sunqian.fs.collect.MapKit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -113,10 +115,90 @@ public class CacheTest implements PrintTest, DataTest {
     }
 
     @Test
+    public void testMapCache() throws Exception {
+        SimpleCache<Integer, Integer> cache = SimpleCache.ofMap(new HashMap<>());
+
+        // get/put
+        assertNull(cache.get(1));
+        assertNull(cache.getVal(1));
+        cache.put(1, 1);
+        assertEquals(
+            MapKit.map(1, 1),
+            cache.copyEntries()
+        );
+        assertEquals(1, cache.get(1));
+        assertEquals(1, cache.getVal(1).get());
+        cache.put(1, 2);
+        assertEquals(
+            MapKit.map(1, 2),
+            cache.copyEntries()
+        );
+        assertEquals(2, cache.get(1));
+        assertEquals(2, cache.getVal(1).get());
+        assertNull(cache.getVal(2));
+
+        // copyEntries
+        assertNotSame(
+            cache.copyEntries(),
+            cache.copyEntries()
+        );
+
+        // remove
+        cache.remove(0);
+        assertNull(cache.get(0));
+        assertNull(cache.getVal(0));
+        cache.remove(1);
+        assertNull(cache.get(1));
+        assertNull(cache.getVal(1));
+        assertEquals(0, cache.size());
+        assertEquals(
+            MapKit.map(),
+            cache.copyEntries()
+        );
+
+        // producer
+        assertNull(cache.getVal(2));
+        assertEquals(2, cache.get(2, k -> 2));
+        assertEquals(2, cache.get(2));
+        assertEquals(2, cache.get(2, k -> 3));
+        assertNull(cache.getVal(3));
+        assertEquals(3, cache.getVal(3, k -> Val.of(3)).get());
+        assertEquals(3, cache.get(3));
+        assertEquals(3, cache.getVal(3, k -> Val.of(4)).get());
+        assertNull(cache.getVal(4, k -> null));
+        assertNull(cache.getVal(4));
+        assertEquals(2, cache.size());
+        assertEquals(
+            MapKit.map(2, 2, 3, 3),
+            cache.copyEntries()
+        );
+
+        // clear
+        assertNotNull(cache.getVal(2));
+        cache.clear();
+        assertNull(cache.getVal(1));
+        assertNull(cache.getVal(2));
+        assertNull(cache.getVal(3));
+        assertNull(cache.getVal(4));
+        assertEquals(0, cache.size());
+        assertEquals(
+            MapKit.map(),
+            cache.copyEntries()
+        );
+
+        // clean
+        cache.clean();
+    }
+
+    @Test
     public void testAbsImpl() throws Exception {
         BooleanVar bv = BooleanVar.of(false);
         String hello = "hello";
         class XCache extends AbstractSimpleCache<Object, Object> {
+
+            private XCache() {
+                super(new ConcurrentHashMap<>());
+            }
 
             @Override
             public void clean() {

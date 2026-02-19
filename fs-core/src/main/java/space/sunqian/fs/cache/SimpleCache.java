@@ -9,6 +9,7 @@ import java.lang.ref.PhantomReference;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -29,58 +30,73 @@ import java.util.function.Function;
 public interface SimpleCache<K, V> extends CacheFunction<K, V> {
 
     /**
-     * Returns a new {@link SimpleCache} based on {@link WeakReference}. The values of the returned cache will be
-     * automatically collected by the garbage collection based on the characteristics of {@link WeakReference}. Its
-     * {@link #clean()} method releases all entries of which values are collected, and this method is automatically
-     * invoked once every time another method is executed.
+     * Returns a new {@link SimpleCache} based on {@link WeakReference} and {@link ConcurrentHashMap}. The values of the
+     * returned cache will be automatically collected by the garbage collection based on the characteristics of
+     * {@link WeakReference}. Its {@link #clean()} method releases all entries of which values are collected, and this
+     * method is automatically invoked once every time another method is executed.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return a new {@link SimpleCache} based on {@link WeakReference}
      */
     static <K, V> @Nonnull SimpleCache<K, V> ofWeak() {
-        return CacheBack.ofWeak();
+        return SimpleCacheBack.ofWeak();
     }
 
     /**
-     * Returns a new {@link SimpleCache} based on {@link SoftReference}. The values of the returned cache will be
-     * automatically collected by the garbage collection based on the characteristics of {@link SoftReference}. Its
-     * {@link #clean()} method releases all entries of which values are collected, and this method is automatically
-     * invoked once every time another method is executed.
+     * Returns a new {@link SimpleCache} based on {@link SoftReference} and {@link ConcurrentHashMap}. The values of the
+     * returned cache will be automatically collected by the garbage collection based on the characteristics of
+     * {@link SoftReference}. Its {@link #clean()} method releases all entries of which values are collected, and this
+     * method is automatically invoked once every time another method is executed.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return a new {@link SimpleCache} based on {@link SoftReference}
      */
     static <K, V> @Nonnull SimpleCache<K, V> ofSoft() {
-        return CacheBack.ofSoft();
+        return SimpleCacheBack.ofSoft();
     }
 
     /**
-     * Returns a new {@link SimpleCache} based on {@link PhantomReference}. The values of the returned cache will be
-     * automatically collected by the garbage collection based on the characteristics of {@link PhantomReference}. Its
-     * {@link #clean()} method releases all entries of which values are collected, and this method is automatically
-     * invoked once every time another method is executed.
+     * Returns a new {@link SimpleCache} based on {@link PhantomReference} and {@link ConcurrentHashMap}. The values of
+     * the returned cache will be automatically collected by the garbage collection based on the characteristics of
+     * {@link PhantomReference}. Its {@link #clean()} method releases all entries of which values are collected, and
+     * this method is automatically invoked once every time another method is executed.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return a new {@link SimpleCache} based on {@link PhantomReference}
      */
     static <K, V> @Nonnull SimpleCache<K, V> ofPhantom() {
-        return CacheBack.ofPhantom();
+        return SimpleCacheBack.ofPhantom();
     }
 
     /**
-     * Returns a new {@link SimpleCache} based on strong reference. The values of the returned cache will never
-     * automatically be invalid, and its {@link #clean()} method does nothing. The behavior of the returned cache is
-     * just like a regular {@link Map}.
+     * Returns a new {@link SimpleCache} based on strong reference and {@link ConcurrentHashMap}. The values of the
+     * returned cache will never automatically be invalid, and its {@link #clean()} method does nothing. The behavior of
+     * the returned cache is just like a regular {@link Map}.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return a new {@link SimpleCache} based on strong reference
      */
     static <K, V> @Nonnull SimpleCache<K, V> ofStrong() {
-        return CacheBack.ofStrong();
+        return SimpleCacheBack.ofStrong();
+    }
+
+    /**
+     * Returns a new {@link SimpleCache} based on the given map.
+     * <p>
+     * Note the returned cache treats {@code null} values as absent, which will lead to certain results in processing
+     * {@code null} values. Therefore, putting {@code null} values are not encouraged for returned map cache.
+     *
+     * @param map the given map to cache the value
+     * @param <K> the type of the key
+     * @param <V> the type of the value
+     * @return a new {@link SimpleCache} based on the given map
+     */
+    static <K, V> @Nonnull SimpleCache<K, V> ofMap(@Nonnull Map<K, V> map) {
+        return SimpleCacheBack.ofMap(map);
     }
 
     /**
@@ -107,8 +123,8 @@ public interface SimpleCache<K, V> extends CacheFunction<K, V> {
      * value, and the new value will be cached and returned. If an exception is thrown during the generation, the
      * exception will be thrown directly. This operation is atomic.
      * <p>
-     * Any value, including {@code null}, generated by the loader will be cached. To distinguish between {@code null}
-     * value or no-cached, try {@link #getVal(Object, Function)}.
+     * Any value, including {@code null}, generated by the loader will be cached. To more explicitly to deal with the
+     * value, especially the {@code null} value, try {@link #getVal(Object, Function)}.
      *
      * @param key    the specified key
      * @param loader the function to generate new value for the specified key
