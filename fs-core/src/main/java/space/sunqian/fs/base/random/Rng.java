@@ -1,7 +1,7 @@
 package space.sunqian.fs.base.random;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.fs.base.lang.Checker;
+import space.sunqian.fs.base.Checker;
 
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;

@@ -1,4 +1,4 @@
-package space.sunqian.fs.base.lang;
+package space.sunqian.fs.base;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.exception.UnreachablePointException;

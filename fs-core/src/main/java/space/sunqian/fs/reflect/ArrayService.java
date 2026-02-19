@@ -2,7 +2,7 @@ package space.sunqian.fs.reflect;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.base.lang.FsLoader;
+import space.sunqian.fs.base.FsLoader;
 
 import java.lang.reflect.Type;
 

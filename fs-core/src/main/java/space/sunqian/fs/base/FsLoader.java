@@ -1,9 +1,10 @@
-package space.sunqian.fs.base.lang;
+package space.sunqian.fs.base;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnknownTypeException;
+import space.sunqian.fs.base.lang.EnumKit;
 import space.sunqian.fs.base.system.JvmKit;
 import space.sunqian.fs.reflect.ClassKit;
 

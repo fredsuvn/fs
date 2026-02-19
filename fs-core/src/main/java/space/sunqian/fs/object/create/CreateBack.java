@@ -3,7 +3,7 @@ package space.sunqian.fs.object.create;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
-import space.sunqian.fs.base.lang.FsLoader;
+import space.sunqian.fs.base.FsLoader;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.create.handlers.CommonCreatorHandler;
 import space.sunqian.fs.third.ThirdKit;

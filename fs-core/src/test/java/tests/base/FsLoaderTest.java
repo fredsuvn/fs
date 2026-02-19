@@ -1,9 +1,9 @@
-package tests.base.lang;
+package tests.base;
 
 import internal.test.J17Also;
 import org.junit.jupiter.api.Test;
+import space.sunqian.fs.base.FsLoader;
 import space.sunqian.fs.base.exception.UnknownTypeException;
-import space.sunqian.fs.base.lang.FsLoader;
 import space.sunqian.fs.base.system.JvmKit;
 import space.sunqian.fs.object.schema.handlers.RecordSchemaHandler;
 

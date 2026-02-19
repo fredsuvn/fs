@@ -1,7 +1,7 @@
 package space.sunqian.fs.object.schema.handlers;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.fs.base.lang.FsLoader;
+import space.sunqian.fs.base.FsLoader;
 import space.sunqian.fs.object.schema.ObjectParser;
 
 /**
