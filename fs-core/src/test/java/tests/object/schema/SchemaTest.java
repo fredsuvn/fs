@@ -10,6 +10,7 @@ import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.cache.SimpleCache;
+import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.invoke.Invocable;
 import space.sunqian.fs.object.convert.ConvertKit;
@@ -28,6 +29,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -562,6 +564,18 @@ public class SchemaTest implements PrintTest {
             a1.annotationType()
         );
         assertNull(prop1.getAnnotation(Nullable.class));
+        assertEquals(
+            ListKit.list(a1),
+            prop1.fieldAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop1.getterAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop1.setterAnnotations()
+        );
         // prop2
         ObjectProperty prop2 = schema.getProperty("prop2");
         assertNotNull(prop2);
@@ -572,6 +586,18 @@ public class SchemaTest implements PrintTest {
             a2.annotationType()
         );
         assertNull(prop2.getAnnotation(Nullable.class));
+        assertEquals(
+            Collections.emptyList(),
+            prop2.fieldAnnotations()
+        );
+        assertEquals(
+            ListKit.list(a2),
+            prop2.getterAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop2.setterAnnotations()
+        );
         // prop3
         ObjectProperty prop3 = schema.getProperty("prop3");
         assertNotNull(prop3);
@@ -582,24 +608,72 @@ public class SchemaTest implements PrintTest {
             a3.annotationType()
         );
         assertNull(prop3.getAnnotation(Nullable.class));
+        assertEquals(
+            Collections.emptyList(),
+            prop3.fieldAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop3.getterAnnotations()
+        );
+        assertEquals(
+            ListKit.list(a3),
+            prop3.setterAnnotations()
+        );
         // prop4
         ObjectProperty prop4 = schema.getProperty("prop4");
         assertNotNull(prop4);
         Nonnull a4 = prop4.getAnnotation(Nonnull.class);
         assertNull(a4);
         assertNull(prop4.getAnnotation(Nullable.class));
+        assertEquals(
+            Collections.emptyList(),
+            prop4.fieldAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop4.getterAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop4.setterAnnotations()
+        );
         // prop5
         ObjectProperty prop5 = schema.getProperty("prop5");
         assertNotNull(prop5);
         Nonnull a5 = prop5.getAnnotation(Nonnull.class);
         assertNull(a5);
         assertNull(prop5.getAnnotation(Nullable.class));
+        assertEquals(
+            Collections.emptyList(),
+            prop5.fieldAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop5.getterAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop5.setterAnnotations()
+        );
         // prop6
         ObjectProperty prop6 = schema.getProperty("prop6");
         assertNotNull(prop6);
         Nonnull a6 = prop6.getAnnotation(Nonnull.class);
         assertNull(a6);
         assertNull(prop6.getAnnotation(Nullable.class));
+        assertEquals(
+            Collections.emptyList(),
+            prop6.fieldAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop6.getterAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop6.setterAnnotations()
+        );
     }
 
     @Test

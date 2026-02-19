@@ -271,7 +271,7 @@ public enum ConvertOption {
      * By default, this option is disabled.
      *
      * @param nameMapper the {@link NameMapper} to be specified
-     * @return an option to specify the {@link PropertyNameMapper}
+     * @return an option to specify the {@link NameMapper}
      */
     public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NameMapper> propertyNameMapper(
         @Nonnull NameMapper nameMapper

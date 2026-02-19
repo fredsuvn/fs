@@ -9,11 +9,13 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.reflect.TypeRef;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -124,6 +126,18 @@ public class SchemaTestJ17 {
             a1.annotationType()
         );
         assertNull(prop1.getAnnotation(Nullable.class));
+        assertEquals(
+            Collections.emptyList(),
+            prop1.fieldAnnotations()
+        );
+        assertEquals(
+            ListKit.list(a1),
+            prop1.getterAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop1.setterAnnotations()
+        );
         // prop2
         ObjectProperty prop2 = schema.getProperty("prop2");
         assertNotNull(prop2);
@@ -134,6 +148,18 @@ public class SchemaTestJ17 {
             a2.annotationType()
         );
         assertNull(prop2.getAnnotation(Nonnull.class));
+        assertEquals(
+            Collections.emptyList(),
+            prop2.fieldAnnotations()
+        );
+        assertEquals(
+            ListKit.list(a2),
+            prop2.getterAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop2.setterAnnotations()
+        );
         // prop3
         ObjectProperty prop3 = schema.getProperty("prop3");
         assertNotNull(prop3);
@@ -144,12 +170,36 @@ public class SchemaTestJ17 {
             a3.annotationType()
         );
         assertNull(prop3.getAnnotation(Nullable.class));
+        assertEquals(
+            Collections.emptyList(),
+            prop3.fieldAnnotations()
+        );
+        assertEquals(
+            ListKit.list(a3),
+            prop3.getterAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop3.setterAnnotations()
+        );
         // prop4
         ObjectProperty prop4 = schema.getProperty("prop4");
         assertNotNull(prop4);
         Nonnull a4 = prop4.getAnnotation(Nonnull.class);
         assertNull(a4);
         assertNull(prop4.getAnnotation(Nullable.class));
+        assertEquals(
+            Collections.emptyList(),
+            prop4.fieldAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop4.getterAnnotations()
+        );
+        assertEquals(
+            Collections.emptyList(),
+            prop4.setterAnnotations()
+        );
     }
 
     public record InfoRecord<T>(String name, int age, List<String> friends, T t) {
