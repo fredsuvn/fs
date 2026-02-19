@@ -7,34 +7,34 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnsupportedEnvException;
 import space.sunqian.fs.invoke.Invocable;
 import space.sunqian.fs.object.ObjectException;
-import space.sunqian.fs.object.create.CreatorProvider;
-import space.sunqian.fs.object.create.ObjectCreator;
+import space.sunqian.fs.object.build.BuilderExecutor;
+import space.sunqian.fs.object.build.BuilderProvider;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 /**
- * {@link CreatorProvider.Handler} implementation for
+ * {@link BuilderProvider.Handler} implementation for
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
  * ObjectBuilderProvider provider = ...;
  * ObjectBuilderProvider protoProvider = provider
- *     .withFirstHandler(ProtobufCreatorHandler.getInstance());
+ *     .withFirstHandler(ProtobufBuilderHandler.getInstance());
  * }</pre>
  * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
- * environment, the {@link CreatorProvider#defaultProvider()} will automatically load this handler.
+ * environment, the {@link BuilderProvider#defaultProvider()} will automatically load this handler.
  *
  * @author sunqian
  */
-public class ProtobufCreatorHandler implements CreatorProvider.Handler {
+public class ProtobufBuilderHandler implements BuilderProvider.Handler {
 
-    private static final @Nonnull ProtobufCreatorHandler INST = new ProtobufCreatorHandler();
+    private static final @Nonnull ProtobufBuilderHandler INST = new ProtobufBuilderHandler();
 
     /**
      * Returns a same one instance of this handler.
      */
-    public static @Nonnull ProtobufCreatorHandler getInstance() {
+    public static @Nonnull ProtobufBuilderHandler getInstance() {
         return INST;
     }
 
@@ -44,12 +44,12 @@ public class ProtobufCreatorHandler implements CreatorProvider.Handler {
      *
      * @throws UnsupportedEnvException if the protobuf package is not available in the current environment.
      */
-    public ProtobufCreatorHandler() throws UnsupportedEnvException {
+    public ProtobufBuilderHandler() throws UnsupportedEnvException {
         Fs.uncheck(() -> Class.forName("com.google.protobuf.Message"), UnsupportedEnvException::new);
     }
 
     @Override
-    public @Nullable ObjectCreator newCreator(@Nonnull Type target) throws Exception {
+    public @Nullable BuilderExecutor newExecutor(@Nonnull Type target) throws Exception {
         // Check whether it is a protobuf object
         if (!(target instanceof Class<?>)) {
             return null;
@@ -71,21 +71,21 @@ public class ProtobufCreatorHandler implements CreatorProvider.Handler {
             Method buildMethod = rawTarget.getMethod("build");
             Class<?> messageType = buildMethod.getReturnType();
             Method builderMethod = messageType.getMethod("newBuilder");
-            return new BuilderCreator(builderMethod, target);
+            return new BuilderExecutorImpl(builderMethod, target);
         } else {
             Method builderMethod = rawTarget.getMethod("newBuilder");
             Class<?> builderType = builderMethod.getReturnType();
             Method buildMethod = builderType.getMethod("build");
-            return new MessageCreator(builderMethod, buildMethod, builderType);
+            return new MessageExecutorImpl(builderMethod, buildMethod, builderType);
         }
     }
 
-    private static final class BuilderCreator implements ObjectCreator {
+    private static final class BuilderExecutorImpl implements BuilderExecutor {
 
         private final @Nonnull Invocable builder;
         private final @Nonnull Type builderType;
 
-        private BuilderCreator(@Nonnull Method builderMethod, @Nonnull Type builderType) {
+        private BuilderExecutorImpl(@Nonnull Method builderMethod, @Nonnull Type builderType) {
             this.builder = Invocable.of(builderMethod);
             this.builderType = builderType;
         }
@@ -111,14 +111,14 @@ public class ProtobufCreatorHandler implements CreatorProvider.Handler {
         }
     }
 
-    private static final class MessageCreator implements ObjectCreator {
+    private static final class MessageExecutorImpl implements BuilderExecutor {
 
         private final @Nonnull Invocable builder;
         private final @Nonnull Invocable build;
         private final @Nonnull Type builderType;
         private final @Nonnull Type messageType;
 
-        private MessageCreator(
+        private MessageExecutorImpl(
             @Nonnull Method builderMethod, @Nonnull Method buildMethod, @Nonnull Type builderType
         ) {
             this.builder = Invocable.of(builderMethod);

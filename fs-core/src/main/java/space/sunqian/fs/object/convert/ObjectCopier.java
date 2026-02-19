@@ -8,8 +8,8 @@ import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.object.build.BuilderProvider;
 import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
-import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
@@ -256,7 +256,7 @@ public interface ObjectCopier {
      * target object, following the rules of the specified options defined in {@link ConvertOption}.
      * <p>
      * The thread safety of the methods in this interface is determined by its dependent {@link ObjectConverter},
-     * {@link CreatorProvider}, and other objects. By default, they are all thread-safe.
+     * {@link BuilderProvider}, and other objects. By default, they are all thread-safe.
      *
      * @author sunqian
      */

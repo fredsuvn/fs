@@ -8,7 +8,7 @@ import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.io.IOOperator;
-import space.sunqian.fs.object.create.CreatorProvider;
+import space.sunqian.fs.object.build.BuilderProvider;
 import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.ObjectParser;
 
@@ -67,9 +67,9 @@ public enum ConvertOption {
     MAP_SCHEMA_PARSER,
 
     /**
-     * Key of {@link #creatorProvider(CreatorProvider)}.
+     * Key of {@link #builderProvider(BuilderProvider)}.
      */
-    CREATOR_PROVIDER,
+    BUILDER_PROVIDER,
 
     /**
      * Key of {@link #objectCopier(ObjectCopier)}.
@@ -233,17 +233,17 @@ public enum ConvertOption {
     }
 
     /**
-     * Returns an option to specify the {@link CreatorProvider} to generate data object during the conversion.
+     * Returns an option to specify the {@link BuilderProvider} to generate data object during the conversion.
      * <p>
-     * By default, the {@link ConvertKit#creatorProvider()} is used.
+     * By default, the {@link ConvertKit#builderProvider()} is used.
      *
-     * @param creatorProvider the {@link CreatorProvider} to be specified
-     * @return an option to specify the {@link CreatorProvider} to generate data object during the conversion
+     * @param builderProvider the {@link BuilderProvider} to be specified
+     * @return an option to specify the {@link BuilderProvider} to generate data object during the conversion
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull CreatorProvider> creatorProvider(
-        @Nonnull CreatorProvider creatorProvider
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull BuilderProvider> builderProvider(
+        @Nonnull BuilderProvider builderProvider
     ) {
-        return Option.of(CREATOR_PROVIDER, creatorProvider);
+        return Option.of(BUILDER_PROVIDER, builderProvider);
     }
 
     /**

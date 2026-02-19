@@ -17,13 +17,13 @@ import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.IOOperator;
+import space.sunqian.fs.object.build.BuilderProvider;
 import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
-import space.sunqian.fs.object.create.CreatorProvider;
 import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.reflect.TypeKit;
@@ -167,8 +167,8 @@ public class ConvertTest implements PrintTest {
         Map<String, String> map2 = Fs.as(converter.convert(a, A.class, new TypeRef<Map<String, String>>() {}.type()));
         assertEquals(map2, MapKit.map("first", "1", "second", "2", "third", "3"));
         Map<String, String> map3 = converter.convert(a, new TypeRef<Map<String, String>>() {},
-            ConvertOption.creatorProvider(CreatorProvider.newProvider(
-                CreatorProvider.defaultProvider().asHandler())
+            ConvertOption.builderProvider(BuilderProvider.newProvider(
+                BuilderProvider.defaultProvider().asHandler())
             )
         );
         assertEquals(map3, MapKit.map("first", "1", "second", "2", "third", "3"));
@@ -567,16 +567,16 @@ public class ConvertTest implements PrintTest {
             );
         }
         {
-            // creator provider
-            assertSame(ConvertKit.creatorProvider(), ConvertKit.creatorProvider());
-            assertSame(ConvertKit.creatorProvider(), ConvertKit.creatorProvider(ConvertOption.ignoreNull(true)));
+            // builder provider
+            assertSame(ConvertKit.builderProvider(), ConvertKit.builderProvider());
+            assertSame(ConvertKit.builderProvider(), ConvertKit.builderProvider(ConvertOption.ignoreNull(true)));
             assertNotEquals(
-                ConvertKit.creatorProvider(),
-                ConvertKit.creatorProvider(ConvertOption.creatorProvider(CreatorProvider.defaultProvider()))
+                ConvertKit.builderProvider(),
+                ConvertKit.builderProvider(ConvertOption.builderProvider(BuilderProvider.defaultProvider()))
             );
             assertSame(
-                CreatorProvider.defaultProvider(),
-                ConvertKit.creatorProvider(ConvertOption.creatorProvider(CreatorProvider.defaultProvider()))
+                BuilderProvider.defaultProvider(),
+                ConvertKit.builderProvider(ConvertOption.builderProvider(BuilderProvider.defaultProvider()))
             );
         }
     }

@@ -5,7 +5,7 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.cache.SimpleCache;
-import space.sunqian.fs.object.create.CreatorProvider;
+import space.sunqian.fs.object.build.BuilderProvider;
 import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.MapSchema;
@@ -66,25 +66,25 @@ public class ConvertKit {
     }
 
     /**
-     * Returns the default {@link CreatorProvider} for object conversion. The returned object is same one and based on
-     * {@link CreatorProvider#defaultProvider()}, and its results are cached with {@link SimpleCache#ofSoft()}.
+     * Returns the default {@link BuilderProvider} for object conversion. The returned object is same one and based on
+     * {@link BuilderProvider#defaultProvider()}, and its results are cached with {@link SimpleCache#ofSoft()}.
      *
-     * @return the default {@link CreatorProvider} with caching for object creation
+     * @return the default {@link BuilderProvider} with caching for object creation
      */
-    public static @Nonnull CreatorProvider creatorProvider() {
-        return CachedCreator.INST;
+    public static @Nonnull BuilderProvider builderProvider() {
+        return CachedBuilder.INST;
     }
 
     /**
-     * Returns the specified {@link CreatorProvider} in the given options, or {@link #creatorProvider()} if the given
-     * options does not contain a {@link ConvertOption#CREATOR_PROVIDER}.
+     * Returns the specified {@link BuilderProvider} in the given options, or {@link #builderProvider()} if the given
+     * options does not contain a {@link ConvertOption#BUILDER_PROVIDER}.
      *
      * @param options the given options
-     * @return the specified {@link CreatorProvider} in the given options, or {@link #creatorProvider()} if the given
-     * options does not contain a {@link ConvertOption#CREATOR_PROVIDER}
+     * @return the specified {@link BuilderProvider} in the given options, or {@link #builderProvider()} if the given
+     * options does not contain a {@link ConvertOption#BUILDER_PROVIDER}
      */
-    public static @Nonnull CreatorProvider creatorProvider(@Nonnull Option<?, ?> @Nonnull ... options) {
-        return Fs.nonnull(OptionKit.findValue(ConvertOption.CREATOR_PROVIDER, options), creatorProvider());
+    public static @Nonnull BuilderProvider builderProvider(@Nonnull Option<?, ?> @Nonnull ... options) {
+        return Fs.nonnull(OptionKit.findValue(ConvertOption.BUILDER_PROVIDER, options), builderProvider());
     }
 
     private ConvertKit() {
@@ -123,12 +123,12 @@ public class ConvertKit {
         }
     }
 
-    private enum CachedCreator implements CreatorProvider {
+    private enum CachedBuilder implements BuilderProvider {
         INST;
 
-        private final @Nonnull CreatorProvider delegate = CreatorProvider.cachedProvider(
+        private final @Nonnull BuilderProvider delegate = BuilderProvider.cachedProvider(
             SimpleCache.ofSoft(),
-            CreatorProvider.defaultProvider()
+            BuilderProvider.defaultProvider()
         );
 
         @Override
