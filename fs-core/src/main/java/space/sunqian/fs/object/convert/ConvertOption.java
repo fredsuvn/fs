@@ -3,6 +3,7 @@ package space.sunqian.fs.object.convert;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
+import space.sunqian.fs.base.number.NumFormatter;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.base.string.NameMapper;
@@ -110,6 +111,11 @@ public enum ConvertOption {
      * Key of {@link #dateFormatter(DateFormatter)}.
      */
     DATE_FORMATTER,
+
+    /**
+     * Key of {@link #numFormatter(NumFormatter)}.
+     */
+    NUM_FORMATTER,
     ;
 
     /**
@@ -140,12 +146,14 @@ public enum ConvertOption {
     }
 
     /**
-     * Check whether the option specifies to enable to include class. The related option
-     * {@link #includeClass(boolean)}.
+     * Check whether the option specifies to enable to include {@code class} properties, which from
+     * {@link Object#getClass()}. The related option configuration method is {@link #includeClass(boolean)}.
      *
      * @param options the options to check
-     * @return {@code true} if the option specifies to enable to include class, {@code false} otherwise
+     * @return {@code true} if the option specifies to enable to include {@code class} properties, {@code false}
+     * otherwise
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean includesClass(@Nonnull Option<?, ?> @Nonnull [] options) {
         return OptionKit.isEnabled(ConvertOption.INCLUDE_CLASS, options);
     }
@@ -177,6 +185,17 @@ public enum ConvertOption {
     }
 
     /**
+     * Returns whether the given options specify to enable strict source type mode. The related option configuration
+     * method is {@link #strictSourceTypeMode(boolean)}.
+     *
+     * @param options the given options
+     * @return {@code true} if the given options specify to enable strict source type mode, {@code false} otherwise
+     */
+    public static boolean isStrictSourceTypeMode(@Nonnull Option<?, ?> @Nonnull [] options) {
+        return OptionKit.isEnabled(ConvertOption.STRICT_SOURCE_TYPE_MODE, options);
+    }
+
+    /**
      * Sets option to enable new instance mode. In new instance mode, the conversion will always create a new instance
      * of the target type even if the target type is assignable from the source type.
      * <p>
@@ -188,6 +207,17 @@ public enum ConvertOption {
      */
     public static @Nonnull Option<@Nonnull ConvertOption, ?> strictTargetTypeMode(boolean strictTargetType) {
         return Option.of(STRICT_TARGET_TYPE_MODE, strictTargetType);
+    }
+
+    /**
+     * Returns whether the given options specify to enable strict target type mode. The related option configuration
+     * method is {@link #strictTargetTypeMode(boolean)}.
+     *
+     * @param options the given options
+     * @return {@code true} if the given options specify to enable strict target type mode, {@code false} otherwise
+     */
+    public static boolean isStrictTargetTypeMode(@Nonnull Option<?, ?> @Nonnull [] options) {
+        return OptionKit.isEnabled(ConvertOption.STRICT_TARGET_TYPE_MODE, options);
     }
 
     /**
@@ -205,6 +235,17 @@ public enum ConvertOption {
     }
 
     /**
+     * Returns whether the given options specify to enable new instance mode. The related option configuration method
+     * is {@link #newInstanceMode(boolean)}.
+     *
+     * @param options the given options
+     * @return {@code true} if the given options specify to enable new instance mode, {@code false} otherwise
+     */
+    public static boolean isNewInstanceMode(@Nonnull Option<?, ?> @Nonnull [] options) {
+        return OptionKit.isEnabled(ConvertOption.NEW_INSTANCE_MODE, options);
+    }
+
+    /**
      * Returns an option to specify the object schema parser.
      * <p>
      * By default, {@link ConvertKit#objectParser()} is used.
@@ -217,6 +258,8 @@ public enum ConvertOption {
     ) {
         return Option.of(OBJECT_SCHEMA_PARSER, schemaParser);
     }
+
+
 
     /**
      * Returns an option to specify the map schema parser.
@@ -306,12 +349,15 @@ public enum ConvertOption {
     }
 
     /**
-     * Returns an option to specify whether includes {@code class} properties from the source object in the conversion.
+     * Returns an option to specify whether includes {@code class} properties, which from {@link Object#getClass()}, for
+     * the source object in the conversion.
      * <p>
      * By default, this option is disabled.
      *
-     * @param includeClass whether includes {@code class} properties from the source object
-     * @return an option to specify to include class properties from the source object in the conversion
+     * @param includeClass whether includes {@code class} properties, which from {@link Object#getClass()}, for the
+     *                     source object
+     * @return an option to specify to include {@code class} properties, which from {@link Object#getClass()}, for the
+     * source object in the conversion
      */
     public static @Nonnull Option<@Nonnull ConvertOption, ?> includeClass(boolean includeClass) {
         return Option.of(INCLUDE_CLASS, includeClass);
@@ -357,5 +403,19 @@ public enum ConvertOption {
         @Nonnull DateFormatter dateFormatter
     ) {
         return Option.of(DATE_FORMATTER, dateFormatter);
+    }
+
+    /**
+     * Returns an option to specify the {@link NumFormatter} if needed.
+     * <p>
+     * By default, no {@link NumFormatter} is used.
+     *
+     * @param numFormatter the {@link NumFormatter} to be specified
+     * @return an option to specify the {@link NumFormatter} if needed
+     */
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumFormatter> numFormatter(
+        @Nonnull NumFormatter numFormatter
+    ) {
+        return Option.of(NUM_FORMATTER, numFormatter);
     }
 }
