@@ -118,6 +118,36 @@ public class OptionKit {
     }
 
     /**
+     * Merges the additional option to the default options.
+     * <p>
+     * This method always returns a new array copied from the default options array. If the key of the additional option
+     * equals the key of any option in the default options array, the additional option will override the default option
+     * in the returned array. Otherwise, the additional option will be added to the returned array.
+     *
+     * @param defaultOptions   the default options
+     * @param additionalOption the additional option
+     * @param <K>              the key type
+     * @param <V>              the value type
+     * @return the merged options
+     */
+    public static <K, V> @Nonnull Option<K, V> @Nonnull [] mergeOption(
+        @Nonnull Option<?, ?> @Nonnull [] defaultOptions,
+        @Nonnull Option<?, ?> additionalOption
+    ) {
+        int index = ArrayKit.indexOf(
+            defaultOptions, (i, o) -> Objects.equals(o.key(), additionalOption.key())
+        );
+        if (index == -1) {
+            Option<?, ?>[] result = Arrays.copyOf(defaultOptions, defaultOptions.length + 1);
+            result[result.length - 1] = additionalOption;
+            return Fs.as(result);
+        }
+        Option<?, ?>[] result = Arrays.copyOf(defaultOptions, defaultOptions.length);
+        result[index] = additionalOption;
+        return Fs.as(result);
+    }
+
+    /**
      * Returns {@code true} if the given options contains an option whose key equals the specified key and the value of
      * the option is enabled checked by {@link StringKit#isEnabled(CharSequence)}.
      *

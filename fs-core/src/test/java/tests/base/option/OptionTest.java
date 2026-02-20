@@ -56,6 +56,7 @@ public class OptionTest {
     public void testMergeOption() {
         Option<String, String>[] defaultOptions = array(Option.of("a", "1"), Option.of("b", "2"), Option.of("c", "3"));
         Option<String, String>[] additionalOptions = array();
+        // test merge options with additional options
         assertSame(
             defaultOptions,
             OptionKit.mergeOptions(defaultOptions, additionalOptions)
@@ -98,6 +99,16 @@ public class OptionTest {
         assertArrayEquals(
             array(Option.of("a", "1"), Option.of("b", "2"), Option.of("c", "3"), Option.of("d", "4")),
             OptionKit.mergeOptions(defaultOptions, additionalOptions4)
+        );
+        // test merge options with additional option
+        Option<String, String> additionalOption = Option.of("b", "3");
+        assertArrayEquals(
+            array(Option.of("a", "1"), Option.of("b", "3"), Option.of("c", "3")),
+            OptionKit.mergeOption(defaultOptions, additionalOption)
+        );
+        assertArrayEquals(
+            array(Option.of("a", "1"), Option.of("c", "3"), Option.of("b", "3")),
+            OptionKit.mergeOption(array(Option.of("a", "1"), Option.of("c", "3")), additionalOption)
         );
     }
 
