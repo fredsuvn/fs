@@ -5,6 +5,7 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.lang.EnumKit;
+import space.sunqian.fs.base.number.NumFormatter;
 import space.sunqian.fs.base.number.NumKit;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ArrayKit;
@@ -63,7 +64,7 @@ import java.util.function.IntFunction;
  *     <th>Conversion Logic</th>
  * </tr>
  * <tr>
- *     <td rowspan="5">{@link String}, {@link CharSequence}</td>
+ *     <td rowspan="6">{@link String}, {@link CharSequence}</td>
  *     <td>{@link InputStream}, {@link ReadableByteChannel}, {@link Reader}, {@link ByteBuffer}, {@code byte[]}</td>
  *     <td>Using {@link ConvertOption#ioOperator(IOOperator)} and {@link ConvertOption#charset(Charset)}
  *     to decode to string.</td>
@@ -79,6 +80,10 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td>Date and Time Objects</td>
  *     <td>Using {@link ConvertOption#dateFormatter(DateFormatter)} to handle.</td>
+ * </tr>
+ * <tr>
+ *     <td>Numbers</td>
+ *     <td>Using {@link NumFormatter#format(Number)}.</td>
  * </tr>
  * <tr>
  *     <td>Others</td>
@@ -467,8 +472,9 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             if (src instanceof char[]) {
                 return new String((char[]) src);
             }
-            if (src instanceof BigDecimal) {
-                return ((BigDecimal) src).toPlainString();
+            if (src instanceof Number) {
+                NumFormatter numFormatter = ConvertOption.getNumFormatter(options);
+                return numFormatter.format((Number) src);
             }
             if (src instanceof Date) {
                 DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);

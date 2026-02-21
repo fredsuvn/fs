@@ -12,6 +12,7 @@ import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.date.DateKit;
 import space.sunqian.fs.base.exception.UnreachablePointException;
+import space.sunqian.fs.base.number.NumFormatter;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
@@ -229,6 +230,11 @@ public class ConvertTest implements PrintTest {
             assertEquals(123, converter.convert("123", int.class));
             assertEquals(123L, converter.convert("123", long.class));
             assertEquals(123L, converter.convert("123", Long.class));
+            assertEquals(123.123, converter.convert("123.123", double.class));
+            assertEquals(
+                "123.12",
+                converter.convert(123.12345, String.class, ConvertOption.numFormatter(NumFormatter.of("#.00")))
+            );
             Date now = new Date();
             assertEquals(converter.convert(now, long.class), now.getTime());
             assertEquals(converter.convert(now.toInstant(), Long.class), now.getTime());
