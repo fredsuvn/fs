@@ -33,7 +33,7 @@ public interface DateFormatter {
      * @return the default {@link DateFormatter} of which pattern is {@link DateKit#DEFAULT_PATTERN}
      */
     static @Nonnull DateFormatter defaultFormatter() {
-        return DateKit.formatter;
+        return DateKit.DEFAULT_FORMATTER;
     }
 
     /**

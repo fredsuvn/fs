@@ -52,21 +52,21 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
         try {
             @Nonnull Option<?, ?> @Nonnull [] actualOptions = OptionKit.mergeOptions(defaultOptionsArray, options);
             if (src instanceof Map) {
-                MapParser srcParser = ConvertKit.mapParser(actualOptions);
+                MapParser srcParser = ConvertOption.getMapParser(actualOptions);
                 MapSchema srcSchema = parseMapSchema((Map<?, ?>) src, srcParser, srcType, actualOptions);
                 if (dst instanceof Map) {
                     MapSchema dstParser = parseMapSchema((Map<?, ?>) dst, srcParser, dstType, actualOptions);
                     mapToMap(Fs.as(src), srcSchema, Fs.as(dst), dstParser, converter, actualOptions);
                 } else {
-                    ObjectParser objectParser = ConvertKit.objectParser(actualOptions);
+                    ObjectParser objectParser = ConvertOption.getObjectParser(actualOptions);
                     ObjectSchema dstSchema = parseObjectSchema(dst, objectParser, dstType, actualOptions);
                     mapToObject(Fs.as(src), srcSchema, dst, dstSchema, converter, actualOptions);
                 }
             } else {
-                ObjectParser srcParser = ConvertKit.objectParser(actualOptions);
+                ObjectParser srcParser = ConvertOption.getObjectParser(actualOptions);
                 ObjectSchema srcSchema = parseObjectSchema(src, srcParser, srcType, actualOptions);
                 if (dst instanceof Map) {
-                    MapParser dstParser = ConvertKit.mapParser(actualOptions);
+                    MapParser dstParser = ConvertOption.getMapParser(actualOptions);
                     MapSchema dstSchema = parseMapSchema((Map<?, ?>) dst, dstParser, dstType, actualOptions);
                     objectToMap(src, srcSchema, Fs.as(dst), dstSchema, converter, actualOptions);
                 } else {

@@ -432,22 +432,22 @@ public class CopierTest implements PrintTest {
             // map to
             Map<String, String> map1 = MapKit.map("1", "1", "2", "2");
             Map<String, String> map2 = new HashMap<>();
-            ObjectCopier.defaultCopier().copyProperties(map1, map2, ConvertOption.propertyNameMapper(
+            ObjectCopier.defaultCopier().copyProperties(map1, map2, ConvertOption.nameMapper(
                 (name) -> name + "1"));
             assertEquals(MapKit.map("11", "1", "21", "2"), map2);
             Map<Integer, String> map3 = MapKit.map(1, "1", 2, "2");
             Map<Integer, String> map4 = new HashMap<>();
-            ObjectCopier.defaultCopier().copyProperties(map3, map4, ConvertOption.propertyNameMapper(
+            ObjectCopier.defaultCopier().copyProperties(map3, map4, ConvertOption.nameMapper(
                 (name) -> name + "1"));
             assertEquals(MapKit.map(1, "1", 2, "2"), map4);
             Map<String, String> map5 = MapKit.map("first", "1", "second", "2", "third", "3");
             ClsA3 cls6 = new ClsA3();
-            ObjectCopier.defaultCopier().copyProperties(map5, cls6, ConvertOption.propertyNameMapper(
+            ObjectCopier.defaultCopier().copyProperties(map5, cls6, ConvertOption.nameMapper(
                 (name) -> name + "1"));
             assertEquals(new ClsA3("1", "2", "3"), cls6);
             Map<Integer, String> map7 = MapKit.map(1, "1", 2, "2", 3, "3");
             ClsA3 cls8 = new ClsA3();
-            ObjectCopier.defaultCopier().copyProperties(map7, cls8, ConvertOption.propertyNameMapper(
+            ObjectCopier.defaultCopier().copyProperties(map7, cls8, ConvertOption.nameMapper(
                 (name) -> name + "1"));
             assertEquals(new ClsA3(), cls8);
         }
@@ -455,11 +455,11 @@ public class CopierTest implements PrintTest {
             // object to
             ClsA cls1 = new ClsA("1", "2", "3");
             Map<String, String> map2 = new HashMap<>();
-            ObjectCopier.defaultCopier().copyProperties(cls1, map2, ConvertOption.propertyNameMapper(
+            ObjectCopier.defaultCopier().copyProperties(cls1, map2, ConvertOption.nameMapper(
                 (name) -> name + "1"));
             assertEquals(MapKit.map("first1", "1", "second1", "2", "third1", "3"), map2);
             ClsA3 cls3 = new ClsA3();
-            ObjectCopier.defaultCopier().copyProperties(cls1, cls3, ConvertOption.propertyNameMapper(
+            ObjectCopier.defaultCopier().copyProperties(cls1, cls3, ConvertOption.nameMapper(
                 (name) -> name + "1"));
             assertEquals(new ClsA3("1", "2", "3"), cls3);
         }

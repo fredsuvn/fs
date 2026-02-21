@@ -21,56 +21,56 @@ public class DateKit {
      */
     public static final @Nonnull String DEFAULT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
 
-    static final @Nonnull DateFormatter formatter = DateFormatter.ofPattern(DEFAULT_PATTERN);
+    static final @Nonnull DateFormatter DEFAULT_FORMATTER = DateFormatter.ofPattern(DEFAULT_PATTERN);
 
     /**
-     * Formats the given date by {@link #formatter}.
+     * Formats the given date by {@link #DEFAULT_FORMATTER}.
      *
      * @param date the given date to format
      * @return the formatted string
      * @throws DateTimeException if any error occurs
      */
     public static @Nonnull String format(@Nonnull Date date) throws DateTimeException {
-        return formatter.format(date);
+        return DEFAULT_FORMATTER.format(date);
     }
 
     /**
-     * Formats the given date by {@link #formatter}. If the given date is {@code null}, or an exception thrown during
-     * formating, returns {@code null}.
+     * Formats the given date by {@link #DEFAULT_FORMATTER}. If the given date is {@code null}, or an exception thrown
+     * during formating, returns {@code null}.
      *
      * @param date the given date to format, can be {@code null}
      * @return the formatted string, or {@code null} if the given date is {@code null} or an exception thrown
      * @throws DateTimeException if any error occurs
      */
     public static @Nullable String formatSafe(@Nullable Date date) throws DateTimeException {
-        return formatter.formatSafe(date);
+        return DEFAULT_FORMATTER.formatSafe(date);
     }
 
     /**
-     * Formats the given time object by {@link #formatter}.
+     * Formats the given time object by {@link #DEFAULT_FORMATTER}.
      *
      * @param time the given time object to format
      * @return the formatted string
      * @throws DateTimeException if any error occurs
      */
     public static @Nonnull String format(@Nonnull TemporalAccessor time) throws DateTimeException {
-        return formatter.format(time);
+        return DEFAULT_FORMATTER.format(time);
     }
 
     /**
-     * Formats the given time object by {@link #formatter}. If the given time object is {@code null}, or an exception
-     * thrown during formating, returns {@code null}.
+     * Formats the given time object by {@link #DEFAULT_FORMATTER}. If the given time object is {@code null}, or an
+     * exception thrown during formating, returns {@code null}.
      *
      * @param time the given time object to format, can be {@code null}
      * @return the formatted string, or {@code null} if the given time object is {@code null} or an exception thrown
      * @throws DateTimeException if any error occurs
      */
     public static @Nullable String formatSafe(@Nullable TemporalAccessor time) throws DateTimeException {
-        return formatter.formatSafe(time);
+        return DEFAULT_FORMATTER.formatSafe(time);
     }
 
     /**
-     * Parses the given date string to an instance of the specified time type by {@link #formatter}.
+     * Parses the given date string to an instance of the specified time type by {@link #DEFAULT_FORMATTER}.
      *
      * @param date     the given date string to parse
      * @param timeType the specified time type
@@ -81,12 +81,12 @@ public class DateKit {
     public static <T> @Nonnull T parse(
         @Nonnull CharSequence date, @Nonnull Class<T> timeType
     ) throws DateTimeException {
-        return formatter.parse(date, timeType);
+        return DEFAULT_FORMATTER.parse(date, timeType);
     }
 
     /**
-     * Parses the given date string to an instance of the specified time type by {@link #formatter}. If the given date
-     * string is {@code null}, or an exception thrown during parsing, returns {@code null}.
+     * Parses the given date string to an instance of the specified time type by {@link #DEFAULT_FORMATTER}. If the
+     * given date string is {@code null}, or an exception thrown during parsing, returns {@code null}.
      *
      * @param date     the given date string to parse, can be {@code null}
      * @param timeType the specified time type
@@ -97,7 +97,7 @@ public class DateKit {
     public static <T> @Nullable T parseSafe(
         @Nullable CharSequence date, @Nonnull Class<T> timeType
     ) throws DateTimeException {
-        return formatter.parseSafe(date, timeType);
+        return DEFAULT_FORMATTER.parseSafe(date, timeType);
     }
 
     /**
@@ -110,7 +110,7 @@ public class DateKit {
      * @throws DateTimeException if any error occurs
      */
     public static <T> @Nonnull T convert(@Nonnull Date date, @Nonnull Class<T> timeType) throws DateTimeException {
-        return formatter.convert(date, timeType);
+        return DEFAULT_FORMATTER.convert(date, timeType);
     }
 
     /**
@@ -126,7 +126,7 @@ public class DateKit {
     public static <T> @Nullable T convertSafe(
         @Nullable Date date, @Nonnull Class<T> timeType
     ) throws DateTimeException {
-        return formatter.convertSafe(date, timeType);
+        return DEFAULT_FORMATTER.convertSafe(date, timeType);
     }
 
     /**
@@ -141,7 +141,7 @@ public class DateKit {
     public static <T> @Nonnull T convert(
         @Nonnull TemporalAccessor time, @Nonnull Class<T> timeType
     ) throws DateTimeException {
-        return formatter.convert(time, timeType);
+        return DEFAULT_FORMATTER.convert(time, timeType);
     }
 
     /**
@@ -158,7 +158,7 @@ public class DateKit {
     public static <T> @Nullable T convertSafe(
         @Nullable TemporalAccessor time, @Nonnull Class<T> timeType
     ) throws DateTimeException {
-        return formatter.convertSafe(time, timeType);
+        return DEFAULT_FORMATTER.convertSafe(time, timeType);
     }
 
     /**

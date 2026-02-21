@@ -3,12 +3,10 @@ package space.sunqian.fs.object.convert.handlers;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.lang.EnumKit;
 import space.sunqian.fs.base.number.NumKit;
 import space.sunqian.fs.base.option.Option;
-import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ArrayOperator;
 import space.sunqian.fs.collect.CollectKit;
@@ -19,7 +17,6 @@ import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.build.BuilderExecutor;
 import space.sunqian.fs.object.build.BuilderProvider;
-import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
@@ -186,10 +183,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             // string to byte[], char[], ByteBuffer, CharBuffer:
             if (srcType.equals(String.class)) {
                 if (target.equals(byte[].class) || target.equals(ByteBuffer.class)) {
-                    Charset charset = Fs.nonnull(
-                        OptionKit.findValue(ConvertOption.CHARSET, options),
-                        CharsKit.defaultCharset()
-                    );
+                    Charset charset = ConvertOption.getCharset(options);
                     byte[] bytes = ((String) src).getBytes(charset);
                     return target.equals(ByteBuffer.class) ? ByteBuffer.wrap(bytes) : bytes;
                 }
@@ -390,16 +384,13 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
         IntFunction<Map<Object, Object>> mapFunc = MapKit.mapFunction(rawTarget);
-        ObjectCopier objectCopier = Fs.nonnull(
-            OptionKit.findValue(ConvertOption.OBJECT_COPIER, options),
-            ObjectCopier.defaultCopier()
-        );
+        ObjectCopier objectCopier = ConvertOption.getObjectCopier(options);
         if (mapFunc != null) {
             Object targetObject = mapFunc.apply(0);
             objectCopier.copyProperties(src, srcType, targetObject, target, converter, options);
             return targetObject;
         } else {
-            BuilderProvider builderProvider = ConvertKit.builderProvider(options);
+            BuilderProvider builderProvider = ConvertOption.getBuilderProvider(options);
             BuilderExecutor executor = builderProvider.forType(target);
             if (executor == null) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
@@ -480,33 +471,21 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 return ((BigDecimal) src).toPlainString();
             }
             if (src instanceof Date) {
-                DateFormatter dateFormatter = Fs.nonnull(
-                    OptionKit.findValue(ConvertOption.DATE_FORMATTER, options),
-                    DateFormatter.defaultFormatter()
-                );
+                DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
                 return dateFormatter.format((Date) src);
             }
             if (src instanceof TemporalAccessor) {
-                DateFormatter dateFormatter = Fs.nonnull(
-                    OptionKit.findValue(ConvertOption.DATE_FORMATTER, options),
-                    DateFormatter.defaultFormatter()
-                );
+                DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
                 return dateFormatter.format((TemporalAccessor) src);
             }
-            Charset charset = Fs.nonnull(
-                OptionKit.findValue(ConvertOption.CHARSET, options),
-                CharsKit.defaultCharset()
-            );
+            Charset charset = ConvertOption.getCharset(options);
             if (src instanceof byte[]) {
                 return new String((byte[]) src, charset);
             }
             if (src instanceof ByteBuffer) {
                 return BufferKit.string((ByteBuffer) src, charset);
             }
-            IOOperator ioOperator = Fs.nonnull(
-                OptionKit.findValue(ConvertOption.IO_OPERATOR, options),
-                IOOperator.defaultOperator()
-            );
+            IOOperator ioOperator = ConvertOption.getIOOperator(options);
             if (src instanceof Reader) {
                 return ioOperator.string((Reader) src);
             }
@@ -542,10 +521,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 }
                 if (src instanceof TemporalAccessor) {
                     TemporalAccessor ta = (TemporalAccessor) src;
-                    DateFormatter dateFormatter = Fs.nonnull(
-                        OptionKit.findValue(ConvertOption.DATE_FORMATTER, options),
-                        DateFormatter.defaultFormatter()
-                    );
+                    DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
                     Date date = dateFormatter.convert(ta, Date.class);
                     return date.getTime();
                 }
@@ -595,10 +571,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) {
-            DateFormatter dateFormatter = Fs.nonnull(
-                OptionKit.findValue(ConvertOption.DATE_FORMATTER, options),
-                DateFormatter.defaultFormatter()
-            );
+            DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
             if (src instanceof String) {
                 return dateFormatter.parse((String) src, target);
             }

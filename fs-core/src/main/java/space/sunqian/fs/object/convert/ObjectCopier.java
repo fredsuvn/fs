@@ -287,10 +287,10 @@ public interface ObjectCopier {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception {
-            if (ConvertOption.ignoresProperty(srcKey, options)) {
+            if (ConvertOption.isIgnoreProperty(srcKey, options)) {
                 return false;
             }
-            if (srcValue == null && ConvertOption.ignoresNull(options)) {
+            if (srcValue == null && ConvertOption.isIgnoreNull(options)) {
                 return false;
             }
             if (srcKey instanceof String) {
@@ -327,10 +327,10 @@ public interface ObjectCopier {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception {
-            if (ConvertOption.ignoresProperty(srcKey, options)) {
+            if (ConvertOption.isIgnoreProperty(srcKey, options)) {
                 return false;
             }
-            if (srcValue == null && ConvertOption.ignoresNull(options)) {
+            if (srcValue == null && ConvertOption.isIgnoreNull(options)) {
                 return false;
             }
             if (srcKey instanceof String) {
@@ -372,18 +372,18 @@ public interface ObjectCopier {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception {
-            if (ConvertOption.ignoresProperty(srcProperty.name(), options)) {
+            if (ConvertOption.isIgnoreProperty(srcProperty.name(), options)) {
                 return false;
             }
             if (!srcProperty.isReadable()) {
                 return false;
             }
-            if ("class".equals(srcPropertyName) && !ConvertOption.includesClass(options)) {
+            if ("class".equals(srcPropertyName) && !ConvertOption.isIncludeClass(options)) {
                 return false;
             }
             String actualSrcPropertyName = ConvertOption.getNameMapper(options).map(srcPropertyName);
             Object srcPropertyValue = srcProperty.getValue(src);
-            if (srcPropertyValue == null && ConvertOption.ignoresNull(options)) {
+            if (srcPropertyValue == null && ConvertOption.isIgnoreNull(options)) {
                 return false;
             }
             Object dstKey = converter.convert(actualSrcPropertyName, String.class, dstSchema.keyType(), options);
@@ -418,18 +418,18 @@ public interface ObjectCopier {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception {
-            if (ConvertOption.ignoresProperty(srcProperty.name(), options)) {
+            if (ConvertOption.isIgnoreProperty(srcProperty.name(), options)) {
                 return false;
             }
             if (!srcProperty.isReadable()) {
                 return false;
             }
-            if ("class".equals(srcPropertyName) && !ConvertOption.includesClass(options)) {
+            if ("class".equals(srcPropertyName) && !ConvertOption.isIncludeClass(options)) {
                 return false;
             }
             String actualSrcPropertyName = ConvertOption.getNameMapper(options).map(srcPropertyName);
             Object srcPropertyValue = srcProperty.getValue(src);
-            if (srcPropertyValue == null && ConvertOption.ignoresNull(options)) {
+            if (srcPropertyValue == null && ConvertOption.isIgnoreNull(options)) {
                 return false;
             }
             String dstPropertyName = Fs.as(converter.convert(actualSrcPropertyName, String.class, String.class, options));

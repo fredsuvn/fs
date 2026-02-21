@@ -543,40 +543,40 @@ public class ConvertTest implements PrintTest {
         {
             // map parser
             assertSame(ConvertKit.mapParser(), ConvertKit.mapParser());
-            assertSame(ConvertKit.mapParser(), ConvertKit.mapParser(ConvertOption.ignoreNull(true)));
+            assertSame(ConvertKit.mapParser(), ConvertOption.getMapParser(ConvertOption.ignoreNull(true)));
             assertNotEquals(
                 ConvertKit.mapParser(),
-                ConvertKit.mapParser(ConvertOption.schemaParser(MapParser.defaultParser()))
+                ConvertOption.getMapParser(ConvertOption.schemaParser(MapParser.defaultParser()))
             );
             assertSame(
                 MapParser.defaultParser(),
-                ConvertKit.mapParser(ConvertOption.schemaParser(MapParser.defaultParser()))
+                ConvertOption.getMapParser(ConvertOption.schemaParser(MapParser.defaultParser()))
             );
         }
         {
             // object parser
             assertSame(ConvertKit.objectParser(), ConvertKit.objectParser());
-            assertSame(ConvertKit.objectParser(), ConvertKit.objectParser(ConvertOption.ignoreNull(true)));
+            assertSame(ConvertKit.objectParser(), ConvertOption.getObjectParser(ConvertOption.ignoreNull(true)));
             assertNotEquals(
                 ConvertKit.objectParser(),
-                ConvertKit.objectParser(ConvertOption.schemaParser(ObjectParser.defaultParser()))
+                ConvertOption.getObjectParser(ConvertOption.schemaParser(ObjectParser.defaultParser()))
             );
             assertSame(
                 ObjectParser.defaultParser(),
-                ConvertKit.objectParser(ConvertOption.schemaParser(ObjectParser.defaultParser()))
+                ConvertOption.getObjectParser(ConvertOption.schemaParser(ObjectParser.defaultParser()))
             );
         }
         {
             // builder provider
             assertSame(ConvertKit.builderProvider(), ConvertKit.builderProvider());
-            assertSame(ConvertKit.builderProvider(), ConvertKit.builderProvider(ConvertOption.ignoreNull(true)));
+            assertSame(ConvertKit.builderProvider(), ConvertOption.getBuilderProvider(ConvertOption.ignoreNull(true)));
             assertNotEquals(
                 ConvertKit.builderProvider(),
-                ConvertKit.builderProvider(ConvertOption.builderProvider(BuilderProvider.defaultProvider()))
+                ConvertOption.getBuilderProvider(ConvertOption.builderProvider(BuilderProvider.defaultProvider()))
             );
             assertSame(
                 BuilderProvider.defaultProvider(),
-                ConvertKit.builderProvider(ConvertOption.builderProvider(BuilderProvider.defaultProvider()))
+                ConvertOption.getBuilderProvider(ConvertOption.builderProvider(BuilderProvider.defaultProvider()))
             );
         }
     }

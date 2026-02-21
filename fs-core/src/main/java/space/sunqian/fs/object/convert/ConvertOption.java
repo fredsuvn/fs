@@ -1,6 +1,7 @@
 package space.sunqian.fs.object.convert;
 
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.number.NumFormatter;
@@ -78,9 +79,9 @@ public enum ConvertOption {
     OBJECT_COPIER,
 
     /**
-     * Key of {@link #propertyNameMapper(NameMapper)}.
+     * Key of {@link #nameMapper(NameMapper)}.
      */
-    PROPERTY_NAME_MAPPER,
+    NAME_MAPPER,
 
     /**
      * Key of {@link #ignoreProperties(Object...)}.
@@ -117,58 +118,6 @@ public enum ConvertOption {
      */
     NUM_FORMATTER,
     ;
-
-    /**
-     * Check whether the property is specified to ignore by the options. The related option
-     * {@link #ignoreProperties(Object...)}.
-     *
-     * @param propertyName the property name to check
-     * @param options      the options to check
-     * @return {@code true} if the property is specified to ignore, {@code false} otherwise
-     */
-    public static boolean ignoresProperty(@Nonnull Object propertyName, @Nonnull Option<?, ?> @Nonnull [] options) {
-        Object[] ignoredProperties = OptionKit.findValue(ConvertOption.IGNORE_PROPERTIES, options);
-        if (ignoredProperties == null) {
-            return false;
-        }
-        return ArrayKit.indexOf(ignoredProperties, propertyName) >= 0;
-    }
-
-    /**
-     * Check whether the option specifies to enable to ignore null values. The related option
-     * {@link #ignoreNull(boolean)}.
-     *
-     * @param options the options to check
-     * @return {@code true} if the option specifies to enable to ignore null values, {@code false} otherwise
-     */
-    public static boolean ignoresNull(@Nonnull Option<?, ?> @Nonnull [] options) {
-        return OptionKit.isEnabled(ConvertOption.IGNORE_NULL, options);
-    }
-
-    /**
-     * Check whether the option specifies to enable to include {@code class} properties, which from
-     * {@link Object#getClass()}. The related option configuration method is {@link #includeClass(boolean)}.
-     *
-     * @param options the options to check
-     * @return {@code true} if the option specifies to enable to include {@code class} properties, {@code false}
-     * otherwise
-     */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public static boolean includesClass(@Nonnull Option<?, ?> @Nonnull [] options) {
-        return OptionKit.isEnabled(ConvertOption.INCLUDE_CLASS, options);
-    }
-
-    /**
-     * Returns the {@link NameMapper}specified by the options. The related option
-     * {@link #propertyNameMapper(NameMapper)}.
-     *
-     * @param options the options to check
-     * @return the {@link NameMapper} specified by the options, or {@link NameMapper#keep()} if not specified
-     */
-    public static @Nonnull NameMapper getNameMapper(@Nonnull Option<?, ?> @Nonnull [] options) {
-        NameMapper mapper = OptionKit.findValue(ConvertOption.PROPERTY_NAME_MAPPER, options);
-        return mapper != null ? mapper : NameMapper.keep();
-    }
 
     /**
      * Sets option to enable strict source type mode. In strict type mode, the conversion will strictly treat the source
@@ -235,8 +184,8 @@ public enum ConvertOption {
     }
 
     /**
-     * Returns whether the given options specify to enable new instance mode. The related option configuration method
-     * is {@link #newInstanceMode(boolean)}.
+     * Returns whether the given options specify to enable new instance mode. The related option configuration method is
+     * {@link #newInstanceMode(boolean)}.
      *
      * @param options the given options
      * @return {@code true} if the given options specify to enable new instance mode, {@code false} otherwise
@@ -259,7 +208,17 @@ public enum ConvertOption {
         return Option.of(OBJECT_SCHEMA_PARSER, schemaParser);
     }
 
-
+    /**
+     * Returns the specified {@link ObjectParser} from the given options, or {@link ConvertKit#objectParser()} if the
+     * given options does not contain a {@link ConvertOption#OBJECT_SCHEMA_PARSER}.
+     *
+     * @param options the given options
+     * @return the specified {@link ObjectParser} from the given options, or {@link ConvertKit#objectParser()} if the
+     * given options does not contain a {@link ConvertOption#OBJECT_SCHEMA_PARSER}
+     */
+    public static @Nonnull ObjectParser getObjectParser(@Nonnull Option<?, ?> @Nonnull ... options) {
+        return Fs.nonnull(OptionKit.findValue(ConvertOption.OBJECT_SCHEMA_PARSER, options), ConvertKit.objectParser());
+    }
 
     /**
      * Returns an option to specify the map schema parser.
@@ -273,6 +232,18 @@ public enum ConvertOption {
         @Nonnull MapParser schemaParser
     ) {
         return Option.of(MAP_SCHEMA_PARSER, schemaParser);
+    }
+
+    /**
+     * Returns the specified {@link MapParser} from the given options, or {@link ConvertKit#mapParser()} if the given
+     * options does not contain a {@link ConvertOption#MAP_SCHEMA_PARSER}.
+     *
+     * @param options the given options
+     * @return the specified {@link MapParser} from the given options, or {@link ConvertKit#mapParser()} if the given
+     * options does not contain a {@link ConvertOption#MAP_SCHEMA_PARSER}
+     */
+    public static @Nonnull MapParser getMapParser(@Nonnull Option<?, ?> @Nonnull ... options) {
+        return Fs.nonnull(OptionKit.findValue(ConvertOption.MAP_SCHEMA_PARSER, options), ConvertKit.mapParser());
     }
 
     /**
@@ -290,6 +261,18 @@ public enum ConvertOption {
     }
 
     /**
+     * Returns the specified {@link BuilderProvider} from the given options, or {@link ConvertKit#builderProvider()} if
+     * the given options does not contain a {@link ConvertOption#BUILDER_PROVIDER}.
+     *
+     * @param options the given options
+     * @return the specified {@link BuilderProvider} from the given options, or {@link ConvertKit#builderProvider()} if
+     * the given options does not contain a {@link ConvertOption#BUILDER_PROVIDER}
+     */
+    public static @Nonnull BuilderProvider getBuilderProvider(@Nonnull Option<?, ?> @Nonnull ... options) {
+        return Fs.nonnull(OptionKit.findValue(ConvertOption.BUILDER_PROVIDER, options), ConvertKit.builderProvider());
+    }
+
+    /**
      * Returns an option to specify the {@link ObjectCopier}.
      * <p>
      * By default, the {@link ObjectCopier#defaultCopier()} is used.
@@ -304,22 +287,46 @@ public enum ConvertOption {
     }
 
     /**
+     * Returns the specified {@link ObjectCopier} from the given options, or {@link ObjectCopier#defaultCopier()} if the
+     * given options does not contain a {@link ConvertOption#OBJECT_COPIER}.
+     *
+     * @param options the given options
+     * @return the specified {@link ObjectCopier} from the given options, or {@link ObjectCopier#defaultCopier()} if the
+     * given options does not contain a {@link ConvertOption#OBJECT_COPIER}
+     */
+    public static @Nonnull ObjectCopier getObjectCopier(@Nonnull Option<?, ?> @Nonnull ... options) {
+        return Fs.nonnull(OptionKit.findValue(ConvertOption.OBJECT_COPIER, options), ObjectCopier.defaultCopier());
+    }
+
+    /**
      * Returns an option to specify the {@link NameMapper}.
      * <p>
-     * Note that this configuration is only valid for the {@link String} type property names (both source and target),
-     * and executed before the configured {@link ObjectCopier.Handler} (if any, and it means the property name received
-     * by the property mapper will be mapped by the name mapper first). For property names whose type is not
-     * {@link String}, such as non-{@link String} keys of a {@link Map}, this configuration will not take effect.
+     * Note that this configuration is only valid for the {@link String} type names, mainly for the property names (both
+     * source and target), and executed before the configured {@link ObjectCopier.Handler} (if any, and it means the
+     * property name received by the property mapper will be mapped by the name mapper first). For the property names
+     * whose type is not {@link String}, such as non-{@link String} keys of a {@link Map}, this configuration will not
+     * take effect.
      * <p>
      * By default, this option is disabled.
      *
      * @param nameMapper the {@link NameMapper} to be specified
      * @return an option to specify the {@link NameMapper}
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NameMapper> propertyNameMapper(
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NameMapper> nameMapper(
         @Nonnull NameMapper nameMapper
     ) {
-        return Option.of(PROPERTY_NAME_MAPPER, nameMapper);
+        return Option.of(NAME_MAPPER, nameMapper);
+    }
+
+    /**
+     * Returns the {@link NameMapper}specified by the options. The related option {@link #nameMapper(NameMapper)}.
+     *
+     * @param options the options to check
+     * @return the {@link NameMapper} specified by the options, or {@link NameMapper#keep()} if not specified
+     */
+    public static @Nonnull NameMapper getNameMapper(@Nonnull Option<?, ?> @Nonnull [] options) {
+        NameMapper mapper = OptionKit.findValue(ConvertOption.NAME_MAPPER, options);
+        return mapper != null ? mapper : NameMapper.keep();
     }
 
     /**
@@ -337,6 +344,22 @@ public enum ConvertOption {
     }
 
     /**
+     * Check whether the property is specified to ignore by the given options. The related option
+     * {@link #ignoreProperties(Object...)}.
+     *
+     * @param propertyName the property name to check
+     * @param options      the given options
+     * @return {@code true} if the property is specified to ignore, {@code false} otherwise
+     */
+    public static boolean isIgnoreProperty(@Nonnull Object propertyName, @Nonnull Option<?, ?> @Nonnull [] options) {
+        Object[] ignoredProperties = OptionKit.findValue(ConvertOption.IGNORE_PROPERTIES, options);
+        if (ignoredProperties == null) {
+            return false;
+        }
+        return ArrayKit.indexOf(ignoredProperties, propertyName) >= 0;
+    }
+
+    /**
      * Returns an option to specify whether ignores {@code null} properties from the source object in the conversion.
      * <p>
      * By default, this option is disabled.
@@ -346,6 +369,17 @@ public enum ConvertOption {
      */
     public static @Nonnull Option<@Nonnull ConvertOption, ?> ignoreNull(boolean ignoreNull) {
         return Option.of(IGNORE_NULL, ignoreNull);
+    }
+
+    /**
+     * Check whether the given option specifies to enable to ignore null values. The related option
+     * {@link #ignoreNull(boolean)}.
+     *
+     * @param options the given options to check
+     * @return {@code true} if the option specifies to enable to ignore null values, {@code false} otherwise
+     */
+    public static boolean isIgnoreNull(@Nonnull Option<?, ?> @Nonnull [] options) {
+        return OptionKit.isEnabled(ConvertOption.IGNORE_NULL, options);
     }
 
     /**
@@ -364,6 +398,19 @@ public enum ConvertOption {
     }
 
     /**
+     * Check whether the given option specifies to enable to include {@code class} properties, which from
+     * {@link Object#getClass()}. The related option configuration method is {@link #includeClass(boolean)}.
+     *
+     * @param options the given options to check
+     * @return {@code true} if the option specifies to enable to include {@code class} properties, {@code false}
+     * otherwise
+     */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public static boolean isIncludeClass(@Nonnull Option<?, ?> @Nonnull [] options) {
+        return OptionKit.isEnabled(ConvertOption.INCLUDE_CLASS, options);
+    }
+
+    /**
      * Returns an option to specify the {@link IOOperator} if needed.
      * <p>
      * By default, the {@link IOOperator#defaultOperator()} is used.
@@ -375,6 +422,21 @@ public enum ConvertOption {
         @Nonnull IOOperator ioOperator
     ) {
         return Option.of(IO_OPERATOR, ioOperator);
+    }
+
+    /**
+     * Returns the specified {@link IOOperator} from the given options, or {@link IOOperator#defaultOperator()} if the
+     * given options does not contain a {@link ConvertOption#IO_OPERATOR}.
+     *
+     * @param options the given options
+     * @return the specified {@link IOOperator} from the given options, or {@link IOOperator#defaultOperator()} if the
+     * given options does not contain a {@link ConvertOption#IO_OPERATOR}
+     */
+    public static @Nonnull IOOperator getIOOperator(@Nonnull Option<?, ?> @Nonnull [] options) {
+        return Fs.nonnull(
+            OptionKit.findValue(ConvertOption.IO_OPERATOR, options),
+            IOOperator.defaultOperator()
+        );
     }
 
     /**
@@ -392,6 +454,21 @@ public enum ConvertOption {
     }
 
     /**
+     * Returns the specified {@link Charset} from the given options, or {@link CharsKit#defaultCharset()} if the given
+     * options does not contain a {@link ConvertOption#CHARSET}.
+     *
+     * @param options the given options
+     * @return the specified {@link Charset} from the given options, or {@link CharsKit#defaultCharset()} if the given
+     * options does not contain a {@link ConvertOption#CHARSET}
+     */
+    public static @Nonnull Charset getCharset(@Nonnull Option<?, ?> @Nonnull [] options) {
+        return Fs.nonnull(
+            OptionKit.findValue(ConvertOption.CHARSET, options),
+            CharsKit.defaultCharset()
+        );
+    }
+
+    /**
      * Returns an option to specify the {@link DateFormatter} if needed.
      * <p>
      * By default, the {@link DateFormatter#defaultFormatter()} is used.
@@ -403,6 +480,21 @@ public enum ConvertOption {
         @Nonnull DateFormatter dateFormatter
     ) {
         return Option.of(DATE_FORMATTER, dateFormatter);
+    }
+
+    /**
+     * Returns the specified {@link DateFormatter} from the given options, or {@link DateFormatter#defaultFormatter()}
+     * if the given options does not contain a {@link ConvertOption#DATE_FORMATTER}.
+     *
+     * @param options the given options
+     * @return the specified {@link DateFormatter} from the given options, or {@link DateFormatter#defaultFormatter()}
+     * if the given options does not contain a {@link ConvertOption#DATE_FORMATTER}
+     */
+    public static @Nonnull DateFormatter getDateFormatter(@Nonnull Option<?, ?> @Nonnull [] options) {
+        return Fs.nonnull(
+            OptionKit.findValue(ConvertOption.DATE_FORMATTER, options),
+            DateFormatter.defaultFormatter()
+        );
     }
 
     /**
