@@ -31,4 +31,18 @@ final class NumFormatterImpl implements NumFormatter {
             throw new NumException(e);
         }
     }
+
+    enum Common implements NumFormatter {
+        INST;
+
+        @Override
+        public @Nonnull String format(@Nonnull Number num) throws NumException {
+            return num.toString();
+        }
+
+        @Override
+        public <T> @Nonnull T parse(@Nonnull CharSequence numStr, @Nonnull Class<T> numType) throws NumException {
+            return NumKit.toNumber(numStr, numType);
+        }
+    }
 }

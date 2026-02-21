@@ -15,6 +15,17 @@ import java.util.function.Supplier;
 public interface NumFormatter {
 
     /**
+     * Returns a common {@link NumFormatter} which uses {@link Number#toString()} to format the number and
+     * {@link NumKit#toNumber(CharSequence, Class)} to parse the string. Note the returned instance is singleton.
+     *
+     * @return a common {@link NumFormatter} which uses {@link Number#toString()} to format the number and
+     * {@link NumKit#toNumber(CharSequence, Class)} to parse the string
+     */
+    static @Nonnull NumFormatter common() {
+        return NumFormatterImpl.Common.INST;
+    }
+
+    /**
      * Returns a new {@link NumFormatter} with the given number format supplier.
      *
      * @param format the number format supplier

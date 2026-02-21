@@ -217,7 +217,10 @@ public enum ConvertOption {
      * given options does not contain a {@link ConvertOption#OBJECT_SCHEMA_PARSER}
      */
     public static @Nonnull ObjectParser getObjectParser(@Nonnull Option<?, ?> @Nonnull ... options) {
-        return Fs.nonnull(OptionKit.findValue(ConvertOption.OBJECT_SCHEMA_PARSER, options), ConvertKit.objectParser());
+        return Fs.nonnull(
+            OptionKit.findValue(ConvertOption.OBJECT_SCHEMA_PARSER, options),
+            ConvertKit.objectParser()
+        );
     }
 
     /**
@@ -243,7 +246,10 @@ public enum ConvertOption {
      * options does not contain a {@link ConvertOption#MAP_SCHEMA_PARSER}
      */
     public static @Nonnull MapParser getMapParser(@Nonnull Option<?, ?> @Nonnull ... options) {
-        return Fs.nonnull(OptionKit.findValue(ConvertOption.MAP_SCHEMA_PARSER, options), ConvertKit.mapParser());
+        return Fs.nonnull(
+            OptionKit.findValue(ConvertOption.MAP_SCHEMA_PARSER, options),
+            ConvertKit.mapParser()
+        );
     }
 
     /**
@@ -269,7 +275,10 @@ public enum ConvertOption {
      * the given options does not contain a {@link ConvertOption#BUILDER_PROVIDER}
      */
     public static @Nonnull BuilderProvider getBuilderProvider(@Nonnull Option<?, ?> @Nonnull ... options) {
-        return Fs.nonnull(OptionKit.findValue(ConvertOption.BUILDER_PROVIDER, options), ConvertKit.builderProvider());
+        return Fs.nonnull(
+            OptionKit.findValue(ConvertOption.BUILDER_PROVIDER, options),
+            ConvertKit.builderProvider()
+        );
     }
 
     /**
@@ -295,7 +304,10 @@ public enum ConvertOption {
      * given options does not contain a {@link ConvertOption#OBJECT_COPIER}
      */
     public static @Nonnull ObjectCopier getObjectCopier(@Nonnull Option<?, ?> @Nonnull ... options) {
-        return Fs.nonnull(OptionKit.findValue(ConvertOption.OBJECT_COPIER, options), ObjectCopier.defaultCopier());
+        return Fs.nonnull(
+            OptionKit.findValue(ConvertOption.OBJECT_COPIER, options),
+            ObjectCopier.defaultCopier()
+        );
     }
 
     /**
@@ -509,5 +521,20 @@ public enum ConvertOption {
         @Nonnull NumFormatter numFormatter
     ) {
         return Option.of(NUM_FORMATTER, numFormatter);
+    }
+
+    /**
+     * Returns the specified {@link NumFormatter} from the given options, or {@link NumFormatter#common()} if the given
+     * options does not contain a {@link ConvertOption#NUM_FORMATTER}.
+     *
+     * @param options the given options
+     * @return the specified {@link NumFormatter} from the given options, or {@link NumFormatter#common()} if the given
+     * options does not contain a {@link ConvertOption#NUM_FORMATTER}
+     */
+    public static @Nonnull NumFormatter getNumFormatter(@Nonnull Option<?, ?> @Nonnull [] options) {
+        return Fs.nonnull(
+            OptionKit.findValue(ConvertOption.NUM_FORMATTER, options),
+            NumFormatter.common()
+        );
     }
 }

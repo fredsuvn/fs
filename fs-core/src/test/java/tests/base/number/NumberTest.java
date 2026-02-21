@@ -101,35 +101,54 @@ public class NumberTest implements DataTest, PrintTest {
     }
 
     @Test
-    public void testFormat() {
-        NumFormatter formatter = NumFormatter.of("#.00");
-        Double number = formatter.parseSafe("123.123456", Double.class);
-        assertNotNull(number);
-        assertEquals(123.123456, number);
-        assertEquals(
-            "123.12",
-            formatter.format(number)
-        );
-        assertEquals(
-            "123.12",
-            formatter.formatSafe(number)
-        );
-        BigDecimal decimal = formatter.parseSafe("123.123456", BigDecimal.class);
-        assertNotNull(decimal);
-        assertEquals(new BigDecimal("123.123456"), decimal);
-        assertEquals(
-            "123.12",
-            formatter.format(decimal)
-        );
-        assertEquals(
-            "123.12",
-            formatter.formatSafe(decimal)
-        );
-        assertNull(formatter.parseSafe("123.123", String.class));
-        assertNull(formatter.formatSafe(null));
-        assertNull(formatter.parseSafe("XXXXX", int.class));
-        assertNull(formatter.parseSafe(null, int.class));
-        assertNull(formatter.formatSafe(new ErrorNumber()));
+    public void testFormatter() {
+        {
+            // specified
+            NumFormatter formatter = NumFormatter.of("#.00");
+            Double number = formatter.parseSafe("123.123456", Double.class);
+            assertNotNull(number);
+            assertEquals(123.123456, number);
+            assertEquals(
+                "123.12",
+                formatter.format(number)
+            );
+            assertEquals(
+                "123.12",
+                formatter.formatSafe(number)
+            );
+            BigDecimal decimal = formatter.parseSafe("123.123456", BigDecimal.class);
+            assertNotNull(decimal);
+            assertEquals(new BigDecimal("123.123456"), decimal);
+            assertEquals(
+                "123.12",
+                formatter.format(decimal)
+            );
+            assertEquals(
+                "123.12",
+                formatter.formatSafe(decimal)
+            );
+            assertNull(formatter.parseSafe("123.123", String.class));
+            assertNull(formatter.formatSafe(null));
+            assertNull(formatter.parseSafe("XXXXX", int.class));
+            assertNull(formatter.parseSafe(null, int.class));
+            assertNull(formatter.formatSafe(new ErrorNumber()));
+        }
+        {
+            // common
+            NumFormatter formatter = NumFormatter.common();
+            BigDecimal number = formatter.parse(
+                "123.123456123456123456123456123456123456123456123456", BigDecimal.class
+            );
+            assertNotNull(number);
+            assertEquals(
+                new BigDecimal("123.123456123456123456123456123456123456123456123456"),
+                number
+            );
+            assertEquals(
+                "123.123456123456123456123456123456123456123456123456",
+                formatter.format(number)
+            );
+        }
     }
 
     @Test
