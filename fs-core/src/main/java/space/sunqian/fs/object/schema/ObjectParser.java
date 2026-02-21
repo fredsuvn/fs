@@ -42,7 +42,20 @@ public interface ObjectParser {
      * @see RecordSchemaHandler
      */
     static @Nonnull ObjectParser defaultParser() {
-        return SchemaBack.defaultObjectParser();
+        return ObjectParserBack.defaultParser();
+    }
+
+    /**
+     * Returns the default cached {@link ObjectParser}, which is based on {@link #defaultParser()} and caches the parsed
+     * results with {@link SimpleCache#ofSoft()}.
+     * <p>
+     * Note the default cached {@link ObjectParser} is singleton.
+     *
+     * @return the default cached {@link ObjectParser}
+     * @see #defaultParser()
+     */
+    static @Nonnull ObjectParser defaultCachedParser() {
+        return ObjectParserBack.defaultCachedParser();
     }
 
     /**
@@ -66,7 +79,7 @@ public interface ObjectParser {
      * @return a new {@link ObjectParser} with given handlers
      */
     static @Nonnull ObjectParser newParser(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
-        return SchemaBack.newObjectParser(handlers);
+        return ObjectParserBack.newParser(handlers);
     }
 
     /**
@@ -80,11 +93,11 @@ public interface ObjectParser {
      * @param parser the underlying {@link ObjectParser} to parse the type
      * @return a new {@link ObjectParser} that caches the parsed results with the specified cache
      */
-    static @Nonnull ObjectParser cachedParser(
+    static @Nonnull ObjectParser newCachedParser(
         @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectSchema> cache,
         @Nonnull ObjectParser parser
     ) {
-        return SchemaBack.cachedObjectParser(cache, parser);
+        return ObjectParserBack.newCachedParser(cache, parser);
     }
 
     /**

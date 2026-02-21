@@ -11,10 +11,14 @@ import space.sunqian.fs.third.ThirdKit;
 import java.lang.reflect.Type;
 import java.util.List;
 
-final class BuilderBack {
+final class BuilderProviderBack {
 
     static @Nonnull BuilderProvider defaultProvider() {
         return BuilderProviderImpl.DEFAULT;
+    }
+
+    static @Nonnull BuilderProvider defaultCachedProvider() {
+        return CachedProvider.DEFAULT;
     }
 
     static @Nonnull BuilderProvider newProvider(
@@ -23,7 +27,7 @@ final class BuilderBack {
         return new BuilderProviderImpl(handlers);
     }
 
-    static @Nonnull BuilderProvider cachedProvider(
+    static @Nonnull CachedProvider newCachedProvider(
         @Nonnull SimpleCache<@Nonnull Type, @Nonnull BuilderExecutor> cache,
         @Nonnull BuilderProvider provider
     ) {
@@ -75,11 +79,16 @@ final class BuilderBack {
 
         @Override
         public @Nullable BuilderExecutor newExecutor(@Nonnull Type target) throws Exception {
-            return BuilderBack.executorForType(target, handlers);
+            return BuilderProviderBack.executorForType(target, handlers);
         }
     }
 
     private static final class CachedProvider implements BuilderProvider {
+
+        private static final @Nonnull CachedProvider DEFAULT = newCachedProvider(
+            SimpleCache.ofSoft(),
+            BuilderProvider.defaultProvider()
+        );
 
         private final @Nonnull SimpleCache<@Nonnull Type, @Nullable BuilderExecutor> cache;
         private final @Nonnull BuilderProvider provider;
@@ -108,6 +117,6 @@ final class BuilderBack {
         }
     }
 
-    private BuilderBack() {
+    private BuilderProviderBack() {
     }
 }

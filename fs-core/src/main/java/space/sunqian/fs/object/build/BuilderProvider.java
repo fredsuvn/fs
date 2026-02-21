@@ -34,7 +34,20 @@ public interface BuilderProvider {
      * @see CommonBuilderHandler
      */
     static @Nonnull BuilderProvider defaultProvider() {
-        return BuilderBack.defaultProvider();
+        return BuilderProviderBack.defaultProvider();
+    }
+
+    /**
+     * Returns the default cached {@link BuilderProvider}, which is based on {@link #defaultProvider()} and caches the
+     * results with a {@link SimpleCache#ofSoft()}.
+     * <p>
+     * Note the default cached {@link BuilderProvider} is singleton.
+     *
+     * @return the default {@link BuilderProvider}
+     * @see #defaultProvider()
+     */
+    static @Nonnull BuilderProvider defaultCachedProvider() {
+        return BuilderProviderBack.defaultCachedProvider();
     }
 
     /**
@@ -58,7 +71,7 @@ public interface BuilderProvider {
      * @return a new {@link BuilderProvider} with given handlers
      */
     static @Nonnull BuilderProvider newProvider(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
-        return BuilderBack.newProvider(handlers);
+        return BuilderProviderBack.newProvider(handlers);
     }
 
     /**
@@ -73,11 +86,11 @@ public interface BuilderProvider {
      * @param provider the underlying {@link BuilderProvider} to create the type
      * @return a new {@link BuilderProvider} that caches the results with the specified cache
      */
-    static @Nonnull BuilderProvider cachedProvider(
+    static @Nonnull BuilderProvider newCachedProvider(
         @Nonnull SimpleCache<@Nonnull Type, @Nonnull BuilderExecutor> cache,
         @Nonnull BuilderProvider provider
     ) {
-        return BuilderBack.cachedProvider(cache, provider);
+        return BuilderProviderBack.newCachedProvider(cache, provider);
     }
 
     /**
@@ -102,7 +115,7 @@ public interface BuilderProvider {
      */
     default @Nullable BuilderExecutor forType(@Nonnull Type target) throws ObjectBuildingException {
         try {
-            return BuilderBack.executorForType(target, handlers());
+            return BuilderProviderBack.executorForType(target, handlers());
         } catch (Exception e) {
             throw new ObjectBuildingException(e);
         }

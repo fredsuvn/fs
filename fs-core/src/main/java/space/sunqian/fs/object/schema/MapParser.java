@@ -23,7 +23,20 @@ public interface MapParser {
      * @return the default {@link MapParser}
      */
     static @Nonnull MapParser defaultParser() {
-        return SchemaBack.defaultMapParser();
+        return MapParserBack.defaultParser();
+    }
+
+    /**
+     * Returns the default cached {@link MapParser}, which is based on {@link #defaultParser()} and caches the parsed
+     * results with a {@link SimpleCache#ofSoft()}.
+     * <p>
+     * Note the default cached {@link MapParser} is singleton.
+     *
+     * @return the default cached {@link MapParser}
+     * @see #defaultParser()
+     */
+    static @Nonnull MapParser defaultCachedParser() {
+        return MapParserBack.defaultCachedParser();
     }
 
     /**
@@ -33,11 +46,11 @@ public interface MapParser {
      * @param parser the underlying {@link MapParser} to parse the type
      * @return a new {@link MapParser} that caches the parsed results with the specified cache
      */
-    static @Nonnull MapParser cachedParser(
+    static @Nonnull MapParser newCachedParser(
         @Nonnull SimpleCache<@Nonnull Type, @Nonnull MapSchema> cache,
         @Nonnull MapParser parser
     ) {
-        return SchemaBack.cachedMapParser(cache, parser);
+        return MapParserBack.newCachedParser(cache, parser);
     }
 
     /**

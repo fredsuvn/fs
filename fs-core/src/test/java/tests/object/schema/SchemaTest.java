@@ -504,7 +504,7 @@ public class SchemaTest implements PrintTest {
     public void testCachedParser() {
         {
             // MapParser
-            MapParser mapParser = MapParser.cachedParser(SimpleCache.ofStrong(), MapParser.defaultParser());
+            MapParser mapParser = MapParser.newCachedParser(SimpleCache.ofStrong(), MapParser.defaultParser());
             assertSame(mapParser.parse(Map.class), mapParser.parse(Map.class));
             assertNotSame(MapSchema.parse(Map.class), MapSchema.parse(Map.class));
             assertSame(
@@ -518,7 +518,7 @@ public class SchemaTest implements PrintTest {
         }
         {
             // ObjectParser
-            ObjectParser objectParser = ObjectParser.cachedParser(SimpleCache.ofStrong(), ObjectParser.defaultParser());
+            ObjectParser objectParser = ObjectParser.newCachedParser(SimpleCache.ofStrong(), ObjectParser.defaultParser());
             assertSame(objectParser.parse(A.class), objectParser.parse(A.class));
             assertNotSame(ObjectSchema.parse(A.class), ObjectSchema.parse(A.class));
             assertSame(ObjectParser.defaultParser().handlers(), objectParser.handlers());

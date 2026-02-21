@@ -80,7 +80,7 @@ public class BuilderTest implements AssertTest, PrintTest {
         }
         {
             // test cache
-            BuilderProvider provider = BuilderProvider.cachedProvider(
+            BuilderProvider provider = BuilderProvider.newCachedProvider(
                 SimpleCache.ofStrong(),
                 BuilderProvider.defaultProvider()
             );
