@@ -28,11 +28,11 @@ public interface NumFormatter {
     /**
      * Returns a new {@link NumFormatter} with the given number format supplier.
      *
-     * @param format the number format supplier
+     * @param supplier the number format supplier
      * @return a new {@link NumFormatter} with the given number format supplier
      */
-    static @Nonnull NumFormatter of(@Nonnull Supplier<? extends @Nonnull NumberFormat> format) {
-        return new NumFormatterImpl(format);
+    static @Nonnull NumFormatter ofSupplier(@Nonnull Supplier<? extends @Nonnull NumberFormat> supplier) {
+        return new NumFormatterImpl(supplier);
     }
 
     /**
@@ -43,9 +43,9 @@ public interface NumFormatter {
      * @param pattern the number format pattern
      * @return a new {@link NumFormatter} with the given number format pattern
      */
-    static @Nonnull NumFormatter of(@Nonnull String pattern) {
+    static @Nonnull NumFormatter ofPattern(@Nonnull String pattern) {
         ThreadLocal<DecimalFormat> format = ThreadLocal.withInitial(() -> new DecimalFormat(pattern));
-        return of(format::get);
+        return ofSupplier(format::get);
     }
 
     /**

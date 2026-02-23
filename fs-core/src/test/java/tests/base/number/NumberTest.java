@@ -104,7 +104,7 @@ public class NumberTest implements DataTest, PrintTest {
     public void testFormatter() {
         {
             // specified
-            NumFormatter formatter = NumFormatter.of("#.00");
+            NumFormatter formatter = NumFormatter.ofPattern(NumKit.DEFAULT_PATTERN);
             Double number = formatter.parseSafe("123.123456", Double.class);
             assertNotNull(number);
             assertEquals(123.123456, number);

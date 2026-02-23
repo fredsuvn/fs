@@ -14,6 +14,11 @@ import java.math.BigInteger;
 public class NumKit {
 
     /**
+     * Default format pattern: "#.00".
+     */
+    public static final @Nonnull String DEFAULT_PATTERN = "#.00";
+
+    /**
      * Converts the given string to the specified number type. Supported number types are:
      * <ul>
      *     <li>{@code byte}, {@link Byte}</li>

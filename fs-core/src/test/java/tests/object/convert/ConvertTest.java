@@ -233,7 +233,7 @@ public class ConvertTest implements PrintTest {
             assertEquals(123.123, converter.convert("123.123", double.class));
             assertEquals(
                 "123.12",
-                converter.convert(123.12345, String.class, ConvertOption.numFormatter(NumFormatter.of("#.00")))
+                converter.convert(123.12345, String.class, ConvertOption.numFormatter(NumFormatter.ofPattern("#.00")))
             );
             Date now = new Date();
             assertEquals(converter.convert(now, long.class), now.getTime());

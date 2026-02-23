@@ -341,6 +341,7 @@ public interface ObjectCopier {
             if (dstProperty == null || !dstProperty.isWritable()) {
                 return false;
             }
+
             Object dstPropertyValue = converter.convert(srcValue, srcSchema.valueType(), dstProperty.type(), options);
             dstProperty.setValue(dst, dstPropertyValue);
             return false;

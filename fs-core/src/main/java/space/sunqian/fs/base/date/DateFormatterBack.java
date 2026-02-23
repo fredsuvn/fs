@@ -17,7 +17,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.Objects;
 
-final class DateBack {
+final class DateFormatterBack {
 
     static @Nonnull DateFormatter ofFormatter(
         @Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId
@@ -214,6 +214,6 @@ final class DateBack {
         }
     }
 
-    private DateBack() {
+    private DateFormatterBack() {
     }
 }

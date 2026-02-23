@@ -79,7 +79,7 @@ public interface DateFormatter {
     static @Nonnull DateFormatter ofFormatter(
         @Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId
     ) {
-        return DateBack.ofFormatter(formatter, zoneId);
+        return DateFormatterBack.ofFormatter(formatter, zoneId);
     }
 
     /**
@@ -97,7 +97,7 @@ public interface DateFormatter {
     static @Nonnull DateFormatter ofPattern(
         @Nonnull String pattern, @Nonnull ZoneId zoneId
     ) throws DateTimeException {
-        return DateBack.ofPattern(pattern, zoneId);
+        return DateFormatterBack.ofPattern(pattern, zoneId);
     }
 
     /**
