@@ -1,6 +1,7 @@
 package space.sunqian.fs.base.value;
 
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.fs.Fs;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -27,6 +28,30 @@ public final class SimpleKey {
 
     private SimpleKey(Object @Nonnull [] elements) {
         this.elements = elements;
+    }
+
+    /**
+     * Returns the element at the specified position in this key, and casts it to the type {@code T}.
+     *
+     * @param index the index of the element to return
+     * @param <T>   the type of the element
+     * @return the element at the specified position in this key, and casts it to the type {@code T}
+     * @throws IndexOutOfBoundsException if the index is out of range
+     * @throws ClassCastException        if the element at the specified position cannot be cast to the specified type
+     */
+    public <T> T getAs(int index) throws IndexOutOfBoundsException, ClassCastException {
+        return Fs.as(get(index));
+    }
+
+    /**
+     * Returns the element at the specified position in this key.
+     *
+     * @param index the index of the element to return
+     * @return the element at the specified position in this key
+     * @throws IndexOutOfBoundsException if the index is out of range
+     */
+    public Object get(int index) throws IndexOutOfBoundsException {
+        return elements[index];
     }
 
     @Override

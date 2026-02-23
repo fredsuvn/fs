@@ -268,5 +268,13 @@ public class ValueTest {
             Arrays.hashCode(new Object[]{1, 2, 3}),
             SimpleKey.of(1, 2, 3).hashCode()
         );
+        assertEquals(1, (Object) SimpleKey.of(1, 2, 3).getAs(0));
+        assertEquals(2, (Object) SimpleKey.of(1, 2, 3).getAs(1));
+        assertEquals(3, (Object) SimpleKey.of(1, 2, 3).getAs(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> SimpleKey.of(1, 2, 3).getAs(3));
+        assertThrows(ClassCastException.class, () -> {
+            long l = SimpleKey.of(1, 2, 3).getAs(0);
+            System.out.println(l);
+        });
     }
 }
