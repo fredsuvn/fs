@@ -19,9 +19,12 @@ import space.sunqian.fs.base.value.LongVar;
 import space.sunqian.fs.base.value.Ret;
 import space.sunqian.fs.base.value.ShortVal;
 import space.sunqian.fs.base.value.ShortVar;
+import space.sunqian.fs.base.value.SimpleKey;
 import space.sunqian.fs.base.value.Span;
 import space.sunqian.fs.base.value.Val;
 import space.sunqian.fs.base.value.Var;
+
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -250,5 +253,20 @@ public class ValueTest {
         assertEquals(66, Ret.of(66).get(e -> 11));
         assertEquals(66, Ret.of(new Throwable()).get(e -> 66));
         assertThrows(Throwable.class, () -> Ret.of(new Throwable()).get());
+    }
+
+    @Test
+    public void testSimpleKey() {
+        assertEquals(
+            "SimpleKey" + Arrays.toString(new Object[]{1, 2, 3}),
+            SimpleKey.of(1, 2, 3).toString()
+        );
+        assertEquals(SimpleKey.of(1, 2, 3), SimpleKey.of(1, 2, 3));
+        assertNotEquals(SimpleKey.of(1, 2, 3), SimpleKey.of(1, 2));
+        assertFalse(SimpleKey.of(1, 2, 3).equals(1));
+        assertEquals(
+            Arrays.hashCode(new Object[]{1, 2, 3}),
+            SimpleKey.of(1, 2, 3).hashCode()
+        );
     }
 }
