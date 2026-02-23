@@ -10,6 +10,7 @@
  *     <li>{@link space.sunqian.fs.object.build}: Defines steps for creating and building objects;</li>
  *     <li>{@link space.sunqian.fs.object.convert}: Converts and copies objects and properties;</li>
  *     <li>{@link space.sunqian.fs.object.pool}: Provides pool interfaces for objects;</li>
+ *     <li>{@link space.sunqian.fs.object.annotation}: Provides annotations for object related operations;</li>
  * </ul>
  */
 package space.sunqian.fs.object;

@@ -9,13 +9,15 @@
  * ObjectCopier copier = ObjectCopier.defaultCopier();
  * copier.copyProperties(src, dst, options);
  * }</pre>
- * The core interfaces of this package:
+ * The core interfaces in this package:
  * <ul>
  *     <li>{@link space.sunqian.fs.object.convert.ObjectConverter}</li>
+ *     <li>{@link space.sunqian.fs.object.convert.ObjectConverter.Handler}</li>
  *     <li>{@link space.sunqian.fs.object.convert.handlers.AssignableConvertHandler}</li>
  *     <li>{@link space.sunqian.fs.object.convert.handlers.CommonConvertHandler}</li>
  *     <li>{@link space.sunqian.fs.object.convert.ObjectCopier}</li>
  *     <li>{@link space.sunqian.fs.object.convert.ObjectCopier.Handler}</li>
+ *     <li>{@link space.sunqian.fs.object.convert.handlers.CommonCopierHandler}</li>
  * </ul>
  */
 package space.sunqian.fs.object.convert;

@@ -13,11 +13,15 @@ import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.date.DateKit;
 import space.sunqian.fs.base.exception.UnreachablePointException;
 import space.sunqian.fs.base.number.NumFormatter;
+import space.sunqian.fs.base.number.NumKit;
+import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.IOOperator;
+import space.sunqian.fs.object.annotation.DatePattern;
+import space.sunqian.fs.object.annotation.NumPattern;
 import space.sunqian.fs.object.build.BuilderProvider;
 import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ConvertOption;
@@ -43,6 +47,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -545,6 +551,124 @@ public class ConvertTest implements PrintTest {
     }
 
     @Test
+    public void testAnnotation() {
+        {
+            // test pattern cache
+            // Note soft-cache does not guarantee the same instance, so "assertSame" may not always work as expected.
+            Option<?, DateFormatter> df1 = ConvertKit.getDateFormatterOption(
+                "yyyy-MM-dd", ZoneId.systemDefault()
+            );
+            Option<?, DateFormatter> df2 = ConvertKit.getDateFormatterOption(
+                "yyyy-MM-dd", ZoneId.systemDefault()
+            );
+            Option<?, DateFormatter> df3 = ConvertKit.getDateFormatterOption(
+                "yyyy-MM-dd HH:mm:ss", ZoneId.systemDefault()
+            );
+            assertSame(df1, df2);
+            assertNotSame(df1, df3);
+            assertNotSame(df2, df3);
+            Option<?, NumFormatter> nf1 = ConvertKit.getNumFormatterOption("#.0000");
+            Option<?, NumFormatter> nf2 = ConvertKit.getNumFormatterOption("#.0000");
+            Option<?, NumFormatter> nf3 = ConvertKit.getNumFormatterOption("#.000000");
+            assertSame(nf1, nf2);
+            assertNotSame(nf1, nf3);
+            assertNotSame(nf2, nf3);
+        }
+        {
+            // test annotation support: object to object
+            ZonedDateTime zdt = ZonedDateTime.now();
+            Ann1 ann1 = new Ann1();
+            ann1.setDate1(DateFormatter.ofPattern(DateKit.DEFAULT_PATTERN).format(zdt));
+            ann1.setDate2(DateFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(zdt));
+            ann1.setDate3(zdt.toLocalDateTime());
+            ann1.setDate4(Date.from(zdt.toInstant()));
+            ann1.setNum1(new BigDecimal("123.456789"));
+            ann1.setNum2(123.456789);
+            ann1.setNum3(new BigDecimal("123.456789"));
+            ann1.setComplex1(DateFormatter.ofPattern(DateKit.DEFAULT_PATTERN).format(zdt));
+            Ann2 ann2 = ObjectConverter.defaultConverter().convert(ann1, Ann2.class);
+            assertEquals(
+                DateFormatter.ofPattern(DateKit.DEFAULT_PATTERN).parse(ann1.getDate1(), LocalDateTime.class),
+                ann2.getDate1()
+            );
+            assertEquals(
+                DateFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", ZoneId.of("UTC+2")).parse(ann1.getDate2(), LocalDateTime.class),
+                ann2.getDate2()
+            );
+            assertEquals(
+                DateFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(ann1.getDate3()),
+                ann2.getDate3()
+            );
+            assertEquals(
+                DateFormatter.ofPattern("YYYY-MM-dd HH:mm:ss", ZoneId.of("Asia/Shanghai")).format(ann1.getDate4()),
+                ann2.getDate4()
+            );
+            assertEquals(
+                NumFormatter.ofPattern(NumKit.DEFAULT_PATTERN).format(ann1.getNum1()),
+                ann2.getNum1()
+            );
+            assertEquals(
+                NumFormatter.ofPattern("#.000").format(ann1.getNum2()),
+                ann2.getNum2()
+            );
+            assertEquals(
+                ann1.getNum3().toString(),
+                ann2.getNum3()
+            );
+            assertEquals(
+                DateFormatter.ofPattern(DateKit.DEFAULT_PATTERN).parse(ann1.getComplex1(), Date.class),
+                ann2.getComplex1()
+            );
+        }
+        {
+            // test annotation support: map to object
+            ZonedDateTime zdt = ZonedDateTime.now();
+            Map<String, Object> ann1 = new HashMap<>();
+            ann1.put("date1", DateFormatter.ofPattern(DateKit.DEFAULT_PATTERN).format(zdt));
+            ann1.put("date2", DateFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(zdt));
+            ann1.put("date3", zdt.toLocalDateTime());
+            ann1.put("date4", Date.from(zdt.toInstant()));
+            ann1.put("num1", new BigDecimal("123.456789"));
+            ann1.put("num2", 123.456789);
+            ann1.put("num3", new BigDecimal("123.456789"));
+            ann1.put("complex1", DateFormatter.ofPattern(DateKit.DEFAULT_PATTERN).format(zdt));
+            Ann2 ann2 = ObjectConverter.defaultConverter().convert(ann1, Ann2.class);
+            assertEquals(
+                DateFormatter.ofPattern(DateKit.DEFAULT_PATTERN).parse((CharSequence) ann1.get("date1"), LocalDateTime.class),
+                ann2.getDate1()
+            );
+            assertEquals(
+                DateFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", ZoneId.of("UTC+2")).parse((CharSequence) ann1.get("date2"), LocalDateTime.class),
+                ann2.getDate2()
+            );
+            assertEquals(
+                DateFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format((LocalDateTime) ann1.get("date3")),
+                ann2.getDate3()
+            );
+            assertEquals(
+                DateFormatter.ofPattern("YYYY-MM-dd HH:mm:ss", ZoneId.of("Asia/Shanghai")).format((Date) ann1.get("date4")),
+                ann2.getDate4()
+            );
+            assertEquals(
+                ((BigDecimal) ann1.get("num1")).toString(),
+                ann2.getNum1()
+            );
+            assertEquals(
+                NumFormatter.ofPattern("#.000").format((Double) ann1.get("num2")),
+                ann2.getNum2()
+            );
+            assertEquals(
+                ((BigDecimal) ann1.get("num3")).toString(),
+                ann2.getNum3()
+            );
+            assertEquals(
+                DateFormatter.ofPattern(DateKit.DEFAULT_PATTERN).parse((CharSequence) ann1.get("complex1"), Date.class),
+                ann2.getComplex1()
+            );
+        }
+    }
+
+    @Test
     public void testConvertKit() throws Exception {
         {
             // map parser
@@ -677,5 +801,43 @@ public class ConvertTest implements PrintTest {
     @NoArgsConstructor
     public static class MapObject {
         private long longNum;
+    }
+
+    @Data
+    public static class Ann1 {
+        @DatePattern
+        private String date1;
+        @DatePattern(value = "yyyy-MM-dd HH:mm:ss", zoneId = "Asia/Shanghai")
+        private String date2;
+        @DatePattern("yyyy-MM-dd HH:mm:ss")
+        private LocalDateTime date3;
+        private Date date4;
+        @NumPattern
+        private BigDecimal num1;
+        @NumPattern("#.0")
+        private double num2;
+        private BigDecimal num3;
+        @DatePattern
+        @NumPattern
+        private String complex1;
+    }
+
+    @Data
+    public static class Ann2 {
+        @DatePattern
+        private LocalDateTime date1;
+        @DatePattern(value = "yyyy-MM-dd HH:mm:ss", zoneId = "UTC+2")
+        private LocalDateTime date2;
+        @DatePattern("yyyy-MM-dd HH:mm:ss")
+        private String date3;
+        @DatePattern(value = "yyyy-MM-dd HH:mm:ss", zoneId = "Asia/Shanghai")
+        private String date4;
+        private String num1;
+        @NumPattern("#.000")
+        private String num2;
+        private String num3;
+        @DatePattern
+        @NumPattern
+        private Date complex1;
     }
 }

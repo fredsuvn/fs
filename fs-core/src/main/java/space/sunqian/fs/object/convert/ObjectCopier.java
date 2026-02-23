@@ -8,6 +8,8 @@ import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.object.annotation.DatePattern;
+import space.sunqian.fs.object.annotation.NumPattern;
 import space.sunqian.fs.object.build.BuilderProvider;
 import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.schema.MapSchema;
@@ -28,6 +30,8 @@ import java.util.Map;
  * options when the method is called.
  *
  * @author sunqian
+ * @implNote The default implementations of {@link ObjectCopier} support annotations defined in
+ * {@link space.sunqian.fs.object.annotation}.
  */
 @ThreadSafe
 public interface ObjectCopier {
@@ -259,6 +263,8 @@ public interface ObjectCopier {
      * {@link BuilderProvider}, and other objects. By default, they are all thread-safe.
      *
      * @author sunqian
+     * @implNote The default implementations of {@link Handler} support annotations defined in
+     * {@link space.sunqian.fs.object.annotation}.
      */
     interface Handler {
 
@@ -341,8 +347,10 @@ public interface ObjectCopier {
             if (dstProperty == null || !dstProperty.isWritable()) {
                 return false;
             }
-
-            Object dstPropertyValue = converter.convert(srcValue, srcSchema.valueType(), dstProperty.type(), options);
+            DatePattern datePattern = dstProperty.getAnnotation(DatePattern.class);
+            NumPattern numPattern = dstProperty.getAnnotation(NumPattern.class);
+            Option<?, ?>[] actualOps = ConvertBack.mergeOptions(options, datePattern, numPattern);
+            Object dstPropertyValue = converter.convert(srcValue, srcSchema.valueType(), dstProperty.type(), actualOps);
             dstProperty.setValue(dst, dstPropertyValue);
             return false;
         }
@@ -438,8 +446,15 @@ public interface ObjectCopier {
             if (dstProperty == null || !dstProperty.isWritable()) {
                 return false;
             }
+            DatePattern datePattern = ConvertBack.getAnnotation(
+                DatePattern.class, srcProperty, dstProperty
+            );
+            NumPattern numPattern = ConvertBack.getAnnotation(
+                NumPattern.class, srcProperty, dstProperty
+            );
+            Option<?, ?>[] actualOps = ConvertBack.mergeOptions(options, datePattern, numPattern);
             Object dstPropertyValue = converter.convert(
-                srcPropertyValue, srcProperty.type(), dstProperty.type(), options
+                srcPropertyValue, srcProperty.type(), dstProperty.type(), actualOps
             );
             dstProperty.setValue(dst, dstPropertyValue);
             return false;

@@ -1,10 +1,10 @@
 package space.sunqian.fs.object.convert;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.number.NumFormatter;
+import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.base.value.SimpleKey;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.build.BuilderProvider;
 import space.sunqian.fs.object.schema.MapParser;
@@ -49,60 +49,63 @@ public class ConvertKit {
     }
 
     /**
-     * Returns the {@link DateFormatter} for the given pattern and zone id. This method is based on a soft-reference
-     * cache (from {@link SimpleCache#ofSoft()}), so the same {@link DateFormatter} instance will be returned for the
-     * same pattern and zone id.
+     * Returns a {@link Option} of {@link DateFormatter} for the given pattern and zone id. This method is based on a
+     * soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
+     * for the same pattern and zone id.
      *
      * @param pattern the pattern of the date formatter
      * @param zoneId  the zone id of the date formatter
-     * @return the {@link DateFormatter} for the given pattern and zone id
+     * @return the {@link Option} of {@link DateFormatter} for the given pattern and zone id
      */
-    public static @Nonnull DateFormatter getDateFormatter(@Nonnull String pattern, @Nonnull ZoneId zoneId) {
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter> getDateFormatterOption(
+        @Nonnull String pattern, @Nonnull ZoneId zoneId) {
         return DateFormatterCache.INST.get(pattern, zoneId);
     }
 
     /**
-     * Returns the {@link NumFormatter} for the given pattern. This method is based on a soft-reference cache (from
-     * {@link SimpleCache#ofSoft()}), so the same {@link NumFormatter} instance will be returned for the same pattern.
+     * Returns a {@link Option} of {@link NumFormatter} for the given pattern. This method is based on a soft-reference
+     * cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned for the same
+     * pattern.
      *
      * @param pattern the pattern of the number formatter
-     * @return the {@link NumFormatter} for the given pattern
+     * @return the {@link Option} of {@link NumFormatter} for the given pattern
      */
-    public static @Nonnull NumFormatter getNumFormatter(@Nonnull String pattern) {
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumFormatter> getNumFormatterOption(
+        @Nonnull String pattern) {
         return NumFormatterCache.INST.get(pattern);
     }
 
     private enum DateFormatterCache {
         INST;
 
-        private final @Nonnull SimpleCache<@Nonnull DateFormatterKey, @Nonnull DateFormatter> cache =
-            SimpleCache.ofSoft();
+        private final @Nonnull SimpleCache<
+            @Nonnull SimpleKey,
+            @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter>
+            > cache = SimpleCache.ofSoft();
 
-        public @Nonnull DateFormatter get(@Nonnull String pattern, @Nonnull ZoneId zoneId) {
+        public @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter> get(
+            @Nonnull String pattern, @Nonnull ZoneId zoneId
+        ) {
             return cache.get(
-                new DateFormatterKey(pattern, zoneId),
-                key -> DateFormatter.ofPattern(pattern, zoneId)
+                SimpleKey.of(pattern, zoneId),
+                k -> ConvertOption.dateFormatter(DateFormatter.ofPattern(k.getAs(0), k.getAs(1))
+                )
             );
-        }
-
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        private static final class DateFormatterKey {
-            private final String pattern;
-            private final ZoneId zoneId;
         }
     }
 
     private enum NumFormatterCache {
         INST;
 
-        private final @Nonnull SimpleCache<@Nonnull String, @Nonnull NumFormatter> cache =
-            SimpleCache.ofSoft();
+        private final @Nonnull SimpleCache<
+            @Nonnull String,
+            @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumFormatter>
+            > cache = SimpleCache.ofSoft();
 
-        public @Nonnull NumFormatter get(@Nonnull String pattern) {
+        public @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumFormatter> get(@Nonnull String pattern) {
             return cache.get(
                 pattern,
-                p -> NumFormatter.ofPattern(pattern)
+                p -> ConvertOption.numFormatter(NumFormatter.ofPattern(p))
             );
         }
     }

@@ -4,9 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
-import space.sunqian.fs.base.date.DateKit;
 import space.sunqian.fs.base.number.NumFormatter;
-import space.sunqian.fs.base.number.NumKit;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.base.string.NameMapper;
@@ -17,7 +15,6 @@ import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.ObjectParser;
 
 import java.nio.charset.Charset;
-import java.time.ZoneId;
 import java.util.Map;
 
 /**
@@ -539,44 +536,5 @@ public enum ConvertOption {
             OptionKit.findValue(ConvertOption.NUM_FORMATTER, options),
             NumFormatter.common()
         );
-    }
-
-    /**
-     * This annotation is used to specify the date pattern to be used. It is available for the default
-     * {@link ObjectConverter} and {@link ObjectCopier} and their handlers.
-     *
-     * @author sunqian
-     */
-    public @interface DatePattern {
-
-        /**
-         * The date pattern to be used, default is {@link DateKit#DEFAULT_PATTERN}.
-         *
-         * @return the date pattern to be used, default is {@link DateKit#DEFAULT_PATTERN}
-         */
-        String value() default DateKit.DEFAULT_PATTERN;
-
-        /**
-         * The zone id to be used, default is {@link ZoneId#systemDefault()}.
-         *
-         * @return the zone id to be used, default is {@link ZoneId#systemDefault()}
-         */
-        String zoneId();
-    }
-
-    /**
-     * This annotation is used to specify the number pattern to be used. It is available for the default
-     * {@link ObjectConverter} and {@link ObjectCopier}.
-     *
-     * @author sunqian
-     */
-    public @interface NumPattern {
-
-        /**
-         * The number pattern to be used, default is {@link NumKit#DEFAULT_PATTERN}.
-         *
-         * @return the number pattern to be used, default is {@link NumKit#DEFAULT_PATTERN}
-         */
-        String value() default NumKit.DEFAULT_PATTERN;
     }
 }

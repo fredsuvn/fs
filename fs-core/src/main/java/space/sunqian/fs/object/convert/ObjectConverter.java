@@ -49,6 +49,8 @@ import java.util.Map;
  * {@link BuilderProvider}, {@link ObjectCopier}, and other objects. By default, they are all thread-safe.
  *
  * @author sunqian
+ * @implNote The default implementations of {@link ObjectConverter} support annotations defined in
+ * {@link space.sunqian.fs.object.annotation}.
  */
 public interface ObjectConverter {
 

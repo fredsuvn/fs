@@ -85,7 +85,7 @@ public class OptionKit {
      */
     public static <K, V> @Nonnull Option<K, V> @Nonnull [] mergeOptions(
         @Nonnull Option<?, ?> @Nonnull @RetainedParam [] defaultOptions,
-        @Nonnull Option<?, ?> @Nonnull [] additionalOptions
+        @Nonnull Option<?, ?> @Nonnull ... additionalOptions
     ) {
         if (ArrayKit.isEmpty(additionalOptions)) {
             return Fs.as(defaultOptions);

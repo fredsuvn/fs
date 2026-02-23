@@ -146,6 +146,14 @@ public class DateTest implements PrintTest {
             // assertEquals(TimeKit.formatter().pattern(), TimeKit.DEFAULT_PATTERN);
             assertEquals(DateKit.DEFAULT_PATTERN, DateFormatter.defaultFormatter().pattern());
         }
+        {
+            // special case:
+            // DateFormatter ymd = DateFormatter.ofPattern("yyyy-MM-dd");
+            // assertEquals(
+            //     LocalDateTime.of(2026, 2, 24, 0, 0, 0),
+            //     ymd.parse("2026-02-24", LocalDateTime.class)
+            // );
+        }
     }
 
     @Test
