@@ -12,8 +12,13 @@ import java.lang.annotation.Target;
 import java.time.ZoneId;
 
 /**
- * This annotation is used to specify the date pattern to be used. It is typically available for the default
- * {@link ObjectConverter} and {@link ObjectCopier} and their handlers when converting to a non-map object.
+ * This annotation is used to specify the date pattern to be used:
+ * <pre>{@code
+ * @DatePattern("yyyy-MM-dd HH:mm:ss")
+ * private String date;
+ * }</pre>
+ * It is typically available for the default {@link ObjectConverter} and {@link ObjectCopier} and their handlers when
+ * converting to a non-map object.
  *
  * @author sunqian
  */

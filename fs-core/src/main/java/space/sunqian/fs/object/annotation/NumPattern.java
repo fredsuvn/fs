@@ -11,8 +11,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is used to specify the number pattern to be used. It is typically available for the default
- * {@link ObjectConverter} and {@link ObjectCopier} and their handlers when converting to a non-map object.
+ * This annotation is used to specify the number pattern to be used:
+ * <pre>{@code
+ * @NumPattern("#.000")
+ * private BigDecimal number;
+ * }</pre>
+ * It is typically available for the default {@link ObjectConverter} and {@link ObjectCopier} and their handlers when
+ * converting to a non-map object.
  *
  * @author sunqian
  */
