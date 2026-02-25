@@ -45,7 +45,7 @@ public class ConvertKit {
      *
      * @return the default {@link BuilderOperatorProvider} for object conversion
      */
-    public static @Nonnull BuilderOperatorProvider builderProvider() {
+    public static @Nonnull BuilderOperatorProvider builderOperatorProvider() {
         return BuilderOperatorProvider.defaultCachedProvider();
     }
 

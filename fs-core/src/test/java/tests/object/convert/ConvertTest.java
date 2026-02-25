@@ -698,15 +698,15 @@ public class ConvertTest implements PrintTest {
         }
         {
             // builder provider
-            assertSame(ConvertKit.builderProvider(), ConvertKit.builderProvider());
-            assertSame(ConvertKit.builderProvider(), ConvertOption.getBuilderProvider(ConvertOption.ignoreNull(true)));
+            assertSame(ConvertKit.builderOperatorProvider(), ConvertKit.builderOperatorProvider());
+            assertSame(ConvertKit.builderOperatorProvider(), ConvertOption.getBuilderOperatorProvider(ConvertOption.ignoreNull(true)));
             assertNotEquals(
-                ConvertKit.builderProvider(),
-                ConvertOption.getBuilderProvider(ConvertOption.builderOperatorProvider(BuilderOperatorProvider.defaultProvider()))
+                ConvertKit.builderOperatorProvider(),
+                ConvertOption.getBuilderOperatorProvider(ConvertOption.builderOperatorProvider(BuilderOperatorProvider.defaultProvider()))
             );
             assertSame(
                 BuilderOperatorProvider.defaultProvider(),
-                ConvertOption.getBuilderProvider(ConvertOption.builderOperatorProvider(BuilderOperatorProvider.defaultProvider()))
+                ConvertOption.getBuilderOperatorProvider(ConvertOption.builderOperatorProvider(BuilderOperatorProvider.defaultProvider()))
             );
         }
     }

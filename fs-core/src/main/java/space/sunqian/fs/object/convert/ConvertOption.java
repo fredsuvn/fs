@@ -257,7 +257,7 @@ public enum ConvertOption {
     /**
      * Returns an option to specify the {@link BuilderOperatorProvider} to generate data object during the conversion.
      * <p>
-     * By default, the {@link ConvertKit#builderProvider()} is used.
+     * By default, the {@link ConvertKit#builderOperatorProvider()} is used.
      *
      * @param operatorProvider the {@link BuilderOperatorProvider} to be specified
      * @return an option to specify the {@link BuilderOperatorProvider} to generate data object during the conversion
@@ -270,18 +270,20 @@ public enum ConvertOption {
 
     /**
      * Returns the specified {@link BuilderOperatorProvider} from the given options, or
-     * {@link ConvertKit#builderProvider()} if the given options does not contain a
+     * {@link ConvertKit#builderOperatorProvider()} if the given options does not contain a
      * {@link ConvertOption#BUILDER_OPERATOR_PROVIDER}.
      *
      * @param options the given options
      * @return the specified {@link BuilderOperatorProvider} from the given options, or
-     * {@link ConvertKit#builderProvider()} if the given options does not contain a
+     * {@link ConvertKit#builderOperatorProvider()} if the given options does not contain a
      * {@link ConvertOption#BUILDER_OPERATOR_PROVIDER}
      */
-    public static @Nonnull BuilderOperatorProvider getBuilderProvider(@Nonnull Option<?, ?> @Nonnull ... options) {
+    public static @Nonnull BuilderOperatorProvider getBuilderOperatorProvider(
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) {
         return Fs.nonnull(
             OptionKit.findValue(ConvertOption.BUILDER_OPERATOR_PROVIDER, options),
-            ConvertKit.builderProvider()
+            ConvertKit.builderOperatorProvider()
         );
     }
 

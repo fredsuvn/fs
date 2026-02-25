@@ -18,7 +18,7 @@ final class JsonParserImpl implements JsonParser {
         ObjectConverter.defaultConverter(),
         ConvertOption.mapSchemaParser(ConvertKit.mapSchemaParser()),
         ConvertOption.objectSchemaParser(ConvertKit.objectSchemaParser()),
-        ConvertOption.builderOperatorProvider(ConvertKit.builderProvider())
+        ConvertOption.builderOperatorProvider(ConvertKit.builderOperatorProvider())
     );
 
     private final @Nonnull ObjectConverter converter;

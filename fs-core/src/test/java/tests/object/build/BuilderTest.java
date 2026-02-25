@@ -31,7 +31,7 @@ public class BuilderTest implements AssertTest, PrintTest {
     @Test
     public void testCreator() throws Exception {
         testCreator(BuilderOperatorProvider.defaultProvider());
-        testCreator(ConvertKit.builderProvider());
+        testCreator(ConvertKit.builderOperatorProvider());
         {
             // test default provider
             BuilderOperatorProvider p1 = BuilderOperatorProvider.defaultProvider();

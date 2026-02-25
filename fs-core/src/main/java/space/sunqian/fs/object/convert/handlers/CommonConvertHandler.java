@@ -395,7 +395,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             objectCopier.copyProperties(src, srcType, targetObject, target, converter, options);
             return targetObject;
         } else {
-            BuilderOperatorProvider builderProvider = ConvertOption.getBuilderProvider(options);
+            BuilderOperatorProvider builderProvider = ConvertOption.getBuilderOperatorProvider(options);
             BuilderOperator operator = builderProvider.forType(target);
             if (operator == null) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
