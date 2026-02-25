@@ -9,24 +9,24 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
-final class MapParserBack {
+final class MapSchemaParserBack {
 
-    static @Nonnull MapParser defaultParser() {
-        return DefaultMapParser.INST;
+    static @Nonnull MapSchemaParser defaultParser() {
+        return DefaultMapSchemaParser.INST;
     }
 
-    static @Nonnull MapParser defaultCachedParser() {
-        return CachedMapParser.DEFAULT;
+    static @Nonnull MapSchemaParser defaultCachedParser() {
+        return CachedMapSchemaParser.DEFAULT;
     }
 
-    static @Nonnull CachedMapParser newCachedParser(
+    static @Nonnull MapSchemaParserBack.CachedMapSchemaParser newCachedParser(
         @Nonnull SimpleCache<@Nonnull Type, @Nonnull MapSchema> cache,
-        @Nonnull MapParser parser
+        @Nonnull MapSchemaParser parser
     ) {
-        return new CachedMapParser(cache, parser);
+        return new CachedMapSchemaParser(cache, parser);
     }
 
-    private enum DefaultMapParser implements MapParser {
+    private enum DefaultMapSchemaParser implements MapSchemaParser {
 
         INST;
 
@@ -65,8 +65,8 @@ final class MapParserBack {
             }
 
             @Override
-            public @Nonnull MapParser parser() {
-                return DefaultMapParser.this;
+            public @Nonnull MapSchemaParser parser() {
+                return DefaultMapSchemaParser.this;
             }
 
             @Override
@@ -97,19 +97,19 @@ final class MapParserBack {
         }
     }
 
-    private static final class CachedMapParser implements MapParser {
+    private static final class CachedMapSchemaParser implements MapSchemaParser {
 
-        private static final @Nonnull CachedMapParser DEFAULT = newCachedParser(
+        private static final @Nonnull MapSchemaParserBack.CachedMapSchemaParser DEFAULT = newCachedParser(
             SimpleCache.ofSoft(),
-            MapParser.defaultParser()
+            MapSchemaParser.defaultParser()
         );
 
         private final @Nonnull SimpleCache<@Nonnull Type, @Nonnull MapSchema> cache;
-        private final @Nonnull MapParser parser;
+        private final @Nonnull MapSchemaParser parser;
 
-        private CachedMapParser(
+        private CachedMapSchemaParser(
             @Nonnull SimpleCache<@Nonnull Type, @Nonnull MapSchema> cache,
-            @Nonnull MapParser parser
+            @Nonnull MapSchemaParser parser
         ) {
             this.cache = cache;
             this.parser = parser;
@@ -121,6 +121,6 @@ final class MapParserBack {
         }
     }
 
-    private MapParserBack() {
+    private MapSchemaParserBack() {
     }
 }

@@ -8,11 +8,11 @@ import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.schema.DataSchemaException;
-import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.MapSchema;
-import space.sunqian.fs.object.schema.ObjectParser;
+import space.sunqian.fs.object.schema.MapSchemaParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -52,21 +52,21 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
         try {
             @Nonnull Option<?, ?> @Nonnull [] actualOptions = OptionKit.mergeOptions(defaultOptionsArray, options);
             if (src instanceof Map) {
-                MapParser srcParser = ConvertOption.getMapParser(actualOptions);
+                MapSchemaParser srcParser = ConvertOption.getMapSchemaParser(actualOptions);
                 MapSchema srcSchema = parseMapSchema((Map<?, ?>) src, srcParser, srcType, actualOptions);
                 if (dst instanceof Map) {
                     MapSchema dstParser = parseMapSchema((Map<?, ?>) dst, srcParser, dstType, actualOptions);
                     mapToMap(Fs.as(src), srcSchema, Fs.as(dst), dstParser, converter, actualOptions);
                 } else {
-                    ObjectParser objectParser = ConvertOption.getObjectParser(actualOptions);
+                    ObjectSchemaParser objectParser = ConvertOption.getObjectSchemaParser(actualOptions);
                     ObjectSchema dstSchema = parseObjectSchema(dst, objectParser, dstType, actualOptions);
                     mapToObject(Fs.as(src), srcSchema, dst, dstSchema, converter, actualOptions);
                 }
             } else {
-                ObjectParser srcParser = ConvertOption.getObjectParser(actualOptions);
+                ObjectSchemaParser srcParser = ConvertOption.getObjectSchemaParser(actualOptions);
                 ObjectSchema srcSchema = parseObjectSchema(src, srcParser, srcType, actualOptions);
                 if (dst instanceof Map) {
-                    MapParser dstParser = ConvertOption.getMapParser(actualOptions);
+                    MapSchemaParser dstParser = ConvertOption.getMapSchemaParser(actualOptions);
                     MapSchema dstSchema = parseMapSchema((Map<?, ?>) dst, dstParser, dstType, actualOptions);
                     objectToMap(src, srcSchema, Fs.as(dst), dstSchema, converter, actualOptions);
                 } else {
@@ -81,7 +81,7 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
 
     private @Nonnull ObjectSchema parseObjectSchema(
         @Nonnull Object object,
-        @Nonnull ObjectParser parser,
+        @Nonnull ObjectSchemaParser parser,
         @Nonnull Type type,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
@@ -101,7 +101,7 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
 
     private @Nonnull MapSchema parseMapSchema(
         @Nonnull Map<?, ?> object,
-        @Nonnull MapParser parser,
+        @Nonnull MapSchemaParser parser,
         @Nonnull Type type,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {

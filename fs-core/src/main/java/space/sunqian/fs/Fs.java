@@ -25,8 +25,8 @@ import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
-import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectSchema;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
@@ -911,7 +911,7 @@ public class Fs {
      * @return the value of the specified property in the given object, {@code null} is permitted
      * @see ObjectKit
      */
-    public static @Nullable Object get(
+    public static @Nullable Object getValue(
         @Nullable Object obj,
         @Nonnull String propertyName
     ) {
@@ -924,7 +924,7 @@ public class Fs {
      * This method supports nested property access using dot notation (e.g., "parent.child.property"). If any part of
      * the property path is not found or is {@code null}, this method returns {@code null}.
      * <p>
-     * This method is a shortcut to the {@link ObjectKit#getPropertyValue(Object, String, ObjectParser)}.
+     * This method is a shortcut to the {@link ObjectKit#getPropertyValue(Object, String, ObjectSchemaParser)}.
      *
      * @param obj          the given object
      * @param propertyName the specified property name
@@ -932,10 +932,10 @@ public class Fs {
      * @return the value of the specified property in the given object, {@code null} is permitted
      * @see ObjectKit
      */
-    public static @Nullable Object get(
+    public static @Nullable Object getValue(
         @Nullable Object obj,
         @Nonnull String propertyName,
-        @Nonnull ObjectParser objectParser
+        @Nonnull ObjectSchemaParser objectParser
     ) {
         return ObjectKit.getPropertyValue(obj, propertyName, objectParser);
     }

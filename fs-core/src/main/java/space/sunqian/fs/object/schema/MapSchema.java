@@ -19,26 +19,26 @@ public interface MapSchema extends DataSchema {
 
     /**
      * Parse the given {@link Map} type or {@link MapType} to {@link MapSchema} using
-     * {@link MapParser#defaultParser()}.
+     * {@link MapSchemaParser#defaultParser()}.
      * <p>
      * Note this method never caches the parsed results.
      *
      * @param type the given type
-     * @return the {@link MapSchema} parsed from the given type using {@link MapParser#defaultParser()}
+     * @return the {@link MapSchema} parsed from the given type using {@link MapSchemaParser#defaultParser()}
      * @throws DataSchemaException if the given type is not a {@link Map} type or {@link MapType}, or any other problem
      *                             occurs
      */
     static @Nonnull MapSchema parse(@Nonnull Type type) throws DataSchemaException {
-        return MapParser.defaultParser().parse(type);
+        return MapSchemaParser.defaultParser().parse(type);
     }
 
     /**
-     * Returns the {@link MapParser} of this {@link MapSchema}.
+     * Returns the {@link MapSchemaParser} of this {@link MapSchema}.
      *
-     * @return the {@link MapParser} of this {@link MapSchema}
+     * @return the {@link MapSchemaParser} of this {@link MapSchema}
      */
     @Nonnull
-    MapParser parser();
+    MapSchemaParser parser();
 
     /**
      * Returns the key type of this map type.

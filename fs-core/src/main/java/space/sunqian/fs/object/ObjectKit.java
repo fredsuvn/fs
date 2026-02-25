@@ -4,9 +4,9 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.exception.UnknownArrayTypeException;
 import space.sunqian.fs.object.convert.ConvertKit;
-import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -223,9 +223,9 @@ public class ObjectKit {
      * This method supports nested property access using dot notation (e.g., "parent.child.property"). If any part of
      * the property path is not found or is {@code null}, this method returns {@code null}.
      * <p>
-     * Note this method use {@link ConvertKit#objectParser()} to parse object schemas, it is equivalent to:
+     * Note this method use {@link ConvertKit#objectSchemaParser()} to parse object schemas, it is equivalent to:
      * <pre>{@code
-     * ObjectKit.getPropertyValue(object, propertyName, ConvertKit.objectParser());
+     * ObjectKit.getPropertyValue(object, propertyName, ConvertKit.objectSchemaParser());
      * }</pre>
      *
      * @param object       the given object from which to retrieve the property value
@@ -236,7 +236,7 @@ public class ObjectKit {
         @Nullable Object object,
         @Nonnull String propertyName
     ) {
-        return getPropertyValue(object, propertyName, ConvertKit.objectParser());
+        return getPropertyValue(object, propertyName, ConvertKit.objectSchemaParser());
     }
 
     /**
@@ -253,7 +253,7 @@ public class ObjectKit {
     public static @Nullable Object getPropertyValue(
         @Nullable Object object,
         @Nonnull String propertyName,
-        @Nonnull ObjectParser objectParser
+        @Nonnull ObjectSchemaParser objectParser
     ) {
         if (object == null) {
             return null;
@@ -274,7 +274,7 @@ public class ObjectKit {
     private static @Nullable Object getPropertyValue0(
         @Nullable Object object,
         @Nonnull String propertyName,
-        @Nonnull ObjectParser objectParser
+        @Nonnull ObjectSchemaParser objectParser
     ) {
         if (object == null) {
             return null;

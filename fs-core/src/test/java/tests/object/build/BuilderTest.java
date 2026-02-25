@@ -12,9 +12,9 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.ObjectException;
-import space.sunqian.fs.object.build.BuilderExecutor;
-import space.sunqian.fs.object.build.BuilderProvider;
-import space.sunqian.fs.object.build.ObjectBuildingException;
+import space.sunqian.fs.object.builder.BuilderOperator;
+import space.sunqian.fs.object.builder.BuilderOperatorProvider;
+import space.sunqian.fs.object.builder.ObjectBuilderException;
 import space.sunqian.fs.object.convert.ConvertKit;
 
 import java.lang.reflect.Type;
@@ -30,16 +30,16 @@ public class BuilderTest implements AssertTest, PrintTest {
 
     @Test
     public void testCreator() throws Exception {
-        testCreator(BuilderProvider.defaultProvider());
+        testCreator(BuilderOperatorProvider.defaultProvider());
         testCreator(ConvertKit.builderProvider());
         {
             // test default provider
-            BuilderProvider p1 = BuilderProvider.defaultProvider();
-            BuilderProvider p2 = BuilderProvider.defaultProvider();
-            BuilderProvider p3 = BuilderProvider.newProvider(BuilderProvider.defaultProvider().handlers());
+            BuilderOperatorProvider p1 = BuilderOperatorProvider.defaultProvider();
+            BuilderOperatorProvider p2 = BuilderOperatorProvider.defaultProvider();
+            BuilderOperatorProvider p3 = BuilderOperatorProvider.newProvider(BuilderOperatorProvider.defaultProvider().handlers());
             assertSame(p1, p2);
             assertNotSame(p1, p3);
-            BuilderExecutor builder = BuilderExecutor.forType(Info.class);
+            BuilderOperator builder = BuilderOperator.of(Info.class);
             assertNotNull(builder);
             Info info = Fs.as(builder.createBuilder());
             info.setIntValue(6);
@@ -53,54 +53,54 @@ public class BuilderTest implements AssertTest, PrintTest {
         }
         {
             // test new provider
-            BuilderProvider.Handler handler = new BuilderProvider.Handler() {
+            BuilderOperatorProvider.Handler handler = new BuilderOperatorProvider.Handler() {
                 @Override
-                public @Nullable BuilderExecutor newExecutor(@Nonnull Type target) throws Exception {
+                public @Nullable BuilderOperator newOperator(@Nonnull Type target) throws Exception {
                     return null;
                 }
             };
-            BuilderExecutor builder = BuilderProvider
+            BuilderOperator builder = BuilderOperatorProvider
                 .newProvider(handler)
                 .forType(Info.class);
             assertNull(builder);
         }
         {
             // test new provider with exception
-            BuilderProvider.Handler handler = new BuilderProvider.Handler() {
+            BuilderOperatorProvider.Handler handler = new BuilderOperatorProvider.Handler() {
                 @Override
-                public @Nullable BuilderExecutor newExecutor(@Nonnull Type target) throws Exception {
+                public @Nullable BuilderOperator newOperator(@Nonnull Type target) throws Exception {
                     throw new Exception();
                 }
             };
             assertThrows(ObjectException.class, () -> {
-                BuilderProvider
+                BuilderOperatorProvider
                     .newProvider(handler)
                     .forType(Info.class);
             });
         }
         {
             // test cache
-            BuilderProvider provider = BuilderProvider.newCachedProvider(
+            BuilderOperatorProvider provider = BuilderOperatorProvider.newCachedProvider(
                 SimpleCache.ofStrong(),
-                BuilderProvider.defaultProvider()
+                BuilderOperatorProvider.defaultProvider()
             );
             assertSame(provider.forType(SimpleCache.class), provider.forType(SimpleCache.class));
             assertSame(
-                BuilderProvider.defaultProvider().handlers(),
+                BuilderOperatorProvider.defaultProvider().handlers(),
                 provider.handlers()
             );
             assertSame(
-                BuilderProvider.defaultProvider().asHandler(),
+                BuilderOperatorProvider.defaultProvider().asHandler(),
                 provider.asHandler()
             );
             testCreator(provider);
         }
     }
 
-    private void testCreator(BuilderProvider provider) throws Exception {
+    private void testCreator(BuilderOperatorProvider provider) throws Exception {
         {
             // test common
-            BuilderExecutor builder = provider.forType(Info.class);
+            BuilderOperator builder = provider.forType(Info.class);
             assertNotNull(builder);
             Info info = Fs.as(builder.createBuilder());
             info.setIntValue(6);
@@ -114,13 +114,13 @@ public class BuilderTest implements AssertTest, PrintTest {
         }
         {
             // test with first handler
-            BuilderProvider.Handler handler1 = new BuilderProvider.Handler() {
+            BuilderOperatorProvider.Handler handler1 = new BuilderOperatorProvider.Handler() {
                 @Override
-                public @Nullable BuilderExecutor newExecutor(@Nonnull Type target) throws Exception {
+                public @Nullable BuilderOperator newOperator(@Nonnull Type target) throws Exception {
                     return null;
                 }
             };
-            BuilderExecutor builder = provider
+            BuilderOperator builder = provider
                 .withFirstHandler(handler1)
                 .forType(Info.class);
             assertNotNull(builder);
@@ -134,13 +134,13 @@ public class BuilderTest implements AssertTest, PrintTest {
         }
         {
             // test new provider with first handler
-            BuilderProvider.Handler handler1 = new BuilderProvider.Handler() {
+            BuilderOperatorProvider.Handler handler1 = new BuilderOperatorProvider.Handler() {
                 @Override
-                public @Nullable BuilderExecutor newExecutor(@Nonnull Type target) throws Exception {
+                public @Nullable BuilderOperator newOperator(@Nonnull Type target) throws Exception {
                     return null;
                 }
             };
-            BuilderExecutor builder = BuilderProvider
+            BuilderOperator builder = BuilderOperatorProvider
                 .newProvider(handler1, provider.asHandler())
                 .forType(Info.class);
             assertNotNull(builder);
@@ -155,11 +155,11 @@ public class BuilderTest implements AssertTest, PrintTest {
         {
             // test wrong type
             class X<T> {}
-            BuilderExecutor builder = provider.forType(X.class.getTypeParameters()[0]);
+            BuilderOperator builder = provider.forType(X.class.getTypeParameters()[0]);
             assertNull(builder);
             builder = provider.forType(X.class);
             assertNull(builder);
-            BuilderExecutor errBuilder = provider.forType(Err.class);
+            BuilderOperator errBuilder = provider.forType(Err.class);
             assertNotNull(errBuilder);
             assertThrows(ObjectException.class, errBuilder::createBuilder);
         }
@@ -169,17 +169,17 @@ public class BuilderTest implements AssertTest, PrintTest {
     public void testException() {
         {
             // ObjectCreateException
-            assertThrows(ObjectBuildingException.class, () -> {
-                throw new ObjectBuildingException();
+            assertThrows(ObjectBuilderException.class, () -> {
+                throw new ObjectBuilderException();
             });
-            assertThrows(ObjectBuildingException.class, () -> {
-                throw new ObjectBuildingException("");
+            assertThrows(ObjectBuilderException.class, () -> {
+                throw new ObjectBuilderException("");
             });
-            assertThrows(ObjectBuildingException.class, () -> {
-                throw new ObjectBuildingException("", new RuntimeException());
+            assertThrows(ObjectBuilderException.class, () -> {
+                throw new ObjectBuilderException("", new RuntimeException());
             });
-            assertThrows(ObjectBuildingException.class, () -> {
-                throw new ObjectBuildingException(new RuntimeException());
+            assertThrows(ObjectBuilderException.class, () -> {
+                throw new ObjectBuilderException(new RuntimeException());
             });
         }
     }

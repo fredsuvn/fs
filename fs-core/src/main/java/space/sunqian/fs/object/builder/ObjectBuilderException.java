@@ -1,4 +1,4 @@
-package space.sunqian.fs.object.build;
+package space.sunqian.fs.object.builder;
 
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.object.ObjectException;
@@ -8,12 +8,12 @@ import space.sunqian.fs.object.ObjectException;
  *
  * @author sunqian
  */
-public class ObjectBuildingException extends ObjectException {
+public class ObjectBuilderException extends ObjectException {
 
     /**
      * Empty constructor.
      */
-    public ObjectBuildingException() {
+    public ObjectBuilderException() {
         super();
     }
 
@@ -22,7 +22,7 @@ public class ObjectBuildingException extends ObjectException {
      *
      * @param message the message
      */
-    public ObjectBuildingException(@Nullable String message) {
+    public ObjectBuilderException(@Nullable String message) {
         super(message);
     }
 
@@ -32,7 +32,7 @@ public class ObjectBuildingException extends ObjectException {
      * @param message the message
      * @param cause   the cause
      */
-    public ObjectBuildingException(@Nullable String message, @Nullable Throwable cause) {
+    public ObjectBuilderException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -41,7 +41,7 @@ public class ObjectBuildingException extends ObjectException {
      *
      * @param cause the cause
      */
-    public ObjectBuildingException(@Nullable Throwable cause) {
+    public ObjectBuilderException(@Nullable Throwable cause) {
         super(cause);
     }
 }

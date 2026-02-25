@@ -14,7 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-final class ObjectSchemaBuilder implements ObjectParser.Context {
+final class ObjectSchemaBuilder implements ObjectSchemaParser.Context {
 
     private final @Nonnull Type type;
     private final @Nonnull Map<@Nonnull String, @Nonnull ObjectPropertyBase> properties = new LinkedHashMap<>();
@@ -34,18 +34,18 @@ final class ObjectSchemaBuilder implements ObjectParser.Context {
     }
 
     @Nonnull
-    ObjectSchema build(@Nonnull ObjectParser parser) {
+    ObjectSchema build(@Nonnull ObjectSchemaParser parser) {
         return new ObjectSchemaImpl(parser, type, properties);
     }
 
     private static final class ObjectSchemaImpl implements ObjectSchema {
 
-        private final @Nonnull ObjectParser parser;
+        private final @Nonnull ObjectSchemaParser parser;
         private final @Nonnull Type type;
         private final @Nonnull Map<@Nonnull String, @Nonnull ObjectProperty> properties;
 
         private ObjectSchemaImpl(
-            @Nonnull ObjectParser parser,
+            @Nonnull ObjectSchemaParser parser,
             @Nonnull Type type,
             @Nonnull Map<@Nonnull String, @Nonnull ObjectPropertyBase> propBases
         ) {
@@ -57,7 +57,7 @@ final class ObjectSchemaBuilder implements ObjectParser.Context {
         }
 
         @Override
-        public @Nonnull ObjectParser parser() {
+        public @Nonnull ObjectSchemaParser parser() {
             return parser;
         }
 

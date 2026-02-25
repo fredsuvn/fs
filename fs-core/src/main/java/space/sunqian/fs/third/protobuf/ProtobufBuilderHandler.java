@@ -7,27 +7,27 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnsupportedEnvException;
 import space.sunqian.fs.invoke.Invocable;
 import space.sunqian.fs.object.ObjectException;
-import space.sunqian.fs.object.build.BuilderExecutor;
-import space.sunqian.fs.object.build.BuilderProvider;
+import space.sunqian.fs.object.builder.BuilderOperator;
+import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 /**
- * {@link BuilderProvider.Handler} implementation for
+ * {@link BuilderOperatorProvider.Handler} implementation for
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
- * ObjectBuilderProvider provider = ...;
- * ObjectBuilderProvider protoProvider = provider
+ * BuilderOperatorProvider provider = ...;
+ * BuilderOperatorProvider protoProvider = provider
  *     .withFirstHandler(ProtobufBuilderHandler.getInstance());
  * }</pre>
  * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
- * environment, the {@link BuilderProvider#defaultProvider()} will automatically load this handler.
+ * environment, the {@link BuilderOperatorProvider#defaultProvider()} will automatically load this handler.
  *
  * @author sunqian
  */
-public class ProtobufBuilderHandler implements BuilderProvider.Handler {
+public class ProtobufBuilderHandler implements BuilderOperatorProvider.Handler {
 
     private static final @Nonnull ProtobufBuilderHandler INST = new ProtobufBuilderHandler();
 
@@ -49,7 +49,7 @@ public class ProtobufBuilderHandler implements BuilderProvider.Handler {
     }
 
     @Override
-    public @Nullable BuilderExecutor newExecutor(@Nonnull Type target) throws Exception {
+    public @Nullable BuilderOperator newOperator(@Nonnull Type target) throws Exception {
         // Check whether it is a protobuf object
         if (!(target instanceof Class<?>)) {
             return null;
@@ -71,21 +71,21 @@ public class ProtobufBuilderHandler implements BuilderProvider.Handler {
             Method buildMethod = rawTarget.getMethod("build");
             Class<?> messageType = buildMethod.getReturnType();
             Method builderMethod = messageType.getMethod("newBuilder");
-            return new BuilderExecutorImpl(builderMethod, target);
+            return new ImplForBuilder(builderMethod, target);
         } else {
             Method builderMethod = rawTarget.getMethod("newBuilder");
             Class<?> builderType = builderMethod.getReturnType();
             Method buildMethod = builderType.getMethod("build");
-            return new MessageExecutorImpl(builderMethod, buildMethod, builderType);
+            return new ImplForMessage(builderMethod, buildMethod, builderType);
         }
     }
 
-    private static final class BuilderExecutorImpl implements BuilderExecutor {
+    private static final class ImplForBuilder implements BuilderOperator {
 
         private final @Nonnull Invocable builder;
         private final @Nonnull Type builderType;
 
-        private BuilderExecutorImpl(@Nonnull Method builderMethod, @Nonnull Type builderType) {
+        private ImplForBuilder(@Nonnull Method builderMethod, @Nonnull Type builderType) {
             this.builder = Invocable.of(builderMethod);
             this.builderType = builderType;
         }
@@ -111,14 +111,14 @@ public class ProtobufBuilderHandler implements BuilderProvider.Handler {
         }
     }
 
-    private static final class MessageExecutorImpl implements BuilderExecutor {
+    private static final class ImplForMessage implements BuilderOperator {
 
         private final @Nonnull Invocable builder;
         private final @Nonnull Invocable build;
         private final @Nonnull Type builderType;
         private final @Nonnull Type messageType;
 
-        private MessageExecutorImpl(
+        private ImplForMessage(
             @Nonnull Method builderMethod, @Nonnull Method buildMethod, @Nonnull Type builderType
         ) {
             this.builder = Invocable.of(builderMethod);

@@ -5,8 +5,8 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectPropertyBase;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.reflect.TypeKit;
 
 import java.lang.reflect.Field;
@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This is a skeletal implementation of {@link ObjectParser.Handler} to minimize the effort required to implement the
- * interface.
+ * This is a skeletal implementation of {@link ObjectSchemaParser.Handler} to minimize the effort required to implement
+ * the interface.
  * <p>
  * This class uses {@link Class#getMethods()} to find out all methods (the synthetic method will be filtered out), then
  * passes each of them to {@link #resolveAccessor(Method)} to resolve property accessor infos. This class will perform
@@ -29,7 +29,7 @@ import java.util.Set;
  *
  * @author sunqian
  */
-public abstract class AbstractObjectSchemaHandler implements ObjectParser.Handler {
+public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.Handler {
 
     private static @Nonnull Type findActualType(
         @Nonnull Type type,
@@ -64,7 +64,7 @@ public abstract class AbstractObjectSchemaHandler implements ObjectParser.Handle
     }
 
     @Override
-    public boolean parse(ObjectParser.@Nonnull Context context) throws Exception {
+    public boolean parse(ObjectSchemaParser.@Nonnull Context context) throws Exception {
         Type type = context.parsedType();
         Class<?> rawType = TypeKit.getRawClass(type);
         if (rawType == null) {

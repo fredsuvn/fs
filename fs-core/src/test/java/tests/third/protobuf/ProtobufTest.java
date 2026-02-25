@@ -9,14 +9,14 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
-import space.sunqian.fs.object.build.BuilderExecutor;
-import space.sunqian.fs.object.build.BuilderProvider;
+import space.sunqian.fs.object.builder.BuilderOperator;
+import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
-import space.sunqian.fs.object.schema.ObjectParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.reflect.TypeRef;
 import space.sunqian.fs.third.protobuf.ProtobufBuilderHandler;
 import space.sunqian.fs.third.protobuf.ProtobufConvertHandler;
@@ -45,7 +45,7 @@ public class ProtobufTest implements PrintTest {
 
     @Test
     public void testSchemaHandler() throws Exception {
-        ObjectParser protoParser = ObjectParser.newParser(ProtobufSchemaHandler.getInstance());
+        ObjectSchemaParser protoParser = ObjectSchemaParser.newParser(ProtobufSchemaHandler.getInstance());
         Data.Builder builder = Data.newBuilder()
             .setStr("str")
             .setI32(1)
@@ -437,18 +437,18 @@ public class ProtobufTest implements PrintTest {
 
     @Test
     public void testCreatorHandler() {
-        BuilderProvider defaultProvider = BuilderProvider.defaultProvider();
-        BuilderProvider provider = BuilderProvider
+        BuilderOperatorProvider defaultProvider = BuilderOperatorProvider.defaultProvider();
+        BuilderOperatorProvider provider = BuilderOperatorProvider
             .newProvider(ProtobufBuilderHandler.getInstance(), defaultProvider.asHandler());
-        ObjectParser parser = ObjectParser
+        ObjectSchemaParser parser = ObjectSchemaParser
             .defaultParser()
             .withFirstHandler(new ProtobufSchemaHandler());
         {
             // type
-            BuilderExecutor messageCreator = provider.forType(PbSimple.class);
+            BuilderOperator messageCreator = provider.forType(PbSimple.class);
             assertEquals(PbSimple.class, messageCreator.targetType());
             assertEquals(PbSimple.Builder.class, messageCreator.builderType());
-            BuilderExecutor builderCreator = provider.forType(PbSimple.Builder.class);
+            BuilderOperator builderCreator = provider.forType(PbSimple.Builder.class);
             assertEquals(PbSimple.Builder.class, builderCreator.targetType());
             assertEquals(PbSimple.Builder.class, builderCreator.builderType());
         }
@@ -456,8 +456,8 @@ public class ProtobufTest implements PrintTest {
             // java to pb
             JvSimple jvSimple = new JvSimple("123", 456);
             PbSimple pbSimple = ObjectConverter.defaultConverter().convert(jvSimple, PbSimple.class,
-                ConvertOption.builderProvider(provider),
-                ConvertOption.schemaParser(parser)
+                ConvertOption.builderOperatorProvider(provider),
+                ConvertOption.objectSchemaParser(parser)
             );
             assertEquals(pbSimple.getP1(), jvSimple.getP1());
             assertEquals(pbSimple.getP2(), jvSimple.getP2());
@@ -469,8 +469,8 @@ public class ProtobufTest implements PrintTest {
                 .setP2(456)
                 .build();
             JvSimple jvSimple = ObjectConverter.defaultConverter().convert(pbSimple, JvSimple.class,
-                ConvertOption.builderProvider(provider),
-                ConvertOption.schemaParser(parser)
+                ConvertOption.builderOperatorProvider(provider),
+                ConvertOption.objectSchemaParser(parser)
             );
             assertEquals(pbSimple.getP1(), jvSimple.getP1());
             assertEquals(pbSimple.getP2(), jvSimple.getP2());
@@ -479,8 +479,8 @@ public class ProtobufTest implements PrintTest {
             // java to pb.Builder
             JvSimple jvSimple = new JvSimple("123", 456);
             PbSimple.Builder pbSimpleBuilder = ObjectConverter.defaultConverter().convert(jvSimple, PbSimple.Builder.class,
-                ConvertOption.builderProvider(provider),
-                ConvertOption.schemaParser(parser)
+                ConvertOption.builderOperatorProvider(provider),
+                ConvertOption.objectSchemaParser(parser)
             );
             assertEquals(pbSimpleBuilder.getP1(), jvSimple.getP1());
             assertEquals(pbSimpleBuilder.getP2(), jvSimple.getP2());
@@ -491,8 +491,8 @@ public class ProtobufTest implements PrintTest {
                 .setP1("123")
                 .setP2(456);
             JvSimple jvSimple = ObjectConverter.defaultConverter().convert(pbSimpleBuilder, JvSimple.class,
-                ConvertOption.builderProvider(provider),
-                ConvertOption.schemaParser(parser)
+                ConvertOption.builderOperatorProvider(provider),
+                ConvertOption.objectSchemaParser(parser)
             );
             assertEquals(pbSimpleBuilder.getP1(), jvSimple.getP1());
             assertEquals(pbSimpleBuilder.getP2(), jvSimple.getP2());
@@ -501,8 +501,8 @@ public class ProtobufTest implements PrintTest {
             // java to java
             JvSimple jvSimple = new JvSimple("123", 456);
             JvT<String> jvT = ObjectConverter.defaultConverter().convert(jvSimple, new TypeRef<JvT<String>>() {},
-                ConvertOption.builderProvider(provider),
-                ConvertOption.schemaParser(parser)
+                ConvertOption.builderOperatorProvider(provider),
+                ConvertOption.objectSchemaParser(parser)
             );
             assertEquals(jvT.getP1(), jvSimple.getP1());
             assertEquals(jvT.getP2(), jvSimple.getP2());

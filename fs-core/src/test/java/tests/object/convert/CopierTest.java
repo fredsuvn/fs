@@ -19,11 +19,11 @@ import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.convert.ObjectCopyException;
-import space.sunqian.fs.object.schema.MapParser;
 import space.sunqian.fs.object.schema.MapSchema;
-import space.sunqian.fs.object.schema.ObjectParser;
+import space.sunqian.fs.object.schema.MapSchemaParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.annotation.ElementType;
@@ -258,7 +258,7 @@ public class CopierTest implements PrintTest {
             Map<String, String> mapA = MapKit.map("first", "1", "second", "2", "third", "3");
             Map<String, Integer> mapB = new HashMap<>();
             objectCopier.copyProperties(
-                mapA, typeA, mapB, typeB, ConvertOption.schemaParser(MapParser.defaultParser()));
+                mapA, typeA, mapB, typeB, ConvertOption.mapSchemaParser(MapSchemaParser.defaultParser()));
             assertEquals(MapKit.map("first", 1, "second", 2, "third", 3), mapB);
             Map<String, String> mapA2 = new HashMap<>();
             objectCopier
@@ -298,7 +298,7 @@ public class CopierTest implements PrintTest {
             Map<String, String> mapA = MapKit.map("first", "1", "second", "2", "third", "3");
             ClsB clsB = new ClsB();
             objectCopier.copyProperties(
-                mapA, typeA, clsB, ClsB.class, ConvertOption.schemaParser(ObjectParser.defaultParser()));
+                mapA, typeA, clsB, ClsB.class, ConvertOption.objectSchemaParser(ObjectSchemaParser.defaultParser()));
             assertEquals(new ClsB(1, 2, 3), clsB);
             ClsA2 clsA2 = new ClsA2();
             objectCopier

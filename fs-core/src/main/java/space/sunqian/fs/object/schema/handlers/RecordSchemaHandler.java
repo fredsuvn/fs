@@ -2,21 +2,22 @@ package space.sunqian.fs.object.schema.handlers;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.FsLoader;
-import space.sunqian.fs.object.schema.ObjectParser;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
 /**
- * This implementation of {@link ObjectParser.Handler} is used to parse {@code record} classes, and it is automatically
- * loaded if the current JVM version supports {@code record} classes (typically JVM version 16 or higher).
+ * This implementation of {@link ObjectSchemaParser.Handler} is used to parse {@code record} classes, and it is
+ * automatically loaded if the current JVM version supports {@code record} classes (typically JVM version 16 or
+ * higher).
  * <p>
  * Using {@link #getInstance()} method can obtain the same instance.
  *
  * @author sunqian
  */
-public class RecordSchemaHandler implements ObjectParser.Handler {
+public class RecordSchemaHandler implements ObjectSchemaParser.Handler {
 
     private static final @Nonnull RecordSchemaHandler INST = new RecordSchemaHandler();
 
-    private static final ObjectParser.@Nonnull Handler HANDLER = FsLoader.loadImplByJvm(
+    private static final ObjectSchemaParser.@Nonnull Handler HANDLER = FsLoader.loadImplByJvm(
         RecordSchemaHandler.class, 16
     );
 
@@ -30,7 +31,7 @@ public class RecordSchemaHandler implements ObjectParser.Handler {
     }
 
     @Override
-    public boolean parse(ObjectParser.@Nonnull Context context) throws Exception {
+    public boolean parse(ObjectSchemaParser.@Nonnull Context context) throws Exception {
         return HANDLER.parse(context);
     }
 }

@@ -11,33 +11,33 @@ import space.sunqian.fs.third.ThirdKit;
 import java.lang.reflect.Type;
 import java.util.List;
 
-final class ObjectParserBack {
+final class ObjectSchemaParserBack {
 
-    static @Nonnull ObjectParser defaultParser() {
-        return ObjectParserImpl.DEFAULT;
+    static @Nonnull ObjectSchemaParser defaultParser() {
+        return ObjectSchemaParserImpl.DEFAULT;
     }
 
 
-    static @Nonnull ObjectParser defaultCachedParser() {
-        return CachedObjectParser.DEFAULT;
+    static @Nonnull ObjectSchemaParser defaultCachedParser() {
+        return CachedObjectSchemaParser.DEFAULT;
     }
 
-    static @Nonnull ObjectParser newParser(
-        @Nonnull @RetainedParam List<ObjectParser.@Nonnull Handler> handlers
+    static @Nonnull ObjectSchemaParser newParser(
+        @Nonnull @RetainedParam List<ObjectSchemaParser.@Nonnull Handler> handlers
     ) {
-        return new ObjectParserImpl(handlers);
+        return new ObjectSchemaParserImpl(handlers);
     }
 
-    static @Nonnull CachedObjectParser newCachedParser(
+    static @Nonnull ObjectSchemaParserBack.CachedObjectSchemaParser newCachedParser(
         @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectSchema> cache,
-        @Nonnull ObjectParser parser
+        @Nonnull ObjectSchemaParser parser
     ) {
-        return new CachedObjectParser(cache, parser);
+        return new CachedObjectSchemaParser(cache, parser);
     }
 
-    private static final class ObjectParserImpl implements ObjectParser, ObjectParser.Handler {
+    private static final class ObjectSchemaParserImpl implements ObjectSchemaParser, ObjectSchemaParser.Handler {
 
-        private static final @Nonnull ObjectParserImpl DEFAULT = new ObjectParserImpl(FsLoader.loadInstances(
+        private static final @Nonnull ObjectSchemaParserBack.ObjectSchemaParserImpl DEFAULT = new ObjectSchemaParserImpl(FsLoader.loadInstances(
             FsLoader.loadClassByDependent(
                 ThirdKit.thirdClassName("protobuf", "ProtobufSchemaHandler"),
                 "com.google.protobuf.Message"
@@ -50,7 +50,7 @@ final class ObjectParserBack {
 
         private final @Nonnull List<@Nonnull Handler> handlers;
 
-        private ObjectParserImpl(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
+        private ObjectSchemaParserImpl(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
             this.handlers = handlers;
         }
 
@@ -75,19 +75,19 @@ final class ObjectParserBack {
         }
     }
 
-    private static final class CachedObjectParser implements ObjectParser {
+    private static final class CachedObjectSchemaParser implements ObjectSchemaParser {
 
-        private static final @Nonnull CachedObjectParser DEFAULT = newCachedParser(
+        private static final @Nonnull ObjectSchemaParserBack.CachedObjectSchemaParser DEFAULT = newCachedParser(
             SimpleCache.ofSoft(),
-            ObjectParser.defaultParser()
+            ObjectSchemaParser.defaultParser()
         );
 
         private final @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectSchema> cache;
-        private final @Nonnull ObjectParser parser;
+        private final @Nonnull ObjectSchemaParser parser;
 
-        private CachedObjectParser(
+        private CachedObjectSchemaParser(
             @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectSchema> cache,
-            @Nonnull ObjectParser parser
+            @Nonnull ObjectSchemaParser parser
         ) {
             this.cache = cache;
             this.parser = parser;
@@ -109,6 +109,6 @@ final class ObjectParserBack {
         }
     }
 
-    private ObjectParserBack() {
+    private ObjectSchemaParserBack() {
     }
 }

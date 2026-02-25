@@ -22,15 +22,15 @@ import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
-import space.sunqian.fs.object.build.BuilderProvider;
+import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
-import space.sunqian.fs.object.schema.MapParser;
-import space.sunqian.fs.object.schema.ObjectParser;
+import space.sunqian.fs.object.schema.MapSchemaParser;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -174,8 +174,8 @@ public class ConvertTest implements PrintTest {
         Map<String, String> map2 = Fs.as(converter.convert(a, A.class, new TypeRef<Map<String, String>>() {}.type()));
         assertEquals(map2, MapKit.map("first", "1", "second", "2", "third", "3"));
         Map<String, String> map3 = converter.convert(a, new TypeRef<Map<String, String>>() {},
-            ConvertOption.builderProvider(BuilderProvider.newProvider(
-                BuilderProvider.defaultProvider().asHandler())
+            ConvertOption.builderOperatorProvider(BuilderOperatorProvider.newProvider(
+                BuilderOperatorProvider.defaultProvider().asHandler())
             )
         );
         assertEquals(map3, MapKit.map("first", "1", "second", "2", "third", "3"));
@@ -672,28 +672,28 @@ public class ConvertTest implements PrintTest {
     public void testConvertKit() throws Exception {
         {
             // map parser
-            assertSame(ConvertKit.mapParser(), ConvertKit.mapParser());
-            assertSame(ConvertKit.mapParser(), ConvertOption.getMapParser(ConvertOption.ignoreNull(true)));
+            assertSame(ConvertKit.mapSchemaParser(), ConvertKit.mapSchemaParser());
+            assertSame(ConvertKit.mapSchemaParser(), ConvertOption.getMapSchemaParser(ConvertOption.ignoreNull(true)));
             assertNotEquals(
-                ConvertKit.mapParser(),
-                ConvertOption.getMapParser(ConvertOption.schemaParser(MapParser.defaultParser()))
+                ConvertKit.mapSchemaParser(),
+                ConvertOption.getMapSchemaParser(ConvertOption.mapSchemaParser(MapSchemaParser.defaultParser()))
             );
             assertSame(
-                MapParser.defaultParser(),
-                ConvertOption.getMapParser(ConvertOption.schemaParser(MapParser.defaultParser()))
+                MapSchemaParser.defaultParser(),
+                ConvertOption.getMapSchemaParser(ConvertOption.mapSchemaParser(MapSchemaParser.defaultParser()))
             );
         }
         {
             // object parser
-            assertSame(ConvertKit.objectParser(), ConvertKit.objectParser());
-            assertSame(ConvertKit.objectParser(), ConvertOption.getObjectParser(ConvertOption.ignoreNull(true)));
+            assertSame(ConvertKit.objectSchemaParser(), ConvertKit.objectSchemaParser());
+            assertSame(ConvertKit.objectSchemaParser(), ConvertOption.getObjectSchemaParser(ConvertOption.ignoreNull(true)));
             assertNotEquals(
-                ConvertKit.objectParser(),
-                ConvertOption.getObjectParser(ConvertOption.schemaParser(ObjectParser.defaultParser()))
+                ConvertKit.objectSchemaParser(),
+                ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectSchemaParser.defaultParser()))
             );
             assertSame(
-                ObjectParser.defaultParser(),
-                ConvertOption.getObjectParser(ConvertOption.schemaParser(ObjectParser.defaultParser()))
+                ObjectSchemaParser.defaultParser(),
+                ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectSchemaParser.defaultParser()))
             );
         }
         {
@@ -702,11 +702,11 @@ public class ConvertTest implements PrintTest {
             assertSame(ConvertKit.builderProvider(), ConvertOption.getBuilderProvider(ConvertOption.ignoreNull(true)));
             assertNotEquals(
                 ConvertKit.builderProvider(),
-                ConvertOption.getBuilderProvider(ConvertOption.builderProvider(BuilderProvider.defaultProvider()))
+                ConvertOption.getBuilderProvider(ConvertOption.builderOperatorProvider(BuilderOperatorProvider.defaultProvider()))
             );
             assertSame(
-                BuilderProvider.defaultProvider(),
-                ConvertOption.getBuilderProvider(ConvertOption.builderProvider(BuilderProvider.defaultProvider()))
+                BuilderOperatorProvider.defaultProvider(),
+                ConvertOption.getBuilderProvider(ConvertOption.builderOperatorProvider(BuilderOperatorProvider.defaultProvider()))
             );
         }
     }

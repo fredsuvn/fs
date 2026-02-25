@@ -20,9 +20,9 @@
  *     <li>{@link space.sunqian.fs.object.schema.DataSchema}</li>
  *     <li>{@link space.sunqian.fs.object.schema.ObjectSchema}</li>
  *     <li>{@link space.sunqian.fs.object.schema.ObjectProperty}</li>
- *     <li>{@link space.sunqian.fs.object.schema.ObjectParser}</li>
+ *     <li>{@link space.sunqian.fs.object.schema.ObjectSchemaParser}</li>
  *     <li>{@link space.sunqian.fs.object.schema.MapSchema}</li>
- *     <li>{@link space.sunqian.fs.object.schema.MapParser}</li>
+ *     <li>{@link space.sunqian.fs.object.schema.MapSchemaParser}</li>
  *     <li>{@link space.sunqian.fs.object.schema.handlers.AbstractObjectSchemaHandler}</li>
  *     <li>{@link space.sunqian.fs.object.schema.handlers.CommonSchemaHandler}</li>
  *     <li>{@link space.sunqian.fs.object.schema.handlers.RecordSchemaHandler}(only loaded on JDK 16+)</li>

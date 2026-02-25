@@ -23,10 +23,10 @@ import java.util.Map;
  * @author sunqian
  */
 @ThreadSafe
-public interface ObjectParser {
+public interface ObjectSchemaParser {
 
     /**
-     * Returns the default {@link ObjectParser}. Here are handlers in the default parser:
+     * Returns the default {@link ObjectSchemaParser}. Here are handlers in the default parser:
      * <ul>
      *     <li>
      *         {@link RecordSchemaHandler#getInstance()}, if the current JVM version supports {@code record} classes
@@ -35,69 +35,69 @@ public interface ObjectParser {
      *     <li>{@link CommonSchemaHandler#getInstance()};</li>
      * </ul>
      * <p>
-     * Note the default {@link ObjectParser} is singleton, and never caches the parsed results.
+     * Note the default {@link ObjectSchemaParser} is singleton, and never caches the parsed results.
      *
-     * @return the default {@link ObjectParser}
+     * @return the default {@link ObjectSchemaParser}
      * @see CommonSchemaHandler
      * @see RecordSchemaHandler
      */
-    static @Nonnull ObjectParser defaultParser() {
-        return ObjectParserBack.defaultParser();
+    static @Nonnull ObjectSchemaParser defaultParser() {
+        return ObjectSchemaParserBack.defaultParser();
     }
 
     /**
-     * Returns the default cached {@link ObjectParser}, which is based on {@link #defaultParser()} and caches the parsed
-     * results with {@link SimpleCache#ofSoft()}.
+     * Returns the default cached {@link ObjectSchemaParser}, which is based on {@link #defaultParser()} and caches the
+     * parsed results with {@link SimpleCache#ofSoft()}.
      * <p>
-     * Note the default cached {@link ObjectParser} is singleton.
+     * Note the default cached {@link ObjectSchemaParser} is singleton.
      *
-     * @return the default cached {@link ObjectParser}
+     * @return the default cached {@link ObjectSchemaParser}
      * @see #defaultParser()
      */
-    static @Nonnull ObjectParser defaultCachedParser() {
-        return ObjectParserBack.defaultCachedParser();
+    static @Nonnull ObjectSchemaParser defaultCachedParser() {
+        return ObjectSchemaParserBack.defaultCachedParser();
     }
 
     /**
-     * Creates and returns a new {@link ObjectParser} with the given handlers.
+     * Creates and returns a new {@link ObjectSchemaParser} with the given handlers.
      * <p>
-     * Note the created {@link ObjectParser} never caches the parsed results.
+     * Note the created {@link ObjectSchemaParser} never caches the parsed results.
      *
      * @param handlers the given handlers
-     * @return a new {@link ObjectParser} with the given handlers
+     * @return a new {@link ObjectSchemaParser} with the given handlers
      */
-    static @Nonnull ObjectParser newParser(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
+    static @Nonnull ObjectSchemaParser newParser(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
         return newParser(ListKit.list(handlers));
     }
 
     /**
-     * Creates and returns a new {@link ObjectParser} with given handlers.
+     * Creates and returns a new {@link ObjectSchemaParser} with given handlers.
      * <p>
-     * Note the created {@link ObjectParser} never caches the parsed results.
+     * Note the created {@link ObjectSchemaParser} never caches the parsed results.
      *
      * @param handlers given handlers
-     * @return a new {@link ObjectParser} with given handlers
+     * @return a new {@link ObjectSchemaParser} with given handlers
      */
-    static @Nonnull ObjectParser newParser(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
-        return ObjectParserBack.newParser(handlers);
+    static @Nonnull ObjectSchemaParser newParser(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
+        return ObjectSchemaParserBack.newParser(handlers);
     }
 
     /**
-     * Returns a new {@link ObjectParser} that caches the parsed results with the specified cache.
+     * Returns a new {@link ObjectSchemaParser} that caches the parsed results with the specified cache.
      * <p>
-     * Note the behavior of the non-parsing methods of the returned {@link ObjectParser}, such as {@link #handlers()},
-     * {@link #asHandler()} and {@link #withFirstHandler(Handler)}, will directly invoke the underlying
-     * {@link ObjectParser}.
+     * Note the behavior of the non-parsing methods of the returned {@link ObjectSchemaParser}, such as
+     * {@link #handlers()}, {@link #asHandler()} and {@link #withFirstHandler(Handler)}, will directly invoke the
+     * underlying {@link ObjectSchemaParser}.
      *
      * @param cache  the specified cache to store the parsed results
-     * @param parser the underlying {@link ObjectParser} to parse the type
-     * @return a new {@link ObjectParser} that caches the parsed results with the specified cache
+     * @param parser the underlying {@link ObjectSchemaParser} to parse the type
+     * @return a new {@link ObjectSchemaParser} that caches the parsed results with the specified cache
      */
-    static @Nonnull ObjectParser newCachedParser(
+    static @Nonnull ObjectSchemaParser newCachedParser(
         @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectSchema> cache,
-        @Nonnull ObjectParser parser
+        @Nonnull ObjectSchemaParser parser
     ) {
-        return ObjectParserBack.newCachedParser(cache, parser);
+        return ObjectSchemaParserBack.newCachedParser(cache, parser);
     }
 
     /**
@@ -106,8 +106,8 @@ public interface ObjectParser {
      * @param type the given type
      * @return the parsed {@link ObjectSchema}
      * @throws DataSchemaException if any problem occurs
-     * @implNote The default implementation of this method invokes the {@link Handler#parse(ObjectParser.Context)} in
-     * the order of {@link #handlers()} until one of the handlers returns {@code false}. The codes are similar to:
+     * @implNote The default implementation of this method invokes the {@link Handler#parse(ObjectSchemaParser.Context)}
+     * in the order of {@link #handlers()} until one of the handlers returns {@code false}. The codes are similar to:
      * <pre>{@code
      * for (Handler handler : handlers()) {
      *     if (!handler.parse(context)) {
@@ -131,38 +131,38 @@ public interface ObjectParser {
     }
 
     /**
-     * Returns all handlers of this {@link ObjectParser}.
+     * Returns all handlers of this {@link ObjectSchemaParser}.
      *
-     * @return all handlers of this {@link ObjectParser}
+     * @return all handlers of this {@link ObjectSchemaParser}
      */
     @Nonnull
     List<@Nonnull Handler> handlers();
 
     /**
-     * Returns a new {@link ObjectParser} of which first handler is the given handler and the next handler is this
-     * {@link ObjectParser} as a {@link Handler}. This method is equivalent:
+     * Returns a new {@link ObjectSchemaParser} of which first handler is the given handler and the next handler is this
+     * {@link ObjectSchemaParser} as a {@link Handler}. This method is equivalent:
      * <pre>{@code
      * newParser(firstHandler, this.asHandler())
      * }</pre>
      *
      * @param firstHandler the first handler
-     * @return a new {@link ObjectParser} of which first handler is the given handler and the next handler is this
-     * {@link ObjectParser} as a {@link Handler}
+     * @return a new {@link ObjectSchemaParser} of which first handler is the given handler and the next handler is this
+     * {@link ObjectSchemaParser} as a {@link Handler}
      */
-    default @Nonnull ObjectParser withFirstHandler(@Nonnull Handler firstHandler) {
+    default @Nonnull ObjectSchemaParser withFirstHandler(@Nonnull Handler firstHandler) {
         return newParser(firstHandler, this.asHandler());
     }
 
     /**
-     * Returns this {@link ObjectParser} as a {@link Handler}.
+     * Returns this {@link ObjectSchemaParser} as a {@link Handler}.
      *
-     * @return this {@link ObjectParser} as a {@link Handler}
+     * @return this {@link ObjectSchemaParser} as a {@link Handler}
      */
     @Nonnull
     Handler asHandler();
 
     /**
-     * Handler for {@link ObjectParser}, provides the specific parsing logic.
+     * Handler for {@link ObjectSchemaParser}, provides the specific parsing logic.
      *
      * @author sunqian
      */

@@ -10,9 +10,9 @@ import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.io.IOOperator;
-import space.sunqian.fs.object.build.BuilderProvider;
-import space.sunqian.fs.object.schema.MapParser;
-import space.sunqian.fs.object.schema.ObjectParser;
+import space.sunqian.fs.object.builder.BuilderOperatorProvider;
+import space.sunqian.fs.object.schema.MapSchemaParser;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -59,19 +59,19 @@ public enum ConvertOption {
     NEW_INSTANCE_MODE,
 
     /**
-     * Key of {@link #schemaParser(ObjectParser)}.
+     * Key of {@link #objectSchemaParser(ObjectSchemaParser)}.
      */
     OBJECT_SCHEMA_PARSER,
 
     /**
-     * Key of {@link #schemaParser(MapParser)}.
+     * Key of {@link #mapSchemaParser(MapSchemaParser)}.
      */
     MAP_SCHEMA_PARSER,
 
     /**
-     * Key of {@link #builderProvider(BuilderProvider)}.
+     * Key of {@link #builderOperatorProvider(BuilderOperatorProvider)}.
      */
-    BUILDER_PROVIDER,
+    BUILDER_OPERATOR_PROVIDER,
 
     /**
      * Key of {@link #objectCopier(ObjectCopier)}.
@@ -197,86 +197,90 @@ public enum ConvertOption {
     /**
      * Returns an option to specify the object schema parser.
      * <p>
-     * By default, {@link ConvertKit#objectParser()} is used.
+     * By default, {@link ConvertKit#objectSchemaParser()} is used.
      *
      * @param schemaParser the specified object schema parser
      * @return an option to specify the object schema parser
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectParser> schemaParser(
-        @Nonnull ObjectParser schemaParser
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectSchemaParser> objectSchemaParser(
+        @Nonnull ObjectSchemaParser schemaParser
     ) {
         return Option.of(OBJECT_SCHEMA_PARSER, schemaParser);
     }
 
     /**
-     * Returns the specified {@link ObjectParser} from the given options, or {@link ConvertKit#objectParser()} if the
-     * given options does not contain a {@link ConvertOption#OBJECT_SCHEMA_PARSER}.
+     * Returns the specified {@link ObjectSchemaParser} from the given options, or
+     * {@link ConvertKit#objectSchemaParser()} if the given options does not contain a
+     * {@link ConvertOption#OBJECT_SCHEMA_PARSER}.
      *
      * @param options the given options
-     * @return the specified {@link ObjectParser} from the given options, or {@link ConvertKit#objectParser()} if the
-     * given options does not contain a {@link ConvertOption#OBJECT_SCHEMA_PARSER}
+     * @return the specified {@link ObjectSchemaParser} from the given options, or
+     * {@link ConvertKit#objectSchemaParser()} if the given options does not contain a
+     * {@link ConvertOption#OBJECT_SCHEMA_PARSER}
      */
-    public static @Nonnull ObjectParser getObjectParser(@Nonnull Option<?, ?> @Nonnull ... options) {
+    public static @Nonnull ObjectSchemaParser getObjectSchemaParser(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Fs.nonnull(
             OptionKit.findValue(ConvertOption.OBJECT_SCHEMA_PARSER, options),
-            ConvertKit.objectParser()
+            ConvertKit.objectSchemaParser()
         );
     }
 
     /**
      * Returns an option to specify the map schema parser.
      * <p>
-     * By default, {@link ConvertKit#mapParser()} is used.
+     * By default, {@link ConvertKit#mapSchemaParser()} is used.
      *
      * @param schemaParser the specified map schema parser
      * @return an option to specify the map schema parser
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull MapParser> schemaParser(
-        @Nonnull MapParser schemaParser
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull MapSchemaParser> mapSchemaParser(
+        @Nonnull MapSchemaParser schemaParser
     ) {
         return Option.of(MAP_SCHEMA_PARSER, schemaParser);
     }
 
     /**
-     * Returns the specified {@link MapParser} from the given options, or {@link ConvertKit#mapParser()} if the given
-     * options does not contain a {@link ConvertOption#MAP_SCHEMA_PARSER}.
+     * Returns the specified {@link MapSchemaParser} from the given options, or {@link ConvertKit#mapSchemaParser()} if
+     * the given options does not contain a {@link ConvertOption#MAP_SCHEMA_PARSER}.
      *
      * @param options the given options
-     * @return the specified {@link MapParser} from the given options, or {@link ConvertKit#mapParser()} if the given
-     * options does not contain a {@link ConvertOption#MAP_SCHEMA_PARSER}
+     * @return the specified {@link MapSchemaParser} from the given options, or {@link ConvertKit#mapSchemaParser()} if
+     * the given options does not contain a {@link ConvertOption#MAP_SCHEMA_PARSER}
      */
-    public static @Nonnull MapParser getMapParser(@Nonnull Option<?, ?> @Nonnull ... options) {
+    public static @Nonnull MapSchemaParser getMapSchemaParser(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Fs.nonnull(
             OptionKit.findValue(ConvertOption.MAP_SCHEMA_PARSER, options),
-            ConvertKit.mapParser()
+            ConvertKit.mapSchemaParser()
         );
     }
 
     /**
-     * Returns an option to specify the {@link BuilderProvider} to generate data object during the conversion.
+     * Returns an option to specify the {@link BuilderOperatorProvider} to generate data object during the conversion.
      * <p>
      * By default, the {@link ConvertKit#builderProvider()} is used.
      *
-     * @param builderProvider the {@link BuilderProvider} to be specified
-     * @return an option to specify the {@link BuilderProvider} to generate data object during the conversion
+     * @param operatorProvider the {@link BuilderOperatorProvider} to be specified
+     * @return an option to specify the {@link BuilderOperatorProvider} to generate data object during the conversion
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull BuilderProvider> builderProvider(
-        @Nonnull BuilderProvider builderProvider
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull BuilderOperatorProvider> builderOperatorProvider(
+        @Nonnull BuilderOperatorProvider operatorProvider
     ) {
-        return Option.of(BUILDER_PROVIDER, builderProvider);
+        return Option.of(BUILDER_OPERATOR_PROVIDER, operatorProvider);
     }
 
     /**
-     * Returns the specified {@link BuilderProvider} from the given options, or {@link ConvertKit#builderProvider()} if
-     * the given options does not contain a {@link ConvertOption#BUILDER_PROVIDER}.
+     * Returns the specified {@link BuilderOperatorProvider} from the given options, or
+     * {@link ConvertKit#builderProvider()} if the given options does not contain a
+     * {@link ConvertOption#BUILDER_OPERATOR_PROVIDER}.
      *
      * @param options the given options
-     * @return the specified {@link BuilderProvider} from the given options, or {@link ConvertKit#builderProvider()} if
-     * the given options does not contain a {@link ConvertOption#BUILDER_PROVIDER}
+     * @return the specified {@link BuilderOperatorProvider} from the given options, or
+     * {@link ConvertKit#builderProvider()} if the given options does not contain a
+     * {@link ConvertOption#BUILDER_OPERATOR_PROVIDER}
      */
-    public static @Nonnull BuilderProvider getBuilderProvider(@Nonnull Option<?, ?> @Nonnull ... options) {
+    public static @Nonnull BuilderOperatorProvider getBuilderProvider(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Fs.nonnull(
-            OptionKit.findValue(ConvertOption.BUILDER_PROVIDER, options),
+            OptionKit.findValue(ConvertOption.BUILDER_OPERATOR_PROVIDER, options),
             ConvertKit.builderProvider()
         );
     }

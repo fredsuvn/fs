@@ -10,7 +10,7 @@ import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
-import space.sunqian.fs.object.build.BuilderProvider;
+import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.ObjectProperty;
@@ -260,7 +260,7 @@ public interface ObjectCopier {
      * target object, following the rules of the specified options defined in {@link ConvertOption}.
      * <p>
      * The thread safety of the methods in this interface is determined by its dependent {@link ObjectConverter},
-     * {@link BuilderProvider}, and other objects. By default, they are all thread-safe.
+     * {@link BuilderOperatorProvider}, and other objects. By default, they are all thread-safe.
      *
      * @author sunqian
      * @implNote The default implementations of {@link Handler} support annotations defined in

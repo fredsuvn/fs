@@ -16,8 +16,8 @@ import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOOperator;
-import space.sunqian.fs.object.build.BuilderExecutor;
-import space.sunqian.fs.object.build.BuilderProvider;
+import space.sunqian.fs.object.builder.BuilderOperator;
+import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
@@ -143,7 +143,7 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td>Map and Data Objects</td>
  *     <td>Any Objects</td>
- *     <td>Generating data object is based on {@link ConvertOption#builderProvider(BuilderProvider)} and
+ *     <td>Generating data object is based on {@link ConvertOption#builderOperatorProvider(BuilderOperatorProvider)} and
  *     {@link ConvertOption#objectCopier(ObjectCopier)}. Generating map using its constructor, and copying properties
  *     also using {@link ConvertOption#objectCopier(ObjectCopier)}. The supported map types follow the
  *     {@link MapKit#mapFunction(Type)}.
@@ -395,14 +395,14 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             objectCopier.copyProperties(src, srcType, targetObject, target, converter, options);
             return targetObject;
         } else {
-            BuilderProvider builderProvider = ConvertOption.getBuilderProvider(options);
-            BuilderExecutor executor = builderProvider.forType(target);
-            if (executor == null) {
+            BuilderOperatorProvider builderProvider = ConvertOption.getBuilderProvider(options);
+            BuilderOperator operator = builderProvider.forType(target);
+            if (operator == null) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
             }
-            Object targetBuilder = executor.createBuilder();
-            objectCopier.copyProperties(src, srcType, targetBuilder, executor.builderType(), converter, options);
-            return executor.buildTarget(targetBuilder);
+            Object targetBuilder = operator.createBuilder();
+            objectCopier.copyProperties(src, srcType, targetBuilder, operator.builderType(), converter, options);
+            return operator.buildTarget(targetBuilder);
         }
     }
 

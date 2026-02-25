@@ -14,7 +14,7 @@ import space.sunqian.fs.base.exception.UnreachablePointException;
 import space.sunqian.fs.base.system.OSKit;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.schema.ObjectParser;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.io.InputStream;
@@ -278,8 +278,8 @@ public class FsTest implements AssertTest, PrintTest {
         {
             // getting property
             MapProps mapProps = new MapProps(111L);
-            assertEquals(111L, Fs.get(mapProps, "longNum"));
-            assertEquals(111L, Fs.get(mapProps, "longNum", ObjectParser.defaultParser()));
+            assertEquals(111L, Fs.getValue(mapProps, "longNum"));
+            assertEquals(111L, Fs.getValue(mapProps, "longNum", ObjectSchemaParser.defaultParser()));
         }
     }
 
