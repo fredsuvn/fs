@@ -51,17 +51,22 @@ public class PropertiesTest implements PrintTest {
             output.reset();
         }
         {
-            // with charset
+            // with channel
             PropertiesData properties = PropertiesData.load(
-                ResKit.findStream("data/x.properties"), CharsKit.defaultCharset()
+                Channels.newChannel(ResKit.findStream("data/x.properties"))
+            );
+            checkProperties(properties);
+        }
+        {
+            // with reader
+            PropertiesData properties = PropertiesData.load(
+                IOKit.newReader(ResKit.findStream("data/x.properties"), CharsKit.defaultCharset())
             );
             checkProperties(properties);
         }
         {
             // wrapper
-            PropertiesData properties = PropertiesData.load(
-                ResKit.findStream("data/x.properties"), CharsKit.defaultCharset()
-            );
+            PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
             checkProperties(PropertiesData.wrap(properties.asProperties()));
         }
     }

@@ -5,15 +5,19 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.string.StringKit;
+import space.sunqian.fs.data.ByteData;
+import space.sunqian.fs.data.CharData;
 import space.sunqian.fs.data.DataMap;
-import space.sunqian.fs.data.OutputableData;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.Writer;
-import java.nio.charset.Charset;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.Map;
 import java.util.Properties;
 
@@ -22,7 +26,7 @@ import java.util.Properties;
  *
  * @author sunqian
  */
-public interface PropertiesData extends OutputableData {
+public interface PropertiesData extends ByteData, CharData {
 
     /**
      * Loads properties from the given input stream, using {@link CharsKit#defaultCharset()}.
@@ -38,17 +42,29 @@ public interface PropertiesData extends OutputableData {
     }
 
     /**
-     * Loads properties from the given input stream, using the specified charset.
+     * Loads properties from the given readable byte channel, using {@link CharsKit#defaultCharset()}.
      * <p>
      * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
      *
-     * @param in      the input stream to read from
-     * @param charset the charset to use
+     * @param channel the readable byte channel to read from
      * @return a new {@link PropertiesData} wraps the loaded properties
      * @throws IORuntimeException if an I/O error occurs while loading the properties
      */
-    static @Nonnull PropertiesData load(@Nonnull InputStream in, @Nonnull Charset charset) throws IORuntimeException {
-        return PropertiesParser.defaultParser().parse(in, charset);
+    static @Nonnull PropertiesData load(@Nonnull ReadableByteChannel channel) throws IORuntimeException {
+        return PropertiesParser.defaultParser().parse(channel);
+    }
+
+    /**
+     * Loads properties from the given reader, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
+     *
+     * @param reader the reader to read from
+     * @return a new {@link PropertiesData} wraps the loaded properties
+     * @throws IORuntimeException if an I/O error occurs while loading the properties
+     */
+    static @Nonnull PropertiesData load(@Nonnull Reader reader) throws IORuntimeException {
+        return PropertiesParser.defaultParser().parse(reader);
     }
 
     /**
@@ -235,10 +251,34 @@ public interface PropertiesData extends OutputableData {
         return DataMap.wrap(asMap());
     }
 
+    /**
+     * Writes the properties to the given output stream with the {@link CharsKit#defaultCharset()}.
+     *
+     * @param out the output stream to write to
+     * @throws IORuntimeException if an I/O error occurs
+     */
     @Override
-    default void writeTo(@Nonnull OutputStream out, @Nonnull Charset charset) throws IORuntimeException {
-        Properties properties = asProperties();
-        Writer writer = IOKit.newWriter(out, charset);
-        Fs.uncheck(() -> properties.store(writer, null), IORuntimeException::new);
+    default void writeTo(@Nonnull OutputStream out) throws IORuntimeException {
+        Writer writer = IOKit.newWriter(out, CharsKit.defaultCharset());
+        writeTo(writer);
+    }
+
+    /**
+     * Writes the properties to the given writable byte channel with the {@link CharsKit#defaultCharset()}.
+     *
+     * @param channel the writable byte channel to write to
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    @Override
+    default void writeTo(@Nonnull WritableByteChannel channel) throws IORuntimeException {
+        // compatible with JDK8
+        @SuppressWarnings("CharsetObjectCanBeUsed")
+        Writer writer = Channels.newWriter(channel, CharsKit.defaultCharset().name());
+        writeTo(writer);
+    }
+
+    @Override
+    default void writeTo(@Nonnull Writer writer) throws IORuntimeException {
+        Fs.uncheck(() -> asProperties().store(writer, null), IORuntimeException::new);
     }
 }

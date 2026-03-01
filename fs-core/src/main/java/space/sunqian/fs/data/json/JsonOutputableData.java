@@ -1,7 +1,7 @@
 package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.fs.data.OutputableData;
+import space.sunqian.fs.data.ByteData;
 import space.sunqian.fs.io.IOKit;
 
 /**
@@ -9,7 +9,7 @@ import space.sunqian.fs.io.IOKit;
  *
  * @author sunqian
  */
-public interface JsonOutputableData extends OutputableData {
+public interface JsonOutputableData extends ByteData {
 
     /**
      * Formats and returns the string representation of the current JSON data.

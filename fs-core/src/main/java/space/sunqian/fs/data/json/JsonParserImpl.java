@@ -2,15 +2,13 @@ package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.option.Option;
-import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;
 import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 
 import java.io.InputStream;
-import java.io.Reader;
-import java.nio.charset.Charset;
+import java.nio.channels.ReadableByteChannel;
 
 final class JsonParserImpl implements JsonParser {
 
@@ -30,16 +28,26 @@ final class JsonParserImpl implements JsonParser {
     }
 
     @Override
-    public @Nonnull JsonData parse(
-        @Nonnull InputStream input, @Nonnull Charset charset
-    ) throws IORuntimeException {
-        return parse(IOKit.newReader(input, charset));
+    public @Nonnull JsonData parse(@Nonnull InputStream input) throws IORuntimeException {
+        return null;
     }
 
     @Override
-    public @Nonnull JsonData parse(@Nonnull Reader reader) throws IORuntimeException {
-        throw new IORuntimeException();
+    public @Nonnull JsonData parse(@Nonnull ReadableByteChannel channel) throws IORuntimeException {
+        return null;
     }
+
+    // @Override
+    // public @Nonnull JsonData parse(
+    //     @Nonnull InputStream input
+    // ) throws IORuntimeException {
+    //     return parse(IOKit.newReader(input, charset));
+    // }
+    //
+    // @Override
+    // public @Nonnull JsonData parse(@Nonnull Reader reader) throws IORuntimeException {
+    //     throw new IORuntimeException();
+    // }
 
     // @Override
     // public @Nonnull JsonData parse(@Nonnull Reader reader) throws IORuntimeException {

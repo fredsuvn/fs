@@ -1,14 +1,14 @@
 package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.fs.data.DataParser;
+import space.sunqian.fs.data.ByteDataParser;
 
 /**
  * Represents the parser that parses properties data a {@code PropertiesData} object.
  *
  * @author sunqian
  */
-public interface JsonParser extends DataParser<JsonData> {
+public interface JsonParser extends ByteDataParser<JsonData> {
 
     /**
      * Returns the default {@link JsonParser}.
