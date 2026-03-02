@@ -10,6 +10,8 @@ dependencies {
   annotationProcessor(platform(project(":fs-dependencies")))
   annotationProcessor("org.projectlombok:lombok")
 
+  implementation("org.springframework.boot:spring-boot-starter")
+
   implementation(platform(project(":fs-dependencies")))
   implementation(project(":fs-annotation"))
   implementation(project(":fs-core"))
@@ -39,8 +41,8 @@ sourceSets {
 jmh {
   resultFormat = "json"
   //includes = listOf(
-    //"internal.tests.benchmarks.(AspectBenchmark|CopyPropertiesBenchmark)"
-    //"internal.tests.benchmarks.TcpServerBenchmark"
+  //"internal.tests.benchmarks.(AspectBenchmark|CopyPropertiesBenchmark)"
+  //"internal.tests.benchmarks.TcpServerBenchmark"
   //)
 }
 

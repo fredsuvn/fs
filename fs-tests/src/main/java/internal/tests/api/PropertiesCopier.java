@@ -2,19 +2,31 @@ package internal.tests.api;
 
 import cn.hutool.core.bean.BeanUtil;
 import internal.tests.common.TestPropsData;
+import internal.tests.common.TestPropsTarget;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.beanutils.converters.DateConverter;
 import space.sunqian.fs.Fs;
 
+import java.util.Date;
+
 public interface PropertiesCopier {
+
+    static void init() {
+        DateConverter converter = new DateConverter();
+        converter.setPattern("yyyy-MM-dd HH:mm:ss");
+        ConvertUtils.register(converter, Date.class);
+    }
 
     static PropertiesCopier createCopier(String copierType) {
         return switch (copierType) {
             case "fs" -> Fs::copyProperties;
+            case "spring" -> org.springframework.beans.BeanUtils::copyProperties;
             case "apache" -> (source, target) -> BeanUtils.copyProperties(target, source);
-            case "hutool" -> (source, target) -> BeanUtil.copyProperties(target, source);
+            case "hutool" -> BeanUtil::copyProperties;
             case "direct" -> (source, target) -> {
                 TestPropsData src = (TestPropsData) source;
-                TestPropsData dst = (TestPropsData) target;
+                TestPropsTarget dst = (TestPropsTarget) target;
                 dst.setI1(src.getI1());
                 dst.setL1(src.getL1());
                 dst.setStr1(src.getStr1());

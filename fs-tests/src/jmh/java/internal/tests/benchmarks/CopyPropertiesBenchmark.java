@@ -17,6 +17,8 @@ import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
@@ -29,6 +31,7 @@ public class CopyPropertiesBenchmark {
 
     @Param({
         "fs",
+        "spring",
         "apache",
         "hutool",
         //"direct"
@@ -52,6 +55,12 @@ public class CopyPropertiesBenchmark {
         data.setIi2(3);
         data.setLl2(4L);
         data.setBb2(new BigDecimal("5.0"));
+        Date now = new Date();
+        String nowStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now);
+        data.setFmt1(now);
+        data.setFmt2(nowStr);
+        data.setFmt3(1111L);
+        data.setFmt4(new BigDecimal("8888.0"));
     }
 
     @Setup(Level.Trial)

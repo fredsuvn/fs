@@ -39,11 +39,12 @@ dependencies {
     //commons
     api("org.apache.commons:commons-lang3:3.13.0")
     api("org.apache.commons:commons-collections4:4.4")
-    api("commons-beanutils:commons-beanutils:1.9.4")
+    api("commons-beanutils:commons-beanutils:1.11.0")
     api("commons-io:commons-io:2.14.0")
     api("commons-codec:commons-codec:1.16.0")
-    api("cn.hutool:hutool-all:5.8.22")
+    api("cn.hutool:hutool-all:5.8.43")
     api("org.jboss:jboss-vfs:3.3.2.Final")
+    api("org.springframework.boot:spring-boot-starter:4.0.3")
 
     //cache
     api("com.google.guava:guava:32.1.3-jre")
@@ -85,5 +86,9 @@ dependencies {
 
     //config
     api("org.yaml:snakeyaml:2.2")
+
+    //data
+    //api("com.fasterxml.jackson.core:jackson-core:2.21.1")
+    api("com.fasterxml.jackson.core:jackson-databind:2.21.1")
   }
 }

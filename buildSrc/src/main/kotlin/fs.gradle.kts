@@ -13,7 +13,11 @@ project.repositories {
 }
 
 val fsLogger: FsBuildLogger by project
-fsLogger.info("hello, ${project.name}!")
+fsLogger.info(
+  "hello, ${project.name}! " +
+    "[${System.getProperty("java.vm.name")}: ${System.getProperty("java.vm.version")}] " +
+    "[gradle: ${gradle.gradleVersion}]"
+)
 
 val javaVersionFrom: String by project
 val javaVersionTo: String by project

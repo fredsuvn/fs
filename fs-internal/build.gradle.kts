@@ -34,6 +34,10 @@ dependencies {
   api("org.projectlombok:lombok")
   api("org.mockito:mockito-core")
   api("org.jboss:jboss-vfs")
+  //api("com.fasterxml.jackson.core:jackson-core")
+  api("com.fasterxml.jackson.core:jackson-databind")
+  // only jdk17
+  //api("org.springframework.boot:spring-boot-starter")
 }
 
 val javaVersionFrom = project.property("javaLangVersionFrom") as JavaLanguageVersion
