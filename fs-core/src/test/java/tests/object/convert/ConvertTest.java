@@ -1,10 +1,13 @@
 package tests.object.convert;
 
+import cn.hutool.core.bean.BeanUtil;
+import internal.test.DataTest;
 import internal.test.PrintTest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.beanutils.BeanUtils;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.Fs;
@@ -73,7 +76,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ConvertTest implements PrintTest {
+public class ConvertTest implements PrintTest, DataTest {
 
     @Test
     public void testObjectConverter() throws Exception {
@@ -540,7 +543,7 @@ public class ConvertTest implements PrintTest {
     }
 
     @Test
-    public void testNewInstance() {
+    public void testNewInstance() throws Exception {
         Object str1 = new Object();
         Object str2 = ObjectConverter.defaultConverter().convert(str1, Object.class, ConvertOption.newInstanceMode(true));
         assertNotSame(str1, str2);
@@ -548,6 +551,34 @@ public class ConvertTest implements PrintTest {
         assertSame(str1, str3);
         Object str4 = ObjectConverter.defaultConverter().convert(str1, Object.class, ConvertOption.newInstanceMode(false));
         assertSame(str1, str4);
+
+        DataObject src = new DataObject(new String(randomChars(16)), new String(randomChars(16)));
+        DataObject dst = new DataObject();
+        BeanUtils.copyProperties(dst, src);
+        assertSame(src.getCode(), dst.getCode());
+        assertSame(src.getName(), dst.getName());
+        dst.setCode(null);
+        dst.setName(null);
+        org.springframework.beans.BeanUtils.copyProperties(src, dst);
+        assertSame(src.getCode(), dst.getCode());
+        assertSame(src.getName(), dst.getName());
+        dst.setCode(null);
+        dst.setName(null);
+        BeanUtil.copyProperties(src, dst);
+        assertSame(src.getCode(), dst.getCode());
+        assertSame(src.getName(), dst.getName());
+        dst.setCode(null);
+        dst.setName(null);
+        Fs.copyProperties(src, dst);
+        assertSame(src.getCode(), dst.getCode());
+        assertSame(src.getName(), dst.getName());
+        dst.setCode(null);
+        dst.setName(null);
+        // Fs.copyProperties(src, dst, ConvertOption.newInstanceMode(true));
+        // assertNotSame(src.getCode(), dst.getCode());
+        // assertNotSame(src.getName(), dst.getName());
+        // assertEquals(src.getCode(), dst.getCode());
+        // assertEquals(src.getName(), dst.getName());
     }
 
     @Test
