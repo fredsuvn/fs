@@ -31,6 +31,7 @@ public class CopyPropertiesBenchmark {
 
     @Param({
         "fs",
+        "fs-instMode",
         "spring",
         "apache",
         "hutool",

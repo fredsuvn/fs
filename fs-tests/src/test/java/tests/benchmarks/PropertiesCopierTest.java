@@ -18,6 +18,7 @@ public class PropertiesCopierTest {
     public void testCopier() throws Exception {
         PropertiesCopier.init();
         testCopier("fs");
+        testCopier("fs-instMode");
         testCopier("spring");
         testCopier("apache");
         testCopier("hutool");

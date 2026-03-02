@@ -7,6 +7,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.converters.DateConverter;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.object.convert.ConvertOption;
 
 import java.util.Date;
 
@@ -21,6 +22,9 @@ public interface PropertiesCopier {
     static PropertiesCopier createCopier(String copierType) {
         return switch (copierType) {
             case "fs" -> Fs::copyProperties;
+            case "fs-instMode" -> (source, target) -> {
+                Fs.copyProperties(source, target, ConvertOption.newInstanceMode(true));
+            };
             case "spring" -> org.springframework.beans.BeanUtils::copyProperties;
             case "apache" -> (source, target) -> BeanUtils.copyProperties(target, source);
             case "hutool" -> BeanUtil::copyProperties;
