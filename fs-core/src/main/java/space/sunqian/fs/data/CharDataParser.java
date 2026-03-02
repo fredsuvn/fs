@@ -6,7 +6,7 @@ import space.sunqian.fs.io.IORuntimeException;
 import java.io.Reader;
 
 /**
- * Represents a char data parser that parses data from a data source (e.g. a {@link Reader}) to a data object.
+ * Represents char data parser that parses data from a data source (e.g. a {@link Reader}) to a data object.
  *
  * @param <T> the type of the parsed data object
  * @author sunqian

@@ -6,11 +6,13 @@ import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.system.ResKit;
 import space.sunqian.fs.data.properties.PropertiesData;
 import space.sunqian.fs.data.properties.PropertiesDataException;
+import space.sunqian.fs.data.properties.PropertiesKit;
 import space.sunqian.fs.io.IOKit;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.nio.channels.Channels;
 import java.util.Properties;
 
@@ -115,6 +117,18 @@ public class PropertiesTest implements PrintTest {
         assertEquals("中文", properties.getProperty("x12"));
         assertEquals(12, properties.size());
         printFor("x.properties - output", properties);
+    }
+
+    @Test
+    public void testFormatter() throws Exception {
+        PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
+        StringWriter stringWriter = new StringWriter();
+        properties.asProperties().store(stringWriter, null);
+        printFor("x.properties", PropertiesKit.toPropertiesString(properties));
+        assertEquals(
+            stringWriter.toString(),
+            PropertiesKit.toPropertiesString(properties)
+        );
     }
 
     @Test

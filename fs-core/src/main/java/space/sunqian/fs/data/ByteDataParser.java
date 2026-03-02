@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.nio.channels.ReadableByteChannel;
 
 /**
- * Represents a byte data parser that parses data from a data source (e.g. a {@link InputStream}) to a data object.
+ * Represents byte data parser that parses data from a data source (e.g. a {@link InputStream}) to a data object.
  *
  * @param <T> the type of the parsed data object
  * @author sunqian
