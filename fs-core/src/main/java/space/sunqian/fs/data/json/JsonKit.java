@@ -1,9 +1,7 @@
 package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
-
-import java.io.OutputStream;
-import java.nio.charset.Charset;
+import space.sunqian.annotation.Nullable;
 
 /**
  * Utilities for {@code JSON}.
@@ -13,23 +11,13 @@ import java.nio.charset.Charset;
 public class JsonKit {
 
     /**
-     * Formats the given JSON data to the specified output stream, with the specified property mapper.
-     * <p>
-     * This method uses {@link JsonFormatter#defaultFormatter()} to format the JSON data.
+     * Returns a string formatted by {@link JsonFormatter#defaultFormatter()} of the given data.
      *
-     * @param jsonData       the JSON data to be formatted, can be any possible object
-     * @param output         the output stream to which the formatted JSON data will be written
-     * @param charset        the charset to be used for formatting
-     * @param propertyMapper the property mapper to be used for formatting the JSON data
-     * @throws JsonDataException if the given JSON data is not a valid JSON
+     * @param data the given JSON data
+     * @return a string formatted by {@link JsonFormatter#defaultFormatter()} of the given data
      */
-    public static void format(
-        @Nonnull Object jsonData,
-        @Nonnull OutputStream output,
-        @Nonnull Charset charset,
-        @Nonnull JsonPropertyMapper propertyMapper
-    ) throws JsonDataException {
-        JsonFormatter.defaultFormatter().format(jsonData, output, charset, propertyMapper);
+    public static @Nonnull String toJsonString(@Nullable Object data) {
+        return JsonFormatter.defaultFormatter().format(data);
     }
 
     private JsonKit() {

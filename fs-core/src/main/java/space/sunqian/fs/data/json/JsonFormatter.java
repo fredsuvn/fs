@@ -1,39 +1,73 @@
 package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.Fs;
+import space.sunqian.fs.data.CharDataFormatter;
+import space.sunqian.fs.io.IORuntimeException;
+import space.sunqian.fs.object.convert.ConvertKit;
+import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
-import java.io.OutputStream;
-import java.nio.charset.Charset;
+import java.io.Writer;
 
 /**
- * JSON formatter, which is used to format JSON data.
+ * Represents JSON data formatter that formats a given JSON data to formatting string.
  *
  * @author sunqian
  */
-public interface JsonFormatter {
+public interface JsonFormatter extends CharDataFormatter<Object> {
 
     /**
-     * Returns the default {@link JsonFormatter}.
+     * Returns the default formatter of JSON data, which uses {@link ConvertKit#objectSchemaParser()} and
+     * {@link ObjectConverter#defaultConverter()} to pars and convert objects, and doesn't ignore the properties of
+     * which values are {@code null} , or {@code null} values of map, when formatting.
      *
-     * @return the default JSON formatter
+     * @return the default formatter of JSON data
      */
     static @Nonnull JsonFormatter defaultFormatter() {
-        return JsonBack.defaultFormatter();
+        return JsonFormatterBack.defaultFormatter();
     }
 
     /**
-     * Formats the given JSON data to the specified output stream, with the specified property mapper.
+     * Returns a new JSON formatter with the specified {@link ObjectSchemaParser} and {@link ObjectConverter} to parse
+     * and convert objects.
      *
-     * @param jsonData       the JSON data to be formatted, can be any possible object
-     * @param output         the output stream to which the formatted JSON data will be written
-     * @param charset        the charset to be used for formatting
-     * @param propertyMapper the property mapper to be used for formatting the JSON data
-     * @throws JsonDataException if the given JSON data is not a valid JSON
+     * @param objectParser    the specified {@link ObjectSchemaParser}
+     * @param objectConverter the specified {@link ObjectConverter}
+     * @param ignoreNullValue whether to ignore the properties of which values are {@code null}, or {@code null} values
+     *                        of map, when formatting
+     * @return a new JSON formatter with the specified {@link ObjectSchemaParser} and {@link ObjectConverter} to parse
+     * and convert objects
      */
-    void format(
-        @Nonnull Object jsonData,
-        @Nonnull OutputStream output,
-        @Nonnull Charset charset,
-        @Nonnull JsonPropertyMapper propertyMapper
-    ) throws JsonDataException;
+    static @Nonnull JsonFormatter newFormatter(
+        @Nonnull ObjectSchemaParser objectParser,
+        @Nonnull ObjectConverter objectConverter,
+        boolean ignoreNullValue
+    ) {
+        return JsonFormatterBack.newFormatter(objectParser, objectConverter, ignoreNullValue);
+    }
+
+    /**
+     * Formats the given JSON data to the given writer.
+     *
+     * @param data   the given JSON data to be formatted
+     * @param writer the writer to write to
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    @Override
+    void formatTo(@Nullable Object data, @Nonnull Writer writer) throws IORuntimeException;
+
+    /**
+     * Formats the given JSON data to a string.
+     *
+     * @param data the given data to be formatted
+     * @return the formatting string
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    @Override
+    @Nonnull
+    default String format(@Nullable Object data) throws IORuntimeException {
+        return CharDataFormatter.super.format(Fs.asNonnull(data));
+    }
 }

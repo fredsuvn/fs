@@ -27,7 +27,7 @@ public interface CharDataFormatter<T> {
      * Formates the given data to a string.
      *
      * @param data the given data to be formatted
-     * @return the formatted string
+     * @return the formatting string
      * @throws IORuntimeException if an I/O error occurs
      */
     default @Nonnull String format(@Nonnull T data) throws IORuntimeException {

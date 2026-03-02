@@ -36,6 +36,7 @@ dependencies {
   api("org.jboss:jboss-vfs")
   //api("com.fasterxml.jackson.core:jackson-core")
   api("com.fasterxml.jackson.core:jackson-databind")
+  api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   // only jdk17
   //api("org.springframework.boot:spring-boot-starter")
 }

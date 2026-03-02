@@ -1,11 +1,154 @@
 package tests.data.json;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import internal.test.PrintTest;
+import lombok.Data;
 import org.junit.jupiter.api.Test;
+import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.data.json.JsonDataException;
+import space.sunqian.fs.data.json.JsonFormatter;
+import space.sunqian.fs.data.json.JsonKit;
+import space.sunqian.fs.object.annotation.DatePattern;
+import space.sunqian.fs.object.annotation.NumPattern;
+import space.sunqian.fs.object.convert.ConvertKit;
+import space.sunqian.fs.object.convert.ObjectConverter;
 
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class JsonTest {
+public class JsonTest implements PrintTest {
+
+    @Test
+    public void testFormatter() throws Exception {
+        ObjectMapper jsonMapper = new ObjectMapper();
+        jsonMapper.registerModule(new JavaTimeModule());
+        {
+            // string
+            String a = "123";
+            assertEquals("\"" + a + "\"", JsonKit.toJsonString(a));
+            String b = "\"123\"";
+            assertEquals("\"\\\"123\\\"\"", JsonKit.toJsonString(b));
+            assertEquals(jsonMapper.writeValueAsString(a), JsonKit.toJsonString(a));
+            assertEquals(jsonMapper.writeValueAsString(b), JsonKit.toJsonString(b));
+        }
+        {
+            // number
+            assertEquals("12345", JsonKit.toJsonString(12345));
+            assertEquals(jsonMapper.writeValueAsString(12345), JsonKit.toJsonString(12345));
+        }
+        {
+            // boolean
+            assertEquals("true", JsonKit.toJsonString(true));
+            assertEquals(jsonMapper.writeValueAsString(true), JsonKit.toJsonString(true));
+            assertEquals("false", JsonKit.toJsonString(false));
+            assertEquals(jsonMapper.writeValueAsString(false), JsonKit.toJsonString(false));
+        }
+        {
+            // null
+            assertEquals("null", JsonKit.toJsonString(null));
+            assertEquals(jsonMapper.writeValueAsString(null), JsonKit.toJsonString(null));
+        }
+        {
+            // object
+            testFormatter(JsonKit::toJsonString, false);
+            JsonFormatter jsonFormatter = JsonFormatter.newFormatter(
+                ConvertKit.objectSchemaParser(), ObjectConverter.defaultConverter(), true
+            );
+            testFormatter(jsonFormatter::format, true);
+        }
+    }
+
+    private void testFormatter(Function<Object, String> formatter, boolean ignoreNull) throws Exception {
+        ObjectMapper jsonMapper = new ObjectMapper();
+        jsonMapper.registerModule(new JavaTimeModule());
+        {
+            // object
+            Date date = new Date();
+            String dateString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+            Date dateFromStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateString);
+            LocalDateTime localDateTime = LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            // assertEquals("\"" + dateString + "\"", JsonKit.toJsonString(dateFromStr));
+            // assertEquals("\"" + dateString + "\"", JsonKit.toJsonString(localDateTime));
+            DataSrc dataSrc = new DataSrc();
+            dataSrc.setS1("s1");
+            dataSrc.setD1(dateFromStr);
+            dataSrc.setD2(localDateTime);
+            dataSrc.setN1(123L);
+            dataSrc.setN2(new BigDecimal("123.456"));
+            dataSrc.setE1(DataEnum.A);
+            dataSrc.setFmt1(dateFromStr);
+            dataSrc.setFmt2(localDateTime);
+            dataSrc.setFmt3(123L);
+            dataSrc.setFmt4(new BigDecimal("123.456"));
+            String jsonString = formatter.apply(dataSrc);
+            printFor("jsonString", jsonString);
+            printFor("jsonString by Jackson", jsonMapper.writeValueAsString(dataSrc));
+            DataTarget target = jsonMapper.readValue(jsonString, DataTarget.class);
+            checkTarget(dataSrc, target, dateString);
+            assertTrue(jsonString.contains("\"n1\":123"));
+            assertTrue(jsonString.contains("\"n2\":123.456"));
+            assertTrue(jsonString.contains("\"fmt3\":123.000"));
+            assertTrue(jsonString.contains("\"fmt4\":123.4560"));
+            if (!ignoreNull) {
+                assertTrue(jsonString.contains("\"o1\":null"));
+                assertTrue(jsonString.contains("\"o2\":null"));
+            } else {
+                assertFalse(jsonString.contains("\"o1\":null"));
+                assertFalse(jsonString.contains("\"o2\":null"));
+            }
+            DataObj obj = new DataObj();
+            obj.setS1("s1");
+            obj.setS2("s2");
+            Map<String, Object> map = new HashMap<>();
+            map.put("m1", "m1");
+            map.put("m2", "m2");
+            map.put("m3", null);
+            dataSrc.setO1(obj);
+            dataSrc.setO2(map);
+            String jsonString2 = formatter.apply(dataSrc);
+            printFor("jsonString2", jsonString2);
+            DataTarget target2 = jsonMapper.readValue(jsonString2, DataTarget.class);
+            checkTarget(dataSrc, target2, dateString);
+            assertTrue(jsonString2.contains("\"n1\":123"));
+            assertTrue(jsonString2.contains("\"n2\":123.456"));
+            assertTrue(jsonString2.contains("\"fmt3\":123.000"));
+            assertTrue(jsonString2.contains("\"fmt4\":123.4560"));
+            if (!ignoreNull) {
+                assertTrue(jsonString2.contains("\"m3\":null"));
+                assertEquals(map, target2.getO2());
+            } else {
+                assertFalse(jsonString2.contains("\"m3\":null"));
+                assertEquals(MapKit.map("m1", "m1", "m2", "m2"), target2.getO2());
+            }
+            assertEquals(obj, target2.getO1());
+        }
+    }
+
+    private void checkTarget(DataSrc dataSrc, DataTarget target, String dateString) {
+        assertEquals(dataSrc.getS1(), target.getS1());
+        assertEquals(dataSrc.getD1().toString(), target.getD1());
+        assertEquals(dataSrc.getD2().toString(), target.getD2());
+        assertEquals(String.valueOf(dataSrc.getN1()), target.getN1().toString());
+        assertEquals(dataSrc.getN2().toString(), target.getN2().toString());
+        assertEquals(dateString, target.getFmt1());
+        assertEquals(dateString, target.getFmt2());
+        assertEquals("123.000", target.getFmt3().toString());
+        assertEquals("123.4560", target.getFmt4().toString());
+        assertEquals(DataEnum.A.toString(), target.getE1());
+    }
 
     @Test
     public void testException() throws Exception {
@@ -24,5 +167,59 @@ public class JsonTest {
                 throw new JsonDataException(new RuntimeException());
             });
         }
+    }
+
+    @Data
+    public static class DataSrc {
+        private String s1;
+        private Date d1;
+        private LocalDateTime d2;
+        private long n1;
+        private BigDecimal n2;
+        private DataEnum e1;
+
+        private DataObj o1;
+        private Map<String, Object> o2;
+
+        @DatePattern("yyyy-MM-dd HH:mm:ss")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private Date fmt1;
+        @DatePattern("yyyy-MM-dd HH:mm:ss")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private LocalDateTime fmt2;
+        @NumPattern("#.000")
+        @JsonFormat(pattern = "#.000")
+        private long fmt3;
+        @NumPattern("#.0000")
+        @JsonFormat(pattern = "#.0000")
+        private BigDecimal fmt4;
+    }
+
+    @Data
+    public static class DataObj {
+        private String s1;
+        private String s2;
+    }
+
+    @Data
+    public static class DataTarget {
+        private String s1;
+        private String d1;
+        private String d2;
+        private BigDecimal n1;
+        private BigDecimal n2;
+        private String e1;
+
+        private DataObj o1;
+        private Map<String, Object> o2;
+
+        private String fmt1;
+        private String fmt2;
+        private BigDecimal fmt3;
+        private BigDecimal fmt4;
+    }
+
+    public enum DataEnum {
+        A, B, C
     }
 }
