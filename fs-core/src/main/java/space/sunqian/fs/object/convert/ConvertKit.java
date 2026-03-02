@@ -6,6 +6,8 @@ import space.sunqian.fs.base.number.NumFormatter;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.value.SimpleKey;
 import space.sunqian.fs.cache.SimpleCache;
+import space.sunqian.fs.object.annotation.DatePattern;
+import space.sunqian.fs.object.annotation.NumPattern;
 import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 import space.sunqian.fs.object.schema.MapSchemaParser;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
@@ -21,7 +23,7 @@ public class ConvertKit {
 
     /**
      * Returns the {@link MapSchemaParser} for default object conversion. It is same as
-     * {@link MapSchemaParser#defaultParser()},
+     * {@link MapSchemaParser#defaultCachedParser()}.
      *
      * @return the default {@link MapSchemaParser} for object conversion
      */
@@ -31,7 +33,7 @@ public class ConvertKit {
 
     /**
      * Returns the {@link ObjectSchemaParser} for default object conversion. It is same as
-     * {@link ObjectSchemaParser#defaultParser()},
+     * {@link ObjectSchemaParser#defaultCachedParser()}.
      *
      * @return the default {@link ObjectSchemaParser} for object conversion
      */
@@ -41,12 +43,31 @@ public class ConvertKit {
 
     /**
      * Returns the {@link BuilderOperatorProvider} for default object conversion. It is same as
-     * {@link BuilderOperatorProvider#defaultProvider()},
+     * {@link BuilderOperatorProvider#defaultCachedProvider()}.
      *
      * @return the default {@link BuilderOperatorProvider} for object conversion
      */
     public static @Nonnull BuilderOperatorProvider builderOperatorProvider() {
         return BuilderOperatorProvider.defaultCachedProvider();
+    }
+
+    /**
+     * Returns a {@link Option} of {@link DateFormatter} for the given {@link DatePattern}. This method is based on a
+     * soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
+     * for the same pattern and zone id.
+     *
+     * @param datePattern the pattern of the date formatter
+     * @return the {@link Option} of {@link DateFormatter} for the given {@link DatePattern}
+     */
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter> getDateFormatterOption(
+        @Nonnull DatePattern datePattern) {
+        ZoneId zoneId;
+        if ("".equals(datePattern.zoneId())) {
+            zoneId = ZoneId.systemDefault();
+        } else {
+            zoneId = ZoneId.of(datePattern.zoneId());
+        }
+        return getDateFormatterOption(datePattern.value(), zoneId);
     }
 
     /**
@@ -61,6 +82,19 @@ public class ConvertKit {
     public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter> getDateFormatterOption(
         @Nonnull String pattern, @Nonnull ZoneId zoneId) {
         return DateFormatterCache.INST.get(pattern, zoneId);
+    }
+
+    /**
+     * Returns a {@link Option} of {@link NumFormatter} for the given {@link NumPattern}. This method is based on a
+     * soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
+     * for the same pattern.
+     *
+     * @param numPattern the pattern of the number formatter
+     * @return the {@link Option} of {@link NumFormatter} for the given {@link NumPattern}
+     */
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumFormatter> getNumFormatterOption(
+        @Nonnull NumPattern numPattern) {
+        return getNumFormatterOption(numPattern.value());
     }
 
     /**
