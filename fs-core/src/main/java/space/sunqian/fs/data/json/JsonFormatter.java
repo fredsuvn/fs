@@ -9,8 +9,6 @@ import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
-import java.io.Writer;
-
 /**
  * Represents JSON data formatter that formats a given JSON data to formatting string.
  *
@@ -56,7 +54,7 @@ public interface JsonFormatter extends CharDataFormatter<Object> {
      * @throws IORuntimeException if an I/O error occurs
      */
     @Override
-    void formatTo(@Nullable Object data, @Nonnull Writer writer) throws IORuntimeException;
+    void formatTo(@Nullable Object data, @Nonnull Appendable writer) throws IORuntimeException;
 
     /**
      * Formats the given JSON data to a string.

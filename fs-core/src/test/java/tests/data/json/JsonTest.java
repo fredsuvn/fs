@@ -43,6 +43,8 @@ public class JsonTest implements PrintTest {
             assertEquals("\"\\\"123\\\"\"", JsonKit.toJsonString(b));
             assertEquals(jsonMapper.writeValueAsString(a), JsonKit.toJsonString(a));
             assertEquals(jsonMapper.writeValueAsString(b), JsonKit.toJsonString(b));
+            String c = "fasfa\"fasfs\"fasfsa\\fasfsa\\\\fasfs\"fsasd";
+            assertEquals(jsonMapper.writeValueAsString(c), JsonKit.toJsonString(c));
         }
         {
             // number

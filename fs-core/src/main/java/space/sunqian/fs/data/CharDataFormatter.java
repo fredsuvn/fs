@@ -3,9 +3,6 @@ package space.sunqian.fs.data;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.io.IORuntimeException;
 
-import java.io.StringWriter;
-import java.io.Writer;
-
 /**
  * Represents char data formatter that formats a given data to formatting string.
  *
@@ -21,7 +18,7 @@ public interface CharDataFormatter<T> {
      * @param writer the writer to write to
      * @throws IORuntimeException if an I/O error occurs
      */
-    void formatTo(@Nonnull T data, @Nonnull Writer writer) throws IORuntimeException;
+    void formatTo(@Nonnull T data, @Nonnull Appendable writer) throws IORuntimeException;
 
     /**
      * Formates the given data to a string.
@@ -31,7 +28,7 @@ public interface CharDataFormatter<T> {
      * @throws IORuntimeException if an I/O error occurs
      */
     default @Nonnull String format(@Nonnull T data) throws IORuntimeException {
-        StringWriter sb = new StringWriter();
+        StringBuilder sb = new StringBuilder();
         formatTo(data, sb);
         return sb.toString();
     }

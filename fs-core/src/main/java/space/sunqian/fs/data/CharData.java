@@ -18,5 +18,5 @@ public interface CharData {
      * @param writer the writer to write to
      * @throws IORuntimeException if an I/O error occurs
      */
-    void writeTo(@Nonnull Writer writer) throws IORuntimeException;
+    void writeTo(@Nonnull Appendable writer) throws IORuntimeException;
 }

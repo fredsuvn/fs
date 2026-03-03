@@ -3411,6 +3411,37 @@ public class IOKit {
         return IOBack.nullWriter();
     }
 
+    /**
+     * Wraps the given {@link Appendable} object as a {@link Writer}.
+     *
+     * @param appendable the given appendable
+     * @return the given appendable as a {@link Writer}
+     */
+    public static @Nonnull Writer wrapWriter(@Nonnull Appendable appendable) {
+        if (appendable instanceof Writer) {
+            return (Writer) appendable;
+        }
+        return new Writer() {
+
+            @Override
+            public void write(char @Nonnull [] cbuf, int off, int len) throws IOException {
+                try {
+                    appendable.append(new String(cbuf, off, len));
+                } catch (Exception e) {
+                    throw new IOException(e);
+                }
+            }
+
+            @Override
+            public void flush() throws IOException {
+            }
+
+            @Override
+            public void close() throws IOException {
+            }
+        };
+    }
+
     private IOKit() {
     }
 }

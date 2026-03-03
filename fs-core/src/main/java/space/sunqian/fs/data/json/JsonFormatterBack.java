@@ -12,7 +12,6 @@ import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
-import java.io.Writer;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.Map;
@@ -54,11 +53,11 @@ final class JsonFormatterBack {
         }
 
         @Override
-        public void formatTo(@Nullable Object data, @Nonnull Writer writer) throws IORuntimeException {
+        public void formatTo(@Nullable Object data, @Nonnull Appendable writer) throws IORuntimeException {
             Fs.uncheck(() -> writeAny(data, writer), IORuntimeException::new);
         }
 
-        private void writeAny(@Nullable Object any, @Nonnull Writer writer) throws Exception {
+        private void writeAny(@Nullable Object any, @Nonnull Appendable writer) throws Exception {
             if (any == null) {
                 writeDirect("null", writer);
                 return;
@@ -94,17 +93,26 @@ final class JsonFormatterBack {
             writeObject(any, writer);
         }
 
-        private void writeString(@Nonnull String string, @Nonnull Writer writer) throws Exception {
+        private void writeString(@Nonnull String string, @Nonnull Appendable writer) throws Exception {
             writeDirect("\"", writer);
-            writeDirect(string.replace("\"", "\\\""), writer);
+            for (int i = 0; i < string.length(); i++) {
+                char c = string.charAt(i);
+                if (c == '\\') {
+                    writeDirect("\\\\", writer);
+                } else if (c == '\"') {
+                    writeDirect("\\\"", writer);
+                } else {
+                    writer.append(c);
+                }
+            }
             writeDirect("\"", writer);
         }
 
-        private void writeDirect(@Nonnull String string, @Nonnull Writer writer) throws Exception {
-            writer.write(string);
+        private void writeDirect(@Nonnull String string, @Nonnull Appendable writer) throws Exception {
+            writer.append(string);
         }
 
-        private void writeMap(@Nonnull Map<?, ?> map, @Nonnull Writer writer) throws Exception {
+        private void writeMap(@Nonnull Map<?, ?> map, @Nonnull Appendable writer) throws Exception {
             writeDirect("{", writer);
             boolean comma = false;
             for (Map.Entry<?, ?> entry : map.entrySet()) {
@@ -123,7 +131,7 @@ final class JsonFormatterBack {
             writeDirect("}", writer);
         }
 
-        private void writeObject(@Nonnull Object object, @Nonnull Writer writer) throws Exception {
+        private void writeObject(@Nonnull Object object, @Nonnull Appendable writer) throws Exception {
             ObjectSchema schema = objectParser.parse(object.getClass());
             writeDirect("{", writer);
             boolean comma = false;
@@ -147,7 +155,7 @@ final class JsonFormatterBack {
         }
 
         private void writeProperty(
-            @Nonnull ObjectProperty property, @Nullable Object value, @Nonnull Writer writer
+            @Nonnull ObjectProperty property, @Nullable Object value, @Nonnull Appendable writer
         ) throws Exception {
             writeString(property.name(), writer);
             writeDirect(":", writer);
