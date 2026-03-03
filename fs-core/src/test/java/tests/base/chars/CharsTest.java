@@ -1,6 +1,7 @@
 package tests.base.chars;
 
 import internal.test.AssertTest;
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.system.SystemKeys;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CharsTest implements AssertTest {
+public class CharsTest implements AssertTest, PrintTest {
 
     @Test
     public void testChars() {
@@ -51,5 +52,16 @@ public class CharsTest implements AssertTest {
             invokeEquals(fileCharset, search, null, (Object) new String[]{"UTF888", SystemKeys.FILE_ENCODING});
             invokeEquals(null, search, null, (Object) new String[]{"UTF888"});
         }
+    }
+
+    @Test
+    public void testEscape() {
+        for (int i = 0; i < 32; i++) {
+            String expected = String.format("\\u%04X", i);
+            printFor("escape " + i, expected);
+            assertEquals(expected, CharsKit.toUnicodeEscape((char) i));
+        }
+        assertNull(CharsKit.toUnicodeEscape((char) 111));
+        assertNull(CharsKit.toUnicodeEscape((char) -111));
     }
 }

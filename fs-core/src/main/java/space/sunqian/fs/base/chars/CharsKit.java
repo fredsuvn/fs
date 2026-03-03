@@ -128,6 +128,18 @@ public class CharsKit {
         }
     }
 
+    /**
+     * Returns the Unicode escape sequence of the specified control character.
+     * <p>
+     * If the specified character is not a control character, returns {@code null}.
+     *
+     * @param c the specified control character
+     * @return the Unicode escape sequence of the specified character
+     */
+    public static @Nullable String toUnicodeEscape(char c) {
+        return ControlTables.toUnicodeEscape(c);
+    }
+
     private static final class Natives {
 
         private static final @Nullable Charset NATIVE_CHARSET = searchNativeCharset();
@@ -149,6 +161,25 @@ public class CharsKit {
                 }
             }
             return null;
+        }
+    }
+
+    private static final class ControlTables {
+
+        private static final @Nonnull String @Nonnull [] CONTROL_CHAR_ESCAPE_TABLE;
+
+        static {
+            CONTROL_CHAR_ESCAPE_TABLE = new String[32];
+            for (int i = 0; i < CONTROL_CHAR_ESCAPE_TABLE.length; i++) {
+                CONTROL_CHAR_ESCAPE_TABLE[i] = String.format("\\u%04X", i);
+            }
+        }
+
+        private static @Nullable String toUnicodeEscape(char c) {
+            if (c >= CONTROL_CHAR_ESCAPE_TABLE.length) {
+                return null;
+            }
+            return CONTROL_CHAR_ESCAPE_TABLE[c];
         }
     }
 
