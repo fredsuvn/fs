@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * The interface to access properties data.
+ * The interface represents properties data.
  *
  * @author sunqian
  */

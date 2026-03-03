@@ -16,13 +16,6 @@ enum PropertiesParserImpl implements PropertiesParser {
     INST;
 
     @Override
-    public @Nonnull PropertiesData parse(@Nonnull Reader reader) throws IORuntimeException {
-        Properties properties = new Properties();
-        Fs.uncheck(() -> properties.load(reader), IORuntimeException::new);
-        return wrap(properties);
-    }
-
-    @Override
     public @Nonnull PropertiesData parse(@Nonnull InputStream input) throws IORuntimeException {
         Reader reader = IOKit.newReader(input, CharsKit.defaultCharset());
         return parse(reader);
@@ -34,5 +27,12 @@ enum PropertiesParserImpl implements PropertiesParser {
         @SuppressWarnings("CharsetObjectCanBeUsed")
         Reader reader = Channels.newReader(channel, CharsKit.defaultCharset().name());
         return parse(reader);
+    }
+
+    @Override
+    public @Nonnull PropertiesData parse(@Nonnull Reader reader) throws IORuntimeException {
+        Properties properties = new Properties();
+        Fs.uncheck(() -> properties.load(reader), IORuntimeException::new);
+        return wrap(properties);
     }
 }
