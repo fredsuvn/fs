@@ -18,6 +18,8 @@ import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
@@ -26,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
 @Fork(3)
-public class CopyPropertiesBenchmark {
+public class CopyFormatPropertiesBenchmark {
 
     @Param({
         "fs",
@@ -55,6 +57,12 @@ public class CopyPropertiesBenchmark {
         data.setIi2(3);
         data.setLl2(4L);
         data.setBb2(new BigDecimal("5.0"));
+        Date now = new Date();
+        String nowStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now);
+        data.setFmt1(nowStr);
+        data.setFmt2(nowStr);
+        data.setFmt3(nowStr);
+        data.setFmt4(nowStr);
     }
 
     @Setup(Level.Trial)
@@ -65,7 +73,7 @@ public class CopyPropertiesBenchmark {
     @Benchmark
     public void copyProperties(Blackhole blackhole) throws Exception {
         TestPropsTarget target = new TestPropsTarget();
-        copier.copyProperties(data, target, false);
+        copier.copyProperties(data, target, true);
         blackhole.consume(target);
     }
 }

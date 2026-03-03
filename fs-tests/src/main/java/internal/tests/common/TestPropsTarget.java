@@ -3,9 +3,7 @@ package internal.tests.common;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.NumberFormat;
 import space.sunqian.fs.object.annotation.DatePattern;
-import space.sunqian.fs.object.annotation.NumPattern;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -28,14 +26,14 @@ public class TestPropsTarget {
 
     @DatePattern("yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private String fmt1;
+    private Date fmt1;
     @DatePattern("yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date fmt2;
-    @NumPattern("#.000")
-    @NumberFormat(pattern = "#.000")
-    private String fmt3;
-    @NumPattern("#.0000")
-    @NumberFormat(pattern = "#.0000")
-    private String fmt4;
+    @DatePattern("yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date fmt3;
+    @DatePattern("yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date fmt4;
 }

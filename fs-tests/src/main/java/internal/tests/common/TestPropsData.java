@@ -3,7 +3,6 @@ package internal.tests.common;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.NumberFormat;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -25,11 +24,11 @@ public class TestPropsData {
     private BigDecimal bb2;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date fmt1;
+    private String fmt1;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private String fmt2;
-    @NumberFormat(pattern = "#.000")
-    private Long fmt3;
-    @NumberFormat(pattern = "#.0000")
-    private BigDecimal fmt4;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private String fmt3;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private String fmt4;
 }

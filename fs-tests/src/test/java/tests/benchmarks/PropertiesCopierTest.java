@@ -6,7 +6,6 @@ import internal.tests.common.TestPropsTarget;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -16,16 +15,21 @@ public class PropertiesCopierTest {
 
     @Test
     public void testCopier() throws Exception {
-        PropertiesCopier.init();
-        testCopier("fs");
-        testCopier("fs-instMode");
-        testCopier("spring");
-        testCopier("apache");
-        testCopier("hutool");
-        testCopier("direct");
+        testCopier("fs", true);
+        testCopier("fs-newInstMode", true);
+        testCopier("spring", true);
+        testCopier("apache", true);
+        testCopier("hutool", true);
+        testCopier("direct", true);
+        testCopier("fs", false);
+        testCopier("fs-newInstMode", false);
+        testCopier("spring", false);
+        testCopier("apache", false);
+        testCopier("hutool", false);
+        testCopier("direct", false);
     }
 
-    private void testCopier(String copierType) throws Exception {
+    private void testCopier(String copierType, boolean format) throws Exception {
         TestPropsData data = new TestPropsData();
         data.setI1(1);
         data.setL1(2L);
@@ -41,13 +45,15 @@ public class PropertiesCopierTest {
         data.setBb2(new BigDecimal("5.0"));
         Date now = new Date();
         String nowStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now);
-        data.setFmt1(now);
-        data.setFmt2(nowStr);
-        data.setFmt3(1111L);
-        data.setFmt4(new BigDecimal("8888.0"));
+        if (format) {
+            data.setFmt1(nowStr);
+            data.setFmt2(nowStr);
+            data.setFmt3(nowStr);
+            data.setFmt4(nowStr);
+        }
         TestPropsTarget target = new TestPropsTarget();
         PropertiesCopier copier = PropertiesCopier.createCopier(copierType);
-        copier.copyProperties(data, target);
+        copier.copyProperties(data, target, format);
         assertEquals(data.getI1(), target.getI1());
         assertEquals(data.getL1(), target.getL1());
         assertEquals(data.getStr1(), target.getStr1());
@@ -60,14 +66,12 @@ public class PropertiesCopierTest {
         assertEquals(data.getIi2(), target.getIi2());
         assertEquals(data.getLl2(), target.getLl2());
         assertEquals(data.getBb2(), target.getBb2());
-        if ("fs".equals(copierType)) {
-            assertEquals(nowStr, target.getFmt1());
-            Date now2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(nowStr);
-            assertEquals(now2, target.getFmt2());
-            String fmt3 = new DecimalFormat("#.000").format(data.getFmt3());
-            assertEquals(fmt3, target.getFmt3());
-            String fmt4 = new DecimalFormat("#.0000").format(data.getFmt4());
-            assertEquals(fmt4, target.getFmt4());
+        if (format) {
+            Date nowDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(nowStr);
+            assertEquals(nowDate, target.getFmt1());
+            assertEquals(nowDate, target.getFmt2());
+            assertEquals(nowDate, target.getFmt3());
+            assertEquals(nowDate, target.getFmt4());
         }
     }
 }
