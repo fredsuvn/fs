@@ -82,7 +82,7 @@ public class JsonFormatBenchmark {
     }
 
     @Benchmark
-    public void aspect(Blackhole blackhole) throws Exception {
+    public void toJsonString(Blackhole blackhole) throws Exception {
         String json = "object".equals(formatTarget) ?
             jsomFormat.toJsonString(data) : jsomFormat.toJsonString(map);
         blackhole.consume(json);

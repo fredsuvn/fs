@@ -3,13 +3,16 @@ package tests.data.json;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import internal.test.ErrorAppender;
 import internal.test.PrintTest;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
+import space.sunqian.fs.base.string.StringView;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.data.json.JsonDataException;
 import space.sunqian.fs.data.json.JsonFormatter;
 import space.sunqian.fs.data.json.JsonKit;
+import space.sunqian.fs.io.IORuntimeException;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
 import space.sunqian.fs.object.convert.ObjectConverter;
@@ -41,7 +44,7 @@ public class JsonTest implements PrintTest {
         jsonMapper.registerModule(new JavaTimeModule());
         {
             // string
-            String a = "123";
+            StringView a = StringView.of("123");
             assertEquals("\"" + a + "\"", JsonKit.toJsonString(a));
             String b = "\"123\"";
             assertEquals("\"\\\"123\\\"\"", JsonKit.toJsonString(b));
@@ -49,6 +52,14 @@ public class JsonTest implements PrintTest {
             assertEquals(jsonMapper.writeValueAsString(b), JsonKit.toJsonString(b));
             String c = "fas,f{a\"fa{sf}s\"fas[fs}a\\fas[fsa\\\\fa]sfs\"fs:a,sd";
             assertEquals(jsonMapper.writeValueAsString(c), JsonKit.toJsonString(c));
+            String d = "abc\n\r\t\f\b1234\u0000";
+            System.out.println(jsonMapper.writeValueAsString(d));
+            assertEquals(jsonMapper.writeValueAsString(d), JsonKit.toJsonString(d));
+            StringBuilder escapes = new StringBuilder();
+            for (int i = 0; i < 38; i++) {
+                escapes.append(String.format("\\u%04X", i));
+            }
+            assertEquals(jsonMapper.writeValueAsString(escapes.toString()), JsonKit.toJsonString(escapes.toString()));
         }
         {
             // number
@@ -111,6 +122,10 @@ public class JsonTest implements PrintTest {
             collection.add(map);
             assertEquals(jsonMapper.writeValueAsString(collection), JsonKit.toJsonString(collection));
             assertEquals(jsonMapper.writeValueAsString(collection), JsonKit.toJsonString(collection.toArray()));
+        }
+        {
+            // error
+            assertThrows(IORuntimeException.class, () -> JsonKit.toJsonString(new Object(), new ErrorAppender()));
         }
     }
 

@@ -133,6 +133,23 @@ public interface ObjectProperty extends ObjectPropertyBase {
         if (field != null) {
             return field.getAnnotation(annotationType);
         }
+
+        // for (Annotation annotation : getterAnnotations()) {
+        //     if (Objects.equals(annotation.annotationType(), annotationType)) {
+        //         return Fs.as(annotation);
+        //     }
+        // }
+        // for (Annotation annotation : setterAnnotations()) {
+        //     if (Objects.equals(annotation.annotationType(), annotationType)) {
+        //         return Fs.as(annotation);
+        //     }
+        // }
+        // for (Annotation annotation : fieldAnnotations()) {
+        //     if (Objects.equals(annotation.annotationType(), annotationType)) {
+        //         return Fs.as(annotation);
+        //     }
+        // }
+
         return null;
     }
 

@@ -54,10 +54,10 @@ public interface JsonFormatter extends CharDataFormatter<Object> {
     }
 
     /**
-     * Formats the given JSON data to the given writer.
+     * Formats the given JSON data to the given appender.
      *
      * @param data     the given JSON data to be formatted
-     * @param appender the writer to write to
+     * @param appender the appender to write to
      * @throws IORuntimeException if an I/O error occurs
      */
     @Override
