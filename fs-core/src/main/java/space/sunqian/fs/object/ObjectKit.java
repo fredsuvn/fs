@@ -3,7 +3,6 @@ package space.sunqian.fs.object;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.exception.UnknownArrayTypeException;
-import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
@@ -223,9 +222,10 @@ public class ObjectKit {
      * This method supports nested property access using dot notation (e.g., "parent.child.property"). If any part of
      * the property path is not found or is {@code null}, this method returns {@code null}.
      * <p>
-     * Note this method use {@link ConvertKit#objectSchemaParser()} to parse object schemas, it is equivalent to:
+     * Note this method use {@link ObjectSchemaParser#defaultCachedParser()} to parse object schemas, it is equivalent
+     * to:
      * <pre>{@code
-     * ObjectKit.getPropertyValue(object, propertyName, ConvertKit.objectSchemaParser());
+     * ObjectKit.getPropertyValue(object, propertyName, ObjectSchemaParser.defaultCachedParser());
      * }</pre>
      *
      * @param object       the given object from which to retrieve the property value
@@ -236,7 +236,7 @@ public class ObjectKit {
         @Nullable Object object,
         @Nonnull String propertyName
     ) {
-        return getPropertyValue(object, propertyName, ConvertKit.objectSchemaParser());
+        return getPropertyValue(object, propertyName, ObjectSchemaParser.defaultCachedParser());
     }
 
     /**

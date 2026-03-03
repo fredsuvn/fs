@@ -71,7 +71,7 @@ public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.
             throw new UnsupportedOperationException("Not a Class or ParameterizedType: " + type + ".");
         }
         Method[] methods = rawType.getMethods();
-        Map<String, PropertyInfo> propertyInfoMap = new LinkedHashMap<>();
+        Map<String, PropertyBase> propertyInfoMap = new LinkedHashMap<>();
 
         // Builds property info for each method.
         for (Method method : methods) {
@@ -83,24 +83,24 @@ public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.
                 continue;
             }
             String propertyName = accessorInfo.propertyName();
-            PropertyInfo propertyInfo = propertyInfoMap.computeIfAbsent(propertyName, PropertyInfo::new);
+            PropertyBase propertyBase = propertyInfoMap.computeIfAbsent(propertyName, PropertyBase::new);
             if (accessorInfo.isGetter()) {
-                propertyInfo.getterMethod = method;
-                propertyInfo.getter = accessorInfo.accessor();
+                propertyBase.getterMethod = method;
+                propertyBase.getter = accessorInfo.accessor();
             } else {
-                propertyInfo.setterMethod = method;
-                propertyInfo.setter = accessorInfo.accessor();
+                propertyBase.setterMethod = method;
+                propertyBase.setter = accessorInfo.accessor();
             }
         }
 
         // Builds property base for each property info.
         Map<TypeVariable<?>, Type> typeParameterMapping = TypeKit.typeParametersMapping(context.parsedType());
         Set<Type> stack = new HashSet<>();
-        propertyInfoMap.forEach((propertyName, propertyInfo) -> {
-            Method getterMethod = propertyInfo.getterMethod;
+        propertyInfoMap.forEach((propertyName, propertyBase) -> {
+            Method getterMethod = propertyBase.getterMethod;
             Type propertyType = getterMethod == null ? null :
                 findActualType(getterMethod.getGenericReturnType(), typeParameterMapping, stack);
-            Method setterMethod = propertyInfo.setterMethod;
+            Method setterMethod = propertyBase.setterMethod;
             if (propertyType == null) {
                 propertyType = findActualType(
                     Fs.asNonnull(setterMethod).getGenericParameterTypes()[0], typeParameterMapping, stack);
@@ -111,9 +111,9 @@ public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.
             and the setter method will no longer be considered as the setter for this property.
              */
             Field field = findField(propertyName, rawType);
-            propertyInfo.type = propertyType;
-            propertyInfo.field = field;
-            context.propertyBaseMap().put(propertyName, propertyInfo);
+            propertyBase.type = propertyType;
+            propertyBase.field = field;
+            context.propertyBaseMap().put(propertyName, propertyBase);
         });
         return true;
     }
@@ -159,7 +159,7 @@ public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.
         boolean isGetter();
     }
 
-    private static final class PropertyInfo implements ObjectPropertyBase {
+    private static final class PropertyBase implements ObjectPropertyBase {
 
         private final @Nonnull String name;
         private @Nonnull Type type = Object.class;
@@ -170,7 +170,7 @@ public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.
         private @Nullable Method setterMethod;
         private @Nullable Invocable setter;
 
-        private PropertyInfo(@Nonnull String name) {
+        private PropertyBase(@Nonnull String name) {
             this.name = name;
         }
 

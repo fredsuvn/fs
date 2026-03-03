@@ -197,7 +197,7 @@ public enum ConvertOption {
     /**
      * Returns an option to specify the object schema parser.
      * <p>
-     * By default, {@link ConvertKit#objectSchemaParser()} is used.
+     * By default, {@link ObjectSchemaParser#defaultCachedParser()} is used.
      *
      * @param schemaParser the specified object schema parser
      * @return an option to specify the object schema parser
@@ -210,25 +210,25 @@ public enum ConvertOption {
 
     /**
      * Returns the specified {@link ObjectSchemaParser} from the given options, or
-     * {@link ConvertKit#objectSchemaParser()} if the given options does not contain a
+     * {@link ObjectSchemaParser#defaultCachedParser()} if the given options does not contain a
      * {@link ConvertOption#OBJECT_SCHEMA_PARSER}.
      *
      * @param options the given options
      * @return the specified {@link ObjectSchemaParser} from the given options, or
-     * {@link ConvertKit#objectSchemaParser()} if the given options does not contain a
+     * {@link ObjectSchemaParser#defaultCachedParser()} if the given options does not contain a
      * {@link ConvertOption#OBJECT_SCHEMA_PARSER}
      */
     public static @Nonnull ObjectSchemaParser getObjectSchemaParser(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Fs.nonnull(
             OptionKit.findValue(ConvertOption.OBJECT_SCHEMA_PARSER, options),
-            ConvertKit.objectSchemaParser()
+            ObjectSchemaParser.defaultCachedParser()
         );
     }
 
     /**
      * Returns an option to specify the map schema parser.
      * <p>
-     * By default, {@link ConvertKit#mapSchemaParser()} is used.
+     * By default, {@link MapSchemaParser#defaultCachedParser()} is used.
      *
      * @param schemaParser the specified map schema parser
      * @return an option to specify the map schema parser
@@ -240,24 +240,26 @@ public enum ConvertOption {
     }
 
     /**
-     * Returns the specified {@link MapSchemaParser} from the given options, or {@link ConvertKit#mapSchemaParser()} if
-     * the given options does not contain a {@link ConvertOption#MAP_SCHEMA_PARSER}.
+     * Returns the specified {@link MapSchemaParser} from the given options, or
+     * {@link MapSchemaParser#defaultCachedParser()} if the given options does not contain a
+     * {@link ConvertOption#MAP_SCHEMA_PARSER}.
      *
      * @param options the given options
-     * @return the specified {@link MapSchemaParser} from the given options, or {@link ConvertKit#mapSchemaParser()} if
-     * the given options does not contain a {@link ConvertOption#MAP_SCHEMA_PARSER}
+     * @return the specified {@link MapSchemaParser} from the given options, or
+     * {@link MapSchemaParser#defaultCachedParser()} if the given options does not contain a
+     * {@link ConvertOption#MAP_SCHEMA_PARSER}
      */
     public static @Nonnull MapSchemaParser getMapSchemaParser(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Fs.nonnull(
             OptionKit.findValue(ConvertOption.MAP_SCHEMA_PARSER, options),
-            ConvertKit.mapSchemaParser()
+            MapSchemaParser.defaultCachedParser()
         );
     }
 
     /**
      * Returns an option to specify the {@link BuilderOperatorProvider} to generate data object during the conversion.
      * <p>
-     * By default, the {@link ConvertKit#builderOperatorProvider()} is used.
+     * By default, the {@link BuilderOperatorProvider#defaultCachedProvider()} is used.
      *
      * @param operatorProvider the {@link BuilderOperatorProvider} to be specified
      * @return an option to specify the {@link BuilderOperatorProvider} to generate data object during the conversion
@@ -270,12 +272,12 @@ public enum ConvertOption {
 
     /**
      * Returns the specified {@link BuilderOperatorProvider} from the given options, or
-     * {@link ConvertKit#builderOperatorProvider()} if the given options does not contain a
+     * {@link BuilderOperatorProvider#defaultCachedProvider()} if the given options does not contain a
      * {@link ConvertOption#BUILDER_OPERATOR_PROVIDER}.
      *
      * @param options the given options
      * @return the specified {@link BuilderOperatorProvider} from the given options, or
-     * {@link ConvertKit#builderOperatorProvider()} if the given options does not contain a
+     * {@link BuilderOperatorProvider#defaultCachedProvider()} if the given options does not contain a
      * {@link ConvertOption#BUILDER_OPERATOR_PROVIDER}
      */
     public static @Nonnull BuilderOperatorProvider getBuilderOperatorProvider(
@@ -283,7 +285,7 @@ public enum ConvertOption {
     ) {
         return Fs.nonnull(
             OptionKit.findValue(ConvertOption.BUILDER_OPERATOR_PROVIDER, options),
-            ConvertKit.builderOperatorProvider()
+            BuilderOperatorProvider.defaultCachedProvider()
         );
     }
 

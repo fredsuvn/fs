@@ -729,10 +729,12 @@ public class ConvertTest implements PrintTest, DataTest {
     public void testConvertKit() throws Exception {
         {
             // map parser
-            assertSame(ConvertKit.mapSchemaParser(), ConvertKit.mapSchemaParser());
-            assertSame(ConvertKit.mapSchemaParser(), ConvertOption.getMapSchemaParser(ConvertOption.ignoreNull(true)));
+            assertSame(
+                MapSchemaParser.defaultCachedParser(),
+                ConvertOption.getMapSchemaParser(ConvertOption.ignoreNull(true))
+            );
             assertNotEquals(
-                ConvertKit.mapSchemaParser(),
+                MapSchemaParser.defaultCachedParser(),
                 ConvertOption.getMapSchemaParser(ConvertOption.mapSchemaParser(MapSchemaParser.defaultParser()))
             );
             assertSame(
@@ -742,10 +744,12 @@ public class ConvertTest implements PrintTest, DataTest {
         }
         {
             // object parser
-            assertSame(ConvertKit.objectSchemaParser(), ConvertKit.objectSchemaParser());
-            assertSame(ConvertKit.objectSchemaParser(), ConvertOption.getObjectSchemaParser(ConvertOption.ignoreNull(true)));
+            assertSame(
+                ObjectSchemaParser.defaultCachedParser(),
+                ConvertOption.getObjectSchemaParser(ConvertOption.ignoreNull(true))
+            );
             assertNotEquals(
-                ConvertKit.objectSchemaParser(),
+                ObjectSchemaParser.defaultCachedParser(),
                 ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectSchemaParser.defaultParser()))
             );
             assertSame(
@@ -755,10 +759,12 @@ public class ConvertTest implements PrintTest, DataTest {
         }
         {
             // builder provider
-            assertSame(ConvertKit.builderOperatorProvider(), ConvertKit.builderOperatorProvider());
-            assertSame(ConvertKit.builderOperatorProvider(), ConvertOption.getBuilderOperatorProvider(ConvertOption.ignoreNull(true)));
+            assertSame(
+                BuilderOperatorProvider.defaultCachedProvider(),
+                ConvertOption.getBuilderOperatorProvider(ConvertOption.ignoreNull(true))
+            );
             assertNotEquals(
-                ConvertKit.builderOperatorProvider(),
+                BuilderOperatorProvider.defaultCachedProvider(),
                 ConvertOption.getBuilderOperatorProvider(ConvertOption.builderOperatorProvider(BuilderOperatorProvider.defaultProvider()))
             );
             assertSame(

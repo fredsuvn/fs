@@ -15,7 +15,6 @@ import space.sunqian.fs.object.ObjectException;
 import space.sunqian.fs.object.builder.BuilderOperator;
 import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 import space.sunqian.fs.object.builder.ObjectBuilderException;
-import space.sunqian.fs.object.convert.ConvertKit;
 
 import java.lang.reflect.Type;
 
@@ -30,8 +29,11 @@ public class BuilderTest implements AssertTest, PrintTest {
 
     @Test
     public void testCreator() throws Exception {
+        assertSame(BuilderOperatorProvider.defaultProvider(), BuilderOperatorProvider.defaultProvider());
+        assertSame(BuilderOperatorProvider.defaultCachedProvider(), BuilderOperatorProvider.defaultCachedProvider());
+        assertNotSame(BuilderOperatorProvider.defaultProvider(), BuilderOperatorProvider.defaultCachedProvider());
         testCreator(BuilderOperatorProvider.defaultProvider());
-        testCreator(ConvertKit.builderOperatorProvider());
+        testCreator(BuilderOperatorProvider.defaultCachedProvider());
         {
             // test default provider
             BuilderOperatorProvider p1 = BuilderOperatorProvider.defaultProvider();

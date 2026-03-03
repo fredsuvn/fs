@@ -8,9 +8,6 @@ import space.sunqian.fs.base.value.SimpleKey;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
-import space.sunqian.fs.object.builder.BuilderOperatorProvider;
-import space.sunqian.fs.object.schema.MapSchemaParser;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
 import java.time.ZoneId;
 
@@ -20,36 +17,6 @@ import java.time.ZoneId;
  * @author sunqian
  */
 public class ConvertKit {
-
-    /**
-     * Returns the {@link MapSchemaParser} for default object conversion. It is same as
-     * {@link MapSchemaParser#defaultCachedParser()}.
-     *
-     * @return the default {@link MapSchemaParser} for object conversion
-     */
-    public static @Nonnull MapSchemaParser mapSchemaParser() {
-        return MapSchemaParser.defaultCachedParser();
-    }
-
-    /**
-     * Returns the {@link ObjectSchemaParser} for default object conversion. It is same as
-     * {@link ObjectSchemaParser#defaultCachedParser()}.
-     *
-     * @return the default {@link ObjectSchemaParser} for object conversion
-     */
-    public static @Nonnull ObjectSchemaParser objectSchemaParser() {
-        return ObjectSchemaParser.defaultCachedParser();
-    }
-
-    /**
-     * Returns the {@link BuilderOperatorProvider} for default object conversion. It is same as
-     * {@link BuilderOperatorProvider#defaultCachedProvider()}.
-     *
-     * @return the default {@link BuilderOperatorProvider} for object conversion
-     */
-    public static @Nonnull BuilderOperatorProvider builderOperatorProvider() {
-        return BuilderOperatorProvider.defaultCachedProvider();
-    }
 
     /**
      * Returns a {@link Option} of {@link DateFormatter} for the given {@link DatePattern}. This method is based on a

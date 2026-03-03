@@ -13,7 +13,6 @@ import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.MapSchemaParser;
@@ -233,8 +232,10 @@ public class SchemaTest implements PrintTest {
 
     @Test
     public void testObjectParser() throws Exception {
+        assertSame(ObjectSchemaParser.defaultParser(), ObjectSchemaParser.defaultParser());
+        assertSame(ObjectSchemaParser.defaultCachedParser(), ObjectSchemaParser.defaultCachedParser());
         testObjectParser(ObjectSchemaParser.defaultParser());
-        testObjectParser(ConvertKit.objectSchemaParser());
+        testObjectParser(ObjectSchemaParser.defaultCachedParser());
     }
 
     private void testObjectParser(ObjectSchemaParser parser) throws Exception {
@@ -425,8 +426,10 @@ public class SchemaTest implements PrintTest {
 
     @Test
     public void testMapParser() throws Exception {
+        assertSame(MapSchemaParser.defaultParser(), MapSchemaParser.defaultParser());
+        assertSame(MapSchemaParser.defaultCachedParser(), MapSchemaParser.defaultCachedParser());
         testMapParser(MapSchemaParser.defaultParser());
-        testMapParser(ConvertKit.mapSchemaParser());
+        testMapParser(MapSchemaParser.defaultCachedParser());
     }
 
     private void testMapParser(MapSchemaParser parser) throws Exception {
