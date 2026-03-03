@@ -11,7 +11,9 @@ import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.utils.codec.Base64Kit;
 
+import java.nio.ByteBuffer;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.Map;
@@ -33,7 +35,7 @@ final class JsonFormatterBack {
     private static final class JsonFormatterImpl implements JsonFormatter {
 
         private static final @Nonnull JsonFormatterImpl DEFAULT = newFormatter(
-            ConvertKit.objectSchemaParser(),
+            ObjectSchemaParser.defaultCachedParser(),
             ObjectConverter.defaultConverter(),
             false
         );
@@ -53,67 +55,114 @@ final class JsonFormatterBack {
         }
 
         @Override
-        public void formatTo(@Nullable Object data, @Nonnull Appendable writer) throws IORuntimeException {
-            Fs.uncheck(() -> writeAny(data, writer), IORuntimeException::new);
+        public void formatTo(@Nullable Object data, @Nonnull Appendable appender) throws IORuntimeException {
+            Fs.uncheck(() -> writeAny(data, appender), IORuntimeException::new);
         }
 
-        private void writeAny(@Nullable Object any, @Nonnull Appendable writer) throws Exception {
+        private void writeAny(@Nullable Object any, @Nonnull Appendable appender) throws Exception {
             if (any == null) {
-                writeDirect("null", writer);
+                writeDirect("null", appender);
                 return;
             }
             if (any instanceof CharSequence) {
-                writeString(any.toString(), writer);
+                writeString(any.toString(), appender);
                 return;
             }
             if (any instanceof Boolean) {
-                writeDirect(any.toString(), writer);
+                writeDirect(any.toString(), appender);
                 return;
             }
             if (any instanceof Number) {
-                writeDirect(any.toString(), writer);
+                writeDirect(any.toString(), appender);
                 return;
             }
             if (any instanceof Date) {
-                writeString(any.toString(), writer);
+                writeString(any.toString(), appender);
                 return;
             }
             if (any instanceof TemporalAccessor) {
-                writeString(any.toString(), writer);
+                writeString(any.toString(), appender);
                 return;
             }
             if (any instanceof Enum) {
-                writeString(any.toString(), writer);
+                writeString(any.toString(), appender);
                 return;
             }
             if (any instanceof Map<?, ?>) {
-                writeMap((Map<?, ?>) any, writer);
+                writeMap((Map<?, ?>) any, appender);
                 return;
             }
-            writeObject(any, writer);
+            if (any instanceof Iterable<?>) {
+                writeArray((Iterable<?>) any, appender);
+                return;
+            }
+            if (any instanceof Object[]) {
+                writeArray((Object[]) any, appender);
+                return;
+            }
+            if (any instanceof boolean[]) {
+                writeArray((boolean[]) any, appender);
+                return;
+            }
+            if (any instanceof byte[]) {
+                // base64
+                writeString(Base64Kit.encoder().encodeToString((byte[]) any), appender);
+                return;
+            }
+            if (any instanceof ByteBuffer) {
+                // base64
+                writeString(Base64Kit.encoder().encodeToString(((ByteBuffer) any)), appender);
+                return;
+            }
+            if (any instanceof short[]) {
+                writeArray((short[]) any, appender);
+                return;
+            }
+            if (any instanceof char[]) {
+                // string
+                writeString(new String((char[]) any), appender);
+                return;
+            }
+            if (any instanceof int[]) {
+                writeArray((int[]) any, appender);
+                return;
+            }
+            if (any instanceof long[]) {
+                writeArray((long[]) any, appender);
+                return;
+            }
+            if (any instanceof float[]) {
+                writeArray((float[]) any, appender);
+                return;
+            }
+            if (any instanceof double[]) {
+                writeArray((double[]) any, appender);
+                return;
+            }
+            writeObject(any, appender);
         }
 
-        private void writeString(@Nonnull String string, @Nonnull Appendable writer) throws Exception {
-            writeDirect("\"", writer);
+        private void writeString(@Nonnull String string, @Nonnull Appendable appender) throws Exception {
+            writeDirect("\"", appender);
             for (int i = 0; i < string.length(); i++) {
                 char c = string.charAt(i);
                 if (c == '\\') {
-                    writeDirect("\\\\", writer);
+                    writeDirect("\\\\", appender);
                 } else if (c == '\"') {
-                    writeDirect("\\\"", writer);
+                    writeDirect("\\\"", appender);
                 } else {
-                    writer.append(c);
+                    appender.append(c);
                 }
             }
-            writeDirect("\"", writer);
+            writeDirect("\"", appender);
         }
 
-        private void writeDirect(@Nonnull String string, @Nonnull Appendable writer) throws Exception {
-            writer.append(string);
+        private void writeDirect(@Nonnull String string, @Nonnull Appendable appender) throws Exception {
+            appender.append(string);
         }
 
-        private void writeMap(@Nonnull Map<?, ?> map, @Nonnull Appendable writer) throws Exception {
-            writeDirect("{", writer);
+        private void writeMap(@Nonnull Map<?, ?> map, @Nonnull Appendable appender) throws Exception {
+            writeDirect("{", appender);
             boolean comma = false;
             for (Map.Entry<?, ?> entry : map.entrySet()) {
                 Object value = entry.getValue();
@@ -121,19 +170,19 @@ final class JsonFormatterBack {
                     continue;
                 }
                 if (comma) {
-                    writeDirect(",", writer);
+                    writeDirect(",", appender);
                 }
-                writeString(String.valueOf(entry.getKey()), writer);
-                writeDirect(":", writer);
-                writeAny(value, writer);
+                writeString(String.valueOf(entry.getKey()), appender);
+                writeDirect(":", appender);
+                writeAny(value, appender);
                 comma = true;
             }
-            writeDirect("}", writer);
+            writeDirect("}", appender);
         }
 
-        private void writeObject(@Nonnull Object object, @Nonnull Appendable writer) throws Exception {
+        private void writeObject(@Nonnull Object object, @Nonnull Appendable appender) throws Exception {
             ObjectSchema schema = objectParser.parse(object.getClass());
-            writeDirect("{", writer);
+            writeDirect("{", appender);
             boolean comma = false;
             for (Map.Entry<@Nonnull String, @Nonnull ObjectProperty> entry : schema.properties().entrySet()) {
                 ObjectProperty property = entry.getValue();
@@ -146,19 +195,19 @@ final class JsonFormatterBack {
                     continue;
                 }
                 if (comma) {
-                    writeDirect(",", writer);
+                    writeDirect(",", appender);
                 }
-                writeProperty(property, value, writer);
+                writeProperty(property, value, appender);
                 comma = true;
             }
-            writeDirect("}", writer);
+            writeDirect("}", appender);
         }
 
         private void writeProperty(
-            @Nonnull ObjectProperty property, @Nullable Object value, @Nonnull Appendable writer
+            @Nonnull ObjectProperty property, @Nullable Object value, @Nonnull Appendable appender
         ) throws Exception {
-            writeString(property.name(), writer);
-            writeDirect(":", writer);
+            writeString(property.name(), appender);
+            writeDirect(":", appender);
             if (value instanceof Date || value instanceof TemporalAccessor) {
                 DatePattern datePattern = property.getAnnotation(DatePattern.class);
                 if (datePattern != null) {
@@ -167,7 +216,7 @@ final class JsonFormatterBack {
                         String.class,
                         ConvertKit.getDateFormatterOption(datePattern)
                     );
-                    writeString(dateString, writer);
+                    writeString(dateString, appender);
                     return;
                 }
             }
@@ -179,11 +228,115 @@ final class JsonFormatterBack {
                         String.class,
                         ConvertKit.getNumFormatterOption(numPattern)
                     );
-                    writeDirect(numString, writer);
+                    writeDirect(numString, appender);
                     return;
                 }
             }
-            writeAny(value, writer);
+            writeAny(value, appender);
+        }
+
+        private void writeArray(@Nonnull Iterable<?> array, @Nonnull Appendable appender) throws Exception {
+            writeDirect("[", appender);
+            boolean comma = false;
+            for (Object object : array) {
+                if (comma) {
+                    writeDirect(",", appender);
+                }
+                writeAny(object, appender);
+                comma = true;
+            }
+            writeDirect("]", appender);
+        }
+
+        private void writeArray(Object @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
+            writeDirect("[", appender);
+            boolean comma = false;
+            for (Object object : array) {
+                if (comma) {
+                    writeDirect(",", appender);
+                }
+                writeAny(object, appender);
+                comma = true;
+            }
+            writeDirect("]", appender);
+        }
+
+        private void writeArray(boolean @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
+            writeDirect("[", appender);
+            boolean comma = false;
+            for (boolean element : array) {
+                if (comma) {
+                    writeDirect(",", appender);
+                }
+                writeDirect(element ? "true" : "false", appender);
+                comma = true;
+            }
+            writeDirect("]", appender);
+        }
+
+        private void writeArray(short @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
+            writeDirect("[", appender);
+            boolean comma = false;
+            for (short element : array) {
+                if (comma) {
+                    writeDirect(",", appender);
+                }
+                appender.append(String.valueOf(element));
+                comma = true;
+            }
+            writeDirect("]", appender);
+        }
+
+        private void writeArray(int @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
+            writeDirect("[", appender);
+            boolean comma = false;
+            for (int element : array) {
+                if (comma) {
+                    writeDirect(",", appender);
+                }
+                appender.append(String.valueOf(element));
+                comma = true;
+            }
+            writeDirect("]", appender);
+        }
+
+        private void writeArray(long @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
+            writeDirect("[", appender);
+            boolean comma = false;
+            for (long element : array) {
+                if (comma) {
+                    writeDirect(",", appender);
+                }
+                appender.append(String.valueOf(element));
+                comma = true;
+            }
+            writeDirect("]", appender);
+        }
+
+        private void writeArray(float @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
+            writeDirect("[", appender);
+            boolean comma = false;
+            for (float element : array) {
+                if (comma) {
+                    writeDirect(",", appender);
+                }
+                appender.append(String.valueOf(element));
+                comma = true;
+            }
+            writeDirect("]", appender);
+        }
+
+        private void writeArray(double @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
+            writeDirect("[", appender);
+            boolean comma = false;
+            for (double element : array) {
+                if (comma) {
+                    writeDirect(",", appender);
+                }
+                appender.append(String.valueOf(element));
+                comma = true;
+            }
+            writeDirect("]", appender);
         }
     }
 

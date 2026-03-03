@@ -12,13 +12,13 @@ import space.sunqian.fs.io.IORuntimeException;
 public interface CharDataFormatter<T> {
 
     /**
-     * Formates and writes the given data to the given writer.
+     * Formates and writes the given data to the given appender.
      *
-     * @param data   the given data to be formatted
-     * @param writer the writer to write to
+     * @param data     the given data to be formatted
+     * @param appender the appender to write to
      * @throws IORuntimeException if an I/O error occurs
      */
-    void formatTo(@Nonnull T data, @Nonnull Appendable writer) throws IORuntimeException;
+    void formatTo(@Nonnull T data, @Nonnull Appendable appender) throws IORuntimeException;
 
     /**
      * Formates the given data to a string.

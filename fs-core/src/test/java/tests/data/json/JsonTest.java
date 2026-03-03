@@ -12,15 +12,19 @@ import space.sunqian.fs.data.json.JsonFormatter;
 import space.sunqian.fs.data.json.JsonKit;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
-import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -43,7 +47,7 @@ public class JsonTest implements PrintTest {
             assertEquals("\"\\\"123\\\"\"", JsonKit.toJsonString(b));
             assertEquals(jsonMapper.writeValueAsString(a), JsonKit.toJsonString(a));
             assertEquals(jsonMapper.writeValueAsString(b), JsonKit.toJsonString(b));
-            String c = "fasfa\"fasfs\"fasfsa\\fasfsa\\\\fasfs\"fsasd";
+            String c = "fas,f{a\"fa{sf}s\"fas[fs}a\\fas[fsa\\\\fa]sfs\"fs:a,sd";
             assertEquals(jsonMapper.writeValueAsString(c), JsonKit.toJsonString(c));
         }
         {
@@ -67,9 +71,46 @@ public class JsonTest implements PrintTest {
             // object
             testFormatter(JsonKit::toJsonString, false);
             JsonFormatter jsonFormatter = JsonFormatter.newFormatter(
-                ConvertKit.objectSchemaParser(), ObjectConverter.defaultConverter(), true
+                ObjectSchemaParser.defaultCachedParser(), ObjectConverter.defaultConverter(), true
             );
             testFormatter(jsonFormatter::format, true);
+        }
+        {
+            // array
+            boolean[] booleans = new boolean[]{true, false, true};
+            assertEquals("[true,false,true]", JsonKit.toJsonString(booleans));
+            assertEquals(jsonMapper.writeValueAsString(booleans), JsonKit.toJsonString(booleans));
+            byte[] bytes = new byte[]{1, 2, 3};
+            // assertEquals("[1,2,3]", JsonKit.toJsonString(bytes));
+            assertEquals(jsonMapper.writeValueAsString(bytes), JsonKit.toJsonString(bytes));
+            ByteBuffer buffer = ByteBuffer.wrap(bytes);
+            assertEquals(jsonMapper.writeValueAsString(bytes), JsonKit.toJsonString(buffer));
+            char[] chars = new char[]{'a', 'b', 'c'};
+            // assertEquals("[\"a\",\"b\",\"c\"]", JsonKit.toJsonString(chars));
+            assertEquals(jsonMapper.writeValueAsString(chars), JsonKit.toJsonString(chars));
+            short[] shorts = new short[]{1, 2, 3};
+            assertEquals("[1,2,3]", JsonKit.toJsonString(shorts));
+            assertEquals(jsonMapper.writeValueAsString(shorts), JsonKit.toJsonString(shorts));
+            int[] ints = new int[]{1, 2, 3};
+            assertEquals("[1,2,3]", JsonKit.toJsonString(ints));
+            assertEquals(jsonMapper.writeValueAsString(ints), JsonKit.toJsonString(ints));
+            long[] longs = new long[]{1, 2, 3};
+            assertEquals("[1,2,3]", JsonKit.toJsonString(longs));
+            assertEquals(jsonMapper.writeValueAsString(longs), JsonKit.toJsonString(longs));
+            float[] floats = new float[]{1.0f, 2.0f, 3.0f};
+            assertEquals("[1.0,2.0,3.0]", JsonKit.toJsonString(floats));
+            assertEquals(jsonMapper.writeValueAsString(floats), JsonKit.toJsonString(floats));
+            double[] doubles = new double[]{1.0, 2.0, 3.0};
+            assertEquals("[1.0,2.0,3.0]", JsonKit.toJsonString(doubles));
+            assertEquals(jsonMapper.writeValueAsString(doubles), JsonKit.toJsonString(doubles));
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("a", 1);
+            map.put("b", 2);
+            Collection<Object> collection = new ArrayList<>();
+            collection.add(map);
+            collection.add(map);
+            assertEquals(jsonMapper.writeValueAsString(collection), JsonKit.toJsonString(collection));
+            assertEquals(jsonMapper.writeValueAsString(collection), JsonKit.toJsonString(collection.toArray()));
         }
     }
 

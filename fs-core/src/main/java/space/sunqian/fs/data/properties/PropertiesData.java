@@ -278,7 +278,7 @@ public interface PropertiesData extends ByteData, CharData {
     }
 
     @Override
-    default void writeTo(@Nonnull Appendable writer) throws IORuntimeException {
-        Fs.uncheck(() -> asProperties().store(IOKit.wrapWriter(writer), null), IORuntimeException::new);
+    default void writeTo(@Nonnull Appendable appender) throws IORuntimeException {
+        Fs.uncheck(() -> asProperties().store(IOKit.wrapWriter(appender), null), IORuntimeException::new);
     }
 }

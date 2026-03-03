@@ -23,6 +23,7 @@ import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -432,6 +434,19 @@ public class IOKitTest implements DataTest {
         {
             // default io operator
             assertSame(IOKit.ioOperator(), IOOperator.get(IOKit.bufferSize()));
+        }
+        {
+            // writer
+            StringBuilder sb = new StringBuilder();
+            Writer writer = IOKit.wrapWriter(sb);
+            writer.close();
+            writer.flush();
+            writer.write("abc");
+            assertNotSame(writer, sb);
+            assertEquals("abc", sb.toString());
+            IOKit.wrapWriter(writer).write("abc");
+            assertSame(writer, IOKit.wrapWriter(writer));
+            assertEquals("abcabc", sb.toString());
         }
     }
 

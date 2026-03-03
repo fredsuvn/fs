@@ -91,5 +91,6 @@ dependencies {
     //api("com.fasterxml.jackson.core:jackson-core:2.21.1")
     api("com.fasterxml.jackson.core:jackson-databind:2.21.1")
     api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.1")
+    api("com.alibaba.fastjson2:fastjson2:2.0.61")
   }
 }

@@ -11,6 +11,7 @@ dependencies {
   annotationProcessor("org.projectlombok:lombok")
 
   implementation("org.springframework.boot:spring-boot-starter")
+  implementation("com.alibaba.fastjson2:fastjson2")
 
   implementation(platform(project(":fs-dependencies")))
   implementation(project(":fs-annotation"))
@@ -42,11 +43,12 @@ jmh {
   resultFormat = "json"
   /*
   includes = listOf(
-    "internal.tests.benchmarks.CopyPropertiesBenchmark"
-    //"internal.tests.benchmarks.(AspectBenchmark)"
+    //"internal.tests.benchmarks.(CopyPropertiesBenchmark|CopyFormatPropertiesBenchmark)"
+    //"internal.tests.benchmarks.AspectBenchmark"
     //"internal.tests.benchmarks.TcpServerBenchmark"
+    "internal.tests.benchmarks.JsonFormatBenchmark"
   )
-   */
+  */
 }
 
 tasks.test {
