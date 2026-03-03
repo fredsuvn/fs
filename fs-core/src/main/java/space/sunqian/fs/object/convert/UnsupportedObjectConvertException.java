@@ -6,6 +6,7 @@ import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.base.option.Option;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 
 /**
  * This exception is thrown when an object conversion is unsupported.
@@ -15,10 +16,18 @@ import java.lang.reflect.Type;
 public class UnsupportedObjectConvertException extends ObjectConvertException {
 
     private static @Nonnull String toMessage(
+        @Nullable Object src,
         @Nonnull Type srcType,
-        @Nonnull Type target
+        @Nonnull Type target,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option<?, ?> @Nonnull @RetainedParam [] options
     ) {
-        return "Unsupported object conversion from " + srcType + " to " + target + ".";
+        return "Unsupported object conversion: [" +
+            "srcType: " + srcType +
+            ", targetType: " + target +
+            ", src: " + src +
+            ", options: " + Arrays.toString(options) +
+            "].";
     }
 
     private final @Nullable Object src;
@@ -43,7 +52,7 @@ public class UnsupportedObjectConvertException extends ObjectConvertException {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull @RetainedParam [] options
     ) {
-        super(toMessage(srcType, target));
+        super(toMessage(src, srcType, target, converter, options));
         this.src = src;
         this.srcType = srcType;
         this.target = target;

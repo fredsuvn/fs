@@ -151,8 +151,16 @@ import java.util.function.IntFunction;
  * </tr>
  * </table>
  * <p>
- * Note that this handler typically creates new objects for each conversion, and does not perform the same handing as
- * {@link AssignableConvertHandler}.
+ * Note:
+ * <ul>
+ *     <li>
+ *         This handler typically creates new objects for each conversion, and does not perform the same handing as
+ *         {@link AssignableConvertHandler};
+ *     </li>
+ *     <li>
+ *         This handler directly returns {@code null} when the source is {@code null};
+ *     </li>
+ * </ul>
  *
  * @author SunQian
  */
@@ -176,7 +184,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
         if (src == null) {
-            return ObjectConverter.Status.HANDLER_CONTINUE;
+            return null;
         }
         if (target instanceof Class<?>) {
             Class<?> targetClass = (Class<?>) target;

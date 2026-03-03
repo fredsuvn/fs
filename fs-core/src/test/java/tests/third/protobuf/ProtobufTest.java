@@ -521,7 +521,7 @@ public class ProtobufTest implements PrintTest {
         ProtocolStringList psList = converter.convert(ListKit.list("1", "2", "3"), ProtocolStringList.class);
         assertEquals(psList, ListKit.list("1", "2", "3"));
         assertSame(str, converter.convert(str, String.class));
-        assertThrows(UnsupportedObjectConvertException.class, () -> converter.convert(null, List.class));
+        assertNull(converter.convert(null, List.class));
         ObjectConverter cvt2 = ObjectConverter
             .newConverter(new ProtobufConvertHandler());
         assertThrows(UnsupportedObjectConvertException.class, () ->

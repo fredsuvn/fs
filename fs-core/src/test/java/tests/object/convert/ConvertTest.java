@@ -87,11 +87,11 @@ public class ConvertTest implements PrintTest, DataTest {
         A a = new A("1", "2", "3");
         assertEquals(new B(1L, 2L, 3L), converter.convert(a, B.class));
         assertEquals(new B(1L, 2L, 3L), converter.convert(a, A.class, B.class));
-        assertThrows(UnsupportedObjectConvertException.class, () -> converter.convert(null, B.class));
+        assertNull(converter.convert(null, B.class));
         ObjectConverter converter2 = ObjectConverter.newConverter(converter.asHandler());
         assertEquals(new B(1L, 2L, 3L), converter2.convert(a, B.class));
         assertEquals(new B(1L, 2L, 3L), converter2.convert(a, A.class, B.class));
-        assertThrows(UnsupportedObjectConvertException.class, () -> converter2.convert(null, B.class));
+        assertNull(converter2.convert(null, B.class));
         {
             // error during handler
             ObjectConverter.Handler handler =
@@ -696,6 +696,32 @@ public class ConvertTest implements PrintTest, DataTest {
                 DateFormatter.ofPattern(DateKit.DEFAULT_PATTERN).parse((CharSequence) ann1.get("complex1"), Date.class),
                 ann2.getComplex1()
             );
+        }
+        {
+            // test annotation null-support: object to object
+            Ann1 ann1 = new Ann1();
+            Ann2 ann2 = ObjectConverter.defaultConverter().convert(ann1, Ann2.class);
+            assertNull(ann2.getDate1());
+            assertNull(ann2.getDate2());
+            assertNull(ann2.getDate3());
+            assertNull(ann2.getDate4());
+            assertNull(ann2.getNum1());
+            assertEquals(".000", ann2.getNum2());
+            assertNull(ann2.getNum3());
+            assertNull(ann2.getComplex1());
+        }
+        {
+            // test annotation support: map to object
+            Map<String, Object> ann1 = new HashMap<>();
+            Ann2 ann2 = ObjectConverter.defaultConverter().convert(ann1, Ann2.class);
+            assertNull(ann2.getDate1());
+            assertNull(ann2.getDate2());
+            assertNull(ann2.getDate3());
+            assertNull(ann2.getDate4());
+            assertNull(ann2.getNum1());
+            assertNull(ann2.getNum2());
+            assertNull(ann2.getNum3());
+            assertNull(ann2.getComplex1());
         }
     }
 
