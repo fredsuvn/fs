@@ -5,20 +5,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import internal.test.ErrorAppender;
 import internal.test.PrintTest;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.string.StringView;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.data.json.JsonDataException;
 import space.sunqian.fs.data.json.JsonFormatter;
 import space.sunqian.fs.data.json.JsonKit;
+import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
+import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -118,14 +123,33 @@ public class JsonTest implements PrintTest {
             map.put("a", 1);
             map.put("b", 2);
             Collection<Object> collection = new ArrayList<>();
+            collection.add(null);
             collection.add(map);
+            collection.add(null);
             collection.add(map);
+            collection.add(null);
+            collection.add(true);
+            collection.add((byte) 1);
+            collection.add((short) 1);
+            collection.add((char) 1);
+            collection.add((char) 33);
+            collection.add(1);
+            collection.add(1L);
+            collection.add(0.1f);
+            collection.add(0.1d);
+            collection.add(new BigInteger("1"));
+            collection.add(new BigDecimal("1"));
             assertEquals(jsonMapper.writeValueAsString(collection), JsonKit.toJsonString(collection));
             assertEquals(jsonMapper.writeValueAsString(collection), JsonKit.toJsonString(collection.toArray()));
         }
         {
             // error
             assertThrows(IORuntimeException.class, () -> JsonKit.toJsonString(new Object(), new ErrorAppender()));
+            Map<String, Object> map = MapKit.map("aaa", 1, "bbb", 2);
+            assertThrows(IORuntimeException.class, () ->
+                JsonKit.toJsonString(map, IOKit.limitedWriter(new StringWriter(), 5)));
+            assertThrows(IORuntimeException.class, () ->
+                JsonKit.toJsonString(new DataObj("1111", "2222"), IOKit.limitedWriter(new StringWriter(), 5)));
         }
     }
 
@@ -254,6 +278,8 @@ public class JsonTest implements PrintTest {
     }
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class DataObj {
         private String s1;
         private String s2;

@@ -53,15 +53,4 @@ public class CharsTest implements AssertTest, PrintTest {
             invokeEquals(null, search, null, (Object) new String[]{"UTF888"});
         }
     }
-
-    @Test
-    public void testEscape() {
-        for (int i = 0; i < 32; i++) {
-            String expected = String.format("\\u%04X", i);
-            printFor("escape " + i, expected);
-            assertEquals(expected, CharsKit.toUnicodeEscape((char) i));
-        }
-        assertNull(CharsKit.toUnicodeEscape((char) 111));
-        assertNull(CharsKit.toUnicodeEscape((char) -111));
-    }
 }

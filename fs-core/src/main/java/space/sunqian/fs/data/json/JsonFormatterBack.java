@@ -2,7 +2,6 @@ package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.io.IORuntimeException;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
@@ -13,9 +12,13 @@ import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.utils.codec.Base64Kit;
 
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 final class JsonFormatterBack {
@@ -39,6 +42,62 @@ final class JsonFormatterBack {
             ObjectConverter.defaultConverter(),
             false
         );
+
+        private interface Formatter {
+
+            void formatTo(
+                @Nonnull JsonFormatterImpl impl,
+                @Nonnull Object data,
+                @Nonnull Appendable appender
+            ) throws Exception;
+        }
+
+        private static final @Nonnull Map<@Nonnull Type, @Nonnull Formatter> FORMAT_MAP;
+
+        static {
+            FORMAT_MAP = new HashMap<>();
+            FORMAT_MAP.put(String.class, (impl, obj, appender) -> impl.writeString((String) obj, appender));
+            // FORMAT_MAP.put(boolean.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            FORMAT_MAP.put(Boolean.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            FORMAT_MAP.put(Byte.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            // FORMAT_MAP.put(short.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            FORMAT_MAP.put(Short.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            // FORMAT_MAP.put(char.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            // FORMAT_MAP.put(int.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            FORMAT_MAP.put(Integer.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            // FORMAT_MAP.put(long.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            FORMAT_MAP.put(Long.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            // FORMAT_MAP.put(float.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            FORMAT_MAP.put(Float.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            // FORMAT_MAP.put(double.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            FORMAT_MAP.put(Double.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            FORMAT_MAP.put(BigInteger.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            FORMAT_MAP.put(BigDecimal.class, (impl, obj, appender) -> appender.append(obj.toString()));
+            FORMAT_MAP.put(boolean[].class, (impl, data, appender) -> impl.writeArray((boolean[]) data, appender));
+            FORMAT_MAP.put(short[].class, (impl, data, appender) -> impl.writeArray((short[]) data, appender));
+            FORMAT_MAP.put(int[].class, (impl, data, appender) -> impl.writeArray((int[]) data, appender));
+            FORMAT_MAP.put(long[].class, (impl, data, appender) -> impl.writeArray((long[]) data, appender));
+            FORMAT_MAP.put(float[].class, (impl, data, appender) -> impl.writeArray((float[]) data, appender));
+            FORMAT_MAP.put(double[].class, (impl, data, appender) -> impl.writeArray((double[]) data, appender));
+            // as base64
+            FORMAT_MAP.put(byte[].class, (impl, data, appender) ->
+                impl.writeString(Base64Kit.encoder().encodeToString((byte[]) data), appender));
+            // as string
+            FORMAT_MAP.put(char[].class, (impl, data, appender) ->
+                impl.writeString(new String((char[]) data), appender));
+            // as char
+            FORMAT_MAP.put(Character.class, (impl, obj, appender) -> {
+                char c = (char) obj;
+                appender.append('\"');
+                String escaped = ControlTables.toUnicodeEscape(c);
+                if (escaped != null) {
+                    appender.append(escaped);
+                } else {
+                    appender.append(c);
+                }
+                appender.append('\"');
+            });
+        }
 
         private final @Nonnull ObjectSchemaParser objectParser;
         private final @Nonnull ObjectConverter objectConverter;
@@ -68,20 +127,13 @@ final class JsonFormatterBack {
                 appender.append("null");
                 return;
             }
-            if (any instanceof String) {
-                writeString((String) any, appender);
+            Formatter formatter = FORMAT_MAP.get(any.getClass());
+            if (formatter != null) {
+                formatter.formatTo(this, any, appender);
                 return;
             }
             if (any instanceof CharSequence) {
                 writeString(any.toString(), appender);
-                return;
-            }
-            if (any instanceof Boolean) {
-                appender.append(any.toString());
-                return;
-            }
-            if (any instanceof Number) {
-                appender.append(any.toString());
                 return;
             }
             if (any instanceof Date) {
@@ -108,133 +160,98 @@ final class JsonFormatterBack {
                 writeArray((Object[]) any, appender);
                 return;
             }
-            if (any instanceof boolean[]) {
-                writeArray((boolean[]) any, appender);
-                return;
-            }
-            if (any instanceof byte[]) {
-                // base64
-                writeString(Base64Kit.encoder().encodeToString((byte[]) any), appender);
-                return;
-            }
             if (any instanceof ByteBuffer) {
-                // base64
-                writeString(Base64Kit.encoder().encodeToString(((ByteBuffer) any)), appender);
-                return;
-            }
-            if (any instanceof short[]) {
-                writeArray((short[]) any, appender);
-                return;
-            }
-            if (any instanceof char[]) {
-                // string
-                writeString(new String((char[]) any), appender);
-                return;
-            }
-            if (any instanceof int[]) {
-                writeArray((int[]) any, appender);
-                return;
-            }
-            if (any instanceof long[]) {
-                writeArray((long[]) any, appender);
-                return;
-            }
-            if (any instanceof float[]) {
-                writeArray((float[]) any, appender);
-                return;
-            }
-            if (any instanceof double[]) {
-                writeArray((double[]) any, appender);
+                // as base64
+                writeString(Base64Kit.encoder().encodeToString((ByteBuffer) any), appender);
                 return;
             }
             writeObject(any, appender);
         }
 
         private void writeString(@Nonnull String string, @Nonnull Appendable appender) throws Exception {
-            appender.append("\"");
-            char[] chars = string.toCharArray();
-            for (char c : chars) {
+            appender.append('\"');
+            int s = 0;
+            for (int i = 0; i < string.length(); i++) {
+                char c = string.charAt(i);
                 switch (c) {
                     case '"':
+                        appender.append(string, s, i);
+                        s = i + 1;
                         appender.append("\\\"");
                         continue;
                     case '\\':
+                        appender.append(string, s, i);
+                        s = i + 1;
                         appender.append("\\\\");
                         continue;
-                    case '\b':
-                        appender.append("\\b");
-                        continue;
-                    case '\f':
-                        appender.append("\\f");
-                        continue;
-                    case '\n':
-                        appender.append("\\n");
-                        continue;
-                    case '\r':
-                        appender.append("\\r");
-                        continue;
-                    case '\t':
-                        appender.append("\\t");
-                        continue;
                     default:
-                        String escaped = CharsKit.toUnicodeEscape(c);
+                        String escaped = ControlTables.toUnicodeEscape(c);
                         if (escaped != null) {
+                            appender.append(string, s, i);
+                            s = i + 1;
                             appender.append(escaped);
-                        } else {
-                            appender.append(c);
                         }
                 }
             }
-            appender.append("\"");
+            appender.append(string, s, string.length());
+            appender.append('\"');
         }
 
         private void writeMap(@Nonnull Map<?, ?> map, @Nonnull Appendable appender) throws Exception {
-            appender.append("{");
-            boolean comma = false;
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
-                Object value = entry.getValue();
+            appender.append('{');
+            boolean[] isFirst = {true};
+            map.forEach((key, value) -> {
                 if (ignoreNullValue && value == null) {
-                    continue;
+                    return;
                 }
-                if (comma) {
-                    appender.append(",");
+                try {
+                    if (isFirst[0]) {
+                        isFirst[0] = false;
+                    } else {
+                        appender.append(',');
+                    }
+                    writeString(String.valueOf(key), appender);
+                    appender.append(':');
+                    writeAny(value, appender);
+                } catch (Exception e) {
+                    throw new JsonDataException(e);
                 }
-                writeString(String.valueOf(entry.getKey()), appender);
-                appender.append(":");
-                writeAny(value, appender);
-                comma = true;
-            }
-            appender.append("}");
+            });
+            appender.append('}');
         }
 
         private void writeObject(@Nonnull Object object, @Nonnull Appendable appender) throws Exception {
             ObjectSchema schema = objectParser.parse(object.getClass());
-            appender.append("{");
-            boolean comma = false;
-            for (Map.Entry<@Nonnull String, @Nonnull ObjectProperty> entry : schema.properties().entrySet()) {
-                ObjectProperty property = entry.getValue();
-                // ignore class
-                if ("class".equals(property.name())) {
-                    continue;
+            appender.append('{');
+            boolean[] isFirst = {true};
+            schema.properties().forEach((key, property) -> {
+                try {
+                    // ignore class
+                    if ("class".equals(property.name())) {
+                        return;
+                    }
+                    Object value = property.getValue(object);
+                    if (ignoreNullValue && value == null) {
+                        return;
+                    }
+                    if (isFirst[0]) {
+                        isFirst[0] = false;
+                    } else {
+                        appender.append(',');
+                    }
+                    writeProperty(property, value, appender);
+                } catch (Exception e) {
+                    throw new JsonDataException(e);
                 }
-                Object value = property.getValue(object);
-                if (ignoreNullValue && value == null) {
-                    continue;
-                }
-                if (comma) {
-                    appender.append(",");
-                }
-                writeProperty(property, value, appender);
-                comma = true;
-            }
-            appender.append("}");
+            });
+            appender.append('}');
         }
 
         private void writeProperty(
             @Nonnull ObjectProperty property, @Nullable Object value, @Nonnull Appendable appender
         ) throws Exception {
             writeString(property.name(), appender);
-            appender.append(":");
+            appender.append(':');
             if (value != null) {
                 if (value instanceof Date || value instanceof TemporalAccessor) {
                     DatePattern datePattern = property.getAnnotation(DatePattern.class);
@@ -265,107 +282,161 @@ final class JsonFormatterBack {
         }
 
         private void writeArray(@Nonnull Iterable<?> array, @Nonnull Appendable appender) throws Exception {
-            appender.append("[");
+            appender.append('[');
             boolean comma = false;
             for (Object object : array) {
                 if (comma) {
-                    appender.append(",");
+                    appender.append(',');
                 }
                 writeAny(object, appender);
                 comma = true;
             }
-            appender.append("]");
+            appender.append(']');
         }
 
         private void writeArray(Object @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
-            appender.append("[");
+            appender.append('[');
             boolean comma = false;
             for (Object object : array) {
                 if (comma) {
-                    appender.append(",");
+                    appender.append(',');
                 }
                 writeAny(object, appender);
                 comma = true;
             }
-            appender.append("]");
+            appender.append(']');
         }
 
         private void writeArray(boolean @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
-            appender.append("[");
+            appender.append('[');
             boolean comma = false;
             for (boolean element : array) {
                 if (comma) {
-                    appender.append(",");
+                    appender.append(',');
                 }
                 appender.append(element ? "true" : "false");
                 comma = true;
             }
-            appender.append("]");
+            appender.append(']');
         }
 
         private void writeArray(short @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
-            appender.append("[");
+            appender.append('[');
             boolean comma = false;
             for (short element : array) {
                 if (comma) {
-                    appender.append(",");
+                    appender.append(',');
                 }
                 appender.append(String.valueOf(element));
                 comma = true;
             }
-            appender.append("]");
+            appender.append(']');
         }
 
         private void writeArray(int @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
-            appender.append("[");
+            appender.append('[');
             boolean comma = false;
             for (int element : array) {
                 if (comma) {
-                    appender.append(",");
+                    appender.append(',');
                 }
                 appender.append(String.valueOf(element));
                 comma = true;
             }
-            appender.append("]");
+            appender.append(']');
         }
 
         private void writeArray(long @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
-            appender.append("[");
+            appender.append('[');
             boolean comma = false;
             for (long element : array) {
                 if (comma) {
-                    appender.append(",");
+                    appender.append(',');
                 }
                 appender.append(String.valueOf(element));
                 comma = true;
             }
-            appender.append("]");
+            appender.append(']');
         }
 
         private void writeArray(float @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
-            appender.append("[");
+            appender.append('[');
             boolean comma = false;
             for (float element : array) {
                 if (comma) {
-                    appender.append(",");
+                    appender.append(',');
                 }
                 appender.append(String.valueOf(element));
                 comma = true;
             }
-            appender.append("]");
+            appender.append(']');
         }
 
         private void writeArray(double @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
-            appender.append("[");
+            appender.append('[');
             boolean comma = false;
             for (double element : array) {
                 if (comma) {
-                    appender.append(",");
+                    appender.append(',');
                 }
                 appender.append(String.valueOf(element));
                 comma = true;
             }
-            appender.append("]");
+            appender.append(']');
+        }
+    }
+
+    private static final class ControlTables {
+
+        private static final @Nonnull String @Nonnull [] CONTROL_CHAR_ESCAPE_TABLE;
+
+        static {
+            CONTROL_CHAR_ESCAPE_TABLE = new String[32];
+            for (int i = 0; i < CONTROL_CHAR_ESCAPE_TABLE.length; i++) {
+                CONTROL_CHAR_ESCAPE_TABLE[i] = String.format("\\u%04X", i);
+            }
+            CONTROL_CHAR_ESCAPE_TABLE['\b'] = "\\b";
+            CONTROL_CHAR_ESCAPE_TABLE['\t'] = "\\t";
+            CONTROL_CHAR_ESCAPE_TABLE['\n'] = "\\n";
+            CONTROL_CHAR_ESCAPE_TABLE['\r'] = "\\r";
+            CONTROL_CHAR_ESCAPE_TABLE['\f'] = "\\f";
+            // case '\b':
+            //     appender.append(string, s, i);
+            //     s = i + 1;
+            //     appender.append('\\');
+            //     appender.append('b');
+            //     continue;
+            // case '\f':
+            //     appender.append(string, s, i);
+            //     s = i + 1;
+            //     appender.append('\\');
+            //     appender.append('f');
+            //     continue;
+            // case '\n':
+            //     appender.append(string, s, i);
+            //     s = i + 1;
+            //     appender.append('\\');
+            //     appender.append('n');
+            //     continue;
+            // case '\r':
+            //     appender.append(string, s, i);
+            //     s = i + 1;
+            //     appender.append('\\');
+            //     appender.append('r');
+            //     continue;
+            // case '\t':
+            //     appender.append(string, s, i);
+            //     s = i + 1;
+            //     appender.append('\\');
+            //     appender.append('t');
+            //     continue;
+        }
+
+        private static @Nullable String toUnicodeEscape(char c) {
+            if (c >= CONTROL_CHAR_ESCAPE_TABLE.length) {
+                return null;
+            }
+            return CONTROL_CHAR_ESCAPE_TABLE[c];
         }
     }
 
