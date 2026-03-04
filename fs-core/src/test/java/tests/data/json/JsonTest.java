@@ -64,6 +64,9 @@ public class JsonTest implements PrintTest {
             for (int i = 0; i < 38; i++) {
                 escapes.append(String.format("\\u%04X", i));
             }
+            for (int i = 0; i < 38; i++) {
+                escapes.append((char) i);
+            }
             assertEquals(jsonMapper.writeValueAsString(escapes.toString()), JsonKit.toJsonString(escapes.toString()));
         }
         {
