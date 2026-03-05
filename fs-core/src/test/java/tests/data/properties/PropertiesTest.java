@@ -6,6 +6,7 @@ import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.system.ResKit;
 import space.sunqian.fs.data.properties.PropertiesData;
 import space.sunqian.fs.data.properties.PropertiesDataException;
+import space.sunqian.fs.data.properties.PropertiesFormatter;
 import space.sunqian.fs.data.properties.PropertiesKit;
 import space.sunqian.fs.io.IOKit;
 
@@ -14,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -128,6 +130,17 @@ public class PropertiesTest implements PrintTest {
         assertEquals(
             stringWriter.toString(),
             PropertiesKit.toPropertiesString(properties)
+        );
+        assertEquals(
+            stringWriter.toString(),
+            new String(PropertiesFormatter.defaultFormatter().toByteArray(properties), CharsKit.defaultCharset())
+        );
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        WritableByteChannel channel = Channels.newChannel(output);
+        PropertiesFormatter.defaultFormatter().formatTo(properties, channel);
+        assertEquals(
+            stringWriter.toString(),
+            new String(output.toByteArray(), CharsKit.defaultCharset())
         );
     }
 

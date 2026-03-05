@@ -3,8 +3,9 @@
  * {@code Properties}:
  * <ul>
  *     <li>{@link space.sunqian.fs.data.ByteData}: Core byte data interface;</li>
- *     <li>{@link space.sunqian.fs.data.CharData}: Core char data interface;</li>
  *     <li>{@link space.sunqian.fs.data.ByteDataParser}: Core byte data parser interface;</li>
+ *     <li>{@link space.sunqian.fs.data.ByteDataFormatter}: Core byte data formatter interface;</li>
+ *     <li>{@link space.sunqian.fs.data.CharData}: Core char data interface;</li>
  *     <li>{@link space.sunqian.fs.data.CharDataParser}: Core char data parser interface;</li>
  *     <li>{@link space.sunqian.fs.data.CharDataFormatter}: Core char data formatter interface;</li>
  *     <li>{@link space.sunqian.fs.data.DataKit}: Utilities for all data;</li>

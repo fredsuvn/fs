@@ -16,7 +16,7 @@ public class PropertiesKit {
      * @return a string formatted by {@link PropertiesFormatter#defaultFormatter()} of the given data
      */
     public static @Nonnull String toPropertiesString(@Nonnull PropertiesData data) {
-        return PropertiesFormatter.defaultFormatter().format(data);
+        return PropertiesFormatter.defaultFormatter().toString(data);
     }
 
     private PropertiesKit() {

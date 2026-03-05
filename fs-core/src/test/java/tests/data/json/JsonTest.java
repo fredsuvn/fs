@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
+import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.string.StringView;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.data.json.JsonDataException;
@@ -21,10 +22,14 @@ import space.sunqian.fs.object.annotation.NumPattern;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,6 +41,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -43,9 +49,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JsonTest implements PrintTest {
 
+    private final ObjectMapper jsonMapper = new ObjectMapper();
+
     @Test
     public void testFormatter() throws Exception {
-        ObjectMapper jsonMapper = new ObjectMapper();
         jsonMapper.registerModule(new JavaTimeModule());
         {
             // string
@@ -92,7 +99,7 @@ public class JsonTest implements PrintTest {
             JsonFormatter jsonFormatter = JsonFormatter.newFormatter(
                 ObjectSchemaParser.defaultCachedParser(), ObjectConverter.defaultConverter(), true
             );
-            testFormatter(jsonFormatter::format, true);
+            testFormatter(jsonFormatter::toString, true);
         }
         {
             // array
@@ -233,6 +240,53 @@ public class JsonTest implements PrintTest {
         assertEquals("123.000", target.getFmt3().toString());
         assertEquals("123.4560", target.getFmt4().toString());
         assertEquals(DataEnum.A.toString(), target.getE1());
+    }
+
+    @Test
+    public void testToStringOrBytes() throws Exception {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", null);
+        Collection<Object> collection = new ArrayList<>();
+        collection.add(null);
+        collection.add(map);
+        collection.add(null);
+        collection.add(map);
+        collection.add(null);
+        collection.add(true);
+        collection.add((byte) 1);
+        collection.add((short) 1);
+        collection.add((char) 1);
+        collection.add((char) 33);
+        collection.add(1);
+        collection.add(1L);
+        collection.add(0.1f);
+        collection.add(0.1d);
+        collection.add(new BigInteger("1"));
+        collection.add(new BigDecimal("1"));
+        String json = jsonMapper.writeValueAsString(collection);
+        assertEquals(json, JsonKit.toJsonString(collection));
+        assertArrayEquals(jsonMapper.writeValueAsBytes(collection), JsonKit.toJsonBytes(collection));
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        JsonKit.toJsonBytes(collection, output);
+        assertEquals(
+            json,
+            new String(output.toByteArray(), CharsKit.defaultCharset())
+        );
+        output.reset();
+        WritableByteChannel channel = Channels.newChannel(output);
+        JsonKit.toJsonBytes(collection, channel);
+        assertEquals(
+            json,
+            new String(output.toByteArray(), CharsKit.defaultCharset())
+        );
+        CharArrayWriter writer = new CharArrayWriter();
+        JsonKit.toJsonString(collection, writer);
+        assertEquals(
+            json,
+            writer.toString()
+        );
     }
 
     @Test

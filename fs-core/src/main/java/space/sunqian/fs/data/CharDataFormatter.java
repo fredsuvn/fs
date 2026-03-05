@@ -27,7 +27,7 @@ public interface CharDataFormatter<T> {
      * @return the formatting string
      * @throws IORuntimeException if an I/O error occurs
      */
-    default @Nonnull String format(@Nonnull T data) throws IORuntimeException {
+    default @Nonnull String toString(@Nonnull T data) throws IORuntimeException {
         StringBuilder sb = new StringBuilder();
         formatTo(data, sb);
         return sb.toString();

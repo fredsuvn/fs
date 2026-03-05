@@ -1,11 +1,11 @@
-package space.sunqian.fs.data.json;
+package space.sunqian.fs.base.chars;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 
 import java.io.IOException;
 
-final class JsonAppender implements Appendable {
+final class SimpleAppender implements Appendable {
 
     private static final int SEG_SIZE = 1024;
 
@@ -14,11 +14,11 @@ final class JsonAppender implements Appendable {
     private final @Nonnull Chars head;
     private @Nonnull Chars tail;
 
-    JsonAppender() {
+    SimpleAppender() {
         this(SEG_SIZE);
     }
 
-    JsonAppender(int segSize) {
+    SimpleAppender(int segSize) {
         this.segSize = segSize;
         Chars first = new Chars(new char[segSize]);
         this.head = first;
