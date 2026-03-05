@@ -356,11 +356,11 @@ final class JsonFormatterBack {
         private void writeArray(long @Nonnull [] array, @Nonnull Appendable appender) throws Exception {
             appender.append('[');
             boolean comma = false;
-            for (long element : array) {
+            for (long l : array) {
                 if (comma) {
                     appender.append(',');
                 }
-                appender.append(String.valueOf(element));
+                appender.append(String.valueOf(l));
                 comma = true;
             }
             appender.append(']');

@@ -7,10 +7,12 @@ import internal.test.ErrorAppender;
 import internal.test.PrintTest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.string.StringView;
+import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.data.json.JsonDataException;
 import space.sunqian.fs.data.json.JsonFormatter;
@@ -38,6 +40,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -151,6 +154,40 @@ public class JsonTest implements PrintTest {
             collection.add(new BigDecimal("1"));
             assertEquals(jsonMapper.writeValueAsString(collection), JsonKit.toJsonString(collection));
             assertEquals(jsonMapper.writeValueAsString(collection), JsonKit.toJsonString(collection.toArray()));
+        }
+        {
+            // complex
+            ComplexJsonData data = new ComplexJsonData();
+            data.setI1(1);
+            data.setL1(2L);
+            data.setStr1("hello");
+            data.setIi1(3);
+            data.setLl1(4L);
+            data.setBb1(new BigDecimal("5.0"));
+            data.setLa1(new long[]{1L, 2L});
+            data.setBa1(new BigDecimal[]{new BigDecimal("1.0"), new BigDecimal("2.0")});
+            data.setSa1(ListKit.list("a", "b"));
+            data.setI2(1);
+            data.setL2(2L);
+            data.setStr2("hello");
+            data.setIi2(3);
+            data.setLl2(4L);
+            data.setBb2(new BigDecimal("5.0"));
+            data.setLa2(new long[]{1L, 2L});
+            data.setBa2(new BigDecimal[]{new BigDecimal("1.0"), new BigDecimal("2.0")});
+            data.setSa2(ListKit.list("a", "b"));
+            data.setI3(1);
+            data.setL3(2L);
+            data.setStr3("hello");
+            data.setIi3(3);
+            data.setLl3(4L);
+            data.setBb3(new BigDecimal("5.0"));
+            data.setLa3(new long[]{1L, 2L});
+            data.setBa3(new BigDecimal[]{new BigDecimal("1.0"), new BigDecimal("2.0")});
+            data.setSa3(ListKit.list("a", "b"));
+            String json = JsonKit.toJsonString(data);
+            ComplexJsonData parsed = jsonMapper.readValue(json, ComplexJsonData.class);
+            assertEquals(data, parsed);
         }
         {
             // error
@@ -358,6 +395,38 @@ public class JsonTest implements PrintTest {
         private String fmt2;
         private BigDecimal fmt3;
         private BigDecimal fmt4;
+    }
+
+    @Data
+    @EqualsAndHashCode
+    public static class ComplexJsonData {
+        private int i1;
+        private long l1;
+        private String str1;
+        private Integer ii1;
+        private Long ll1;
+        private BigDecimal bb1;
+        private long[] la1;
+        private BigDecimal[] ba1;
+        private List<String> sa1;
+        private int i2;
+        private long l2;
+        private String str2;
+        private Integer ii2;
+        private Long ll2;
+        private BigDecimal bb2;
+        private long[] la2;
+        private BigDecimal[] ba2;
+        private List<String> sa2;
+        private int i3;
+        private long l3;
+        private String str3;
+        private Integer ii3;
+        private Long ll3;
+        private BigDecimal bb3;
+        private long[] la3;
+        private BigDecimal[] ba3;
+        private List<String> sa3;
     }
 
     public enum DataEnum {
