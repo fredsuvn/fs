@@ -1,6 +1,8 @@
 package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.data.ByteData;
 import space.sunqian.fs.data.CharData;
 import space.sunqian.fs.data.DataList;
@@ -19,12 +21,90 @@ import java.util.Map;
 public interface JsonData extends ByteData, CharData {
 
     /**
+     * Returns a {@link JsonData} represents JSON null.
+     *
+     * @return a {@link JsonData} represents JSON null
+     */
+    static @Nonnull JsonData ofNull() {
+        return JsonDataBack.JsonNull.INST;
+    }
+
+    /**
+     * Returns a {@link JsonData} represents a JSON string whose value is the given string.
+     *
+     * @param string the given JSON string
+     * @return a {@link JsonData} represents a JSON string whose value is the given string
+     */
+    static @Nonnull JsonData ofString(@Nonnull String string) {
+        return new JsonDataBack.JsonString(string);
+    }
+
+    /**
+     * Returns a {@link JsonData} represents a JSON number whose value is the given number.
+     *
+     * @param number the given JSON number
+     * @return a {@link JsonData} represents a JSON number whose value is the given number
+     */
+    static @Nonnull JsonData ofNumber(@Nonnull Number number) {
+        return new JsonDataBack.JsonNumber(number);
+    }
+
+    /**
+     * Returns a {@link JsonData} represents a JSON boolean whose value is the given boolean.
+     *
+     * @param bool the given JSON boolean
+     * @return a {@link JsonData} represents a JSON boolean whose value is the given boolean
+     */
+    static @Nonnull JsonData ofBoolean(boolean bool) {
+        return bool ? JsonDataBack.JsonBoolean.TRUE : JsonDataBack.JsonBoolean.FALSE;
+    }
+
+    /**
+     * Returns a {@link JsonData} represents a JSON object whose value is the given map.
+     *
+     * @param map the given map
+     * @return a {@link JsonData} represents a JSON object whose value is the given map
+     */
+    static @Nonnull JsonData ofMap(@Nonnull @RetainedParam Map<@Nonnull String, @Nullable Object> map) {
+        return new JsonDataBack.JsonObject(map);
+    }
+
+    /**
+     * Returns a {@link JsonData} represents a JSON array whose value is the given list.
+     *
+     * @param array the given list
+     * @return a {@link JsonData} represents a JSON array whose value is the given list
+     */
+    static @Nonnull JsonData ofList(@Nonnull @RetainedParam List<@Nullable Object> array) {
+        return new JsonDataBack.JsonArray(array);
+    }
+
+    /**
+     * Returns a {@link JsonData} represents a JSON array whose value is the given array.
+     *
+     * @param array the given array
+     * @return a {@link JsonData} represents a JSON array whose value is the given array
+     */
+    static @Nonnull JsonData ofArray(@Nullable Object @Nonnull @RetainedParam ... array) {
+        return new JsonDataBack.JsonArray(array);
+    }
+
+    /**
      * Returns the type of the current JSON data.
      *
      * @return the type of the current JSON data
      */
     @Nonnull
     JsonType type();
+
+    /**
+     * Returns {@code true} if the current JSON data is JSON null.
+     *
+     * @return {@code true} if the current JSON data is JSON null
+     */
+    default boolean isNull() {
+        return type() == JsonType.NULL;
+    }
 
     /**
      * Returns the string parsed from the current JSON data if the type of the current JSON data is JSON string.
@@ -36,7 +116,8 @@ public interface JsonData extends ByteData, CharData {
     String asString() throws JsonDataException;
 
     /**
-     * Returns a map parsed from the current JSON data if the type of the current JSON data is JSON object.
+     * Returns a map parsed from the current JSON data if the type of the current JSON data is JSON object. Note the
+     * returned map is mutable.
      *
      * @return a map parsed from the current JSON data if the type of the current JSON data is JSON object
      * @throws JsonDataException if the current JSON data is not a JSON object
@@ -45,7 +126,8 @@ public interface JsonData extends ByteData, CharData {
     Map<String, Object> asMap() throws JsonDataException;
 
     /**
-     * Returns a list parsed from the current JSON data if the type of the current JSON data is JSON array.
+     * Returns a list parsed from the current JSON data if the type of the current JSON data is JSON array. Note the
+     * returned list is mutable.
      *
      * @return a list parsed from the current JSON data if the type of the current JSON data is JSON array
      * @throws JsonDataException if the current JSON data is not a JSON array
@@ -126,15 +208,6 @@ public interface JsonData extends ByteData, CharData {
     boolean asBoolean() throws JsonDataException;
 
     /**
-     * Returns a {@link JsonNull} parsed from the current JSON data if the type of the current JSON data is JSON null.
-     *
-     * @return a {@link JsonNull} parsed from the current JSON data if the type of the current JSON data is JSON null
-     * @throws JsonDataException if the current JSON data is not a JSON null
-     */
-    @Nonnull
-    JsonNull asNUll() throws JsonDataException;
-
-    /**
      * Returns a {@link DataMap} with the {@link ObjectConverter#defaultConverter()} to wrap the {@link #asMap()} if the
      * type of the current JSON data is JSON object.
      *
@@ -157,4 +230,12 @@ public interface JsonData extends ByteData, CharData {
     default @Nonnull DataList asDataList() throws JsonDataException {
         return DataList.wrap(asList());
     }
+
+    /**
+     * Returns the JSON string of the current JSON data.
+     *
+     * @return the JSON string of the current JSON data
+     */
+    @Nonnull
+    String toString();
 }

@@ -17,6 +17,10 @@ import java.nio.channels.WritableByteChannel;
 /**
  * Represents JSON data formatter that formats a given JSON data. By default, it uses {@link CharsKit#defaultCharset()}
  * to formats the data in bytes.
+ * <p>
+ * Note the JsonFormatter does not support {@link JsonData}, using {@link JsonData}'s own methods (such as
+ * {@link JsonData#writeTo(Appendable)}) or converting the  {@link JsonData} (such as {@link JsonData#asMap()}) to
+ * format.
  *
  * @author sunqian
  */

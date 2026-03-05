@@ -134,6 +134,10 @@ final class JsonFormatterBack {
                 appender.append("null");
                 return;
             }
+            // if (any instanceof JsonData) {
+            //     ((JsonData) any).writeTo(appender);
+            //     return;
+            // }
             Formatter formatter = FORMAT_MAP.get(any.getClass());
             if (formatter != null) {
                 formatter.formatTo(this, any, appender);
@@ -321,7 +325,7 @@ final class JsonFormatterBack {
                 if (comma) {
                     appender.append(',');
                 }
-                appender.append(element ? "true" : "false");
+                appender.append(Boolean.toString(element));
                 comma = true;
             }
             appender.append(']');

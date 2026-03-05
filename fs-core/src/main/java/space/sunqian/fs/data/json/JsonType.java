@@ -28,7 +28,7 @@ public enum JsonType {
      */
     BOOLEAN,
     /**
-     * Represents the type of JSON null. Note that the only one java type can represent JSON null is {@link JsonNull}.
+     * Represents the type of JSON null.
      */
     NULL,
 }
