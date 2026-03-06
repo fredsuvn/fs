@@ -2,6 +2,7 @@ package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.io.IORuntimeException;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
@@ -397,43 +398,13 @@ final class JsonFormatterBack {
         static {
             CONTROL_CHAR_ESCAPE_TABLE = new String[32];
             for (int i = 0; i < CONTROL_CHAR_ESCAPE_TABLE.length; i++) {
-                CONTROL_CHAR_ESCAPE_TABLE[i] = String.format("\\u%04X", i);
+                CONTROL_CHAR_ESCAPE_TABLE[i] = CharsKit.toUnicode((char) i);
             }
-            CONTROL_CHAR_ESCAPE_TABLE['\b'] = "\\b";
-            CONTROL_CHAR_ESCAPE_TABLE['\t'] = "\\t";
-            CONTROL_CHAR_ESCAPE_TABLE['\n'] = "\\n";
             CONTROL_CHAR_ESCAPE_TABLE['\r'] = "\\r";
+            CONTROL_CHAR_ESCAPE_TABLE['\n'] = "\\n";
+            CONTROL_CHAR_ESCAPE_TABLE['\t'] = "\\t";
+            CONTROL_CHAR_ESCAPE_TABLE['\b'] = "\\b";
             CONTROL_CHAR_ESCAPE_TABLE['\f'] = "\\f";
-            // case '\b':
-            //     appender.append(string, s, i);
-            //     s = i + 1;
-            //     appender.append('\\');
-            //     appender.append('b');
-            //     continue;
-            // case '\f':
-            //     appender.append(string, s, i);
-            //     s = i + 1;
-            //     appender.append('\\');
-            //     appender.append('f');
-            //     continue;
-            // case '\n':
-            //     appender.append(string, s, i);
-            //     s = i + 1;
-            //     appender.append('\\');
-            //     appender.append('n');
-            //     continue;
-            // case '\r':
-            //     appender.append(string, s, i);
-            //     s = i + 1;
-            //     appender.append('\\');
-            //     appender.append('r');
-            //     continue;
-            // case '\t':
-            //     appender.append(string, s, i);
-            //     s = i + 1;
-            //     appender.append('\\');
-            //     appender.append('t');
-            //     continue;
         }
 
         private static @Nullable String toUnicodeEscape(char c) {

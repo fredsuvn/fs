@@ -2,17 +2,16 @@ package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.io.IORuntimeException;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,405 +35,230 @@ enum JsonParserImpl implements JsonParser {
     @Override
     public @Nonnull JsonData parse(@Nonnull Reader reader) throws IORuntimeException {
         try {
-            JsonTokenizer tokenizer = new JsonTokenizer(reader);
-            JsonToken token = tokenizer.nextToken();
-            return parseValue(token, tokenizer);
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        } catch (JsonDataException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new JsonDataException("Failed to parse JSON", e);
-        }
-    }
-
-    private @Nonnull JsonData parseValue(@Nullable JsonToken token, @Nonnull JsonTokenizer tokenizer) throws IOException {
-        if (token == null) {
-            throw new JsonDataException("Unexpected end of JSON input");
-        }
-
-        switch (token.type) {
-            case NULL:
+            Object parsed = parseJson(reader, 0, true);
+            if (parsed == null) {
                 return JsonData.ofNull();
-            case TRUE:
-                return JsonData.ofBoolean(true);
-            case FALSE:
-                return JsonData.ofBoolean(false);
-            case STRING:
-                return JsonData.ofString(token.value);
-            case NUMBER:
-                return parseNumber(token.value);
-            case LEFT_BRACE:
-                return parseObject(tokenizer);
-            case LEFT_BRACKET:
-                return parseArray(tokenizer);
-            default:
-                throw new JsonDataException("Unexpected token: " + token.type);
+            }
+            if (parsed instanceof String) {
+                return JsonData.ofString(parsed.toString());
+            }
+            if (parsed instanceof Boolean) {
+                return JsonData.ofBoolean((Boolean) parsed);
+            }
+            if (parsed instanceof Number) {
+                return JsonData.ofNumber((Number) parsed);
+            }
+            if (parsed instanceof List<?>) {
+                return JsonData.ofList(Fs.as(parsed));
+            }
+            return JsonData.ofMap(Fs.as(parsed));
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
         }
     }
 
-    private @Nonnull JsonData parseNumber(@Nonnull String numberStr) {
-        try {
-            if (numberStr.contains(".") || numberStr.contains("e") || numberStr.contains("E")) {
-                return JsonData.ofNumber(Double.parseDouble(numberStr));
-            } else {
-                long longValue = Long.parseLong(numberStr);
-                if (longValue <= Integer.MAX_VALUE && longValue >= Integer.MIN_VALUE) {
-                    return JsonData.ofNumber((int) longValue);
-                }
-                return JsonData.ofNumber(longValue);
+    private @Nullable Object parseJson(@Nonnull Reader reader, final int index, boolean toEnd) throws Exception {
+        int hasRead = 0;
+        int i;
+        while ((i = reader.read()) != -1) {
+            hasRead++;
+            char c = (char) i;
+            if (Character.isWhitespace(c)) {
+                continue;
             }
-        } catch (NumberFormatException e) {
-            try {
-                return JsonData.ofNumber(new java.math.BigDecimal(numberStr));
-            } catch (Exception ex) {
-                throw new JsonDataException("Invalid number format: " + numberStr, e);
-            }
-        }
-    }
-
-    private @Nonnull JsonData parseObject(@Nonnull JsonTokenizer tokenizer) throws IOException {
-        Map<String, Object> map = new HashMap<>();
-        @Nullable JsonToken token = tokenizer.nextToken();
-
-        if (token != null && token.type == JsonToken.Type.RIGHT_BRACE) {
-            return JsonData.ofMap(map);
-        }
-
-        while (token != null) {
-            if (token.type != JsonToken.Type.STRING) {
-                throw new JsonDataException("Expected string key in object, got: " + token.type);
-            }
-
-            @Nonnull String key = token.value;
-            token = tokenizer.nextToken();
-            if (token == null || token.type != JsonToken.Type.COLON) {
-                throw new JsonDataException("Expected ':' after key in object");
-            }
-
-            token = tokenizer.nextToken();
-            @Nonnull JsonData value = parseValue(token, tokenizer);
-            map.put(key, convertJsonDataToObject(value));
-
-            token = tokenizer.nextToken();
-            if (token == null) {
-                throw new JsonDataException("Unexpected end of JSON input");
-            }
-
-            if (token.type == JsonToken.Type.RIGHT_BRACE) {
-                break;
-            }
-
-            if (token.type != JsonToken.Type.COMMA) {
-                throw new JsonDataException("Expected ',' or '}' in object, got: " + token.type);
-            }
-
-            token = tokenizer.nextToken();
-        }
-
-        return JsonData.ofMap(map);
-    }
-
-    private @Nonnull JsonData parseArray(@Nonnull JsonTokenizer tokenizer) throws IOException {
-        List<Object> list = new ArrayList<>();
-        @Nullable JsonToken token = tokenizer.nextToken();
-
-        if (token != null && token.type == JsonToken.Type.RIGHT_BRACKET) {
-            return JsonData.ofList(list);
-        }
-
-        while (token != null) {
-            @Nonnull JsonData value = parseValue(token, tokenizer);
-            list.add(convertJsonDataToObject(value));
-
-            token = tokenizer.nextToken();
-            if (token == null) {
-                throw new JsonDataException("Unexpected end of JSON input");
-            }
-
-            if (token.type == JsonToken.Type.RIGHT_BRACKET) {
-                break;
-            }
-
-            if (token.type != JsonToken.Type.COMMA) {
-                throw new JsonDataException("Expected ',' or ']' in array, got: " + token.type);
-            }
-
-            token = tokenizer.nextToken();
-        }
-
-        return JsonData.ofList(list);
-    }
-
-    private @Nullable Object convertJsonDataToObject(@Nonnull JsonData jsonData) {
-        switch (jsonData.type()) {
-            case NULL:
-                return null;
-            case BOOLEAN:
-                return jsonData.asBoolean();
-            case NUMBER:
-                return jsonData.asNumber();
-            case STRING:
-                return jsonData.asString();
-            case OBJECT:
-                return jsonData.asMap();
-            case ARRAY:
-                return jsonData.asList();
-            default:
-                return null;
-        }
-    }
-
-    private static class JsonTokenizer {
-        private final @Nonnull Reader reader;
-        private int currentChar = -1;
-        private boolean eof = false;
-
-        JsonTokenizer(@Nonnull Reader reader) throws IOException {
-            this.reader = reader;
-            advance();
-        }
-
-        @Nullable
-        JsonToken nextToken() throws IOException {
-            skipWhitespace();
-            if (eof) {
-                return null;
-            }
-
-            switch (currentChar) {
-                case '{':
-                    advance();
-                    return new JsonToken(JsonToken.Type.LEFT_BRACE, null);
-                case '}':
-                    advance();
-                    return new JsonToken(JsonToken.Type.RIGHT_BRACE, null);
-                case '[':
-                    advance();
-                    return new JsonToken(JsonToken.Type.LEFT_BRACKET, null);
-                case ']':
-                    advance();
-                    return new JsonToken(JsonToken.Type.RIGHT_BRACKET, null);
-                case ',':
-                    advance();
-                    return new JsonToken(JsonToken.Type.COMMA, null);
-                case ':':
-                    advance();
-                    return new JsonToken(JsonToken.Type.COLON, null);
-                case '"':
-                    return parseString();
-                case 't':
-                    return parseTrue();
-                case 'f':
-                    return parseFalse();
+            switch (c) {
                 case 'n':
-                    return parseNull();
-                default:
-                    if (isDigit(currentChar) || currentChar == '-') {
-                        return parseNumber();
+                    parseNull(reader, index + 1);
+                    if (toEnd) {
+                        skipToEof(reader, index + 4);
                     }
-                    throw new JsonDataException("Unexpected character: " + (char) currentChar);
-            }
-        }
-
-        private void advance() throws IOException {
-            currentChar = reader.read();
-            if (currentChar == -1) {
-                eof = true;
-            }
-        }
-
-        private void skipWhitespace() throws IOException {
-            while (!eof && isWhitespace(currentChar)) {
-                advance();
-            }
-        }
-
-        private boolean isWhitespace(int c) {
-            return c == ' ' || c == '\t' || c == '\n' || c == '\r';
-        }
-
-        private boolean isDigit(int c) {
-            return c >= '0' && c <= '9';
-        }
-
-        @Nonnull
-        JsonToken parseString() throws IOException {
-            advance(); // skip opening quote
-            StringBuilder sb = new StringBuilder();
-
-            while (!eof && currentChar != '"') {
-                if (currentChar == '\\') {
-                    advance();
-                    if (eof) {
-                        throw new JsonDataException("Unexpected end of input in string escape");
+                    return null;
+                case 't':
+                    parseTrue(reader, index + 1);
+                    if (toEnd) {
+                        skipToEof(reader, index + 4);
                     }
-
-                    switch (currentChar) {
-                        case '"':
-                            sb.append('"');
-                            break;
-                        case '\\':
-                            sb.append('\\');
-                            break;
-                        case '/':
-                            sb.append('/');
-                            break;
-                        case 'b':
-                            sb.append('\b');
-                            break;
-                        case 'f':
-                            sb.append('\f');
-                            break;
-                        case 'n':
-                            sb.append('\n');
-                            break;
-                        case 'r':
-                            sb.append('\r');
-                            break;
-                        case 't':
-                            sb.append('\t');
-                            break;
-                        case 'u':
-                            // Parse unicode escape
-                            @Nonnull StringBuilder unicode = new StringBuilder();
-                            for (int i = 0; i < 4; i++) {
-                                advance();
-                                if (eof) {
-                                    throw new JsonDataException("Unexpected end of input in unicode escape");
-                                }
-                                unicode.append((char) currentChar);
-                            }
-                            try {
-                                int codePoint = Integer.parseInt(unicode.toString(), 16);
-                                sb.append((char) codePoint);
-                            } catch (NumberFormatException e) {
-                                throw new JsonDataException("Invalid unicode escape: \\u" + unicode);
-                            }
-                            break;
-                        default:
-                            throw new JsonDataException("Invalid escape sequence: \\" + (char) currentChar);
+                    return true;
+                case 'f':
+                    parseFalse(reader, index + 1);
+                    if (toEnd) {
+                        skipToEof(reader, index + 5);
                     }
-                } else {
-                    sb.append((char) currentChar);
-                }
-                advance();
-            }
-
-            if (eof) {
-                throw new JsonDataException("Unexpected end of input in string");
-            }
-
-            advance(); // skip closing quote
-            return new JsonToken(JsonToken.Type.STRING, sb.toString());
-        }
-
-        @Nonnull
-        JsonToken parseNumber() throws IOException {
-            @Nonnull StringBuilder sb = new StringBuilder();
-
-            if (currentChar == '-') {
-                sb.append('-');
-                advance();
-            }
-
-            if (currentChar == '0') {
-                sb.append('0');
-                advance();
-            } else if (isDigit(currentChar)) {
-                while (!eof && isDigit(currentChar)) {
-                    sb.append((char) currentChar);
-                    advance();
-                }
-            } else {
-                throw new JsonDataException("Invalid number format");
-            }
-
-            // Fraction part
-            if (!eof && currentChar == '.') {
-                sb.append('.');
-                advance();
-                if (!eof && isDigit(currentChar)) {
-                    while (!eof && isDigit(currentChar)) {
-                        sb.append((char) currentChar);
-                        advance();
-                    }
-                } else {
-                    throw new JsonDataException("Expected digit after '.' in number");
-                }
-            }
-
-            // Exponent part
-            if (!eof && (currentChar == 'e' || currentChar == 'E')) {
-                sb.append((char) currentChar);
-                advance();
-                if (!eof && (currentChar == '+' || currentChar == '-')) {
-                    sb.append((char) currentChar);
-                    advance();
-                }
-                if (!eof && isDigit(currentChar)) {
-                    while (!eof && isDigit(currentChar)) {
-                        sb.append((char) currentChar);
-                        advance();
-                    }
-                } else {
-                    throw new JsonDataException("Expected digit in exponent");
-                }
-            }
-
-            return new JsonToken(JsonToken.Type.NUMBER, sb.toString());
-        }
-
-        @Nonnull
-        JsonToken parseTrue() throws IOException {
-            if (matchKeyword("true")) {
-                return new JsonToken(JsonToken.Type.TRUE, null);
-            }
-            throw new JsonDataException("Invalid token, expected 'true'");
-        }
-
-        @Nonnull
-        JsonToken parseFalse() throws IOException {
-            if (matchKeyword("false")) {
-                return new JsonToken(JsonToken.Type.FALSE, null);
-            }
-            throw new JsonDataException("Invalid token, expected 'false'");
-        }
-
-        @Nonnull
-        JsonToken parseNull() throws IOException {
-            if (matchKeyword("null")) {
-                return new JsonToken(JsonToken.Type.NULL, null);
-            }
-            throw new JsonDataException("Invalid token, expected 'null'");
-        }
-
-        private boolean matchKeyword(@Nonnull String keyword) throws IOException {
-            for (int i = 0; i < keyword.length(); i++) {
-                if (eof || currentChar != keyword.charAt(i)) {
                     return false;
+                case '\"': {
+                    int validIndex = index + hasRead;
+                    StringBuilder builder = new StringBuilder();
+                    int strLen = parseString(reader, builder, validIndex);
+                    if (toEnd) {
+                        skipToEof(reader, validIndex + strLen);
+                    }
+                    return builder.toString();
                 }
-                advance();
+                case '{': {
+                    int validIndex = index + hasRead;
+                    Map<String, Object> builder = new LinkedHashMap<>();
+                    int strLen = parseObject(reader, builder, validIndex);
+                    if (toEnd) {
+                        skipToEof(reader, validIndex + strLen);
+                    }
+                    return builder;
+                }
             }
-            return true;
+        }
+        throw new JsonDataException("Unexpected end of JSON string at index: " + index + ".");
+    }
+
+    private int parseObject(
+        @Nonnull Reader reader, @Nonnull Map<@Nonnull String, @Nullable Object> builder, int index
+    ) throws Exception {
+        int hasRead = 0;
+        int i;
+        while ((i = reader.read()) != -1) {
+            hasRead++;
+            char c = (char) i;
+            if (Character.isWhitespace(c)) {
+                continue;
+            }
+            if (c == '\"') {
+                int validIndex = index + hasRead;
+                StringBuilder keyBuilder = new StringBuilder();
+                int strLen = parseString(reader, keyBuilder, validIndex);
+                validIndex = validIndex + strLen;
+                int skipLen = skipToChar(reader, ':', validIndex);
+                validIndex = validIndex + skipLen;
+                Object value = parseJson(reader, validIndex, false);
+                builder.put(keyBuilder.toString(), value);
+            }
+        }
+        throw new JsonDataException("Unexpected end of JSON string at index: " + index + ".");
+    }
+
+    private void parseNull(@Nonnull Reader reader, int index) throws Exception {
+        nextChar(reader, 'u', index++);
+        nextChar(reader, 'l', index++);
+        nextChar(reader, 'l', index);
+    }
+
+    private void parseTrue(@Nonnull Reader reader, int index) throws Exception {
+        nextChar(reader, 'r', index++);
+        nextChar(reader, 'u', index++);
+        nextChar(reader, 'e', index);
+    }
+
+    private void parseFalse(@Nonnull Reader reader, int index) throws Exception {
+        nextChar(reader, 'a', index++);
+        nextChar(reader, 'l', index++);
+        nextChar(reader, 's', index++);
+        nextChar(reader, 'e', index);
+    }
+
+    private int parseString(
+        @Nonnull Reader reader, @Nonnull StringBuilder builder, final int index
+    ) throws Exception {
+        int hasRead = 0;
+        int i;
+        while ((i = reader.read()) != -1) {
+            hasRead++;
+            char c = (char) i;
+            switch (c) {
+                case '\"':
+                    return hasRead;
+                case '\\':
+                    int escapeLen = parseEscape(reader, builder, index + hasRead);
+                    hasRead += escapeLen;
+                default:
+                    builder.append(c);
+            }
+        }
+        throw new JsonParsingDataException(index + hasRead - 1, null, "\"");
+    }
+
+    private int parseEscape(@Nonnull Reader reader, @Nonnull StringBuilder builder, final int index) throws Exception {
+        int i = reader.read();
+        if (i != -1) {
+            char c = (char) i;
+            switch (c) {
+                case '\"':
+                case '\\':
+                    builder.append(c);
+                    return 1;
+                case 'r':
+                    builder.append('\r');
+                    return 1;
+                case 'n':
+                    builder.append('\n');
+                    return 1;
+                case 't':
+                    builder.append('\t');
+                    return 1;
+                case 'b':
+                    builder.append('\b');
+                    return 1;
+                case 'f':
+                    builder.append('\f');
+                    return 1;
+                case 'u':
+                    parseUnicode(reader, builder, index + 1);
+                    return 5;
+                default:
+                    throw new JsonParsingDataException(index, String.valueOf(c), null);
+            }
+        }
+        throw new JsonParsingDataException(index, null, null);
+    }
+
+    private void parseUnicode(@Nonnull Reader reader, @Nonnull StringBuilder builder, final int index) throws Exception {
+        char c1 = nextChar(reader, index);
+        char c2 = nextChar(reader, index + 1);
+        char c3 = nextChar(reader, index + 2);
+        char c4 = nextChar(reader, index + 3);
+        builder.append(CharsKit.unicodeToChar(c1, c2, c3, c4));
+    }
+
+    private char nextChar(@Nonnull Reader reader, final int index) throws Exception {
+        int i = reader.read();
+        if (i == -1) {
+            throw new JsonParsingDataException(index, null, null);
+        }
+        return (char) i;
+    }
+
+    private void nextChar(@Nonnull Reader reader, char shouldBe, final int index) throws Exception {
+        int i = reader.read();
+        if (i == -1) {
+            throw new JsonParsingDataException(index, null, String.valueOf(shouldBe));
+        }
+        char c = (char) i;
+        if (shouldBe != c) {
+            throw new JsonParsingDataException(index, String.valueOf(c), String.valueOf(shouldBe));
         }
     }
 
-    private static class JsonToken {
-        enum Type {
-            LEFT_BRACE, RIGHT_BRACE,
-            LEFT_BRACKET, RIGHT_BRACKET,
-            COMMA, COLON,
-            STRING, NUMBER,
-            TRUE, FALSE, NULL
+    private void skipToEof(@Nonnull Reader reader, final int index) throws Exception {
+        int hasRead = 0;
+        int i;
+        while ((i = reader.read()) != -1) {
+            hasRead++;
+            char c = (char) i;
+            if (!Character.isWhitespace(c)) {
+                throw new JsonParsingDataException(index + hasRead - 1, String.valueOf(c), null);
+            }
         }
+    }
 
-        private final @Nonnull Type type;
-        private final @Nullable String value;
-
-        JsonToken(@Nonnull Type type, @Nullable String value) {
-            this.type = type;
-            this.value = value;
+    private int skipToChar(@Nonnull Reader reader, char target, final int index) throws Exception {
+        int hasRead = 0;
+        int i;
+        while ((i = reader.read()) != -1) {
+            hasRead++;
+            char c = (char) i;
+            if (c == target) {
+                return hasRead;
+            }
+            if (!Character.isWhitespace(c)) {
+                throw new JsonParsingDataException(index + hasRead - 1, String.valueOf(c), String.valueOf(target));
+            }
         }
+        throw new JsonParsingDataException(index + hasRead - 1, null, String.valueOf(target));
     }
 }
