@@ -2,6 +2,8 @@ package space.sunqian.fs.data.properties;
 
 import space.sunqian.annotation.Nonnull;
 
+import java.util.Properties;
+
 /**
  * Utilities for {@code Properties}.
  *
@@ -10,13 +12,24 @@ import space.sunqian.annotation.Nonnull;
 public class PropertiesKit {
 
     /**
-     * Returns a string formatted by {@link PropertiesFormatter#defaultFormatter()} of the given data.
+     * Wraps the given {@link Properties} object into a {@link PropertiesData} object.
      *
-     * @param data the given properties data
-     * @return a string formatted by {@link PropertiesFormatter#defaultFormatter()} of the given data
+     * @param properties the given {@link Properties} object
+     * @return the wrapped {@link PropertiesData} object
      */
-    public static @Nonnull String toPropertiesString(@Nonnull PropertiesData data) {
-        return PropertiesFormatter.defaultFormatter().toString(data);
+    public static @Nonnull PropertiesData wrap(@Nonnull Properties properties) {
+        return new PropertiesData() {
+
+            @Override
+            public @Nonnull Properties asProperties() {
+                return properties;
+            }
+
+            @Override
+            public @Nonnull String toString() {
+                return properties.toString();
+            }
+        };
     }
 
     private PropertiesKit() {

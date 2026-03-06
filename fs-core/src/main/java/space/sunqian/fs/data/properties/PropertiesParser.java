@@ -9,7 +9,6 @@ import space.sunqian.fs.io.IORuntimeException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.channels.ReadableByteChannel;
-import java.util.Properties;
 
 /**
  * Represents the properties data parser that parses properties data a {@code PropertiesData} object.
@@ -25,27 +24,6 @@ public interface PropertiesParser extends ByteDataParser<PropertiesData>, CharDa
      */
     static @Nonnull PropertiesParser defaultParser() {
         return PropertiesParserImpl.INST;
-    }
-
-    /**
-     * Wraps the given {@link Properties} object into a {@link PropertiesData} object.
-     *
-     * @param properties the given {@link Properties} object
-     * @return the wrapped {@link PropertiesData} object
-     */
-    default @Nonnull PropertiesData wrap(@Nonnull Properties properties) {
-        return new PropertiesData() {
-
-            @Override
-            public @Nonnull Properties asProperties() {
-                return properties;
-            }
-
-            @Override
-            public String toString() {
-                return properties.toString();
-            }
-        };
     }
 
     /**

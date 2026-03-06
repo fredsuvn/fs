@@ -68,18 +68,6 @@ public interface PropertiesData extends ByteData, CharData {
     }
 
     /**
-     * Returns a new {@link PropertiesData} wraps the given {@link Properties}.
-     * <p>
-     * This method uses {@link PropertiesParser#defaultParser()} to wrap the properties.
-     *
-     * @param properties the {@link Properties} to wrap
-     * @return a new {@link PropertiesData} wraps the given {@link Properties}
-     */
-    static @Nonnull PropertiesData wrap(@Nonnull Properties properties) {
-        return PropertiesParser.defaultParser().wrap(properties);
-    }
-
-    /**
      * Gets the string value of the property, or {@code null} if not found.
      *
      * @param name the name of the property
@@ -281,4 +269,12 @@ public interface PropertiesData extends ByteData, CharData {
     default void writeTo(@Nonnull Appendable appender) throws IORuntimeException {
         Fs.uncheck(() -> asProperties().store(IOKit.wrapWriter(appender), null), IORuntimeException::new);
     }
+
+    /**
+     * Returns a string representation of the current properties.
+     *
+     * @return a string representation of the current properties
+     */
+    @Nonnull
+    String toString();
 }

@@ -33,6 +33,6 @@ enum PropertiesParserImpl implements PropertiesParser {
     public @Nonnull PropertiesData parse(@Nonnull Reader reader) throws IORuntimeException {
         Properties properties = new Properties();
         Fs.uncheck(() -> properties.load(reader), IORuntimeException::new);
-        return wrap(properties);
+        return PropertiesKit.wrap(properties);
     }
 }
