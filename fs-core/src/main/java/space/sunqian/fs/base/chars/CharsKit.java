@@ -4,6 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.system.SystemKeys;
+import space.sunqian.fs.io.IORuntimeException;
 
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -128,6 +129,97 @@ public class CharsKit {
         }
     }
 
+    /**
+     * Converts the given char to the corresponding Unicode escape string. For example:
+     * <ul>
+     *    <li>{@code 'a'} -> {@code \\u0061}</li>
+     *    <li>{@code 'h'} -> {@code \\u0068}</li>
+     *    <li>{@code '中'} -> {@code \\u4E20}</li>
+     * </ul>
+     *
+     * @param c the given char
+     * @return the corresponding Unicode escape string
+     */
+    public static @Nonnull String toUnicode(char c) {
+        return toUnicode(c, true);
+    }
+
+    /**
+     * Converts the given char to the corresponding Unicode escape string. For example:
+     * <ul>
+     *    <li>{@code 'a'} -> {@code \\u0061}</li>
+     *    <li>{@code 'h'} -> {@code \\u0068}</li>
+     *    <li>{@code '中'} -> {@code \\u4E20}</li>
+     * </ul>
+     *
+     * @param c         the given char
+     * @param uppercase {@code true} to use uppercase letters, {@code false} to use lowercase letters
+     * @return the corresponding Unicode escape string
+     */
+    public static @Nonnull String toUnicode(char c, boolean uppercase) {
+        return CharToUnicode.charToUnicode(c, uppercase);
+    }
+
+    /**
+     * Converts the given char to the corresponding Unicode escape string and appends it to the given appender. For
+     * example:
+     * <ul>
+     *    <li>{@code 'a'} -> {@code \\u0061}</li>
+     *    <li>{@code 'h'} -> {@code \\u0068}</li>
+     *    <li>{@code '中'} -> {@code \\u4E20}</li>
+     * </ul>
+     *
+     * @param c         the given char
+     * @param uppercase {@code true} to use uppercase letters, {@code false} to use lowercase letters
+     * @param appender  the appender to append the result
+     */
+    public static void toUnicode(char c, boolean uppercase, @Nonnull Appendable appender) throws IORuntimeException {
+        try {
+            CharToUnicode.charToUnicode(c, uppercase, appender);
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
+     * Converts the Unicode escape sequence to the corresponding character. For example:
+     * <ul>
+     *    <li>{@code \\u0061} -> {@code 'a'}</li>
+     *    <li>{@code \\u0068} -> {@code 'h'}</li>
+     *    <li>{@code \\u4E20} -> {@code '中'}</li>
+     * </ul>
+     *
+     * @param c1 the first character of the Unicode escape sequence
+     * @param c2 the second character of the Unicode escape sequence
+     * @param c3 the third character of the Unicode escape sequence
+     * @param c4 the fourth character of the Unicode escape sequence
+     * @return the corresponding character
+     */
+    public static char unicodeToChar(char c1, char c2, char c3, char c4) {
+        int digits = unicodeToDigits(c1);
+        digits <<= 4;
+        digits |= unicodeToDigits(c2);
+        digits <<= 4;
+        digits |= unicodeToDigits(c3);
+        digits <<= 4;
+        digits |= unicodeToDigits(c4);
+        return (char) digits;
+    }
+
+    private static int unicodeToDigits(char c) {
+        int digit;
+        if (c >= '0' && c <= '9') {
+            digit = c - '0';
+        } else if (c >= 'A' && c <= 'F') {
+            digit = c - 'A' + 10;
+        } else if (c >= 'a' && c <= 'f') {
+            digit = c - 'a' + 10;
+        } else {
+            throw new IllegalArgumentException("Illegal hex character: " + c);
+        }
+        return digit;
+    }
+
     private static final class Natives {
 
         private static final @Nullable Charset NATIVE_CHARSET = searchNativeCharset();
@@ -150,6 +242,39 @@ public class CharsKit {
                 }
             }
             return null;
+        }
+    }
+
+    private static final class CharToUnicode {
+
+        private static final char[] UPPERS =
+            {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        private static final char[] LOWERS =
+            {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+        private static String charToUnicode(char ch, boolean uppercase) {
+            char[] result = new char[6];
+            result[0] = '\\';
+            result[1] = 'u';
+            char[] dict = uppercase ? UPPERS : LOWERS;
+            int code = ch & 0xFFFF;
+            result[2] = dict[(code >>> 12) & 0x0F];
+            result[3] = dict[(code >>> 8) & 0x0F];
+            result[4] = dict[(code >>> 4) & 0x0F];
+            result[5] = dict[code & 0x0F];
+            return new String(result);
+        }
+
+        private static void charToUnicode(char ch, boolean uppercase, @Nonnull Appendable appender) throws Exception {
+            char c0 = '\\';
+            char c1 = 'u';
+            char[] dict = uppercase ? UPPERS : LOWERS;
+            int code = ch & 0xFFFF;
+            char c2 = dict[(code >>> 12) & 0x0F];
+            char c3 = dict[(code >>> 8) & 0x0F];
+            char c4 = dict[(code >>> 4) & 0x0F];
+            char c5 = dict[code & 0x0F];
+            appender.append(c0).append(c1).append(c2).append(c3).append(c4).append(c5);
         }
     }
 

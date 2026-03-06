@@ -39,6 +39,7 @@ dependencies {
     //commons
     api("org.apache.commons:commons-lang3:3.13.0")
     api("org.apache.commons:commons-collections4:4.4")
+    api("org.apache.commons:commons-text:1.15.0")
     api("commons-beanutils:commons-beanutils:1.11.0")
     api("commons-io:commons-io:2.14.0")
     api("commons-codec:commons-codec:1.16.0")

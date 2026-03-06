@@ -19,6 +19,7 @@ dependencies {
   api("org.slf4j:slf4j-api")
   api("org.apache.commons:commons-lang3")
   api("org.apache.commons:commons-collections4")
+  api("org.apache.commons:commons-text")
   api("commons-beanutils:commons-beanutils")
   api("commons-io:commons-io")
   api("commons-codec:commons-codec")
