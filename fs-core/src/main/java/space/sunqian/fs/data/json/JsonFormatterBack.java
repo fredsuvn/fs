@@ -2,7 +2,6 @@ package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
@@ -13,7 +12,6 @@ import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.utils.codec.Base64Kit;
 
-import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -122,11 +120,6 @@ final class JsonFormatterBack {
             } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
-        }
-
-        @Override
-        public void formatTo(@Nullable Object data, @Nonnull OutputStream out) throws IORuntimeException {
-            formatTo(data, IOKit.newWriter(out));
         }
 
         private void writeAny(@Nullable Object any, @Nonnull Appendable appender) throws Exception {

@@ -2,10 +2,10 @@ package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.data.ByteDataFormatter;
 import space.sunqian.fs.data.CharDataFormatter;
+import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
@@ -27,22 +27,22 @@ import java.nio.channels.WritableByteChannel;
 public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormatter<Object> {
 
     /**
-     * Returns the default formatter of JSON data, which uses {@link ObjectSchemaParser#defaultCachedParser()} and
+     * Returns the default {@link JsonFormatter}, which uses {@link ObjectSchemaParser#defaultCachedParser()} and
      * {@link ObjectConverter#defaultConverter()} to pars and convert objects, and doesn't ignore the properties of
      * which values are {@code null} , or {@code null} values of map, when formatting.
      * <p>
      * The returned formatter will format {@code byte[]}/{@link ByteBuffer} as Base64 string, and it is the only way to
      * format binary data.
      *
-     * @return the default formatter of JSON data
+     * @return the default {@link JsonFormatter}
      */
     static @Nonnull JsonFormatter defaultFormatter() {
         return JsonFormatterBack.defaultFormatter();
     }
 
     /**
-     * Returns a new JSON formatter with the specified {@link ObjectSchemaParser} and {@link ObjectConverter} to parse
-     * and convert objects.
+     * Returns a new {@link JsonFormatter} with the specified {@link ObjectSchemaParser} and {@link ObjectConverter} to
+     * parse and convert objects.
      * <p>
      * The returned formatter will format {@code byte[]}/{@link ByteBuffer} as Base64 string, and it is the only way to
      * format binary data.
@@ -51,8 +51,8 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
      * @param objectConverter the specified {@link ObjectConverter}
      * @param ignoreNullValue whether to ignore the properties of which values are {@code null}, or {@code null} values
      *                        of map, when formatting
-     * @return a new JSON formatter with the specified {@link ObjectSchemaParser} and {@link ObjectConverter} to parse
-     * and convert objects
+     * @return a new {@link JsonFormatter} with the specified {@link ObjectSchemaParser} and {@link ObjectConverter} to
+     * parse and convert objects
      */
     static @Nonnull JsonFormatter newFormatter(
         @Nonnull ObjectSchemaParser objectParser,
@@ -63,59 +63,66 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
     }
 
     /**
-     * Formats the given JSON data to the given appender.
-     *
-     * @param data     the given JSON data to be formatted
-     * @param appender the appender to write to
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    @Override
-    void formatTo(@Nullable Object data, @Nonnull Appendable appender) throws IORuntimeException;
-
-    /**
-     * Formats the given JSON data to a string.
-     *
-     * @param data the given data to be formatted
-     * @return the formatting string
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    @Override
-    @Nonnull
-    default String toString(@Nullable Object data) throws IORuntimeException {
-        return CharDataFormatter.super.toString(Fs.asNonnull(data));
-    }
-
-    /**
-     * Formats the given JSON data to the given output stream.
+     * Formates and writes the given data as JSON string to the given output stream, using
+     * {@link CharsKit#defaultCharset()}.
      *
      * @param data the given data to be formatted
      * @param out  the output stream to write to
      * @throws IORuntimeException if an I/O error occurs
      */
     @Override
-    void formatTo(@Nullable Object data, @Nonnull OutputStream out) throws IORuntimeException;
-
-    /**
-     * Formats the given JSON data to the given writable byte channel.
-     *
-     * @param data    the given data to be formatted
-     * @param channel the writable byte channel to write to
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    @Override
-    default void formatTo(@Nullable Object data, @Nonnull WritableByteChannel channel) throws IORuntimeException {
-        ByteDataFormatter.super.formatTo(Fs.asNonnull(data), channel);
+    default void formatTo(@Nullable Object data, @Nonnull OutputStream out) throws IORuntimeException {
+        formatTo(data, IOKit.newWriter(out));
     }
 
     /**
-     * Formats the given JSON data to a byte array.
+     * Formates and writes the given data as JSON string to the given writable byte channel, using
+     * {@link CharsKit#defaultCharset()}.
+     *
+     * @param data    the given data to be formatted
+     * @param channel the output channel to write to
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    @SuppressWarnings("DataFlowIssue")
+    @Override
+    default void formatTo(@Nullable Object data, @Nonnull WritableByteChannel channel) throws IORuntimeException {
+        ByteDataFormatter.super.formatTo(data, channel);
+    }
+
+    /**
+     * Formates and writes the given data as JSON string to a byte array, using {@link CharsKit#defaultCharset()}.
      *
      * @param data the given data to be formatted
-     * @return the formatting byte array
+     * @return the byte array formatted from the given data
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    @SuppressWarnings("DataFlowIssue")
+    @Override
+    default byte @Nonnull [] toByteArray(@Nullable Object data) throws IORuntimeException {
+        return ByteDataFormatter.super.toByteArray(data);
+    }
+
+    /**
+     * Formates and writes the given data as JSON string to the given appender.
+     *
+     * @param data     the given data to be formatted
+     * @param appender the output appender to write to
      * @throws IORuntimeException if an I/O error occurs
      */
     @Override
-    default byte @Nonnull [] toByteArray(@Nullable Object data) throws IORuntimeException {
-        return ByteDataFormatter.super.toByteArray(Fs.asNonnull(data));
+    void formatTo(@Nullable Object data, @Nonnull Appendable appender) throws IORuntimeException;
+
+    /**
+     * Formates and writes the given data as a JSON string.
+     *
+     * @param data the given data to be formatted
+     * @return the JSON string
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    @SuppressWarnings("DataFlowIssue")
+    @Override
+    @Nonnull
+    default String toString(@Nullable Object data) throws IORuntimeException {
+        return CharDataFormatter.super.toString(data);
     }
 }
