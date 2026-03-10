@@ -4,6 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.base.value.Var;
 import space.sunqian.fs.io.IORuntimeException;
 
 import java.io.InputStream;
@@ -11,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,30 +37,35 @@ enum JsonParserImpl implements JsonParser {
     @Override
     public @Nonnull JsonData parse(@Nonnull Reader reader) throws IORuntimeException {
         try {
-            Object parsed = parseJson(reader, 0, true);
-            if (parsed == null) {
+            Var<Object> parsed = Var.of(null);
+            parseJson(reader, parsed, 0, true);
+            Object result = parsed.get();
+            if (result == null) {
                 return JsonData.ofNull();
             }
-            if (parsed instanceof String) {
-                return JsonData.ofString(parsed.toString());
+            if (result instanceof String) {
+                return JsonData.ofString((String) result);
             }
-            if (parsed instanceof Boolean) {
-                return JsonData.ofBoolean((Boolean) parsed);
+            if (result instanceof Boolean) {
+                return JsonData.ofBoolean((Boolean) result);
             }
-            if (parsed instanceof Number) {
-                return JsonData.ofNumber((Number) parsed);
+            if (result instanceof Number) {
+                return JsonData.ofNumber((Number) result);
             }
-            if (parsed instanceof List<?>) {
-                return JsonData.ofList(Fs.as(parsed));
+            if (result instanceof List<?>) {
+                return JsonData.ofList(Fs.as(result));
             }
-            return JsonData.ofMap(Fs.as(parsed));
+            return JsonData.ofMap(Fs.as(result));
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
     }
 
-    private @Nullable Object parseJson(@Nonnull Reader reader, final int index, boolean toEnd) throws Exception {
+    private int parseJson(
+        @Nonnull Reader reader, @Nonnull Var<Object> out, final int lastIndex, boolean toEnd
+    ) throws Exception {
         int hasRead = 0;
+        Object result = null;
         int i;
         while ((i = reader.read()) != -1) {
             hasRead++;
@@ -68,50 +75,50 @@ enum JsonParserImpl implements JsonParser {
             }
             switch (c) {
                 case 'n':
-                    parseNull(reader, index + 1);
-                    if (toEnd) {
-                        skipToEof(reader, index + 4);
-                    }
-                    return null;
+                    hasRead += parseNull(reader, lastIndex + hasRead);
+                    break;
                 case 't':
-                    parseTrue(reader, index + 1);
-                    if (toEnd) {
-                        skipToEof(reader, index + 4);
-                    }
-                    return true;
+                    hasRead += parseTrue(reader, lastIndex + hasRead);
+                    result = true;
+                    break;
                 case 'f':
-                    parseFalse(reader, index + 1);
-                    if (toEnd) {
-                        skipToEof(reader, index + 5);
-                    }
-                    return false;
+                    hasRead += parseFalse(reader, lastIndex + hasRead);
+                    result = false;
+                    break;
                 case '\"': {
-                    int validIndex = index + hasRead;
                     StringBuilder builder = new StringBuilder();
-                    int strLen = parseString(reader, builder, validIndex);
-                    if (toEnd) {
-                        skipToEof(reader, validIndex + strLen);
-                    }
-                    return builder.toString();
+                    hasRead += parseString(reader, builder, lastIndex + hasRead);
+                    result = builder.toString();
+                    break;
                 }
                 case '{': {
-                    int validIndex = index + hasRead;
                     Map<String, Object> builder = new LinkedHashMap<>();
-                    int strLen = parseObject(reader, builder, validIndex);
-                    if (toEnd) {
-                        skipToEof(reader, validIndex + strLen);
-                    }
-                    return builder;
+                    hasRead += parseObject(reader, builder, lastIndex + hasRead);
+                    result = builder;
+                    break;
                 }
+                case '[': {
+                    List<Object> builder = new ArrayList<>();
+                    hasRead += parseArray(reader, builder, lastIndex + hasRead);
+                    result = builder;
+                    break;
+                }
+                default:
+                    throw new JsonParsingDataException(lastIndex + hasRead, String.valueOf(c), null);
             }
         }
-        throw new JsonDataException("Unexpected end of JSON string at index: " + index + ".");
+        if (toEnd) {
+            hasRead += skipToEof(reader, lastIndex + hasRead);
+        }
+        out.set(result);
+        return hasRead;
     }
 
     private int parseObject(
-        @Nonnull Reader reader, @Nonnull Map<@Nonnull String, @Nullable Object> builder, int index
+        @Nonnull Reader reader, @Nonnull Map<@Nonnull String, @Nullable Object> builder, int lastIndex
     ) throws Exception {
         int hasRead = 0;
+        boolean first = true;
         int i;
         while ((i = reader.read()) != -1) {
             hasRead++;
@@ -120,40 +127,102 @@ enum JsonParserImpl implements JsonParser {
                 continue;
             }
             if (c == '\"') {
-                int validIndex = index + hasRead;
                 StringBuilder keyBuilder = new StringBuilder();
-                int strLen = parseString(reader, keyBuilder, validIndex);
-                validIndex = validIndex + strLen;
-                int skipLen = skipToChar(reader, ':', validIndex);
-                validIndex = validIndex + skipLen;
-                Object value = parseJson(reader, validIndex, false);
-                builder.put(keyBuilder.toString(), value);
+                hasRead += parseString(reader, keyBuilder, lastIndex + hasRead);
+                hasRead += skipToChar(reader, ':', lastIndex + hasRead);
+                Var<Object> json = Var.of(null);
+                hasRead += parseJson(reader, json, lastIndex + hasRead, false);
+                builder.put(keyBuilder.toString(), json.get());
+                first = false;
+                continue;
             }
+            if (c == ',') {
+                if (!first) {
+                    continue;
+                }
+            }
+            if (c == '}') {
+                return hasRead;
+            }
+            throw new JsonParsingDataException(lastIndex + hasRead, String.valueOf(c), null);
         }
-        throw new JsonDataException("Unexpected end of JSON string at index: " + index + ".");
+        throw new JsonParsingDataException(lastIndex + hasRead + 1, null, null);
     }
 
-    private void parseNull(@Nonnull Reader reader, int index) throws Exception {
-        nextChar(reader, 'u', index++);
-        nextChar(reader, 'l', index++);
-        nextChar(reader, 'l', index);
+    private int parseArray(
+        @Nonnull Reader reader, @Nonnull List<@Nullable Object> builder, int lastIndex
+    ) throws Exception {
+        int hasRead = 0;
+        PARSING:
+        while (true) {
+            Var<Object> json = Var.of(null);
+            hasRead += parseJson(reader, json, lastIndex + hasRead, false);
+            builder.add(json.get());
+            int i;
+            while ((i = reader.read()) != -1) {
+                hasRead++;
+                char c = (char) i;
+                if (Character.isWhitespace(c)) {
+                    continue;
+                }
+                if (c == ',') {
+                    continue PARSING;
+                }
+                if (c == ']') {
+                    return hasRead;
+                }
+                throw new JsonParsingDataException(lastIndex + hasRead, String.valueOf(c), null);
+            }
+            throw new JsonParsingDataException(lastIndex + hasRead + 1, null, null);
+        }
     }
 
-    private void parseTrue(@Nonnull Reader reader, int index) throws Exception {
-        nextChar(reader, 'r', index++);
-        nextChar(reader, 'u', index++);
-        nextChar(reader, 'e', index);
+    private int parseNull(@Nonnull Reader reader, int lastIndex) throws Exception {
+        nextChar(reader, 'u', lastIndex);
+        nextChar(reader, 'l', lastIndex + 1);
+        nextChar(reader, 'l', lastIndex + 2);
+        return 3;
     }
 
-    private void parseFalse(@Nonnull Reader reader, int index) throws Exception {
-        nextChar(reader, 'a', index++);
-        nextChar(reader, 'l', index++);
-        nextChar(reader, 's', index++);
-        nextChar(reader, 'e', index);
+    private int parseTrue(@Nonnull Reader reader, int lastIndex) throws Exception {
+        nextChar(reader, 'r', lastIndex);
+        nextChar(reader, 'u', lastIndex + 1);
+        nextChar(reader, 'e', lastIndex + 2);
+        return 3;
     }
+
+    private int parseFalse(@Nonnull Reader reader, int lastIndex) throws Exception {
+        nextChar(reader, 'a', lastIndex);
+        nextChar(reader, 'l', lastIndex + 1);
+        nextChar(reader, 's', lastIndex + 2);
+        nextChar(reader, 'e', lastIndex + 3);
+        return 4;
+    }
+
+    // private int parseNumber(
+    //     @Nonnull Reader reader, char firstChar, @Nonnull Var<@Nonnull Object> out, final int lastIndex
+    // ) throws Exception {
+    //     int hasRead = 0;
+    //     boolean isNegative = firstChar == '-';
+    //
+    //     int i;
+    //     while ((i = reader.read()) != -1) {
+    //         hasRead++;
+    //         char c = (char) i;
+    //         switch (c) {
+    //             case '\"':
+    //                 return hasRead;
+    //             case '\\':
+    //                 hasRead += parseEscape(reader, builder, lastIndex + hasRead);
+    //             default:
+    //                 builder.append(c);
+    //         }
+    //     }
+    //     throw new JsonParsingDataException(lastIndex + hasRead + 1, null, "\"");
+    // }
 
     private int parseString(
-        @Nonnull Reader reader, @Nonnull StringBuilder builder, final int index
+        @Nonnull Reader reader, @Nonnull StringBuilder builder, final int lastIndex
     ) throws Exception {
         int hasRead = 0;
         int i;
@@ -164,16 +233,17 @@ enum JsonParserImpl implements JsonParser {
                 case '\"':
                     return hasRead;
                 case '\\':
-                    int escapeLen = parseEscape(reader, builder, index + hasRead);
-                    hasRead += escapeLen;
+                    hasRead += parseEscape(reader, builder, lastIndex + hasRead);
                 default:
                     builder.append(c);
             }
         }
-        throw new JsonParsingDataException(index + hasRead - 1, null, "\"");
+        throw new JsonParsingDataException(lastIndex + hasRead + 1, null, "\"");
     }
 
-    private int parseEscape(@Nonnull Reader reader, @Nonnull StringBuilder builder, final int index) throws Exception {
+    private int parseEscape(
+        @Nonnull Reader reader, @Nonnull StringBuilder builder, final int lastIndex
+    ) throws Exception {
         int i = reader.read();
         if (i != -1) {
             char c = (char) i;
@@ -198,55 +268,58 @@ enum JsonParserImpl implements JsonParser {
                     builder.append('\f');
                     return 1;
                 case 'u':
-                    parseUnicode(reader, builder, index + 1);
+                    parseUnicode(reader, builder, lastIndex + 1);
                     return 5;
                 default:
-                    throw new JsonParsingDataException(index, String.valueOf(c), null);
+                    throw new JsonParsingDataException(lastIndex + 1, String.valueOf(c), null);
             }
         }
-        throw new JsonParsingDataException(index, null, null);
+        throw new JsonParsingDataException(lastIndex + 1, null, null);
     }
 
-    private void parseUnicode(@Nonnull Reader reader, @Nonnull StringBuilder builder, final int index) throws Exception {
-        char c1 = nextChar(reader, index);
-        char c2 = nextChar(reader, index + 1);
-        char c3 = nextChar(reader, index + 2);
-        char c4 = nextChar(reader, index + 3);
+    private void parseUnicode(
+        @Nonnull Reader reader, @Nonnull StringBuilder builder, final int lastIndex
+    ) throws Exception {
+        char c1 = nextChar(reader, lastIndex);
+        char c2 = nextChar(reader, lastIndex + 1);
+        char c3 = nextChar(reader, lastIndex + 2);
+        char c4 = nextChar(reader, lastIndex + 3);
         builder.append(CharsKit.unicodeToChar(c1, c2, c3, c4));
     }
 
-    private char nextChar(@Nonnull Reader reader, final int index) throws Exception {
+    private char nextChar(@Nonnull Reader reader, final int lastIndex) throws Exception {
         int i = reader.read();
         if (i == -1) {
-            throw new JsonParsingDataException(index, null, null);
+            throw new JsonParsingDataException(lastIndex + 1, null, null);
         }
         return (char) i;
     }
 
-    private void nextChar(@Nonnull Reader reader, char shouldBe, final int index) throws Exception {
+    private void nextChar(@Nonnull Reader reader, char shouldBe, final int lastIndex) throws Exception {
         int i = reader.read();
         if (i == -1) {
-            throw new JsonParsingDataException(index, null, String.valueOf(shouldBe));
+            throw new JsonParsingDataException(lastIndex + 1, null, String.valueOf(shouldBe));
         }
         char c = (char) i;
         if (shouldBe != c) {
-            throw new JsonParsingDataException(index, String.valueOf(c), String.valueOf(shouldBe));
+            throw new JsonParsingDataException(lastIndex + 1, String.valueOf(c), String.valueOf(shouldBe));
         }
     }
 
-    private void skipToEof(@Nonnull Reader reader, final int index) throws Exception {
+    private int skipToEof(@Nonnull Reader reader, final int lastIndex) throws Exception {
         int hasRead = 0;
         int i;
         while ((i = reader.read()) != -1) {
             hasRead++;
             char c = (char) i;
             if (!Character.isWhitespace(c)) {
-                throw new JsonParsingDataException(index + hasRead - 1, String.valueOf(c), null);
+                throw new JsonParsingDataException(lastIndex + hasRead, String.valueOf(c), null);
             }
         }
+        return hasRead;
     }
 
-    private int skipToChar(@Nonnull Reader reader, char target, final int index) throws Exception {
+    private int skipToChar(@Nonnull Reader reader, char target, final int lastIndex) throws Exception {
         int hasRead = 0;
         int i;
         while ((i = reader.read()) != -1) {
@@ -256,9 +329,9 @@ enum JsonParserImpl implements JsonParser {
                 return hasRead;
             }
             if (!Character.isWhitespace(c)) {
-                throw new JsonParsingDataException(index + hasRead - 1, String.valueOf(c), String.valueOf(target));
+                throw new JsonParsingDataException(lastIndex + hasRead, String.valueOf(c), String.valueOf(target));
             }
         }
-        throw new JsonParsingDataException(index + hasRead - 1, null, String.valueOf(target));
+        throw new JsonParsingDataException(lastIndex + hasRead + 1, null, String.valueOf(target));
     }
 }
