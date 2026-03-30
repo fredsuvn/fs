@@ -79,7 +79,7 @@ public class NumberTest implements DataTest, PrintTest {
         }, BigInteger.class));
     }
 
-    public void testNumberToNumber(Number number) {
+    private void testNumberToNumber(Number number) {
         assertEquals((byte) 123, NumKit.toNumber(number, byte.class));
         assertEquals((short) 123L, NumKit.toNumber(number, short.class));
         assertEquals((char) 123, NumKit.toNumber(number, char.class));
@@ -149,6 +149,44 @@ public class NumberTest implements DataTest, PrintTest {
                 formatter.format(number)
             );
         }
+    }
+
+    @Test
+    public void testCharSequenceToNumber() {
+        assertEquals(123, NumKit.toNumber("123"));
+        assertEquals(123456789, NumKit.toNumber("123456789"));
+        assertEquals(12345678910L, NumKit.toNumber("12345678910"));
+        assertEquals(123456789123456789L, NumKit.toNumber("123456789123456789"));
+        assertEquals(new BigInteger("1234567891234567891"), NumKit.toNumber("1234567891234567891"));
+        assertEquals(new BigDecimal("1.1"), NumKit.toNumber("1.1"));
+        assertEquals(new BigDecimal("1.1e12"), NumKit.toNumber("1.1e12"));
+        assertEquals(new BigDecimal("2e12"), NumKit.toNumber("2e12"));
+        assertEquals(new BigDecimal("2E12"), NumKit.toNumber("2E12"));
+
+        assertEquals(123, NumKit.toNumber("+123"));
+        assertEquals(123456789, NumKit.toNumber("+123456789"));
+        assertEquals(12345678910L, NumKit.toNumber("+12345678910"));
+        assertEquals(123456789123456789L, NumKit.toNumber("+123456789123456789"));
+        assertEquals(new BigInteger("1234567891234567891"), NumKit.toNumber("+1234567891234567891"));
+        assertEquals(new BigDecimal("1.1"), NumKit.toNumber("+1.1"));
+        assertEquals(new BigDecimal("1.1e12"), NumKit.toNumber("+1.1e12"));
+        assertEquals(new BigDecimal("2e12"), NumKit.toNumber("+2e12"));
+        assertEquals(new BigDecimal("2E12"), NumKit.toNumber("+2E12"));
+
+        assertEquals(-123, NumKit.toNumber("-123"));
+        assertEquals(-123456789, NumKit.toNumber("-123456789"));
+        assertEquals(-12345678910L, NumKit.toNumber("-12345678910"));
+        assertEquals(-123456789123456789L, NumKit.toNumber("-123456789123456789"));
+        assertEquals(new BigInteger("-1234567891234567891"), NumKit.toNumber("-1234567891234567891"));
+        assertEquals(new BigDecimal("-1.1"), NumKit.toNumber("-1.1"));
+        assertEquals(new BigDecimal("-1.1e12"), NumKit.toNumber("-1.1e12"));
+        assertEquals(new BigDecimal("-2e12"), NumKit.toNumber("-2e12"));
+        assertEquals(new BigDecimal("-2E12"), NumKit.toNumber("-2E12"));
+
+        assertThrows(NumException.class, () -> NumKit.toNumber("+"));
+        assertThrows(NumException.class, () -> NumKit.toNumber("-"));
+        assertThrows(NumException.class, () -> NumKit.toNumber(""));
+        assertThrows(NumException.class, () -> NumKit.toNumber("0x123"));
     }
 
     @Test

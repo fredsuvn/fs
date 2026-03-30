@@ -147,6 +147,40 @@ public class NumKit {
         throw new NumException("Failed to convert " + num + " to type: " + numType + ".");
     }
 
+    /**
+     * Returns a {@link Number} object parsed from the given string. The actual type of the object may be
+     * {@link Integer}, {@link Long}, {@link BigInteger} or {@link BigDecimal}.
+     *
+     * @param cs the given string
+     * @return a {@link Number} object parsed from the given string
+     * @throws NumException if any error occurs during the parsing
+     */
+    public static @Nonnull Number toNumber(@Nonnull CharSequence cs) throws NumException {
+        try {
+            return toNumber0(cs);
+        } catch (Exception e) {
+            throw new NumException(e);
+        }
+    }
+
+    private static @Nonnull Number toNumber0(@Nonnull CharSequence cs) throws NumberFormatException {
+        String str = cs.toString();
+        if (str.contains(".") || str.contains("e") || str.contains("E")) {
+            return new BigDecimal(str);
+        }
+        int len = str.length();
+        if (str.startsWith("-") || str.startsWith("+")) {
+            len--;
+        }
+        if (len <= 9) {
+            return Integer.parseInt(str);
+        }
+        if (len <= 18) {
+            return Long.parseLong(str);
+        }
+        return new BigInteger(str);
+    }
+
     private NumKit() {
     }
 }
