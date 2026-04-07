@@ -19,7 +19,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -328,7 +328,7 @@ public class TcpServerBuilder {
             int index = 0;
             int minClientCount = Integer.MAX_VALUE;
             for (int i = 0; i < workers.length; i++) {
-                int clientCount = workers[i].clientSet.size();
+                int clientCount = workers[i].clients.size();
                 if (clientCount < minClientCount) {
                     minClientCount = clientCount;
                     index = i;
@@ -363,7 +363,7 @@ public class TcpServerBuilder {
         private final class WorkerImpl implements Worker, Runnable {
 
             private final @Nonnull Selector selector;
-            private final @Nonnull Set<ContextImpl> clientSet = new HashSet<>();
+            private final @Nonnull List<ContextImpl> clients = new ArrayList<>();
 
             // the thread this worker starts on
             private Thread thread;
@@ -416,7 +416,7 @@ public class TcpServerBuilder {
                     SocketChannel channel = event.channel;
                     if (channel != null) {
                         ContextImpl context = new ContextImpl(channel, bufSize);
-                        clientSet.add(context);
+                        clients.add(context);
                         registerRead(context);
                         event.channel = null;
                         TcpKit.channelOpen(handler, context);
@@ -441,6 +441,17 @@ public class TcpServerBuilder {
             private void handleRead() throws Exception {
                 int keysNum = selector.select(selectTimeout);
                 if (keysNum == 0) {
+                    // Selector newSelector = Selector.open();
+                    // // move keys from old to new selector
+                    // for (SelectionKey key : selector.keys()) {
+                    //     if (key.isValid()) {
+                    //         SelectableChannel channel = key.channel();
+                    //         channel.register(newSelector, key.interestOps());
+                    //     }
+                    // }
+                    // selector.close();
+                    // selector = newSelector;
+                    // emptySelectCount = 0;
                     return;
                 }
                 Set<SelectionKey> selectedKeys = selector.selectedKeys();
@@ -453,14 +464,14 @@ public class TcpServerBuilder {
             }
 
             private void handleLoop() {
-                for (ContextImpl context : clientSet) {
+                for (ContextImpl context : clients) {
                     TcpKit.channelLoop(handler, context);
                 }
             }
 
             @SuppressWarnings("resource")
             private void handleClose() {
-                Iterator<ContextImpl> iterator = clientSet.iterator();
+                Iterator<ContextImpl> iterator = clients.iterator();
                 while (iterator.hasNext()) {
                     ContextImpl context = iterator.next();
                     if (!context.channel().isOpen()) {
@@ -472,7 +483,7 @@ public class TcpServerBuilder {
 
             @Override
             public int connectionNumber() {
-                return clientSet.size();
+                return clients.size();
             }
 
             @Override
@@ -481,7 +492,7 @@ public class TcpServerBuilder {
             }
 
             private void releaseClients() {
-                for (ContextImpl context : clientSet) {
+                for (ContextImpl context : clients) {
                     context.close();
                 }
             }
