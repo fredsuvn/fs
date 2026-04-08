@@ -20,6 +20,13 @@ import java.util.Objects;
  * Its conversion logic is:
  * <ol>
  *     <li>
+ *         If the specified source type is a {@link WildcardType} or {@link TypeVariable}, and it represents {@code ?}
+ *         or {@code ? extends Object} or raw {@code T} or {@code T extends Object}, this handler will use
+ *         {@link Object#getClass()} as the actual source type (or {@code Object.class} if the source object is
+ *         {@code null}) to convert, the codes are simplified as:
+ *         {@code return converter.convert(src, src == null ? Object.class : src.getClass(), targetType, options)};
+ *     </li>
+ *     <li>
  *         If the conversion enables {@link ConvertOption#NEW_INSTANCE_MODE}, returns
  *         {@link ObjectConverter.Status#HANDLER_CONTINUE} for any source type;
  *     </li>
@@ -57,38 +64,64 @@ public class AssignableConvertHandler implements ObjectConverter.Handler {
     public Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
-        @Nonnull Type target,
+        @Nonnull Type targetType,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
+        if (srcType instanceof WildcardType) {
+            if (isUndefined((WildcardType) srcType)) {
+                Type actualSrcType = src == null ? Object.class : src.getClass();
+                return converter.convert(src, actualSrcType, targetType, options);
+            }
+        }
+        if (srcType instanceof TypeVariable) {
+            if (isUndefined((TypeVariable<?>) srcType)) {
+                Type actualSrcType = src == null ? Object.class : src.getClass();
+                return converter.convert(src, actualSrcType, targetType, options);
+            }
+        }
         if (ConvertOption.isNewInstanceMode(options)) {
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
-        if (Objects.equals(target, srcType)) {
+        if (Objects.equals(targetType, srcType)) {
             return src;
         }
         if (ConvertOption.isStrictTargetTypeMode(options)) {
             // strict mode, wildcard is unsupported
-            if (target instanceof WildcardType) {
+            if (targetType instanceof WildcardType) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
             }
         } else {
             // non-strict mode, wildcard and type variable will be considered as their bounds type
-            if (target instanceof WildcardType) {
-                WildcardType wildcard = (WildcardType) target;
+            if (targetType instanceof WildcardType) {
+                WildcardType wildcard = (WildcardType) targetType;
                 Type superType = TypeKit.getLowerBound(wildcard);
                 if (superType != null) {
                     return converter.convert(src, srcType, superType, options);
                 }
                 return converter.convert(src, srcType, TypeKit.getUpperBound(wildcard), options);
             }
-            if (target instanceof TypeVariable<?>) {
-                return converter.convert(src, srcType, ((TypeVariable<?>) target).getBounds()[0], options);
+            if (targetType instanceof TypeVariable<?>) {
+                return converter.convert(src, srcType, ((TypeVariable<?>) targetType).getBounds()[0], options);
             }
         }
-        if (TypeKit.isCompatible(target, srcType)) {
+        if (TypeKit.isCompatible(targetType, srcType)) {
             return src;
         }
         return ObjectConverter.Status.HANDLER_CONTINUE;
+    }
+
+    private boolean isUndefined(WildcardType type) {
+        Type lowerBound = TypeKit.getLowerBound(type);
+        if (lowerBound == null) {
+            Type upperBound = TypeKit.getUpperBound(type);
+            return Object.class.equals(upperBound);
+        }
+        return false;
+    }
+
+    private boolean isUndefined(TypeVariable<?> type) {
+        Type upperBound = TypeKit.getFirstBound(type);
+        return Object.class.equals(upperBound);
     }
 }

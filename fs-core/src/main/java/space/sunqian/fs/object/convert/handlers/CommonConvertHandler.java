@@ -179,15 +179,15 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
     public Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
-        @Nonnull Type target,
+        @Nonnull Type targetType,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
         if (src == null) {
             return null;
         }
-        if (target instanceof Class<?>) {
-            Class<?> targetClass = (Class<?>) target;
+        if (targetType instanceof Class<?>) {
+            Class<?> targetClass = (Class<?>) targetType;
             // to enum:
             if (targetClass.isEnum()) {
                 String name = src.toString();
@@ -195,15 +195,15 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             }
             // string to byte[], char[], ByteBuffer, CharBuffer:
             if (srcType.equals(String.class)) {
-                if (target.equals(byte[].class) || target.equals(ByteBuffer.class)) {
+                if (targetType.equals(byte[].class) || targetType.equals(ByteBuffer.class)) {
                     Charset charset = ConvertOption.getCharset(options);
                     byte[] bytes = ((String) src).getBytes(charset);
-                    return target.equals(ByteBuffer.class) ? ByteBuffer.wrap(bytes) : bytes;
+                    return targetType.equals(ByteBuffer.class) ? ByteBuffer.wrap(bytes) : bytes;
                 }
-                if (target.equals(char[].class)) {
+                if (targetType.equals(char[].class)) {
                     return ((String) src).toCharArray();
                 }
-                if (target.equals(CharBuffer.class)) {
+                if (targetType.equals(CharBuffer.class)) {
                     return CharBuffer.wrap((String) src);
                 }
             }
@@ -224,12 +224,12 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 );
             }
             // to map or data object:
-            return toDataObject(src, srcType, targetClass, target, converter, options);
-        } else if (target instanceof GenericArrayType) {
+            return toDataObject(src, srcType, targetClass, targetType, converter, options);
+        } else if (targetType instanceof GenericArrayType) {
             // to generic array:
-            return toArray(src, srcType, (GenericArrayType) target, converter, options);
-        } else if (target instanceof ParameterizedType) {
-            ParameterizedType paramType = (ParameterizedType) target;
+            return toArray(src, srcType, (GenericArrayType) targetType, converter, options);
+        } else if (targetType instanceof ParameterizedType) {
+            ParameterizedType paramType = (ParameterizedType) targetType;
             Class<?> rawTarget = (Class<?>) paramType.getRawType();
             IntFunction<Collection<Object>> collectionFunc = collectionFunction(rawTarget);
             // to collection:
@@ -239,7 +239,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 );
             }
             // to map or data object:
-            return toDataObject(src, srcType, rawTarget, target, converter, options);
+            return toDataObject(src, srcType, rawTarget, targetType, converter, options);
         }
         return ObjectConverter.Status.HANDLER_CONTINUE;
     }

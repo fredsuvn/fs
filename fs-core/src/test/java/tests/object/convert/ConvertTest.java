@@ -161,7 +161,24 @@ public class ConvertTest implements PrintTest, DataTest {
                 converter.convert(obj, X.class.getTypeParameters()[0], ConvertOption.strictTargetTypeMode(true)));
             assertSame(converter.convert(obj, X.class.getTypeParameters()[0]), obj);
         }
+    }
 
+    @Test
+    public void testAssignableConvertHandler() {
+        {
+            // for source type
+            Map<String, ?> map = MapKit.map(
+                "one", "1",
+                "two", 2,
+                "array", new long[]{1, 2, 3},
+                "list", ListKit.list("1", "2", "3")
+            );
+            C expected = new C(1, "2", new int[]{1, 2, 3}, SetKit.set(1, 2, 3));
+            C target = ObjectConverter.defaultConverter().convert(map, C.class);
+            assertEquals(expected, target);
+            C target2 = ObjectConverter.defaultConverter().convert(map, new TypeRef<Map<String, ?>>() {}.type(), C.class);
+            assertEquals(expected, target2);
+        }
     }
 
     @Test
@@ -817,6 +834,17 @@ public class ConvertTest implements PrintTest, DataTest {
         private Long first;
         private Long second;
         private Long third;
+    }
+
+    @Data
+    @EqualsAndHashCode
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class C {
+        private int one;
+        private String two;
+        private int[] array;
+        private Set<Integer> list;
     }
 
     public static class F {

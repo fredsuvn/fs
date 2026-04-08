@@ -201,6 +201,31 @@ public interface ObjectConverter {
      * {@link ConvertOption} or other custom options for custom implementations.
      *
      * @param src     the given source object
+     * @param srcType the specified type of the given source object
+     * @param target  the specified type of the target object
+     * @param options the other conversion options
+     * @param <T>     the target type
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
+     *                                           supported
+     * @throws ObjectConvertException            if the conversion failed
+     */
+    default <T> T convert(
+        @Nullable Object src,
+        @Nonnull Type srcType,
+        @Nonnull Class<? extends T> target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
+        return Fs.as(convert(src, (Type) target, options));
+    }
+
+    /**
+     * Converts the given source object from the specified type to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConvertOption} or other custom options for custom implementations.
+     *
+     * @param src     the given source object
      * @param target  the specified type ref of the target object
      * @param options the other conversion options
      * @param <T>     the target type
@@ -325,11 +350,11 @@ public interface ObjectConverter {
         /**
          * Converts the given source object to the given target type.
          *
-         * @param src       the given source object
-         * @param srcType   the specified type of the given source object
-         * @param target    the specified type of the target object
-         * @param converter the converter where this handler in
-         * @param options   the other conversion options
+         * @param src        the given source object
+         * @param srcType    the specified type of the given source object
+         * @param targetType the specified type of the target object
+         * @param converter  the converter where this handler in
+         * @param options    the other conversion options
          * @return the converted object, {@code null} is permitted, or {@link Status#HANDLER_CONTINUE} /
          * {@link Status#HANDLER_BREAK} if conversion failed
          * @throws Exception any exception can be thrown here
@@ -337,7 +362,7 @@ public interface ObjectConverter {
         Object convert(
             @Nullable Object src,
             @Nonnull Type srcType,
-            @Nonnull Type target,
+            @Nonnull Type targetType,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception;

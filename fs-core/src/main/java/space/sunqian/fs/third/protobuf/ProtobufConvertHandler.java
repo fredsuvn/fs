@@ -55,7 +55,7 @@ public class ProtobufConvertHandler implements ObjectConverter.Handler {
     public Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
-        @Nonnull Type target,
+        @Nonnull Type targetType,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
@@ -64,13 +64,13 @@ public class ProtobufConvertHandler implements ObjectConverter.Handler {
         }
         if (src instanceof ByteString) {
             ByteString bs = (ByteString) src;
-            return converter.asHandler().convert(bs.asReadOnlyByteBuffer(), srcType, target, converter, options);
-        } else if (target.equals(ByteString.class)) {
+            return converter.asHandler().convert(bs.asReadOnlyByteBuffer(), srcType, targetType, converter, options);
+        } else if (targetType.equals(ByteString.class)) {
             Object ret = converter.asHandler().convert(src, srcType, byte[].class, converter, options);
             if (ret instanceof byte[]) {
                 return ByteString.copyFrom((byte[]) ret);
             }
-        } else if (target.equals(ProtocolStringList.class)) {
+        } else if (targetType.equals(ProtocolStringList.class)) {
             Object ret = converter.asHandler().convert(
                 src, srcType, ProtobufSchemaHandler.StringListTypeRef.SINGLETON.type(), converter, options
             );

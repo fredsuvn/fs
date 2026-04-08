@@ -84,12 +84,12 @@ final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Hand
     public Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
-        @Nonnull Type target,
+        @Nonnull Type targetType,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
         try {
-            return convert(src, srcType, target, options);
+            return convert(src, srcType, targetType, options);
         } catch (UnsupportedObjectConvertException e) {
             return Status.HANDLER_CONTINUE;
         }
