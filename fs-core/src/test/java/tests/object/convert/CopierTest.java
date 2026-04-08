@@ -19,6 +19,7 @@ import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.convert.ObjectCopyException;
+import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.MapSchemaParser;
 import space.sunqian.fs.object.schema.ObjectProperty;
@@ -138,16 +139,16 @@ public class CopierTest implements PrintTest {
         };
 
         // key + "2"
-        ObjectCopier.Handler keyPlusHandler = new ObjectCopier.Handler() {
+        class Key2Handler extends CommonCopierHandler {
             @Override
             public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapSchema srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
-                return ObjectCopier.Handler.super.copyProperty(
+                return super.copyProperty(
                     (srcKey + "2"), srcValue, src, srcSchema, dst, dstSchema, converter, options);
             }
 
             @Override
             public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapSchema srcSchema, @Nonnull Object dst, @Nonnull ObjectSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
-                return ObjectCopier.Handler.super.copyProperty(
+                return super.copyProperty(
                     (srcKey + "2"), srcValue, src, srcSchema, dst, dstSchema, converter, options);
             }
 
@@ -156,7 +157,7 @@ public class CopierTest implements PrintTest {
                 if ("class".equals(srcPropertyName) || !srcProperty.isReadable()) {
                     return false;
                 }
-                return ObjectCopier.Handler.super.copyProperty(
+                return super.copyProperty(
                     srcPropertyName + "2", srcProperty, src, srcSchema, dst, dstSchema, converter, options);
             }
 
@@ -165,13 +166,14 @@ public class CopierTest implements PrintTest {
                 if ("class".equals(srcPropertyName) || !srcProperty.isReadable()) {
                     return false;
                 }
-                return ObjectCopier.Handler.super.copyProperty(
+                return super.copyProperty(
                     srcPropertyName + "2", srcProperty, src, srcSchema, dst, dstSchema, converter, options);
             }
-        };
+        }
+        ObjectCopier.Handler keyPlusHandler = new Key2Handler();
 
         // value to "1"/"2"
-        ObjectCopier.Handler valueChangeHandler = new ObjectCopier.Handler() {
+        class Value2Handler extends CommonCopierHandler {
             @Override
             public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapSchema srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 Object value;
@@ -180,7 +182,7 @@ public class CopierTest implements PrintTest {
                 } else {
                     value = "1";
                 }
-                return ObjectCopier.Handler.super.copyProperty(
+                return super.copyProperty(
                     srcKey, value, src, srcSchema, dst, dstSchema, converter, options);
             }
 
@@ -192,7 +194,7 @@ public class CopierTest implements PrintTest {
                 } else {
                     value = "1";
                 }
-                return ObjectCopier.Handler.super.copyProperty(
+                return super.copyProperty(
                     srcKey, value, src, srcSchema, dst, dstSchema, converter, options);
             }
 
@@ -225,7 +227,8 @@ public class CopierTest implements PrintTest {
                 dstSchema.getProperty(srcPropertyName).setValue(dst, value);
                 return false;
             }
-        };
+        }
+        ObjectCopier.Handler valueChangeHandler = new Value2Handler();
 
         // error handler
         ObjectCopier.Handler errorHandler = new ObjectCopier.Handler() {

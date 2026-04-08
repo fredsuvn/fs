@@ -1,6 +1,7 @@
 package space.sunqian.fs.object.convert;
 
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
@@ -10,6 +11,7 @@ import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.schema.DataSchemaException;
 import space.sunqian.fs.object.schema.MapSchema;
 import space.sunqian.fs.object.schema.MapSchemaParser;
+import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
@@ -232,5 +234,61 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
                 throw new ObjectCopyException(e);
             }
         });
+    }
+
+    @Override
+    public boolean copyProperty(@Nonnull Object srcKey, @Nullable Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapSchema srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+        boolean goon = true;
+        for (Handler handler : handlers) {
+            goon = handler.copyProperty(
+                srcKey, srcValue, src, srcSchema, dst, dstSchema, converter, options
+            );
+            if (!goon) {
+                break;
+            }
+        }
+        return goon;
+    }
+
+    @Override
+    public boolean copyProperty(@Nonnull Object srcKey, @Nullable Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapSchema srcSchema, @Nonnull Object dst, @Nonnull ObjectSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+        boolean goon = true;
+        for (Handler handler : handlers) {
+            goon = handler.copyProperty(
+                srcKey, srcValue, src, srcSchema, dst, dstSchema, converter, options
+            );
+            if (!goon) {
+                break;
+            }
+        }
+        return goon;
+    }
+
+    @Override
+    public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull ObjectProperty srcProperty, @Nonnull Object src, @Nonnull ObjectSchema srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+        boolean goon = true;
+        for (Handler handler : handlers) {
+            goon = handler.copyProperty(
+                srcPropertyName, srcProperty, src, srcSchema, dst, dstSchema, converter, options
+            );
+            if (!goon) {
+                break;
+            }
+        }
+        return goon;
+    }
+
+    @Override
+    public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull ObjectProperty srcProperty, @Nonnull Object src, @Nonnull ObjectSchema srcSchema, @Nonnull Object dst, @Nonnull ObjectSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+        boolean goon = true;
+        for (Handler handler : handlers) {
+            goon = handler.copyProperty(
+                srcPropertyName, srcProperty, src, srcSchema, dst, dstSchema, converter, options
+            );
+            if (!goon) {
+                break;
+            }
+        }
+        return goon;
     }
 }

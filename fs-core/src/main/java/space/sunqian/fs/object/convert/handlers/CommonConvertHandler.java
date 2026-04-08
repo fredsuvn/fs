@@ -433,7 +433,6 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             HANDLER_MAP.put(String.class, StringClassHandler.INST);
             HANDLER_MAP.put(CharSequence.class, StringClassHandler.INST);
             HANDLER_MAP.put(boolean.class, BooleanClassHandler.INST);
-            HANDLER_MAP.put(Boolean.class, BooleanClassHandler.INST);
             HANDLER_MAP.put(byte.class, NumberClassHandler.INST);
             HANDLER_MAP.put(short.class, NumberClassHandler.INST);
             HANDLER_MAP.put(char.class, NumberClassHandler.INST);
@@ -441,6 +440,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             HANDLER_MAP.put(long.class, NumberClassHandler.INST);
             HANDLER_MAP.put(float.class, NumberClassHandler.INST);
             HANDLER_MAP.put(double.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(Boolean.class, BooleanClassHandler.INST);
             HANDLER_MAP.put(Byte.class, NumberClassHandler.INST);
             HANDLER_MAP.put(Short.class, NumberClassHandler.INST);
             HANDLER_MAP.put(Character.class, NumberClassHandler.INST);

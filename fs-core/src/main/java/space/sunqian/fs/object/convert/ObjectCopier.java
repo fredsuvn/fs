@@ -5,11 +5,8 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.annotation.ThreadSafe;
-import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
-import space.sunqian.fs.object.annotation.DatePattern;
-import space.sunqian.fs.object.annotation.NumPattern;
 import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.schema.MapSchema;
@@ -283,7 +280,7 @@ public interface ObjectCopier {
          * @return whether to continue to copy
          * @throws Exception any exception can be thrown here
          */
-        default boolean copyProperty(
+        boolean copyProperty(
             @Nonnull Object srcKey,
             @Nullable Object srcValue,
             @Nonnull Map<Object, Object> src,
@@ -292,21 +289,7 @@ public interface ObjectCopier {
             @Nonnull MapSchema dstSchema,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
-        ) throws Exception {
-            if (ConvertOption.isIgnoreProperty(srcKey, options)) {
-                return false;
-            }
-            if (srcValue == null && ConvertOption.isIgnoreNull(options)) {
-                return false;
-            }
-            if (srcKey instanceof String) {
-                srcKey = Fs.as(ConvertOption.getNameMapper(options).map((String) srcKey));
-            }
-            Object dstKey = converter.convert(srcKey, srcSchema.keyType(), dstSchema.keyType(), options);
-            Object dstValue = converter.convert(srcValue, srcSchema.valueType(), dstSchema.valueType(), options);
-            dst.put(dstKey, dstValue);
-            return false;
-        }
+        ) throws Exception;
 
         /**
          * This method will be invoked when copy an entry from the source map to a destination object. Returns
@@ -323,7 +306,7 @@ public interface ObjectCopier {
          * @return whether to continue to copy
          * @throws Exception any exception can be thrown here
          */
-        default boolean copyProperty(
+        boolean copyProperty(
             @Nonnull Object srcKey,
             @Nullable Object srcValue,
             @Nonnull Map<Object, Object> src,
@@ -332,28 +315,7 @@ public interface ObjectCopier {
             @Nonnull ObjectSchema dstSchema,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
-        ) throws Exception {
-            if (ConvertOption.isIgnoreProperty(srcKey, options)) {
-                return false;
-            }
-            if (srcValue == null && ConvertOption.isIgnoreNull(options)) {
-                return false;
-            }
-            if (srcKey instanceof String) {
-                srcKey = ConvertOption.getNameMapper(options).map((String) srcKey);
-            }
-            String dstPropertyName = Fs.as(converter.convert(srcKey, srcSchema.keyType(), String.class, options));
-            ObjectProperty dstProperty = dstSchema.getProperty(dstPropertyName);
-            if (dstProperty == null || !dstProperty.isWritable()) {
-                return false;
-            }
-            DatePattern datePattern = dstProperty.getAnnotation(DatePattern.class);
-            NumPattern numPattern = dstProperty.getAnnotation(NumPattern.class);
-            Option<?, ?>[] actualOps = ConvertBack.mergeOptions(options, datePattern, numPattern);
-            Object dstPropertyValue = converter.convert(srcValue, srcSchema.valueType(), dstProperty.type(), actualOps);
-            dstProperty.setValue(dst, dstPropertyValue);
-            return false;
-        }
+        ) throws Exception;
 
         /**
          * This method will be invoked when copy a property from the source object to a destination map. Returns
@@ -371,7 +333,7 @@ public interface ObjectCopier {
          * @return whether to continue to copy
          * @throws Exception any exception can be thrown here
          */
-        default boolean copyProperty(
+        boolean copyProperty(
             @Nonnull String srcPropertyName,
             @Nonnull ObjectProperty srcProperty,
             @Nonnull Object src,
@@ -380,26 +342,7 @@ public interface ObjectCopier {
             @Nonnull MapSchema dstSchema,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
-        ) throws Exception {
-            if (ConvertOption.isIgnoreProperty(srcProperty.name(), options)) {
-                return false;
-            }
-            if (!srcProperty.isReadable()) {
-                return false;
-            }
-            if ("class".equals(srcPropertyName) && !ConvertOption.isIncludeClass(options)) {
-                return false;
-            }
-            String actualSrcPropertyName = ConvertOption.getNameMapper(options).map(srcPropertyName);
-            Object srcPropertyValue = srcProperty.getValue(src);
-            if (srcPropertyValue == null && ConvertOption.isIgnoreNull(options)) {
-                return false;
-            }
-            Object dstKey = converter.convert(actualSrcPropertyName, String.class, dstSchema.keyType(), options);
-            Object dstValue = converter.convert(srcPropertyValue, srcProperty.type(), dstSchema.valueType(), options);
-            dst.put(dstKey, dstValue);
-            return false;
-        }
+        ) throws Exception;
 
         /**
          * This method will be invoked when copy a property from the source object to a destination object. Returns
@@ -417,7 +360,7 @@ public interface ObjectCopier {
          * @return whether to continue to copy
          * @throws Exception any exception can be thrown here
          */
-        default boolean copyProperty(
+        boolean copyProperty(
             @Nonnull String srcPropertyName,
             @Nonnull ObjectProperty srcProperty,
             @Nonnull Object src,
@@ -426,38 +369,6 @@ public interface ObjectCopier {
             @Nonnull ObjectSchema dstSchema,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
-        ) throws Exception {
-            if (ConvertOption.isIgnoreProperty(srcProperty.name(), options)) {
-                return false;
-            }
-            if (!srcProperty.isReadable()) {
-                return false;
-            }
-            if ("class".equals(srcPropertyName) && !ConvertOption.isIncludeClass(options)) {
-                return false;
-            }
-            String actualSrcPropertyName = ConvertOption.getNameMapper(options).map(srcPropertyName);
-            Object srcPropertyValue = srcProperty.getValue(src);
-            if (srcPropertyValue == null && ConvertOption.isIgnoreNull(options)) {
-                return false;
-            }
-            String dstPropertyName = Fs.as(converter.convert(actualSrcPropertyName, String.class, String.class, options));
-            ObjectProperty dstProperty = dstSchema.getProperty(dstPropertyName);
-            if (dstProperty == null || !dstProperty.isWritable()) {
-                return false;
-            }
-            DatePattern datePattern = ConvertBack.getAnnotation(
-                DatePattern.class, srcProperty, dstProperty
-            );
-            NumPattern numPattern = ConvertBack.getAnnotation(
-                NumPattern.class, srcProperty, dstProperty
-            );
-            Option<?, ?>[] actualOps = ConvertBack.mergeOptions(options, datePattern, numPattern);
-            Object dstPropertyValue = converter.convert(
-                srcPropertyValue, srcProperty.type(), dstProperty.type(), actualOps
-            );
-            dstProperty.setValue(dst, dstPropertyValue);
-            return false;
-        }
+        ) throws Exception;
     }
 }
