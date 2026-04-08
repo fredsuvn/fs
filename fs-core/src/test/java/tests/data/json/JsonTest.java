@@ -160,8 +160,8 @@ public class JsonTest implements PrintTest {
             assertEquals(jsonMapper.writeValueAsString(collection), JsonKit.toJsonString(collection.toArray()));
         }
         {
-            // complex
-            ComplexJsonData data = new ComplexJsonData();
+            // complex data 1
+            ComplexData data = new ComplexData();
             data.setI1(1);
             data.setL1(2L);
             data.setStr1("hello");
@@ -190,14 +190,34 @@ public class JsonTest implements PrintTest {
             data.setBa3(new BigDecimal[]{new BigDecimal("1.0"), new BigDecimal("2.0")});
             data.setSa3(ListKit.list("a", "b"));
             String json = JsonKit.toJsonString(data);
-            ComplexJsonData parsed = jsonMapper.readValue(json, ComplexJsonData.class);
+            ComplexData parsed = jsonMapper.readValue(json, ComplexData.class);
             assertEquals(data, parsed);
         }
-        // {
-        //     // JsonData
-        //     JsonData nullData = JsonData.ofNull();
-        //     assertEquals("null", JsonKit.toJsonString(nullData));
-        // }
+        {
+            // complex data 2
+            LocalDateTime now = LocalDateTime.of(2026, 4, 8, 14, 59, 59);
+            // full and complex data
+            ParsedData src = new ParsedData();
+            src.setI(11);
+            src.setL(22L);
+            src.setString("333");
+            src.setIntObj(44);
+            src.setLongObj(55L);
+            src.setDecimal(new BigDecimal("66.667"));
+            src.setLs(new long[]{1, 2, 3});
+            src.setDecimals(new BigDecimal[]{new BigDecimal("2.333")});
+            src.setStrings(ListKit.list("a", "b", "c"));
+            src.setStringMap(MapKit.map("a", "1", "b", "2", "c", "3"));
+            src.setDataObjMap(MapKit.map("x1", new DataObj("11", "22"), "x2", new DataObj("33", "44")));
+            src.setDataObj(new DataObj("s1", "s2"));
+            src.setInner(new ParsedData.Inner(now, new DataObj("88", "99")));
+            src.setDataEnum(DataEnum.C);
+            String json = JsonKit.toJsonString(src);
+            ParsedData parsed = jsonMapper.readValue(json, ParsedData.class);
+            System.out.println(src);
+            System.out.println(parsed);
+            assertEquals(src, parsed);
+        }
         {
             // error
             assertThrows(IORuntimeException.class, () -> JsonKit.toJsonString(new Object(), new ErrorAppender()));
@@ -518,6 +538,10 @@ public class JsonTest implements PrintTest {
     }
 
     @Test
+    public void testParsing() throws Exception {
+    }
+
+    @Test
     public void testException() throws Exception {
         {
             // JsonDataException
@@ -563,6 +587,7 @@ public class JsonTest implements PrintTest {
     }
 
     @Data
+    @EqualsAndHashCode
     @AllArgsConstructor
     @NoArgsConstructor
     public static class DataObj {
@@ -590,7 +615,7 @@ public class JsonTest implements PrintTest {
 
     @Data
     @EqualsAndHashCode
-    public static class ComplexJsonData {
+    public static class ComplexData {
         private int i1;
         private long l1;
         private String str1;
@@ -622,5 +647,37 @@ public class JsonTest implements PrintTest {
 
     public enum DataEnum {
         A, B, C
+    }
+
+    @Data
+    @EqualsAndHashCode
+    public static class ParsedData {
+        private int i;
+        private long l;
+        private String string;
+        private Integer intObj;
+        private Long longObj;
+        private BigDecimal decimal;
+        private long[] ls;
+        private BigDecimal[] decimals;
+        private List<String> strings;
+        private Map<String, String> stringMap;
+        private Map<String, DataObj> dataObjMap;
+        private DataObj dataObj;
+        private Inner inner;
+        private DataEnum dataEnum;
+
+        @Data
+        @EqualsAndHashCode
+        @AllArgsConstructor
+        @NoArgsConstructor
+        public static class Inner {
+
+            @DatePattern("yyyy-MM-dd HH:mm:ss")
+            @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")// timezone = "Asia/Shanghai"
+            private LocalDateTime date;
+
+            private DataObj dataObj;
+        }
     }
 }
