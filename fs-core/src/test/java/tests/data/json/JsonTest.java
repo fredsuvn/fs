@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.string.StringView;
@@ -56,11 +57,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JsonTest implements PrintTest {
 
-    private final ObjectMapper jsonMapper = new ObjectMapper();
+    private static final ObjectMapper jsonMapper = new ObjectMapper();
+
+    @BeforeAll
+    public static void setUp() {
+        jsonMapper.registerModule(new JavaTimeModule());
+    }
 
     @Test
-    public void testFormatter() throws Exception {
-        jsonMapper.registerModule(new JavaTimeModule());
+    public void testFormatting() throws Exception {
         {
             // string
             StringView a = StringView.of("123");
@@ -102,11 +107,11 @@ public class JsonTest implements PrintTest {
         }
         {
             // object
-            testFormatter(JsonKit::toJsonString, false);
+            testFormatting(JsonKit::toJsonString, false);
             JsonFormatter jsonFormatter = JsonFormatter.newFormatter(
                 ObjectSchemaParser.defaultCachedParser(), ObjectConverter.defaultConverter(), true
             );
-            testFormatter(jsonFormatter::toString, true);
+            testFormatting(jsonFormatter::toString, true);
         }
         {
             // array
@@ -196,7 +201,6 @@ public class JsonTest implements PrintTest {
         {
             // complex data 2
             LocalDateTime now = LocalDateTime.of(2026, 4, 8, 14, 59, 59);
-            // full and complex data
             ParsedData src = new ParsedData();
             src.setI(11);
             src.setL(22L);
@@ -214,8 +218,6 @@ public class JsonTest implements PrintTest {
             src.setDataEnum(DataEnum.C);
             String json = JsonKit.toJsonString(src);
             ParsedData parsed = jsonMapper.readValue(json, ParsedData.class);
-            System.out.println(src);
-            System.out.println(parsed);
             assertEquals(src, parsed);
         }
         {
@@ -229,7 +231,7 @@ public class JsonTest implements PrintTest {
         }
     }
 
-    private void testFormatter(Function<Object, String> formatter, boolean ignoreNull) throws Exception {
+    private void testFormatting(Function<Object, String> formatter, boolean ignoreNull) throws Exception {
         ObjectMapper jsonMapper = new ObjectMapper();
         jsonMapper.registerModule(new JavaTimeModule());
         {
@@ -539,6 +541,30 @@ public class JsonTest implements PrintTest {
 
     @Test
     public void testParsing() throws Exception {
+        {
+            LocalDateTime now = LocalDateTime.of(2026, 4, 8, 14, 59, 59);
+            ParsedData src = new ParsedData();
+            src.setI(11);
+            src.setL(22L);
+            src.setString("333");
+            src.setIntObj(44);
+            src.setLongObj(55L);
+            src.setDecimal(new BigDecimal("66.667"));
+            src.setLs(new long[]{1, 2, 3});
+            src.setDecimals(new BigDecimal[]{new BigDecimal("2.333")});
+            src.setStrings(ListKit.list("a", "b", "c"));
+            src.setStringMap(MapKit.map("a", "1", "b", "2", "c", "3"));
+            src.setDataObjMap(MapKit.map("x1", new DataObj("11", "22"), "x2", new DataObj("33", "44")));
+            src.setDataObj(new DataObj("s1", "s2"));
+            src.setInner(new ParsedData.Inner(now, new DataObj("88", "99")));
+            src.setDataEnum(DataEnum.C);
+            String json = jsonMapper.writeValueAsString(src);
+            System.out.println(json);
+            ParsedData parsed = JsonKit.parse(json).toObject(ParsedData.class);
+            // System.out.println(src);
+            // System.out.println(parsed);
+            assertEquals(src, parsed);
+        }
     }
 
     @Test

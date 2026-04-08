@@ -8,6 +8,7 @@ import space.sunqian.fs.io.IORuntimeException;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.nio.channels.ReadableByteChannel;
 
 /**
@@ -60,4 +61,15 @@ public interface JsonParser extends ByteDataParser<JsonData>, CharDataParser<Jso
     @Override
     @Nonnull
     JsonData parse(@Nonnull Reader reader) throws IORuntimeException;
+
+    /**
+     * Parses and returns the JSON data from the given JSON string to a {@link JsonData} object.
+     *
+     * @param str the given JSON string
+     * @return the parsed {@link JsonData} object
+     * @throws IORuntimeException if an I/O error occurs during parsing
+     */
+    default @Nonnull JsonData parse(@Nonnull String str) throws IORuntimeException {
+        return parse(new StringReader(str));
+    }
 }

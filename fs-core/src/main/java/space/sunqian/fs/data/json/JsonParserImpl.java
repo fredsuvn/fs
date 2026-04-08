@@ -66,6 +66,7 @@ enum JsonParserImpl implements JsonParser {
     ) throws Exception {
         Object result = null;
         int i;
+        PARSING:
         while ((i = reader.nextChar()) != -1) {
             char c = (char) i;
             if (Character.isWhitespace(c)) {
@@ -74,32 +75,32 @@ enum JsonParserImpl implements JsonParser {
             switch (c) {
                 case 'n':
                     parseNull(reader);
-                    break;
+                    break PARSING;
                 case 't':
                     parseTrue(reader);
                     result = true;
-                    break;
+                    break PARSING;
                 case 'f':
                     parseFalse(reader);
                     result = false;
-                    break;
+                    break PARSING;
                 case '\"': {
                     parseString(reader, strBuilder);
                     result = strBuilder.toString();
                     strBuilder.setLength(0);
-                    break;
+                    break PARSING;
                 }
                 case '{': {
                     Map<String, Object> objBuilder = new LinkedHashMap<>();
                     parseObject(reader, objBuilder, strBuilder);
                     result = objBuilder;
-                    break;
+                    break PARSING;
                 }
                 case '[': {
                     List<Object> arrBuilder = new ArrayList<>();
                     parseArray(reader, arrBuilder, strBuilder);
                     result = arrBuilder;
-                    break;
+                    break PARSING;
                 }
                 case '0':
                 case '1':
@@ -112,10 +113,12 @@ enum JsonParserImpl implements JsonParser {
                 case '8':
                 case '9':
                 case '-':
+                    strBuilder.append(c);
+                    @SuppressWarnings("UnnecessaryLocalVariable")
                     Number number = parseNumber(reader, strBuilder);
                     result = number;
                     strBuilder.setLength(0);
-                    break;
+                    break PARSING;
                 default:
                     throw new JsonParsingDataException(reader.nextIndex() - 1, String.valueOf(c), null);
             }
@@ -138,25 +141,27 @@ enum JsonParserImpl implements JsonParser {
             if (Character.isWhitespace(c)) {
                 continue;
             }
-            if (c == '\"') {
-                parseString(reader, strBuilder);
-                skipToChar(reader, ':');
-                String key = strBuilder.toString();
-                strBuilder.setLength(0);
-                Object obj = parseJson(reader, strBuilder, false);
-                objBuilder.put(key, obj);
-                first = false;
-                continue;
-            }
-            if (c == ',') {
-                if (!first) {
+            switch (c) {
+                case '\"':
+                    parseString(reader, strBuilder);
+                    skipToChar(reader, ':');
+                    String key = strBuilder.toString();
+                    strBuilder.setLength(0);
+                    Object obj = parseJson(reader, strBuilder, false);
+                    objBuilder.put(key, obj);
+                    first = false;
                     continue;
-                }
+                case ',':
+                    if (!first) {
+                        continue;
+                    } else {
+                        throw new JsonParsingDataException(reader.nextIndex() - 1, String.valueOf(c), null);
+                    }
+                case '}':
+                    return;
+                default:
+                    throw new JsonParsingDataException(reader.nextIndex() - 1, String.valueOf(c), null);
             }
-            if (c == '}') {
-                return;
-            }
-            throw new JsonParsingDataException(reader.nextIndex() - 1, String.valueOf(c), null);
         }
         throw new JsonParsingDataException(reader.nextIndex(), null, null);
     }
@@ -328,6 +333,7 @@ enum JsonParserImpl implements JsonParser {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void skipToChar(@Nonnull JReader reader, char target) throws Exception {
         int i;
         while ((i = reader.nextChar()) != -1) {

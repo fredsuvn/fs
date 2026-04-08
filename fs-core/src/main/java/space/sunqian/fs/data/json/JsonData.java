@@ -3,12 +3,16 @@ package space.sunqian.fs.data.json;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
+import space.sunqian.fs.Fs;
 import space.sunqian.fs.data.ByteData;
 import space.sunqian.fs.data.CharData;
+import space.sunqian.fs.data.DataException;
 import space.sunqian.fs.data.DataList;
 import space.sunqian.fs.data.DataMap;
 import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.reflect.TypeRef;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -229,6 +233,65 @@ public interface JsonData extends ByteData, CharData {
      */
     default @Nonnull DataList asDataList() throws JsonDataException {
         return DataList.wrap(asList());
+    }
+
+    /**
+     * Converts this {@link JsonData} to a new object of the specified class.
+     * <p>
+     * This method supports {@code JSON Object}, {@code JSON Array}, {@code JSON String}, {@code JSON Number},
+     * {@code JSON Boolean}, but not {@code JSON Null}.
+     *
+     * @param cls the specified class
+     * @param <T> the type of the object to be returned`
+     * @return a new object of the specified class
+     * @throws DataException if an error occurs during the conversion
+     */
+    default <T> @Nonnull T toObject(Class<T> cls) throws DataException {
+        return Fs.as(toObject((Type) cls));
+    }
+
+    /**
+     * Converts this {@link JsonData} to a new object of the specified class.
+     * <p>
+     * This method supports {@code JSON Object}, {@code JSON Array}, {@code JSON String}, {@code JSON Number},
+     * {@code JSON Boolean}, but not {@code JSON Null}.
+     *
+     * @param typeRef the reference of the specified class
+     * @param <T>     the type of the object to be returned`
+     * @return a new object of the specified class
+     * @throws DataException if an error occurs during the conversion
+     */
+    default <T> @Nonnull T toObject(TypeRef<T> typeRef) throws DataException {
+        return Fs.as(toObject(typeRef.type()));
+    }
+
+    /**
+     * Converts this {@link JsonData} to a new object of the specified type.
+     * <p>
+     * This method supports {@code JSON Object}, {@code JSON Array}, {@code JSON String}, {@code JSON Number},
+     * {@code JSON Boolean}, but not {@code JSON Null}.
+     *
+     * @param type the specified type
+     * @return a new object of the specified type
+     * @throws DataException if an error occurs during the conversion
+     */
+    @SuppressWarnings("EnhancedSwitchMigration")
+    default @Nonnull Object toObject(Type type) throws DataException {
+        JsonType jsonType = type();
+        switch (jsonType) {
+            case OBJECT:
+                return asDataMap().toObject(type);
+            case ARRAY:
+                return asDataList().toList(type);
+            case STRING:
+                return asString();
+            case NUMBER:
+                return asNumber();
+            case BOOLEAN:
+                return asBoolean();
+            default:
+                throw new DataException("Unsupported JSON type: " + jsonType + ".");
+        }
     }
 
     /**
