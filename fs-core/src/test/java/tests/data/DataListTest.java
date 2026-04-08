@@ -56,13 +56,16 @@ public class DataListTest {
         assertThrows(DataException.class, () -> {
             DataList.wrap(new ErrorList<>()).getBigDecimal(1);
         });
+        assertThrows(DataException.class, () -> {
+            DataList.wrap(new ErrorList<>()).toList(String.class);
+        });
 
         // to list
         dataList.clear();
         dataList.add(MapKit.map("str111", "1111"));
         dataList.add(MapKit.map("str111", "2222"));
-        assertEquals(new Cls("1111"), dataList.toObjectList(Cls.class).get(0));
-        assertEquals(new Cls("2222"), dataList.toObjectList(new TypeRef<Cls>() {}).get(1));
+        assertEquals(new Cls("1111"), dataList.toList(Cls.class).get(0));
+        assertEquals(new Cls("2222"), dataList.toList(new TypeRef<Cls>() {}).get(1));
     }
 
     @Test

@@ -4,7 +4,6 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
-import space.sunqian.fs.object.ObjectException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -246,10 +245,10 @@ public interface DataList extends List<Object> {
      * @param cls the specified class
      * @param <T> the type of the object to be returned`
      * @return a new list of which elements' type is the specified class
-     * @throws ObjectException if an error occurs during the conversion
+     * @throws DataException if an error occurs during the conversion
      */
-    default <T> @Nonnull List<T> toObjectList(Class<T> cls) throws ObjectException {
-        return Fs.as(toObjectList((Type) cls));
+    default <T> @Nonnull List<T> toList(Class<T> cls) throws DataException {
+        return Fs.as(toList((Type) cls));
     }
 
     /**
@@ -258,10 +257,10 @@ public interface DataList extends List<Object> {
      * @param typeRef the reference of the specified class
      * @param <T>     the type of the object to be returned`
      * @return a new list of which elements' type is the specified class
-     * @throws ObjectException if an error occurs during the conversion
+     * @throws DataException if an error occurs during the conversion
      */
-    default <T> @Nonnull List<T> toObjectList(TypeRef<T> typeRef) throws ObjectException {
-        return Fs.as(toObjectList(typeRef.type()));
+    default <T> @Nonnull List<T> toList(TypeRef<T> typeRef) throws DataException {
+        return Fs.as(toList(typeRef.type()));
     }
 
     /**
@@ -269,10 +268,10 @@ public interface DataList extends List<Object> {
      *
      * @param type the specified type
      * @return a new list of which elements' type is the specified type
-     * @throws ObjectException if an error occurs during the conversion
+     * @throws DataException if an error occurs during the conversion
      */
     @Nonnull
-    List<Object> toObjectList(Type type) throws ObjectException;
+    List<Object> toList(Type type) throws DataException;
 
     /**
      * Returns {@code true} if the given object is an instance of {@link DataList} and their contents are equal,

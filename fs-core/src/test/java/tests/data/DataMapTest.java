@@ -58,6 +58,9 @@ public class DataMapTest {
         assertThrows(DataException.class, () -> {
             DataMap.wrap(new ErrorMap<>()).getBigDecimal("2");
         });
+        assertThrows(DataException.class, () -> {
+            DataMap.wrap(new ErrorMap<>()).toObject(String.class);
+        });
 
         // to object
         dataMap.clear();

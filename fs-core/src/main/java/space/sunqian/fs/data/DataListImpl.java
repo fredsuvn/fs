@@ -5,7 +5,6 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.Checker;
 import space.sunqian.fs.base.option.Option;
-import space.sunqian.fs.object.ObjectException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.reflect.TypeRef;
@@ -54,9 +53,13 @@ final class DataListImpl implements DataList {
     }
 
     @Override
-    public @Nonnull List<Object> toObjectList(Type type) throws ObjectException {
-        ParameterizedType listType = TypeKit.parameterizedType(List.class, new Type[]{type});
-        return Fs.as(converter.convert(this, LIST_OBJECT_TYPE, listType, defaultOptions));
+    public @Nonnull List<Object> toList(Type type) throws DataException {
+        try {
+            ParameterizedType listType = TypeKit.parameterizedType(List.class, new Type[]{type});
+            return Fs.as(converter.convert(this, LIST_OBJECT_TYPE, listType, defaultOptions));
+        } catch (Exception e) {
+            throw new DataException(e);
+        }
     }
 
     @Override

@@ -4,7 +4,6 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
-import space.sunqian.fs.object.ObjectException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -245,9 +244,9 @@ public interface DataMap extends Map<String, Object> {
      * @param cls the specified class
      * @param <T> the type of the object to be returned`
      * @return a new object of the specified class
-     * @throws ObjectException if an error occurs during the conversion
+     * @throws DataException if an error occurs during the conversion
      */
-    default <T> @Nonnull T toObject(Class<T> cls) throws ObjectException {
+    default <T> @Nonnull T toObject(Class<T> cls) throws DataException {
         return Fs.as(toObject((Type) cls));
     }
 
@@ -257,9 +256,9 @@ public interface DataMap extends Map<String, Object> {
      * @param typeRef the reference of the specified class
      * @param <T>     the type of the object to be returned`
      * @return a new object of the specified class
-     * @throws ObjectException if an error occurs during the conversion
+     * @throws DataException if an error occurs during the conversion
      */
-    default <T> @Nonnull T toObject(TypeRef<T> typeRef) throws ObjectException {
+    default <T> @Nonnull T toObject(TypeRef<T> typeRef) throws DataException {
         return Fs.as(toObject(typeRef.type()));
     }
 
@@ -268,10 +267,10 @@ public interface DataMap extends Map<String, Object> {
      *
      * @param type the specified type
      * @return a new object of the specified type
-     * @throws ObjectException if an error occurs during the conversion
+     * @throws DataException if an error occurs during the conversion
      */
     @Nonnull
-    Object toObject(Type type) throws ObjectException;
+    Object toObject(Type type) throws DataException;
 
     /**
      * Returns {@code true} if the given object is an instance of {@link DataMap } and their contents are equal,
