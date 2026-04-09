@@ -81,27 +81,51 @@ public class NetTest implements PrintTest {
             selector.cancel(client.channel());
             // keys
             assertEquals(0, selector.keys().size());
-            // rebuild
+            // selector
             Selector s2 = selector.selector();
             assertSame(s1, s2);
+            selector.close();
+        }
+        {
+            // rebuild selector
+            NetSelector selector = NetSelector.open(1);
+            Selector s1 = selector.selector();
             SocketChannel c1 = SocketChannel.open();
             c1.configureBlocking(false);
-            c1.register(s2, SelectionKey.OP_READ);
+            c1.register(selector.selector(), SelectionKey.OP_READ);
             SocketChannel c2 = SocketChannel.open();
             c2.configureBlocking(false);
-            c2.register(s2, SelectionKey.OP_READ);
-            Set<SelectionKey> keys = new HashSet<>(s2.keys());
+            c2.register(selector.selector(), SelectionKey.OP_READ);
+            Set<SelectionKey> keys = new HashSet<>(s1.keys());
             selector.cancel(c2);
-            int i = 0;
-            while (i++ < 512) {
-                selector.select(1);
-            }
-            Selector s3 = selector.selector();
-            assertNotSame(s2, selector.selector());
-            assertNotSame(s2, s3);
-            assertSame(s3.keys(), selector.keys());
-            assertEquals(keys.size() - 1, s3.keys().size());
-            assertSame(c1, s3.keys().iterator().next().channel());
+            selector.select(1);
+            Selector s2 = selector.selector();
+            assertNotSame(s1, selector.selector());
+            assertNotSame(s1, s2);
+            assertSame(s2.keys(), selector.keys());
+            assertEquals(keys.size() - 1, s2.keys().size());
+            assertSame(c1, s2.keys().iterator().next().channel());
+            selector.close();
+        }
+        {
+            // rebuild selector with invalid
+            NetSelector selector = NetSelector.open(1);
+            Selector s1 = selector.selector();
+            SocketChannel c1 = SocketChannel.open();
+            c1.configureBlocking(false);
+            c1.register(selector.selector(), SelectionKey.OP_READ);
+            SocketChannel c2 = SocketChannel.open();
+            c2.configureBlocking(false);
+            c2.register(selector.selector(), SelectionKey.OP_READ);
+            Set<SelectionKey> keys = new HashSet<>(s1.keys());
+            selector.cancel(c2);
+            selector.rebuildSelector();
+            Selector s2 = selector.selector();
+            assertNotSame(s1, selector.selector());
+            assertNotSame(s1, s2);
+            assertSame(s2.keys(), selector.keys());
+            assertEquals(keys.size() - 1, s2.keys().size());
+            assertSame(c1, s2.keys().iterator().next().channel());
             selector.close();
         }
     }

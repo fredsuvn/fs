@@ -10,13 +10,13 @@ import java.util.Set;
 
 final class NetSelectorImpl implements NetSelector {
 
-    private static final int EMPTY_SELECT_THRESHOLD = 512;
-
+    private final int EMPTY_SELECT_THRESHOLD;
     private volatile @Nonnull Selector selector;
     private int emptySelectCount = 0;
 
-    NetSelectorImpl() throws NetException {
+    NetSelectorImpl(int emptySelectThreshold) throws NetException {
         this.selector = Fs.uncheck(Selector::open, NetException::new);
+        this.EMPTY_SELECT_THRESHOLD = emptySelectThreshold;
     }
 
     @Override
@@ -32,7 +32,6 @@ final class NetSelectorImpl implements NetSelector {
                 emptySelectCount++;
                 if (emptySelectCount >= EMPTY_SELECT_THRESHOLD) {
                     rebuildSelector();
-                    emptySelectCount = 0;
                 }
             } else {
                 emptySelectCount = 0;
@@ -71,16 +70,20 @@ final class NetSelectorImpl implements NetSelector {
         }, NetException::new);
     }
 
-    private void rebuildSelector() throws Exception {
-        Selector newSelector = Selector.open();
-        for (SelectionKey key : selector.keys()) {
-            if (key.isValid()) {
-                @SuppressWarnings("resource")
-                SelectableChannel channel = key.channel();
-                channel.register(newSelector, key.interestOps(), key.attachment());
+    @Override
+    public void rebuildSelector() throws NetException {
+        Fs.uncheck(() -> {
+            Selector newSelector = Selector.open();
+            for (SelectionKey key : selector.keys()) {
+                if (key.isValid()) {
+                    @SuppressWarnings("resource")
+                    SelectableChannel channel = key.channel();
+                    channel.register(newSelector, key.interestOps(), key.attachment());
+                }
             }
-        }
-        selector.close();
-        selector = newSelector;
+            selector.close();
+            selector = newSelector;
+        }, NetException::new);
+        emptySelectCount = 0;
     }
 }

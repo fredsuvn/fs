@@ -32,13 +32,29 @@ import java.util.Set;
 public interface NetSelector {
 
     /**
-     * Opens and returns a new {@link NetSelector} instance.
+     * The default empty select threshold.
+     */
+    int DEFAULT_EMPTY_SELECT_THRESHOLD = 512;
+
+    /**
+     * Opens and returns a new {@link NetSelector} instance with the default empty select threshold.
      *
      * @return a new {@link NetSelector} instance
      * @throws NetException if an I/O error occurs
      */
     static @Nonnull NetSelector open() throws NetException {
-        return new NetSelectorImpl();
+        return open(DEFAULT_EMPTY_SELECT_THRESHOLD);
+    }
+
+    /**
+     * Opens and returns a new {@link NetSelector} instance with the specified empty select threshold.
+     *
+     * @param emptySelectThreshold the empty select threshold to use
+     * @return a new {@link NetSelector} instance with the specified empty select threshold
+     * @throws NetException if an I/O error occurs
+     */
+    static @Nonnull NetSelector open(int emptySelectThreshold) throws NetException {
+        return new NetSelectorImpl(emptySelectThreshold);
     }
 
     /**
@@ -108,4 +124,14 @@ public interface NetSelector {
      * @throws NetException if an I/O error occurs
      */
     void cancel(@Nonnull SelectableChannel channel) throws NetException;
+
+    /**
+     * Rebuilds the underlying {@link Selector} instance by creating a new {@link Selector} instance and migrating all
+     * registered channels to it.
+     * <p>
+     * This method should be invoked automatically by the implementation when the empty select thresholds are exceeded.
+     *
+     * @throws NetException if an I/O error occurs
+     */
+    void rebuildSelector() throws NetException;
 }
