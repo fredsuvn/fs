@@ -311,22 +311,9 @@ public class FsTest implements AssertTest, PrintTest {
         assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, IntProps.class));
         assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, sp.getClass(), IntProps.class));
         assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, new TypeRef<IntProps>() {}));
+        assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, sp.getClass(), new TypeRef<IntProps>() {}));
         assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, (Type) IntProps.class));
-        // Map<K, V>
-        Map<String, Object> map = new HashMap<>();
-        map.put("longNum", 1);
-        assertEquals(
-            1L,
-            Fs.convertMap(map, MapProps.class).getLongNum()
-        );
-        assertEquals(
-            1L,
-            Fs.convertMap(map, new TypeRef<MapProps>() {}).getLongNum()
-        );
-        assertEquals(
-            1L,
-            ((MapProps) Fs.convertMap(map, (Type) MapProps.class)).getLongNum()
-        );
+        assertEquals(new IntProps(1, 2, 3), Fs.convert(sp, sp.getClass(), (Type) IntProps.class));
     }
 
     @Data

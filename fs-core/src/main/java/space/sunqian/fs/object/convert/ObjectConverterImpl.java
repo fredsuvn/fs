@@ -43,14 +43,14 @@ final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Hand
     public Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
-        @Nonnull Type target,
+        @Nonnull Type targetType,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectConvertException {
         @Nonnull Option<?, ?> @Nonnull [] actualOptions = OptionKit.mergeOptions(defaultOptionsArray, options);
         for (Handler handler : handlers()) {
             Object ret;
             try {
-                ret = handler.convert(src, srcType, target, this, actualOptions);
+                ret = handler.convert(src, srcType, targetType, this, actualOptions);
             } catch (Exception e) {
                 throw new ObjectConvertException(e);
             }
@@ -58,11 +58,11 @@ final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Hand
                 continue;
             }
             if (ret == Status.HANDLER_BREAK) {
-                throw new UnsupportedObjectConvertException(src, srcType, target, this, actualOptions);
+                throw new UnsupportedObjectConvertException(src, srcType, targetType, this, actualOptions);
             }
             return Fs.as(ret);
         }
-        throw new UnsupportedObjectConvertException(src, srcType, target, this, actualOptions);
+        throw new UnsupportedObjectConvertException(src, srcType, targetType, this, actualOptions);
     }
 
     @Override

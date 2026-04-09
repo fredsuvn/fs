@@ -58,7 +58,7 @@ final class DataMapImpl implements DataMap {
     @Override
     public @Nonnull Object toObject(Type type) throws DataException {
         try {
-            return converter.convertMap(this, type, defaultOptions);
+            return converter.convert(this, type, defaultOptions);
         } catch (Exception e) {
             throw new DataException(e);
         }

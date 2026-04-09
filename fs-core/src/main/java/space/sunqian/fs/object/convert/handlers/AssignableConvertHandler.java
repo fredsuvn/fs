@@ -70,14 +70,12 @@ public class AssignableConvertHandler implements ObjectConverter.Handler {
     ) throws Exception {
         if (srcType instanceof WildcardType) {
             if (isUndefined((WildcardType) srcType)) {
-                Type actualSrcType = src == null ? Object.class : src.getClass();
-                return converter.convert(src, actualSrcType, targetType, options);
+                return converter.convert(src, ensureType(src), targetType, options);
             }
         }
         if (srcType instanceof TypeVariable) {
             if (isUndefined((TypeVariable<?>) srcType)) {
-                Type actualSrcType = src == null ? Object.class : src.getClass();
-                return converter.convert(src, actualSrcType, targetType, options);
+                return converter.convert(src, ensureType(src), targetType, options);
             }
         }
         if (ConvertOption.isNewInstanceMode(options)) {
@@ -94,12 +92,11 @@ public class AssignableConvertHandler implements ObjectConverter.Handler {
         } else {
             // non-strict mode, wildcard and type variable will be considered as their bounds type
             if (targetType instanceof WildcardType) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 WildcardType wildcard = (WildcardType) targetType;
                 Type superType = TypeKit.getLowerBound(wildcard);
-                if (superType != null) {
-                    return converter.convert(src, srcType, superType, options);
-                }
-                return converter.convert(src, srcType, TypeKit.getUpperBound(wildcard), options);
+                superType = superType != null ? superType : TypeKit.getUpperBound(wildcard);
+                return converter.convert(src, srcType, superType, options);
             }
             if (targetType instanceof TypeVariable<?>) {
                 return converter.convert(src, srcType, ((TypeVariable<?>) targetType).getBounds()[0], options);
@@ -123,5 +120,9 @@ public class AssignableConvertHandler implements ObjectConverter.Handler {
     private boolean isUndefined(TypeVariable<?> type) {
         Type upperBound = TypeKit.getFirstBound(type);
         return Object.class.equals(upperBound);
+    }
+
+    private @Nonnull Type ensureType(@Nullable Object src) {
+        return src == null ? Object.class : src.getClass();
     }
 }

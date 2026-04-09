@@ -40,6 +40,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -48,29 +49,6 @@ public class CopierTest implements PrintTest {
     @Test
     public void testCopyProperties() {
         testCopyProperties(ObjectCopier.defaultCopier());
-        // just continue
-        ObjectCopier.Handler continueHandler = new ObjectCopier.Handler() {
-            @Override
-            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapSchema srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
-                return true;
-            }
-
-            @Override
-            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapSchema srcSchema, @Nonnull Object dst, @Nonnull ObjectSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
-                return true;
-            }
-
-            @Override
-            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull ObjectProperty srcProperty, @Nonnull Object src, @Nonnull ObjectSchema srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
-                return true;
-            }
-
-            @Override
-            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull ObjectProperty srcProperty, @Nonnull Object src, @Nonnull ObjectSchema srcSchema, @Nonnull Object dst, @Nonnull ObjectSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
-                return true;
-            }
-        };
-        testCopyProperties(ObjectCopier.defaultCopier().withFirstHandler(continueHandler));
         {
             // empty handler
             ObjectCopier copier = ObjectCopier.newCopier();
@@ -430,6 +408,62 @@ public class CopierTest implements PrintTest {
     }
 
     @Test
+    public void testAsHandler() {
+        {
+            // just continue
+            ObjectCopier.Handler continueHandler = new ObjectCopier.Handler() {
+                @Override
+                public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapSchema srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                    return true;
+                }
+
+                @Override
+                public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapSchema srcSchema, @Nonnull Object dst, @Nonnull ObjectSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                    return true;
+                }
+
+                @Override
+                public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull ObjectProperty srcProperty, @Nonnull Object src, @Nonnull ObjectSchema srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                    return true;
+                }
+
+                @Override
+                public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull ObjectProperty srcProperty, @Nonnull Object src, @Nonnull ObjectSchema srcSchema, @Nonnull Object dst, @Nonnull ObjectSchema dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                    return true;
+                }
+            };
+            ObjectCopier copier = ObjectCopier.defaultCopier().withFirstHandler(continueHandler);
+            testCopyProperties(copier);
+            testCopyProperties(ObjectCopier.newCopier(copier.asHandler()));
+        }
+        {
+            // empty
+            ObjectCopier copier = ObjectCopier.newCopier();
+            ObjectCopier copier2 = ObjectCopier.newCopier(copier.asHandler());
+            Map<String, Integer> srcMap = MapKit.map("first", 1, "second", 2, "third", 3);
+            Map<String, Integer> dstMap = new HashMap<>();
+            ClsB srcCls = new ClsB(1, 2, 3);
+            ClsB dstCls = new ClsB();
+            // map to map
+            copier2.copyProperties(srcMap, dstMap);
+            assertEquals(0, dstMap.size());
+            // map to object
+            copier2.copyProperties(srcMap, dstCls);
+            assertNull(dstCls.getFirst());
+            assertNull(dstCls.getSecond());
+            assertNull(dstCls.getThird());
+            // object to map
+            copier2.copyProperties(srcCls, dstMap);
+            assertEquals(0, dstMap.size());
+            // object to object
+            copier2.copyProperties(srcCls, dstCls);
+            assertNull(dstCls.getFirst());
+            assertNull(dstCls.getSecond());
+            assertNull(dstCls.getThird());
+        }
+    }
+
+    @Test
     public void testPropertyNameMapper() {
         {
             // map to
@@ -545,14 +579,6 @@ public class CopierTest implements PrintTest {
             ObjectConverter.defaultConverter().convert(
                 MapKit.map("first", "1", "second", "2", "third", "3"),
                 Object.class,
-                ClsA.class,
-                ConvertOption.strictSourceTypeMode(true)
-            )
-        );
-        assertThrows(ObjectConvertException.class, () ->
-            ObjectConverter.defaultConverter().convert(
-                MapKit.map("first", "1", "second", "2", "third", "3"),
-                List.class.getTypeParameters()[0],
                 ClsA.class,
                 ConvertOption.strictSourceTypeMode(true)
             )

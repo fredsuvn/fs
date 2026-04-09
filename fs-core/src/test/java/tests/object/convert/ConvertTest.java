@@ -164,9 +164,27 @@ public class ConvertTest implements PrintTest, DataTest {
     }
 
     @Test
+    public void testAsHandler() throws Exception {
+        class X {}
+        assertThrows(ObjectConvertException.class, () ->
+            ObjectConverter.defaultConverter().convert(new X(), int.class));
+        ObjectConverter cvt = ObjectConverter.newConverter(
+            ObjectConverter.defaultConverter().asHandler(),
+            (src, srcType, targetType, converter, options) -> {
+                if (src instanceof X) {
+                    return 666;
+                }
+                return null;
+            }
+        );
+        assertEquals(666, cvt.convert(new X(), int.class));
+    }
+
+    @Test
     public void testAssignableConvertHandler() {
+        ObjectConverter converter = ObjectConverter.defaultConverter();
         {
-            // for source type
+            // for undefined source type
             Map<String, ?> map = MapKit.map(
                 "one", "1",
                 "two", 2,
@@ -174,10 +192,33 @@ public class ConvertTest implements PrintTest, DataTest {
                 "list", ListKit.list("1", "2", "3")
             );
             C expected = new C(1, "2", new int[]{1, 2, 3}, SetKit.set(1, 2, 3));
-            C target = ObjectConverter.defaultConverter().convert(map, C.class);
+            C target = converter.convert(map, C.class);
             assertEquals(expected, target);
-            C target2 = ObjectConverter.defaultConverter().convert(map, new TypeRef<Map<String, ?>>() {}.type(), C.class);
+            C target2 = converter.convert(map, new TypeRef<Map<String, ?>>() {}.type(), C.class);
             assertEquals(expected, target2);
+            List<? extends String> strList = ListKit.list("1", "2", "3");
+            assertArrayEquals(
+                new int[]{1, 2, 3},
+                converter.convert(strList, new TypeRef<List<? extends String>>() {}.type(), int[].class)
+            );
+            List<? super String> superList = ListKit.list("1", "2", "3");
+            assertArrayEquals(
+                new int[]{1, 2, 3},
+                converter.convert(superList, new TypeRef<List<? super String>>() {}.type(), new TypeRef<int[]>() {})
+            );
+            @Data
+            @AllArgsConstructor
+            class X<T extends String> {
+            }
+            assertEquals(
+                111,
+                converter.convert("111", X.class.getTypeParameters()[0], int.class)
+            );
+            List<?> nullList = ListKit.list((Object) null);
+            assertArrayEquals(
+                new Object[]{null},
+                converter.convert(nullList, new TypeRef<List<?>>() {}.type(), Object[].class)
+            );
         }
     }
 
@@ -247,8 +288,6 @@ public class ConvertTest implements PrintTest, DataTest {
                 CharBuffer.wrap("123")
             );
         }
-        class X<T> {}
-        Type nonClass = X.class.getTypeParameters()[0];
         {
             // to Number
             assertEquals(123.0, converter.convert(123, double.class));
@@ -293,8 +332,6 @@ public class ConvertTest implements PrintTest, DataTest {
             assertEquals(converter.convert(now.toInstant(), Instant.class), now.toInstant());
             assertEquals(converter.convert(now.getTime(), Date.class), now);
             assertEquals(converter.convert(now.getTime(), long.class, Date.class), now);
-            assertThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert(new X<String>(), nonClass, Date.class));
             assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(a, Date.class));
         }
@@ -526,15 +563,15 @@ public class ConvertTest implements PrintTest, DataTest {
             map.put("longNum", 1);
             assertEquals(
                 1L,
-                ObjectConverter.defaultConverter().convertMap(map, MapObject.class).getLongNum()
+                ObjectConverter.defaultConverter().convert(map, MapObject.class).getLongNum()
             );
             assertEquals(
                 1L,
-                ObjectConverter.defaultConverter().convertMap(map, new TypeRef<MapObject>() {}).getLongNum()
+                ObjectConverter.defaultConverter().convert(map, new TypeRef<MapObject>() {}).getLongNum()
             );
             assertEquals(
                 1L,
-                ((MapObject) ObjectConverter.defaultConverter().convertMap(map, (Type) MapObject.class)).getLongNum()
+                ((MapObject) ObjectConverter.defaultConverter().convert(map, (Type) MapObject.class)).getLongNum()
             );
         }
     }

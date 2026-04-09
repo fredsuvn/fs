@@ -15,7 +15,6 @@ import space.sunqian.fs.reflect.TypeRef;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This interface is used to convert an object from the specified type to the target type.
@@ -42,8 +41,9 @@ import java.util.Map;
  * throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
  * }</pre>
  * <p>
- * A converter can have default options. The options parameter of a conversion method (such as
- * {@link #convert(Object, Type, Type, Option[])}) will be merged with the default options when the method is called.
+ * A converter can have default options. The actual options used in a conversion are merged with the default options and
+ * the additional options of the conversion method. Note the default options of which keys are same as the additional
+ * options will be overridden by those additional options.
  * <p>
  * The thread safety of the methods in this interface is determined by its dependent option objects, such as
  * {@link BuilderOperatorProvider}, {@link ObjectCopier}, and other objects. By default, they are all thread-safe.
@@ -104,185 +104,145 @@ public interface ObjectConverter {
     }
 
     /**
-     * Converts the given source map from {@code Map<String, Object>} to the target type.
+     * Converts the given source object to the target type.
      * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
+     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
+     * conversion will use the options merged from the default options and additional options. Note the default options
+     * of which keys are same as the additional options will be overridden by those additional options.
      *
-     * @param src     the given source map
-     * @param target  the specified type of the target object
-     * @param options the other conversion options
-     * @param <T>     the target type
+     * @param src        the given source object
+     * @param targetType the target type
+     * @param options    the additional conversion options
+     * @param <T>        the target type
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConvertException if the conversion from {@code Map<String, Object>} to the target type
-     *                                           is not supported
-     * @throws ObjectConvertException            if the conversion failed
-     */
-    default <T> T convertMap(
-        @Nonnull Map<String, Object> src,
-        @Nonnull Class<? extends T> target,
-        @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return Fs.as(convert(src, new TypeRef<Map<String, Object>>() {}.type(), target, options));
-    }
-
-    /**
-     * Converts the given source map from {@code Map<String, Object>} to the target type.
-     * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
-     *
-     * @param src     the given source map
-     * @param target  the specified type ref of the target object
-     * @param options the other conversion options
-     * @param <T>     the target type
-     * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConvertException if the conversion from {@code Map<String, Object>} to the target type
-     *                                           is not supported
-     * @throws ObjectConvertException            if the conversion failed
-     */
-    default <T> T convertMap(
-        @Nonnull Map<String, Object> src,
-        @Nonnull TypeRef<? extends T> target,
-        @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return Fs.as(convert(src, new TypeRef<Map<String, Object>>() {}.type(), target.type(), options));
-    }
-
-    /**
-     * Converts the given source map from {@code Map<String, Object>} to the target type.
-     * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
-     *
-     * @param src     the given source map
-     * @param target  the specified type of the target object
-     * @param options the other conversion options
-     * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConvertException if the conversion from {@code Map<String, Object>} to the target type
-     *                                           is not supported
-     * @throws ObjectConvertException            if the conversion failed
-     */
-    default Object convertMap(
-        @Nonnull Map<String, Object> src,
-        @Nonnull Type target,
-        @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return convert(src, new TypeRef<Map<String, Object>>() {}.type(), target, options);
-    }
-
-    /**
-     * Converts the given source object from the specified type to the target type.
-     * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
-     *
-     * @param src     the given source object
-     * @param target  the specified type of the target object
-     * @param options the other conversion options
-     * @param <T>     the target type
-     * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
-     *                                           supported
+     * @throws UnsupportedObjectConvertException if the conversion to the target type is unsupported
      * @throws ObjectConvertException            if the conversion failed
      */
     default <T> T convert(
         @Nullable Object src,
-        @Nonnull Class<? extends T> target,
+        @Nonnull Class<? extends T> targetType,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return Fs.as(convert(src, (Type) target, options));
+        return Fs.as(convert(src, (Type) targetType, options));
     }
 
     /**
-     * Converts the given source object from the specified type to the target type.
+     * Converts the given source object from the specified source type to the target type.
      * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
+     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
+     * conversion will use the options merged from the default options and additional options. Note the default options
+     * of which keys are same as the additional options will be overridden by those additional options.
      *
-     * @param src     the given source object
-     * @param srcType the specified type of the given source object
-     * @param target  the specified type of the target object
-     * @param options the other conversion options
-     * @param <T>     the target type
+     * @param src        the given source object
+     * @param srcType    the specified source type
+     * @param targetType the target type
+     * @param options    the additional conversion options
+     * @param <T>        the target type
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
-     *                                           supported
+     * @throws UnsupportedObjectConvertException if the conversion from the specified source type to the target type is
+     *                                           unsupported
      * @throws ObjectConvertException            if the conversion failed
      */
     default <T> T convert(
         @Nullable Object src,
         @Nonnull Type srcType,
-        @Nonnull Class<? extends T> target,
+        @Nonnull Class<? extends T> targetType,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return Fs.as(convert(src, (Type) target, options));
+        return Fs.as(convert(src, srcType, (Type) targetType, options));
     }
 
     /**
-     * Converts the given source object from the specified type to the target type.
+     * Converts the given source object to the target type.
      * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
+     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
+     * conversion will use the options merged from the default options and additional options. Note the default options
+     * of which keys are same as the additional options will be overridden by those additional options.
      *
-     * @param src     the given source object
-     * @param target  the specified type ref of the target object
-     * @param options the other conversion options
-     * @param <T>     the target type
+     * @param src        the given source object
+     * @param targetType the type ref of the target type
+     * @param options    the additional conversion options
+     * @param <T>        the target type
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
-     *                                           supported
+     * @throws UnsupportedObjectConvertException if the conversion to the target type is unsupported
      * @throws ObjectConvertException            if the conversion failed
      */
     default <T> T convert(
         @Nullable Object src,
-        @Nonnull TypeRef<? extends T> target,
+        @Nonnull TypeRef<? extends T> targetType,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return Fs.as(convert(src, target.type(), options));
+        return Fs.as(convert(src, targetType.type(), options));
     }
 
     /**
-     * Converts the given source object from the specified type to the target type.
+     * Converts the given source object from the specified source type to the target type.
      * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
+     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
+     * conversion will use the options merged from the default options and additional options. Note the default options
+     * of which keys are same as the additional options will be overridden by those additional options.
      *
-     * @param src     the given source object
-     * @param target  the specified type of the target object
-     * @param options the other conversion options
+     * @param src        the given source object
+     * @param srcType    the specified source type
+     * @param targetType the type ref of the target type
+     * @param options    the additional conversion options
+     * @param <T>        the target type
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
-     *                                           supported
+     * @throws UnsupportedObjectConvertException if the conversion from the specified source type to the target type is
+     *                                           unsupported
+     * @throws ObjectConvertException            if the conversion failed
+     */
+    default <T> T convert(
+        @Nullable Object src,
+        @Nonnull Type srcType,
+        @Nonnull TypeRef<? extends T> targetType,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
+        return Fs.as(convert(src, srcType, targetType.type(), options));
+    }
+
+    /**
+     * Converts the given source object to the target type.
+     * <p>
+     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
+     * conversion will use the options merged from the default options and additional options. Note the default options
+     * of which keys are same as the additional options will be overridden by those additional options.
+     *
+     * @param src        the given source object
+     * @param targetType the target type
+     * @param options    the additional conversion options
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConvertException if the conversion to the target type is unsupported
      * @throws ObjectConvertException            if the conversion failed
      */
     default Object convert(
         @Nullable Object src,
-        @Nonnull Type target,
+        @Nonnull Type targetType,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return convert(src, src == null ? Object.class : src.getClass(), target, options);
+        return convert(src, src == null ? Object.class : src.getClass(), targetType, options);
     }
 
     /**
-     * Converts the given source object from the specified type to the target type.
+     * Converts the given source object from the specified source type to the target type.
      * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
+     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
+     * conversion will use the options merged from the default options and additional options. Note the default options
+     * of which keys are same as the additional options will be overridden by those additional options.
      *
-     * @param src     the given source object
-     * @param srcType the specified type of the given source object
-     * @param target  the specified type of the target object
-     * @param options the other conversion options
+     * @param src        the given source object
+     * @param srcType    the specified source type
+     * @param targetType the target type
+     * @param options    the additional conversion options
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
-     *                                           supported
+     * @throws UnsupportedObjectConvertException if the conversion from the specified source type to the target type is
+     *                                           unsupported
      * @throws ObjectConvertException            if the conversion failed
      */
     Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
-        @Nonnull Type target,
+        @Nonnull Type targetType,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException;
 
