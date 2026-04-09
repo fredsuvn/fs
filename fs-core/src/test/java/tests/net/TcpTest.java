@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -374,6 +375,99 @@ public class TcpTest implements DataTest, PrintTest {
                     .socketOption(StandardSocketOptions.IP_MULTICAST_IF, null)
                     .connect(null)
             );
+        }
+    }
+
+    @Test
+    public void testCloseDetection() throws Exception {
+        {
+            // client close detection
+            CountDownLatch latch = new CountDownLatch(1);
+            StringBuilder received = new StringBuilder();
+            TcpServer server = TcpServer.newBuilder()
+                .handler(new TcpServerHandler() {
+
+                    @Override
+                    public void channelOpen(@Nonnull TcpContext context) throws Exception {
+                    }
+
+                    @Override
+                    public void channelClose(@Nonnull TcpContext context) throws Exception {
+                    }
+
+                    @Override
+                    public void channelRead(@Nonnull TcpContext context) throws Exception {
+                        String str = context.availableString();
+                        if (str != null) {
+                            received.append(str);
+                        }
+                        if (received.toString().equals("hello world")) {
+                            latch.countDown();
+                        }
+                    }
+
+                    @Override
+                    public void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause) {
+                    }
+                })
+                .bind();
+            TcpClient client = TcpClient.newBuilder()
+                .connect(server.localAddress());
+            client.writeString("hello world");
+            latch.await();
+            assertFalse(client.isClosed());
+            assertFalse(server.isClosed());
+            server.close();
+            assertTrue(server.isClosed());
+            assertNull(client.availableString());
+            client.close();
+            assertTrue(client.isClosed());
+        }
+        {
+            // server close detection
+            CountDownLatch latch = new CountDownLatch(1);
+            CountDownLatch clientCloseLatch = new CountDownLatch(1);
+            StringBuilder received = new StringBuilder();
+            TcpServer server = TcpServer.newBuilder()
+                .handler(new TcpServerHandler() {
+
+                    @Override
+                    public void channelOpen(@Nonnull TcpContext context) throws Exception {
+                    }
+
+                    @Override
+                    public void channelClose(@Nonnull TcpContext context) throws Exception {
+                    }
+
+                    @Override
+                    public void channelRead(@Nonnull TcpContext context) throws Exception {
+                        String str = context.availableString();
+                        if (str != null) {
+                            received.append(str);
+                        } else {
+                            context.close();
+                            clientCloseLatch.countDown();
+                        }
+                        if (received.toString().equals("hello world")) {
+                            latch.countDown();
+                        }
+                    }
+
+                    @Override
+                    public void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause) {
+                    }
+                })
+                .bind();
+            TcpClient client = TcpClient.newBuilder()
+                .connect(server.localAddress());
+            client.writeString("hello world");
+            latch.await();
+            assertFalse(client.isClosed());
+            assertFalse(server.isClosed());
+            client.close();
+            clientCloseLatch.await();
+            assertTrue(client.isClosed());
+            assertFalse(server.isClosed());
         }
     }
 

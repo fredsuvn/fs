@@ -8,6 +8,7 @@ import space.sunqian.fs.base.function.VoidCallable;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.net.NetException;
+import space.sunqian.fs.net.NetSelector;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -16,7 +17,6 @@ import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -128,7 +128,7 @@ public class UdpServerBuilder {
     private static final class UdpServerImpl implements UdpServer, Runnable {
 
         private final @Nonnull DatagramChannel server;
-        private final @Nonnull Selector mainSelector;
+        private final @Nonnull NetSelector mainSelector;
         private final @Nonnull Thread mainThread;
         private final @Nonnull UdpServerHandler handler;
         private final @Nonnull InetSocketAddress localAddress;
@@ -145,13 +145,13 @@ public class UdpServerBuilder {
             Map<SocketOption<?>, Object> socketOptions
         ) throws Exception {
             this.server = DatagramChannel.open();
-            this.mainSelector = Selector.open();
+            this.mainSelector = NetSelector.open();
             this.handler = handler;
             this.mainThread = newThread(mainthreadFactory, this);
             socketOptions.forEach((name, value) ->
                 Fs.uncheck(() -> server.setOption(Fs.as(name), value), NetException::new));
             server.configureBlocking(false);
-            server.register(mainSelector, SelectionKey.OP_READ);
+            server.register(mainSelector.selector(), SelectionKey.OP_READ);
             this.buffer = ByteBuffer.allocate(maxPacketSize);
             server.bind(localAddress);
             this.localAddress = (InetSocketAddress) server.getLocalAddress();
@@ -210,7 +210,7 @@ public class UdpServerBuilder {
         }
 
         private void doMainWork() throws Exception {
-            mainSelector.select();
+            mainSelector.select(0);
             Set<SelectionKey> selectedKeys = mainSelector.selectedKeys();
             Iterator<SelectionKey> keys = selectedKeys.iterator();
             while (keys.hasNext()) {
