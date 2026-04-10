@@ -110,6 +110,8 @@ public interface SimpleJdbcPool {
 
     /**
      * Factory interface for creating database connections.
+     * <p>
+     * This interface is typically used to create underlying database connections.
      */
     interface ConnectionFactory {
 
@@ -121,7 +123,7 @@ public interface SimpleJdbcPool {
          * @param username        the username, default is {@code null}
          * @param password        the password, default is {@code null}
          * @return a new connection
-         * @throws SqlRuntimeException if failed to create connection
+         * @throws SqlRuntimeException if failed to create
          */
         @Nonnull
         Connection create(
@@ -129,6 +131,27 @@ public interface SimpleJdbcPool {
             @Nonnull String url,
             @Nullable String username,
             @Nullable String password
+        ) throws SqlRuntimeException;
+    }
+
+    /**
+     * Factory interface for wrapping original database connection.
+     * <p>
+     * This interface is typically used to wrap the underlying database connection with additional pooling behavior.
+     */
+    interface ConnectionWrapperFactory {
+
+        /**
+         * Wraps the original database connection with additional pooling behavior.
+         *
+         * @param origin the original database connection
+         * @param pool   the connection pool for the original connection
+         * @return the wrapped connection
+         * @throws SqlRuntimeException if failed to wrap
+         */
+        @Nonnull
+        Connection wrap(
+            @Nonnull Connection origin, @Nonnull SimplePool<Connection> pool
         ) throws SqlRuntimeException;
     }
 
@@ -155,6 +178,7 @@ public interface SimpleJdbcPool {
         private int maxSize = 10;
         private @Nonnull Duration idleTimeout = Duration.ofMinutes(5);
         private @Nullable ConnectionFactory connectionFactory = null;
+        private @Nullable ConnectionWrapperFactory connectionWrapperFactory = null;
         private @Nonnull Consumer<@Nonnull Connection> closer = CLOSER;
         private @Nonnull Predicate<@Nonnull Connection> validator = VALIDATOR;
 
@@ -245,16 +269,29 @@ public interface SimpleJdbcPool {
         }
 
         /**
-         * Sets the connection factory for creating new database connections. By default, connections are created using
+         * Sets the connection factory for creating underlying database connections. By default, connections are created
+         * using
          * <pre>{@code
          * DriverManager.getConnection(url, username, password);
          * }</pre>.
          *
-         * @param connectionFactory the connection factory for creating new database connections
+         * @param connectionFactory the connection factory for creating underlying database connections
          * @return this builder
          */
         public @Nonnull Builder connectionFactory(@Nonnull ConnectionFactory connectionFactory) {
             this.connectionFactory = connectionFactory;
+            return this;
+        }
+
+        /**
+         * Sets the connection wrapper factory for wrapping underlying database connections. By default, connections are
+         * wrapped with pooled behavior.
+         *
+         * @param connectionWrapperFactory the connection wrapper factory for wrapping underlying database connections
+         * @return this builder
+         */
+        public @Nonnull Builder connectionWrapperFactory(@Nonnull ConnectionWrapperFactory connectionWrapperFactory) {
+            this.connectionWrapperFactory = connectionWrapperFactory;
             return this;
         }
 
@@ -303,6 +340,7 @@ public interface SimpleJdbcPool {
             return new SimpleJdbcPoolImpl(
                 url, username, password, driver,
                 connectionFactory == null ? new ConnectionFactoryImpl() : connectionFactory,
+                connectionWrapperFactory == null ? AsmGenerator.newWrapperFactory() : connectionWrapperFactory,
                 closer, validator, coreSize, maxSize, idleTimeout
             );
         }

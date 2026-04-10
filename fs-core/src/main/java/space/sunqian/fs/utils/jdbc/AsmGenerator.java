@@ -24,7 +24,7 @@ import java.util.Arrays;
 final class AsmGenerator {
 
     private static final @Nonnull String POOLED_NAME = buildClassName("PooledConnection");
-    private static final @Nonnull String PROVIDER_NAME = buildClassName("PooledConnectionProvider");
+    private static final @Nonnull String PROVIDER_NAME = buildClassName("PooledConnectionWrapperFactory");
     // Connection
     private static final @Nonnull String CONNECTION_INTERNAL_NAME = JvmKit.toInternalName(Connection.class);
     private static final @Nonnull String CONNECTION_DESCRIPTOR = JvmKit.toDescriptor(Connection.class);
@@ -38,15 +38,15 @@ final class AsmGenerator {
     private static final @Nonnull String @Nonnull [] SQL_EXCEPTIONS = {SQL_EXCEPTION_INTERNAL_NAME};
     private static final @Nonnull String @Nonnull [] SQL_CLIENT_EXCEPTIONS = {SQL_CLIENT_EXCEPTION_INTERNAL_NAME};
     // Provider
-    private static final @Nonnull String PROVIDER_INTERNAL_NAME = JvmKit.toInternalName(ConnectionProvider.class);
-    private static final @Nonnull String PROVIDER_DESCRIPTOR = JvmKit.toDescriptor(ConnectionProvider.class);
+    private static final @Nonnull String PROVIDER_INTERNAL_NAME = JvmKit.toInternalName(SimpleJdbcPool.ConnectionWrapperFactory.class);
+    private static final @Nonnull String PROVIDER_DESCRIPTOR = JvmKit.toDescriptor(SimpleJdbcPool.ConnectionWrapperFactory.class);
     // Others
     private static final @Nonnull String STRING_DESCRIPTOR = JvmKit.toDescriptor(String.class);
     // fields
     private static final @Nonnull String FIELD_DELEGATE = "delegate";
     private static final @Nonnull String FIELD_POOL = "pool";
 
-    static ConnectionProvider newConnectionProvider() throws SqlRuntimeException {
+    static SimpleJdbcPool.ConnectionWrapperFactory newWrapperFactory() throws SqlRuntimeException {
         byte[] pooledBytes = PooledAsm.bytecode();
         byte[] providerBytes = ProviderAsm.bytecode();
         DynamicClassLoader classLoader = new DynamicClassLoader();
@@ -55,7 +55,7 @@ final class AsmGenerator {
         Object inst = Fs.uncheck(() ->
                 providerClass.getMethod("getInstance").invoke(null),
             SqlRuntimeException::new);
-        return (ConnectionProvider) inst;
+        return (SimpleJdbcPool.ConnectionWrapperFactory) inst;
     }
 
     private static class ProviderAsm {
@@ -67,7 +67,7 @@ final class AsmGenerator {
 
             classWriter.visit(
                 Opcodes.V1_8,
-                Opcodes.ACC_FINAL | Opcodes.ACC_SUPER,
+                Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_SUPER,
                 PROVIDER_NAME,
                 null,
                 AsmKit.OBJECT_NAME,
@@ -96,7 +96,7 @@ final class AsmGenerator {
             }
             {
                 methodVisitor = classWriter.visitMethod(
-                    Opcodes.ACC_STATIC,
+                    Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC,
                     "getInstance",
                     "()" + PROVIDER_DESCRIPTOR,
                     null,
@@ -118,7 +118,7 @@ final class AsmGenerator {
             {
                 methodVisitor = classWriter.visitMethod(
                     Opcodes.ACC_PUBLIC,
-                    "newConnection",
+                    "wrap",
                     "(" + CONNECTION_DESCRIPTOR + POOL_DESCRIPTOR + ")" + CONNECTION_DESCRIPTOR,
                     "(" + CONNECTION_DESCRIPTOR + POOL_SIGNATURE + ")" + CONNECTION_DESCRIPTOR,
                     new String[]{JvmKit.toInternalName(SqlRuntimeException.class)}
@@ -327,7 +327,7 @@ final class AsmGenerator {
                 methodVisitor = classWriter.visitMethod(
                     Opcodes.ACC_PUBLIC | Opcodes.ACC_SYNCHRONIZED,
                     "isClosed",
-                    AsmKit.EMPTY_METHOD_DESCRIPTOR,
+                    "()Z",
                     null,
                     SQL_EXCEPTIONS
                 );
@@ -492,5 +492,8 @@ final class AsmGenerator {
     private static String buildClassName(@Nonnull String name) {
         Package pkg = AsmGenerator.class.getPackage();
         return AsmKit.newClassInternalName(pkg, name);
+    }
+
+    private AsmGenerator() {
     }
 }

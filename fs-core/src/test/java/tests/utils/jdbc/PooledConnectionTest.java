@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.sql.Connection;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -64,7 +65,13 @@ public class PooledConnectionTest {
         for (Method method : methods) {
             Object[] args = argsList.get(i++);
             InvocationTargetException e = assertThrows(InvocationTargetException.class, () -> method.invoke(conn, args));
-            assertInstanceOf(SQLException.class, e.getCause());
+            Class<?>[] exceptionTypes = method.getExceptionTypes();
+            if (exceptionTypes.length > 0 && SQLClientInfoException.class.equals(exceptionTypes[0])) {
+
+                assertInstanceOf(SQLClientInfoException.class, e.getCause());
+            } else {
+                assertInstanceOf(SQLException.class, e.getCause());
+            }
         }
     }
 }

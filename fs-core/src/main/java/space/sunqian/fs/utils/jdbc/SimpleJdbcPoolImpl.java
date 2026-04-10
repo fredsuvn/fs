@@ -15,9 +15,8 @@ import java.util.stream.Collectors;
 
 final class SimpleJdbcPoolImpl implements SimpleJdbcPool {
 
-    private static final @Nonnull ConnectionProvider provider = AsmGenerator.newConnectionProvider();
-
     private final @Nonnull SimplePool<@Nonnull Connection> pool;
+    private final @Nonnull ConnectionWrapperFactory connectionWrapperFactory;
 
     SimpleJdbcPoolImpl(
         @Nonnull String url,
@@ -25,12 +24,14 @@ final class SimpleJdbcPoolImpl implements SimpleJdbcPool {
         @Nullable String password,
         @Nonnull String driver,
         @Nonnull ConnectionFactory connectionFactory,
+        @Nonnull ConnectionWrapperFactory connectionWrapperFactory,
         @Nonnull Consumer<@Nonnull Connection> closer,
         @Nonnull Predicate<@Nonnull Connection> validator,
         int coreSize,
         int maxSize,
         @Nonnull Duration idleTimeout
     ) {
+        this.connectionWrapperFactory = connectionWrapperFactory;
         Fs.uncheck(() -> Class.forName(driver));
         pool = SimplePool.<Connection>newBuilder()
             .coreSize(coreSize)
@@ -45,7 +46,7 @@ final class SimpleJdbcPoolImpl implements SimpleJdbcPool {
     @Override
     public @Nullable Connection getConnection() throws SqlRuntimeException {
         Connection connection = pool.get();
-        return connection == null ? null : provider.newConnection(connection, pool);
+        return connection == null ? null : connectionWrapperFactory.wrap(connection, pool);
     }
 
     @Override

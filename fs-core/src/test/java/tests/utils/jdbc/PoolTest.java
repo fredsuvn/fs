@@ -4,6 +4,7 @@ import internal.test.J17Only;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.value.IntVar;
+import space.sunqian.fs.base.value.Var;
 import space.sunqian.fs.utils.jdbc.SimpleJdbcPool;
 import space.sunqian.fs.utils.jdbc.SqlRuntimeException;
 
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -146,6 +148,31 @@ public class PoolTest {
             assertThrows(IllegalArgumentException.class, () -> SimpleJdbcPool.newBuilder().idleTimeout(Duration.ofSeconds(-1)));
             assertThrows(IllegalArgumentException.class, () -> SimpleJdbcPool.newBuilder().build());
             assertThrows(IllegalArgumentException.class, () -> SimpleJdbcPool.newBuilder().url(DB_URL).build());
+        }
+        {
+            // custom wrapper factory
+            Var<Connection> vc = Var.of(null);
+            SimpleJdbcPool pool = SimpleJdbcPool.newBuilder()
+                .driverClassName(DB_DRIVER)
+                .url(DB_URL)
+                .username(DB_USER)
+                .password(DB_PASSWORD)
+                .coreSize(2)
+                .maxSize(3)
+                .idleTimeout(Duration.ofSeconds(10))
+                .connectionWrapperFactory((o, p) -> {
+                    if (vc.get() == null) {
+                        vc.set(o);
+                    }
+                    return vc.get();
+                })
+                .build();
+            Connection c1 = pool.getConnection();
+            Connection c2 = pool.getConnection();
+            Connection c3 = pool.getConnection();
+            assertSame(c1, c2);
+            assertSame(c1, c3);
+            pool.close();
         }
     }
 }
