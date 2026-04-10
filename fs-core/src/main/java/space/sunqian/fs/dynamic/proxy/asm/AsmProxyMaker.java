@@ -543,7 +543,7 @@ public class AsmProxyMaker implements ProxyMaker {
         return classWriter.toByteArray();
     }
 
-    private void loadParameters(MethodVisitor visitor, Executable executable) {
+    private void loadParameters(@Nonnull MethodVisitor visitor, @Nonnull Executable executable) {
         int pIndex = 0;
         for (Parameter parameter : executable.getParameters()) {
             // get args
@@ -555,6 +555,7 @@ public class AsmProxyMaker implements ProxyMaker {
         }
     }
 
+    @SuppressWarnings("ClassCanBeRecord")
     private static final class ProxyClassInfo {
 
         private final @Nonnull String proxyName;
@@ -563,7 +564,7 @@ public class AsmProxyMaker implements ProxyMaker {
         private final @Nonnull String @Nullable [] proxyInterfaces;
         private final @Nonnull String innerSimpleName;
         private final @Nonnull String innerName;
-        private final @Nonnull List<ProxyMethodInfo> methods;
+        private final @Nonnull List<@Nonnull ProxyMethodInfo> methods;
 
         private ProxyClassInfo(
             @Nonnull String proxyName,
@@ -572,7 +573,7 @@ public class AsmProxyMaker implements ProxyMaker {
             @Nonnull String @Nullable [] proxyInterfaces,
             @Nonnull String innerSimpleName,
             @Nonnull String innerName,
-            @Nonnull List<ProxyMethodInfo> methods
+            @Nonnull List<@Nonnull ProxyMethodInfo> methods
         ) {
             this.proxyName = proxyName;
             this.proxyDescriptor = proxyDescriptor;
@@ -584,6 +585,7 @@ public class AsmProxyMaker implements ProxyMaker {
         }
     }
 
+    @SuppressWarnings("ClassCanBeRecord")
     private static final class ProxyMethodInfo {
 
         private final @Nonnull Method method;
@@ -619,6 +621,7 @@ public class AsmProxyMaker implements ProxyMaker {
         }
     }
 
+    @SuppressWarnings("ClassCanBeRecord")
     private static final class AsmProxySpec implements ProxySpec {
 
         private final @Nonnull Class<?> proxyClass;

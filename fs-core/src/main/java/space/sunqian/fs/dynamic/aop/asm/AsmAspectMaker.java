@@ -367,7 +367,7 @@ public class AsmAspectMaker implements AspectMaker {
         }
     }
 
-    private @Nonnull Object toFrameName(Class<?> type) {
+    private @Nonnull Object toFrameName(@Nonnull Class<?> type) {
         if (Objects.equals(type, boolean.class)
             || Objects.equals(type, byte.class)
             || Objects.equals(type, short.class)
@@ -392,13 +392,13 @@ public class AsmAspectMaker implements AspectMaker {
         private final @Nonnull String aspectName;
         // private final @Nonnull String aspectDescriptor;
         private final @Nonnull String advisedName;
-        private final @Nonnull List<AspectMethodInfo> methods;
+        private final @Nonnull List<@Nonnull AspectMethodInfo> methods;
 
         private AspectClassInfo(
             @Nonnull String aspectName,
             //@Nonnull String aspectDescriptor,
             @Nonnull String advisedName,
-            @Nonnull List<AspectMethodInfo> methods
+            @Nonnull List<@Nonnull AspectMethodInfo> methods
         ) {
             this.aspectName = aspectName;
             // this.aspectDescriptor = aspectDescriptor;
