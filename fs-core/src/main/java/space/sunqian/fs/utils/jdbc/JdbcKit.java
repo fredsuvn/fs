@@ -243,8 +243,8 @@ public class JdbcKit {
     ) throws SQLException {
         ResultSetMetaData metaData = resultSet.getMetaData();
         ArrayList<T> objects = new ArrayList<>();
+        Map<String, Object> rowMap = new HashMap<>();
         while (resultSet.next()) {
-            Map<String, Object> rowMap = new HashMap<>();
             for (int column = 0; column < metaData.getColumnCount(); column++) {
                 String columnName = metaData.getColumnName(column + 1);
                 Object jdbcObject = resultSet.getObject(column + 1);
@@ -253,6 +253,7 @@ public class JdbcKit {
             }
             Object element = converter.convert(rowMap, javaType, options);
             objects.add(Fs.as(element));
+            rowMap.clear();
         }
         objects.trimToSize();
         return objects;

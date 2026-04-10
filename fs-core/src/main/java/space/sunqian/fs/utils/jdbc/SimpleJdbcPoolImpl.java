@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 final class SimpleJdbcPoolImpl implements SimpleJdbcPool {
 
+    private static final @Nonnull ConnectionProvider provider = AsmGenerator.newConnectionProvider();
+
     private final @Nonnull SimplePool<@Nonnull Connection> pool;
 
     SimpleJdbcPoolImpl(
@@ -43,7 +45,7 @@ final class SimpleJdbcPoolImpl implements SimpleJdbcPool {
     @Override
     public @Nullable Connection getConnection() throws SqlRuntimeException {
         Connection connection = pool.get();
-        return connection == null ? null : ConnectionService.INST.newConnection(connection, pool);
+        return connection == null ? null : provider.newConnection(connection, pool);
     }
 
     @Override

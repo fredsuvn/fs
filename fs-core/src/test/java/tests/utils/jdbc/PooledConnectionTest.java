@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @J17Also
-public class ConnectionWrapperTest {
+public class PooledConnectionTest {
 
     // private static final String DB_DRIVER = "org.h2.Driver";
     // private static final String DB_URL = "jdbc:h2:mem:" + ConnectionWrapperTest.class.getName();

@@ -5,14 +5,17 @@
 //
 // import java.sql.Connection;
 //
-// enum ConnectionServiceImpl implements ConnectionService {
-//     INST;
+// final class ConnectionProviderImpl implements ConnectionProvider {
+//
+//     static ConnectionProvider getInstance() {
+//         return new ConnectionProviderImpl();
+//     }
 //
 //     @Override
 //     public Connection newConnection(
-//         @Nonnull Connection delegate, @Nonnull SimplePool<Connection> pool
+//         @Nonnull Connection delegate,
+//         @Nonnull SimplePool<Connection> pool
 //     ) throws SqlRuntimeException {
 //         return new PooledConnection(delegate, pool);
 //     }
-//
 // }

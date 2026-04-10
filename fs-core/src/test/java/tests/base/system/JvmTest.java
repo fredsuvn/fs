@@ -337,8 +337,8 @@ public class JvmTest implements AssertTest, PrintTest {
         }
         assertNull(JvmKit.toExceptions(X.class.getDeclaredMethod("x1")));
         assertArrayEquals(
-            JvmKit.toExceptions(X.class.getDeclaredMethod("x2")),
-            new String[]{"java/lang/Exception"}
+            new String[]{"java/lang/Exception"},
+            JvmKit.toExceptions(X.class.getDeclaredMethod("x2"))
         );
     }
 
