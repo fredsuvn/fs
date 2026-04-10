@@ -125,7 +125,7 @@ public class AsmAspectMaker implements AspectMaker {
     ) {
         String descriptor = JvmKit.toDescriptor(method);
         String signature = JvmKit.toSignature(method);
-        String[] exceptions = AsmKit.getExceptions(method);
+        String[] exceptions = JvmKit.toExceptions(method);
         return new AspectMethodInfo(
             method,
             // ownerName,
@@ -178,7 +178,7 @@ public class AsmAspectMaker implements AspectMaker {
                 Opcodes.INVOKESPECIAL,
                 pcInfo.advisedName,
                 AsmKit.CONSTRUCTOR_NAME,
-                AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR,
+                AsmKit.EMPTY_METHOD_DESCRIPTOR,
                 false
             );
             visitor.visitVarInsn(Opcodes.ALOAD, 0);

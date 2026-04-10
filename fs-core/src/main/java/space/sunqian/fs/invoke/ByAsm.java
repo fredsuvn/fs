@@ -69,7 +69,7 @@ final class ByAsm {
             MethodVisitor visitor = classWriter.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 AsmKit.CONSTRUCTOR_NAME,
-                AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR,
+                AsmKit.EMPTY_METHOD_DESCRIPTOR,
                 null,
                 null
             );
@@ -78,7 +78,7 @@ final class ByAsm {
                 Opcodes.INVOKESPECIAL,
                 AsmKit.OBJECT_NAME,
                 AsmKit.CONSTRUCTOR_NAME,
-                AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR,
+                AsmKit.EMPTY_METHOD_DESCRIPTOR,
                 false
             );
             visitor.visitInsn(Opcodes.RETURN);

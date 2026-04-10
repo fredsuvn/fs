@@ -528,6 +528,26 @@ public class JvmKit {
         throw new JvmException("Unknown array type: " + type + ".");
     }
 
+    /**
+     * Returns an array contains the internal names of exceptions declared by the given executable, or null if no
+     * exception is declared.
+     *
+     * @param executable the given executable
+     * @return an array contains the internal names of exceptions declared by the given executable, or null if no
+     * exception is declared
+     */
+    public static @Nonnull String @Nullable [] toExceptions(@Nonnull Executable executable) {
+        Class<?>[] exceptionTypes = executable.getExceptionTypes();
+        if (exceptionTypes.length == 0) {
+            return null;
+        }
+        String[] expInternalNames = new String[exceptionTypes.length];
+        for (int i = 0; i < exceptionTypes.length; i++) {
+            expInternalNames[i] = toInternalName(exceptionTypes[i]);
+        }
+        return expInternalNames;
+    }
+
     private JvmKit() {
     }
 }

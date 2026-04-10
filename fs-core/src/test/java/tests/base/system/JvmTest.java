@@ -26,7 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -323,6 +325,21 @@ public class JvmTest implements AssertTest, PrintTest {
         invokeThrows(JvmException.class, toRawClass1, null, TypeTest.errorParameterizedType());
         Method toRawClass2 = JvmKit.class.getDeclaredMethod("toRawClass", GenericArrayType.class);
         invokeThrows(JvmException.class, toRawClass2, null, TypeKit.arrayType(TypeKit.otherType()));
+    }
+
+    @Test
+    public void testToExceptions() throws Exception {
+        class X {
+
+            public void x1() {}
+
+            public void x2() throws Exception {}
+        }
+        assertNull(JvmKit.toExceptions(X.class.getDeclaredMethod("x1")));
+        assertArrayEquals(
+            JvmKit.toExceptions(X.class.getDeclaredMethod("x2")),
+            new String[]{"java/lang/Exception"}
+        );
     }
 
     static class SignatureParser extends ClassVisitor {

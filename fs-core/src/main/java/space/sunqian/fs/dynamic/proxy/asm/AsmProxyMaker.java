@@ -68,13 +68,13 @@ public class AsmProxyMaker implements ProxyMaker {
         AsmProxyException::new
     );
     private static final @Nonnull String INVOKER_INVOKE_DESCRIPTOR = JvmKit.toDescriptor(INVOKER_INVOKE);
-    private static final @Nonnull String @Nullable [] INVOKER_INVOKE_EXCEPTIONS = AsmKit.getExceptions(INVOKER_INVOKE);
+    private static final @Nonnull String @Nullable [] INVOKER_INVOKE_EXCEPTIONS = JvmKit.toExceptions(INVOKER_INVOKE);
     private static final @Nonnull Method INVOKER_INVOKE_SUPER = Fs.uncheck(
         () -> ProxyInvoker.class.getMethod("invokeSuper", Object.class, Object[].class),
         AsmProxyException::new
     );
     private static final @Nonnull String INVOKER_INVOKE_SUPER_DESCRIPTOR = JvmKit.toDescriptor(INVOKER_INVOKE_SUPER);
-    private static final @Nonnull String @Nullable [] INVOKER_INVOKE_SUPER_EXCEPTIONS = AsmKit.getExceptions(INVOKER_INVOKE_SUPER);
+    private static final @Nonnull String @Nullable [] INVOKER_INVOKE_SUPER_EXCEPTIONS = JvmKit.toExceptions(INVOKER_INVOKE_SUPER);
 
     @Override
     public @Nonnull ProxySpec make(
@@ -158,7 +158,7 @@ public class AsmProxyMaker implements ProxyMaker {
     ) {
         String descriptor = JvmKit.toDescriptor(method);
         String signature = JvmKit.toSignature(method);
-        String[] exceptions = AsmKit.getExceptions(method);
+        String[] exceptions = JvmKit.toExceptions(method);
         String superInvokerName = SUPER_INVOKER_NAME_PREFIX + methodIndex;// access$001
         String superInvokerDescriptor = descriptor.replace("(", "(" + proxyDescriptor);
         String superInvokerSignature =
@@ -235,7 +235,7 @@ public class AsmProxyMaker implements ProxyMaker {
                 Opcodes.INVOKESPECIAL,
                 pcInfo.proxySuperName,
                 AsmKit.CONSTRUCTOR_NAME,
-                AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR,
+                AsmKit.EMPTY_METHOD_DESCRIPTOR,
                 false
             );
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
@@ -436,7 +436,7 @@ public class AsmProxyMaker implements ProxyMaker {
                 Opcodes.INVOKESPECIAL,
                 AsmKit.OBJECT_NAME,
                 AsmKit.CONSTRUCTOR_NAME,
-                AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR,
+                AsmKit.EMPTY_METHOD_DESCRIPTOR,
                 false
             );
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
