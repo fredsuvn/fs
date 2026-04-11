@@ -1,6 +1,7 @@
 package tests.dynamic;
 
 import org.junit.jupiter.api.Test;
+import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.dynamic.DynamicClassLoader;
 import space.sunqian.fs.io.IOKit;
 
@@ -17,8 +18,13 @@ public class DynamicClassLoaderTest {
 
     @Test
     public void testLoadClass() throws Exception {
+        testLoadClass(null);
+        testLoadClass(getClass().getClassLoader());
+    }
+
+    private void testLoadClass(@Nullable ClassLoader parent) throws Exception {
         {
-            DynamicClassLoader loader = new DynamicClassLoader();
+            DynamicClassLoader loader = newClassLoader(parent);
             InputStream in = ClassLoader.getSystemResourceAsStream(
                 LA.class.getName().replace('.', '/') + ".class"
             );
@@ -33,7 +39,7 @@ public class DynamicClassLoaderTest {
             in.close();
         }
         {
-            DynamicClassLoader loader = new DynamicClassLoader();
+            DynamicClassLoader loader = newClassLoader(parent);
             InputStream in = ClassLoader.getSystemResourceAsStream(
                 LA.class.getName().replace('.', '/') + ".class"
             );
@@ -48,7 +54,7 @@ public class DynamicClassLoaderTest {
             in.close();
         }
         {
-            DynamicClassLoader loader = new DynamicClassLoader();
+            DynamicClassLoader loader = newClassLoader(parent);
             InputStream in = ClassLoader.getSystemResourceAsStream(
                 LA.class.getName().replace('.', '/') + ".class"
             );
@@ -63,7 +69,7 @@ public class DynamicClassLoaderTest {
             in.close();
         }
         {
-            DynamicClassLoader loader = new DynamicClassLoader();
+            DynamicClassLoader loader = newClassLoader(parent);
             InputStream in = ClassLoader.getSystemResourceAsStream(
                 LA.class.getName().replace('.', '/') + ".class"
             );
@@ -81,14 +87,19 @@ public class DynamicClassLoaderTest {
 
     @Test
     public void testLoadedClass() throws Exception {
-        DynamicClassLoader loader1 = new DynamicClassLoader();
+        testLoadedClass(null);
+        testLoadedClass(getClass().getClassLoader());
+    }
+
+    private void testLoadedClass(@Nullable ClassLoader parent) throws Exception {
+        DynamicClassLoader loader1 = newClassLoader(parent);
         InputStream in1 = ClassLoader.getSystemResourceAsStream(
             LA.class.getName().replace('.', '/') + ".class"
         );
         byte[] bytes1 = IOKit.read(in1);
         Class<?> cls1 = loader1.loadClass(LA.class.getName(), bytes1);
         in1.close();
-        DynamicClassLoader loader2 = new DynamicClassLoader();
+        DynamicClassLoader loader2 = newClassLoader(parent);
         InputStream in2 = ClassLoader.getSystemResourceAsStream(
             LA.class.getName().replace('.', '/') + ".class"
         );
@@ -104,7 +115,7 @@ public class DynamicClassLoaderTest {
         Object o2 = cls2.getConstructor().newInstance();
         assertFalse(o1 instanceof LA);
         assertFalse(o2 instanceof LA);
-        DynamicClassLoader loader3 = new DynamicClassLoader();
+        DynamicClassLoader loader3 = newClassLoader(parent);
         InputStream in3 = ClassLoader.getSystemResourceAsStream("dynamic/LAC.binary");
         byte[] bytes3 = IOKit.read(in3);
         Class<?> cls3 = loader3.loadClass(LA.class.getName(), bytes3);
@@ -116,5 +127,9 @@ public class DynamicClassLoaderTest {
         String test = "tests";
         assertEquals(test + test, la.compute(test));
         assertEquals(test, ((LA) lac).compute(test));
+    }
+
+    private DynamicClassLoader newClassLoader(@Nullable ClassLoader parent) throws Exception {
+        return parent == null ? new DynamicClassLoader() : new DynamicClassLoader(parent);
     }
 }
