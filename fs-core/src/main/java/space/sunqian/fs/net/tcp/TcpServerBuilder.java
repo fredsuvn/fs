@@ -44,7 +44,7 @@ public class TcpServerBuilder {
     private @Nullable ThreadFactory mainThreadFactory;
     private @Nullable ThreadFactory workerThreadFactory;
     private final @Nonnull Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
-    private long selectTimeout = 0;
+    // private long selectTimeout = 0;
     private int bufSize = IOKit.bufferSize();
 
     /**
@@ -101,15 +101,15 @@ public class TcpServerBuilder {
     }
 
     /**
-     * Sets the buffer size for advanced IO operations. Note this buffer size is not the kernel network buffer size, it
-     * is an I/O advanced operations buffer size.
+     * Sets the I/O buffer size for advanced IO operations, typically used for read/write operations on
+     * {@link IOOperator}. The default size is {@link IOKit#bufferSize()}.
      *
-     * @param bufSize the buffer size for advanced IO operations
+     * @param bufSize the I/O buffer size for advanced IO operations
      * @return this builder
-     * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
+     * @throws IllegalArgumentException if the I/O buffer size is negative or {@code 0}
      */
-    public @Nonnull TcpServerBuilder bufferSize(int bufSize) throws IllegalArgumentException {
-        Checker.checkArgument(bufSize > 0, "bufSize must be positive");
+    public @Nonnull TcpServerBuilder ioBufferSize(int bufSize) throws IllegalArgumentException {
+        Checker.checkArgument(bufSize > 0, "ioBufferSize must be positive");
         this.bufSize = bufSize;
         return this;
     }
@@ -130,21 +130,21 @@ public class TcpServerBuilder {
         return this;
     }
 
-    /**
-     * Sets the timeout for underlying {@link NetSelector#select(long)}, in milliseconds. This timeout must
-     * {@code >= 0}, and will affect the triggering interval of {@link TcpServerHandler#channelLoop(TcpContext)}. If it
-     * is {@code 0}, there may be a large interval or even never triggering.
-     *
-     * @param selectTimeout the timeout for underlying {@link NetSelector#select(long)}, in milliseconds, must
-     *                      {@code >= 0}
-     * @return this builder
-     * @throws IllegalArgumentException if the timeout is negative
-     */
-    public @Nonnull TcpServerBuilder selectTimeout(long selectTimeout) throws IllegalArgumentException {
-        Checker.checkArgument(selectTimeout >= 0, "selectTimeout must >= 0");
-        this.selectTimeout = selectTimeout;
-        return this;
-    }
+    // /**
+    //  * Sets the timeout for underlying {@link NetSelector#select(long)}, in milliseconds. This timeout must
+    //  * {@code >= 0}, and will affect the triggering interval of {@link TcpServerHandler#channelLoop(TcpContext)}. If it
+    //  * is {@code 0}, there may be a large interval or even never triggering.
+    //  *
+    //  * @param selectTimeout the timeout for underlying {@link NetSelector#select(long)}, in milliseconds, must
+    //  *                      {@code >= 0}
+    //  * @return this builder
+    //  * @throws IllegalArgumentException if the timeout is negative
+    //  */
+    // public @Nonnull TcpServerBuilder selectTimeout(long selectTimeout) throws IllegalArgumentException {
+    //     Checker.checkArgument(selectTimeout >= 0, "selectTimeout must >= 0");
+    //     this.selectTimeout = selectTimeout;
+    //     return this;
+    // }
 
     /**
      * Binds the server's socket to the automatically assigned address and configures the socket to listen for
@@ -191,7 +191,7 @@ public class TcpServerBuilder {
                 workerThreadFactory,
                 workerThreadNum,
                 socketOptions,
-                selectTimeout,
+                // selectTimeout,
                 backlog,
                 bufSize
             ),
@@ -203,7 +203,7 @@ public class TcpServerBuilder {
 
         private final @Nonnull ServerSocketChannel server;
         private final @Nonnull NetSelector mainSelector;
-        private final long selectTimeout;
+        // private final long selectTimeout;
         private final @Nonnull Thread mainThread;
         private final @Nonnull WorkerImpl @Nonnull [] workers;
         private final @Nonnull TcpServerHandler handler;
@@ -220,7 +220,7 @@ public class TcpServerBuilder {
             @Nullable ThreadFactory workerthreadFactory,
             int workThreadNum,
             Map<SocketOption<?>, Object> socketOptions,
-            long selectTimeout,
+            // long selectTimeout,
             int backlog,
             int bufSize
         ) throws Exception {
@@ -229,7 +229,7 @@ public class TcpServerBuilder {
             this.handler = handler;
             this.mainThread = newThread(mainthreadFactory, this);
             this.workers = new WorkerImpl[workThreadNum];
-            this.selectTimeout = selectTimeout;
+            // this.selectTimeout = selectTimeout;
             this.bufSize = bufSize;
             server.configureBlocking(false);
             socketOptions.forEach((name, value) ->
@@ -440,7 +440,7 @@ public class TcpServerBuilder {
             }
 
             private void handleRead() throws Exception {
-                selector.select(selectTimeout);
+                selector.select(0);
                 Set<SelectionKey> selectedKeys = selector.selectedKeys();
                 Iterator<SelectionKey> keys = selectedKeys.iterator();
                 while (keys.hasNext()) {

@@ -33,15 +33,15 @@ public class TcpClientBuilder {
     private final @Nonnull Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
 
     /**
-     * Sets the buffer size for advanced IO operations. Note this buffer size is not the kernel network buffer size, it
-     * is an I/O advanced operations buffer size.
+     * Sets the I/O buffer size for advanced IO operations, typically used for read/write operations on
+     * {@link IOOperator}. The default size is {@link IOKit#bufferSize()}.
      *
-     * @param bufSize the buffer size for advanced IO operations
+     * @param bufSize the I/O buffer size for advanced IO operations
      * @return this builder
-     * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
+     * @throws IllegalArgumentException if the I/O buffer size is negative or {@code 0}
      */
-    public @Nonnull TcpClientBuilder bufferSize(int bufSize) throws IllegalArgumentException {
-        Checker.checkArgument(bufSize > 0, "bufSize must be positive");
+    public @Nonnull TcpClientBuilder ioBufferSize(int bufSize) throws IllegalArgumentException {
+        Checker.checkArgument(bufSize > 0, "ioBufferSize must be positive");
         this.bufSize = bufSize;
         return this;
     }

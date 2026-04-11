@@ -96,8 +96,8 @@ public class TcpTest implements DataTest, PrintTest {
             .workerThreadNum(workerNum)
             .workerThreadFactory(workerFactory)
             .socketOption(StandardSocketOptions.SO_RCVBUF, 1024)
-            .bufferSize(1024)
-            .selectTimeout(100)
+            .ioBufferSize(1024)
+            //.selectTimeout(100)
             .handler(new TcpServerHandler() {
 
                 @Override
@@ -167,7 +167,7 @@ public class TcpTest implements DataTest, PrintTest {
         for (int i = 0; i < clients.length; i++) {
             TcpClient client = TcpClient.newBuilder()
                 .socketOption(StandardSocketOptions.SO_SNDBUF, 1024)
-                .bufferSize(1024)
+                .ioBufferSize(1024)
                 .bind(localhost)
                 .connect(server.localAddress());
             CountDownLatch openLatch = openLatches[i];
@@ -359,15 +359,15 @@ public class TcpTest implements DataTest, PrintTest {
                     .workerThreadNum(0)
             );
             assertThrows(IllegalArgumentException.class, () ->
-                TcpServer.newBuilder().bufferSize(0).bind()
+                TcpServer.newBuilder().ioBufferSize(0).bind()
             );
-            assertThrows(IllegalArgumentException.class, () ->
-                TcpServer.newBuilder().selectTimeout(-1).bind()
-            );
+            // assertThrows(IllegalArgumentException.class, () ->
+            //     TcpServer.newBuilder().selectTimeout(-1).bind()
+            // );
             // socket option exceptions
             assertThrows(IllegalArgumentException.class, () ->
                 TcpClient.newBuilder()
-                    .bufferSize(0)
+                    .ioBufferSize(0)
                     .connect(null)
             );
             assertThrows(NetException.class, () ->
