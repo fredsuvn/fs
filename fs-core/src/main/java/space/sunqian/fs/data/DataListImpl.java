@@ -6,10 +6,8 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.Checker;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.reflect.TypeRef;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Comparator;
@@ -24,7 +22,7 @@ import java.util.stream.Stream;
 
 final class DataListImpl implements DataList {
 
-    private static final @Nonnull Type LIST_OBJECT_TYPE = new TypeRef<List<Object>>() {}.type();
+    private static final @Nonnull Type LIST_OBJECT_TYPE = new TypeRef<List<?>>() {}.type();
 
     private final @Nonnull List<Object> delegate;
     private final @Nonnull ObjectConverter converter;
@@ -53,10 +51,9 @@ final class DataListImpl implements DataList {
     }
 
     @Override
-    public @Nonnull List<Object> toList(Type type) throws DataException {
+    public @Nonnull Object toObject(@Nonnull Type type) throws DataException {
         try {
-            ParameterizedType listType = TypeKit.parameterizedType(List.class, new Type[]{type});
-            return Fs.as(converter.convert(this, LIST_OBJECT_TYPE, listType, defaultOptions));
+            return Fs.as(converter.convert(this, LIST_OBJECT_TYPE, type, defaultOptions));
         } catch (Exception e) {
             throw new DataException(e);
         }
@@ -78,17 +75,17 @@ final class DataListImpl implements DataList {
     }
 
     @Override
-    public Iterator<Object> iterator() {
+    public @Nonnull Iterator<Object> iterator() {
         return delegate.iterator();
     }
 
     @Override
-    public Object[] toArray() {
+    public Object @Nonnull [] toArray() {
         return delegate.toArray();
     }
 
     @Override
-    public <T> T[] toArray(T[] a) {
+    public <T> T @Nonnull [] toArray(T @Nonnull [] a) {
         return delegate.toArray(a);
     }
 
@@ -102,33 +99,34 @@ final class DataListImpl implements DataList {
         return delegate.remove(o);
     }
 
+    @SuppressWarnings("SlowListContainsAll")
     @Override
-    public boolean containsAll(Collection<?> c) {
+    public boolean containsAll(@Nonnull Collection<?> c) {
         return delegate.containsAll(c);
     }
 
     @Override
-    public boolean addAll(Collection<?> c) {
+    public boolean addAll(@Nonnull Collection<?> c) {
         return delegate.addAll(c);
     }
 
     @Override
-    public boolean addAll(int index, Collection<?> c) {
+    public boolean addAll(int index, @Nonnull Collection<?> c) {
         return delegate.addAll(index, c);
     }
 
     @Override
-    public boolean removeAll(Collection<?> c) {
+    public boolean removeAll(@Nonnull Collection<?> c) {
         return delegate.removeAll(c);
     }
 
     @Override
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(@Nonnull Collection<?> c) {
         return delegate.retainAll(c);
     }
 
     @Override
-    public void replaceAll(UnaryOperator<Object> operator) {
+    public void replaceAll(@Nonnull UnaryOperator<Object> operator) {
         delegate.replaceAll(operator);
     }
 
@@ -173,37 +171,37 @@ final class DataListImpl implements DataList {
     }
 
     @Override
-    public ListIterator<Object> listIterator() {
+    public @Nonnull ListIterator<Object> listIterator() {
         return delegate.listIterator();
     }
 
     @Override
-    public ListIterator<Object> listIterator(int index) {
+    public @Nonnull ListIterator<Object> listIterator(int index) {
         return delegate.listIterator(index);
     }
 
     @Override
-    public List<Object> subList(int fromIndex, int toIndex) {
+    public @Nonnull List<Object> subList(int fromIndex, int toIndex) {
         return delegate.subList(fromIndex, toIndex);
     }
 
     @Override
-    public Spliterator<Object> spliterator() {
+    public @Nonnull Spliterator<Object> spliterator() {
         return delegate.spliterator();
     }
 
     @Override
-    public boolean removeIf(Predicate<? super Object> filter) {
+    public boolean removeIf(@Nonnull Predicate<? super Object> filter) {
         return delegate.removeIf(filter);
     }
 
     @Override
-    public Stream<Object> stream() {
+    public @Nonnull Stream<Object> stream() {
         return delegate.stream();
     }
 
     @Override
-    public Stream<Object> parallelStream() {
+    public @Nonnull Stream<Object> parallelStream() {
         return delegate.parallelStream();
     }
 
@@ -219,10 +217,10 @@ final class DataListImpl implements DataList {
 
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof DataList)) {
+        if (!(object instanceof List<?>)) {
             return false;
         }
-        return contentEquals((DataList) object);
+        return contentEquals((List<?>) object);
     }
 
     @Override

@@ -246,7 +246,7 @@ public interface DataMap extends Map<String, Object> {
      * @return a new object of the specified class
      * @throws DataException if an error occurs during the conversion
      */
-    default <T> @Nonnull T toObject(Class<T> cls) throws DataException {
+    default <T> @Nonnull T toObject(@Nonnull Class<T> cls) throws DataException {
         return Fs.as(toObject((Type) cls));
     }
 
@@ -258,7 +258,7 @@ public interface DataMap extends Map<String, Object> {
      * @return a new object of the specified class
      * @throws DataException if an error occurs during the conversion
      */
-    default <T> @Nonnull T toObject(TypeRef<T> typeRef) throws DataException {
+    default <T> @Nonnull T toObject(@Nonnull TypeRef<T> typeRef) throws DataException {
         return Fs.as(toObject(typeRef.type()));
     }
 
@@ -270,7 +270,7 @@ public interface DataMap extends Map<String, Object> {
      * @throws DataException if an error occurs during the conversion
      */
     @Nonnull
-    Object toObject(Type type) throws DataException;
+    Object toObject(@Nonnull Type type) throws DataException;
 
     /**
      * Returns {@code true} if the given object is an instance of {@link DataMap } and their contents are equal,
@@ -281,7 +281,7 @@ public interface DataMap extends Map<String, Object> {
      * {@code false} otherwise.
      */
     @Override
-    boolean equals(Object o);
+    boolean equals(@Nullable Object o);
 
     /**
      * Returns {@code true} if the content of this {@link DataMap } are equal to the content of the given map,
@@ -291,5 +291,5 @@ public interface DataMap extends Map<String, Object> {
      * @return {@code true} if the content of this {@link DataMap } are equal to the content of the given map,
      * {@code false} otherwise.
      */
-    boolean contentEquals(@Nullable Map<String, Object> o);
+    boolean contentEquals(@Nullable Map<@Nonnull String, ?> o);
 }

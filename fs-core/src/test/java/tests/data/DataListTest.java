@@ -32,7 +32,7 @@ public class DataListTest {
             dataList
         );
         assertTrue(dataList.contentEquals(ListKit.list(1111)));
-        assertFalse(dataList.equals(ListKit.list(1111)));
+        assertTrue(dataList.equals(ListKit.list(1111)));
         assertEquals(
             dataList.toString(),
             ListKit.arrayList(1111).toString()
@@ -66,6 +66,8 @@ public class DataListTest {
         dataList.add(MapKit.map("str111", "2222"));
         assertEquals(new Cls("1111"), dataList.toList(Cls.class).get(0));
         assertEquals(new Cls("2222"), dataList.toList(new TypeRef<Cls>() {}).get(1));
+        assertEquals(new Cls("1111"), dataList.toObject(new TypeRef<Cls[]>() {})[0]);
+        assertEquals(new Cls("2222"), dataList.toObject(Cls[].class)[1]);
     }
 
     @Test

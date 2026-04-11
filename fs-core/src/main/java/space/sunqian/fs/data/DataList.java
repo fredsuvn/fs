@@ -5,8 +5,10 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.object.convert.ObjectConverter;
+import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.reflect.TypeRef;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -247,7 +249,7 @@ public interface DataList extends List<Object> {
      * @return a new list of which elements' type is the specified class
      * @throws DataException if an error occurs during the conversion
      */
-    default <T> @Nonnull List<T> toList(Class<T> cls) throws DataException {
+    default <T> @Nonnull List<T> toList(@Nonnull Class<T> cls) throws DataException {
         return Fs.as(toList((Type) cls));
     }
 
@@ -259,7 +261,7 @@ public interface DataList extends List<Object> {
      * @return a new list of which elements' type is the specified class
      * @throws DataException if an error occurs during the conversion
      */
-    default <T> @Nonnull List<T> toList(TypeRef<T> typeRef) throws DataException {
+    default <T> @Nonnull List<T> toList(@Nonnull TypeRef<T> typeRef) throws DataException {
         return Fs.as(toList(typeRef.type()));
     }
 
@@ -270,8 +272,47 @@ public interface DataList extends List<Object> {
      * @return a new list of which elements' type is the specified type
      * @throws DataException if an error occurs during the conversion
      */
+    default @Nonnull List<Object> toList(@Nonnull Type type) throws DataException {
+        ParameterizedType listType = TypeKit.parameterizedType(List.class, new Type[]{type});
+        return Fs.as(toObject(listType));
+    }
+
+    /**
+     * Converts this {@link DataList} to a new object of the specified class, the type must be a collection or array
+     * type.
+     *
+     * @param cls the specified class
+     * @param <T> the type of the object to be returned`
+     * @return a new object of the specified class, the type must be a collection or array type.
+     * @throws DataException if an error occurs during the conversion
+     */
+    default <T> @Nonnull T toObject(@Nonnull Class<T> cls) throws DataException {
+        return Fs.as(toObject((Type) cls));
+    }
+
+    /**
+     * Converts this {@link DataList} to a new object of the specified class, the type must be a collection or array
+     * type.
+     *
+     * @param typeRef the reference of the specified class
+     * @param <T>     the type of the object to be returned`
+     * @return a new object of the specified class, the type must be a collection or array type.
+     * @throws DataException if an error occurs during the conversion
+     */
+    default <T> @Nonnull T toObject(@Nonnull TypeRef<T> typeRef) throws DataException {
+        return Fs.as(toObject(typeRef.type()));
+    }
+
+    /**
+     * Converts this {@link DataList} to a new object of the specified type, the type must be a collection or array
+     * type.
+     *
+     * @param type the specified type
+     * @return a new object of the specified type, the type must be a collection or array type.
+     * @throws DataException if an error occurs during the conversion
+     */
     @Nonnull
-    List<Object> toList(Type type) throws DataException;
+    Object toObject(@Nonnull Type type) throws DataException;
 
     /**
      * Returns {@code true} if the given object is an instance of {@link DataList} and their contents are equal,
@@ -282,7 +323,7 @@ public interface DataList extends List<Object> {
      * {@code false} otherwise.
      */
     @Override
-    boolean equals(Object o);
+    boolean equals(@Nullable Object o);
 
     /**
      * Returns {@code true} if the content of this {@link DataList } are equal to the content of the given list,

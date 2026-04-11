@@ -18,7 +18,7 @@ import java.util.function.Function;
 
 final class DataMapImpl implements DataMap {
 
-    private static final @Nonnull Type MAP_OBJECT_TYPE = new TypeRef<Map<String, Object>>() {}.type();
+    private static final @Nonnull Type MAP_OBJECT_TYPE = new TypeRef<Map<String, ?>>() {}.type();
     private static final @Nonnull Object NONE = new Object();
 
     private final @Nonnull Map<String, Object> delegate;
@@ -49,16 +49,16 @@ final class DataMapImpl implements DataMap {
             if (var.get() != NONE) {
                 return defaultValue;
             }
-            return Fs.as(converter.convert(object, MAP_OBJECT_TYPE, type, defaultOptions));
+            return Fs.as(converter.convert(object, type, defaultOptions));
         } catch (Exception e) {
             throw new DataException(e);
         }
     }
 
     @Override
-    public @Nonnull Object toObject(Type type) throws DataException {
+    public @Nonnull Object toObject(@Nonnull Type type) throws DataException {
         try {
-            return converter.convert(this, type, defaultOptions);
+            return converter.convert(this, MAP_OBJECT_TYPE, type, defaultOptions);
         } catch (Exception e) {
             throw new DataException(e);
         }
@@ -100,7 +100,7 @@ final class DataMapImpl implements DataMap {
     }
 
     @Override
-    public void putAll(Map<? extends String, ?> m) {
+    public void putAll(@Nonnull Map<? extends String, ?> m) {
         delegate.putAll(m);
     }
 
@@ -110,17 +110,17 @@ final class DataMapImpl implements DataMap {
     }
 
     @Override
-    public Set<String> keySet() {
+    public @Nonnull Set<String> keySet() {
         return delegate.keySet();
     }
 
     @Override
-    public Collection<Object> values() {
+    public @Nonnull Collection<Object> values() {
         return delegate.values();
     }
 
     @Override
-    public Set<Entry<String, Object>> entrySet() {
+    public @Nonnull Set<Entry<String, Object>> entrySet() {
         return delegate.entrySet();
     }
 
@@ -160,22 +160,22 @@ final class DataMapImpl implements DataMap {
     }
 
     @Override
-    public Object computeIfAbsent(String key, Function<? super String, ?> mappingFunction) {
+    public Object computeIfAbsent(String key, @Nonnull Function<? super String, ?> mappingFunction) {
         return delegate.computeIfAbsent(key, mappingFunction);
     }
 
     @Override
-    public Object computeIfPresent(String key, BiFunction<? super String, ? super Object, ?> remappingFunction) {
+    public Object computeIfPresent(String key, @Nonnull BiFunction<? super String, ? super Object, ?> remappingFunction) {
         return delegate.computeIfPresent(key, remappingFunction);
     }
 
     @Override
-    public Object compute(String key, BiFunction<? super String, ? super Object, ?> remappingFunction) {
+    public Object compute(String key, @Nonnull BiFunction<? super String, ? super Object, ?> remappingFunction) {
         return delegate.compute(key, remappingFunction);
     }
 
     @Override
-    public Object merge(String key, Object value, BiFunction<? super Object, ? super Object, ?> remappingFunction) {
+    public Object merge(String key, @Nonnull Object value, @Nonnull BiFunction<? super Object, ? super Object, ?> remappingFunction) {
         return delegate.merge(key, value, remappingFunction);
     }
 
@@ -186,14 +186,14 @@ final class DataMapImpl implements DataMap {
 
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof DataMap)) {
+        if (!(object instanceof Map<?, ?>)) {
             return false;
         }
-        return contentEquals((DataMap) object);
+        return contentEquals((Fs.as(object)));
     }
 
     @Override
-    public boolean contentEquals(@Nullable Map<String, Object> o) {
+    public boolean contentEquals(@Nullable Map<String, ?> o) {
         return delegate.equals(o);
     }
 
