@@ -223,6 +223,7 @@ enum JsonParserImpl implements JsonParser {
                     return;
                 case '\\':
                     parseEscape(reader, builder);
+                    continue;
                 default:
                     builder.append(c);
             }
@@ -288,6 +289,7 @@ enum JsonParserImpl implements JsonParser {
                     || (c == '.')
                     || (c == 'e')
                     || (c == 'E')
+                    || (c == '+')
             ) {
                 strBuilder.append(c);
                 // continue;

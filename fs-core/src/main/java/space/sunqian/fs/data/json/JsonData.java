@@ -282,7 +282,7 @@ public interface JsonData extends ByteData, CharData {
             case OBJECT:
                 return asDataMap().toObject(type);
             case ARRAY:
-                return asDataList().toList(type);
+                return asDataList().toObject(type);
             case STRING:
                 return asString();
             case NUMBER:

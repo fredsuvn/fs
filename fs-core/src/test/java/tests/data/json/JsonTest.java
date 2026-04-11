@@ -17,22 +17,20 @@ import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.data.json.JsonData;
 import space.sunqian.fs.data.json.JsonDataException;
-import space.sunqian.fs.data.json.JsonFormatter;
 import space.sunqian.fs.data.json.JsonKit;
+import space.sunqian.fs.data.json.JsonParser;
 import space.sunqian.fs.data.json.JsonType;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
-import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.text.SimpleDateFormat;
@@ -45,12 +43,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -66,19 +66,105 @@ public class JsonTest implements PrintTest {
 
     @Test
     public void testFormatting() throws Exception {
+        testFormattingAndParsing(
+            JsonKit::toJsonString,
+            false,
+            (j, t) -> JsonParser.defaultParser().parse(j).toObject(t)
+        );
+    }
+
+    private void testFormattingAndParsing(
+        Function<Object, String> formatter,
+        boolean ignoreNull,
+        BiFunction<String, Type, Object> parser
+    ) throws Exception {
+        {
+            // object
+            Date date = new Date();
+            String dateString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+            Date dateFromStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateString);
+            LocalDateTime localDateTime = LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            DataSrc dataSrc = new DataSrc();
+            dataSrc.setS1("s1");
+            dataSrc.setD1(dateFromStr);
+            dataSrc.setD2(localDateTime);
+            dataSrc.setN1(123L);
+            dataSrc.setN2(new BigDecimal("123.456"));
+            dataSrc.setE1(DataEnum.A);
+            dataSrc.setB1(true);
+            dataSrc.setB2(false);
+            dataSrc.setFmt1(dateFromStr);
+            dataSrc.setFmt2(localDateTime);
+            dataSrc.setFmt3(123L);
+            dataSrc.setFmt4(new BigDecimal("123.456"));
+            String jsonString = formatter.apply(dataSrc);
+            printFor("jsonString", jsonString);
+            printFor("jsonString by Jackson", jsonMapper.writeValueAsString(dataSrc));
+            assertTrue(jsonString.contains("\"n1\":123"));
+            assertTrue(jsonString.contains("\"n2\":123.456"));
+            assertTrue(jsonString.contains("\"fmt3\":123.000"));
+            assertTrue(jsonString.contains("\"fmt4\":123.4560"));
+            if (!ignoreNull) {
+                assertTrue(jsonString.contains("\"o1\":null"));
+                assertTrue(jsonString.contains("\"o2\":null"));
+            } else {
+                assertFalse(jsonString.contains("\"o1\":null"));
+                assertFalse(jsonString.contains("\"o2\":null"));
+            }
+            DataTarget targetByJackson = jsonMapper.readValue(jsonString, DataTarget.class);
+            checkTarget(dataSrc, targetByJackson, dateString);
+            DataTarget target = (DataTarget) parser.apply(jsonString, DataTarget.class);
+            checkTarget(dataSrc, target, dateString);
+            assertEquals(targetByJackson, target);
+            DataPack obj = new DataPack();
+            obj.setS1("s1");
+            obj.setS2("s2");
+            Map<String, Object> map = new HashMap<>();
+            map.put("m1", "m1");
+            map.put("m2", "m2");
+            map.put("m3", null);
+            dataSrc.setO1(obj);
+            dataSrc.setO2(map);
+            String jsonString2 = formatter.apply(dataSrc);
+            printFor("jsonString2", jsonString2);
+            DataTarget targetByJackson2 = jsonMapper.readValue(jsonString2, DataTarget.class);
+            checkTarget(dataSrc, targetByJackson2, dateString);
+            DataTarget target2 = (DataTarget) parser.apply(jsonString2, DataTarget.class);
+            checkTarget(dataSrc, target2, dateString);
+            assertEquals(targetByJackson2, target2);
+            assertTrue(jsonString2.contains("\"n1\":123"));
+            assertTrue(jsonString2.contains("\"n2\":123.456"));
+            assertTrue(jsonString2.contains("\"fmt3\":123.000"));
+            assertTrue(jsonString2.contains("\"fmt4\":123.4560"));
+            if (!ignoreNull) {
+                assertTrue(jsonString2.contains("\"m3\":null"));
+                assertTrue(jsonString2.contains("\"nullStr\":null"));
+                assertEquals(map, targetByJackson2.getO2());
+            } else {
+                assertFalse(jsonString2.contains("\"m3\":null"));
+                assertFalse(jsonString2.contains("\"nullStr\":null"));
+                assertEquals(MapKit.map("m1", "m1", "m2", "m2"), targetByJackson2.getO2());
+            }
+            assertEquals(obj, targetByJackson2.getO1());
+        }
         {
             // string
             StringView a = StringView.of("123");
-            assertEquals("\"" + a + "\"", JsonKit.toJsonString(a));
+            String jsonA = jsonMapper.writeValueAsString(a.toString());
+            assertEquals(jsonA, formatter.apply(a));
+            assertEquals(a.toString(), parser.apply(jsonA, String.class));
             String b = "\"123\"";
-            assertEquals("\"\\\"123\\\"\"", JsonKit.toJsonString(b));
-            assertEquals(jsonMapper.writeValueAsString(a), JsonKit.toJsonString(a));
-            assertEquals(jsonMapper.writeValueAsString(b), JsonKit.toJsonString(b));
+            String jsonB = jsonMapper.writeValueAsString(b);
+            assertEquals(jsonB, formatter.apply(b));
+            assertEquals(b, parser.apply(jsonB, String.class));
             String c = "fas,f{a\"fa{sf}s\"fas[fs}a\\fas[fsa\\\\fa]sfs\"fs:a,sd";
-            assertEquals(jsonMapper.writeValueAsString(c), JsonKit.toJsonString(c));
-            String d = "abc\n\r\t\f\b1234\u0000";
-            System.out.println(jsonMapper.writeValueAsString(d));
-            assertEquals(jsonMapper.writeValueAsString(d), JsonKit.toJsonString(d));
+            String jsonC = jsonMapper.writeValueAsString(c);
+            assertEquals(jsonC, formatter.apply(c));
+            assertEquals(c, parser.apply(jsonC, String.class));
+            String d = "abc\n\r\t\f\b1234\u0000中文";
+            String jsonD = jsonMapper.writeValueAsString(d);
+            assertEquals(jsonD, formatter.apply(d));
+            assertEquals(d, parser.apply(jsonD, String.class));
             StringBuilder escapes = new StringBuilder();
             for (int i = 0; i < 38; i++) {
                 escapes.append(String.format("\\u%04X", i));
@@ -86,61 +172,84 @@ public class JsonTest implements PrintTest {
             for (int i = 0; i < 38; i++) {
                 escapes.append((char) i);
             }
-            assertEquals(jsonMapper.writeValueAsString(escapes.toString()), JsonKit.toJsonString(escapes.toString()));
+            String jsonEscapes = jsonMapper.writeValueAsString(escapes.toString());
+            assertEquals(jsonEscapes, formatter.apply(escapes.toString()));
+            assertEquals(escapes.toString(), parser.apply(jsonEscapes, String.class));
         }
         {
             // number
-            assertEquals("12345", JsonKit.toJsonString(12345));
-            assertEquals(jsonMapper.writeValueAsString(12345), JsonKit.toJsonString(12345));
+            Integer a = 12345;
+            String jsonA = jsonMapper.writeValueAsString(a);
+            assertEquals(jsonA, formatter.apply(a));
+            assertEquals(a, parser.apply(jsonA, Integer.class));
+            Long b = 123456789123456789L;
+            String jsonB = jsonMapper.writeValueAsString(b);
+            assertEquals(jsonB, formatter.apply(b));
+            assertEquals(b, parser.apply(jsonB, Long.class));
+            BigDecimal c = new BigDecimal("123.456");
+            String jsonC = jsonMapper.writeValueAsString(c);
+            assertEquals(jsonC, formatter.apply(c));
+            assertEquals(c, parser.apply(jsonC, BigDecimal.class));
+            BigDecimal d = new BigDecimal("123.456e12");
+            String jsonD = jsonMapper.writeValueAsString(d);
+            assertEquals(jsonD, formatter.apply(d));
+            assertEquals(d, parser.apply(jsonD, BigDecimal.class));
+            BigDecimal e = new BigDecimal("123.456E12");
+            String jsonE = jsonMapper.writeValueAsString(e);
+            assertEquals(jsonE, formatter.apply(e));
+            assertEquals(e, parser.apply(jsonE, BigDecimal.class));
+            BigDecimal f = new BigDecimal("-123.456e12");
+            String jsonF = jsonMapper.writeValueAsString(f);
+            assertEquals(jsonF, formatter.apply(f));
+            assertEquals(f, parser.apply(jsonF, BigDecimal.class));
         }
         {
             // boolean
-            assertEquals("true", JsonKit.toJsonString(true));
-            assertEquals(jsonMapper.writeValueAsString(true), JsonKit.toJsonString(true));
-            assertEquals("false", JsonKit.toJsonString(false));
-            assertEquals(jsonMapper.writeValueAsString(false), JsonKit.toJsonString(false));
-        }
-        {
-            // null
-            assertEquals("null", JsonKit.toJsonString(null));
-            assertEquals(jsonMapper.writeValueAsString(null), JsonKit.toJsonString(null));
-        }
-        {
-            // object
-            testFormatting(JsonKit::toJsonString, false);
-            JsonFormatter jsonFormatter = JsonFormatter.newFormatter(
-                ObjectSchemaParser.defaultCachedParser(), ObjectConverter.defaultConverter(), true
-            );
-            testFormatting(jsonFormatter::toString, true);
+            Boolean a = true;
+            String jsonA = jsonMapper.writeValueAsString(a);
+            assertEquals(jsonA, formatter.apply(a));
+            assertEquals(a, parser.apply(jsonA, Boolean.class));
+            Boolean b = false;
+            String jsonB = jsonMapper.writeValueAsString(b);
+            assertEquals(jsonB, formatter.apply(b));
+            assertEquals(b, parser.apply(jsonB, Boolean.class));
         }
         {
             // array
             boolean[] booleans = new boolean[]{true, false, true};
-            assertEquals("[true,false,true]", JsonKit.toJsonString(booleans));
-            assertEquals(jsonMapper.writeValueAsString(booleans), JsonKit.toJsonString(booleans));
+            String jsonBooleans = jsonMapper.writeValueAsString(booleans);
+            assertEquals(jsonBooleans, formatter.apply(booleans));
+            assertArrayEquals(booleans, (boolean[]) parser.apply(jsonBooleans, boolean[].class));
             byte[] bytes = new byte[]{1, 2, 3};
-            // assertEquals("[1,2,3]", JsonKit.toJsonString(bytes));
-            assertEquals(jsonMapper.writeValueAsString(bytes), JsonKit.toJsonString(bytes));
-            ByteBuffer buffer = ByteBuffer.wrap(bytes);
-            assertEquals(jsonMapper.writeValueAsString(bytes), JsonKit.toJsonString(buffer));
+            // Base64: "AQID"
+            String jsonBytes = jsonMapper.writeValueAsString(bytes);
+            assertEquals(jsonBytes, formatter.apply(bytes));
+            // assertArrayEquals(bytes, (byte[]) parser.apply(jsonBytes, byte[].class));
             char[] chars = new char[]{'a', 'b', 'c'};
-            // assertEquals("[\"a\",\"b\",\"c\"]", JsonKit.toJsonString(chars));
-            assertEquals(jsonMapper.writeValueAsString(chars), JsonKit.toJsonString(chars));
+            // String: "abc"
+            String jsonChars = jsonMapper.writeValueAsString(chars);
+            assertEquals(jsonChars, formatter.apply(chars));
+            // assertArrayEquals(chars, (char[]) parser.apply(jsonChars, char[].class));
             short[] shorts = new short[]{1, 2, 3};
-            assertEquals("[1,2,3]", JsonKit.toJsonString(shorts));
-            assertEquals(jsonMapper.writeValueAsString(shorts), JsonKit.toJsonString(shorts));
+            String jsonShorts = jsonMapper.writeValueAsString(shorts);
+            assertEquals(jsonShorts, formatter.apply(shorts));
+            assertArrayEquals(shorts, (short[]) parser.apply(jsonShorts, short[].class));
             int[] ints = new int[]{1, 2, 3};
-            assertEquals("[1,2,3]", JsonKit.toJsonString(ints));
-            assertEquals(jsonMapper.writeValueAsString(ints), JsonKit.toJsonString(ints));
+            String jsonInts = jsonMapper.writeValueAsString(ints);
+            assertEquals(jsonInts, formatter.apply(ints));
+            assertArrayEquals(ints, (int[]) parser.apply(jsonInts, int[].class));
             long[] longs = new long[]{1, 2, 3};
-            assertEquals("[1,2,3]", JsonKit.toJsonString(longs));
-            assertEquals(jsonMapper.writeValueAsString(longs), JsonKit.toJsonString(longs));
+            String jsonLongs = jsonMapper.writeValueAsString(longs);
+            assertEquals(jsonLongs, formatter.apply(longs));
+            assertArrayEquals(longs, (long[]) parser.apply(jsonLongs, long[].class));
             float[] floats = new float[]{1.0f, 2.0f, 3.0f};
-            assertEquals("[1.0,2.0,3.0]", JsonKit.toJsonString(floats));
-            assertEquals(jsonMapper.writeValueAsString(floats), JsonKit.toJsonString(floats));
+            String jsonFloats = jsonMapper.writeValueAsString(floats);
+            assertEquals(jsonFloats, formatter.apply(floats));
+            assertArrayEquals(floats, (float[]) parser.apply(jsonFloats, float[].class));
             double[] doubles = new double[]{1.0, 2.0, 3.0};
-            assertEquals("[1.0,2.0,3.0]", JsonKit.toJsonString(doubles));
-            assertEquals(jsonMapper.writeValueAsString(doubles), JsonKit.toJsonString(doubles));
+            String jsonDoubles = jsonMapper.writeValueAsString(doubles);
+            assertEquals(jsonDoubles, formatter.apply(doubles));
+            assertArrayEquals(doubles, (double[]) parser.apply(jsonDoubles, double[].class));
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("a", 1);
             map.put("b", 2);
@@ -161,11 +270,12 @@ public class JsonTest implements PrintTest {
             collection.add(0.1d);
             collection.add(new BigInteger("1"));
             collection.add(new BigDecimal("1"));
-            assertEquals(jsonMapper.writeValueAsString(collection), JsonKit.toJsonString(collection));
-            assertEquals(jsonMapper.writeValueAsString(collection), JsonKit.toJsonString(collection.toArray()));
+            String jsonCollection = jsonMapper.writeValueAsString(collection);
+            assertEquals(jsonCollection, formatter.apply(collection));
+            assertEquals(collection, parser.apply(jsonCollection, List.class));
         }
         {
-            // complex data 1
+            // complex data
             ComplexData data = new ComplexData();
             data.setI1(1);
             data.setL1(2L);
@@ -194,31 +304,9 @@ public class JsonTest implements PrintTest {
             data.setLa3(new long[]{1L, 2L});
             data.setBa3(new BigDecimal[]{new BigDecimal("1.0"), new BigDecimal("2.0")});
             data.setSa3(ListKit.list("a", "b"));
-            String json = JsonKit.toJsonString(data);
-            ComplexData parsed = jsonMapper.readValue(json, ComplexData.class);
-            assertEquals(data, parsed);
-        }
-        {
-            // complex data 2
-            LocalDateTime now = LocalDateTime.of(2026, 4, 8, 14, 59, 59);
-            ParsedData src = new ParsedData();
-            src.setI(11);
-            src.setL(22L);
-            src.setString("333");
-            src.setIntObj(44);
-            src.setLongObj(55L);
-            src.setDecimal(new BigDecimal("66.667"));
-            src.setLs(new long[]{1, 2, 3});
-            src.setDecimals(new BigDecimal[]{new BigDecimal("2.333")});
-            src.setStrings(ListKit.list("a", "b", "c"));
-            src.setStringMap(MapKit.map("a", "1", "b", "2", "c", "3"));
-            src.setDataObjMap(MapKit.map("x1", new DataObj("11", "22"), "x2", new DataObj("33", "44")));
-            src.setDataObj(new DataObj("s1", "s2"));
-            src.setInner(new ParsedData.Inner(now, new DataObj("88", "99")));
-            src.setDataEnum(DataEnum.C);
-            String json = JsonKit.toJsonString(src);
-            ParsedData parsed = jsonMapper.readValue(json, ParsedData.class);
-            assertEquals(src, parsed);
+            String jsonData = jsonMapper.writeValueAsString(data);
+            assertEquals(jsonData, formatter.apply(data));
+            assertEquals(data, parser.apply(jsonData, ComplexData.class));
         }
         {
             // error
@@ -227,73 +315,7 @@ public class JsonTest implements PrintTest {
             assertThrows(IORuntimeException.class, () ->
                 JsonKit.toJsonString(map, IOKit.limitedWriter(new StringWriter(), 5)));
             assertThrows(IORuntimeException.class, () ->
-                JsonKit.toJsonString(new DataObj("1111", "2222"), IOKit.limitedWriter(new StringWriter(), 5)));
-        }
-    }
-
-    private void testFormatting(Function<Object, String> formatter, boolean ignoreNull) throws Exception {
-        ObjectMapper jsonMapper = new ObjectMapper();
-        jsonMapper.registerModule(new JavaTimeModule());
-        {
-            // object
-            Date date = new Date();
-            String dateString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-            Date dateFromStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateString);
-            LocalDateTime localDateTime = LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            // assertEquals("\"" + dateString + "\"", JsonKit.toJsonString(dateFromStr));
-            // assertEquals("\"" + dateString + "\"", JsonKit.toJsonString(localDateTime));
-            DataSrc dataSrc = new DataSrc();
-            dataSrc.setS1("s1");
-            dataSrc.setD1(dateFromStr);
-            dataSrc.setD2(localDateTime);
-            dataSrc.setN1(123L);
-            dataSrc.setN2(new BigDecimal("123.456"));
-            dataSrc.setE1(DataEnum.A);
-            dataSrc.setFmt1(dateFromStr);
-            dataSrc.setFmt2(localDateTime);
-            dataSrc.setFmt3(123L);
-            dataSrc.setFmt4(new BigDecimal("123.456"));
-            String jsonString = formatter.apply(dataSrc);
-            printFor("jsonString", jsonString);
-            printFor("jsonString by Jackson", jsonMapper.writeValueAsString(dataSrc));
-            DataTarget target = jsonMapper.readValue(jsonString, DataTarget.class);
-            checkTarget(dataSrc, target, dateString);
-            assertTrue(jsonString.contains("\"n1\":123"));
-            assertTrue(jsonString.contains("\"n2\":123.456"));
-            assertTrue(jsonString.contains("\"fmt3\":123.000"));
-            assertTrue(jsonString.contains("\"fmt4\":123.4560"));
-            if (!ignoreNull) {
-                assertTrue(jsonString.contains("\"o1\":null"));
-                assertTrue(jsonString.contains("\"o2\":null"));
-            } else {
-                assertFalse(jsonString.contains("\"o1\":null"));
-                assertFalse(jsonString.contains("\"o2\":null"));
-            }
-            DataObj obj = new DataObj();
-            obj.setS1("s1");
-            obj.setS2("s2");
-            Map<String, Object> map = new HashMap<>();
-            map.put("m1", "m1");
-            map.put("m2", "m2");
-            map.put("m3", null);
-            dataSrc.setO1(obj);
-            dataSrc.setO2(map);
-            String jsonString2 = formatter.apply(dataSrc);
-            printFor("jsonString2", jsonString2);
-            DataTarget target2 = jsonMapper.readValue(jsonString2, DataTarget.class);
-            checkTarget(dataSrc, target2, dateString);
-            assertTrue(jsonString2.contains("\"n1\":123"));
-            assertTrue(jsonString2.contains("\"n2\":123.456"));
-            assertTrue(jsonString2.contains("\"fmt3\":123.000"));
-            assertTrue(jsonString2.contains("\"fmt4\":123.4560"));
-            if (!ignoreNull) {
-                assertTrue(jsonString2.contains("\"m3\":null"));
-                assertEquals(map, target2.getO2());
-            } else {
-                assertFalse(jsonString2.contains("\"m3\":null"));
-                assertEquals(MapKit.map("m1", "m1", "m2", "m2"), target2.getO2());
-            }
-            assertEquals(obj, target2.getO1());
+                JsonKit.toJsonString(new DataPack("1111", "2222"), IOKit.limitedWriter(new StringWriter(), 5)));
         }
     }
 
@@ -308,6 +330,9 @@ public class JsonTest implements PrintTest {
         assertEquals("123.000", target.getFmt3().toString());
         assertEquals("123.4560", target.getFmt4().toString());
         assertEquals(DataEnum.A.toString(), target.getE1());
+        assertEquals(dataSrc.isB1(), target.isB1());
+        assertEquals(dataSrc.isB2(), target.isB2());
+        assertNull(target.getNullStr());
     }
 
     @Test
@@ -546,7 +571,7 @@ public class JsonTest implements PrintTest {
             ParsedData src = new ParsedData();
             src.setI(11);
             src.setL(22L);
-            src.setString("333");
+            src.setString("33\n\r\b\t\u1234t3\"中文");
             src.setIntObj(44);
             src.setLongObj(55L);
             src.setDecimal(new BigDecimal("66.667"));
@@ -554,12 +579,14 @@ public class JsonTest implements PrintTest {
             src.setDecimals(new BigDecimal[]{new BigDecimal("2.333")});
             src.setStrings(ListKit.list("a", "b", "c"));
             src.setStringMap(MapKit.map("a", "1", "b", "2", "c", "3"));
-            src.setDataObjMap(MapKit.map("x1", new DataObj("11", "22"), "x2", new DataObj("33", "44")));
-            src.setDataObj(new DataObj("s1", "s2"));
-            src.setInner(new ParsedData.Inner(now, new DataObj("88", "99")));
+            src.setObjMap(MapKit.map("x1", new DataPack("11", "22"), "x2", new DataPack("33", "44")));
+            src.setDataPack(new DataPack("s1", "s2"));
+            src.setInner(new ParsedData.Inner(now, new DataPack("88", "99")));
             src.setDataEnum(DataEnum.C);
+            src.setBool1(true);
+            src.setBool2(false);
             String json = jsonMapper.writeValueAsString(src);
-            System.out.println(json);
+            printFor("json by jsonMapper", json);
             ParsedData parsed = JsonKit.parse(json).toObject(ParsedData.class);
             // System.out.println(src);
             // System.out.println(parsed);
@@ -594,8 +621,11 @@ public class JsonTest implements PrintTest {
         private long n1;
         private BigDecimal n2;
         private DataEnum e1;
+        private String nullStr;
+        private boolean b1;
+        private boolean b2;
 
-        private DataObj o1;
+        private DataPack o1;
         private Map<String, Object> o2;
 
         @DatePattern("yyyy-MM-dd HH:mm:ss")
@@ -613,15 +643,6 @@ public class JsonTest implements PrintTest {
     }
 
     @Data
-    @EqualsAndHashCode
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class DataObj {
-        private String s1;
-        private String s2;
-    }
-
-    @Data
     public static class DataTarget {
         private String s1;
         private String d1;
@@ -629,14 +650,26 @@ public class JsonTest implements PrintTest {
         private BigDecimal n1;
         private BigDecimal n2;
         private String e1;
+        private Integer nullStr;
+        private boolean b1;
+        private boolean b2;
 
-        private DataObj o1;
+        private DataPack o1;
         private Map<String, Object> o2;
 
         private String fmt1;
         private String fmt2;
         private BigDecimal fmt3;
         private BigDecimal fmt4;
+    }
+
+    @Data
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class DataPack {
+        private String s1;
+        private String s2;
     }
 
     @Data
@@ -688,10 +721,13 @@ public class JsonTest implements PrintTest {
         private BigDecimal[] decimals;
         private List<String> strings;
         private Map<String, String> stringMap;
-        private Map<String, DataObj> dataObjMap;
-        private DataObj dataObj;
+        private Map<String, DataPack> objMap;
+        private DataPack dataPack;
         private Inner inner;
         private DataEnum dataEnum;
+        private String nullStr;
+        private boolean bool1;
+        private boolean bool2;
 
         @Data
         @EqualsAndHashCode
@@ -703,7 +739,7 @@ public class JsonTest implements PrintTest {
             @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")// timezone = "Asia/Shanghai"
             private LocalDateTime date;
 
-            private DataObj dataObj;
+            private DataPack dataPack;
         }
     }
 }
