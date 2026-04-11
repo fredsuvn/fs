@@ -340,7 +340,7 @@ public interface SimpleJdbcPool {
             return new SimpleJdbcPoolImpl(
                 url, username, password, driver,
                 connectionFactory == null ? new ConnectionFactoryImpl() : connectionFactory,
-                connectionWrapperFactory == null ? AsmGenerator.newWrapperFactory() : connectionWrapperFactory,
+                connectionWrapperFactory == null ? AsmConnectionWrapperFactory.INST : connectionWrapperFactory,
                 closer, validator, coreSize, maxSize, idleTimeout
             );
         }
