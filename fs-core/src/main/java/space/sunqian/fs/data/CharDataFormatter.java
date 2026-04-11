@@ -19,17 +19,4 @@ public interface CharDataFormatter<T> {
      * @throws IORuntimeException if an I/O error occurs
      */
     void formatTo(@Nonnull T data, @Nonnull Appendable appender) throws IORuntimeException;
-
-    /**
-     * Formates the given data to a string.
-     *
-     * @param data the given data to be formatted
-     * @return the formatting string
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    default @Nonnull String toString(@Nonnull T data) throws IORuntimeException {
-        StringBuilder sb = new StringBuilder();
-        formatTo(data, sb);
-        return sb.toString();
-    }
 }

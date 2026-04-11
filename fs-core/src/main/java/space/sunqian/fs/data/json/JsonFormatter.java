@@ -2,6 +2,7 @@ package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.base.bytes.BytesBuilder;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.data.ByteDataFormatter;
 import space.sunqian.fs.data.CharDataFormatter;
@@ -29,7 +30,7 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
     /**
      * Returns the default {@link JsonFormatter}, which uses {@link ObjectSchemaParser#defaultCachedParser()} and
      * {@link ObjectConverter#defaultConverter()} to pars and convert objects, and doesn't ignore the properties of
-     * which values are {@code null} , or {@code null} values of map, when formatting.
+     * which values are {@code null}, or {@code null} values of map, when formatting.
      * <p>
      * The returned formatter will format {@code byte[]}/{@link ByteBuffer} as Base64 string, and it is the only way to
      * format binary data.
@@ -38,6 +39,20 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
      */
     static @Nonnull JsonFormatter defaultFormatter() {
         return JsonFormatterBack.defaultFormatter();
+    }
+
+    /**
+     * Returns the default {@link JsonFormatter}, which uses {@link ObjectSchemaParser#defaultCachedParser()} and
+     * {@link ObjectConverter#defaultConverter()} to pars and convert objects, and does ignore the properties of which
+     * values are {@code null}, or {@code null} values of map, when formatting.
+     * <p>
+     * The returned formatter will format {@code byte[]}/{@link ByteBuffer} as Base64 string, and it is the only way to
+     * format binary data.
+     *
+     * @return the default {@link JsonFormatter}
+     */
+    static @Nonnull JsonFormatter newFormatter(boolean ignoreNullValue) {
+        return JsonFormatterBack.newFormatter(ignoreNullValue);
     }
 
     /**
@@ -90,19 +105,6 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
     }
 
     /**
-     * Formates and writes the given data as JSON string to a byte array, using {@link CharsKit#defaultCharset()}.
-     *
-     * @param data the given data to be formatted
-     * @return the byte array formatted from the given data
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    @SuppressWarnings("DataFlowIssue")
-    @Override
-    default byte @Nonnull [] toByteArray(@Nullable Object data) throws IORuntimeException {
-        return ByteDataFormatter.super.toByteArray(data);
-    }
-
-    /**
      * Formates and writes the given data as JSON string to the given appender.
      *
      * @param data     the given data to be formatted
@@ -119,10 +121,23 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
      * @return the JSON string
      * @throws IORuntimeException if an I/O error occurs
      */
-    @SuppressWarnings("DataFlowIssue")
-    @Override
     @Nonnull
-    default String toString(@Nullable Object data) throws IORuntimeException {
-        return CharDataFormatter.super.toString(data);
+    default String format(@Nullable Object data) throws IORuntimeException {
+        StringBuilder sb = new StringBuilder();
+        formatTo(data, sb);
+        return sb.toString();
+    }
+
+    /**
+     * Formates and writes the given data as JSON string to a byte array, using {@link CharsKit#defaultCharset()}.
+     *
+     * @param data the given data to be formatted
+     * @return the byte array formatted from the given data
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default byte @Nonnull [] formatBytes(@Nullable Object data) throws IORuntimeException {
+        BytesBuilder out = new BytesBuilder();
+        formatTo(data, out);
+        return out.toByteArray();
     }
 }

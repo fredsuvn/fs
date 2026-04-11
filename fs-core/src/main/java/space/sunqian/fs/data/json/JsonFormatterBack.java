@@ -24,8 +24,16 @@ import java.util.Map;
 
 final class JsonFormatterBack {
 
-    static @Nonnull JsonFormatter defaultFormatter() {
+    static @Nonnull JsonFormatterImpl defaultFormatter() {
         return JsonFormatterImpl.DEFAULT;
+    }
+
+    static @Nonnull JsonFormatterImpl newFormatter(boolean ignoreNullValue) {
+        return newFormatter(
+            ObjectSchemaParser.defaultCachedParser(),
+            ObjectConverter.defaultConverter(),
+            ignoreNullValue
+        );
     }
 
     static @Nonnull JsonFormatterImpl newFormatter(
@@ -39,8 +47,6 @@ final class JsonFormatterBack {
     private static final class JsonFormatterImpl implements JsonFormatter {
 
         private static final @Nonnull JsonFormatterImpl DEFAULT = newFormatter(
-            ObjectSchemaParser.defaultCachedParser(),
-            ObjectConverter.defaultConverter(),
             false
         );
 

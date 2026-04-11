@@ -25,7 +25,7 @@ public class JsonKit {
      * @return a string formatted by {@link JsonFormatter#defaultFormatter()} of the given data
      */
     public static @Nonnull String toJsonString(@Nullable Object data) {
-        return JsonFormatter.defaultFormatter().toString(data);
+        return JsonFormatter.defaultFormatter().format(data);
     }
 
     /**
@@ -35,7 +35,7 @@ public class JsonKit {
      * @return a byte array formatted by {@link JsonFormatter#defaultFormatter()} of the given data
      */
     public static byte @Nonnull [] toJsonBytes(@Nullable Object data) {
-        return JsonFormatter.defaultFormatter().toByteArray(data);
+        return JsonFormatter.defaultFormatter().formatBytes(data);
     }
 
     /**
