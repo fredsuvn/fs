@@ -1,4 +1,4 @@
-package internal.tools;
+package internal.utils;
 
 import java.text.MessageFormat;
 
