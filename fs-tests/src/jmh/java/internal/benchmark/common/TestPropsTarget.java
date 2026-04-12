@@ -1,4 +1,4 @@
-package internal.tests.common;
+package internal.benchmark.common;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

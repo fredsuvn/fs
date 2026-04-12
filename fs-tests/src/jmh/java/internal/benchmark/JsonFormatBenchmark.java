@@ -1,7 +1,7 @@
-package internal.tests.benchmarks;
+package internal.benchmark;
 
-import internal.tests.api.JsonFormatApi;
-import internal.tests.common.TestJsonData;
+import internal.benchmark.api.JsonFormatApi;
+import internal.benchmark.common.TestJsonData;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -25,28 +25,25 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @BenchmarkMode({Mode.Throughput})
-@Warmup(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
-@Fork(3)
+@Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
+@Fork(5)
 public class JsonFormatBenchmark {
 
+    private final TestJsonData data = new TestJsonData();
+    private final Map<String, Object> map = new LinkedHashMap<>();
     @Param({
         "fs",
         "jackson",
         "fastjson",
     })
     private String formatType;
-
     @Param({
         "object",
         "map",
     })
     private String formatTarget;
-
     private JsonFormatApi jsomFormat;
-
-    private final TestJsonData data = new TestJsonData();
-    private final Map<String, Object> map = new LinkedHashMap<>();
 
     {
         // object

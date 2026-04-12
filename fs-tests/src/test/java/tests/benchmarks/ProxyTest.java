@@ -1,6 +1,6 @@
 package tests.benchmarks;
 
-import internal.tests.api.ProxyApi;
+import internal.benchmark.api.ProxyApi;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

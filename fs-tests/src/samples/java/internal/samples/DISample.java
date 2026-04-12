@@ -48,6 +48,26 @@ public class DISample {
         child.shutdown();
     }
 
+    public interface XService {
+
+        String doService();
+    }
+
+    @Target(FIELD)
+    @Retention(RUNTIME)
+    public @interface XResource {
+    }
+
+    @Target(METHOD)
+    @Retention(RUNTIME)
+    public @interface XPostConstruct {
+    }
+
+    @Target(METHOD)
+    @Retention(RUNTIME)
+    public @interface XPreDestroy {
+    }
+
     public static class XController {
 
         @XResource
@@ -79,11 +99,6 @@ public class DISample {
         public void destroy() {
             System.out.println("before destroy");
         }
-    }
-
-    public interface XService {
-
-        String doService();
     }
 
     public static class XServiceImpl implements XService {
@@ -133,20 +148,5 @@ public class DISample {
         public void doDestroy() {
             System.out.println("destroy");
         }
-    }
-
-    @Target(FIELD)
-    @Retention(RUNTIME)
-    public @interface XResource {
-    }
-
-    @Target(METHOD)
-    @Retention(RUNTIME)
-    public @interface XPostConstruct {
-    }
-
-    @Target(METHOD)
-    @Retention(RUNTIME)
-    public @interface XPreDestroy {
     }
 }

@@ -1,8 +1,8 @@
-package internal.tests.benchmarks;
+package internal.benchmark;
 
-import internal.tests.api.PropertiesCopier;
-import internal.tests.common.TestPropsData;
-import internal.tests.common.TestPropsTarget;
+import internal.benchmark.api.PropertiesCopier;
+import internal.benchmark.common.TestPropsData;
+import internal.benchmark.common.TestPropsTarget;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -18,16 +18,19 @@ import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @BenchmarkMode({Mode.Throughput})
-@Warmup(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
-@Fork(3)
-public class CopyPropertiesBenchmark {
+@Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
+@Fork(5)
+public class CopyPropertiesWithAnnotationsBenchmark {
 
+    private final TestPropsData data = new TestPropsData();
     @Param({
         "fs",
         "fs-newInstMode",
@@ -37,10 +40,7 @@ public class CopyPropertiesBenchmark {
         "direct"
     })
     private String copierType;
-
     private PropertiesCopier copier;
-
-    private final TestPropsData data = new TestPropsData();
 
     {
         data.setI1(1);
@@ -55,6 +55,12 @@ public class CopyPropertiesBenchmark {
         data.setIi2(3);
         data.setLl2(4L);
         data.setBb2(new BigDecimal("5.0"));
+        Date now = new Date();
+        String nowStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now);
+        data.setFmt1(nowStr);
+        data.setFmt2(nowStr);
+        data.setFmt3(nowStr);
+        data.setFmt4(nowStr);
     }
 
     @Setup(Level.Trial)
@@ -65,7 +71,7 @@ public class CopyPropertiesBenchmark {
     @Benchmark
     public void copyProperties(Blackhole blackhole) throws Exception {
         TestPropsTarget target = new TestPropsTarget();
-        copier.copyProperties(data, target, false);
+        copier.copyProperties(data, target, true);
         blackhole.consume(target);
     }
 }

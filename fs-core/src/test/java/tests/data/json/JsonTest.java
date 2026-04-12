@@ -13,8 +13,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import space.sunqian.annotation.Nonnull;
-import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.string.StringView;
 import space.sunqian.fs.collect.ListKit;
@@ -37,15 +35,12 @@ import space.sunqian.fs.reflect.TypeRef;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -81,45 +76,9 @@ public class JsonTest implements PrintTest {
     @Test
     public void testFormattingAndParsing() throws Exception {
         testFormattingAndParsing(
-            new JsonFormatter() {
-
-                @Override
-                public void formatTo(@Nullable Object data, @Nonnull Appendable appender) throws DataFormattingException {
-                    JsonKit.toJsonString(data, appender);
-                }
-
-                @Override
-                public @Nonnull String format(@Nullable Object data) throws DataFormattingException {
-                    return JsonKit.toJsonString(data);
-                }
-
-                @Override
-                public byte @Nonnull [] formatBytes(@Nullable Object data) throws DataFormattingException {
-                    return JsonKit.toJsonBytes(data);
-                }
-            },
+            JsonFormatter.defaultFormatter(),
             false,
-            new JsonParser() {
-                @Override
-                public @Nonnull JsonData parse(@Nonnull InputStream input) throws JsonDataParsingException {
-                    return JsonKit.parse(input);
-                }
-
-                @Override
-                public @Nonnull JsonData parse(@Nonnull ReadableByteChannel channel) throws JsonDataParsingException {
-                    return JsonKit.parse(channel);
-                }
-
-                @Override
-                public @Nonnull JsonData parse(@Nonnull Reader reader) throws JsonDataParsingException {
-                    return JsonKit.parse(reader);
-                }
-
-                @Override
-                public @Nonnull JsonData parse(@Nonnull String string) throws JsonDataParsingException {
-                    return JsonKit.parse(string);
-                }
-            }
+            JsonParser.defaultParser()
         );
         testFormattingAndParsing(
             JsonFormatter.newFormatter(true),

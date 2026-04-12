@@ -1,4 +1,4 @@
-package internal.tests.api;
+package internal.benchmark.api;
 
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,11 +1,10 @@
-package internal.tests.common;
+package internal.benchmark.common;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 @Data
 @EqualsAndHashCode

@@ -1,8 +1,8 @@
 package tests.benchmarks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import internal.tests.api.JsonFormatApi;
-import internal.tests.common.TestJsonData;
+import internal.benchmark.api.JsonFormatApi;
+import internal.benchmark.common.TestJsonData;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.collect.ListKit;
 

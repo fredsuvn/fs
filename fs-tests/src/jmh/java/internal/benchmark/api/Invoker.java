@@ -1,4 +1,4 @@
-package internal.tests.api;
+package internal.benchmark.api;
 
 import space.sunqian.fs.invoke.Invocable;
 import space.sunqian.fs.invoke.InvocationMode;

@@ -1,4 +1,4 @@
-package internal.tests.api;
+package internal.benchmark.api;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;

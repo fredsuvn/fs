@@ -1,7 +1,7 @@
 package tests.benchmarks;
 
+import internal.benchmark.api.TcpServerApi;
 import internal.test.DataTest;
-import internal.tests.api.TcpServerApi;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.net.tcp.TcpClient;

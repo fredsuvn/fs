@@ -1,4 +1,4 @@
-package internal.tests.api;
+package internal.benchmark.api;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;

@@ -1,8 +1,8 @@
 package tests.benchmarks;
 
-import internal.tests.api.PropertiesCopier;
-import internal.tests.common.TestPropsData;
-import internal.tests.common.TestPropsTarget;
+import internal.benchmark.api.PropertiesCopier;
+import internal.benchmark.common.TestPropsData;
+import internal.benchmark.common.TestPropsTarget;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

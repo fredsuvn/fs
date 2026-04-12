@@ -37,6 +37,25 @@ sourceSets {
       srcDirs += jmh.java
     }
   }
+  test {
+    compileClasspath += jmh.output
+    runtimeClasspath += jmh.output
+  }
+  create("samples") {
+    java.srcDir("src/samples/java")
+    resources.srcDir("src/samples/resources")
+  }
+}
+val samplesImplementation by configurations.getting {
+  extendsFrom(configurations.implementation.get())
+}
+
+dependencies {
+  // samples
+  samplesImplementation(platform(project(":fs-dependencies")))
+  samplesImplementation(project(":fs-annotation"))
+  samplesImplementation(project(":fs-core"))
+  samplesImplementation(project(":fs-internal"))
 }
 
 jmh {
