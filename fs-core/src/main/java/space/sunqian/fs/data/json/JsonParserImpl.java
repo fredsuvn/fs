@@ -5,7 +5,6 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.number.NumKit;
-import space.sunqian.fs.io.IORuntimeException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,13 +21,13 @@ enum JsonParserImpl implements JsonParser {
     INST;
 
     @Override
-    public @Nonnull JsonData parse(@Nonnull InputStream input) throws IORuntimeException {
+    public @Nonnull JsonData parse(@Nonnull InputStream input) throws JsonParsingDataException {
         Reader reader = new InputStreamReader(input, CharsKit.defaultCharset());
         return parse(reader);
     }
 
     @Override
-    public @Nonnull JsonData parse(@Nonnull ReadableByteChannel channel) throws IORuntimeException {
+    public @Nonnull JsonData parse(@Nonnull ReadableByteChannel channel) throws JsonParsingDataException {
         // compatible with JDK8
         @SuppressWarnings("CharsetObjectCanBeUsed")
         Reader reader = Channels.newReader(channel, CharsKit.defaultCharset().name());
@@ -36,7 +35,7 @@ enum JsonParserImpl implements JsonParser {
     }
 
     @Override
-    public @Nonnull JsonData parse(@Nonnull Reader reader) throws IORuntimeException {
+    public @Nonnull JsonData parse(@Nonnull Reader reader) throws JsonParsingDataException {
         try {
             JReader jReader = new JReader(reader);
             Object result = parseJson(jReader, new StringBuilder(), true);
@@ -56,8 +55,10 @@ enum JsonParserImpl implements JsonParser {
                 return JsonData.ofList(Fs.as(result));
             }
             return JsonData.ofMap(Fs.as(result));
+        } catch (JsonParsingDataException e) {
+            throw e;
         } catch (Exception e) {
-            throw new IORuntimeException(e);
+            throw new JsonParsingDataException(e);
         }
     }
 
@@ -163,7 +164,7 @@ enum JsonParserImpl implements JsonParser {
                     throw new JsonParsingDataException(reader.nextIndex() - 1, String.valueOf(c), null);
             }
         }
-        throw new JsonParsingDataException(reader.nextIndex(), null, null);
+        throw new JsonParsingDataException(reader.nextIndex(), null, "}");
     }
 
     private void parseArray(

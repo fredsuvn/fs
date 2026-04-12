@@ -3,7 +3,7 @@ package space.sunqian.fs.data.json;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.chars.CharsKit;
-import space.sunqian.fs.io.IORuntimeException;
+import space.sunqian.fs.data.DataFormattingException;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
 import space.sunqian.fs.object.convert.ConvertKit;
@@ -121,11 +121,11 @@ final class JsonFormatterBack {
         }
 
         @Override
-        public void formatTo(@Nullable Object data, @Nonnull Appendable appender) throws IORuntimeException {
+        public void formatTo(@Nullable Object data, @Nonnull Appendable appender) throws DataFormattingException {
             try {
                 writeAny(data, appender);
             } catch (Exception e) {
-                throw new IORuntimeException(e);
+                throw new DataFormattingException(e);
             }
         }
 

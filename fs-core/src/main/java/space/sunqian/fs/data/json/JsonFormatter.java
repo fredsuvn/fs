@@ -6,8 +6,8 @@ import space.sunqian.fs.base.bytes.BytesBuilder;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.data.ByteDataFormatter;
 import space.sunqian.fs.data.CharDataFormatter;
+import space.sunqian.fs.data.DataFormattingException;
 import space.sunqian.fs.io.IOKit;
-import space.sunqian.fs.io.IORuntimeException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
@@ -83,10 +83,10 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
      *
      * @param data the given data to be formatted
      * @param out  the output stream to write to
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws DataFormattingException if any error occurs during formatting
      */
     @Override
-    default void formatTo(@Nullable Object data, @Nonnull OutputStream out) throws IORuntimeException {
+    default void formatTo(@Nullable Object data, @Nonnull OutputStream out) throws DataFormattingException {
         formatTo(data, IOKit.newWriter(out));
     }
 
@@ -96,11 +96,11 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
      *
      * @param data    the given data to be formatted
      * @param channel the output channel to write to
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws DataFormattingException if any error occurs during formatting
      */
     @SuppressWarnings("DataFlowIssue")
     @Override
-    default void formatTo(@Nullable Object data, @Nonnull WritableByteChannel channel) throws IORuntimeException {
+    default void formatTo(@Nullable Object data, @Nonnull WritableByteChannel channel) throws DataFormattingException {
         ByteDataFormatter.super.formatTo(data, channel);
     }
 
@@ -109,20 +109,20 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
      *
      * @param data     the given data to be formatted
      * @param appender the output appender to write to
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws DataFormattingException if any error occurs during formatting
      */
     @Override
-    void formatTo(@Nullable Object data, @Nonnull Appendable appender) throws IORuntimeException;
+    void formatTo(@Nullable Object data, @Nonnull Appendable appender) throws DataFormattingException;
 
     /**
      * Formates and writes the given data as a JSON string.
      *
      * @param data the given data to be formatted
      * @return the JSON string
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws DataFormattingException if any error occurs during formatting
      */
     @Nonnull
-    default String format(@Nullable Object data) throws IORuntimeException {
+    default String format(@Nullable Object data) throws DataFormattingException {
         StringBuilder sb = new StringBuilder();
         formatTo(data, sb);
         return sb.toString();
@@ -133,9 +133,9 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
      *
      * @param data the given data to be formatted
      * @return the byte array formatted from the given data
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws DataFormattingException if any error occurs during formatting
      */
-    default byte @Nonnull [] formatBytes(@Nullable Object data) throws IORuntimeException {
+    default byte @Nonnull [] formatBytes(@Nullable Object data) throws DataFormattingException {
         BytesBuilder out = new BytesBuilder();
         formatTo(data, out);
         return out.toByteArray();
