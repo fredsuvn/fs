@@ -245,6 +245,7 @@ public interface JsonData extends ByteData, CharData {
      * @param <T> the type of the object to be returned`
      * @return a new object of the specified class
      * @throws DataException if an error occurs during the conversion
+     * @implNote the default implementation uses {@link ObjectConverter#defaultConverter()} to convert types.
      */
     default <T> @Nonnull T toObject(Class<T> cls) throws DataException {
         return Fs.as(toObject((Type) cls));
@@ -260,6 +261,7 @@ public interface JsonData extends ByteData, CharData {
      * @param <T>     the type of the object to be returned`
      * @return a new object of the specified class
      * @throws DataException if an error occurs during the conversion
+     * @implNote the default implementation uses {@link ObjectConverter#defaultConverter()} to convert types.
      */
     default <T> @Nonnull T toObject(TypeRef<T> typeRef) throws DataException {
         return Fs.as(toObject(typeRef.type()));
@@ -274,6 +276,7 @@ public interface JsonData extends ByteData, CharData {
      * @param type the specified type
      * @return a new object of the specified type
      * @throws DataException if an error occurs during the conversion
+     * @implNote the default implementation uses {@link ObjectConverter#defaultConverter()} to convert types.
      */
     @SuppressWarnings("EnhancedSwitchMigration")
     default @Nonnull Object toObject(Type type) throws DataException {
@@ -284,13 +287,13 @@ public interface JsonData extends ByteData, CharData {
             case ARRAY:
                 return asDataList().toObject(type);
             case STRING:
-                return asString();
+                return ObjectConverter.defaultConverter().convert(asString(), type);
             case NUMBER:
-                return asNumber();
+                return ObjectConverter.defaultConverter().convert(asNumber(), type);
             case BOOLEAN:
-                return asBoolean();
+                return ObjectConverter.defaultConverter().convert(asBoolean(), type);
             default:
-                throw new DataException("Unsupported JSON type: " + jsonType + ".");
+                throw new JsonDataException("Unsupported JSON type: " + jsonType + ".");
         }
     }
 

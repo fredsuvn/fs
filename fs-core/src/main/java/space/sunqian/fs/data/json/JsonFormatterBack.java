@@ -90,8 +90,8 @@ final class JsonFormatterBack {
             FORMAT_MAP.put(float[].class, (impl, data, appender) -> impl.writeArray((float[]) data, appender));
             FORMAT_MAP.put(double[].class, (impl, data, appender) -> impl.writeArray((double[]) data, appender));
             // as base64
-            FORMAT_MAP.put(byte[].class, (impl, data, appender) ->
-                impl.writeString(Base64Kit.encoder().encodeToString((byte[]) data), appender));
+            // FORMAT_MAP.put(byte[].class, (impl, data, appender) ->
+            //     impl.writeString(Base64Kit.encoder().encodeToString((byte[]) data), appender));
             // as string
             FORMAT_MAP.put(char[].class, (impl, data, appender) ->
                 impl.writeString(new String((char[]) data), appender));
@@ -133,7 +133,8 @@ final class JsonFormatterBack {
         }
 
         private void writeAny(@Nullable Object any, @Nonnull Appendable appender) throws Exception {
-            if (any == null) {
+            Object actualValue = preProcess(any);
+            if (actualValue == null) {
                 appender.append("null");
                 return;
             }
@@ -141,61 +142,40 @@ final class JsonFormatterBack {
             //     ((JsonData) any).writeTo(appender);
             //     return;
             // }
-            Formatter formatter = FORMAT_MAP.get(any.getClass());
+            Formatter formatter = FORMAT_MAP.get(actualValue.getClass());
             if (formatter != null) {
-                formatter.formatTo(this, any, appender);
+                formatter.formatTo(this, actualValue, appender);
                 return;
             }
-            if (any instanceof CharSequence) {
-                writeString(any.toString(), appender);
+            if (actualValue instanceof CharSequence) {
+                writeString(actualValue.toString(), appender);
                 return;
             }
-            if (any instanceof Date) {
-                writeString(any.toString(), appender);
+            if (actualValue instanceof Date) {
+                writeString(actualValue.toString(), appender);
                 return;
             }
-            if (any instanceof TemporalAccessor) {
-                writeString(any.toString(), appender);
+            if (actualValue instanceof TemporalAccessor) {
+                writeString(actualValue.toString(), appender);
                 return;
             }
-            if (any instanceof Enum) {
-                writeString(any.toString(), appender);
+            if (actualValue instanceof Enum) {
+                writeString(actualValue.toString(), appender);
                 return;
             }
-            if (any instanceof Map<?, ?>) {
-                writeMap((Map<?, ?>) any, appender);
+            if (actualValue instanceof Map<?, ?>) {
+                writeMap((Map<?, ?>) actualValue, appender);
                 return;
             }
-            if (any instanceof Iterable<?>) {
-                writeArray((Iterable<?>) any, appender);
+            if (actualValue instanceof Iterable<?>) {
+                writeArray((Iterable<?>) actualValue, appender);
                 return;
             }
-            if (any instanceof Object[]) {
-                writeArray((Object[]) any, appender);
+            if (actualValue instanceof Object[]) {
+                writeArray((Object[]) actualValue, appender);
                 return;
             }
-            if (any instanceof ByteBuffer) {
-                // as base64
-                writeString(Base64Kit.encoder().encodeToString((ByteBuffer) any), appender);
-                return;
-            }
-            if (any instanceof InputStream) {
-                // as base64
-                byte[] bytes = IOKit.read((InputStream) any);
-                if (bytes != null) {
-                    writeString(Base64Kit.encoder().encodeToString(bytes), appender);
-                }
-                return;
-            }
-            if (any instanceof ReadableByteChannel) {
-                // as base64
-                byte[] bytes = IOKit.readBytes((ReadableByteChannel) any);
-                if (bytes != null) {
-                    writeString(Base64Kit.encoder().encodeToString(bytes), appender);
-                }
-                return;
-            }
-            writeObject(any, appender);
+            writeObject(actualValue, appender);
         }
 
         private void writeString(@Nonnull String string, @Nonnull Appendable appender) throws Exception {
@@ -231,7 +211,8 @@ final class JsonFormatterBack {
             appender.append('{');
             boolean[] isFirst = {true};
             map.forEach((key, value) -> {
-                if (ignoreNullValue && value == null) {
+                Object actualValue = preProcess(value);
+                if (ignoreNullValue && actualValue == null) {
                     return;
                 }
                 try {
@@ -242,7 +223,7 @@ final class JsonFormatterBack {
                     }
                     writeString(String.valueOf(key), appender);
                     appender.append(':');
-                    writeAny(value, appender);
+                    writeAny(actualValue, appender);
                 } catch (Exception e) {
                     throw new JsonDataException(e);
                 }
@@ -261,7 +242,8 @@ final class JsonFormatterBack {
                         return;
                     }
                     Object value = property.getValue(object);
-                    if (ignoreNullValue && value == null) {
+                    Object actualValue = preProcess(value);
+                    if (ignoreNullValue && actualValue == null) {
                         return;
                     }
                     if (isFirst[0]) {
@@ -269,12 +251,45 @@ final class JsonFormatterBack {
                     } else {
                         appender.append(',');
                     }
-                    writeProperty(property, value, appender);
+                    writeProperty(property, actualValue, appender);
                 } catch (Exception e) {
                     throw new JsonDataException(e);
                 }
             });
             appender.append('}');
+        }
+
+        private @Nullable Object preProcess(@Nullable Object any) {
+            if (any instanceof byte[]) {
+                if (((byte[]) any).length != 0) {
+                    return Base64Kit.encoder().encodeToString((byte[]) any);
+                }
+                return "";
+            }
+            if (any instanceof ByteBuffer) {
+                // as base64
+                if (((ByteBuffer) any).hasRemaining()) {
+                    return Base64Kit.encoder().encodeToString((ByteBuffer) any);
+                }
+                return "";
+            }
+            if (any instanceof InputStream) {
+                // as base64
+                byte[] bytes = IOKit.read((InputStream) any);
+                if (bytes != null) {
+                    return Base64Kit.encoder().encodeToString(bytes);
+                }
+                return "";
+            }
+            if (any instanceof ReadableByteChannel) {
+                // as base64
+                byte[] bytes = IOKit.readBytes((ReadableByteChannel) any);
+                if (bytes != null) {
+                    return Base64Kit.encoder().encodeToString(bytes);
+                }
+                return "";
+            }
+            return any;
         }
 
         private void writeProperty(
