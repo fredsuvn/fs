@@ -2,6 +2,7 @@ package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.Fs;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;
@@ -88,7 +89,7 @@ final class JsonDataBack {
 
         @Override
         public @Nonnull String toString() {
-            return "null";
+            return Fs.NULL_STRING;
         }
     }
 

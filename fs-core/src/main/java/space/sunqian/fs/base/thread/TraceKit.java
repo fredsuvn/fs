@@ -1,6 +1,7 @@
 package space.sunqian.fs.base.thread;
 
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.fs.Fs;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,7 +18,7 @@ public class TraceKit {
      * An empty stack trace element, indicating that the caller is unknown or not available or not exists.
      */
     public static final @Nonnull StackTraceElement EMPTY_FRAME = new StackTraceElement(
-        "null", "null", null, -1);
+        Fs.NULL_STRING, Fs.NULL_STRING, null, -1);
 
     /**
      * Returns the stack trace list of the current thread, starting at the method that invokes this method

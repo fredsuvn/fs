@@ -72,7 +72,7 @@
 //     }
 //
 //     private @Nonnull CharSequence asNonnull(@Nullable CharSequence csq) {
-//         return csq == null ? "null" : csq;
+//         return csq == null ? Fs.NULL_STRING : csq;
 //     }
 //
 //     @SuppressWarnings("DataFlowIssue")

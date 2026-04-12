@@ -2,6 +2,7 @@ package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.data.DataFormattingException;
 import space.sunqian.fs.io.IOKit;
@@ -135,7 +136,7 @@ final class JsonFormatterBack {
         private void writeAny(@Nullable Object any, @Nonnull Appendable appender) throws Exception {
             Object actualValue = preProcess(any);
             if (actualValue == null) {
-                appender.append("null");
+                appender.append(Fs.NULL_STRING);
                 return;
             }
             // if (any instanceof JsonData) {
