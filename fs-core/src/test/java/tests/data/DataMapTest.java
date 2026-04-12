@@ -35,6 +35,7 @@ public class DataMapTest {
         );
         assertTrue(dataMap.contentEquals(DataMap.wrap(MapKit.map("1", 1111))));
         assertTrue(dataMap.equals(MapKit.map("1", 1111)));
+        assertFalse(dataMap.equals(""));
         assertEquals(
             dataMap.toString(),
             MapKit.linkedHashMap("1", 1111).toString()

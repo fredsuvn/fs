@@ -39,6 +39,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -635,6 +636,29 @@ public class JsonTest implements PrintTest {
             map.put("b", Channels.newChannel(new ByteArrayInputStream(new byte[0])));
             assertEquals(json2, JsonKit.toJsonString(map));
         }
+    }
+
+    @Test
+    public void testJsonKit() throws Exception {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        String json = jsonMapper.writeValueAsString(map);
+        assertEquals(
+            map,
+            JsonKit.parse(json).asMap()
+        );
+        assertEquals(
+            map,
+            JsonKit.parse(new StringReader(json)).asMap()
+        );
+        assertEquals(
+            map,
+            JsonKit.parse(IOKit.newInputStream(new StringReader(json))).asMap()
+        );
+        assertEquals(
+            map,
+            JsonKit.parse(Channels.newChannel(IOKit.newInputStream(new StringReader(json)))).asMap()
+        );
     }
 
     @Test

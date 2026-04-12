@@ -33,6 +33,7 @@ public class DataListTest {
         );
         assertTrue(dataList.contentEquals(ListKit.list(1111)));
         assertTrue(dataList.equals(ListKit.list(1111)));
+        assertFalse(dataList.equals(""));
         assertEquals(
             dataList.toString(),
             ListKit.arrayList(1111).toString()
