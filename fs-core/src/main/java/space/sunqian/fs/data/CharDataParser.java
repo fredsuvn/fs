@@ -1,7 +1,6 @@
 package space.sunqian.fs.data;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.fs.io.IORuntimeException;
 
 import java.io.Reader;
 
@@ -18,8 +17,8 @@ public interface CharDataParser<T> {
      *
      * @param reader the given reader
      * @return the parsed data object
-     * @throws IORuntimeException if an I/O error occurs during parsing
+     * @throws DataParsingException if any error occurs during parsing
      **/
     @Nonnull
-    T parse(@Nonnull Reader reader) throws IORuntimeException;
+    T parse(@Nonnull Reader reader) throws DataParsingException;
 }

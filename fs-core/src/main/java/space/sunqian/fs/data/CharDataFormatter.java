@@ -1,7 +1,6 @@
 package space.sunqian.fs.data;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.fs.io.IORuntimeException;
 
 /**
  * Represents char data formatter that formats a given data to formatting string.
@@ -16,7 +15,7 @@ public interface CharDataFormatter<T> {
      *
      * @param data     the given data to be formatted
      * @param appender the appender to write to
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws DataFormattingException if any error occurs during formatting
      */
-    void formatTo(@Nonnull T data, @Nonnull Appendable appender) throws IORuntimeException;
+    void formatTo(@Nonnull T data, @Nonnull Appendable appender) throws DataFormattingException;
 }

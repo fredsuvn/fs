@@ -1,7 +1,6 @@
 package space.sunqian.fs.data;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.fs.io.IORuntimeException;
 
 import java.io.InputStream;
 import java.nio.channels.ReadableByteChannel;
@@ -19,18 +18,18 @@ public interface ByteDataParser<T> {
      *
      * @param input the given input stream
      * @return the parsed data object
-     * @throws IORuntimeException if an I/O error occurs during parsing
+     * @throws DataParsingException if any error occurs during parsing
      */
     @Nonnull
-    T parse(@Nonnull InputStream input) throws IORuntimeException;
+    T parse(@Nonnull InputStream input) throws DataParsingException;
 
     /**
      * Parses and returns the data from the given readable byte channel to a data object.
      *
      * @param channel the given readable byte channel
      * @return the parsed data object
-     * @throws IORuntimeException if an I/O error occurs during parsing
+     * @throws DataParsingException if any error occurs during parsing
      */
     @Nonnull
-    T parse(@Nonnull ReadableByteChannel channel) throws IORuntimeException;
+    T parse(@Nonnull ReadableByteChannel channel) throws DataParsingException;
 }

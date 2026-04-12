@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.system.ResKit;
 import space.sunqian.fs.data.properties.PropertiesData;
-import space.sunqian.fs.data.properties.PropertiesDataException;
 import space.sunqian.fs.data.properties.PropertiesKit;
 import space.sunqian.fs.io.IOKit;
 
@@ -17,7 +16,6 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PropertiesTest implements PrintTest {
 
@@ -120,24 +118,5 @@ public class PropertiesTest implements PrintTest {
         assertEquals("中文", properties.getProperty("x12"));
         assertEquals(12, properties.size());
         printFor("x.properties - output", properties);
-    }
-
-    @Test
-    public void testException() throws Exception {
-        {
-            // PropertiesDataException
-            assertThrows(PropertiesDataException.class, () -> {
-                throw new PropertiesDataException();
-            });
-            assertThrows(PropertiesDataException.class, () -> {
-                throw new PropertiesDataException("");
-            });
-            assertThrows(PropertiesDataException.class, () -> {
-                throw new PropertiesDataException("", new RuntimeException());
-            });
-            assertThrows(PropertiesDataException.class, () -> {
-                throw new PropertiesDataException(new RuntimeException());
-            });
-        }
     }
 }

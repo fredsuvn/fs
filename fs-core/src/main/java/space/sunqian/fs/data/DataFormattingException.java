@@ -1,19 +1,18 @@
-package space.sunqian.fs.data.properties;
+package space.sunqian.fs.data;
 
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.data.DataException;
 
 /**
- * Base exception for {@code Properties} errors.
+ * Base exception for data formatting errors.
  *
  * @author sunqian
  */
-public class PropertiesDataException extends DataException {
+public class DataFormattingException extends DataException {
 
     /**
      * Empty constructor.
      */
-    public PropertiesDataException() {
+    public DataFormattingException() {
         super();
     }
 
@@ -22,7 +21,7 @@ public class PropertiesDataException extends DataException {
      *
      * @param message the message
      */
-    public PropertiesDataException(@Nullable String message) {
+    public DataFormattingException(@Nullable String message) {
         super(message);
     }
 
@@ -32,7 +31,7 @@ public class PropertiesDataException extends DataException {
      * @param message the message
      * @param cause   the cause
      */
-    public PropertiesDataException(@Nullable String message, @Nullable Throwable cause) {
+    public DataFormattingException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -41,7 +40,7 @@ public class PropertiesDataException extends DataException {
      *
      * @param cause the cause
      */
-    public PropertiesDataException(@Nullable Throwable cause) {
+    public DataFormattingException(@Nullable Throwable cause) {
         super(cause);
     }
 }

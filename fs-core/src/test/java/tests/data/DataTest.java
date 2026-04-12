@@ -2,6 +2,8 @@ package tests.data;
 
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.data.DataException;
+import space.sunqian.fs.data.DataFormattingException;
+import space.sunqian.fs.data.DataParsingException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -22,6 +24,36 @@ public class DataTest {
             });
             assertThrows(DataException.class, () -> {
                 throw new DataException(new RuntimeException());
+            });
+        }
+        {
+            // DataFormattingException
+            assertThrows(DataFormattingException.class, () -> {
+                throw new DataFormattingException();
+            });
+            assertThrows(DataFormattingException.class, () -> {
+                throw new DataFormattingException("");
+            });
+            assertThrows(DataFormattingException.class, () -> {
+                throw new DataFormattingException("", new RuntimeException());
+            });
+            assertThrows(DataFormattingException.class, () -> {
+                throw new DataFormattingException(new RuntimeException());
+            });
+        }
+        {
+            // DataParsingException
+            assertThrows(DataParsingException.class, () -> {
+                throw new DataParsingException();
+            });
+            assertThrows(DataParsingException.class, () -> {
+                throw new DataParsingException("");
+            });
+            assertThrows(DataParsingException.class, () -> {
+                throw new DataParsingException("", new RuntimeException());
+            });
+            assertThrows(DataParsingException.class, () -> {
+                throw new DataParsingException(new RuntimeException());
             });
         }
     }

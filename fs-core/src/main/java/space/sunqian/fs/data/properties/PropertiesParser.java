@@ -4,7 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.data.ByteDataParser;
 import space.sunqian.fs.data.CharDataParser;
-import space.sunqian.fs.io.IORuntimeException;
+import space.sunqian.fs.data.DataParsingException;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -32,11 +32,11 @@ public interface PropertiesParser extends ByteDataParser<PropertiesData>, CharDa
      *
      * @param input the given input stream
      * @return the parsed {@link PropertiesData} object
-     * @throws IORuntimeException if an I/O error occurs during parsing
+     * @throws DataParsingException if any error occurs during parsing
      */
     @Override
     @Nonnull
-    PropertiesData parse(@Nonnull InputStream input) throws IORuntimeException;
+    PropertiesData parse(@Nonnull InputStream input) throws DataParsingException;
 
     /**
      * Parses and returns the properties data from the given readable byte channel to a {@link PropertiesData} object,
@@ -44,20 +44,20 @@ public interface PropertiesParser extends ByteDataParser<PropertiesData>, CharDa
      *
      * @param channel the given readable byte channel
      * @return the parsed {@link PropertiesData} object
-     * @throws IORuntimeException if an I/O error occurs during parsing
+     * @throws DataParsingException if any error occurs during parsing
      */
     @Override
     @Nonnull
-    PropertiesData parse(@Nonnull ReadableByteChannel channel) throws IORuntimeException;
+    PropertiesData parse(@Nonnull ReadableByteChannel channel) throws DataParsingException;
 
     /**
      * Parses and returns the properties data from the given reader to a {@link PropertiesData} object.
      *
      * @param reader the given reader
      * @return the parsed {@link PropertiesData} object
-     * @throws IORuntimeException if an I/O error occurs during parsing
+     * @throws DataParsingException if any error occurs during parsing
      */
     @Override
     @Nonnull
-    PropertiesData parse(@Nonnull Reader reader) throws IORuntimeException;
+    PropertiesData parse(@Nonnull Reader reader) throws DataParsingException;
 }

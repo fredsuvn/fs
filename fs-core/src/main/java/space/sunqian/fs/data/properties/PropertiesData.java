@@ -8,6 +8,7 @@ import space.sunqian.fs.base.string.StringKit;
 import space.sunqian.fs.data.ByteData;
 import space.sunqian.fs.data.CharData;
 import space.sunqian.fs.data.DataMap;
+import space.sunqian.fs.data.DataParsingException;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;
 
@@ -35,9 +36,9 @@ public interface PropertiesData extends ByteData, CharData {
      *
      * @param in the input stream to read from
      * @return a new {@link PropertiesData} wraps the loaded properties
-     * @throws IORuntimeException if an I/O error occurs while loading the properties
+     * @throws DataParsingException if an I/O error occurs while loading the properties
      */
-    static @Nonnull PropertiesData load(@Nonnull InputStream in) throws IORuntimeException {
+    static @Nonnull PropertiesData load(@Nonnull InputStream in) throws DataParsingException {
         return PropertiesParser.defaultParser().parse(in);
     }
 
@@ -48,9 +49,9 @@ public interface PropertiesData extends ByteData, CharData {
      *
      * @param channel the readable byte channel to read from
      * @return a new {@link PropertiesData} wraps the loaded properties
-     * @throws IORuntimeException if an I/O error occurs while loading the properties
+     * @throws DataParsingException if an I/O error occurs while loading the properties
      */
-    static @Nonnull PropertiesData load(@Nonnull ReadableByteChannel channel) throws IORuntimeException {
+    static @Nonnull PropertiesData load(@Nonnull ReadableByteChannel channel) throws DataParsingException {
         return PropertiesParser.defaultParser().parse(channel);
     }
 
@@ -61,9 +62,9 @@ public interface PropertiesData extends ByteData, CharData {
      *
      * @param reader the reader to read from
      * @return a new {@link PropertiesData} wraps the loaded properties
-     * @throws IORuntimeException if an I/O error occurs while loading the properties
+     * @throws DataParsingException if an I/O error occurs while loading the properties
      */
-    static @Nonnull PropertiesData load(@Nonnull Reader reader) throws IORuntimeException {
+    static @Nonnull PropertiesData load(@Nonnull Reader reader) throws DataParsingException {
         return PropertiesParser.defaultParser().parse(reader);
     }
 

@@ -1,7 +1,6 @@
 package space.sunqian.fs.data;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.fs.io.IORuntimeException;
 
 import java.io.OutputStream;
 import java.nio.channels.Channels;
@@ -20,18 +19,18 @@ public interface ByteDataFormatter<T> {
      *
      * @param data the given data to be formatted
      * @param out  the output stream to write to
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws DataFormattingException if any error occurs during formatting
      */
-    void formatTo(@Nonnull T data, @Nonnull OutputStream out) throws IORuntimeException;
+    void formatTo(@Nonnull T data, @Nonnull OutputStream out) throws DataFormattingException;
 
     /**
      * Formates and writes the given data to the given writable byte channel.
      *
      * @param data    the given data to be formatted
      * @param channel the output channel to write to
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws DataFormattingException if any error occurs during formatting
      */
-    default void formatTo(@Nonnull T data, @Nonnull WritableByteChannel channel) throws IORuntimeException {
+    default void formatTo(@Nonnull T data, @Nonnull WritableByteChannel channel) throws DataFormattingException {
         formatTo(data, Channels.newOutputStream(channel));
     }
 }
