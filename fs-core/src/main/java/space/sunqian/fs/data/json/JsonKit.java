@@ -8,6 +8,7 @@ import space.sunqian.fs.io.IORuntimeException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
@@ -76,6 +77,10 @@ public class JsonKit {
     /**
      * Parses and returns the JSON data from the given input stream to a {@link JsonData} object by
      * {@link JsonParser#defaultParser()}, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * Note for the data of type {@code byte[]}, {@link ByteBuffer}, {@link InputStream} or {@link ReadableByteChannel},
+     * it will be read and formatted as Base64 string; for the data of type {@code char[]}, it will be formatted as JSON
+     * string rather than JSON array.
      *
      * @param input the given input stream
      * @return the parsed {@link JsonData} object
@@ -88,19 +93,26 @@ public class JsonKit {
     /**
      * Parses and returns the JSON data from the given readable byte channel to a {@link JsonData} object by
      * {@link JsonParser#defaultParser()}, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * Note for the data of type {@code byte[]}, {@link ByteBuffer}, {@link InputStream} or {@link ReadableByteChannel},
+     * it will be read and formatted as Base64 string; for the data of type {@code char[]}, it will be formatted as JSON
+     * string rather than JSON array.
      *
      * @param channel the given readable byte channel
      * @return the parsed {@link JsonData} object
      * @throws IORuntimeException if an I/O error occurs during parsing
      */
-    public static @Nonnull
-    JsonData parse(@Nonnull ReadableByteChannel channel) throws IORuntimeException {
+    public static @Nonnull JsonData parse(@Nonnull ReadableByteChannel channel) throws IORuntimeException {
         return JsonParser.defaultParser().parse(channel);
     }
 
     /**
      * Parses and returns the JSON data from the given reader to a {@link JsonData} object by
      * {@link JsonParser#defaultParser()}.
+     * <p>
+     * Note for the data of type {@code byte[]}, {@link ByteBuffer}, {@link InputStream} or {@link ReadableByteChannel},
+     * it will be read and formatted as Base64 string; for the data of type {@code char[]}, it will be formatted as JSON
+     * string rather than JSON array.
      *
      * @param reader the given reader
      * @return the parsed {@link JsonData} object
@@ -113,6 +125,10 @@ public class JsonKit {
     /**
      * Parses and returns the JSON data from the given JSON string to a {@link JsonData} object by
      * {@link JsonParser#defaultParser()}.
+     * <p>
+     * Note for the data of type {@code byte[]}, {@link ByteBuffer}, {@link InputStream} or {@link ReadableByteChannel},
+     * it will be read and formatted as Base64 string; for the data of type {@code char[]}, it will be formatted as JSON
+     * string rather than JSON array.
      *
      * @param str the given JSON string
      * @return the parsed {@link JsonData} object

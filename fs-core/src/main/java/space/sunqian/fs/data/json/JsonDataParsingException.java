@@ -9,7 +9,7 @@ import space.sunqian.fs.data.DataParsingException;
  *
  * @author sunqian
  */
-public class JsonParsingDataException extends DataParsingException {
+public class JsonDataParsingException extends DataParsingException {
 
     private static @Nonnull String buildMessage(int index, @Nullable String unexpected, @Nullable String expected) {
         StringBuilder builder = new StringBuilder("JSON parsing error at index " + index + ".");
@@ -32,7 +32,7 @@ public class JsonParsingDataException extends DataParsingException {
      *
      * @param cause the specified cause
      */
-    public JsonParsingDataException(@Nullable Throwable cause) {
+    public JsonDataParsingException(@Nullable Throwable cause) {
         super(cause);
         this.index = -1;
         this.unexpected = null;
@@ -47,7 +47,7 @@ public class JsonParsingDataException extends DataParsingException {
      * @param unexpected the unexpected char sequence
      * @param expected   the expected char sequence
      */
-    public JsonParsingDataException(int occurIndex, @Nullable String unexpected, @Nullable String expected) {
+    public JsonDataParsingException(int occurIndex, @Nullable String unexpected, @Nullable String expected) {
         super(buildMessage(occurIndex, unexpected, expected));
         this.index = occurIndex;
         this.unexpected = unexpected;

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import internal.test.ErrorAppender;
 import internal.test.PrintTest;
+import internal.test.ReadOps;
+import internal.test.TestReader;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,12 +17,13 @@ import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.string.StringView;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
+import space.sunqian.fs.data.DataFormattingException;
 import space.sunqian.fs.data.json.JsonData;
 import space.sunqian.fs.data.json.JsonDataException;
+import space.sunqian.fs.data.json.JsonDataParsingException;
 import space.sunqian.fs.data.json.JsonFormatter;
 import space.sunqian.fs.data.json.JsonKit;
 import space.sunqian.fs.data.json.JsonParser;
-import space.sunqian.fs.data.json.JsonParsingDataException;
 import space.sunqian.fs.data.json.JsonType;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;
@@ -38,6 +41,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -150,19 +154,77 @@ public class JsonTest implements PrintTest {
                 assertEquals(MapKit.map("m1", "m1", "m2", "m2"), targetByJackson2.getO2());
             }
             assertEquals(obj, targetByJackson2.getO1());
+            // empty object
+            assertEquals(Collections.emptyMap(), parser.apply("{}").asMap());
+            assertEquals(Collections.emptyMap(), parser.apply("{  }  ").asMap());
+            assertEquals(Collections.emptyMap(), parser.apply("  {  }  ").asMap());
             // errors:
-            JsonParsingDataException e1 = assertThrows(JsonParsingDataException.class, () -> {
+            JsonDataParsingException e1 = assertThrows(JsonDataParsingException.class, () -> {
                 parser.apply("{\"a:123,\"b\":243}").toObject(DataTarget.class);
             });
             assertEquals(9, e1.getOccurIndex());
             assertEquals(":", e1.getExpectedChars());
             assertEquals("b", e1.getUnexpectedChars());
-            JsonParsingDataException e2 = assertThrows(JsonParsingDataException.class, () -> {
+            JsonDataParsingException e2 = assertThrows(JsonDataParsingException.class, () -> {
                 parser.apply("{\"a\":123,\"b\":243").toObject(DataTarget.class);
             });
             assertEquals(16, e2.getOccurIndex());
             assertEquals("}", e2.getExpectedChars());
             assertNull(e2.getUnexpectedChars());
+            JsonDataParsingException e3 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("{\"a\":+123,\"b\":243}").toObject(DataTarget.class);
+            });
+            assertEquals(5, e3.getOccurIndex());
+            assertNull(e3.getExpectedChars());
+            assertEquals("+", e3.getUnexpectedChars());
+            JsonDataParsingException e4 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("{\"a\":123XXX\"\",\"b\":243}").toObject(DataTarget.class);
+            });
+            assertEquals(8, e4.getOccurIndex());
+            assertNull(e4.getExpectedChars());
+            assertEquals("X", e4.getUnexpectedChars());
+            JsonDataParsingException e5 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("{\"a\":123e11.11\"\",\"b\":243}").toObject(DataTarget.class);
+            });
+            assertEquals(5, e5.getOccurIndex());
+            assertNull(e5.getExpectedChars());
+            assertEquals("123e11.11", e5.getUnexpectedChars());
+            JsonDataParsingException e6 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("{\"a\":\"123,\"b\":243}").toObject(DataTarget.class);
+            });
+            assertEquals(11, e6.getOccurIndex());
+            assertNull(e6.getExpectedChars());
+            assertEquals("b", e6.getUnexpectedChars());
+            JsonDataParsingException e7 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("{,\"a\":\"123,\"b\":243}").toObject(DataTarget.class);
+            });
+            assertEquals(1, e7.getOccurIndex());
+            assertNull(e7.getExpectedChars());
+            assertEquals(",", e7.getUnexpectedChars());
+            JsonDataParsingException e8 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("{\"a\"").toObject(DataTarget.class);
+            });
+            assertEquals(4, e8.getOccurIndex());
+            assertEquals(":", e8.getExpectedChars());
+            assertNull(e8.getUnexpectedChars());
+            JsonDataParsingException e9 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("{\"a\"  ").toObject(DataTarget.class);
+            });
+            assertEquals(6, e9.getOccurIndex());
+            assertEquals(":", e9.getExpectedChars());
+            assertNull(e9.getUnexpectedChars());
+            JsonDataParsingException e10 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("").toObject(DataTarget.class);
+            });
+            assertEquals(0, e10.getOccurIndex());
+            assertNull(e10.getExpectedChars());
+            assertNull(e10.getUnexpectedChars());
+            JsonDataParsingException e11 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("   ").toObject(DataTarget.class);
+            });
+            assertEquals(3, e11.getOccurIndex());
+            assertNull(e11.getExpectedChars());
+            assertNull(e11.getUnexpectedChars());
         }
         {
             // string
@@ -192,6 +254,31 @@ public class JsonTest implements PrintTest {
             String jsonEscapes = jsonMapper.writeValueAsString(escapes.toString());
             assertEquals(jsonEscapes, formatter.apply(escapes.toString()));
             assertEquals(escapes.toString(), parser.apply(jsonEscapes).asString());
+            // errors:
+            JsonDataParsingException e1 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("\"b").toObject(DataTarget.class);
+            });
+            assertEquals(2, e1.getOccurIndex());
+            assertEquals("\"", e1.getExpectedChars());
+            assertNull(e1.getUnexpectedChars());
+            JsonDataParsingException e2 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("\"b\\x\"").toObject(DataTarget.class);
+            });
+            assertEquals(4, e2.getOccurIndex());
+            assertNull(e2.getExpectedChars());
+            assertEquals("x", e2.getUnexpectedChars());
+            JsonDataParsingException e3 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("\"b\\").toObject(DataTarget.class);
+            });
+            assertEquals(3, e3.getOccurIndex());
+            assertNull(e3.getExpectedChars());
+            assertNull(e3.getUnexpectedChars());
+            JsonDataParsingException e4 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("\"b\\u123").toObject(DataTarget.class);
+            });
+            assertEquals(7, e4.getOccurIndex());
+            assertNull(e4.getExpectedChars());
+            assertNull(e4.getUnexpectedChars());
         }
         {
             // number
@@ -219,6 +306,26 @@ public class JsonTest implements PrintTest {
             String jsonF = jsonMapper.writeValueAsString(f);
             assertEquals(jsonF, formatter.apply(f));
             assertEquals(f, parser.apply(jsonF).asBigDecimal());
+            BigDecimal g = new BigDecimal("-123.456e+12");
+            String jsonG = jsonMapper.writeValueAsString(g);
+            assertEquals(jsonG, formatter.apply(g));
+            assertEquals(g, parser.apply(jsonG).asBigDecimal());
+            for (int i = 0; i < 10; i++) {
+                assertEquals(i, parser.apply(String.valueOf(i)).asInt());
+            }
+            // errors:
+            JsonDataParsingException e1 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("123x").toObject(DataTarget.class);
+            });
+            assertEquals(3, e1.getOccurIndex());
+            assertNull(e1.getExpectedChars());
+            assertEquals("x", e1.getUnexpectedChars());
+            JsonDataParsingException e2 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("y123x").toObject(DataTarget.class);
+            });
+            assertEquals(0, e2.getOccurIndex());
+            assertNull(e2.getExpectedChars());
+            assertEquals("y", e2.getUnexpectedChars());
         }
         {
             // boolean
@@ -230,6 +337,43 @@ public class JsonTest implements PrintTest {
             String jsonB = jsonMapper.writeValueAsString(b);
             assertEquals(jsonB, formatter.apply(b));
             assertEquals(b, parser.apply(jsonB).asBoolean());
+            // errors:
+            JsonDataParsingException e1 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("tru").toObject(DataTarget.class);
+            });
+            assertEquals(3, e1.getOccurIndex());
+            assertEquals("e", e1.getExpectedChars());
+            assertNull(e1.getUnexpectedChars());
+            JsonDataParsingException e2 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("truq").toObject(DataTarget.class);
+            });
+            assertEquals(3, e2.getOccurIndex());
+            assertEquals("e", e2.getExpectedChars());
+            assertEquals("q", e2.getUnexpectedChars());
+            JsonDataParsingException e3 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("fa").toObject(DataTarget.class);
+            });
+            assertEquals(2, e3.getOccurIndex());
+            assertEquals("l", e3.getExpectedChars());
+            assertNull(e3.getUnexpectedChars());
+            JsonDataParsingException e4 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("faq").toObject(DataTarget.class);
+            });
+            assertEquals(2, e4.getOccurIndex());
+            assertEquals("l", e4.getExpectedChars());
+            assertEquals("q", e4.getUnexpectedChars());
+        }
+        {
+            // null
+            assertEquals("null", formatter.apply(null));
+            assertTrue(parser.apply("null").isNull());
+            // errors:
+            JsonDataParsingException e1 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("nul").toObject(DataTarget.class);
+            });
+            assertEquals(3, e1.getOccurIndex());
+            assertEquals("l", e1.getExpectedChars());
+            assertNull(e1.getUnexpectedChars());
         }
         {
             // array
@@ -300,6 +444,22 @@ public class JsonTest implements PrintTest {
             expList.set(14, 1);
             expList.set(15, 1);
             assertEquals(expList, parser.apply(jsonCollection).asList());
+            // empty array
+            assertEquals(Collections.emptyList(), parser.apply("[]").asList());
+            assertEquals(Collections.emptyList(), parser.apply("[  ]").asList());
+            // errors:
+            JsonDataParsingException e1 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("[1, 2").asList();
+            });
+            assertEquals(5, e1.getOccurIndex());
+            assertEquals("]", e1.getExpectedChars());
+            assertNull(e1.getUnexpectedChars());
+            JsonDataParsingException e2 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.apply("[ , ]").asList();
+            });
+            assertEquals(2, e2.getOccurIndex());
+            assertNull(e2.getExpectedChars());
+            assertEquals(",", e2.getUnexpectedChars());
         }
         {
             // complex data
@@ -336,18 +496,18 @@ public class JsonTest implements PrintTest {
             assertEquals(data, parser.apply(jsonData).toObject(ComplexData.class));
         }
         {
-            // null
-            assertEquals("null", formatter.apply(null));
-            assertTrue(parser.apply("null").isNull());
-        }
-        {
             // error
-            assertThrows(IORuntimeException.class, () -> JsonKit.toJsonString(new Object(), new ErrorAppender()));
+            assertThrows(DataFormattingException.class, () -> JsonKit.toJsonString(new Object(), new ErrorAppender()));
             Map<String, Object> map = MapKit.map("aaa", 1, "bbb", 2);
-            assertThrows(IORuntimeException.class, () ->
+            assertThrows(DataFormattingException.class, () ->
                 JsonKit.toJsonString(map, IOKit.limitedWriter(new StringWriter(), 5)));
-            assertThrows(IORuntimeException.class, () ->
+            assertThrows(DataFormattingException.class, () ->
                 JsonKit.toJsonString(new DataPack("1111", "2222"), IOKit.limitedWriter(new StringWriter(), 5)));
+            TestReader tr = new TestReader(IOKit.emptyReader());
+            tr.setNextOperation(ReadOps.THROW, 999);
+            assertThrows(JsonDataParsingException.class, () -> JsonKit.parse(tr));
+            assertThrows(JsonDataParsingException.class, () -> JsonKit.parse(IOKit.newInputStream(tr)));
+            assertThrows(JsonDataParsingException.class, () -> JsonKit.parse(Channels.newChannel(IOKit.newInputStream(tr))));
         }
     }
 

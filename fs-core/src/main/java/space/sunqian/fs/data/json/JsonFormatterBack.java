@@ -4,6 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.data.DataFormattingException;
+import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
 import space.sunqian.fs.object.convert.ConvertKit;
@@ -13,10 +14,12 @@ import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.utils.codec.Base64Kit;
 
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.HashMap;
@@ -174,6 +177,22 @@ final class JsonFormatterBack {
             if (any instanceof ByteBuffer) {
                 // as base64
                 writeString(Base64Kit.encoder().encodeToString((ByteBuffer) any), appender);
+                return;
+            }
+            if (any instanceof InputStream) {
+                // as base64
+                byte[] bytes = IOKit.read((InputStream) any);
+                if (bytes != null) {
+                    writeString(Base64Kit.encoder().encodeToString(bytes), appender);
+                }
+                return;
+            }
+            if (any instanceof ReadableByteChannel) {
+                // as base64
+                byte[] bytes = IOKit.readBytes((ReadableByteChannel) any);
+                if (bytes != null) {
+                    writeString(Base64Kit.encoder().encodeToString(bytes), appender);
+                }
                 return;
             }
             writeObject(any, appender);

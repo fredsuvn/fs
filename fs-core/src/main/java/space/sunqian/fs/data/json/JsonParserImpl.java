@@ -20,14 +20,16 @@ import java.util.Map;
 enum JsonParserImpl implements JsonParser {
     INST;
 
+    private static final @Nonnull Object NULL = new Object();
+
     @Override
-    public @Nonnull JsonData parse(@Nonnull InputStream input) throws JsonParsingDataException {
+    public @Nonnull JsonData parse(@Nonnull InputStream input) throws JsonDataParsingException {
         Reader reader = new InputStreamReader(input, CharsKit.defaultCharset());
         return parse(reader);
     }
 
     @Override
-    public @Nonnull JsonData parse(@Nonnull ReadableByteChannel channel) throws JsonParsingDataException {
+    public @Nonnull JsonData parse(@Nonnull ReadableByteChannel channel) throws JsonDataParsingException {
         // compatible with JDK8
         @SuppressWarnings("CharsetObjectCanBeUsed")
         Reader reader = Channels.newReader(channel, CharsKit.defaultCharset().name());
@@ -35,7 +37,7 @@ enum JsonParserImpl implements JsonParser {
     }
 
     @Override
-    public @Nonnull JsonData parse(@Nonnull Reader reader) throws JsonParsingDataException {
+    public @Nonnull JsonData parse(@Nonnull Reader reader) throws JsonDataParsingException {
         try {
             JReader jReader = new JReader(reader);
             Object result = parseJson(jReader, new StringBuilder(), true);
@@ -55,10 +57,10 @@ enum JsonParserImpl implements JsonParser {
                 return JsonData.ofList(Fs.as(result));
             }
             return JsonData.ofMap(Fs.as(result));
-        } catch (JsonParsingDataException e) {
+        } catch (JsonDataParsingException e) {
             throw e;
         } catch (Exception e) {
-            throw new JsonParsingDataException(e);
+            throw new JsonDataParsingException(e);
         }
     }
 
@@ -76,6 +78,7 @@ enum JsonParserImpl implements JsonParser {
             switch (c) {
                 case 'n':
                     parseNull(reader);
+                    result = NULL;
                     break PARSING;
                 case 't':
                     parseTrue(reader);
@@ -121,8 +124,14 @@ enum JsonParserImpl implements JsonParser {
                     strBuilder.setLength(0);
                     break PARSING;
                 default:
-                    throw new JsonParsingDataException(reader.nextIndex() - 1, String.valueOf(c), null);
+                    throw new JsonDataParsingException(reader.nextIndex() - 1, String.valueOf(c), null);
             }
+        }
+        if (result == null) {
+            throw new JsonDataParsingException(reader.nextIndex(), null, null);
+        }
+        if (result == NULL) {
+            return null;
         }
         if (toEnd) {
             skipToEof(reader);
@@ -156,15 +165,15 @@ enum JsonParserImpl implements JsonParser {
                     if (!first) {
                         continue;
                     } else {
-                        throw new JsonParsingDataException(reader.nextIndex() - 1, String.valueOf(c), null);
+                        throw new JsonDataParsingException(reader.nextIndex() - 1, String.valueOf(c), null);
                     }
                 case '}':
                     return;
                 default:
-                    throw new JsonParsingDataException(reader.nextIndex() - 1, String.valueOf(c), null);
+                    throw new JsonDataParsingException(reader.nextIndex() - 1, String.valueOf(c), null);
             }
         }
-        throw new JsonParsingDataException(reader.nextIndex(), null, "}");
+        throw new JsonDataParsingException(reader.nextIndex(), null, "}");
     }
 
     private void parseArray(
@@ -172,26 +181,29 @@ enum JsonParserImpl implements JsonParser {
         @Nonnull List<@Nullable Object> arrBuilder,
         @Nonnull StringBuilder strBuilder
     ) throws Exception {
-        PARSING:
-        while (true) {
+        int count = 0;
+        int i;
+        while ((i = reader.nextChar()) != -1) {
+            char c = (char) i;
+            if (Character.isWhitespace(c)) {
+                continue;
+            }
+            if (c == ',') {
+                if (count == 0) {
+                    throw new JsonDataParsingException(reader.nextIndex() - 1, String.valueOf(c), null);
+                }
+                continue;
+            }
+            if (c == ']') {
+                return;
+            }
+            // parsing element
+            reader.swallow(i);
             Object element = parseJson(reader, strBuilder, false);
             arrBuilder.add(element);
-            int i;
-            while ((i = reader.nextChar()) != -1) {
-                char c = (char) i;
-                if (Character.isWhitespace(c)) {
-                    continue;
-                }
-                if (c == ',') {
-                    continue PARSING;
-                }
-                if (c == ']') {
-                    return;
-                }
-                throw new JsonParsingDataException(reader.nextIndex() - 1, String.valueOf(c), null);
-            }
-            throw new JsonParsingDataException(reader.nextIndex(), null, null);
+            count++;
         }
+        throw new JsonDataParsingException(reader.nextIndex(), null, "]");
     }
 
     private void parseNull(@Nonnull JReader reader) throws Exception {
@@ -229,7 +241,7 @@ enum JsonParserImpl implements JsonParser {
                     builder.append(c);
             }
         }
-        throw new JsonParsingDataException(reader.nextIndex(), null, "\"");
+        throw new JsonDataParsingException(reader.nextIndex(), null, "\"");
     }
 
     private void parseEscape(
@@ -262,10 +274,10 @@ enum JsonParserImpl implements JsonParser {
                     parseUnicode(reader, builder);
                     return;
                 default:
-                    throw new JsonParsingDataException(reader.nextIndex(), String.valueOf(c), null);
+                    throw new JsonDataParsingException(reader.nextIndex(), String.valueOf(c), null);
             }
         }
-        throw new JsonParsingDataException(reader.nextIndex(), null, null);
+        throw new JsonDataParsingException(reader.nextIndex(), null, null);
     }
 
     private void parseUnicode(
@@ -281,7 +293,7 @@ enum JsonParserImpl implements JsonParser {
     private Number parseNumber(
         @Nonnull JReader reader, @Nonnull StringBuilder strBuilder
     ) throws Exception {
-        int startIndex = reader.nextIndex();
+        int startIndex = reader.nextIndex() - 1;
         int i;
         while ((i = reader.nextChar()) != -1) {
             char c = (char) i;
@@ -303,14 +315,14 @@ enum JsonParserImpl implements JsonParser {
         try {
             return NumKit.toNumber(numberString);
         } catch (Exception e) {
-            throw new JsonParsingDataException(startIndex, numberString, null);
+            throw new JsonDataParsingException(startIndex, numberString, null);
         }
     }
 
     private char nextChar(@Nonnull JReader reader) throws Exception {
         int i = reader.nextChar();
         if (i == -1) {
-            throw new JsonParsingDataException(reader.nextIndex(), null, null);
+            throw new JsonDataParsingException(reader.nextIndex(), null, null);
         }
         return (char) i;
     }
@@ -318,11 +330,11 @@ enum JsonParserImpl implements JsonParser {
     private void nextChar(@Nonnull JReader reader, char shouldBe) throws Exception {
         int i = reader.nextChar();
         if (i == -1) {
-            throw new JsonParsingDataException(reader.nextIndex(), null, String.valueOf(shouldBe));
+            throw new JsonDataParsingException(reader.nextIndex(), null, String.valueOf(shouldBe));
         }
         char c = (char) i;
         if (shouldBe != c) {
-            throw new JsonParsingDataException(reader.nextIndex() - 1, String.valueOf(c), String.valueOf(shouldBe));
+            throw new JsonDataParsingException(reader.nextIndex() - 1, String.valueOf(c), String.valueOf(shouldBe));
         }
     }
 
@@ -331,7 +343,7 @@ enum JsonParserImpl implements JsonParser {
         while ((i = reader.nextChar()) != -1) {
             char c = (char) i;
             if (!Character.isWhitespace(c)) {
-                throw new JsonParsingDataException(reader.nextIndex() - 1, String.valueOf(c), null);
+                throw new JsonDataParsingException(reader.nextIndex() - 1, String.valueOf(c), null);
             }
         }
     }
@@ -345,10 +357,10 @@ enum JsonParserImpl implements JsonParser {
                 return;
             }
             if (!Character.isWhitespace(c)) {
-                throw new JsonParsingDataException(reader.nextIndex() - 1, String.valueOf(c), String.valueOf(target));
+                throw new JsonDataParsingException(reader.nextIndex() - 1, String.valueOf(c), String.valueOf(target));
             }
         }
-        throw new JsonParsingDataException(reader.nextIndex(), null, String.valueOf(target));
+        throw new JsonDataParsingException(reader.nextIndex(), null, String.valueOf(target));
     }
 
     private static final class JReader {

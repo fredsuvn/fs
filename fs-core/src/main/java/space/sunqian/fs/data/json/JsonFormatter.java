@@ -11,8 +11,10 @@ import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
 /**
@@ -80,6 +82,10 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
     /**
      * Formates and writes the given data as JSON string to the given output stream, using
      * {@link CharsKit#defaultCharset()}.
+     * <p>
+     * Note for the data of type {@code byte[]}, {@link ByteBuffer}, {@link InputStream} or {@link ReadableByteChannel},
+     * it will be read and formatted as Base64 string; for the data of type {@code char[]}, it will be formatted as JSON
+     * string rather than JSON array.
      *
      * @param data the given data to be formatted
      * @param out  the output stream to write to
@@ -93,6 +99,10 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
     /**
      * Formates and writes the given data as JSON string to the given writable byte channel, using
      * {@link CharsKit#defaultCharset()}.
+     * <p>
+     * Note for the data of type {@code byte[]}, {@link ByteBuffer}, {@link InputStream} or {@link ReadableByteChannel},
+     * it will be read and formatted as Base64 string; for the data of type {@code char[]}, it will be formatted as JSON
+     * string rather than JSON array.
      *
      * @param data    the given data to be formatted
      * @param channel the output channel to write to
@@ -106,6 +116,10 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
 
     /**
      * Formates and writes the given data as JSON string to the given appender.
+     * <p>
+     * Note for the data of type {@code byte[]}, {@link ByteBuffer}, {@link InputStream} or {@link ReadableByteChannel},
+     * it will be read and formatted as Base64 string; for the data of type {@code char[]}, it will be formatted as JSON
+     * string rather than JSON array.
      *
      * @param data     the given data to be formatted
      * @param appender the output appender to write to
@@ -116,6 +130,10 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
 
     /**
      * Formates and writes the given data as a JSON string.
+     * <p>
+     * Note for the data of type {@code byte[]}, {@link ByteBuffer}, {@link InputStream} or {@link ReadableByteChannel},
+     * it will be read and formatted as Base64 string; for the data of type {@code char[]}, it will be formatted as JSON
+     * string rather than JSON array.
      *
      * @param data the given data to be formatted
      * @return the JSON string
@@ -130,6 +148,10 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
 
     /**
      * Formates and writes the given data as JSON string to a byte array, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * Note for the data of type {@code byte[]}, {@link ByteBuffer}, {@link InputStream} or {@link ReadableByteChannel},
+     * it will be read and formatted as Base64 string; for the data of type {@code char[]}, it will be formatted as JSON
+     * string rather than JSON array.
      *
      * @param data the given data to be formatted
      * @return the byte array formatted from the given data

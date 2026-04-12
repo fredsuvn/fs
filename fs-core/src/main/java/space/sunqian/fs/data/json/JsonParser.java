@@ -32,11 +32,11 @@ public interface JsonParser extends ByteDataParser<JsonData>, CharDataParser<Jso
      *
      * @param input the given input stream
      * @return the parsed {@link JsonData} object
-     * @throws JsonParsingDataException if any error occurs during parsing
+     * @throws JsonDataParsingException if any error occurs during parsing
      */
     @Override
     @Nonnull
-    JsonData parse(@Nonnull InputStream input) throws JsonParsingDataException;
+    JsonData parse(@Nonnull InputStream input) throws JsonDataParsingException;
 
     /**
      * Parses and returns the JSON data from the given readable byte channel to a {@link JsonData} object, using
@@ -44,31 +44,31 @@ public interface JsonParser extends ByteDataParser<JsonData>, CharDataParser<Jso
      *
      * @param channel the given readable byte channel
      * @return the parsed {@link JsonData} object
-     * @throws JsonParsingDataException if any error occurs during parsing
+     * @throws JsonDataParsingException if any error occurs during parsing
      */
     @Override
     @Nonnull
-    JsonData parse(@Nonnull ReadableByteChannel channel) throws JsonParsingDataException;
+    JsonData parse(@Nonnull ReadableByteChannel channel) throws JsonDataParsingException;
 
     /**
      * Parses and returns the JSON data from the given reader to a {@link JsonData} object.
      *
      * @param reader the given reader
      * @return the parsed {@link JsonData} object
-     * @throws JsonParsingDataException if any error occurs during parsing
+     * @throws JsonDataParsingException if any error occurs during parsing
      */
     @Override
     @Nonnull
-    JsonData parse(@Nonnull Reader reader) throws JsonParsingDataException;
+    JsonData parse(@Nonnull Reader reader) throws JsonDataParsingException;
 
     /**
      * Parses and returns the JSON data from the given JSON string to a {@link JsonData} object.
      *
      * @param str the given JSON string
      * @return the parsed {@link JsonData} object
-     * @throws JsonParsingDataException if any error occurs during parsing
+     * @throws JsonDataParsingException if any error occurs during parsing
      */
-    default @Nonnull JsonData parse(@Nonnull String str) throws JsonParsingDataException {
+    default @Nonnull JsonData parse(@Nonnull String str) throws JsonDataParsingException {
         return parse(new StringReader(str));
     }
 }
