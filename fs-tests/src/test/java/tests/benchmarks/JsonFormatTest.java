@@ -1,8 +1,8 @@
 package tests.benchmarks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import internal.benchmark.api.JsonFormatApi;
-import internal.benchmark.common.TestJsonData;
+import internal.api.JsonFormatApi;
+import internal.data.TestJsonData;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.collect.ListKit;
 
@@ -24,7 +24,7 @@ public class JsonFormatTest {
     }
 
     private void testFormat(String formatType) throws Exception {
-        JsonFormatApi formatApi = JsonFormatApi.createFormat(formatType);
+        JsonFormatApi formatApi = JsonFormatApi.createApi(formatType);
         // object
         TestJsonData data = new TestJsonData();
         data.setI1(1);

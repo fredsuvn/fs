@@ -1,8 +1,8 @@
 package tests.benchmarks;
 
-import internal.benchmark.api.PropertiesCopier;
-import internal.benchmark.common.TestPropsData;
-import internal.benchmark.common.TestPropsTarget;
+import internal.api.PropertiesCopier;
+import internal.data.TestPropsData;
+import internal.data.TestPropsTarget;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -11,7 +11,7 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PropertiesCopierTest {
+public class CopyPropertiesTest {
 
     @Test
     public void testCopier() throws Exception {

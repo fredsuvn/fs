@@ -1,6 +1,6 @@
 package internal.benchmark;
 
-import internal.benchmark.api.ProxyApi;
+import internal.api.ProxyApi;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Fork(5)
-public class ProxyBenchmark {
+public class ProxyJmh {
 
     @Param({
         "fs-asm",
@@ -46,7 +46,7 @@ public class ProxyBenchmark {
 
     @Setup(Level.Trial)
     public void setup() throws Exception {
-        this.proxy = ProxyApi.createProxy(proxyType);
+        this.proxy = ProxyApi.createApi(proxyType);
     }
 
     @Benchmark

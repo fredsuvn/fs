@@ -1,6 +1,6 @@
 package internal.benchmark;
 
-import internal.benchmark.api.CacheApi;
+import internal.api.CacheApi;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Fork(5)
-public class CacheBenchmark {
+public class CacheJmh {
 
     private static final int DATA_SIZE = 100000;
     private static final KeyValue[] DATA = new KeyValue[DATA_SIZE];
@@ -57,7 +57,7 @@ public class CacheBenchmark {
 
     @Setup(Level.Trial)
     public void setup() {
-        this.cache = CacheApi.createCache(cacheType);
+        this.cache = CacheApi.createApi(cacheType);
     }
 
     @Benchmark
@@ -68,7 +68,6 @@ public class CacheBenchmark {
         String value = cache.get(data.key, k -> data.value);
         blackhole.consume(value);
     }
-
 
     private record KeyValue(String key, String value) {}
 }

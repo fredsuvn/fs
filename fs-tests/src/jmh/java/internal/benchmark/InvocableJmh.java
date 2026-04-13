@@ -1,6 +1,6 @@
 package internal.benchmark;
 
-import internal.benchmark.api.AspectApi;
+import internal.api.Invoker;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -15,9 +15,8 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
@@ -25,35 +24,32 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Fork(5)
-public class AspectBenchmark {
+public class InvocableJmh {
 
     @Param({
-        "fs-asm",
-        //"byte-buddy",
+        "byReflect",
+        "byAsm",
+        "byMethodHandle",
         "direct",
     })
-    private String aspectType;
+    private String invokeType;
 
     @Param({
-        "true",
-        "false",
+        "static",
+        "instance",
     })
-    private String withPrimitive;
+    private String methodType;
 
-    private AspectApi aspect;
+    private Supplier<Object> action;
 
     @Setup(Level.Trial)
-    public void setup() throws Exception {
-        this.aspect = AspectApi.createAspect(aspectType);
+    public void setup() {
+        this.action = Invoker.createAction(invokeType, methodType);
     }
 
     @Benchmark
-    public void aspect(Blackhole blackhole) throws Exception {
-        Random random = ThreadLocalRandom.current();
-        String value = "true".equals(withPrimitive) ?
-            aspect.withPrimitive(random.nextInt(), random.nextLong(), "hello")
-            :
-            aspect.withoutPrimitive(random.nextInt(), random.nextLong(), "hello");
+    public void invoke(Blackhole blackhole) throws Exception {
+        Object value = action.get();
         blackhole.consume(value);
     }
 }

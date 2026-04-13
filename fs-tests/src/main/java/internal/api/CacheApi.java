@@ -1,4 +1,4 @@
-package internal.benchmark.api;
+package internal.api;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -12,7 +12,7 @@ public interface CacheApi<K, V> {
 
     int CAPACITY = 1000;
 
-    static <K, V> CacheApi<K, V> createCache(String cacheType) {
+    static <K, V> CacheApi<K, V> createApi(String cacheType) {
         return switch (cacheType) {
             case "fs-simpleWeak" -> {
                 SimpleCache<K, V> cache = SimpleCache.ofWeak();

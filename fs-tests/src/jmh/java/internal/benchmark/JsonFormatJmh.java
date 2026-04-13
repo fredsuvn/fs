@@ -1,7 +1,7 @@
 package internal.benchmark;
 
-import internal.benchmark.api.JsonFormatApi;
-import internal.benchmark.common.TestJsonData;
+import internal.api.JsonFormatApi;
+import internal.data.TestJsonData;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Fork(5)
-public class JsonFormatBenchmark {
+public class JsonFormatJmh {
 
     private final TestJsonData data = new TestJsonData();
     private final Map<String, Object> map = new LinkedHashMap<>();
@@ -106,7 +106,7 @@ public class JsonFormatBenchmark {
 
     @Setup(Level.Trial)
     public void setup() throws Exception {
-        this.jsomFormat = JsonFormatApi.createFormat(formatType);
+        this.jsomFormat = JsonFormatApi.createApi(formatType);
     }
 
     @Benchmark

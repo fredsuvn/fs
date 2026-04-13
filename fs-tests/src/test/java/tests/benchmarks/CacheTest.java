@@ -1,6 +1,6 @@
 package tests.benchmarks;
 
-import internal.benchmark.api.CacheApi;
+import internal.api.CacheApi;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,6 +21,6 @@ public class CacheTest {
     }
 
     private void testCache(String cacheType) throws Exception {
-        assertEquals("1", CacheApi.createCache(cacheType).get("1", k -> k));
+        assertEquals("1", CacheApi.createApi(cacheType).get("1", k -> k));
     }
 }

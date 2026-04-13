@@ -1,4 +1,4 @@
-package internal.benchmark.api;
+package internal.api;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 
 public class AspectApi {
 
-    public static AspectApi createAspect(String aspectType) throws Exception {
+    public static AspectApi createApi(String aspectType) throws Exception {
         return switch (aspectType) {
             case "fs-asm" -> AspectMaker.byAsm().make(
                 AspectApi.class,

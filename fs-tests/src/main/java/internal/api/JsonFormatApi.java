@@ -1,4 +1,4 @@
-package internal.benchmark.api;
+package internal.api;
 
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,7 +6,7 @@ import space.sunqian.fs.data.json.JsonKit;
 
 public interface JsonFormatApi {
 
-    static JsonFormatApi createFormat(String formatType) {
+    static JsonFormatApi createApi(String formatType) {
         return switch (formatType) {
             case "fs" -> new FsImpl();
             case "jackson" -> new JacksonImpl();

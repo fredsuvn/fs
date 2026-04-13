@@ -1,14 +1,16 @@
-package internal.benchmark.common;
+package internal.data;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
+import space.sunqian.fs.object.annotation.DatePattern;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Data
 @EqualsAndHashCode
-public class TestPropsData {
+public class TestPropsTarget {
     private int i1;
     private long l1;
     private String str1;
@@ -22,12 +24,16 @@ public class TestPropsData {
     private Long ll2;
     private BigDecimal bb2;
 
+    @DatePattern("yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private String fmt1;
+    private Date fmt1;
+    @DatePattern("yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private String fmt2;
+    private Date fmt2;
+    @DatePattern("yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private String fmt3;
+    private Date fmt3;
+    @DatePattern("yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private String fmt4;
+    private Date fmt4;
 }

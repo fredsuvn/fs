@@ -1,6 +1,6 @@
 package internal.benchmark;
 
-import internal.benchmark.api.TcpServerApi;
+import internal.api.TcpServerApi;
 import internal.utils.DataTest;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Fork(5)
-public class TcpServerBenchmark implements DataTest {
+public class TcpServerJmh implements DataTest {
 
     private final byte[] message = randomBytes(16);
     @Param({
@@ -39,7 +39,7 @@ public class TcpServerBenchmark implements DataTest {
 
     @Setup(Level.Trial)
     public void setup() {
-        this.server = TcpServerApi.createServer(serverType);
+        this.server = TcpServerApi.createApi(serverType);
         this.clients = new TcpClient[30];
         for (int i = 0; i < clients.length; i++) {
             TcpClient client = TcpClient.newBuilder().connect(server.address());

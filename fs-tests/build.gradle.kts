@@ -46,6 +46,7 @@ sourceSets {
     resources.srcDir("src/samples/resources")
   }
 }
+
 val samplesImplementation by configurations.getting {
   extendsFrom(configurations.implementation.get())
 }
@@ -60,6 +61,7 @@ dependencies {
 
 jmh {
   resultFormat = "json"
+  includeTests = false
   /*
   includes = listOf(
     //"internal.tests.benchmarks.(CopyPropertiesBenchmark|CopyFormatPropertiesBenchmark)"

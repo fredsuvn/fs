@@ -1,6 +1,6 @@
 package tests.benchmarks;
 
-import internal.benchmark.api.TcpServerApi;
+import internal.api.TcpServerApi;
 import internal.utils.DataTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.io.IOKit;
@@ -17,7 +17,7 @@ public class TcpServerTest implements DataTest {
     }
 
     public void testTcpServer(String serverType) throws Exception {
-        TcpServerApi server = TcpServerApi.createServer(serverType);
+        TcpServerApi server = TcpServerApi.createApi(serverType);
         TcpClient client = TcpClient.newBuilder().connect(server.address());
         byte[] message = randomBytes(10);
         client.writeBytes(message);

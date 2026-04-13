@@ -1,11 +1,11 @@
 package tests.benchmarks;
 
-import internal.benchmark.api.Invoker;
+import internal.api.Invoker;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Supplier;
 
-public class InvokerTest {
+public class InvocableTest {
 
     @Test
     public void testInvoker() throws Exception {

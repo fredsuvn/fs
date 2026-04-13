@@ -1,9 +1,9 @@
-package internal.benchmark.api;
+package internal.api;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
-import internal.tests.common.TestPropsData;
-import internal.tests.common.TestPropsTarget;
+import internal.data.TestPropsData;
+import internal.data.TestPropsTarget;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.apache.commons.beanutils.converters.DateConverter;

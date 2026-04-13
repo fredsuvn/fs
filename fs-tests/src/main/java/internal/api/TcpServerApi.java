@@ -1,4 +1,4 @@
-package internal.benchmark.api;
+package internal.api;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
 
 public abstract class TcpServerApi {
 
-    public static TcpServerApi createServer(String serverType) {
+    public static TcpServerApi createApi(String serverType) {
         return switch (serverType) {
             case "fs" -> new FsServer();
             case "netty" -> new NettyServer();

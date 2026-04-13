@@ -1,6 +1,6 @@
 package tests.benchmarks;
 
-import internal.benchmark.api.ProxyApi;
+import internal.api.ProxyApi;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,11 +19,11 @@ public class ProxyTest {
     public void testProxy(String proxyType) throws Exception {
         assertEquals(
             "3hello[proxy]",
-            ProxyApi.createProxy(proxyType).withPrimitive(1, 2, "hello")
+            ProxyApi.createApi(proxyType).withPrimitive(1, 2, "hello")
         );
         assertEquals(
             "12hello[proxy]",
-            ProxyApi.createProxy(proxyType).withoutPrimitive(1, 2L, "hello")
+            ProxyApi.createApi(proxyType).withoutPrimitive(1, 2L, "hello")
         );
     }
 }

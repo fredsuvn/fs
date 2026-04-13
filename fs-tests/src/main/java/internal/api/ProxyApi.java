@@ -1,4 +1,4 @@
-package internal.benchmark.api;
+package internal.api;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.dynamic.proxy.ProxyHandler;
@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ProxyApi {
 
-    static ProxyApi createProxy(String proxyType) throws Exception {
+    static ProxyApi createApi(String proxyType) throws Exception {
         return (ProxyApi) switch (proxyType) {
             case "fs-asm" -> ProxyMaker.byAsm().make(
                 null,
