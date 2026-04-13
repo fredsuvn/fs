@@ -1,0 +1,28 @@
+package tests.core.reflect;
+
+import org.junit.jupiter.api.Test;
+import space.sunqian.fs.reflect.ReflectionException;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class ReflectTest {
+
+    @Test
+    public void testExceptions() {
+        {
+            // ReflectionException
+            assertThrows(ReflectionException.class, () -> {
+                throw new ReflectionException();
+            });
+            assertThrows(ReflectionException.class, () -> {
+                throw new ReflectionException("");
+            });
+            assertThrows(ReflectionException.class, () -> {
+                throw new ReflectionException("", new RuntimeException());
+            });
+            assertThrows(ReflectionException.class, () -> {
+                throw new ReflectionException(new RuntimeException());
+            });
+        }
+    }
+}

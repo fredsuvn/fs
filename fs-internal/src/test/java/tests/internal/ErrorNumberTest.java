@@ -1,6 +1,6 @@
 package tests.internal;
 
-import internal.test.ErrorNumber;
+import internal.utils.ErrorNumber;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;

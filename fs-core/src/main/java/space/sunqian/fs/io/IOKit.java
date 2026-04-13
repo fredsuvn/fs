@@ -3425,7 +3425,7 @@ public class IOKit {
 
             @Override
             public void write(char @Nonnull [] cbuf, int off, int len) throws IOException {
-                    appendable.append(new String(cbuf, off, len));
+                appendable.append(new String(cbuf, off, len));
             }
 
             @Override

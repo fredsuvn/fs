@@ -1,7 +1,7 @@
 package tests.internal;
 
-import internal.test.DataTest;
-import internal.test.PrintTest;
+import internal.utils.DataTest;
+import internal.utils.PrintTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

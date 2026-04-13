@@ -1,9 +1,9 @@
 package tests.internal;
 
-import internal.test.ReadOps;
-import internal.test.TestIOException;
-import internal.test.TestInputStream;
-import internal.test.TestReader;
+import internal.utils.ReadOps;
+import internal.utils.TestIOException;
+import internal.utils.TestInputStream;
+import internal.utils.TestReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;

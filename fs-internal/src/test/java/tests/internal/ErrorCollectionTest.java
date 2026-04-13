@@ -1,9 +1,9 @@
 package tests.internal;
 
-import internal.test.DataTest;
-import internal.test.ErrorList;
-import internal.test.ErrorMap;
-import internal.test.PrintTest;
+import internal.utils.DataTest;
+import internal.utils.ErrorList;
+import internal.utils.ErrorMap;
+import internal.utils.PrintTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;

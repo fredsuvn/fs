@@ -1,7 +1,7 @@
 package tests.internal;
 
-import internal.test.ErrorAppender;
-import internal.test.ErrorOutputStream;
+import internal.utils.ErrorAppender;
+import internal.utils.ErrorOutputStream;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

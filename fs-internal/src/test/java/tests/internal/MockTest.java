@@ -1,6 +1,6 @@
 package tests.internal;
 
-import internal.test.Mocker;
+import internal.utils.Mocker;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

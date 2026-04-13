@@ -1,9 +1,9 @@
 package tests.internal;
 
-import internal.test.AssertTest;
-import internal.test.FsTestException;
-import internal.test.Materials;
-import internal.test.TestIOException;
+import internal.utils.AssertTest;
+import internal.utils.FsTestException;
+import internal.utils.Materials;
+import internal.utils.TestIOException;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -15,11 +15,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
-import static internal.test.Materials.copyBuffer;
-import static internal.test.Materials.copyBytes;
-import static internal.test.Materials.copyChars;
-import static internal.test.Materials.copyDirect;
-import static internal.test.Materials.newFile;
+import static internal.utils.Materials.copyBuffer;
+import static internal.utils.Materials.copyBytes;
+import static internal.utils.Materials.copyChars;
+import static internal.utils.Materials.copyDirect;
+import static internal.utils.Materials.newFile;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
