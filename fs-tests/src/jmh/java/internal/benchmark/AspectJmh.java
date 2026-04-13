@@ -40,20 +40,20 @@ public class AspectJmh {
     })
     private String withPrimitive;
 
-    private AspectApi aspect;
+    private AspectApi aspectApi;
 
     @Setup(Level.Trial)
     public void setup() throws Exception {
-        this.aspect = AspectApi.createApi(aspectType);
+        this.aspectApi = AspectApi.createApi(aspectType);
     }
 
     @Benchmark
     public void aspect(Blackhole blackhole) throws Exception {
         Random random = ThreadLocalRandom.current();
         String value = "true".equals(withPrimitive) ?
-            aspect.withPrimitive(random.nextInt(), random.nextLong(), "hello")
+            aspectApi.withPrimitive(random.nextInt(), random.nextLong(), "hello")
             :
-            aspect.withoutPrimitive(random.nextInt(), random.nextLong(), "hello");
+            aspectApi.withoutPrimitive(random.nextInt(), random.nextLong(), "hello");
         blackhole.consume(value);
     }
 }

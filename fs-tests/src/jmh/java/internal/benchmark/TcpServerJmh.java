@@ -34,15 +34,15 @@ public class TcpServerJmh implements DataTest {
         "netty",
     })
     private String serverType;
-    private TcpServerApi server;
+    private TcpServerApi serverApi;
     private TcpClient[] clients;
 
     @Setup(Level.Trial)
     public void setup() {
-        this.server = TcpServerApi.createApi(serverType);
+        this.serverApi = TcpServerApi.createApi(serverType);
         this.clients = new TcpClient[30];
         for (int i = 0; i < clients.length; i++) {
-            TcpClient client = TcpClient.newBuilder().connect(server.address());
+            TcpClient client = TcpClient.newBuilder().connect(serverApi.address());
             clients[i] = client;
         }
     }
@@ -54,8 +54,8 @@ public class TcpServerJmh implements DataTest {
                 client.close();
             }
         }
-        if (server != null) {
-            server.shutdown();
+        if (serverApi != null) {
+            serverApi.shutdown();
         }
     }
 

@@ -43,7 +43,7 @@ public class Invoker {
         return null;
     }
 
-    public static Supplier<Object> createAction(String invokeType, String methodType) {
+    public static Supplier<Object> createSupplier(String invokeType, String methodType) {
         Invocable invocable = createInvocable(invokeType, methodType);
         Invoker invoker = "static".equals(methodType) ? null : new Invoker();
         if (invocable != null) {

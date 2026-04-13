@@ -16,9 +16,9 @@ public class InvocableTest {
     }
 
     public void testInvoker(String invokeType) throws Exception {
-        Supplier<Object> forStatic = Invoker.createAction(invokeType, "static");
+        Supplier<Object> forStatic = Invoker.createSupplier(invokeType, "static");
         System.out.println(forStatic.get());
-        Supplier<Object> forInstance = Invoker.createAction(invokeType, "instance");
+        Supplier<Object> forInstance = Invoker.createSupplier(invokeType, "instance");
         System.out.println(forInstance.get());
     }
 }

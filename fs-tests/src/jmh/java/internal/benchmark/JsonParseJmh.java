@@ -1,6 +1,6 @@
 package internal.benchmark;
 
-import internal.api.JsonFormatApi;
+import internal.api.JsonParseApi;
 import internal.data.TestJsonData;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -16,6 +16,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.data.json.JsonKit;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
@@ -28,22 +29,24 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Fork(5)
-public class JsonFormatJmh {
+public class JsonParseJmh {
 
     private final TestJsonData data = new TestJsonData();
     private final Map<String, Object> map = new LinkedHashMap<>();
+    private final String dataJson;
+    private final String mapJson;
     @Param({
         "fs",
         "jackson",
         "fastjson",
     })
-    private String formatType;
+    private String parseType;
     @Param({
         "object",
         "map",
     })
-    private String formatTarget;
-    private JsonFormatApi jsonFormatApi;
+    private String parseTarget;
+    private JsonParseApi jsonParseApi;
 
     {
         // object
@@ -74,6 +77,7 @@ public class JsonFormatJmh {
         data.setLa3(new long[]{1L, 2L});
         data.setBa3(new BigDecimal[]{new BigDecimal("1.0"), new BigDecimal("2.0")});
         data.setSa3(ListKit.list("a", "b"));
+        this.dataJson = JsonKit.toJsonString(data);
         // map
         map.put("i1", 1);
         map.put("l1", 2L);
@@ -102,17 +106,22 @@ public class JsonFormatJmh {
         map.put("la3", new long[]{1L, 2L});
         map.put("ba3", new BigDecimal[]{new BigDecimal("1.0"), new BigDecimal("2.0")});
         map.put("sa3", ListKit.list("a", "b"));
+        this.mapJson = JsonKit.toJsonString(map);
     }
 
     @Setup(Level.Trial)
     public void setup() throws Exception {
-        this.jsonFormatApi = JsonFormatApi.createApi(formatType);
+        this.jsonParseApi = JsonParseApi.createApi(parseType);
     }
 
     @Benchmark
     public void toJsonString(Blackhole blackhole) throws Exception {
-        String json = "object".equals(formatTarget) ?
-            jsonFormatApi.toJsonString(data) : jsonFormatApi.toJsonString(map);
-        blackhole.consume(json);
+        if ("object".equals(parseType)) {
+            Object data = jsonParseApi.parse(dataJson, TestJsonData.class);
+            blackhole.consume(data);
+        } else {
+            Object map = jsonParseApi.parse(mapJson, Map.class);
+            blackhole.consume(map);
+        }
     }
 }

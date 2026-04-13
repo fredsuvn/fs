@@ -40,16 +40,16 @@ public class InvocableJmh {
     })
     private String methodType;
 
-    private Supplier<Object> action;
+    private Supplier<Object> supplier;
 
     @Setup(Level.Trial)
     public void setup() {
-        this.action = Invoker.createAction(invokeType, methodType);
+        this.supplier = Invoker.createSupplier(invokeType, methodType);
     }
 
     @Benchmark
     public void invoke(Blackhole blackhole) throws Exception {
-        Object value = action.get();
+        Object value = supplier.get();
         blackhole.consume(value);
     }
 }

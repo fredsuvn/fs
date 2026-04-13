@@ -42,20 +42,20 @@ public class ProxyJmh {
     })
     private String withPrimitive;
 
-    private ProxyApi proxy;
+    private ProxyApi proxyApi;
 
     @Setup(Level.Trial)
     public void setup() throws Exception {
-        this.proxy = ProxyApi.createApi(proxyType);
+        this.proxyApi = ProxyApi.createApi(proxyType);
     }
 
     @Benchmark
     public void proxy(Blackhole blackhole) throws Exception {
         Random random = ThreadLocalRandom.current();
         String value = "true".equals(withPrimitive) ?
-            proxy.withPrimitive(random.nextInt(), random.nextLong(), "hello")
+            proxyApi.withPrimitive(random.nextInt(), random.nextLong(), "hello")
             :
-            proxy.withoutPrimitive(random.nextInt(), random.nextLong(), "hello");
+            proxyApi.withoutPrimitive(random.nextInt(), random.nextLong(), "hello");
         blackhole.consume(value);
     }
 }

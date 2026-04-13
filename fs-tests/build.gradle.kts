@@ -62,14 +62,13 @@ dependencies {
 jmh {
   resultFormat = "json"
   includeTests = false
-  /*
-  includes = listOf(
-    //"internal.tests.benchmarks.(CopyPropertiesBenchmark|CopyFormatPropertiesBenchmark)"
-    //"internal.tests.benchmarks.AspectBenchmark"
-    //"internal.tests.benchmarks.TcpServerBenchmark"
-    "internal.tests.benchmarks.JsonFormatBenchmark"
-  )
-  */
+
+  //includes = listOf(
+    //"internal.benchmark.(CopyPropertiesJmh|CopyPropertiesWithAnnotationsJmh)"
+    //"internal.benchmark.AspectJmh"
+    //"internal.benchmark.TcpServerJmh"
+    //"internal.benchmark.JsonParseJmh"
+  //)
 }
 
 tasks.test {

@@ -53,11 +53,11 @@ public class CacheJmh {
     })
     private String cacheType;
 
-    private CacheApi<String, String> cache;
+    private CacheApi<String, String> cacheApi;
 
     @Setup(Level.Trial)
     public void setup() {
-        this.cache = CacheApi.createApi(cacheType);
+        this.cacheApi = CacheApi.createApi(cacheType);
     }
 
     @Benchmark
@@ -65,7 +65,7 @@ public class CacheJmh {
     public void computeIfAbsent(Blackhole blackhole) throws Exception {
         Random random = ThreadLocalRandom.current();
         KeyValue data = DATA[random.nextInt(DATA_SIZE)];
-        String value = cache.get(data.key, k -> data.value);
+        String value = cacheApi.get(data.key, k -> data.value);
         blackhole.consume(value);
     }
 
