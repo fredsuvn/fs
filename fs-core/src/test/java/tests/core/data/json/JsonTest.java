@@ -874,9 +874,13 @@ public class JsonTest implements PrintTest {
         private DataPack o1;
         private Map<String, Object> o2;
 
+        @DatePattern("yyyy-MM-dd HH:mm:ss")
         private String fmt1;
+        @DatePattern("yyyy-MM-dd HH:mm:ss")
         private String fmt2;
+        @NumPattern("#.000")
         private BigDecimal fmt3;
+        @NumPattern("#.0000")
         private BigDecimal fmt4;
     }
 
