@@ -13,16 +13,38 @@ image:fs.svg[]
 
 _fs_ is a lightweight, multi-version JDK support, high-performance, zero-dependency tool lib for java.
 
-It includes 8 modules:
+=== Project Architecture
 
-* <<chapter-dependencies>>: The dependency platform of _fs_;
-* <<chapter-annotation>>: Annotation of _fs_, dependents on _fs-jsr305_, can help improve code quality;
-* <<chapter-jsr305>>: JSR305 for _fs_, providing partial implementations of _jsr305_ annotation;
-* <<chapter-asm>>: Internal asm (7.1) for _fs_, no dependencies;
-* <<chapter-core>>: Core module of _fs_, dependents on _fs-annotation_, main part of _fs_;
-* <<chapter-all>>: Aggregation of _fs_, including all classes and resources in _fs-jsr305_, _fs-annotation_ and _fs-core_, zero-dependency;
-* <<chapter-internal>>: Internal module, typically providing internal classes for tests;
-* <<chapter-tests>>: Tests module, benchmarks here;
+_fs_ follows a modular architecture with clear separation of concerns:
+
+* <<chapter-dependencies>>: Dependency management platform (BOM)
+* <<chapter-jsr305>>: JSR-305 annotations implementation
+* <<chapter-annotation>>: Custom annotations for code analysis and validation
+* <<chapter-asm>>: Embedded ASM framework for bytecode manipulation
+* <<chapter-core>>: Main library with comprehensive utilities and interfaces
+* <<chapter-all>>: Aggregated jar containing all modules (zero-dependency)
+* <<chapter-internal>>: Internal utilities for testing
+* <<chapter-tests>>: Test suite and benchmarks
+
+=== Design Principles
+
+_fs_ is built on the following design principles:
+
+* **Zero Dependency**: Minimal external dependencies, self-contained implementations
+* **Multi-Version Support**: Automatic JDK version detection and optimal implementation selection
+* **High Performance**: Optimized implementations with benchmark validation
+* **Modularity**: Clear module boundaries and responsibilities
+* **Extensibility**: Well-defined interfaces for custom implementations
+
+=== Development Guidelines
+
+When contributing to _fs_, follow these guidelines:
+
+* Use the existing package structure and naming conventions
+* Follow the multi-version JDK support pattern using `FsLoader`
+* Write comprehensive tests for new functionality
+* Maintain 100% test coverage
+* Use the built-in annotations for null safety and code analysis
 
 [NOTE]
 ====
@@ -63,9 +85,26 @@ src: link:../fs-annotation/[fs-annotation]
 _fs-annotation_ is the annotation module of _fs_, should be published as a jar.
 It depends on _fs-jsr305_.
 
-It contains:
+=== Purpose
 
-* Annotation for _fs_: such as `space.sunqian.annotation.Nonnull`, `space.sunqian.annotation.Nullable`...;
+Provides custom annotations for code analysis, validation, and static analysis support.
+
+=== Key Annotations
+
+* **Null Safety**: `@Nonnull`, `@Nullable` for null pointer prevention
+* **Immutability**: `@Immutable` for immutable types
+* **Parameter Handling**: `@RetainedParam` for parameter retention
+* **Visibility**: `@NonExported` for non-exported packages
+
+=== Usage Guidelines
+
+* Use `@Nonnull` and `@Nullable` consistently for method parameters and return types
+* Apply `@Immutable` to value objects and data classes
+* Use package-level annotations for default nullability settings
+
+=== Integration
+
+These annotations are used throughout _fs-core_ and can be used in external projects for consistent code analysis.
 
 [[chapter-jsr305]]
 == _fs-jsr305_
@@ -74,9 +113,27 @@ src: link:../fs-jsr305/[fs-jsr305]
 
 _fs-jsr305_ is the partial jsr305 implementations for _fs_, should be published as a jar.
 
-It contains:
+=== Purpose
 
-* Partial implementations of jsr305: such as `javax.annotation.Nonnull`, `javax.annotation.Nullable`...;
+Provides JSR-305 annotations implementation to ensure null-safety and code quality without external dependencies.
+
+=== Key Features
+
+* **Self-Contained**: No dependency on external JSR-305 implementations
+* **Compatibility**: Compatible with standard JSR-305 annotations
+* **Integration**: Used as foundation for _fs-annotation_ module
+
+=== Annotations Included
+
+* `javax.annotation.Nonnull`
+* `javax.annotation.Nullable`
+* `javax.annotation.meta` package annotations
+
+=== Usage Notes
+
+* This module provides the base annotations that _fs-annotation_ extends
+* External projects can use these annotations for consistent null-safety
+* The annotations are compatible with standard static analysis tools
 
 [[chapter-asm]]
 == _fs-asm_
@@ -85,7 +142,34 @@ src: link:../fs-asm/[fs-asm]
 
 _fs-asm_ is the internal asm (7.1) for _fs_, should be published as a jar.
 
-It contains core asm classes: such as `ClassReader`, `ClassWriter`, `MethodVisitor`... (all in `space.sunqian.fs.asm` package).
+=== Purpose
+
+Embedded ASM framework for bytecode manipulation, providing dynamic programming capabilities without external dependencies.
+
+=== Key Features
+
+* **Zero Dependency**: Complete ASM implementation with no external dependencies
+* **Package Isolation**: All classes in `space.sunqian.fs.asm` package
+* **Version Compatibility**: ASM 7.1 feature set
+
+=== Core Components
+
+* **Class Manipulation**: `ClassReader`, `ClassWriter`
+* **Method Handling**: `MethodVisitor`, `FieldVisitor`
+* **Bytecode Analysis**: `AnnotationVisitor`, `Type`
+* **Framework Support**: Complete ASM opcodes and utilities
+
+=== Usage in _fs_
+
+* Used by _fs-core_ for dynamic proxy and AOP functionality
+* Enables bytecode generation for performance optimization
+* Provides reflection alternatives for high-performance scenarios
+
+=== Development Notes
+
+* This is a direct copy of ASM framework with package relocation
+* No modifications to original ASM functionality
+* Used internally by _fs-core_ dynamic programming features
 
 [[chapter-core]]
 == _fs-core_
@@ -95,15 +179,22 @@ src: link:../fs-core/[fs-core]
 _fs-core_ is main part of _fs_, should be published as a jar.
 It depends on _fs-annotation_.
 
-It contains:
+=== Architecture Overview
 
-* Core utility kits: such as `Fs`, `StringKit`, `IOKit`...;
-* Core interfaces: such as `SimpleCache`, `DIContainer`...;
-* Default implementations for core interfaces;
+_fs-core_ is organized into functional packages with clear responsibilities:
 
-Unless it is necessary to create a separate module, kits, interfaces, and implementations should all be written here.
+* **Base Utilities** (`space.sunqian.fs.base`): Fundamental utilities for common operations
+* **Collections & Data** (`space.sunqian.fs.collect`, `space.sunqian.fs.data`): Enhanced collection and data processing
+* **I/O Operations** (`space.sunqian.fs.io`): Byte/char processing and file operations
+* **Networking** (`space.sunqian.fs.net`): HTTP, TCP, UDP with adaptive implementations
+* **Object Manipulation** (`space.sunqian.fs.object`): Schema, building, conversion, and pooling
+* **Dynamic Programming** (`space.sunqian.fs.dynamic`, `space.sunqian.fs.invoke`): Proxy, AOP, and reflection
+* **Dependency Injection** (`space.sunqian.fs.di`): Lightweight DI container
+* **Utilities** (`space.sunqian.fs.utils`): Codec, event bus, JDBC, versioning
 
-The codes from `JDK8` to `JDK17` are also written here, and the `build script` will automatically compile into the corresponding version of the class file. `FsLoader` can be used in the code to distinguish between different implementation versions:
+=== Multi-Version JDK Support
+
+The codes from `JDK8` to `JDK17` are written here, and the build script automatically compiles into the corresponding version of the class file. `FsLoader` is used to distinguish between different implementation versions:
 
 [source,java]
 ----
@@ -120,15 +211,54 @@ interface HttpCallerService {
 }
 ----
 
+=== Key Design Patterns
+
+* **Factory Pattern**: Used extensively for creating instances with version-specific implementations
+* **Builder Pattern**: Network clients and object builders use fluent builder interfaces
+* **Strategy Pattern**: Different implementations selected based on runtime environment
+* **Adapter Pattern**: JDK version compatibility through adapter implementations
+
+=== Development Guidelines
+
+* Place kits, interfaces, and implementations in appropriate packages
+* Use `FsLoader` for multi-version JDK support
+* Follow the established naming conventions and package structure
+* Write comprehensive tests for all new functionality
+* Maintain interface-back-implementation pattern for extensibility
+
+=== Performance Considerations
+
+* Optimize hot paths with benchmark validation
+* Use appropriate data structures for performance-critical operations
+* Leverage ASM-based implementations for dynamic programming features
+* Implement efficient caching strategies where appropriate
+
 [[chapter-all]]
 == _fs-all_
 
 src: link:../fs-all/[fs-all]
 
-_fs-all_ is the aggregation of _fs-annotation_ and _fs-core_, should be published as a jar.
-It aggregates all classes and resources in _fs-jsr305_, _fs-annotation_ and _fs-core_, and zero-dependency for publishing.
+_fs-all_ is the aggregation module of _fs_, should be published as a jar.
 
-This module can not only integrate _fs-jsr305_, _fs-annotation_ and _fs-core_'s classes and resources, but also generate aggregations for `Javadoc`, `Jacoco`, and `test reports`.
+=== Purpose
+
+Provides a zero-dependency aggregated jar containing all essential modules for easy consumption by external projects.
+
+=== Aggregation Strategy
+
+* **Complete Integration**: Combines classes and resources from _fs-jsr305_, _fs-annotation_, and _fs-core_
+* **Zero Dependency**: No module dependencies, self-contained distribution
+* **Documentation Aggregation**: Generates unified Javadoc, JaCoCo reports, and test reports
+
+=== Usage Scenarios
+
+* **External Projects**: Single dependency for all _fs_ functionality
+* **Distribution**: Simplified deployment and version management
+* **Documentation**: Comprehensive documentation in one place
+
+=== Build Integration
+
+The aggregation is performed during the build process, ensuring consistency across all modules.
 
 [[chapter-internal]]
 == _fs-internal_
@@ -136,7 +266,22 @@ This module can not only integrate _fs-jsr305_, _fs-annotation_ and _fs-core_'s 
 src: link:../fs-internal/[fs-internal]
 
 _fs-internal_ is the internal module of _fs_, should not be published.
-It typically provides internal classes for tests.
+
+=== Purpose
+
+Provides internal utilities and classes specifically designed for testing purposes.
+
+=== Usage Guidelines
+
+* **Test Support**: Helper classes and utilities for unit and integration tests
+* **Internal Only**: Not intended for external consumption
+* **Build Isolation**: Excluded from published artifacts
+
+=== Content
+
+* Test-specific implementations and mocks
+* Internal utilities for test setup and teardown
+* Shared test resources and configurations
 
 [[chapter-tests]]
 == _fs-tests_
@@ -144,6 +289,83 @@ It typically provides internal classes for tests.
 src: link:../fs-tests/[fs-tests]
 
 _fs-tests_ is the internal tests module of _fs_, should not be published.
-It typically provides internal tests such as benchmarks.
+
+=== Testing Strategy
+
+_fs_ maintains 100% test coverage with comprehensive test suites:
+
+* **Unit Tests**: Individual component testing
+* **Integration Tests**: Module interaction testing
+* **Benchmarks**: Performance testing with JMH
+* **Coverage**: JaCoCo integration for coverage reporting
+
+=== Benchmarking
+
+The module includes JMH benchmarks for performance-critical components:
+
+* Cache performance comparisons
+* Object conversion benchmarks
+* Network operation performance
+* Collection operation efficiency
+
+=== Test Organization
+
+* Organized by functional areas matching _fs-core_ packages
+* Clear separation between unit and integration tests
+* Benchmark tests in dedicated JMH package
+
+[[chapter-build]]
+== Build System
+
+=== Gradle Configuration
+
+_fs_ uses a custom Gradle build system with the following features:
+
+* **Multi-Module Support**: Clear separation of module responsibilities
+* **Multi-JDK Build**: Support for JDK 8 through 17
+* **Custom Plugins**: `fs` and `fs-publish` plugins for build automation
+* **Dependency Management**: Centralized dependency versions
+
+=== Build Tasks
+
+Key build tasks available:
+
+* `gradle build` - Build all modules
+* `gradle test` - Run all tests
+* `gradle jmh` - Run JMH benchmarks
+* `gradle javadoc` - Generate aggregated Javadoc
+* `gradle jacocoTestReport` - Generate coverage reports
+
+=== Publishing
+
+Publishing configuration includes:
+
+* **Maven Central**: Support for publishing to Maven repositories
+* **Signing**: Optional artifact signing
+* **Documentation**: Automated documentation generation
+
+[[chapter-contributing]]
+== Contributing Guidelines
+
+=== Code Quality
+
+* Maintain 100% test coverage
+* Follow established coding conventions
+* Use built-in annotations consistently
+* Write comprehensive documentation
+
+=== Testing Requirements
+
+* All new functionality must include tests
+* Performance changes require benchmark validation
+* Integration tests for cross-module functionality
+* Maintain backward compatibility
+
+=== Pull Request Process
+
+* Clear description of changes
+* Link to related issues
+* Performance impact analysis
+* Documentation updates included
 
 image::fs.svg[]

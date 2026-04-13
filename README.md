@@ -4,24 +4,125 @@
 
 ## Overview
 
-_fs_ is a lightweight, multi-version JDK support, high-performance, zero-dependency tool lib for java. It provides:
+_fs_ is a lightweight, multi-version JDK support, high-performance, zero-dependency tool lib for java.
 
-- Annotations that can be used for code analysis;
-- Core class `space.sunqian.fs.Fs`;
-- Base and core utilities and interfaces for bytes, chars, coding, date, enum, exception, logging, math, number,
-  process, random, resource, string, system, thread and checker;
-- Extensions for functions, values, and options;
-- I/O kits and interfaces;
-- More light and fast cache interfaces and implementations;
-- Kits for collections, maps, arrays, etc.;
-- Concurrent supports;
-- Network kits and interfaces for http, tcp, udp, etc.;
-- Object parsing, creating, and conversion;
-- Dynamic invocation, supporting reflection, method-handle and [asm](https://asm.ow2.io);
-- Dynamic proxy and aspect, supporting JDK dynamic proxy and [asm](https://asm.ow2.io);
-- Reflection;
-- Utilities for codec, dependency injection, eventbus, jdbc, semantic version, etc.;
-- Third-party supporting: [asm](https://asm.ow2.io), [protobuf](https://github.com/protocolbuffers/protobuf);
+### Quick Start
+
+#### Gradle
+
+```kotlin-dsl
+dependencies {
+    implementation("space.sunqian.fs:fs-all:0.0.2-SNAPSHOT")
+}
+```
+
+#### Maven
+
+```xml
+
+<dependency>
+  <groupId>space.sunqian.fs</groupId>
+  <artifactId>fs-all</artifactId>
+  <version>0.0.2-SNAPSHOT</version>
+</dependency>
+```
+
+### Core Modules
+
+- **fs-core**: Main library with comprehensive utilities and interfaces;
+- **fs-annotation**: Main annotations of _fs_ for code analysis and validation;
+- **fs-jsr305**: JSR-305 annotations implementation (`@Nonnull`, `@Nullable`, etc.);
+- **fs-asm**: Embedded ASM framework for bytecode manipulation;
+- **fs-all**: Aggregated jar containing all modules (fs-jsr305, fs-annotation, fs-asm, fs-core);
+
+### Core Features
+
+#### fs-core Module
+
+The main library providing comprehensive utilities and interfaces:
+
+**Base Utilities** (`space.sunqian.fs.base`)
+
+- **Bytes & Chars**: BytesKit, CharsKit, BytesBuilder, CharsBuilder for byte/char manipulation
+- **Date & Time**: DateKit, DateFormatter for date/time operations
+- **Exception Handling**: Comprehensive exception hierarchy and ThrowKit utilities
+- **Logging**: SimpleLogger, LogKit for lightweight logging
+- **Math & Numbers**: MathKit, NumKit, NumFormatter for mathematical operations
+- **Process Management**: ProcessKit, VirtualProcess for process control
+- **String Processing**: StringKit, StringView, NameFormatter, NameMapper for string operations
+- **System Utilities**: SystemKit, OSKit, JvmKit, ResKit for system-level operations
+- **Thread & Concurrency**: ThreadKit, ThreadGate, LocalKit, TraceKit for threading
+
+**Functional Extensions** (`space.sunqian.fs.base.function`, `space.sunqian.fs.base.value`,
+`space.sunqian.fs.base.option`)
+
+- Enhanced functional interfaces (IndexedFunction, IndexedConsumer, IndexedPredicate, etc.)
+- Value types (Val, Var, Span) and option handling (Option, OptionKit)
+
+**Collections & Data** (`space.sunqian.fs.collect`, `space.sunqian.fs.data`)
+
+- Array, List, Set, Map utilities with enhanced operations
+- JSON and Properties data handling with parsers and formatters
+- StreamKit for enhanced stream operations
+
+**I/O Operations** (`space.sunqian.fs.io`)
+
+- Byte/char processing with readers, writers, and transformers
+- File operations with FileKit and FileRef interfaces
+- Communication interfaces for network and IPC
+
+**Networking** (`space.sunqian.fs.net`)
+
+- HTTP client with JDK version-adaptive implementations (HttpURLConnection/HttpClient)
+- TCP client/server with builder patterns
+- UDP sender/server implementations
+
+**Object Manipulation** (`space.sunqian.fs.object`)
+
+- Object schema definition and parsing
+- Object building with builder patterns
+- Object conversion and property copying
+- Object pooling interfaces
+
+**Dynamic Programming** (`space.sunqian.fs.dynamic`, `space.sunqian.fs.invoke`)
+
+- Dynamic proxy (JDK proxy and ASM-based)
+- Aspect-oriented programming (AOP) support
+- Reflection and method-handle based invocation
+
+**Dependency Injection** (`space.sunqian.fs.di`)
+
+- Lightweight DI container implementation
+- Component lifecycle management
+
+**Utilities** (`space.sunqian.fs.utils`)
+
+- Codec utilities (Base64, Hex, Crypto, Digest)
+- Event bus interfaces
+- JDBC and SQL utilities
+- Semantic versioning support
+
+#### fs-annotation Module
+
+Provides annotations supporting simple static analyses:
+
+- `@Nonnull`, `@Nullable` for null safety
+- `@Immutable`, `@RetainedParam` for code analysis
+- Custom annotations for validation and code analysis
+
+#### fs-asm Module
+
+Embedded ASM framework for bytecode manipulation:
+
+- Complete ASM library implementation (copied from ASM framework)
+- Used for dynamic proxy and AOP functionality
+- No external dependencies on org.objectweb.asm
+
+### Third-party Integration
+
+- Built-in [ASM](https://asm.ow2.io) framework for bytecode manipulation
+- [Protobuf](https://github.com/protocolbuffers/protobuf) support for object conversion
+- Multi-version JDK compatibility (JDK8 to JDK17+);
 
 ## Multi-Version JDK Support
 
@@ -32,6 +133,13 @@ implementation classes of different jdk versions.
 For example, the implementation class of `space.sunqian.fs.net.http.HttpCaller` has two versions:
 `JDK8` and `JDK11`. The former is based on `java.net.HttpURLConnection`, and the latter is based on
 `java.net.http.HttpClient`.
+
+_fs_ automatically selects the optimal implementation based on the runtime JDK environment, such as:
+
+- **JDK8**: Uses `HttpURLConnection` for HTTP calls
+- **JDK11+**: Uses `HttpClient` for better performance
+- **JDK9+**: Enhanced reflection capabilities
+- **JDK16+**: Record type support for schema parsing
 
 This ensures:
 
@@ -44,18 +152,23 @@ This ensures:
 
 _fs_ has higher performance than other common libraries in many places, Here are some examples:
 
-- **Simple Cache** (`space.sunqian.fs.cache.SimpleCache`):
-  SimpleCache only considers common cache functions, so it has higher performance in common functions.
-  Here is the benchmark: [CacheBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/CacheBenchmark.java)
+### High-Performance Utilities
 
-- **CopyProperties** (`Fs.copyProperties / space.sunqian.fs.object.convert.ObjectCopier`):
-  DataMapper has better performance and more comprehensive support.
-  Here is the
-  benchmark: [CopyPropertiesBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/CopyPropertiesBenchmark.java)
+- **SimpleCache** (`space.sunqian.fs.cache.SimpleCache`):
+  Lightweight caching with excellent performance, focusing on common cache functions.
+  Here is the benchmark: [Cache](fs-tests/src/jmh/java/internal/benchmark/CacheJmh.java)
+
+- **Object Conversion** (`Fs.copyProperties / space.sunqian.fs.object.convert.ObjectCopier`):
+  Fast property copying and object mapping with better performance and comprehensive support.
+  Here is the benchmark: [CopyProperties](fs-tests/src/jmh/java/internal/benchmark/CopyPropertiesJmh.java)
 
 - **TCP Server** (`space.sunqian.fs.net.tcp.TcpServer`):
-  Rare interface server implementation with slightly better performance than **netty**.
-  Here is the benchmark: [TcpServerBenchmark](fs-tests/src/jmh/java/internal/tests/benchmarks/TcpServerBenchmark.java)
+  High-performance TCP server implementation with slightly better performance than **netty**.
+  Here is the benchmark: [TcpServer](fs-tests/src/jmh/java/internal/benchmark/TcpServerJmh.java)
+
+- **JSON Processing**: Efficient JSON parsing and formatting with optimized implementations.
+
+### Benchmark Results
 
 Here is the full benchmark result: [results.json](docs/jmh/results.json).
 
