@@ -33,16 +33,19 @@ public class AssertTestTest implements AssertTest {
         Method throwError = Tt.class.getDeclaredMethod("throwError");
         assertEquals(FsTestException.class, invokeThrows(FsTestException.class, throwError, null).getClass());
         Method string = Tt.class.getDeclaredMethod("string");
-        assertEquals(NoThrows.class, invokeThrows(NoThrows.class, string, null).getClass());
+        assertEquals(AssertTest.NoThrows.class, invokeThrows(AssertTest.NoThrows.class, string, null).getClass());
     }
 
     @Test
     public void testEquals() throws Exception {
         Method string = Tt.class.getDeclaredMethod("string");
         invokeEquals("123", string, null);
-        assertThrows(AssertionError.class, () ->
-            invokeEquals("123", string, null, "123")
-        );
+    }
+
+    @Test
+    public void testInvokeEqualsWithException() throws Exception {
+        Method throwError = Tt.class.getDeclaredMethod("throwError");
+        assertThrows(AssertionError.class, () -> invokeEquals("123", throwError, null));
     }
 
     @Test
@@ -125,7 +128,7 @@ public class AssertTestTest implements AssertTest {
             assertEquals(bb.capacity(), chars.length);
         }
         {
-            // chars copy
+            // bytes copy
             char[] chars = new char[1024];
             Arrays.fill(chars, (char) 66);
             CharBuffer directBuffer = Materials.copyDirect(chars);

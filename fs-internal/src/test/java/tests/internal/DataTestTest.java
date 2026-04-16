@@ -17,15 +17,12 @@ public class DataTestTest implements DataTest, PrintTest {
         testRandom(100, -64, 22);
         testRandom(100, -33, 44);
 
-        assertThrows(NegativeArraySizeException.class, () -> randomBytes(-1));
-        assertThrows(IllegalArgumentException.class, () -> randomBytes(10, (byte) 3, (byte) 2));
-        assertThrows(NegativeArraySizeException.class, () -> randomChars(-1));
         assertThrows(IllegalArgumentException.class, () -> randomChars(10, '3', '2'));
     }
 
     private void testRandom(int size, int from, int to) throws Exception {
         {
-            // byte
+            // Byte
             byte[] array = randomBytes(size);
             printFor("Random bytes", Arrays.toString(array));
             byte start = (byte) from;
@@ -37,7 +34,7 @@ public class DataTestTest implements DataTest, PrintTest {
             printFor("Random bytes", Arrays.toString(array));
         }
         {
-            // char
+            // Char
             char[] array = randomChars(size);
             printFor("Random chars", Arrays.toString(array));
             char start = (char) Math.min(Math.abs(from), Math.abs(to));

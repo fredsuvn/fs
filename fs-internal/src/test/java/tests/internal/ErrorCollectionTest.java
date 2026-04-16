@@ -11,9 +11,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class ErrorCollectionTest implements DataTest, PrintTest {
 
     @Test
-    public void testError() throws Exception {
-        assertThrows(UnsupportedOperationException.class, () -> {new ErrorMap<>().get("");});
-        assertThrows(UnsupportedOperationException.class, () -> {new ErrorList<>().get(1);});
-        assertThrows(UnsupportedOperationException.class, () -> {new ErrorList<>().size();});
+    public void testErrorCollection() throws Exception {
+        // Test ErrorList
+        assertThrows(UnsupportedOperationException.class, () -> new ErrorList<>().get(1));
+        assertThrows(UnsupportedOperationException.class, () -> new ErrorList<>().size());
+
+        // Test ErrorMap
+        assertThrows(UnsupportedOperationException.class, () -> new ErrorMap<>().get("key"));
+        assertThrows(UnsupportedOperationException.class, () -> new ErrorMap<>().size());
     }
 }
