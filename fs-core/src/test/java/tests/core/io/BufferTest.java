@@ -1,6 +1,6 @@
 package tests.core.io;
 
-import internal.utils.DataTest;
+import internal.utils.DataGen;
 import internal.utils.ErrorAppender;
 import internal.utils.ErrorOutputStream;
 import internal.utils.Materials;
@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BufferTest implements DataTest {
+public class BufferTest implements DataGen {
 
     @Test
     public void testIndex() {

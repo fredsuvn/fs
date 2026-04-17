@@ -1,8 +1,8 @@
 package tests.core.object.convert;
 
 import cn.hutool.core.bean.BeanUtil;
-import internal.utils.DataTest;
-import internal.utils.PrintTest;
+import internal.utils.DataGen;
+import internal.utils.TestPrint;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -76,7 +76,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ConvertTest implements PrintTest, DataTest {
+public class ConvertTest implements TestPrint, DataGen {
 
     @Test
     public void testObjectConverter() throws Exception {

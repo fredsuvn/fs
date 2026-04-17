@@ -1,6 +1,6 @@
 package tests.core.base.string;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.exception.UnreachablePointException;
 import space.sunqian.fs.base.string.StringView;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class StringViewTest implements PrintTest {
+public class StringViewTest implements TestPrint {
 
     @Test
     public void testStringView() throws Exception {

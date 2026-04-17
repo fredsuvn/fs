@@ -1,7 +1,7 @@
 package tests.core.object;
 
-import internal.utils.AssertTest;
-import internal.utils.PrintTest;
+import internal.utils.Asserter;
+import internal.utils.TestPrint;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.exception.UnknownArrayTypeException;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ObjectTest implements AssertTest, PrintTest {
+public class ObjectTest implements Asserter, TestPrint {
 
     @Test
     public void testEquals() throws Exception {

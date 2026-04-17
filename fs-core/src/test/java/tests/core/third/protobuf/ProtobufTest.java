@@ -2,7 +2,7 @@ package tests.core.third.protobuf;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ProtocolStringList;
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ProtobufTest implements PrintTest {
+public class ProtobufTest implements TestPrint {
 
     @Test
     public void testProtobuf() {

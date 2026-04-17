@@ -1,10 +1,10 @@
 package tests.core.base.system;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.system.OSKit;
 
-public class OSTest implements PrintTest {
+public class OSTest implements TestPrint {
 
     @Test
     public void testOSCheck() {

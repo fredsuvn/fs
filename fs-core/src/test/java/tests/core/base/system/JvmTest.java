@@ -1,7 +1,7 @@
 package tests.core.base.system;
 
-import internal.utils.AssertTest;
-import internal.utils.PrintTest;
+import internal.utils.Asserter;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.asm.ClassReader;
@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class JvmTest implements AssertTest, PrintTest {
+public class JvmTest implements Asserter, TestPrint {
 
     @Test
     public void testJavaVersion() {

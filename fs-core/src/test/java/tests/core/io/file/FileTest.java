@@ -1,8 +1,8 @@
 package tests.core.io.file;
 
-import internal.utils.AssertTest;
-import internal.utils.DataTest;
-import internal.utils.PrintTest;
+import internal.utils.Asserter;
+import internal.utils.DataGen;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.io.BufferKit;
@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FileTest implements DataTest, PrintTest, AssertTest {
+public class FileTest implements DataGen, TestPrint, Asserter {
 
     @Test
     public void testTempDirAndFile() throws Exception {

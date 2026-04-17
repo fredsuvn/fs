@@ -17,6 +17,9 @@ import java.nio.file.Path;
  */
 public class Materials {
 
+    private Materials() {
+    }
+
     /**
      * Returns a buffer backed by the middle of an extended array. The extended array is longer than and copied from the
      * given array, with the copied data positioned in the middle (not occupying the start or end of the extended
@@ -238,8 +241,5 @@ public class Materials {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    private Materials() {
     }
 }

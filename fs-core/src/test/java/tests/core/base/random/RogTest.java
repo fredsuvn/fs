@@ -1,7 +1,7 @@
 package tests.core.base.random;
 
-import internal.utils.AssertTest;
-import internal.utils.PrintTest;
+import internal.utils.Asserter;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.exception.UnreachablePointException;
 import space.sunqian.fs.base.random.Rog;
@@ -13,7 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class RogTest implements AssertTest, PrintTest {
+public class RogTest implements Asserter, TestPrint {
 
     @Test
     public void testObjectSupplier() throws Exception {

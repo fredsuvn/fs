@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  *
  * @author sunqian
  */
-public interface AssertTest {
+public interface Asserter {
 
     /**
      * Tests the specified method via reflection and {@link Assertions#assertThrows(Class, Executable)}. This method is

@@ -1,6 +1,6 @@
 package tests.core.data.properties;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.system.ResKit;
@@ -17,7 +17,7 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class PropertiesTest implements PrintTest {
+public class PropertiesTest implements TestPrint {
 
     @Test
     public void testPropertiesData() throws Exception {

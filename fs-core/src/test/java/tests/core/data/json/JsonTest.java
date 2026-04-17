@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import internal.utils.ErrorAppender;
-import internal.utils.PrintTest;
 import internal.utils.ReadOps;
+import internal.utils.TestPrint;
 import internal.utils.TestReader;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -64,7 +64,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class JsonTest implements PrintTest {
+public class JsonTest implements TestPrint {
 
     private static final ObjectMapper jsonMapper = new ObjectMapper();
 

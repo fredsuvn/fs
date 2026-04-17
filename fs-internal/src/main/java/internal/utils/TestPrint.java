@@ -4,13 +4,15 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 
 import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This interface provides methods for printing test info. The default printer is {@link System#out}.
  *
  * @author sunqian
  */
-public interface PrintTest {
+public interface TestPrint {
 
     /**
      * Sets the printer for current thread. The printer may be {@code null}, int this case the printer will be set to
@@ -20,9 +22,9 @@ public interface PrintTest {
      */
     default void setPrinter(@Nullable PrintStream printer) {
         if (printer == null) {
-            ThreadLocals.remove(ThreadLocals.Key.PRINTER);
+            Local.remove(Local.Key.PRINTER);
         } else {
-            ThreadLocals.set(ThreadLocals.Key.PRINTER, printer);
+            Local.set(Local.Key.PRINTER, printer);
         }
     }
 
@@ -36,7 +38,7 @@ public interface PrintTest {
         for (Object o : message) {
             sb.append(o);
         }
-        PrintStream printer = ThreadLocals.get(ThreadLocals.Key.PRINTER);
+        PrintStream printer = Local.get(Local.Key.PRINTER);
         printer = printer == null ? System.out : printer;
         printer.print(sb);
         printer.flush();
@@ -53,7 +55,7 @@ public interface PrintTest {
         for (Object o : message) {
             sb.append(o);
         }
-        PrintStream printer = ThreadLocals.get(ThreadLocals.Key.PRINTER);
+        PrintStream printer = Local.get(Local.Key.PRINTER);
         printer = printer == null ? System.out : printer;
         printer.println(sb);
         printer.flush();
@@ -71,5 +73,37 @@ public interface PrintTest {
         msg[0] = title + ": ";
         System.arraycopy(message, 0, msg, 1, message.length);
         println(msg);
+    }
+
+    final class Local {
+
+        private static final @Nonnull ThreadLocal<Map<Key, Object>> localMap = new ThreadLocal<Map<Key, Object>>() {
+            @Override
+            protected @Nonnull Map<Key, Object> initialValue() {
+                return new HashMap<>();
+            }
+        };
+
+        private Local() {
+        }
+
+        static void set(@Nonnull TestPrint.Local.Key key, @Nonnull Object value) {
+            localMap.get().put(key, value);
+        }
+
+        @SuppressWarnings("unchecked")
+        static <T> T get(@Nonnull TestPrint.Local.Key key) {
+            return (T) localMap.get().get(key);
+        }
+
+        static void remove(@Nonnull TestPrint.Local.Key key) {
+            localMap.get().remove(key);
+        }
+
+        enum Key {
+
+            PRINTER,
+            ;
+        }
     }
 }

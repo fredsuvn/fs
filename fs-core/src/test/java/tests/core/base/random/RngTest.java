@@ -1,8 +1,8 @@
 package tests.core.base.random;
 
 import internal.annotations.J17Also;
-import internal.utils.AssertTest;
-import internal.utils.PrintTest;
+import internal.utils.Asserter;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.math.MathKit;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @J17Also
-public class RngTest implements AssertTest, PrintTest {
+public class RngTest implements Asserter, TestPrint {
 
     @Test
     public void testRng() {

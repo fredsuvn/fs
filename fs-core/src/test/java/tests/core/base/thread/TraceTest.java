@@ -1,6 +1,6 @@
 package tests.core.base.thread;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.thread.TraceKit;
 
@@ -10,7 +10,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TraceTest implements PrintTest {
+public class TraceTest implements TestPrint {
 
     @Test
     public void testTrace() throws Exception {

@@ -1,6 +1,6 @@
 package tests.core.utils.codec;
 
-import internal.utils.DataTest;
+import internal.utils.DataGen;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.chars.CharsKit;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class HexTest implements DataTest {
+public class HexTest implements DataGen {
 
     @Test
     public void testHex() {

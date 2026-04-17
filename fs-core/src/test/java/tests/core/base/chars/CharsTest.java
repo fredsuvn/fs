@@ -1,8 +1,8 @@
 package tests.core.base.chars;
 
-import internal.utils.AssertTest;
+import internal.utils.Asserter;
 import internal.utils.ErrorAppender;
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.system.SystemKeys;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CharsTest implements AssertTest, PrintTest {
+public class CharsTest implements Asserter, TestPrint {
 
     @Test
     public void testChars() {

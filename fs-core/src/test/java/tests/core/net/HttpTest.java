@@ -1,9 +1,9 @@
 package tests.core.net;
 
 import internal.annotations.J17Also;
-import internal.utils.DataTest;
+import internal.utils.DataGen;
 import internal.utils.ErrorCharset;
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @J17Also
-public class HttpTest implements PrintTest, DataTest {
+public class HttpTest implements TestPrint, DataGen {
 
     private static final String TEST_URL = "https://www.baidu.com/s";
 

@@ -1,6 +1,6 @@
 package tests.core.base.process;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.process.ProcessKit;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ProcessTest implements PrintTest {
+public class ProcessTest implements TestPrint {
 
     @Test
     public void testProcess() {

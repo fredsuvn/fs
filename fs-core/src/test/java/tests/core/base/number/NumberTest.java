@@ -1,8 +1,8 @@
 package tests.core.base.number;
 
-import internal.utils.DataTest;
+import internal.utils.DataGen;
 import internal.utils.ErrorNumber;
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.number.NumException;
 import space.sunqian.fs.base.number.NumFormatter;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class NumberTest implements DataTest, PrintTest {
+public class NumberTest implements DataGen, TestPrint {
 
     @Test
     public void testStringToNumber() {

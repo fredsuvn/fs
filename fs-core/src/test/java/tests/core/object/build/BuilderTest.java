@@ -1,7 +1,7 @@
 package tests.core.object.build;
 
-import internal.utils.AssertTest;
-import internal.utils.PrintTest;
+import internal.utils.Asserter;
+import internal.utils.TestPrint;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class BuilderTest implements AssertTest, PrintTest {
+public class BuilderTest implements Asserter, TestPrint {
 
     @Test
     public void testCreator() throws Exception {

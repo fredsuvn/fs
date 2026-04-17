@@ -1,6 +1,6 @@
 package tests.core.utils.codec;
 
-import internal.utils.DataTest;
+import internal.utils.DataGen;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.utils.codec.Base64Kit;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class Base64Test implements DataTest {
+public class Base64Test implements DataGen {
 
     @Test
     public void testBase64() {

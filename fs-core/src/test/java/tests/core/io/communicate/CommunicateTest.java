@@ -1,6 +1,6 @@
 package tests.core.io.communicate;
 
-import internal.utils.DataTest;
+import internal.utils.DataGen;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.bytes.BytesBuilder;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CommunicateTest implements DataTest {
+public class CommunicateTest implements DataGen {
 
     @Test
     public void testChannel() throws Exception {

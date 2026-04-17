@@ -1,12 +1,12 @@
 package tests.core.third;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.third.ThirdKit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ThirdTest implements PrintTest {
+public class ThirdTest implements TestPrint {
 
     @Test
     public void testThirdClassName() throws Exception {

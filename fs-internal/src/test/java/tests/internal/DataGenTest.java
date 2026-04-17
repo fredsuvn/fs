@@ -1,7 +1,7 @@
 package tests.internal;
 
-import internal.utils.DataTest;
-import internal.utils.PrintTest;
+import internal.utils.DataGen;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -9,7 +9,7 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DataTestTest implements DataTest, PrintTest {
+public class DataGenTest implements DataGen, TestPrint {
 
     @Test
     public void testRandom() throws Exception {

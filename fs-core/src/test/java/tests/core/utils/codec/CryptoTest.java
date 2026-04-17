@@ -1,6 +1,6 @@
 package tests.core.utils.codec;
 
-import internal.utils.DataTest;
+import internal.utils.DataGen;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.io.ByteProcessor;
 import space.sunqian.fs.utils.codec.CryptoKit;
@@ -15,7 +15,7 @@ import java.security.KeyPairGenerator;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class CryptoTest implements DataTest {
+public class CryptoTest implements DataGen {
 
     @Test
     public void testCipher() throws Exception {

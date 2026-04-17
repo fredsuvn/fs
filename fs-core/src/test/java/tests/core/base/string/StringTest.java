@@ -1,7 +1,7 @@
 package tests.core.base.string;
 
-import internal.utils.DataTest;
-import internal.utils.PrintTest;
+import internal.utils.DataGen;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.exception.UnknownArrayTypeException;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class StringTest implements DataTest, PrintTest {
+public class StringTest implements DataGen, TestPrint {
 
     @Test
     public void testIndexOf() {

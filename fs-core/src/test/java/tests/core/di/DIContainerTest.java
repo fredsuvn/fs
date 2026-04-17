@@ -1,7 +1,7 @@
 package tests.core.di;
 
 import internal.utils.FsTestException;
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DIContainerTest implements PrintTest {
+public class DIContainerTest implements TestPrint {
 
     private static final List<String> postList = new ArrayList<>();
     private static final List<String> preList = new ArrayList<>();

@@ -1,7 +1,7 @@
 package internal.benchmark;
 
 import internal.api.TcpServerApi;
-import internal.utils.DataTest;
+import internal.utils.DataGen;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Fork(5)
-public class TcpServerJmh implements DataTest {
+public class TcpServerJmh implements DataGen {
 
     private final byte[] message = randomBytes(16);
     @Param({

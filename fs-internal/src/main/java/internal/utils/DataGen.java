@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  * @author sunqian
  */
-public interface DataTest {
+public interface DataGen {
 
     /**
      * Returns a new random bytes array of the specified length.

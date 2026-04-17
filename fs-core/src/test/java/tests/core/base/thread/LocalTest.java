@@ -1,6 +1,6 @@
 package tests.core.base.thread;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.thread.LocalKit;
 import space.sunqian.fs.collect.MapKit;
@@ -8,7 +8,7 @@ import space.sunqian.fs.collect.MapKit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class LocalTest implements PrintTest {
+public class LocalTest implements TestPrint {
 
     @Test
     public void testLocal() {

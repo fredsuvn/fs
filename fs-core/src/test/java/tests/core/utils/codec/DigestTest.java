@@ -1,6 +1,6 @@
 package tests.core.utils.codec;
 
-import internal.utils.DataTest;
+import internal.utils.DataGen;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.io.ByteProcessor;
 import space.sunqian.fs.utils.codec.DigestKit;
@@ -9,7 +9,7 @@ import java.security.MessageDigest;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class DigestTest implements DataTest {
+public class DigestTest implements DataGen {
 
     @Test
     public void testDigest() throws Exception {

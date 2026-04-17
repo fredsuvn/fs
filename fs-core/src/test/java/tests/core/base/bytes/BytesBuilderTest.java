@@ -1,7 +1,7 @@
 package tests.core.base.bytes;
 
-import internal.utils.AssertTest;
-import internal.utils.DataTest;
+import internal.utils.Asserter;
+import internal.utils.DataGen;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.bytes.BytesBuilder;
 import space.sunqian.fs.base.bytes.BytesKit;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class BytesBuilderTest implements DataTest, AssertTest {
+public class BytesBuilderTest implements DataGen, Asserter {
 
     private static int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 

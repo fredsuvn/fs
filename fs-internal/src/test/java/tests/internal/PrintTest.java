@@ -1,6 +1,6 @@
 package tests.internal;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -8,7 +8,7 @@ import java.io.PrintStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PrintTestTest implements PrintTest {
+public class PrintTest implements TestPrint {
 
     @Test
     public void testPrinter() throws Exception {

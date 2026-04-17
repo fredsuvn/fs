@@ -1,7 +1,7 @@
 package tests.core.cache;
 
-import internal.utils.DataTest;
-import internal.utils.PrintTest;
+import internal.utils.DataGen;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class CacheTest implements PrintTest, DataTest {
+public class CacheTest implements TestPrint, DataGen {
 
     private final char[] chars = randomChars(8 * 1024, 'a', 'z');
 

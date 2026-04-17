@@ -1,6 +1,6 @@
 package tests.core.base.date;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.date.DateException;
 import space.sunqian.fs.base.date.DateFormatter;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DateTest implements PrintTest {
+public class DateTest implements TestPrint {
 
     @Test
     public void testTime() {

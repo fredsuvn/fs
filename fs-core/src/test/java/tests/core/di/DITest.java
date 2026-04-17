@@ -1,6 +1,6 @@
 package tests.core.di;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.di.DIException;
@@ -12,7 +12,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DITest implements PrintTest {
+public class DITest implements TestPrint {
 
     @Test
     public void testDependent() throws Exception {

@@ -1,6 +1,6 @@
 package tests.core.base.system;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.system.SystemKeys;
 import space.sunqian.fs.base.system.SystemKit;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SystemTest implements PrintTest {
+public class SystemTest implements TestPrint {
 
     @Test
     public void testSystemProperties() throws Exception {

@@ -1,7 +1,7 @@
 package tests.core.net;
 
-import internal.utils.DataTest;
-import internal.utils.PrintTest;
+import internal.utils.DataGen;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TcpTest implements DataTest, PrintTest {
+public class TcpTest implements DataGen, TestPrint {
 
     @Test
     public void testTcp() throws Exception {

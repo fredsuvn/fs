@@ -19,6 +19,9 @@ import java.util.function.IntFunction;
  */
 public class Mocker {
 
+    private Mocker() {
+    }
+
     /**
      * Mocks a class, including private types.
      *
@@ -90,8 +93,5 @@ public class Mocker {
             return null;
         }
         return Mockito.mock(clazz);
-    }
-
-    private Mocker() {
     }
 }

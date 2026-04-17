@@ -1,14 +1,14 @@
 package tests.benchmarks;
 
 import internal.api.TcpServerApi;
-import internal.utils.DataTest;
+import internal.utils.DataGen;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.net.tcp.TcpClient;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class TcpServerTest implements DataTest {
+public class TcpServerTest implements DataGen {
 
     @Test
     public void testTcpServerWithDifferentImplementations() throws Exception {

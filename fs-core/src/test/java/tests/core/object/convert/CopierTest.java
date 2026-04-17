@@ -1,7 +1,7 @@
 package tests.core.object.convert;
 
 import internal.utils.ErrorMap;
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CopierTest implements PrintTest {
+public class CopierTest implements TestPrint {
 
     @Test
     public void testCopyProperties() {

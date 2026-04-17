@@ -1,6 +1,6 @@
 package tests.core.io;
 
-import internal.utils.DataTest;
+import internal.utils.DataGen;
 import internal.utils.ErrorAppender;
 import internal.utils.ReadOps;
 import internal.utils.TestReader;
@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CharReaderTest implements DataTest {
+public class CharReaderTest implements DataGen {
 
     private static final int DST_SIZE = 256;
 

@@ -1,6 +1,6 @@
 package tests.core.object.schema;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class SchemaTest implements PrintTest {
+public class SchemaTest implements TestPrint {
 
     @Test
     public void testObjectSchema() throws Exception {

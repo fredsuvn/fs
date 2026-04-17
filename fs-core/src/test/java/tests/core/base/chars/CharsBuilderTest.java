@@ -1,7 +1,7 @@
 package tests.core.base.chars;
 
-import internal.utils.AssertTest;
-import internal.utils.DataTest;
+import internal.utils.Asserter;
+import internal.utils.DataGen;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.chars.CharsBuilder;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class CharsBuilderTest implements DataTest, AssertTest {
+public class CharsBuilderTest implements DataGen, Asserter {
 
     private static int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 

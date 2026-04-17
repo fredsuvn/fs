@@ -1,6 +1,6 @@
 package tests.internal;
 
-import internal.utils.AssertTest;
+import internal.utils.Asserter;
 import internal.utils.FsTestException;
 import internal.utils.Materials;
 import internal.utils.TestIOException;
@@ -26,14 +26,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class AssertTestTest implements AssertTest {
+public class AsserterTest implements Asserter {
 
     @Test
     public void testThrows() throws Exception {
         Method throwError = Tt.class.getDeclaredMethod("throwError");
         assertEquals(FsTestException.class, invokeThrows(FsTestException.class, throwError, null).getClass());
         Method string = Tt.class.getDeclaredMethod("string");
-        assertEquals(AssertTest.NoThrows.class, invokeThrows(AssertTest.NoThrows.class, string, null).getClass());
+        assertEquals(Asserter.NoThrows.class, invokeThrows(Asserter.NoThrows.class, string, null).getClass());
     }
 
     @Test

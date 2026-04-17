@@ -1,6 +1,6 @@
 package tests.core.net;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class NetTest implements PrintTest {
+public class NetTest implements TestPrint {
 
     @Test
     public void testBroadcastAddress() throws Exception {

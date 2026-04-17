@@ -1,7 +1,7 @@
 package tests.core.io;
 
-import internal.utils.AssertTest;
-import internal.utils.DataTest;
+import internal.utils.Asserter;
+import internal.utils.DataGen;
 import internal.utils.ErrorOutputStream;
 import internal.utils.ReadOps;
 import internal.utils.TestReader;
@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CharProcessorTest implements DataTest, AssertTest {
+public class CharProcessorTest implements DataGen, Asserter {
 
     @Test
     public void testProcess() throws Exception {

@@ -1,12 +1,12 @@
 package tests.core.third.asm;
 
-import internal.utils.PrintTest;
+import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.third.asm.AsmKit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AsmTest implements PrintTest {
+public class AsmTest implements TestPrint {
 
     @Test
     public void testGeneratedClassName() {

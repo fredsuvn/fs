@@ -1,6 +1,6 @@
 package tests.core.io;
 
-import internal.utils.DataTest;
+import internal.utils.DataGen;
 import internal.utils.ErrorOutputStream;
 import internal.utils.ReadOps;
 import internal.utils.TestInputStream;
@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ByteReaderTest implements DataTest {
+public class ByteReaderTest implements DataGen {
 
     private static final int DST_SIZE = 256;
 

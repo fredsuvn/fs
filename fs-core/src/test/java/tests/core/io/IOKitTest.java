@@ -1,6 +1,6 @@
 package tests.core.io;
 
-import internal.utils.DataTest;
+import internal.utils.DataGen;
 import internal.utils.ErrorAppender;
 import internal.utils.ErrorOutputStream;
 import internal.utils.ReadOps;
@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class IOKitTest implements DataTest {
+public class IOKitTest implements DataGen {
 
     @Test
     public void testReader() throws Exception {

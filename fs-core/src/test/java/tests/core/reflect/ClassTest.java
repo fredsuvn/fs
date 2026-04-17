@@ -1,7 +1,7 @@
 package tests.core.reflect;
 
 import internal.annotations.J17Also;
-import internal.utils.AssertTest;
+import internal.utils.Asserter;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnknownPrimitiveTypeException;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ClassTest implements AssertTest {
+public class ClassTest implements Asserter {
 
     @Test
     public void testMember() throws Exception {
