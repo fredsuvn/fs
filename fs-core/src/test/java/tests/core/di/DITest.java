@@ -2,7 +2,6 @@ package tests.core.di;
 
 import internal.utils.TestPrint;
 import org.junit.jupiter.api.Test;
-import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.di.DIException;
 import space.sunqian.fs.di.DIKit;
 
@@ -15,25 +14,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class DITest implements TestPrint {
 
     @Test
-    public void testDependent() throws Exception {
-        testCycleDependency1();
-        testCycleDependency2();
-        testNoCycleDependency();
-    }
-
-    private void testCycleDependency1() {
+    public void testCycleDependency1() {
         // 1 -> 2 -> 3 -> 4 -> 1
-        Dep dep1 = new Dep();
-        Dep dep2 = new Dep();
-        Dep dep3 = new Dep();
-        Dep dep4 = new Dep();
+        Dep dep1 = createDep();
+        Dep dep2 = createDep();
+        Dep dep3 = createDep();
+        Dep dep4 = createDep();
         dep1.dependencies.add(dep2);
         dep2.dependencies.add(dep3);
         dep3.dependencies.add(dep4);
         dep4.dependencies.add(dep1);
-        assertThrows(DIException.class, () -> DIKit.checkCycleDependencies(dep1, Dep::dependencies));
+        assertThrows(DIException.class, () -> DIKit.checkCycleDependencies(dep1, Dep::getDependencies));
         try {
-            DIKit.checkCycleDependencies(dep1, Dep::dependencies);
+            DIKit.checkCycleDependencies(dep1, Dep::getDependencies);
         } catch (DIException e) {
             assertEquals("Cycle dependency: "
                     + dep1 + " -> "
@@ -45,20 +38,21 @@ public class DITest implements TestPrint {
         }
     }
 
-    private void testCycleDependency2() {
+    @Test
+    public void testCycleDependency2() {
         // 1 -> 2 -> 2, 3, 4 -> 1
-        Dep dep1 = new Dep();
-        Dep dep2 = new Dep();
-        Dep dep3 = new Dep();
-        Dep dep4 = new Dep();
+        Dep dep1 = createDep();
+        Dep dep2 = createDep();
+        Dep dep3 = createDep();
+        Dep dep4 = createDep();
         dep1.dependencies.add(dep2);
         dep2.dependencies.add(dep2);
         dep2.dependencies.add(dep3);
         dep2.dependencies.add(dep4);
         dep2.dependencies.add(dep1);
-        assertThrows(DIException.class, () -> DIKit.checkCycleDependencies(dep1, Dep::dependencies));
+        assertThrows(DIException.class, () -> DIKit.checkCycleDependencies(dep1, Dep::getDependencies));
         try {
-            DIKit.checkCycleDependencies(dep1, Dep::dependencies);
+            DIKit.checkCycleDependencies(dep1, Dep::getDependencies);
         } catch (DIException e) {
             assertEquals("Cycle dependency: "
                     + dep1 + " -> "
@@ -68,24 +62,29 @@ public class DITest implements TestPrint {
         }
     }
 
-    private void testNoCycleDependency() {
+    @Test
+    public void testNoCycleDependency() {
         // 1 -> 2 -> 3 -> 4
-        Dep dep1 = new Dep();
-        Dep dep2 = new Dep();
-        Dep dep3 = new Dep();
-        Dep dep4 = new Dep();
+        Dep dep1 = createDep();
+        Dep dep2 = createDep();
+        Dep dep3 = createDep();
+        Dep dep4 = createDep();
         dep1.dependencies.add(dep2);
         dep2.dependencies.add(dep3);
         dep2.dependencies.add(dep4);
-        DIKit.checkCycleDependencies(dep1, Dep::dependencies);
-        DIKit.checkCycleDependencies(dep4, Dep::dependencies);
+        DIKit.checkCycleDependencies(dep1, Dep::getDependencies);
+        DIKit.checkCycleDependencies(dep4, Dep::getDependencies);
+    }
+
+    private Dep createDep() {
+        return new Dep();
     }
 
     private static class Dep {
 
         List<Dep> dependencies = new ArrayList<>();
 
-        public @Nonnull List<Dep> dependencies() {
+        public List<Dep> getDependencies() {
             return dependencies;
         }
     }
