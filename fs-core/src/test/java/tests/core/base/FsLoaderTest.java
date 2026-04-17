@@ -20,40 +20,48 @@ public class FsLoaderTest {
     public void testLoadImplByJvm() {
         int jvmVersion = JvmKit.javaMajorVersion();
         if (jvmVersion <= 8) {
-            {
-                XService service8 = FsLoader.loadImplByJvm(XService.class, 8);
-                assertEquals("XService.J8", service8.doSomething());
-                XService service9 = FsLoader.loadImplByJvm(XService.class, 9);
-                assertEquals("XService.J8", service9.doSomething());
-                XService service17 = FsLoader.loadImplByJvm(XService.class, 17);
-                assertEquals("XService.J8", service17.doSomething());
-            }
-            {
-                YService service8 = FsLoader.loadImplByJvm(YService.class, 8);
-                assertEquals("YService.J8", service8.doSomething());
-                YService service9 = FsLoader.loadImplByJvm(YService.class, 9);
-                assertEquals("YService.J8", service9.doSomething());
-                YService service17 = FsLoader.loadImplByJvm(YService.class, 17);
-                assertEquals("YService.J8", service17.doSomething());
-            }
+            testLoadImplByJvmForJ8();
         } else {
-            {
-                XService service8 = FsLoader.loadImplByJvm(XService.class, 8);
-                assertEquals("XService.J8", service8.doSomething());
-                YService service9 = FsLoader.loadImplByJvm(YService.class, 9);
-                assertEquals("YService.J8", service9.doSomething());
-                XService service17 = FsLoader.loadImplByJvm(XService.class, 17);
-                assertEquals("XService.J17", service17.doSomething());
-            }
-            {
-                YService service8 = FsLoader.loadImplByJvm(YService.class, 8);
-                assertEquals("YService.J8", service8.doSomething());
-                YService service9 = FsLoader.loadImplByJvm(YService.class, 9);
-                assertEquals("YService.J8", service9.doSomething());
-                YService service17 = FsLoader.loadImplByJvm(YService.class, 17);
-                assertEquals("YService.J8", service17.doSomething());
-            }
+            testLoadImplByJvmForJ9Plus();
         }
+        testLoadImplByJvmWithUnknownService();
+    }
+
+    private void testLoadImplByJvmForJ8() {
+        // Test XService for J8
+        XService service8 = FsLoader.loadImplByJvm(XService.class, 8);
+        assertEquals("XService.J8", service8.doSomething());
+        XService service9 = FsLoader.loadImplByJvm(XService.class, 9);
+        assertEquals("XService.J8", service9.doSomething());
+        XService service17 = FsLoader.loadImplByJvm(XService.class, 17);
+        assertEquals("XService.J8", service17.doSomething());
+
+        // Test YService for J8
+        YService yService8 = FsLoader.loadImplByJvm(YService.class, 8);
+        assertEquals("YService.J8", yService8.doSomething());
+        YService yService9 = FsLoader.loadImplByJvm(YService.class, 9);
+        assertEquals("YService.J8", yService9.doSomething());
+        YService yService17 = FsLoader.loadImplByJvm(YService.class, 17);
+        assertEquals("YService.J8", yService17.doSomething());
+    }
+
+    private void testLoadImplByJvmForJ9Plus() {
+        // Test XService for J9+
+        XService service8 = FsLoader.loadImplByJvm(XService.class, 8);
+        assertEquals("XService.J8", service8.doSomething());
+        XService service17 = FsLoader.loadImplByJvm(XService.class, 17);
+        assertEquals("XService.J17", service17.doSomething());
+
+        // Test YService for J9+
+        YService yService8 = FsLoader.loadImplByJvm(YService.class, 8);
+        assertEquals("YService.J8", yService8.doSomething());
+        YService yService9 = FsLoader.loadImplByJvm(YService.class, 9);
+        assertEquals("YService.J8", yService9.doSomething());
+        YService yService17 = FsLoader.loadImplByJvm(YService.class, 17);
+        assertEquals("YService.J8", yService17.doSomething());
+    }
+
+    private void testLoadImplByJvmWithUnknownService() {
         assertThrows(UnknownTypeException.class, () -> FsLoader.loadImplByJvm(XXService.class, 8));
     }
 
@@ -101,20 +109,40 @@ public class FsLoaderTest {
 
     @Test
     public void testLoadClassByDependent() {
+        testLoadClassByDependentWithExistingClass();
+        testLoadClassByDependentWithNonExistingClass();
+    }
+
+    private void testLoadClassByDependentWithExistingClass() {
         assertEquals(
             String.class,
             FsLoader.loadClassByDependent("java.lang.String", "java.lang.String")
         );
+    }
+
+    private void testLoadClassByDependentWithNonExistingClass() {
         assertNull(FsLoader.loadClassByDependent("java.lang.String", "666"));
     }
 
     @Test
     public void testLoadInstanceByDependent() {
+        testLoadInstanceByDependentWithExistingClass();
+        testLoadInstanceByDependentWithNonExistingClass();
+        testLoadInstanceByDependentWithRecordSchemaHandler();
+    }
+
+    private void testLoadInstanceByDependentWithExistingClass() {
         assertEquals(
             String.class,
             FsLoader.supplyByDependent(() -> String.class, "java.lang.String")
         );
+    }
+
+    private void testLoadInstanceByDependentWithNonExistingClass() {
         assertNull(FsLoader.supplyByDependent(() -> "java.lang.String", "666"));
+    }
+
+    private void testLoadInstanceByDependentWithRecordSchemaHandler() {
         assertNull(FsLoader.supplyByDependent(
             RecordSchemaHandler::getInstance,
             RecordSchemaHandler.class.getName() + "ImplByJ16"

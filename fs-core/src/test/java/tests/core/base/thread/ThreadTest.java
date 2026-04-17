@@ -11,17 +11,21 @@ public class ThreadTest {
 
     @Test
     public void testSleep() throws Exception {
-        {
-            long t1 = System.currentTimeMillis();
-            ThreadKit.sleep(10);
-            long t2 = System.currentTimeMillis();
-            assertTrue(t2 - t1 >= 10);
-        }
-        {
-            long t1 = System.currentTimeMillis();
-            ThreadKit.sleep(Duration.ofMillis(10));
-            long t2 = System.currentTimeMillis();
-            assertTrue(t2 - t1 >= 10);
-        }
+        testSleepWithMillis();
+        testSleepWithDuration();
+    }
+
+    private void testSleepWithMillis() throws Exception {
+        long t1 = System.currentTimeMillis();
+        ThreadKit.sleep(10);
+        long t2 = System.currentTimeMillis();
+        assertTrue(t2 - t1 >= 10);
+    }
+
+    private void testSleepWithDuration() throws Exception {
+        long t1 = System.currentTimeMillis();
+        ThreadKit.sleep(Duration.ofMillis(10));
+        long t2 = System.currentTimeMillis();
+        assertTrue(t2 - t1 >= 10);
     }
 }

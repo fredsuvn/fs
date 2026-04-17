@@ -17,31 +17,36 @@ public class RogTest implements Asserter, TestPrint {
 
     @Test
     public void testObjectSupplier() throws Exception {
+        // Test with different sizes
         testObjectSupplier(10);
         testObjectSupplier(100);
         testObjectSupplier(1000);
         testObjectSupplier(10000);
 
-        {
-            // always
-            Rog<CharSequence> rog = Rog.newBuilder()
-                .rng(() -> 5)
-                .weight(10, "a")
-                .weight(10, "b")
-                .build();
-            for (int i = 0; i < 100; i++) {
-                assertEquals("a", rog.next());
-            }
-        }
+        // Test always returning the same value
+        testAlwaysReturnSameValue();
 
-        {
-            // exception
-            Rog<CharSequence> rog = Rog.newBuilder()
-                .weight(10, "a")
-                .build();
-            Method getNode = rog.getClass().getDeclaredMethod("getWeight", long.class);
-            invokeThrows(UnreachablePointException.class, getNode, rog, -1L);
+        // Test exception case
+        testExceptionCase();
+    }
+
+    private void testAlwaysReturnSameValue() {
+        Rog<CharSequence> rog = Rog.newBuilder()
+            .rng(() -> 5)
+            .weight(10, "a")
+            .weight(10, "b")
+            .build();
+        for (int i = 0; i < 100; i++) {
+            assertEquals("a", rog.next());
         }
+    }
+
+    private void testExceptionCase() throws Exception {
+        Rog<CharSequence> rog = Rog.newBuilder()
+            .weight(10, "a")
+            .build();
+        Method getNode = rog.getClass().getDeclaredMethod("getWeight", long.class);
+        invokeThrows(UnreachablePointException.class, getNode, rog, -1L);
     }
 
     private void testObjectSupplier(int size) {
@@ -51,9 +56,13 @@ public class RogTest implements Asserter, TestPrint {
             .weight(30, () -> "b")
             .weight(60, "c")
             .build();
+
+        // Generate random values
         for (int i = 0; i < size; i++) {
             list.add(rog.next());
         }
+
+        // Count occurrences
         int ac = 0;
         int bc = 0;
         int cc = 0;
@@ -69,10 +78,14 @@ public class RogTest implements Asserter, TestPrint {
                 x++;
             }
         }
+
+        // Verify no unexpected values
         assertEquals(0, x);
+
+        // Show probability distribution
         showProbability(size, ac, bc, cc);
 
-        // exception:
+        // Test exception case for negative weight
         assertThrows(IllegalArgumentException.class, () -> Rog.newBuilder().weight(-1, "a"));
     }
 

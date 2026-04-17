@@ -28,131 +28,107 @@ public class ExceptionTest {
 
     @Test
     public void testThrowKit() {
-        {
-            // print stack trace
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            Exception e = new Exception();
-            String traceInfo = ThrowKit.toString(e);
-            e.printStackTrace(pw);
-            assertEquals(sw.toString(), traceInfo);
-        }
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        Exception e = new Exception();
+        String traceInfo = ThrowKit.toString(e);
+        e.printStackTrace(pw);
+        assertEquals(sw.toString(), traceInfo);
     }
 
     @Test
-    public void testExceptionConstructors() {
-
-        String message = "hello";
-        Throwable cause = new RuntimeException(message);
-        {
-            // FsException
-            assertThrows(FsException.class, () -> {
-                throw new FsException();
-            });
-            assertThrows(FsException.class, () -> {
-                throw new FsException("");
-            });
-            assertThrows(FsException.class, () -> {
-                throw new FsException("", new RuntimeException());
-            });
-            assertThrows(FsException.class, () -> {
-                throw new FsException(new RuntimeException());
-            });
-        }
-        {
-            // FsRuntimeException
-            assertThrows(FsRuntimeException.class, () -> {
-                throw new FsRuntimeException();
-            });
-            assertThrows(FsRuntimeException.class, () -> {
-                throw new FsRuntimeException("");
-            });
-            assertThrows(FsRuntimeException.class, () -> {
-                throw new FsRuntimeException("", new RuntimeException());
-            });
-            assertThrows(FsRuntimeException.class, () -> {
-                throw new FsRuntimeException(new RuntimeException());
-            });
-        }
-        {
-            // UnreachablePointException
-            assertThrows(UnreachablePointException.class, () -> {
-                throw new UnreachablePointException();
-            });
-            assertThrows(UnreachablePointException.class, () -> {
-                throw new UnreachablePointException("");
-            });
-            assertThrows(UnreachablePointException.class, () -> {
-                throw new UnreachablePointException("", new RuntimeException());
-            });
-            assertThrows(UnreachablePointException.class, () -> {
-                throw new UnreachablePointException(new RuntimeException());
-            });
-        }
-        {
-            // UnknownTypeException
-            assertThrows(UnknownTypeException.class, () -> {
-                throw new UnknownTypeException(Object.class);
-            });
-            assertThrows(UnknownTypeException.class, () -> {
-                throw new UnknownTypeException(Object.class, "keyword");
-            });
-            assertThrows(UnknownTypeException.class, () -> {
-                throw new UnknownTypeException("unknow.type");
-            });
-            // UnknownArrayTypeException
-            assertThrows(UnknownArrayTypeException.class, () -> {
-                throw new UnknownArrayTypeException(Object.class);
-            });
-            // UnknownPrimitiveTypeException
-            assertThrows(UnknownPrimitiveTypeException.class, () -> {
-                throw new UnknownPrimitiveTypeException(Object.class);
-            });
-        }
-        {
-            // AwaitingException
-            assertThrows(AwaitingException.class, () -> {
-                throw new AwaitingException();
-            });
-            assertThrows(AwaitingException.class, () -> {
-                throw new AwaitingException("");
-            });
-            assertThrows(AwaitingException.class, () -> {
-                throw new AwaitingException("", new RuntimeException());
-            });
-            assertTrue(new AwaitingException(new InterruptedException()).isCausedByInterruption());
-            assertFalse(new AwaitingException().isCausedByInterruption());
-        }
-        {
-            // WrappedException
-            assertSame(new WrappedException(cause).getCause(), cause);
-        }
-        {
-            // UnsupportedEnvException
-            assertThrows(UnsupportedEnvException.class, () -> {
-                throw new UnsupportedEnvException();
-            });
-            assertThrows(UnsupportedEnvException.class, () -> {
-                throw new UnsupportedEnvException("");
-            });
-            assertThrows(UnsupportedEnvException.class, () -> {
-                throw new UnsupportedEnvException("", new RuntimeException());
-            });
-            assertThrows(UnsupportedEnvException.class, () -> {
-                throw new UnsupportedEnvException(new RuntimeException());
-            });
-        }
+    public void testFsExceptionConstructors() {
+        // Test FsException constructors
+        assertThrows(FsException.class, () -> {throw new FsException();});
+        assertThrows(FsException.class, () -> {throw new FsException("");});
+        assertThrows(FsException.class, () -> {throw new FsException("", new RuntimeException());});
+        assertThrows(FsException.class, () -> {throw new FsException(new RuntimeException());});
     }
 
     @Test
-    public void testAwaitingException() {
-        assertTrue(new AwaitingException(new TimeoutException()).isCausedByTimeout());
-        assertFalse(new AwaitingException().isCausedByTimeout());
-        assertTrue(new AwaitingException(new CancellationException()).isCausedByCancellation());
-        assertFalse(new AwaitingException().isCausedByCancellation());
-        assertTrue(new AwaitingException(new ExecutionException(new RuntimeException())).isCausedByExecution());
-        assertFalse(new AwaitingException().isCausedByExecution());
+    public void testFsRuntimeExceptionConstructors() {
+        // Test FsRuntimeException constructors
+        assertThrows(FsRuntimeException.class, () -> {throw new FsRuntimeException();});
+        assertThrows(FsRuntimeException.class, () -> {throw new FsRuntimeException("");});
+        assertThrows(FsRuntimeException.class, () -> {throw new FsRuntimeException("", new RuntimeException());});
+        assertThrows(FsRuntimeException.class, () -> {throw new FsRuntimeException(new RuntimeException());});
+    }
+
+    @Test
+    public void testUnreachablePointExceptionConstructors() {
+        // Test UnreachablePointException constructors
+        assertThrows(UnreachablePointException.class, () -> {throw new UnreachablePointException();});
+        assertThrows(UnreachablePointException.class, () -> {throw new UnreachablePointException("");});
+        assertThrows(UnreachablePointException.class, () -> {
+            throw new UnreachablePointException("", new RuntimeException());
+        });
+        assertThrows(UnreachablePointException.class, () -> {
+            throw new UnreachablePointException(new RuntimeException());
+        });
+    }
+
+    @Test
+    public void testUnknownTypeExceptions() {
+        // Test UnknownTypeException constructors
+        assertThrows(UnknownTypeException.class, () -> {throw new UnknownTypeException(Object.class);});
+        assertThrows(UnknownTypeException.class, () -> {throw new UnknownTypeException(Object.class, "keyword");});
+        assertThrows(UnknownTypeException.class, () -> {throw new UnknownTypeException("unknow.type");});
+
+        // Test UnknownArrayTypeException
+        assertThrows(UnknownArrayTypeException.class, () -> {throw new UnknownArrayTypeException(Object.class);});
+
+        // Test UnknownPrimitiveTypeException
+        assertThrows(UnknownPrimitiveTypeException.class, () -> {
+            throw new UnknownPrimitiveTypeException(Object.class);
+        });
+    }
+
+    @Test
+    public void testAwaitingExceptionConstructors() {
+        // Test AwaitingException constructors
+        assertThrows(AwaitingException.class, () -> {throw new AwaitingException();});
+        assertThrows(AwaitingException.class, () -> {throw new AwaitingException("");});
+        assertThrows(AwaitingException.class, () -> {throw new AwaitingException("", new RuntimeException());});
+        assertThrows(AwaitingException.class, () -> {throw new AwaitingException(new RuntimeException());});
+
+        // Test isCausedByInterruption
         assertTrue(new AwaitingException(new InterruptedException()).isCausedByInterruption());
         assertFalse(new AwaitingException().isCausedByInterruption());
+    }
+
+    @Test
+    public void testAwaitingExceptionCauseMethods() {
+        // Test isCausedByTimeout
+        assertTrue(new AwaitingException(new TimeoutException()).isCausedByTimeout());
+        assertFalse(new AwaitingException().isCausedByTimeout());
+
+        // Test isCausedByCancellation
+        assertTrue(new AwaitingException(new CancellationException()).isCausedByCancellation());
+        assertFalse(new AwaitingException().isCausedByCancellation());
+
+        // Test isCausedByExecution
+        assertTrue(new AwaitingException(new ExecutionException(new RuntimeException())).isCausedByExecution());
+        assertFalse(new AwaitingException().isCausedByExecution());
+
+        // Test isCausedByInterruption
+        assertTrue(new AwaitingException(new InterruptedException()).isCausedByInterruption());
+        assertFalse(new AwaitingException().isCausedByInterruption());
+    }
+
+    @Test
+    public void testWrappedException() {
+        Throwable cause = new RuntimeException("hello");
+        assertSame(new WrappedException(cause).getCause(), cause);
+    }
+
+    @Test
+    public void testUnsupportedEnvExceptionConstructors() {
+        // Test UnsupportedEnvException constructors
+        assertThrows(UnsupportedEnvException.class, () -> {throw new UnsupportedEnvException();});
+        assertThrows(UnsupportedEnvException.class, () -> {throw new UnsupportedEnvException("");});
+        assertThrows(UnsupportedEnvException.class, () -> {
+            throw new UnsupportedEnvException("", new RuntimeException());
+        });
+        assertThrows(UnsupportedEnvException.class, () -> {throw new UnsupportedEnvException(new RuntimeException());});
     }
 }

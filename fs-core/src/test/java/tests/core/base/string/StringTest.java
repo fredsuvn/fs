@@ -165,44 +165,33 @@ public class StringTest implements DataGen, TestPrint {
     public void testCharsCopy() {
         testCharsCopy("12345");
         testCharsCopy(StringView.of("12345"));
-        // error
-        assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy("12345", 0, 6, new char[5], 0));
-        assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy("12345", 0, 5, new char[5], 1));
-        assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy("12345", 5, 0, new char[5], 0));
-        assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy("12345", 0, new char[1], 0, 5));
-        assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy("12345", 8, new char[5], 0, 5));
-        assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy("12345", 0, new char[5], 0, 6));
-        assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy("12345", 0, new char[5], 6, 0));
-        assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy("12345", 6, new char[5], 0, 0));
-        assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy("12345", 0, new char[5], 0, 6));
 
+        // Test error cases for String
+        testCharsCopyErrorCases("12345");
+
+        // Test error cases for StringView
+        testCharsCopyErrorCases(StringView.of("12345"));
+    }
+
+    private void testCharsCopyErrorCases(CharSequence chars) {
         assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy(StringView.of("12345"), 0, 6, new char[5], 0));
+            StringKit.charsCopy(chars, 0, 6, new char[5], 0));
         assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy(StringView.of("12345"), 0, 5, new char[5], 1));
+            StringKit.charsCopy(chars, 0, 5, new char[5], 1));
         assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy(StringView.of("12345"), 5, 0, new char[5], 0));
+            StringKit.charsCopy(chars, 5, 0, new char[5], 0));
         assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy(StringView.of("12345"), 0, new char[1], 0, 5));
+            StringKit.charsCopy(chars, 0, new char[1], 0, 5));
         assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy(StringView.of("12345"), 8, new char[5], 0, 5));
+            StringKit.charsCopy(chars, 8, new char[5], 0, 5));
         assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy(StringView.of("12345"), 0, new char[5], 0, 6));
+            StringKit.charsCopy(chars, 0, new char[5], 0, 6));
         assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy(StringView.of("12345"), 0, new char[5], 6, 0));
+            StringKit.charsCopy(chars, 0, new char[5], 6, 0));
         assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy(StringView.of("12345"), 6, new char[5], 0, 0));
+            StringKit.charsCopy(chars, 6, new char[5], 0, 0));
         assertThrows(IndexOutOfBoundsException.class, () ->
-            StringKit.charsCopy(StringView.of("12345"), 0, new char[5], 0, 6));
+            StringKit.charsCopy(chars, 0, new char[5], 0, 6));
     }
 
     private void testCharsCopy(CharSequence chars) {

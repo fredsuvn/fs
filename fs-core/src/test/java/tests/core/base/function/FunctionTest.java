@@ -11,22 +11,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FunctionTest {
 
     @Test
-    public void testCallable() throws Exception {
-        {
-            BooleanCallable call = () -> true;
-            assertEquals(call.callAsBoolean(), call.call());
-        }
-        {
-            IntCallable call = () -> 66;
-            assertEquals(call.callAsInt(), call.call());
-        }
-        {
-            LongCallable call = () -> 66;
-            assertEquals(call.callAsLong(), call.call());
-        }
-        {
-            DoubleCallable call = () -> 66;
-            assertEquals(call.callAsDouble(), call.call());
-        }
+    public void testBooleanCallable() throws Exception {
+        BooleanCallable call = () -> true;
+        assertEquals(call.callAsBoolean(), call.call());
+    }
+
+    @Test
+    public void testIntCallable() throws Exception {
+        IntCallable call = () -> 66;
+        assertEquals(call.callAsInt(), call.call());
+    }
+
+    @Test
+    public void testLongCallable() throws Exception {
+        LongCallable call = () -> 66;
+        assertEquals(call.callAsLong(), call.call());
+    }
+
+    @Test
+    public void testDoubleCallable() throws Exception {
+        DoubleCallable call = () -> 66;
+        assertEquals(call.callAsDouble(), call.call());
     }
 }

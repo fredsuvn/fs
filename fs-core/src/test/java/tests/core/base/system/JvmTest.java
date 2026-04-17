@@ -76,6 +76,15 @@ public class JvmTest implements Asserter, TestPrint {
 
     @Test
     public void testDescriptor() throws Exception {
+        testClassDescriptor();
+        testFieldDescriptor();
+        testMethodDescriptor();
+        testConstructorDescriptor();
+        testInnerClassDescriptor();
+        testDescriptorException();
+    }
+
+    private void testClassDescriptor() {
         // class:
         assertEquals(JvmKit.toDescriptor(boolean.class), asmDescriptor(boolean.class));
         assertEquals(JvmKit.toDescriptor(byte.class), asmDescriptor(byte.class));
@@ -95,66 +104,75 @@ public class JvmTest implements Asserter, TestPrint {
         assertEquals(JvmKit.toDescriptor(String[].class), asmDescriptor(String[].class));
         assertEquals(JvmKit.toDescriptor(String[][].class), asmDescriptor(String[][].class));
         assertEquals(JvmKit.toDescriptor(Integer.class), asmDescriptor(Integer.class));
-        {
-            // fields
-            SignatureParser signatureParser = signatureParser(DS.class);
-            for (int i = 1; i <= DS.fieldNum; i++) {
-                String fieldName = "f" + i;
-                Field field = DS.class.getDeclaredField(fieldName);
-                String testDesc = JvmKit.toDescriptor(field.getGenericType());
-                String asmDesc = signatureParser.fieldDescriptor(fieldName);
-                assertEquals(testDesc, asmDesc);
-            }
-            // method:
-            List<Method> methods = Fs.list(DS.class.getDeclaredMethods());
-            for (int i = 1; i <= DS.methodNum; i++) {
-                String methodName = "m" + i;
-                Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
-                String testDesc = JvmKit.toDescriptor(method);
-                String asmDesc = signatureParser.methodDescriptor(methodName);
-                assertEquals(testDesc, asmDesc);
-            }
-            // constructor:
-            assertTrue(signatureParser.hasConstructorDescriptor(
-                JvmKit.toDescriptor(DS.class.getDeclaredConstructor())
-            ));
-            assertTrue(signatureParser.hasConstructorDescriptor(
-                JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class))
-            ));
-            assertTrue(signatureParser.hasConstructorDescriptor(
-                JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class, List.class))
-            ));
-            assertTrue(signatureParser.hasConstructorDescriptor(
-                JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
-            ));
-            assertTrue(signatureParser.hasConstructorDescriptor(
-                JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
-            ));
-            assertTrue(signatureParser.hasConstructorDescriptor(
-                JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class))
-            ));
+    }
+
+    private void testFieldDescriptor() throws Exception {
+        // fields
+        SignatureParser signatureParser = signatureParser(DS.class);
+        for (int i = 1; i <= DS.fieldNum; i++) {
+            String fieldName = "f" + i;
+            Field field = DS.class.getDeclaredField(fieldName);
+            String testDesc = JvmKit.toDescriptor(field.getGenericType());
+            String asmDesc = signatureParser.fieldDescriptor(fieldName);
+            assertEquals(testDesc, asmDesc);
         }
-        {
-            // inner class
-            // fields
-            SignatureParser signatureParser = signatureParser(ODS.class);
-            for (int i = 1; i <= ODS.fieldNum; i++) {
-                String fieldName = "f" + i;
-                Field field = ODS.class.getDeclaredField(fieldName);
-                String testDesc = JvmKit.toDescriptor(field.getGenericType());
-                String asmDesc = signatureParser.fieldDescriptor(fieldName);
-                assertEquals(testDesc, asmDesc);
-            }
-            // method:
-            List<Method> methods = Fs.list(ODS.class.getDeclaredMethods());
-            for (int i = 1; i <= ODS.methodNum; i++) {
-                String methodName = "m" + i;
-                Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
-                String testDesc = JvmKit.toDescriptor(method);
-                String asmDesc = signatureParser.methodDescriptor(methodName);
-                assertEquals(testDesc, asmDesc);
-            }
+    }
+
+    private void testMethodDescriptor() throws Exception {
+        // method:
+        List<Method> methods = Fs.list(DS.class.getDeclaredMethods());
+        for (int i = 1; i <= DS.methodNum; i++) {
+            String methodName = "m" + i;
+            Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
+            String testDesc = JvmKit.toDescriptor(method);
+            String asmDesc = signatureParser(DS.class).methodDescriptor(methodName);
+            assertEquals(testDesc, asmDesc);
         }
+    }
+
+    private void testConstructorDescriptor() throws Exception {
+        // constructor:
+        SignatureParser signatureParser = signatureParser(DS.class);
+        assertTrue(signatureParser.hasConstructorDescriptor(
+            JvmKit.toDescriptor(DS.class.getDeclaredConstructor())
+        ));
+        assertTrue(signatureParser.hasConstructorDescriptor(
+            JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class))
+        ));
+        assertTrue(signatureParser.hasConstructorDescriptor(
+            JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class, List.class))
+        ));
+        assertTrue(signatureParser.hasConstructorDescriptor(
+            JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
+        ));
+        assertTrue(signatureParser.hasConstructorDescriptor(
+            JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class))
+        ));
+    }
+
+    private void testInnerClassDescriptor() throws Exception {
+        // inner class
+        // fields
+        SignatureParser signatureParser = signatureParser(ODS.class);
+        for (int i = 1; i <= ODS.fieldNum; i++) {
+            String fieldName = "f" + i;
+            Field field = ODS.class.getDeclaredField(fieldName);
+            String testDesc = JvmKit.toDescriptor(field.getGenericType());
+            String asmDesc = signatureParser.fieldDescriptor(fieldName);
+            assertEquals(testDesc, asmDesc);
+        }
+        // method:
+        List<Method> methods = Fs.list(ODS.class.getDeclaredMethods());
+        for (int i = 1; i <= ODS.methodNum; i++) {
+            String methodName = "m" + i;
+            Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
+            String testDesc = JvmKit.toDescriptor(method);
+            String asmDesc = signatureParser.methodDescriptor(methodName);
+            assertEquals(testDesc, asmDesc);
+        }
+    }
+
+    private void testDescriptorException() throws Exception {
         // exception
         assertThrows(JvmException.class, () -> JvmKit.toDescriptor(TypeKit.upperWildcard(String.class)));
         Method toPrimitiveDescriptor = JvmKit.class.getDeclaredMethod("toPrimitiveDescriptor", Class.class);
@@ -167,147 +185,171 @@ public class JvmTest implements Asserter, TestPrint {
 
     @Test
     public void testSignature() throws Exception {
-        {
-            abstract class A {
-            }
-            abstract class B extends Number {
-            }
-            abstract class C implements List {
-            }
-            abstract class D implements List<String> {
-            }
-            abstract class E extends Number implements List<String> {
-            }
-            abstract class F extends Number implements Map<String, String>, Serializable, RandomAccess {
-            }
-            SignatureParser a = signatureParser(A.class);
-            assertEquals(JvmKit.toSignature(A.class), a.classSignature());
-            SignatureParser b = signatureParser(B.class);
-            assertEquals(JvmKit.toSignature(B.class), b.classSignature());
-            SignatureParser c = signatureParser(C.class);
-            assertEquals(JvmKit.toSignature(C.class), c.classSignature());
-            SignatureParser d = signatureParser(D.class);
-            assertEquals(JvmKit.toSignature(D.class), d.classSignature());
-            SignatureParser e = signatureParser(E.class);
-            assertEquals(JvmKit.toSignature(E.class), e.classSignature());
-            SignatureParser f = signatureParser(F.class);
-            assertEquals(JvmKit.toSignature(F.class), f.classSignature());
+        testClassSignature();
+        testGenericClassSignature();
+        testComplexClassSignature();
+        testInterfaceSignature();
+        testFieldDescriptorSignature();
+        testMethodSignature();
+        testConstructorSignature();
+        testInnerClassSignature();
+        testSignatureException();
+    }
+
+    private void testClassSignature() throws Exception {
+        abstract class A {
         }
-        {
-            abstract class A<T> {
-            }
-            abstract class B<T extends String> {
-            }
-            abstract class C<T extends String & Serializable> {
-            }
-            abstract class D<T extends CharSequence & Serializable> {
-            }
-            abstract class E<T extends CharSequence & Serializable, U extends T> {
-            }
-            abstract class F<T extends CharSequence & Serializable & RandomAccess, U extends T, W> {
-            }
-            SignatureParser a = signatureParser(A.class);
-            assertEquals(JvmKit.toSignature(A.class), a.classSignature());
-            SignatureParser b = signatureParser(B.class);
-            assertEquals(JvmKit.toSignature(B.class), b.classSignature());
-            SignatureParser c = signatureParser(C.class);
-            assertEquals(JvmKit.toSignature(C.class), c.classSignature());
-            SignatureParser d = signatureParser(D.class);
-            assertEquals(JvmKit.toSignature(D.class), d.classSignature());
-            SignatureParser e = signatureParser(E.class);
-            assertEquals(JvmKit.toSignature(E.class), e.classSignature());
-            SignatureParser f = signatureParser(F.class);
-            assertEquals(JvmKit.toSignature(F.class), f.classSignature());
+        abstract class B extends Number {
         }
-        {
-            abstract class A<T extends CharSequence & Serializable & RandomAccess, U extends T, W>
-                extends Number implements Map<String, String>, Serializable, RandomAccess {
-            }
-            abstract class B<T> {
-            }
-            abstract class C extends B<String> {
-            }
-            SignatureParser a = signatureParser(A.class);
-            assertEquals(JvmKit.toSignature(A.class), a.classSignature());
-            SignatureParser c = signatureParser(C.class);
-            assertEquals(JvmKit.toSignature(C.class), c.classSignature());
+        abstract class C implements List {
         }
-        {
-            // for Inter
-            SignatureParser a = signatureParser(Inter.class);
-            assertEquals(JvmKit.toSignature(Inter.class), a.classSignature());
+        abstract class D implements List<String> {
         }
-        {
-            // for DS:
-            // fields
-            SignatureParser signatureParser = signatureParser(DS.class);
-            for (int i = 1; i <= DS.fieldNum; i++) {
-                String fieldName = "f" + i;
-                Field field = DS.class.getDeclaredField(fieldName);
-                String testSig = JvmKit.toSignature(field);
-                String asmSig = signatureParser.fieldSignature(fieldName);
-                assertEquals(testSig, asmSig);
-            }
-            // method:
-            List<Method> methods = Fs.list(DS.class.getDeclaredMethods());
-            for (int i = 1; i <= DS.methodNum; i++) {
-                String methodName = "m" + i;
-                Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
-                String testSig = JvmKit.toSignature(method);
-                String asmSig = signatureParser.methodSignature(methodName);
-                assertEquals(testSig, asmSig);
-            }
-            // constructor:
-            assertEquals(
-                JvmKit.toSignature(DS.class.getDeclaredConstructor()),
-                signatureParser.constructorSignature(JvmKit.toDescriptor(DS.class.getDeclaredConstructor()))
-            );
-            assertEquals(
-                JvmKit.toSignature(DS.class.getDeclaredConstructor(String.class)),
-                signatureParser.constructorSignature(
-                    JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class))
-                )
-            );
-            assertEquals(
-                JvmKit.toSignature(DS.class.getDeclaredConstructor(String.class, List.class)),
-                signatureParser.constructorSignature(
-                    JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class, List.class))
-                )
-            );
-            assertEquals(
-                JvmKit.toSignature(DS.class.getDeclaredConstructor(String.class, List.class, Map.class)),
-                signatureParser.constructorSignature(
-                    JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
-                )
-            );
-            assertEquals(
-                JvmKit.toSignature(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class)),
-                signatureParser.constructorSignature(
-                    JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class))
-                )
-            );
+        abstract class E extends Number implements List<String> {
         }
-        {
-            // inner class
-            // fields
-            SignatureParser signatureParser = signatureParser(ODS.class);
-            for (int i = 1; i <= ODS.fieldNum; i++) {
-                String fieldName = "f" + i;
-                Field field = ODS.class.getDeclaredField(fieldName);
-                String testSig = JvmKit.toSignature(field);
-                String asmSig = signatureParser.fieldSignature(fieldName);
-                assertEquals(testSig, asmSig);
-            }
-            // method:
-            List<Method> methods = Fs.list(ODS.class.getDeclaredMethods());
-            for (int i = 1; i <= ODS.methodNum; i++) {
-                String methodName = "m" + i;
-                Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
-                String testSig = JvmKit.toSignature(method);
-                String asmSig = signatureParser.methodSignature(methodName);
-                assertEquals(testSig, asmSig);
-            }
+        abstract class F extends Number implements Map<String, String>, Serializable, RandomAccess {
         }
+        SignatureParser a = signatureParser(A.class);
+        assertEquals(JvmKit.toSignature(A.class), a.classSignature());
+        SignatureParser b = signatureParser(B.class);
+        assertEquals(JvmKit.toSignature(B.class), b.classSignature());
+        SignatureParser c = signatureParser(C.class);
+        assertEquals(JvmKit.toSignature(C.class), c.classSignature());
+        SignatureParser d = signatureParser(D.class);
+        assertEquals(JvmKit.toSignature(D.class), d.classSignature());
+        SignatureParser e = signatureParser(E.class);
+        assertEquals(JvmKit.toSignature(E.class), e.classSignature());
+        SignatureParser f = signatureParser(F.class);
+        assertEquals(JvmKit.toSignature(F.class), f.classSignature());
+    }
+
+    private void testGenericClassSignature() throws Exception {
+        abstract class A<T> {
+        }
+        abstract class B<T extends String> {
+        }
+        abstract class C<T extends String & Serializable> {
+        }
+        abstract class D<T extends CharSequence & Serializable> {
+        }
+        abstract class E<T extends CharSequence & Serializable, U extends T> {
+        }
+        abstract class F<T extends CharSequence & Serializable & RandomAccess, U extends T, W> {
+        }
+        SignatureParser a = signatureParser(A.class);
+        assertEquals(JvmKit.toSignature(A.class), a.classSignature());
+        SignatureParser b = signatureParser(B.class);
+        assertEquals(JvmKit.toSignature(B.class), b.classSignature());
+        SignatureParser c = signatureParser(C.class);
+        assertEquals(JvmKit.toSignature(C.class), c.classSignature());
+        SignatureParser d = signatureParser(D.class);
+        assertEquals(JvmKit.toSignature(D.class), d.classSignature());
+        SignatureParser e = signatureParser(E.class);
+        assertEquals(JvmKit.toSignature(E.class), e.classSignature());
+        SignatureParser f = signatureParser(F.class);
+        assertEquals(JvmKit.toSignature(F.class), f.classSignature());
+    }
+
+    private void testComplexClassSignature() throws Exception {
+        abstract class A<T extends CharSequence & Serializable & RandomAccess, U extends T, W>
+            extends Number implements Map<String, String>, Serializable, RandomAccess {
+        }
+        abstract class B<T> {
+        }
+        abstract class C extends B<String> {
+        }
+        SignatureParser a = signatureParser(A.class);
+        assertEquals(JvmKit.toSignature(A.class), a.classSignature());
+        SignatureParser c = signatureParser(C.class);
+        assertEquals(JvmKit.toSignature(C.class), c.classSignature());
+    }
+
+    private void testInterfaceSignature() throws Exception {
+        // for Inter
+        SignatureParser a = signatureParser(Inter.class);
+        assertEquals(JvmKit.toSignature(Inter.class), a.classSignature());
+    }
+
+    private void testFieldDescriptorSignature() throws Exception {
+        // for DS: fields
+        SignatureParser signatureParser = signatureParser(DS.class);
+        for (int i = 1; i <= DS.fieldNum; i++) {
+            String fieldName = "f" + i;
+            Field field = DS.class.getDeclaredField(fieldName);
+            String testSig = JvmKit.toSignature(field);
+            String asmSig = signatureParser.fieldSignature(fieldName);
+            assertEquals(testSig, asmSig);
+        }
+    }
+
+    private void testMethodSignature() throws Exception {
+        // for DS: method
+        List<Method> methods = Fs.list(DS.class.getDeclaredMethods());
+        for (int i = 1; i <= DS.methodNum; i++) {
+            String methodName = "m" + i;
+            Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
+            String testSig = JvmKit.toSignature(method);
+            String asmSig = signatureParser(DS.class).methodSignature(methodName);
+            assertEquals(testSig, asmSig);
+        }
+    }
+
+    private void testConstructorSignature() throws Exception {
+        // for DS: constructor
+        SignatureParser signatureParser = signatureParser(DS.class);
+        assertEquals(
+            JvmKit.toSignature(DS.class.getDeclaredConstructor()),
+            signatureParser.constructorSignature(JvmKit.toDescriptor(DS.class.getDeclaredConstructor()))
+        );
+        assertEquals(
+            JvmKit.toSignature(DS.class.getDeclaredConstructor(String.class)),
+            signatureParser.constructorSignature(
+                JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class))
+            )
+        );
+        assertEquals(
+            JvmKit.toSignature(DS.class.getDeclaredConstructor(String.class, List.class)),
+            signatureParser.constructorSignature(
+                JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class, List.class))
+            )
+        );
+        assertEquals(
+            JvmKit.toSignature(DS.class.getDeclaredConstructor(String.class, List.class, Map.class)),
+            signatureParser.constructorSignature(
+                JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
+            )
+        );
+        assertEquals(
+            JvmKit.toSignature(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class)),
+            signatureParser.constructorSignature(
+                JvmKit.toDescriptor(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class))
+            )
+        );
+    }
+
+    private void testInnerClassSignature() throws Exception {
+        // inner class
+        // fields
+        SignatureParser signatureParser = signatureParser(ODS.class);
+        for (int i = 1; i <= ODS.fieldNum; i++) {
+            String fieldName = "f" + i;
+            Field field = ODS.class.getDeclaredField(fieldName);
+            String testSig = JvmKit.toSignature(field);
+            String asmSig = signatureParser.fieldSignature(fieldName);
+            assertEquals(testSig, asmSig);
+        }
+        // method:
+        List<Method> methods = Fs.list(ODS.class.getDeclaredMethods());
+        for (int i = 1; i <= ODS.methodNum; i++) {
+            String methodName = "m" + i;
+            Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
+            String testSig = JvmKit.toSignature(method);
+            String asmSig = signatureParser.methodSignature(methodName);
+            assertEquals(testSig, asmSig);
+        }
+    }
+
+    private void testSignatureException() {
         // exception
         assertThrows(JvmException.class, () -> JvmKit.toSignature(TypeKit.otherType()));
     }

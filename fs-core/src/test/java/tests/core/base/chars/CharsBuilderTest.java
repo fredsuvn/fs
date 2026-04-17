@@ -26,15 +26,23 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CharsBuilderTest implements DataGen, Asserter {
 
-    private static int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
     @Test
-    public void testCharsBuilder() throws Exception {
-        testCharsBuilder(512);
-        testCharsBuilder(1024);
+    public void testCharsBuilderInitialization() {
         assertThrows(IllegalArgumentException.class, () -> new CharsBuilder(-1));
         assertThrows(IllegalArgumentException.class, () -> new CharsBuilder(10, -2));
         assertThrows(IllegalArgumentException.class, () -> new CharsBuilder(10, 2));
+    }
+
+    @Test
+    public void testCharsBuilderAppendMethods() throws Exception {
+        testCharsBuilderAppendMethods(512);
+        testCharsBuilderAppendMethods(1024);
+    }
+
+    @Test
+    public void testCharsBuilderWriteToExceptions() {
         CharsBuilder cb = new CharsBuilder();
         cb.append(1);
         assertThrows(IORuntimeException.class, () -> cb.writeTo(new Writer() {
@@ -56,7 +64,10 @@ public class CharsBuilderTest implements DataGen, Asserter {
         }));
         CharBuffer bufEmpty = CharBuffer.allocate(0);
         assertThrows(IORuntimeException.class, () -> cb.writeTo(bufEmpty));
+    }
 
+    @Test
+    public void testCharsBuilderMemoryLimits() throws Exception {
         // test big memory!
         Method grow = CharsBuilder.class.getDeclaredMethod("grow", int.class);
         CharsBuilder cbs = new CharsBuilder(1, 1);
@@ -79,45 +90,81 @@ public class CharsBuilderTest implements DataGen, Asserter {
         assertEquals(MAX_ARRAY_SIZE, newCapacity.invoke(new CharsBuilder(), -1, 1));
     }
 
-    private void testCharsBuilder(int size) throws Exception {
+    private void testCharsBuilderAppendMethods(int size) throws Exception {
         char[] cs = randomChars(size, '0', '9');
         char[] bs = new String(cs).toCharArray();
-        CharsBuilder bb = new CharsBuilder();
-        bb.close();
-        bb.trim();
-        bb.append(bs[0]);
-        assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 1));
-        bb.append(Arrays.copyOfRange(bs, 1, 10));
-        assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 10));
-        bb.append(bs, 10, 10);
-        assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 20));
+        CharsBuilder cb = new CharsBuilder();
+
+        // Test basic append operations
+        testBasicAppendOperations(cb, bs, cs);
+
+        // Test reset and trim operations
+        testResetAndTrimOperations(cb, bs);
+
+        // Test writeTo operations
+        testWriteToOperations(cb);
+    }
+
+    private void testBasicAppendOperations(CharsBuilder cb, char[] bs, char[] cs) throws Exception {
+        cb.close();
+        cb.trim();
+
+        // Append single char
+        cb.append(bs[0]);
+        assertArrayEquals(cb.toCharArray(), Arrays.copyOf(bs, 1));
+
+        // Append char array range
+        cb.append(Arrays.copyOfRange(bs, 1, 10));
+        assertArrayEquals(cb.toCharArray(), Arrays.copyOf(bs, 10));
+
+        // Append char array with offset and length
+        cb.append(bs, 10, 10);
+        assertArrayEquals(cb.toCharArray(), Arrays.copyOf(bs, 20));
+
+        // Append CharBuffer
         CharBuffer buffer = CharBuffer.wrap(Arrays.copyOfRange(bs, 20, 25));
-        bb.append(buffer);
-        CharBuffer arrayBuf = CharBuffer.wrap(bs, 20, 10);
-        arrayBuf.get(new char[5]);
-        bb.append(arrayBuf);
-        assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 30));
+        cb.append(buffer);
         assertEquals(5, buffer.position());
         assertFalse(buffer.hasRemaining());
-        bb.append(IOKit.newReader(Arrays.copyOfRange(bs, 30, 40)));
-        assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 40));
-        CharsBuilder bb2 = new CharsBuilder();
-        bb2.append(Arrays.copyOfRange(bs, 40, 50));
-        bb.append(bb2);
-        assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 50));
-        bb.append(IOKit.newReader(Arrays.copyOfRange(bs, 50, 60)), 1);
-        assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 60));
+
+        // Append CharBuffer with position
+        CharBuffer arrayBuf = CharBuffer.wrap(bs, 20, 10);
+        arrayBuf.get(new char[5]);
+        cb.append(arrayBuf);
+        assertArrayEquals(cb.toCharArray(), Arrays.copyOf(bs, 30));
+
+        // Append Reader
+        cb.append(IOKit.newReader(Arrays.copyOfRange(bs, 30, 40)));
+        assertArrayEquals(cb.toCharArray(), Arrays.copyOf(bs, 40));
+
+        // Append another CharsBuilder
+        CharsBuilder cb2 = new CharsBuilder();
+        cb2.append(Arrays.copyOfRange(bs, 40, 50));
+        cb.append(cb2);
+        assertArrayEquals(cb.toCharArray(), Arrays.copyOf(bs, 50));
+
+        // Append Reader with length
+        cb.append(IOKit.newReader(Arrays.copyOfRange(bs, 50, 60)), 1);
+        assertArrayEquals(cb.toCharArray(), Arrays.copyOf(bs, 60));
+
+        // Append direct CharBuffer
         CharBuffer buffer2 = BufferKit.directCharBuffer(10);
         buffer2.put(CharBuffer.wrap(Arrays.copyOfRange(bs, 60, 70)));
         buffer2.flip();
-        bb.append(buffer2);
-        assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 70));
-        bb.append(BufferKit.directCharBuffer(0));
-        assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 70));
+        cb.append(buffer2);
+        assertArrayEquals(cb.toCharArray(), Arrays.copyOf(bs, 70));
         assertEquals(10, buffer2.position());
         assertFalse(buffer2.hasRemaining());
-        bb.append(CharsKit.emptyBuffer());
-        assertThrows(IORuntimeException.class, () -> bb.append(new Reader() {
+
+        // Append empty direct CharBuffer
+        cb.append(BufferKit.directCharBuffer(0));
+        assertArrayEquals(cb.toCharArray(), Arrays.copyOf(bs, 70));
+
+        // Append empty buffer
+        cb.append(CharsKit.emptyBuffer());
+
+        // Test exception cases
+        assertThrows(IORuntimeException.class, () -> cb.append(new Reader() {
 
             @Override
             public int read(char @Nonnull [] cbuf, int off, int len) throws IOException {
@@ -130,33 +177,49 @@ public class CharsBuilderTest implements DataGen, Asserter {
             }
         }));
         assertThrows(IllegalArgumentException.class, () ->
-            bb.append(new CharArrayReader(new char[0]), -1)
+            cb.append(new CharArrayReader(new char[0]), -1)
         );
-        assertEquals(70, bb.size());
-        assertEquals(bb.toCharBuffer(), CharBuffer.wrap(bs, 0, 70));
-        assertArrayEquals(Arrays.copyOf(cs, 70), bb.toString().toCharArray());
-        bb.reset();
-        bb.append(bs[0]);
-        bb.append(bs[1]);
-        assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 2));
-        bb.reset();
-        bb.append(bs[0]);
-        assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 1));
-        bb.reset();
-        bb.trim();
-        bb.append(bs[0]);
-        bb.append(bs[1]);
-        assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 2));
-        bb.trim();
-        bb.reset();
-        bb.trim();
-        bb.append(bs[0]);
-        assertArrayEquals(bb.toCharArray(), Arrays.copyOf(bs, 1));
+
+        // Test size and conversion methods
+        assertEquals(70, cb.size());
+        assertEquals(cb.toCharBuffer(), CharBuffer.wrap(bs, 0, 70));
+        assertArrayEquals(Arrays.copyOf(cs, 70), cb.toString().toCharArray());
+    }
+
+    private void testResetAndTrimOperations(CharsBuilder cb, char[] bs) {
+        // Test reset operation
+        cb.reset();
+        cb.append(bs[0]);
+        cb.append(bs[1]);
+        assertArrayEquals(cb.toCharArray(), Arrays.copyOf(bs, 2));
+
+        cb.reset();
+        cb.append(bs[0]);
+        assertArrayEquals(cb.toCharArray(), Arrays.copyOf(bs, 1));
+
+        // Test reset and trim combination
+        cb.reset();
+        cb.trim();
+        cb.append(bs[0]);
+        cb.append(bs[1]);
+        assertArrayEquals(cb.toCharArray(), Arrays.copyOf(bs, 2));
+
+        cb.trim();
+        cb.reset();
+        cb.trim();
+        cb.append(bs[0]);
+        assertArrayEquals(cb.toCharArray(), Arrays.copyOf(bs, 1));
+    }
+
+    private void testWriteToOperations(CharsBuilder cb) throws IOException {
+        // Test writeTo Writer
         CharArrayWriter out = new CharArrayWriter();
-        bb.writeTo(out);
-        assertArrayEquals(bb.toCharArray(), out.toCharArray());
+        cb.writeTo(out);
+        assertArrayEquals(cb.toCharArray(), out.toCharArray());
+
+        // Test writeTo CharBuffer
         CharBuffer bufOut = CharBuffer.allocate(1);
-        bb.writeTo(bufOut);
-        assertArrayEquals(bb.toCharArray(), bufOut.array());
+        cb.writeTo(bufOut);
+        assertArrayEquals(cb.toCharArray(), bufOut.array());
     }
 }
