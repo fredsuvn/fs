@@ -8,22 +8,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ProxyTest {
 
     @Test
-    public void testProxy() throws Exception {
-        testProxy("fs-asm");
-        testProxy("fs-jdk");
-        // testProxy("byte-buddy");
-        // testProxy("cglib");
-        testProxy("direct");
+    public void testProxyWithDifferentImplementations() throws Exception {
+        testProxyImplementation("fs-asm");
+        testProxyImplementation("fs-jdk");
+        // testProxyImplementation("byte-buddy");
+        // testProxyImplementation("cglib");
+        testProxyImplementation("direct");
     }
 
-    public void testProxy(String proxyType) throws Exception {
-        assertEquals(
-            "3hello[proxy]",
-            ProxyApi.createApi(proxyType).withPrimitive(1, 2, "hello")
-        );
-        assertEquals(
-            "12hello[proxy]",
-            ProxyApi.createApi(proxyType).withoutPrimitive(1, 2L, "hello")
-        );
+    private void testProxyImplementation(String proxyType) throws Exception {
+        ProxyApi api = ProxyApi.createApi(proxyType);
+
+        // Test with primitive parameters
+        assertEquals("3hello[proxy]", api.withPrimitive(1, 2, "hello"));
+
+        // Test with non-primitive parameters
+        assertEquals("12hello[proxy]", api.withoutPrimitive(1, 2L, "hello"));
     }
 }

@@ -12,12 +12,35 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JsonParseTest {
 
-    private final TestJsonData data;
-    private final String json;
+    private final TestJsonData testData;
+    private final String testJson;
 
     {
-        // object
+        testData = createTestData();
+        testJson = JsonKit.toJsonString(testData);
+
+        // Verify initial serialization/deserialization works
+        TestJsonData parsed = JsonKit.parse(testJson).toObject(TestJsonData.class);
+        assertEquals(testData, parsed);
+    }
+
+    @Test
+    public void testJsonParseWithDifferentImplementations() throws Exception {
+        testJsonParseImplementation("fs");
+        testJsonParseImplementation("jackson");
+        testJsonParseImplementation("fastjson");
+    }
+
+    private void testJsonParseImplementation(String parseType) throws Exception {
+        JsonParseApi parseApi = JsonParseApi.createApi(parseType);
+        Object parsed = parseApi.parse(testJson, TestJsonData.class);
+        assertEquals(testData, parsed);
+    }
+
+    private TestJsonData createTestData() {
         TestJsonData data = new TestJsonData();
+
+        // Set properties for test data
         data.setI1(1);
         data.setL1(2L);
         data.setStr1("hello");
@@ -45,23 +68,7 @@ public class JsonParseTest {
         data.setLa3(new long[]{1L, 2L});
         data.setBa3(new BigDecimal[]{new BigDecimal("1.0"), new BigDecimal("2.0")});
         data.setSa3(ListKit.list("a", "b"));
-        String json = JsonKit.toJsonString(data);
-        TestJsonData parsed = JsonKit.parse(json).toObject(TestJsonData.class);
-        assertEquals(data, parsed);
-        this.data = data;
-        this.json = json;
-    }
 
-    @Test
-    public void testParse() throws Exception {
-        testParse("fs");
-        testParse("jackson");
-        testParse("fastjson");
-    }
-
-    private void testParse(String parseType) throws Exception {
-        JsonParseApi parseApi = JsonParseApi.createApi(parseType);
-        Object parsed = parseApi.parse(json, TestJsonData.class);
-        assertEquals(data, parsed);
+        return data;
     }
 }

@@ -15,12 +15,38 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class JsonFormatTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
-    private final TestJsonData data1;
-    private final Map<String, Object> data2;
+    private final TestJsonData testObject;
+    private final Map<String, Object> testMap;
 
     {
-        // object
+        testObject = createTestObject();
+        testMap = createTestMap();
+    }
+
+    @Test
+    public void testJsonFormatWithDifferentImplementations() throws Exception {
+        testJsonFormatImplementation("fs");
+        testJsonFormatImplementation("jackson");
+        testJsonFormatImplementation("fastjson");
+    }
+
+    private void testJsonFormatImplementation(String formatType) throws Exception {
+        JsonFormatApi formatApi = JsonFormatApi.createApi(formatType);
+
+        // Test object serialization
+        String objectJson = formatApi.toJsonString(testObject);
+        TestJsonData parsedObject = mapper.readValue(objectJson, TestJsonData.class);
+        assertEquals(testObject, parsedObject);
+
+        // Test map serialization
+        String mapJson = formatApi.toJsonString(testMap);
+        assertEquals(mapper.writeValueAsString(testMap), mapJson);
+    }
+
+    private TestJsonData createTestObject() {
         TestJsonData data = new TestJsonData();
+
+        // Set properties for test object
         data.setI1(1);
         data.setL1(2L);
         data.setStr1("hello");
@@ -48,9 +74,14 @@ public class JsonFormatTest {
         data.setLa3(new long[]{1L, 2L});
         data.setBa3(new BigDecimal[]{new BigDecimal("1.0"), new BigDecimal("2.0")});
         data.setSa3(ListKit.list("a", "b"));
-        this.data1 = data;
-        // map
+
+        return data;
+    }
+
+    private Map<String, Object> createTestMap() {
         Map<String, Object> map = new LinkedHashMap<>();
+
+        // Set properties for test map
         map.put("i1", 1);
         map.put("l1", 2L);
         map.put("str1", "hello");
@@ -78,24 +109,7 @@ public class JsonFormatTest {
         map.put("la3", new long[]{1L, 2L});
         map.put("ba3", new BigDecimal[]{new BigDecimal("1.0"), new BigDecimal("2.0")});
         map.put("sa3", ListKit.list("a", "b"));
-        this.data2 = map;
-    }
 
-    @Test
-    public void testFormat() throws Exception {
-        testFormat("fs");
-        testFormat("jackson");
-        testFormat("fastjson");
-    }
-
-    private void testFormat(String formatType) throws Exception {
-        JsonFormatApi formatApi = JsonFormatApi.createApi(formatType);
-        // object
-        String json = formatApi.toJsonString(data1);
-        TestJsonData parsed = mapper.readValue(json, TestJsonData.class);
-        assertEquals(data1, parsed);
-        // map
-        String json2 = formatApi.toJsonString(data2);
-        assertEquals(mapper.writeValueAsString(data2), json2);
+        return map;
     }
 }

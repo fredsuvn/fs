@@ -11,21 +11,25 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 public class TcpServerTest implements DataTest {
 
     @Test
-    public void testTcpServer() throws Exception {
-        testTcpServer("fs");
-        testTcpServer("netty");
+    public void testTcpServerWithDifferentImplementations() throws Exception {
+        testTcpServerImplementation("fs");
+        testTcpServerImplementation("netty");
     }
 
-    public void testTcpServer(String serverType) throws Exception {
+    private void testTcpServerImplementation(String serverType) throws Exception {
         TcpServerApi server = TcpServerApi.createApi(serverType);
         TcpClient client = TcpClient.newBuilder().connect(server.address());
-        byte[] message = randomBytes(10);
-        client.writeBytes(message);
-        client.writeBytes(message);
-        client.readWait();
-        byte[] received = IOKit.readBytes(client.channel(), message.length);
-        assertArrayEquals(message, received);
-        server.shutdown();
-        client.close();
+
+        try {
+            byte[] message = randomBytes(10);
+            client.writeBytes(message);
+            client.writeBytes(message);
+            client.readWait();
+            byte[] received = IOKit.readBytes(client.channel(), message.length);
+            assertArrayEquals(message, received);
+        } finally {
+            server.shutdown();
+            client.close();
+        }
     }
 }

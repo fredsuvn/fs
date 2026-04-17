@@ -8,17 +8,20 @@ import java.util.function.Supplier;
 public class InvocableTest {
 
     @Test
-    public void testInvoker() throws Exception {
-        testInvoker("byReflect");
-        testInvoker("byAsm");
-        testInvoker("byMethodHandle");
-        testInvoker("direct");
+    public void testInvocableWithDifferentImplementations() throws Exception {
+        testInvocableImplementation("byReflect");
+        testInvocableImplementation("byAsm");
+        testInvocableImplementation("byMethodHandle");
+        testInvocableImplementation("direct");
     }
 
-    public void testInvoker(String invokeType) throws Exception {
-        Supplier<Object> forStatic = Invoker.createSupplier(invokeType, "static");
-        System.out.println(forStatic.get());
-        Supplier<Object> forInstance = Invoker.createSupplier(invokeType, "instance");
-        System.out.println(forInstance.get());
+    private void testInvocableImplementation(String invokeType) throws Exception {
+        // Test static method invocation
+        Supplier<Object> staticSupplier = Invoker.createSupplier(invokeType, "static");
+        System.out.println("Static invocation result: " + staticSupplier.get());
+
+        // Test instance method invocation
+        Supplier<Object> instanceSupplier = Invoker.createSupplier(invokeType, "instance");
+        System.out.println("Instance invocation result: " + instanceSupplier.get());
     }
 }

@@ -8,20 +8,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class AspectTest {
 
     @Test
-    public void testAspect() throws Exception {
-        testAspect("fs-asm");
-        // testAspect("byte-buddy");
-        testAspect("direct");
+    public void testAspectWithDifferentImplementations() throws Exception {
+        testAspectImplementation("fs-asm");
+        // testAspectImplementation("byte-buddy");
+        testAspectImplementation("direct");
     }
 
-    public void testAspect(String aspectType) throws Exception {
-        assertEquals(
-            "4hello",
-            AspectApi.createApi(aspectType).withPrimitive(1, 2, "hello")
-        );
-        assertEquals(
-            "22hello",
-            AspectApi.createApi(aspectType).withoutPrimitive(1, 2L, "hello")
-        );
+    private void testAspectImplementation(String aspectType) throws Exception {
+        AspectApi api = AspectApi.createApi(aspectType);
+
+        // Test with primitive parameters
+        assertEquals("4hello", api.withPrimitive(1, 2, "hello"));
+
+        // Test with non-primitive parameters
+        assertEquals("22hello", api.withoutPrimitive(1, 2L, "hello"));
     }
 }
