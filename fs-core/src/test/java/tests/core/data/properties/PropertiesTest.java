@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class PropertiesTest implements TestPrint {
 
     @Test
-    public void testPropertiesData() throws Exception {
+    public void testPropertiesDataLoading() throws Exception {
         testCommonLoading();
         testChannelLoading();
         testReaderLoading();
@@ -28,32 +28,17 @@ public class PropertiesTest implements TestPrint {
     }
 
     private void testCommonLoading() throws Exception {
-        // common
+        // common loading
         PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
         printFor("x.properties", properties);
         checkProperties(properties);
-        assertEquals(
-            properties.asMap(),
-            properties.asDataMap()
-        );
+        verifyMapConversion(properties);
 
-        // update
-        properties.set("x1", "1000");
-        assertEquals(1000, properties.getInt("x1"));
-        properties.set("x100", "1000");
-        assertEquals(1000, properties.getInt("x100"));
-        properties.remove("x2");
-        assertNull(properties.getString("x2"));
-        printFor("x.properties - modified", properties);
+        // update properties
+        updateAndVerifyProperties(properties);
 
-        // write
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        properties.writeTo(output);
-        checkOutput(output);
-        output.reset();
-        properties.writeTo(Channels.newChannel(output));
-        checkOutput(output);
-        output.reset();
+        // write properties
+        testWriteOperations(properties);
     }
 
     private void testChannelLoading() throws Exception {
@@ -76,6 +61,36 @@ public class PropertiesTest implements TestPrint {
         // wrapper
         PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
         checkProperties(PropertiesKit.wrap(properties.asProperties()));
+    }
+
+    private void verifyMapConversion(PropertiesData properties) {
+        assertEquals(
+            properties.asMap(),
+            properties.asDataMap()
+        );
+    }
+
+    private void updateAndVerifyProperties(PropertiesData properties) {
+        properties.set("x1", "1000");
+        assertEquals(1000, properties.getInt("x1"));
+        properties.set("x100", "1000");
+        assertEquals(1000, properties.getInt("x100"));
+        properties.remove("x2");
+        assertNull(properties.getString("x2"));
+        printFor("x.properties - modified", properties);
+    }
+
+    private void testWriteOperations(PropertiesData properties) throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        // write to output stream
+        properties.writeTo(output);
+        checkOutput(output);
+
+        // write to channel
+        output.reset();
+        properties.writeTo(Channels.newChannel(output));
+        checkOutput(output);
     }
 
     private void checkProperties(PropertiesData properties) {

@@ -622,193 +622,221 @@ public class JsonTest implements TestPrint {
 
     @Test
     public void testJsonData() throws Exception {
-        {
-            // null
-            JsonData data = JsonData.ofNull();
-            assertSame(data, JsonData.ofNull());
-            assertSame(JsonType.NULL, data.type());
-            assertEquals("null", data.toString());
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            WritableByteChannel channel = Channels.newChannel(out);
-            data.writeTo(channel);
-            assertEquals("null", out.toString(CharsKit.defaultCharset().name()));
-            assertTrue(data.isNull());
-            assertThrows(JsonDataException.class, data::asString);
-            assertThrows(JsonDataException.class, data::asInt);
-            assertThrows(JsonDataException.class, data::asLong);
-            assertThrows(JsonDataException.class, data::asFloat);
-            assertThrows(JsonDataException.class, data::asDouble);
-            assertThrows(JsonDataException.class, data::asBigDecimal);
-            assertThrows(JsonDataException.class, data::asBoolean);
-            assertThrows(JsonDataException.class, data::asDataMap);
-            assertThrows(JsonDataException.class, data::asDataList);
-            assertThrows(JsonDataException.class, () -> data.toObject(String.class));
-        }
-        {
-            // boolean
-            JsonData tData = JsonData.ofBoolean(true);
-            assertSame(tData, JsonData.ofBoolean(true));
-            assertSame(JsonType.BOOLEAN, tData.type());
-            assertEquals("true", tData.toString());
-            assertEquals(true, tData.toObject(boolean.class));
-            assertEquals(true, tData.toObject(Boolean.class));
-            assertEquals("true", tData.toObject(String.class));
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            WritableByteChannel channel = Channels.newChannel(out);
-            tData.writeTo(channel);
-            assertEquals("true", out.toString(CharsKit.defaultCharset().name()));
-            assertFalse(tData.isNull());
-            assertThrows(JsonDataException.class, tData::asString);
-            assertThrows(JsonDataException.class, tData::asInt);
-            assertThrows(JsonDataException.class, tData::asLong);
-            assertThrows(JsonDataException.class, tData::asFloat);
-            assertThrows(JsonDataException.class, tData::asDouble);
-            assertThrows(JsonDataException.class, tData::asBigDecimal);
-            assertTrue(tData.asBoolean());
-            assertThrows(JsonDataException.class, tData::asDataMap);
-            assertThrows(JsonDataException.class, tData::asDataList);
+        testJsonDataNull();
+        testJsonDataBoolean();
+        testJsonDataString();
+        testJsonDataNumber();
+        testJsonDataObject();
+        testJsonDataArray();
+        testJsonDataError();
+    }
 
-            JsonData fData = JsonData.ofBoolean(false);
-            assertSame(fData, JsonData.ofBoolean(false));
-            assertSame(JsonType.BOOLEAN, fData.type());
-            assertEquals("false", fData.toString());
-            assertEquals(false, fData.toObject(boolean.class));
-            assertEquals(false, fData.toObject(Boolean.class));
-            assertEquals("false", fData.toObject(String.class));
-            out.reset();
-            fData.writeTo(channel);
-            assertEquals("false", out.toString(CharsKit.defaultCharset().name()));
-            assertFalse(fData.isNull());
-            assertThrows(JsonDataException.class, fData::asString);
-            assertThrows(JsonDataException.class, fData::asInt);
-            assertThrows(JsonDataException.class, fData::asLong);
-            assertThrows(JsonDataException.class, fData::asFloat);
-            assertThrows(JsonDataException.class, fData::asDouble);
-            assertThrows(JsonDataException.class, fData::asBigDecimal);
-            assertFalse(fData.asBoolean());
-            assertThrows(JsonDataException.class, fData::asDataMap);
-            assertThrows(JsonDataException.class, fData::asDataList);
-        }
-        {
-            // string
-            String value = "123456";
-            JsonData data = JsonData.ofString(value);
-            assertNotSame(data, JsonData.ofString(value));
-            assertSame(JsonType.STRING, data.type());
-            assertEquals(jsonMapper.writeValueAsString(value), data.toString());
-            assertEquals(123456, data.toObject(int.class));
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            WritableByteChannel channel = Channels.newChannel(out);
-            data.writeTo(channel);
-            assertEquals(jsonMapper.writeValueAsString(value), out.toString(CharsKit.defaultCharset().name()));
-            assertFalse(data.isNull());
-            assertSame(value, data.asString());
-            assertThrows(JsonDataException.class, data::asInt);
-            assertThrows(JsonDataException.class, data::asLong);
-            assertThrows(JsonDataException.class, data::asFloat);
-            assertThrows(JsonDataException.class, data::asDouble);
-            assertThrows(JsonDataException.class, data::asBigDecimal);
-            assertThrows(JsonDataException.class, data::asBoolean);
-            assertThrows(JsonDataException.class, data::asDataMap);
-            assertThrows(JsonDataException.class, data::asDataList);
-        }
-        {
-            // number
-            int value = 66;
-            JsonData data = JsonData.ofNumber(value);
-            assertNotSame(data, JsonData.ofNumber(value));
-            assertSame(JsonType.NUMBER, data.type());
-            assertEquals(jsonMapper.writeValueAsString(value), data.toString());
-            assertEquals("66", data.toObject(String.class));
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            WritableByteChannel channel = Channels.newChannel(out);
-            data.writeTo(channel);
-            assertEquals(jsonMapper.writeValueAsString(value), out.toString(CharsKit.defaultCharset().name()));
-            assertFalse(data.isNull());
-            assertThrows(JsonDataException.class, data::asString);
-            assertEquals(value, data.asNumber());
-            assertEquals(value, data.asInt());
-            assertEquals(value, data.asLong());
-            assertEquals(value, data.asFloat());
-            assertEquals(value, data.asDouble());
-            assertEquals(value, data.asBigDecimal().intValue());
-            assertThrows(JsonDataException.class, data::asBoolean);
-            assertThrows(JsonDataException.class, data::asDataMap);
-            assertThrows(JsonDataException.class, data::asDataList);
-            // BigDecimal
-            BigDecimal decimal = new BigDecimal("123.456");
-            assertSame(decimal, JsonData.ofNumber(decimal).asBigDecimal());
-        }
-        {
-            // object
-            Map<String, Object> value = MapKit.map("a", 1, "b", 2);
-            JsonData data = JsonData.ofMap(value);
-            assertNotSame(data, JsonData.ofMap(value));
-            assertSame(JsonType.OBJECT, data.type());
-            assertEquals(jsonMapper.writeValueAsString(value), data.toString());
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            WritableByteChannel channel = Channels.newChannel(out);
-            data.writeTo(channel);
-            assertEquals(jsonMapper.writeValueAsString(value), out.toString(CharsKit.defaultCharset().name()));
-            assertFalse(data.isNull());
-            assertThrows(JsonDataException.class, data::asString);
-            assertThrows(JsonDataException.class, data::asInt);
-            assertThrows(JsonDataException.class, data::asLong);
-            assertThrows(JsonDataException.class, data::asFloat);
-            assertThrows(JsonDataException.class, data::asDouble);
-            assertThrows(JsonDataException.class, data::asBigDecimal);
-            assertThrows(JsonDataException.class, data::asBoolean);
-            assertSame(value, data.asMap());
-            assertEquals(value, data.asDataMap());
-            assertThrows(JsonDataException.class, data::asDataList);
-        }
-        {
-            // array
-            List<Object> list = ListKit.list(1, 2, 3);
-            JsonData lData = JsonData.ofList(list);
-            assertNotSame(lData, JsonData.ofList(list));
-            assertSame(JsonType.ARRAY, lData.type());
-            assertEquals(jsonMapper.writeValueAsString(list), lData.toString());
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            WritableByteChannel channel = Channels.newChannel(out);
-            lData.writeTo(channel);
-            assertEquals(jsonMapper.writeValueAsString(list), out.toString(CharsKit.defaultCharset().name()));
-            assertFalse(lData.isNull());
-            assertThrows(JsonDataException.class, lData::asString);
-            assertThrows(JsonDataException.class, lData::asInt);
-            assertThrows(JsonDataException.class, lData::asLong);
-            assertThrows(JsonDataException.class, lData::asFloat);
-            assertThrows(JsonDataException.class, lData::asDouble);
-            assertThrows(JsonDataException.class, lData::asBigDecimal);
-            assertThrows(JsonDataException.class, lData::asBoolean);
-            assertThrows(JsonDataException.class, lData::asDataMap);
-            assertSame(list, lData.asList());
-            assertEquals(list, lData.asDataList());
-            // object
-            Object[] array = new Object[]{1, 2, 3};
-            JsonData aData = JsonData.ofArray(array);
-            assertNotSame(aData, JsonData.ofArray(array));
-            assertSame(JsonType.ARRAY, aData.type());
-            assertEquals(jsonMapper.writeValueAsString(array), aData.toString());
-            out.reset();
-            aData.writeTo(channel);
-            assertEquals(jsonMapper.writeValueAsString(array), out.toString(CharsKit.defaultCharset().name()));
-            assertFalse(aData.isNull());
-            assertThrows(JsonDataException.class, aData::asString);
-            assertThrows(JsonDataException.class, aData::asInt);
-            assertThrows(JsonDataException.class, aData::asLong);
-            assertThrows(JsonDataException.class, aData::asFloat);
-            assertThrows(JsonDataException.class, aData::asDouble);
-            assertThrows(JsonDataException.class, aData::asBigDecimal);
-            assertThrows(JsonDataException.class, aData::asBoolean);
-            assertThrows(JsonDataException.class, aData::asDataMap);
-            assertArrayEquals(array, aData.asList().toArray());
-            assertArrayEquals(array, aData.asDataList().toArray());
-        }
-        {
-            // error
-            assertThrows(IORuntimeException.class, () -> JsonData.ofString("123456").writeTo(new ErrorAppender()));
-        }
+    private void testJsonDataNull() throws Exception {
+        JsonData data = JsonData.ofNull();
+        assertSame(data, JsonData.ofNull());
+        assertSame(JsonType.NULL, data.type());
+        assertEquals("null", data.toString());
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        WritableByteChannel channel = Channels.newChannel(out);
+        data.writeTo(channel);
+        assertEquals("null", out.toString(CharsKit.defaultCharset().name()));
+
+        assertTrue(data.isNull());
+        assertThrows(JsonDataException.class, data::asString);
+        assertThrows(JsonDataException.class, data::asInt);
+        assertThrows(JsonDataException.class, data::asLong);
+        assertThrows(JsonDataException.class, data::asFloat);
+        assertThrows(JsonDataException.class, data::asDouble);
+        assertThrows(JsonDataException.class, data::asBigDecimal);
+        assertThrows(JsonDataException.class, data::asBoolean);
+        assertThrows(JsonDataException.class, data::asDataMap);
+        assertThrows(JsonDataException.class, data::asDataList);
+        assertThrows(JsonDataException.class, () -> data.toObject(String.class));
+    }
+
+    private void testJsonDataBoolean() throws Exception {
+        // Test true boolean
+        JsonData tData = JsonData.ofBoolean(true);
+        assertSame(tData, JsonData.ofBoolean(true));
+        assertSame(JsonType.BOOLEAN, tData.type());
+        assertEquals("true", tData.toString());
+        assertEquals(true, tData.toObject(boolean.class));
+        assertEquals(true, tData.toObject(Boolean.class));
+        assertEquals("true", tData.toObject(String.class));
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        WritableByteChannel channel = Channels.newChannel(out);
+        tData.writeTo(channel);
+        assertEquals("true", out.toString(CharsKit.defaultCharset().name()));
+
+        assertFalse(tData.isNull());
+        assertThrows(JsonDataException.class, tData::asString);
+        assertThrows(JsonDataException.class, tData::asInt);
+        assertThrows(JsonDataException.class, tData::asLong);
+        assertThrows(JsonDataException.class, tData::asFloat);
+        assertThrows(JsonDataException.class, tData::asDouble);
+        assertThrows(JsonDataException.class, tData::asBigDecimal);
+        assertTrue(tData.asBoolean());
+        assertThrows(JsonDataException.class, tData::asDataMap);
+        assertThrows(JsonDataException.class, tData::asDataList);
+
+        // Test false boolean
+        JsonData fData = JsonData.ofBoolean(false);
+        assertSame(fData, JsonData.ofBoolean(false));
+        assertSame(JsonType.BOOLEAN, fData.type());
+        assertEquals("false", fData.toString());
+        assertEquals(false, fData.toObject(boolean.class));
+        assertEquals(false, fData.toObject(Boolean.class));
+        assertEquals("false", fData.toObject(String.class));
+
+        out.reset();
+        fData.writeTo(channel);
+        assertEquals("false", out.toString(CharsKit.defaultCharset().name()));
+
+        assertFalse(fData.isNull());
+        assertThrows(JsonDataException.class, fData::asString);
+        assertThrows(JsonDataException.class, fData::asInt);
+        assertThrows(JsonDataException.class, fData::asLong);
+        assertThrows(JsonDataException.class, fData::asFloat);
+        assertThrows(JsonDataException.class, fData::asDouble);
+        assertThrows(JsonDataException.class, fData::asBigDecimal);
+        assertFalse(fData.asBoolean());
+        assertThrows(JsonDataException.class, fData::asDataMap);
+        assertThrows(JsonDataException.class, fData::asDataList);
+    }
+
+    private void testJsonDataString() throws Exception {
+        String value = "123456";
+        JsonData data = JsonData.ofString(value);
+        assertNotSame(data, JsonData.ofString(value));
+        assertSame(JsonType.STRING, data.type());
+        assertEquals(jsonMapper.writeValueAsString(value), data.toString());
+        assertEquals(123456, data.toObject(int.class));
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        WritableByteChannel channel = Channels.newChannel(out);
+        data.writeTo(channel);
+        assertEquals(jsonMapper.writeValueAsString(value), out.toString(CharsKit.defaultCharset().name()));
+
+        assertFalse(data.isNull());
+        assertSame(value, data.asString());
+        assertThrows(JsonDataException.class, data::asInt);
+        assertThrows(JsonDataException.class, data::asLong);
+        assertThrows(JsonDataException.class, data::asFloat);
+        assertThrows(JsonDataException.class, data::asDouble);
+        assertThrows(JsonDataException.class, data::asBigDecimal);
+        assertThrows(JsonDataException.class, data::asBoolean);
+        assertThrows(JsonDataException.class, data::asDataMap);
+        assertThrows(JsonDataException.class, data::asDataList);
+    }
+
+    private void testJsonDataNumber() throws Exception {
+        int value = 66;
+        JsonData data = JsonData.ofNumber(value);
+        assertNotSame(data, JsonData.ofNumber(value));
+        assertSame(JsonType.NUMBER, data.type());
+        assertEquals(jsonMapper.writeValueAsString(value), data.toString());
+        assertEquals("66", data.toObject(String.class));
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        WritableByteChannel channel = Channels.newChannel(out);
+        data.writeTo(channel);
+        assertEquals(jsonMapper.writeValueAsString(value), out.toString(CharsKit.defaultCharset().name()));
+
+        assertFalse(data.isNull());
+        assertThrows(JsonDataException.class, data::asString);
+        assertEquals(value, data.asNumber());
+        assertEquals(value, data.asInt());
+        assertEquals(value, data.asLong());
+        assertEquals(value, data.asFloat());
+        assertEquals(value, data.asDouble());
+        assertEquals(value, data.asBigDecimal().intValue());
+        assertThrows(JsonDataException.class, data::asBoolean);
+        assertThrows(JsonDataException.class, data::asDataMap);
+        assertThrows(JsonDataException.class, data::asDataList);
+
+        // Test BigDecimal
+        BigDecimal decimal = new BigDecimal("123.456");
+        assertSame(decimal, JsonData.ofNumber(decimal).asBigDecimal());
+    }
+
+    private void testJsonDataObject() throws Exception {
+        Map<String, Object> value = MapKit.map("a", 1, "b", 2);
+        JsonData data = JsonData.ofMap(value);
+        assertNotSame(data, JsonData.ofMap(value));
+        assertSame(JsonType.OBJECT, data.type());
+        assertEquals(jsonMapper.writeValueAsString(value), data.toString());
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        WritableByteChannel channel = Channels.newChannel(out);
+        data.writeTo(channel);
+        assertEquals(jsonMapper.writeValueAsString(value), out.toString(CharsKit.defaultCharset().name()));
+
+        assertFalse(data.isNull());
+        assertThrows(JsonDataException.class, data::asString);
+        assertThrows(JsonDataException.class, data::asInt);
+        assertThrows(JsonDataException.class, data::asLong);
+        assertThrows(JsonDataException.class, data::asFloat);
+        assertThrows(JsonDataException.class, data::asDouble);
+        assertThrows(JsonDataException.class, data::asBigDecimal);
+        assertThrows(JsonDataException.class, data::asBoolean);
+        assertSame(value, data.asMap());
+        assertEquals(value, data.asDataMap());
+        assertThrows(JsonDataException.class, data::asDataList);
+    }
+
+    private void testJsonDataArray() throws Exception {
+        // Test list
+        List<Object> list = ListKit.list(1, 2, 3);
+        JsonData lData = JsonData.ofList(list);
+        assertNotSame(lData, JsonData.ofList(list));
+        assertSame(JsonType.ARRAY, lData.type());
+        assertEquals(jsonMapper.writeValueAsString(list), lData.toString());
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        WritableByteChannel channel = Channels.newChannel(out);
+        lData.writeTo(channel);
+        assertEquals(jsonMapper.writeValueAsString(list), out.toString(CharsKit.defaultCharset().name()));
+
+        assertFalse(lData.isNull());
+        assertThrows(JsonDataException.class, lData::asString);
+        assertThrows(JsonDataException.class, lData::asInt);
+        assertThrows(JsonDataException.class, lData::asLong);
+        assertThrows(JsonDataException.class, lData::asFloat);
+        assertThrows(JsonDataException.class, lData::asDouble);
+        assertThrows(JsonDataException.class, lData::asBigDecimal);
+        assertThrows(JsonDataException.class, lData::asBoolean);
+        assertThrows(JsonDataException.class, lData::asDataMap);
+        assertSame(list, lData.asList());
+        assertEquals(list, lData.asDataList());
+
+        // Test array
+        Object[] array = new Object[]{1, 2, 3};
+        JsonData aData = JsonData.ofArray(array);
+        assertNotSame(aData, JsonData.ofArray(array));
+        assertSame(JsonType.ARRAY, aData.type());
+        assertEquals(jsonMapper.writeValueAsString(array), aData.toString());
+
+        out.reset();
+        aData.writeTo(channel);
+        assertEquals(jsonMapper.writeValueAsString(array), out.toString(CharsKit.defaultCharset().name()));
+
+        assertFalse(aData.isNull());
+        assertThrows(JsonDataException.class, aData::asString);
+        assertThrows(JsonDataException.class, aData::asInt);
+        assertThrows(JsonDataException.class, aData::asLong);
+        assertThrows(JsonDataException.class, aData::asFloat);
+        assertThrows(JsonDataException.class, aData::asDouble);
+        assertThrows(JsonDataException.class, aData::asBigDecimal);
+        assertThrows(JsonDataException.class, aData::asBoolean);
+        assertThrows(JsonDataException.class, aData::asDataMap);
+        assertArrayEquals(array, aData.asList().toArray());
+        assertArrayEquals(array, aData.asDataList().toArray());
+    }
+
+    private void testJsonDataError() throws Exception {
+        assertThrows(IORuntimeException.class, () -> JsonData.ofString("123456").writeTo(new ErrorAppender()));
     }
 
     @Test
@@ -821,6 +849,10 @@ public class JsonTest implements TestPrint {
         assertThrows(JsonDataException.class, () -> {throw new JsonDataException("");});
         assertThrows(JsonDataException.class, () -> {throw new JsonDataException("", new RuntimeException());});
         assertThrows(JsonDataException.class, () -> {throw new JsonDataException(new RuntimeException());});
+    }
+
+    public enum DataEnum {
+        A, B, C
     }
 
     @Data
@@ -916,9 +948,5 @@ public class JsonTest implements TestPrint {
         private long[] la3;
         private BigDecimal[] ba3;
         private List<String> sa3;
-    }
-
-    public enum DataEnum {
-        A, B, C
     }
 }

@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class DataTest {
 
     @Test
-    public void testException() throws Exception {
+    public void testDataExceptions() {
         testDataException();
         testDataFormattingException();
         testDataParsingException();

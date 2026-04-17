@@ -19,10 +19,16 @@ description: "分析、重整和优化单元测试代码。当需要重构、改
 - 理解类的设计模式和架构
 - 识别关键的业务逻辑和边界情况
 
-### 3. 重整优化单元测试
+### 3. 分析原始测试代码
+- 分析原始测试代码代码质量，如重复代码、注释不足、命名不规范、代码是否粘黏在一起等
+- 分析原始测试代码的依赖关系，如是否依赖了被测试类的其他方法、是否依赖了其他类的方法等
+- 识别关键的业务逻辑和边界情况，如是否覆盖了所有可能的输入场景、是否处理了异常情况等
+
+### 4. 重整优化单元测试
 基于前两步的分析结果，进行以下优化：
 - **提取重复代码**：将重复的测试逻辑提取到辅助方法或单独的类中，对于重复的测试场景，考虑是否可以提取为一个通用的测试方法
 - **优化测试结构**：改进测试类的组织结构，使其更清晰易读
+- **优化代码结构**：改进测试类的代码质量，如整理代码结构、添加注释、增加代码可读性等
 - **保持覆盖范围**：确保优化后的测试覆盖所有原有测试场景
 - **补充缺失测试**：发现并补充未覆盖的代码路径
 - **合理分类**：根据需要将测试拆分为多个逻辑相关的类
@@ -49,8 +55,8 @@ description: "分析、重整和优化单元测试代码。当需要重构、改
 ### 第一步：测试代码分析
 - 使用 `Read` 工具或其他方式读取测试文件
 - 使用 `SearchCodebase` 或其他方式查找相关的测试辅助类
-- 分析测试方法的命名、结构和依赖关系
 - 分析被测试类的功能、方法和属性，理解其业务逻辑和边界情况
+- 分析测试方法的命名、结构、代码质量和依赖关系
 
 ### 第二步：被测试类分析
 - 定位被测试的类文件
@@ -60,6 +66,7 @@ description: "分析、重整和优化单元测试代码。当需要重构、改
 ### 第三步：优化实施
 - 提取重复的测试准备逻辑到 `@BeforeEach` 或 `@BeforeAll` 等 setUp 类方法中
 - 提取重复的测试代码或逻辑到辅助方法或单独的类中，对于重复的测试场景，考虑是否可以提取为一个通用的测试方法
+- 整理依赖的测试类，对于公共的依赖类，考虑是否可以提取为一个单独的测试类
 - 创建测试数据构建器或工厂方法
 - 重新组织测试方法，按功能模块分组
 - 添加缺失的边界条件测试
@@ -83,19 +90,19 @@ description: "分析、重整和优化单元测试代码。当需要重构、改
 - 对于复杂的测试场景，考虑创建专门的测试工具类
 - 类的私有空构造方法不需要覆盖测试
 - 代码中的注释用英语编写，注意不是我跟你的AI对话语言，而是代码中的注释
+- 包内的子包内的测试类也需要一起重整和优化
 
 ## 使用示例
 
 ### 场景：优化一个用户服务类的单元测试
 
-**原始测试代码分析：**
+**原始测试代码：**
 ```java
 // UserServiceTest.java - 原始版本
 public class UserServiceTest {
 
     @Test
     public void testCreateUser() {
-        // 重复的用户创建逻辑
         UserService service = new UserService();
         User user = service.createUser("john", "john@example.com");
         assertNotNull(user);
@@ -104,17 +111,27 @@ public class UserServiceTest {
 
     @Test
     public void testCreateUserWithDuplicateEmail() {
-        // 重复的用户创建逻辑
         UserService service = new UserService();
         service.createUser("user1", "duplicate@example.com");
-
-        // 测试重复邮箱
         assertThrows(DuplicateEmailException.class, () -> {
             service.createUser("user2", "duplicate@example.com");
         });
     }
 }
 ```
+
+**原始测试代码分析：**
+
+- 测试方法中包含重复的用户创建逻辑，导致代码冗余
+- 测试方法中没有测试边界条件，如用户名为空或为空字符串
+- 测试方法中没有测试邮箱格式是否正确
+- 测试方法代码粘黏在一起，没有注释，没有分组
+
+**原始测试代码改进：**
+
+- 提取重复的用户创建逻辑到辅助方法或者辅助类中
+- 添加缺失的边界条件测试
+- 重新组织测试方法，按功能模块分组
 
 **优化后的测试代码：**
 ```java
@@ -154,7 +171,7 @@ public class UserServiceTest {
             () -> createTestUser(null, "test@example.com"));
     }
 
-    // 提取的辅助方法
+    // Create test user
     private User createTestUser(String username, String email) {
         return service.createUser(username, email);
     }
