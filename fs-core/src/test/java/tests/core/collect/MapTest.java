@@ -100,7 +100,6 @@ public class MapTest {
         assertNotSame(MapKit.toLinkedHashMap(list::iterator), new LinkedHashMap<>(map));
         assertEquals(LinkedHashMap.class, MapKit.toLinkedHashMap(list::iterator).getClass());
 
-
         Map<Integer, Integer> intMap = new LinkedHashMap<>();
         intMap.put(1, 2);
         intMap.put(3, 4);

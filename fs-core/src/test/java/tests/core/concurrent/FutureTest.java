@@ -17,33 +17,42 @@ public class FutureTest {
     @Test
     public void testFuture() {
         ExecutorService service = Executors.newCachedThreadPool();
-        {
-            Future<String> future = service.submit(() -> "hello");
-            assertEquals("hello", FutureKit.get(future));
-            assertEquals("hello", FutureKit.get(future, 100));
-            assertEquals("hello", FutureKit.get(future, Duration.ofMillis(100)));
-        }
-        {
-            Future<String> future = service.submit(() -> {
-                throw new Exception("hello");
-            });
-            assertThrows(AwaitingException.class, () -> FutureKit.get(future));
-            assertThrows(AwaitingException.class, () -> FutureKit.get(future, 100));
-            assertThrows(AwaitingException.class, () -> FutureKit.get(future, Duration.ofMillis(100)));
-        }
-        {
-            Future<String> future = service.submit(() -> {
-                throw new Exception("hello");
-            });
-            assertEquals("world", FutureKit.get(future, "world"));
-            assertEquals("world", FutureKit.get(future, 100, "world"));
-            assertEquals("world", FutureKit.get(future, Duration.ofMillis(100), "world"));
-        }
-        {
-            Future<String> future = service.submit(() -> "hello");
-            assertEquals("hello", FutureKit.get(future, "world"));
-            assertEquals("hello", FutureKit.get(future, 100, "world"));
-            assertEquals("hello", FutureKit.get(future, Duration.ofMillis(100), "world"));
-        }
+        
+        testFutureWithSuccess(service);
+        testFutureWithException(service);
+        testFutureWithExceptionAndDefaultValue(service);
+        testFutureWithSuccessAndDefaultValue(service);
+    }
+
+    private void testFutureWithSuccess(ExecutorService service) {
+        Future<String> future = service.submit(() -> "hello");
+        assertEquals("hello", FutureKit.get(future));
+        assertEquals("hello", FutureKit.get(future, 100));
+        assertEquals("hello", FutureKit.get(future, Duration.ofMillis(100)));
+    }
+
+    private void testFutureWithException(ExecutorService service) {
+        Future<String> future = service.submit(() -> {
+            throw new Exception("hello");
+        });
+        assertThrows(AwaitingException.class, () -> FutureKit.get(future));
+        assertThrows(AwaitingException.class, () -> FutureKit.get(future, 100));
+        assertThrows(AwaitingException.class, () -> FutureKit.get(future, Duration.ofMillis(100)));
+    }
+
+    private void testFutureWithExceptionAndDefaultValue(ExecutorService service) {
+        Future<String> future = service.submit(() -> {
+            throw new Exception("hello");
+        });
+        assertEquals("world", FutureKit.get(future, "world"));
+        assertEquals("world", FutureKit.get(future, 100, "world"));
+        assertEquals("world", FutureKit.get(future, Duration.ofMillis(100), "world"));
+    }
+
+    private void testFutureWithSuccessAndDefaultValue(ExecutorService service) {
+        Future<String> future = service.submit(() -> "hello");
+        assertEquals("hello", FutureKit.get(future, "world"));
+        assertEquals("hello", FutureKit.get(future, 100, "world"));
+        assertEquals("hello", FutureKit.get(future, Duration.ofMillis(100), "world"));
     }
 }
