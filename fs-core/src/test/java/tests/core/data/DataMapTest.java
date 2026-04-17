@@ -29,6 +29,12 @@ public class DataMapTest {
     public void testDataMap() throws Exception {
         DataMap dataMap = DataMap.newMap();
         dataMap.put("1", 1111);
+        testBasicOperations(dataMap);
+        testConversions(dataMap);
+        testToObject(dataMap);
+    }
+
+    private void testBasicOperations(DataMap dataMap) {
         assertEquals(
             DataMap.wrap(MapKit.map("1", 1111)),
             dataMap
@@ -40,7 +46,9 @@ public class DataMapTest {
             dataMap.toString(),
             MapKit.linkedHashMap("1", 1111).toString()
         );
-        // conversions
+    }
+
+    private void testConversions(DataMap dataMap) {
         assertEquals(1111, dataMap.get("1"));
         assertEquals(2222, dataMap.get("2", 2222));
         assertNull(dataMap.get("2", null));
@@ -62,8 +70,9 @@ public class DataMapTest {
         assertThrows(DataException.class, () -> {
             DataMap.wrap(new ErrorMap<>()).toObject(String.class);
         });
+    }
 
-        // to object
+    private void testToObject(DataMap dataMap) {
         dataMap.clear();
         dataMap.put("str111", "1111");
         assertEquals(new Cls("1111"), dataMap.toObject(Cls.class));

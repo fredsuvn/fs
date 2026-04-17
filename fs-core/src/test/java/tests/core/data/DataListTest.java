@@ -27,6 +27,12 @@ public class DataListTest {
     public void testDataList() throws Exception {
         DataList dataList = DataList.newList();
         dataList.add(1111);
+        testBasicOperations(dataList);
+        testConversions(dataList);
+        testToList(dataList);
+    }
+
+    private void testBasicOperations(DataList dataList) {
         assertEquals(
             DataList.wrap(ListKit.list(1111)),
             dataList
@@ -38,7 +44,9 @@ public class DataListTest {
             dataList.toString(),
             ListKit.arrayList(1111).toString()
         );
-        // conversions
+    }
+
+    private void testConversions(DataList dataList) {
         assertEquals(1111, dataList.get(0));
         assertEquals(2222, dataList.get(1, 2222));
         assertNull(dataList.get(1, null));
@@ -60,8 +68,9 @@ public class DataListTest {
         assertThrows(DataException.class, () -> {
             DataList.wrap(new ErrorList<>()).toList(String.class);
         });
+    }
 
-        // to list
+    private void testToList(DataList dataList) {
         dataList.clear();
         dataList.add(MapKit.map("str111", "1111"));
         dataList.add(MapKit.map("str111", "2222"));

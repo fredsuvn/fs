@@ -21,53 +21,61 @@ public class PropertiesTest implements TestPrint {
 
     @Test
     public void testPropertiesData() throws Exception {
-        {
-            // common
-            PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
-            printFor("x.properties", properties);
-            checkProperties(properties);
-            assertEquals(
-                properties.asMap(),
-                properties.asDataMap()
-            );
+        testCommonLoading();
+        testChannelLoading();
+        testReaderLoading();
+        testWrapperLoading();
+    }
 
-            // update
-            properties.set("x1", "1000");
-            assertEquals(1000, properties.getInt("x1"));
-            properties.set("x100", "1000");
-            assertEquals(1000, properties.getInt("x100"));
-            properties.remove("x2");
-            assertNull(properties.getString("x2"));
-            printFor("x.properties - modified", properties);
+    private void testCommonLoading() throws Exception {
+        // common
+        PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
+        printFor("x.properties", properties);
+        checkProperties(properties);
+        assertEquals(
+            properties.asMap(),
+            properties.asDataMap()
+        );
 
-            // write
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            properties.writeTo(output);
-            checkOutput(output);
-            output.reset();
-            properties.writeTo(Channels.newChannel(output));
-            checkOutput(output);
-            output.reset();
-        }
-        {
-            // with channel
-            PropertiesData properties = PropertiesData.load(
-                Channels.newChannel(ResKit.findStream("data/x.properties"))
-            );
-            checkProperties(properties);
-        }
-        {
-            // with reader
-            PropertiesData properties = PropertiesData.load(
-                IOKit.newReader(ResKit.findStream("data/x.properties"), CharsKit.defaultCharset())
-            );
-            checkProperties(properties);
-        }
-        {
-            // wrapper
-            PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
-            checkProperties(PropertiesKit.wrap(properties.asProperties()));
-        }
+        // update
+        properties.set("x1", "1000");
+        assertEquals(1000, properties.getInt("x1"));
+        properties.set("x100", "1000");
+        assertEquals(1000, properties.getInt("x100"));
+        properties.remove("x2");
+        assertNull(properties.getString("x2"));
+        printFor("x.properties - modified", properties);
+
+        // write
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        properties.writeTo(output);
+        checkOutput(output);
+        output.reset();
+        properties.writeTo(Channels.newChannel(output));
+        checkOutput(output);
+        output.reset();
+    }
+
+    private void testChannelLoading() throws Exception {
+        // with channel
+        PropertiesData properties = PropertiesData.load(
+            Channels.newChannel(ResKit.findStream("data/x.properties"))
+        );
+        checkProperties(properties);
+    }
+
+    private void testReaderLoading() throws Exception {
+        // with reader
+        PropertiesData properties = PropertiesData.load(
+            IOKit.newReader(ResKit.findStream("data/x.properties"), CharsKit.defaultCharset())
+        );
+        checkProperties(properties);
+    }
+
+    private void testWrapperLoading() throws Exception {
+        // wrapper
+        PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
+        checkProperties(PropertiesKit.wrap(properties.asProperties()));
     }
 
     private void checkProperties(PropertiesData properties) {

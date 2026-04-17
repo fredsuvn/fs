@@ -945,8 +945,22 @@ public class AsmProxyTest implements TestPrint {
     public void testSimple() {
         IntVar count = IntVar.of(0);
         BooleanVar replace = BooleanVar.of(false);
-        ProxyHandler handler = new ProxyHandler() {
+        ProxyHandler handler = createSimpleProxyHandler(count, replace);
+        testStringMethod(handler, count, replace);
+        testVoidMethod(handler, count, replace);
+        testBooleanMethod(handler, count, replace);
+        testByteMethod(handler, count, replace);
+        testCharMethod(handler, count, replace);
+        testShortMethod(handler, count, replace);
+        testIntMethod(handler, count, replace);
+        testLongMethod(handler, count, replace);
+        testFloatMethod(handler, count, replace);
+        testDoubleMethod(handler, count, replace);
+        testThrowMethod(handler, count, replace);
+    }
 
+    private ProxyHandler createSimpleProxyHandler(IntVar count, BooleanVar replace) {
+        return new ProxyHandler() {
             @Override
             public boolean needsProxy(@Nonnull Method method) {
                 return true;
@@ -999,229 +1013,231 @@ public class AsmProxyTest implements TestPrint {
                 return result[0];
             }
         };
-        {
-            // String
-            ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
-            SimpleCls sc = spec.newInstance();
-            assertEquals(0, count.get());
-            assertEquals(
-                "atrue234567.08.0",
-                sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(2, count.get());
-            replace.set(true);
-            assertEquals(
-                "btrue234567.08.0",
-                sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(4, count.get());
-            count.clear();
-            replace.clear();
-        }
-        {
-            // void
-            ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
-            SimpleCls sc = spec.newInstance();
-            assertEquals(0, count.get());
-            Object[] result = new Object[1];
-            sc.getVoid("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result);
-            assertEquals(
-                "atrue234567.08.0",
-                result[0]
-            );
-            assertEquals(2, count.get());
-            replace.set(true);
-            result[0] = null;
-            sc.getVoid("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result);
-            assertEquals(
-                "btrue234567.08.0",
-                result[0]
-            );
-            assertEquals(4, count.get());
-            count.clear();
-            replace.clear();
-        }
-        {
-            // boolean
-            ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
-            SimpleCls sc = spec.newInstance();
-            assertEquals(0, count.get());
-            assertEquals(
-                true,
-                sc.getBoolean("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(2, count.get());
-            assertEquals(
-                false,
-                sc.getBoolean("a", false, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(4, count.get());
-            count.clear();
-            replace.clear();
-        }
-        {
-            // byte
-            ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
-            SimpleCls sc = spec.newInstance();
-            assertEquals(0, count.get());
-            assertEquals(
-                2,
-                sc.getByte("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(2, count.get());
-            assertEquals(
-                20,
-                sc.getByte("a", true, (byte) 20, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(4, count.get());
-            count.clear();
-            replace.clear();
-        }
-        {
-            // char
-            ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
-            SimpleCls sc = spec.newInstance();
-            assertEquals(0, count.get());
-            assertEquals(
-                '3',
-                sc.getChar("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(2, count.get());
-            assertEquals(
-                '6',
-                sc.getChar("a", true, (byte) 2, '6', (short) 4, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(4, count.get());
-            count.clear();
-            replace.clear();
-        }
-        {
-            // short
-            ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
-            SimpleCls sc = spec.newInstance();
-            assertEquals(0, count.get());
-            assertEquals(
-                4,
-                sc.getShort("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(2, count.get());
-            assertEquals(
-                40,
-                sc.getShort("a", true, (byte) 2, '3', (short) 40, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(4, count.get());
-            count.clear();
-            replace.clear();
-        }
-        {
-            // int
-            ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
-            SimpleCls sc = spec.newInstance();
-            assertEquals(0, count.get());
-            assertEquals(
-                5,
-                sc.getInt("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(2, count.get());
-            assertEquals(
-                50,
-                sc.getInt("a", true, (byte) 2, '3', (short) 4, 50, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(4, count.get());
-            count.clear();
-            replace.clear();
-        }
-        {
-            // long
-            ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
-            SimpleCls sc = spec.newInstance();
-            assertEquals(0, count.get());
-            assertEquals(
-                6L,
-                sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(2, count.get());
-            assertEquals(
-                60L,
-                sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 60L, 7.0f, 8.0d)
-            );
-            assertEquals(4, count.get());
-            count.clear();
-            replace.clear();
-        }
-        {
-            // float
-            ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
-            SimpleCls sc = spec.newInstance();
-            assertEquals(0, count.get());
-            assertEquals(
-                7.0f,
-                sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(2, count.get());
-            assertEquals(
-                70.0f,
-                sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 70.0f, 8.0d)
-            );
-            assertEquals(4, count.get());
-            count.clear();
-            replace.clear();
-        }
-        {
-            // double
-            ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
-            SimpleCls sc = spec.newInstance();
-            assertEquals(0, count.get());
-            assertEquals(
-                8.0,
-                sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
-            );
-            assertEquals(2, count.get());
-            assertEquals(
-                80.0,
-                sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 80.0d)
-            );
-            assertEquals(4, count.get());
-            count.clear();
-            replace.clear();
-        }
-        {
-            // throw
-            ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
-            SimpleCls sc = spec.newInstance();
-            assertEquals(0, count.get());
-            Object[] result = new Object[1];
-            assertEquals(
-                8.0,
-                sc.throwDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result)
-            );
-            assertEquals(
-                8.0,
-                result[0]
-            );
-            assertEquals(2, count.get());
-            count.clear();
-            replace.clear();
-            // direct throw
-            ProxySpec spec2 = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), new ProxyHandler() {
+    }
 
-                @Override
-                public boolean needsProxy(@Nonnull Method method) {
-                    return true;
-                }
+    private void testStringMethod(ProxyHandler handler, IntVar count, BooleanVar replace) {
+        ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
+        SimpleCls sc = spec.newInstance();
+        assertEquals(0, count.get());
+        assertEquals(
+            "atrue234567.08.0",
+            sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(2, count.get());
+        replace.set(true);
+        assertEquals(
+            "btrue234567.08.0",
+            sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(4, count.get());
+        count.clear();
+        replace.clear();
+    }
 
-                @Override
-                public @Nullable Object invoke(
-                    @Nonnull Object proxy, @Nonnull Method method, @Nonnull ProxyInvoker invoker, @Nullable Object @Nonnull ... args) {
-                    throw new ProxyTestException("hello!");
-                }
-            });
-            SimpleCls sc2 = spec2.newInstance();
-            ProxyTestException ex = assertThrows(ProxyTestException.class, () ->
-                sc2.throwDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, null)
-            );
-            assertEquals("hello!", ex.getMessage());
-        }
+    private void testVoidMethod(ProxyHandler handler, IntVar count, BooleanVar replace) {
+        ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
+        SimpleCls sc = spec.newInstance();
+        assertEquals(0, count.get());
+        Object[] result = new Object[1];
+        sc.getVoid("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result);
+        assertEquals(
+            "atrue234567.08.0",
+            result[0]
+        );
+        assertEquals(2, count.get());
+        replace.set(true);
+        result[0] = null;
+        sc.getVoid("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result);
+        assertEquals(
+            "btrue234567.08.0",
+            result[0]
+        );
+        assertEquals(4, count.get());
+        count.clear();
+        replace.clear();
+    }
+
+    private void testBooleanMethod(ProxyHandler handler, IntVar count, BooleanVar replace) {
+        ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
+        SimpleCls sc = spec.newInstance();
+        assertEquals(0, count.get());
+        assertEquals(
+            true,
+            sc.getBoolean("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(2, count.get());
+        assertEquals(
+            false,
+            sc.getBoolean("a", false, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(4, count.get());
+        count.clear();
+        replace.clear();
+    }
+
+    private void testByteMethod(ProxyHandler handler, IntVar count, BooleanVar replace) {
+        ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
+        SimpleCls sc = spec.newInstance();
+        assertEquals(0, count.get());
+        assertEquals(
+            2,
+            sc.getByte("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(2, count.get());
+        assertEquals(
+            20,
+            sc.getByte("a", true, (byte) 20, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(4, count.get());
+        count.clear();
+        replace.clear();
+    }
+
+    private void testCharMethod(ProxyHandler handler, IntVar count, BooleanVar replace) {
+        ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
+        SimpleCls sc = spec.newInstance();
+        assertEquals(0, count.get());
+        assertEquals(
+            '3',
+            sc.getChar("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(2, count.get());
+        assertEquals(
+            '6',
+            sc.getChar("a", true, (byte) 2, '6', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(4, count.get());
+        count.clear();
+        replace.clear();
+    }
+
+    private void testShortMethod(ProxyHandler handler, IntVar count, BooleanVar replace) {
+        ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
+        SimpleCls sc = spec.newInstance();
+        assertEquals(0, count.get());
+        assertEquals(
+            4,
+            sc.getShort("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(2, count.get());
+        assertEquals(
+            40,
+            sc.getShort("a", true, (byte) 2, '3', (short) 40, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(4, count.get());
+        count.clear();
+        replace.clear();
+    }
+
+    private void testIntMethod(ProxyHandler handler, IntVar count, BooleanVar replace) {
+        ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
+        SimpleCls sc = spec.newInstance();
+        assertEquals(0, count.get());
+        assertEquals(
+            5,
+            sc.getInt("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(2, count.get());
+        assertEquals(
+            50,
+            sc.getInt("a", true, (byte) 2, '3', (short) 4, 50, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(4, count.get());
+        count.clear();
+        replace.clear();
+    }
+
+    private void testLongMethod(ProxyHandler handler, IntVar count, BooleanVar replace) {
+        ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
+        SimpleCls sc = spec.newInstance();
+        assertEquals(0, count.get());
+        assertEquals(
+            6L,
+            sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(2, count.get());
+        assertEquals(
+            60L,
+            sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 60L, 7.0f, 8.0d)
+        );
+        assertEquals(4, count.get());
+        count.clear();
+        replace.clear();
+    }
+
+    private void testFloatMethod(ProxyHandler handler, IntVar count, BooleanVar replace) {
+        ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
+        SimpleCls sc = spec.newInstance();
+        assertEquals(0, count.get());
+        assertEquals(
+            7.0f,
+            sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(2, count.get());
+        assertEquals(
+            70.0f,
+            sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 70.0f, 8.0d)
+        );
+        assertEquals(4, count.get());
+        count.clear();
+        replace.clear();
+    }
+
+    private void testDoubleMethod(ProxyHandler handler, IntVar count, BooleanVar replace) {
+        ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
+        SimpleCls sc = spec.newInstance();
+        assertEquals(0, count.get());
+        assertEquals(
+            8.0,
+            sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(2, count.get());
+        assertEquals(
+            80.0,
+            sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 80.0d)
+        );
+        assertEquals(4, count.get());
+        count.clear();
+        replace.clear();
+    }
+
+    private void testThrowMethod(ProxyHandler handler, IntVar count, BooleanVar replace) {
+        ProxySpec spec = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), handler);
+        SimpleCls sc = spec.newInstance();
+        assertEquals(0, count.get());
+        Object[] result = new Object[1];
+        assertEquals(
+            8.0,
+            sc.throwDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result)
+        );
+        assertEquals(
+            8.0,
+            result[0]
+        );
+        assertEquals(2, count.get());
+        count.clear();
+        replace.clear();
+        testDirectThrow();
+    }
+
+    private void testDirectThrow() {
+        ProxySpec spec2 = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), new ProxyHandler() {
+            @Override
+            public boolean needsProxy(@Nonnull Method method) {
+                return true;
+            }
+
+            @Override
+            public @Nullable Object invoke(
+                @Nonnull Object proxy, @Nonnull Method method, @Nonnull ProxyInvoker invoker, @Nullable Object @Nonnull ... args) {
+                throw new ProxyTestException("hello!");
+            }
+        });
+        SimpleCls sc2 = spec2.newInstance();
+        ProxyTestException ex = assertThrows(ProxyTestException.class, () ->
+            sc2.throwDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, null)
+        );
+        assertEquals("hello!", ex.getMessage());
     }
 
     public static class SimpleCls {

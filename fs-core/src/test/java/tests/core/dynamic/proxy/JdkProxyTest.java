@@ -28,148 +28,168 @@ public class JdkProxyTest {
         ProxyMaker proxyMaker = ProxyMaker.byJdk();
         IntVar counter = IntVar.of(0);
         String result = "66666";
-        {
-            ProxyHandler proxyHandler = new ProxyHandler() {
+        testBasicProxy(proxyMaker, counter, result);
+        testInvokeWithTarget(proxyMaker, counter);
+        testFilteredMethods(proxyMaker, counter);
+        testOverpassInterfaces(proxyMaker, counter);
+    }
 
-                @Override
-                public boolean needsProxy(@Nonnull Method method) {
-                    return true;
-                }
+    private void testBasicProxy(ProxyMaker proxyMaker, IntVar counter, String result) {
+        ProxyHandler proxyHandler = createBasicProxyHandler(counter, result);
+        ProxySpec spec = proxyMaker.make(
+            null, Fs.list(InterA.class, InterB.class, InterC.class), proxyHandler
+        );
+        assertEquals(Object.class, spec.proxiedClass());
+        assertEquals(spec.proxiedInterfaces(), Fs.list(InterA.class, InterB.class, InterC.class));
+        assertEquals(spec.proxyHandler(), proxyHandler);
+        assertNotNull(spec.proxyClass());
+        InterA a = spec.newInstance();
+        assertSame(result, a.aa("11", 11));
+        assertEquals(1, counter.get());
+        InterB b = spec.newInstance();
+        assertSame(result, b.bb("11", 11));
+        assertEquals(2, counter.get());
+        InterC c = spec.newInstance();
+        assertSame(result, c.cc("11", 11));
+        assertEquals(3, counter.get());
+        counter.clear();
+    }
 
-                @Override
-                public @Nullable Object invoke(
-                    @Nonnull Object proxy,
-                    @Nonnull Method method,
-                    @Nonnull ProxyInvoker invoker,
-                    @Nullable Object @Nonnull ... args
-                ) throws Throwable {
-                    counter.incrementAndGet();
-                    return result;
-                }
-            };
-            ProxySpec spec = proxyMaker.make(
-                null, Fs.list(InterA.class, InterB.class, InterC.class), proxyHandler
-            );
-            assertEquals(Object.class, spec.proxiedClass());
-            assertEquals(spec.proxiedInterfaces(), Fs.list(InterA.class, InterB.class, InterC.class));
-            assertEquals(spec.proxyHandler(), proxyHandler);
-            assertNotNull(spec.proxyClass());
-            InterA a = spec.newInstance();
-            assertSame(result, a.aa("11", 11));
-            assertEquals(1, counter.get());
-            InterB b = spec.newInstance();
-            assertSame(result, b.bb("11", 11));
-            assertEquals(2, counter.get());
-            InterC c = spec.newInstance();
-            assertSame(result, c.cc("11", 11));
-            assertEquals(3, counter.get());
-            counter.clear();
-        }
-        {
-            class Cls implements InterA, InterB, InterC<String> {
-                @Override
-                public String aa(String a0, int a1) {
-                    return "777";
-                }
+    private ProxyHandler createBasicProxyHandler(IntVar counter, String result) {
+        return new ProxyHandler() {
+            @Override
+            public boolean needsProxy(@Nonnull Method method) {
+                return true;
             }
-            Cls cls = new Cls();
-            ProxySpec spec = proxyMaker.make(
-                null, Fs.list(InterA.class, InterB.class, InterC.class),
-                new ProxyHandler() {
 
-                    @Override
-                    public boolean needsProxy(@Nonnull Method method) {
-                        return true;
-                    }
-
-                    @Override
-                    public @Nullable Object invoke(
-                        @Nonnull Object proxy,
-                        @Nonnull Method method,
-                        @Nonnull ProxyInvoker invoker,
-                        @Nullable Object @Nonnull ... args
-                    ) throws Throwable {
-                        counter.incrementAndGet();
-                        return invoker.invoke(cls, args);
-                    }
-                }
-            );
-            InterA pa2 = spec.newInstance();
-            assertEquals(pa2.aa("11", 11), cls.aa("11", 11));
-            counter.clear();
-        }
-        {
-            class Cls implements InterA, InterB, InterC<String> {
-                @Override
-                public String aa(String a0, int a1) {
-                    return "777";
-                }
+            @Override
+            public @Nullable Object invoke(
+                @Nonnull Object proxy,
+                @Nonnull Method method,
+                @Nonnull ProxyInvoker invoker,
+                @Nullable Object @Nonnull ... args
+            ) throws Throwable {
+                counter.incrementAndGet();
+                return result;
             }
-            Cls cls = new Cls();
-            ProxySpec spec = proxyMaker.make(
-                null, Fs.list(InterA.class, InterB.class, InterC.class),
-                new ProxyHandler() {
+        };
+    }
 
-                    @Override
-                    public boolean needsProxy(@Nonnull Method method) {
-                        return !method.getName().startsWith("filtered");
-                    }
-
-                    @Override
-                    public @Nullable Object invoke(
-                        @Nonnull Object proxy,
-                        @Nonnull Method method,
-                        @Nonnull ProxyInvoker invoker,
-                        @Nullable Object @Nonnull ... args
-                    ) throws Throwable {
-                        counter.incrementAndGet();
-                        return invoker.invoke(proxy, args);
-                    }
-                }
-            );
-            InterA paA = spec.newInstance();
-            InterB paB = spec.newInstance();
-            InterC paC = spec.newInstance();
-            assertThrows(StackOverflowError.class, () -> paA.aa("11", 11));
-            assertThrows(StackOverflowError.class, () -> paB.bb("11", 11));
-            assertThrows(StackOverflowError.class, () -> paC.cc("11", 11));
-            counter.clear();
-            assertEquals(paA.filteredA(), cls.filteredA());
-            assertEquals(paB.filteredB(), cls.filteredB());
-            assertEquals(paC.filteredC(), cls.filteredC());
-            assertEquals(paA.filteredA(), cls.filteredA());
-            assertEquals(paB.filteredB(), cls.filteredB());
-            assertEquals(paC.filteredC(), cls.filteredC());
-            assertEquals(0, counter.get());
-            counter.clear();
+    private void testInvokeWithTarget(ProxyMaker proxyMaker, IntVar counter) {
+        class Cls implements InterA, InterB, InterC<String> {
+            @Override
+            public String aa(String a0, int a1) {
+                return "777";
+            }
         }
-        {
-            ProxySpec spec = proxyMaker.make(
-                null, Fs.list(InterOverpass1.class, InterOverpass2.class, InterOverpass3.class),
-                new ProxyHandler() {
+        Cls cls = new Cls();
+        ProxyHandler proxyHandler = createInvokeWithTargetHandler(counter, cls);
+        ProxySpec spec = proxyMaker.make(
+            null, Fs.list(InterA.class, InterB.class, InterC.class), proxyHandler
+        );
+        InterA pa2 = spec.newInstance();
+        assertEquals(pa2.aa("11", 11), cls.aa("11", 11));
+        counter.clear();
+    }
 
-                    @Override
-                    public boolean needsProxy(@Nonnull Method method) {
-                        return true;
-                    }
+    private ProxyHandler createInvokeWithTargetHandler(IntVar counter, Object target) {
+        return new ProxyHandler() {
+            @Override
+            public boolean needsProxy(@Nonnull Method method) {
+                return true;
+            }
 
-                    @Override
-                    public @Nullable Object invoke(
-                        @Nonnull Object proxy,
-                        @Nonnull Method method,
-                        @Nonnull ProxyInvoker invoker,
-                        @Nullable Object @Nonnull ... args
-                    ) throws Throwable {
-                        counter.incrementAndGet();
-                        return null;
-                    }
-                }
-            );
-            InterOverpass1 po = spec.newInstance();
-            assertNull(po.ooi("11", 11));
-            assertEquals(1, counter.get());
-            counter.clear();
+            @Override
+            public @Nullable Object invoke(
+                @Nonnull Object proxy,
+                @Nonnull Method method,
+                @Nonnull ProxyInvoker invoker,
+                @Nullable Object @Nonnull ... args
+            ) throws Throwable {
+                counter.incrementAndGet();
+                return invoker.invoke(target, args);
+            }
+        };
+    }
+
+    private void testFilteredMethods(ProxyMaker proxyMaker, IntVar counter) {
+        class Cls implements InterA, InterB, InterC<String> {
+            @Override
+            public String aa(String a0, int a1) {
+                return "777";
+            }
         }
+        Cls cls = new Cls();
+        ProxyHandler proxyHandler = createFilteredMethodsHandler(counter);
+        ProxySpec spec = proxyMaker.make(
+            null, Fs.list(InterA.class, InterB.class, InterC.class), proxyHandler
+        );
+        InterA paA = spec.newInstance();
+        InterB paB = spec.newInstance();
+        InterC paC = spec.newInstance();
+        assertThrows(StackOverflowError.class, () -> paA.aa("11", 11));
+        assertThrows(StackOverflowError.class, () -> paB.bb("11", 11));
+        assertThrows(StackOverflowError.class, () -> paC.cc("11", 11));
+        counter.clear();
+        assertEquals(paA.filteredA(), cls.filteredA());
+        assertEquals(paB.filteredB(), cls.filteredB());
+        assertEquals(paC.filteredC(), cls.filteredC());
+        assertEquals(paA.filteredA(), cls.filteredA());
+        assertEquals(paB.filteredB(), cls.filteredB());
+        assertEquals(paC.filteredC(), cls.filteredC());
+        assertEquals(0, counter.get());
+        counter.clear();
+    }
+
+    private ProxyHandler createFilteredMethodsHandler(IntVar counter) {
+        return new ProxyHandler() {
+            @Override
+            public boolean needsProxy(@Nonnull Method method) {
+                return !method.getName().startsWith("filtered");
+            }
+
+            @Override
+            public @Nullable Object invoke(
+                @Nonnull Object proxy,
+                @Nonnull Method method,
+                @Nonnull ProxyInvoker invoker,
+                @Nullable Object @Nonnull ... args
+            ) throws Throwable {
+                counter.incrementAndGet();
+                return invoker.invoke(proxy, args);
+            }
+        };
+    }
+
+    private void testOverpassInterfaces(ProxyMaker proxyMaker, IntVar counter) {
+        ProxyHandler proxyHandler = createOverpassInterfacesHandler(counter);
+        ProxySpec spec = proxyMaker.make(
+            null, Fs.list(InterOverpass1.class, InterOverpass2.class, InterOverpass3.class), proxyHandler
+        );
+        InterOverpass1 po = spec.newInstance();
+        assertNull(po.ooi("11", 11));
+        assertEquals(1, counter.get());
+        counter.clear();
+    }
+
+    private ProxyHandler createOverpassInterfacesHandler(IntVar counter) {
+        return new ProxyHandler() {
+            @Override
+            public boolean needsProxy(@Nonnull Method method) {
+                return true;
+            }
+
+            @Override
+            public @Nullable Object invoke(
+                @Nonnull Object proxy,
+                @Nonnull Method method,
+                @Nonnull ProxyInvoker invoker,
+                @Nullable Object @Nonnull ... args
+            ) throws Throwable {
+                counter.incrementAndGet();
+                return null;
+            }
+        };
     }
 
     @J17Also

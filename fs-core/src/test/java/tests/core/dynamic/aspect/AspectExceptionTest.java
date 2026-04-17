@@ -9,20 +9,13 @@ public class AspectExceptionTest {
 
     @Test
     public void testProxyException() {
-        {
-            // AspectException
-            assertThrows(AspectException.class, () -> {
-                throw new AspectException();
-            });
-            assertThrows(AspectException.class, () -> {
-                throw new AspectException("");
-            });
-            assertThrows(AspectException.class, () -> {
-                throw new AspectException("", new RuntimeException());
-            });
-            assertThrows(AspectException.class, () -> {
-                throw new AspectException(new RuntimeException());
-            });
-        }
+        testAspectException();
+    }
+
+    private void testAspectException() {
+        assertThrows(AspectException.class, () -> {throw new AspectException();});
+        assertThrows(AspectException.class, () -> {throw new AspectException("");});
+        assertThrows(AspectException.class, () -> {throw new AspectException("", new RuntimeException());});
+        assertThrows(AspectException.class, () -> {throw new AspectException(new RuntimeException());});
     }
 }

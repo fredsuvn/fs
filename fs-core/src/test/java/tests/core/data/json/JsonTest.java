@@ -813,21 +813,14 @@ public class JsonTest implements TestPrint {
 
     @Test
     public void testException() throws Exception {
-        {
-            // JsonDataException
-            assertThrows(JsonDataException.class, () -> {
-                throw new JsonDataException();
-            });
-            assertThrows(JsonDataException.class, () -> {
-                throw new JsonDataException("");
-            });
-            assertThrows(JsonDataException.class, () -> {
-                throw new JsonDataException("", new RuntimeException());
-            });
-            assertThrows(JsonDataException.class, () -> {
-                throw new JsonDataException(new RuntimeException());
-            });
-        }
+        testJsonDataException();
+    }
+
+    private void testJsonDataException() {
+        assertThrows(JsonDataException.class, () -> {throw new JsonDataException();});
+        assertThrows(JsonDataException.class, () -> {throw new JsonDataException("");});
+        assertThrows(JsonDataException.class, () -> {throw new JsonDataException("", new RuntimeException());});
+        assertThrows(JsonDataException.class, () -> {throw new JsonDataException(new RuntimeException());});
     }
 
     @Data

@@ -11,50 +11,31 @@ public class DataTest {
 
     @Test
     public void testException() throws Exception {
-        {
-            // DataException
-            assertThrows(DataException.class, () -> {
-                throw new DataException();
-            });
-            assertThrows(DataException.class, () -> {
-                throw new DataException("");
-            });
-            assertThrows(DataException.class, () -> {
-                throw new DataException("", new RuntimeException());
-            });
-            assertThrows(DataException.class, () -> {
-                throw new DataException(new RuntimeException());
-            });
-        }
-        {
-            // DataFormattingException
-            assertThrows(DataFormattingException.class, () -> {
-                throw new DataFormattingException();
-            });
-            assertThrows(DataFormattingException.class, () -> {
-                throw new DataFormattingException("");
-            });
-            assertThrows(DataFormattingException.class, () -> {
-                throw new DataFormattingException("", new RuntimeException());
-            });
-            assertThrows(DataFormattingException.class, () -> {
-                throw new DataFormattingException(new RuntimeException());
-            });
-        }
-        {
-            // DataParsingException
-            assertThrows(DataParsingException.class, () -> {
-                throw new DataParsingException();
-            });
-            assertThrows(DataParsingException.class, () -> {
-                throw new DataParsingException("");
-            });
-            assertThrows(DataParsingException.class, () -> {
-                throw new DataParsingException("", new RuntimeException());
-            });
-            assertThrows(DataParsingException.class, () -> {
-                throw new DataParsingException(new RuntimeException());
-            });
-        }
+        testDataException();
+        testDataFormattingException();
+        testDataParsingException();
+    }
+
+    private void testDataException() {
+        assertThrows(DataException.class, () -> {throw new DataException();});
+        assertThrows(DataException.class, () -> {throw new DataException("");});
+        assertThrows(DataException.class, () -> {throw new DataException("", new RuntimeException());});
+        assertThrows(DataException.class, () -> {throw new DataException(new RuntimeException());});
+    }
+
+    private void testDataFormattingException() {
+        assertThrows(DataFormattingException.class, () -> {throw new DataFormattingException();});
+        assertThrows(DataFormattingException.class, () -> {throw new DataFormattingException("");});
+        assertThrows(DataFormattingException.class, () -> {
+            throw new DataFormattingException("", new RuntimeException());
+        });
+        assertThrows(DataFormattingException.class, () -> {throw new DataFormattingException(new RuntimeException());});
+    }
+
+    private void testDataParsingException() {
+        assertThrows(DataParsingException.class, () -> {throw new DataParsingException();});
+        assertThrows(DataParsingException.class, () -> {throw new DataParsingException("");});
+        assertThrows(DataParsingException.class, () -> {throw new DataParsingException("", new RuntimeException());});
+        assertThrows(DataParsingException.class, () -> {throw new DataParsingException(new RuntimeException());});
     }
 }

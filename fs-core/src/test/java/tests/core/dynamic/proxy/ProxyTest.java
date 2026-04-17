@@ -18,14 +18,20 @@ public class ProxyTest {
 
     @Test
     public void testProxy() throws Exception {
-        testProxy(ProxyMaker.byAsm());
-        testProxy(ProxyMaker.byJdk());
+        testProxyWithMaker(ProxyMaker.byAsm());
+        testProxyWithMaker(ProxyMaker.byJdk());
     }
 
-    private void testProxy(ProxyMaker maker) throws Exception {
+    private void testProxyWithMaker(ProxyMaker maker) throws Exception {
         String result = "ssssssss";
-        ProxySpec pc = maker.make(null, Fs.list(InterA.class), new ProxyHandler() {
+        ProxyHandler handler = createProxyHandler(result);
+        ProxySpec pc = maker.make(null, Fs.list(InterA.class), handler);
+        InterA pa = pc.newInstance();
+        testProxyBehavior(pa, result);
+    }
 
+    private ProxyHandler createProxyHandler(String result) {
+        return new ProxyHandler() {
             @Override
             public boolean needsProxy(@Nonnull Method method) {
                 return !method.getName().equals("a1");
@@ -40,8 +46,10 @@ public class ProxyTest {
             ) throws Throwable {
                 return result;
             }
-        });
-        InterA pa = pc.newInstance();
+        };
+    }
+
+    private void testProxyBehavior(InterA pa, String result) {
         assertThrows(AbstractMethodError.class, pa::a1);
         assertSame(pa.a2(), result);
     }

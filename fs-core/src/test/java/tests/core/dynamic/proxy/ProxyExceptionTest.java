@@ -9,20 +9,13 @@ public class ProxyExceptionTest {
 
     @Test
     public void testProxyException() {
-        {
-            // ProxyException
-            assertThrows(ProxyException.class, () -> {
-                throw new ProxyException();
-            });
-            assertThrows(ProxyException.class, () -> {
-                throw new ProxyException("");
-            });
-            assertThrows(ProxyException.class, () -> {
-                throw new ProxyException("", new RuntimeException());
-            });
-            assertThrows(ProxyException.class, () -> {
-                throw new ProxyException(new RuntimeException());
-            });
-        }
+        testProxyExceptionConstructors();
+    }
+
+    private void testProxyExceptionConstructors() {
+        assertThrows(ProxyException.class, () -> {throw new ProxyException();});
+        assertThrows(ProxyException.class, () -> {throw new ProxyException("");});
+        assertThrows(ProxyException.class, () -> {throw new ProxyException("", new RuntimeException());});
+        assertThrows(ProxyException.class, () -> {throw new ProxyException(new RuntimeException());});
     }
 }

@@ -42,6 +42,13 @@ public class DIContainerTest implements TestPrint {
 
     @Test
     public void testDIComponents() {
+        DIContainer container1 = createAndTestContainer1();
+        DIContainer container2 = createAndTestContainer2(container1);
+        createAndTestContainer3(container1);
+        testErrorCase(container2);
+    }
+
+    private DIContainer createAndTestContainer1() {
         // container1
         postList.clear();
         DIContainer container1 = DIContainer.newBuilder()
@@ -84,7 +91,10 @@ public class DIContainerTest implements TestPrint {
         );
         assertThrows(DIException.class, container1::initialize);
         assertThrows(DIException.class, container1::shutdown);
+        return container1;
+    }
 
+    private DIContainer createAndTestContainer2(DIContainer container1) {
         // container2
         postList.clear();
         DIContainer container2 = DIContainer.newBuilder()
@@ -98,6 +108,7 @@ public class DIContainerTest implements TestPrint {
             ListKit.list(SubService2.class.getName())
         );
         Map<Type, DIComponent> c2Components = container2.components();
+        Map<Type, DIComponent> c1Components = container1.components();
         assertEquals(c2Components.size(), c1Components.size() + 3);
         Map<Type, DIComponent> c2LocalComponents = container2.localComponents();
         assertEquals(3, c2LocalComponents.size());
@@ -125,7 +136,10 @@ public class DIContainerTest implements TestPrint {
             preList,
             ListKit.list(SubService2.class.getName())
         );
+        return container2;
+    }
 
+    private void createAndTestContainer3(DIContainer container1) {
         // container3
         DIContainer container3 = DIContainer.newBuilder()
             .parentContainers(container1)
@@ -133,11 +147,11 @@ public class DIContainerTest implements TestPrint {
             .build();
         container3.initialize();
         assertSame(container1.getObject(Starter.class), container3.getObject(Starter.class));
+    }
 
-        {
-            // error
-            assertNull(container2.getObject(String.class));
-        }
+    private void testErrorCase(DIContainer container2) {
+        // error
+        assertNull(container2.getObject(String.class));
     }
 
     private void testDIComponents(DIContainer container) {
@@ -497,124 +511,83 @@ public class DIContainerTest implements TestPrint {
 
     @Test
     public void testDependency() throws Exception {
-        {
-            Dep.postList.clear();
-            Dep.destroyList.clear();
-            DIContainer container = DIContainer.newBuilder()
-                .componentTypes(Dep1.class, Dep2.class, Dep3.class)
-                .build()
-                .initialize();
-            DIComponent dep1 = container.getComponent(Dep1.class);
-            assertNotNull(dep1);
-            DIComponent dep2 = container.getComponent(Dep2.class);
-            assertNotNull(dep2);
-            assertEquals(1, dep2.postConstructDependencies().size());
-            assertEquals(dep1, dep2.postConstructDependencies().get(0));
-            assertEquals(1, dep2.preDestroyDependencies().size());
-            assertEquals(dep1, dep2.preDestroyDependencies().get(0));
-            container.shutdown();
-            assertEquals(Dep.postList, ListKit.list(1, 2, 3));
-            assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
-        }
-        {
-            Dep.postList.clear();
-            Dep.destroyList.clear();
-            DIContainer container = DIContainer.newBuilder()
-                .componentTypes(Dep1.class, Dep3.class, Dep2.class)
-                .build()
-                .initialize()
-                .shutdown();
-            assertEquals(Dep.postList, ListKit.list(1, 2, 3));
-            assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
-        }
-        {
-            Dep.postList.clear();
-            Dep.destroyList.clear();
-            DIContainer container = DIContainer.newBuilder()
-                .componentTypes(Dep2.class, Dep1.class, Dep3.class)
-                .build()
-                .initialize()
-                .shutdown();
-            assertEquals(Dep.postList, ListKit.list(1, 2, 3));
-            assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
-        }
-        {
-            Dep.postList.clear();
-            Dep.destroyList.clear();
-            DIContainer container = DIContainer.newBuilder()
-                .componentTypes(Dep2.class, Dep3.class, Dep1.class)
-                .build()
-                .initialize()
-                .shutdown();
-            assertEquals(Dep.postList, ListKit.list(1, 2, 3));
-            assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
-        }
-        {
-            Dep.postList.clear();
-            Dep.destroyList.clear();
-            DIContainer container = DIContainer.newBuilder()
-                .componentTypes(Dep3.class, Dep1.class, Dep2.class)
-                .build()
-                .initialize()
-                .shutdown();
-            assertEquals(Dep.postList, ListKit.list(1, 2, 3));
-            assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
-        }
-        {
-            Dep.postList.clear();
-            Dep.destroyList.clear();
-            DIContainer container = DIContainer.newBuilder()
-                .componentTypes(Dep3.class, Dep2.class, Dep1.class)
-                .build()
-                .initialize()
-                .shutdown();
-            assertEquals(Dep.postList, ListKit.list(1, 2, 3));
-            assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
-        }
-        {
-            DIContainer container = DIContainer.newBuilder().componentTypes(DepErr1.class).build();
-            container.initialize();
-            container.shutdown();
-            DIContainer container2 = DIContainer.newBuilder().componentTypes(DepErr2.class).build();
-            container2.initialize();
-            container2.shutdown();
-        }
-        {
-            assertThrows(DIException.class, () ->
-                DIContainer.newBuilder().componentTypes(Dep4.class, Dep5.class).build().initialize());
-            assertThrows(DIException.class, () ->
-                DIContainer.newBuilder().componentTypes(Dep6.class, Dep7.class).build().initialize());
-            assertThrows(DIException.class, () ->
-                DIContainer.newBuilder().componentTypes(DepErr3.class).build().initialize());
-        }
-        {
-            DIContainer container = DIContainer.newBuilder()
-                .componentTypes(Dep8.class, Dep10.class, Dep9.class)
-                .build()
-                .initialize();
-            container.shutdown();
-        }
-        {
-            DIContainer container = DIContainer.newBuilder()
-                .componentTypes(Dep9.class, Dep10.class, Dep8.class)
-                .build()
-                .initialize();
-            container.shutdown();
-        }
-        {
-            // no dependency
-            DIContainer container = DIContainer.newBuilder()
-                .componentTypes(Object.class)
-                .build()
-                .initialize();
-            DIComponent res = container.getComponent(Object.class);
-            assertNotNull(res);
-            assertNull(res.postConstructMethod());
-            res.postConstruct();
-            assertNull(res.preDestroyMethod());
-            res.preDestroy();
-            container.shutdown();
-        }
+        testDependencyOrder(ListKit.list(Dep1.class, Dep2.class, Dep3.class));
+        testDependencyOrder(ListKit.list(Dep1.class, Dep3.class, Dep2.class));
+        testDependencyOrder(ListKit.list(Dep2.class, Dep1.class, Dep3.class));
+        testDependencyOrder(ListKit.list(Dep2.class, Dep3.class, Dep1.class));
+        testDependencyOrder(ListKit.list(Dep3.class, Dep1.class, Dep2.class));
+        testDependencyOrder(ListKit.list(Dep3.class, Dep2.class, Dep1.class));
+        testErrorComponents();
+        testCycleDependencies();
+        testNoDependencyComponents();
+        testNoDependency();
+    }
+
+    private void testDependencyOrder(List<Class<?>> componentTypes) throws Exception {
+        Dep.postList.clear();
+        Dep.destroyList.clear();
+        List<Type> types = componentTypes.stream().map(c -> (Type) c).collect(Collectors.toList());
+        DIContainer container = DIContainer.newBuilder()
+            .componentTypes(types)
+            .build()
+            .initialize();
+        DIComponent dep1 = container.getComponent(Dep1.class);
+        assertNotNull(dep1);
+        DIComponent dep2 = container.getComponent(Dep2.class);
+        assertNotNull(dep2);
+        assertEquals(1, dep2.postConstructDependencies().size());
+        assertEquals(dep1, dep2.postConstructDependencies().get(0));
+        assertEquals(1, dep2.preDestroyDependencies().size());
+        assertEquals(dep1, dep2.preDestroyDependencies().get(0));
+        container.shutdown();
+        assertEquals(Dep.postList, ListKit.list(1, 2, 3));
+        assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
+    }
+
+    private void testErrorComponents() throws Exception {
+        DIContainer container = DIContainer.newBuilder().componentTypes(DepErr1.class).build();
+        container.initialize();
+        container.shutdown();
+        DIContainer container2 = DIContainer.newBuilder().componentTypes(DepErr2.class).build();
+        container2.initialize();
+        container2.shutdown();
+    }
+
+    private void testCycleDependencies() {
+        assertThrows(DIException.class, () ->
+            DIContainer.newBuilder().componentTypes(Dep4.class, Dep5.class).build().initialize());
+        assertThrows(DIException.class, () ->
+            DIContainer.newBuilder().componentTypes(Dep6.class, Dep7.class).build().initialize());
+        assertThrows(DIException.class, () ->
+            DIContainer.newBuilder().componentTypes(DepErr3.class).build().initialize());
+    }
+
+    private void testNoDependencyComponents() throws Exception {
+        DIContainer container = DIContainer.newBuilder()
+            .componentTypes(Dep8.class, Dep10.class, Dep9.class)
+            .build()
+            .initialize();
+        container.shutdown();
+        DIContainer container2 = DIContainer.newBuilder()
+            .componentTypes(Dep9.class, Dep10.class, Dep8.class)
+            .build()
+            .initialize();
+        container2.shutdown();
+    }
+
+    private void testNoDependency() throws Exception {
+        // no dependency
+        DIContainer container = DIContainer.newBuilder()
+            .componentTypes(Object.class)
+            .build()
+            .initialize();
+        DIComponent res = container.getComponent(Object.class);
+        assertNotNull(res);
+        assertNull(res.postConstructMethod());
+        res.postConstruct();
+        assertNull(res.preDestroyMethod());
+        res.preDestroy();
+        container.shutdown();
     }
 
     public static class Dep {
@@ -764,66 +737,72 @@ public class DIContainerTest implements TestPrint {
 
     @Test
     public void testStartAndShutdown() {
-        {
-            // startup
-            DIInitializeException startErr = assertThrows(DIInitializeException.class, () -> {
-                DIContainer.newBuilder()
-                    .componentTypes(Dep8.class, Dep9.class, ConstructErr.class, Dep10.class)
-                    .build()
-                    .initialize();
-            });
-            assertEquals(ConstructErr.class, startErr.failedComponent().type());
-            for (DIComponent initializedComponent : startErr.initializedComponents()) {
-                assertTrue(initializedComponent.isInitialized());
-            }
-            assertEquals(
-                startErr.initializedComponents().stream().map(DIComponent::type).collect(Collectors.toSet()),
-                SetKit.set(Dep8.class, Dep9.class)
-            );
-            for (DIComponent uninitializedComponent : startErr.uninitializedComponents()) {
-                assertFalse(uninitializedComponent.isInitialized());
-            }
-            assertEquals(
-                startErr.uninitializedComponents().stream().map(DIComponent::type).collect(Collectors.toSet()),
-                SetKit.set(Dep10.class)
-            );
-        }
-        {
-            // shutdown
-            DIShutdownException shutErr = assertThrows(DIShutdownException.class, () -> {
-                DIContainer.newBuilder()
-                    .componentTypes(Dep8.class, Dep9.class, DestroyErr.class, Dep10.class)
-                    .build()
-                    .initialize()
-                    .shutdown();
-            });
-            assertEquals(DestroyErr.class, shutErr.failedComponent().type());
-            for (DIComponent destroyedComponent : shutErr.destroyedComponents()) {
-                assertTrue(destroyedComponent.isDestroyed());
-            }
-            assertEquals(
-                shutErr.destroyedComponents().stream().map(DIComponent::type).collect(Collectors.toSet()),
-                SetKit.set(Dep8.class, Dep9.class)
-            );
-            for (DIComponent undestroyedComponent : shutErr.undestroyedComponents()) {
-                assertFalse(undestroyedComponent.isDestroyed());
-            }
-            assertEquals(
-                shutErr.undestroyedComponents().stream().map(DIComponent::type).collect(Collectors.toSet()),
-                SetKit.set(Dep10.class)
-            );
-        }
-        {
-            // PostConstruct and PreDestroy at same method
-            DIContainer container = DIContainer.newBuilder()
-                .componentTypes(Dep11.class)
+        testStartupError();
+        testShutdownError();
+        testPostConstructAndPreDestroyAtSameMethod();
+    }
+
+    private void testStartupError() {
+        // startup
+        DIInitializeException startErr = assertThrows(DIInitializeException.class, () -> {
+            DIContainer.newBuilder()
+                .componentTypes(Dep8.class, Dep9.class, ConstructErr.class, Dep10.class)
                 .build()
                 .initialize();
-            for (DIComponent component : container.components().values()) {
-                assertSame(component.postConstructMethod(), component.preDestroyMethod());
-            }
-            container.shutdown();
+        });
+        assertEquals(ConstructErr.class, startErr.failedComponent().type());
+        for (DIComponent initializedComponent : startErr.initializedComponents()) {
+            assertTrue(initializedComponent.isInitialized());
         }
+        assertEquals(
+            startErr.initializedComponents().stream().map(DIComponent::type).collect(Collectors.toSet()),
+            SetKit.set(Dep8.class, Dep9.class)
+        );
+        for (DIComponent uninitializedComponent : startErr.uninitializedComponents()) {
+            assertFalse(uninitializedComponent.isInitialized());
+        }
+        assertEquals(
+            startErr.uninitializedComponents().stream().map(DIComponent::type).collect(Collectors.toSet()),
+            SetKit.set(Dep10.class)
+        );
+    }
+
+    private void testShutdownError() {
+        // shutdown
+        DIShutdownException shutErr = assertThrows(DIShutdownException.class, () -> {
+            DIContainer.newBuilder()
+                .componentTypes(Dep8.class, Dep9.class, DestroyErr.class, Dep10.class)
+                .build()
+                .initialize()
+                .shutdown();
+        });
+        assertEquals(DestroyErr.class, shutErr.failedComponent().type());
+        for (DIComponent destroyedComponent : shutErr.destroyedComponents()) {
+            assertTrue(destroyedComponent.isDestroyed());
+        }
+        assertEquals(
+            shutErr.destroyedComponents().stream().map(DIComponent::type).collect(Collectors.toSet()),
+            SetKit.set(Dep8.class, Dep9.class)
+        );
+        for (DIComponent undestroyedComponent : shutErr.undestroyedComponents()) {
+            assertFalse(undestroyedComponent.isDestroyed());
+        }
+        assertEquals(
+            shutErr.undestroyedComponents().stream().map(DIComponent::type).collect(Collectors.toSet()),
+            SetKit.set(Dep10.class)
+        );
+    }
+
+    private void testPostConstructAndPreDestroyAtSameMethod() {
+        // PostConstruct and PreDestroy at same method
+        DIContainer container = DIContainer.newBuilder()
+            .componentTypes(Dep11.class)
+            .build()
+            .initialize();
+        for (DIComponent component : container.components().values()) {
+            assertSame(component.postConstructMethod(), component.preDestroyMethod());
+        }
+        container.shutdown();
     }
 
     public static class ConstructErr {
