@@ -33,119 +33,123 @@ public class NetTest implements TestPrint {
     }
 
     @Test
-    public void testNetSelector() throws Exception {
-        {
-            // base
-            CountDownLatch latch = new CountDownLatch(1);
-            CountDownLatch clientCloseLatch = new CountDownLatch(1);
-            StringBuilder received = new StringBuilder();
-            TcpServer server = TcpServer.newBuilder()
-                .handler(new TcpServerHandler() {
+    public void testNetSelectorWithClientInteraction() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch clientCloseLatch = new CountDownLatch(1);
+        StringBuilder received = new StringBuilder();
 
-                    @Override
-                    public void channelOpen(@Nonnull TcpContext context) throws Exception {
-                    }
+        TcpServer server = createTcpServer(latch, clientCloseLatch, received);
+        TcpClient client = TcpClient.newBuilder().connect(server.localAddress());
 
-                    @Override
-                    public void channelClose(@Nonnull TcpContext context) throws Exception {
-                    }
+        client.writeString("hello world");
+        latch.await();
+        client.close();
+        clientCloseLatch.await();
 
-                    @Override
-                    public void channelRead(@Nonnull TcpContext context) throws Exception {
-                        String str = context.availableString();
-                        if (str != null) {
-                            received.append(str);
-                        } else {
-                            context.close();
-                            clientCloseLatch.countDown();
-                        }
-                        if (received.toString().equals("hello world")) {
-                            latch.countDown();
-                        }
-                    }
+        testSelectorBasicOperations(client);
 
-                    @Override
-                    public void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause) {
-                    }
-                })
-                .bind();
-            TcpClient client = TcpClient.newBuilder()
-                .connect(server.localAddress());
-            client.writeString("hello world");
-            latch.await();
-            client.close();
-            clientCloseLatch.await();
-            // no cancel
-            NetSelector selector = NetSelector.open();
-            Selector s1 = selector.selector();
-            selector.cancel(client.channel());
-            // keys
-            assertEquals(0, selector.keys().size());
-            // selector
-            Selector s2 = selector.selector();
-            assertSame(s1, s2);
-            selector.close();
-        }
-        {
-            // rebuild selector
-            NetSelector selector = NetSelector.open(1);
-            Selector s1 = selector.selector();
-            SocketChannel c1 = SocketChannel.open();
-            c1.configureBlocking(false);
-            c1.register(selector.selector(), SelectionKey.OP_READ);
-            SocketChannel c2 = SocketChannel.open();
-            c2.configureBlocking(false);
-            c2.register(selector.selector(), SelectionKey.OP_READ);
-            Set<SelectionKey> keys = new HashSet<>(s1.keys());
-            selector.cancel(c2);
-            selector.select(1);
-            Selector s2 = selector.selector();
-            assertNotSame(s1, selector.selector());
-            assertNotSame(s1, s2);
-            assertSame(s2.keys(), selector.keys());
-            assertEquals(keys.size() - 1, s2.keys().size());
-            assertSame(c1, s2.keys().iterator().next().channel());
-            selector.close();
-        }
-        {
-            // rebuild selector with invalid
-            NetSelector selector = NetSelector.open(1);
-            Selector s1 = selector.selector();
-            SocketChannel c1 = SocketChannel.open();
-            c1.configureBlocking(false);
-            c1.register(selector.selector(), SelectionKey.OP_READ);
-            SocketChannel c2 = SocketChannel.open();
-            c2.configureBlocking(false);
-            c2.register(selector.selector(), SelectionKey.OP_READ);
-            Set<SelectionKey> keys = new HashSet<>(s1.keys());
-            selector.cancel(c2);
-            selector.rebuildSelector();
-            Selector s2 = selector.selector();
-            assertNotSame(s1, selector.selector());
-            assertNotSame(s1, s2);
-            assertSame(s2.keys(), selector.keys());
-            assertEquals(keys.size() - 1, s2.keys().size());
-            assertSame(c1, s2.keys().iterator().next().channel());
-            selector.close();
-        }
+        server.close();
     }
 
     @Test
-    public void testException() throws Exception {
-        {
-            // NetException
-            assertThrows(NetException.class, () -> {
-                throw new NetException();
-            });
-            assertThrows(NetException.class, () -> {
-                throw new NetException("");
-            });
-            assertThrows(NetException.class, () -> {
-                throw new NetException("", new RuntimeException());
-            });
-            assertThrows(NetException.class, () -> {
-                throw new NetException(new RuntimeException());
-            });
-        }
+    public void testNetSelectorRebuildOnSelect() throws Exception {
+        NetSelector selector = NetSelector.open(1);
+        Selector s1 = selector.selector();
+
+        SocketChannel c1 = SocketChannel.open();
+        c1.configureBlocking(false);
+        c1.register(selector.selector(), SelectionKey.OP_READ);
+
+        SocketChannel c2 = SocketChannel.open();
+        c2.configureBlocking(false);
+        c2.register(selector.selector(), SelectionKey.OP_READ);
+
+        Set<SelectionKey> keys = new HashSet<>(s1.keys());
+        selector.cancel(c2);
+        selector.select(1);
+
+        Selector s2 = selector.selector();
+        assertNotSame(s1, s2);
+        assertSame(s2.keys(), selector.keys());
+        assertEquals(keys.size() - 1, s2.keys().size());
+        assertSame(c1, s2.keys().iterator().next().channel());
+
+        selector.close();
+    }
+
+    @Test
+    public void testNetSelectorRebuildExplicit() throws Exception {
+        NetSelector selector = NetSelector.open(1);
+        Selector s1 = selector.selector();
+
+        SocketChannel c1 = SocketChannel.open();
+        c1.configureBlocking(false);
+        c1.register(selector.selector(), SelectionKey.OP_READ);
+
+        SocketChannel c2 = SocketChannel.open();
+        c2.configureBlocking(false);
+        c2.register(selector.selector(), SelectionKey.OP_READ);
+
+        Set<SelectionKey> keys = new HashSet<>(s1.keys());
+        selector.cancel(c2);
+        selector.rebuildSelector();
+
+        Selector s2 = selector.selector();
+        assertNotSame(s1, s2);
+        assertSame(s2.keys(), selector.keys());
+        assertEquals(keys.size() - 1, s2.keys().size());
+        assertSame(c1, s2.keys().iterator().next().channel());
+
+        selector.close();
+    }
+
+    @Test
+    public void testNetException() throws Exception {
+        assertThrows(NetException.class, () -> {throw new NetException();});
+        assertThrows(NetException.class, () -> {throw new NetException("");});
+        assertThrows(NetException.class, () -> {throw new NetException("", new RuntimeException());});
+        assertThrows(NetException.class, () -> {throw new NetException(new RuntimeException());});
+    }
+
+    private TcpServer createTcpServer(CountDownLatch latch, CountDownLatch clientCloseLatch, StringBuilder received) {
+        return TcpServer.newBuilder()
+            .handler(new TcpServerHandler() {
+                @Override
+                public void channelOpen(@Nonnull TcpContext context) throws Exception {}
+
+                @Override
+                public void channelClose(@Nonnull TcpContext context) throws Exception {}
+
+                @Override
+                public void channelRead(@Nonnull TcpContext context) throws Exception {
+                    String str = context.availableString();
+                    if (str != null) {
+                        received.append(str);
+                    } else {
+                        context.close();
+                        clientCloseLatch.countDown();
+                    }
+                    if (received.toString().equals("hello world")) {
+                        latch.countDown();
+                    }
+                }
+
+                @Override
+                public void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause) {}
+            })
+            .bind();
+    }
+
+    private void testSelectorBasicOperations(TcpClient client) throws Exception {
+        NetSelector selector = NetSelector.open();
+        Selector s1 = selector.selector();
+        selector.cancel(client.channel());
+
+        assertEquals(0, selector.keys().size());
+
+        Selector s2 = selector.selector();
+        assertSame(s1, s2);
+
+        selector.close();
     }
 }

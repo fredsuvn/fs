@@ -42,7 +42,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -81,7 +80,6 @@ public class HttpTest implements TestPrint, DataGen {
                 String respBody = "no-body".equals(msg) ? null : "hello, world2!";
                 if ("no-code".equals(msg)) {
                     resp.setStatus(999, "Unknown");
-                    // resp.setStatus(999);
                 }
                 if ("no-content".equals(msg)) {
                     resp.setContentType(null);
@@ -103,151 +101,108 @@ public class HttpTest implements TestPrint, DataGen {
     }
 
     @Test
-    public void testRequest() throws Exception {
-        {
-            // no write body
-            HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.getURI().getPort())
-                .method("GET")
-                .header("X-HEADER", "hello!")
-                .header("X-HEADER2", "hello2-1!")
-                .header("X-HEADER2", "hello2-2!")
-                .timeout(Duration.ofSeconds(5))
-                .build();
-            HttpResp resp = HttpKit.request(req);
-            assertEquals("200", resp.statusCode());
-            assertEquals("OK", resp.statusText());
-            checkRespHeaders(resp);
-            String bodyString = resp.bodyString();
-            assertEquals("hello, world2!", bodyString);
-        }
-        {
-            // write body
-            HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.getURI().getPort())
-                .method("GET")
-                .headers(MapKit.map(
-                    "X-HEADER", Collections.singletonList("hello!"),
-                    "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
-                ))
-                .body("hello, world!")
-                .timeout(Duration.ofSeconds(5))
-                .build();
-            HttpResp resp = HttpKit.request(req, null);
-            assertEquals("200", resp.statusCode());
-            assertEquals("OK", resp.statusText());
-            checkRespHeaders(resp);
-            String bodyString = resp.bodyString();
-            assertEquals("hello, world2!", bodyString);
-        }
-        {
-            // write empty body
-            HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.getURI().getPort())
-                .method("GET")
-                .headers(MapKit.map(
-                    "X-HEADER", Collections.singletonList("hello!"),
-                    "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
-                ))
-                .body("")
-                .timeout(Duration.ofSeconds(5))
-                .build();
-            HttpResp resp = HttpKit.request(req, Proxy.NO_PROXY);
-            assertEquals("200", resp.statusCode());
-            assertEquals("OK", resp.statusText());
-            checkRespHeaders(resp);
-            String bodyString = resp.bodyString();
-            assertEquals("hello, world2!", bodyString);
-        }
-        {
-            // no-body
-            HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.getURI().getPort())
-                .method("GET")
-                .headers(MapKit.map(
-                    "X-HEADER", Collections.singletonList("hello!"),
-                    "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
-                ))
-                .body("no-body")
-                .build();
-            HttpResp resp = HttpKit.request(req);
-            assertEquals("200", resp.statusCode());
-            assertEquals("OK", resp.statusText());
-            checkRespHeaders(resp);
-            assertNull(resp.bodyString());
-        }
-        {
-            // no-code
-            HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.getURI().getPort())
-                .method("GET")
-                .header("X-HEADER", "hello!")
-                .header("X-HEADER2", "hello2-1!")
-                .header("X-HEADER2", "hello2-2!")
-                .body("no-code")
-                .build();
-            HttpResp resp = HttpKit.request(req);
-            assertEquals("999", resp.statusCode());
-            assertEquals("Unknown", resp.statusText());
-            checkRespHeaders(resp);
-            String bodyString = resp.bodyString();
-            assertEquals("hello, world2!", bodyString);
-        }
-        {
-            // with io buffer size
-            HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.getURI().getPort())
-                .method("GET")
-                .header("X-HEADER", "hello!")
-                .header("X-HEADER2", "hello2-1!")
-                .header("X-HEADER2", "hello2-2!")
-                .timeout(Duration.ofSeconds(5))
-                .build();
-            HttpResp resp = HttpCaller.newBuilder().bufSize(1024).build().request(req);
-            assertEquals("200", resp.statusCode());
-            assertEquals("OK", resp.statusText());
-            checkRespHeaders(resp);
-            String bodyString = resp.bodyString();
-            assertEquals("hello, world2!", bodyString);
-        }
-        {
-            // with proxy
-            Proxy proxy = new Proxy(
-                Proxy.Type.HTTP,
-                new InetSocketAddress(httpServer.getURI().getHost(), httpServer.getURI().getPort())
-            );
-            HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.getURI().getPort())
-                .method("GET")
-                .header("X-HEADER", "hello!")
-                .header("X-HEADER2", "hello2-1!")
-                .header("X-HEADER2", "hello2-2!")
-                .timeout(Duration.ofSeconds(5))
-                .build();
-            HttpResp resp = HttpKit.request(req, proxy);
-            assertEquals("200", resp.statusCode());
-            assertEquals("OK", resp.statusText());
-            checkRespHeaders(resp);
-            String bodyString = resp.bodyString();
-            assertEquals("hello, world2!", bodyString);
-        }
-        {
-            // error
-            assertThrows(IllegalArgumentException.class, () -> HttpReq.newBuilder().build());
-        }
-    }
-
-    private void checkRespHeaders(HttpResp resp) {
-        assertEquals("HTTP/1.1", resp.protocolVersion());
-        String contentType = resp.contentType();
-        assertNotNull(contentType);
-        assertEquals("text/html;charset=UTF-8".toLowerCase(), contentType.toLowerCase());
-        assertEquals(CharsKit.UTF_8, resp.bodyCharset());
-        assertEquals(resp.headers().get("X-HEADER"), Collections.singletonList("hello2!"));
+    public void testRequestWithoutBody() throws Exception {
+        HttpReq req = createDefaultRequest()
+            .method("GET")
+            .timeout(Duration.ofSeconds(5))
+            .build();
+        HttpResp resp = HttpKit.request(req);
+        assertSuccessfulResponse(resp, "hello, world2!");
     }
 
     @Test
-    public void testUrl() throws Exception {
+    public void testRequestWithHeaderMethod() throws Exception {
+        HttpReq req = HttpReq.newBuilder()
+            .url("http://localhost:" + httpServer.getURI().getPort())
+            .method("GET")
+            .header("X-HEADER", "hello!")
+            .header("X-HEADER2", "hello2-1!")
+            .header("X-HEADER2", "hello2-2!")
+            .timeout(Duration.ofSeconds(5))
+            .build();
+        HttpResp resp = HttpKit.request(req);
+        assertSuccessfulResponse(resp, "hello, world2!");
+    }
+
+    @Test
+    public void testRequestWithBody() throws Exception {
+        HttpReq req = createDefaultRequest()
+            .method("GET")
+            .body("hello, world!")
+            .timeout(Duration.ofSeconds(5))
+            .build();
+        HttpResp resp = HttpKit.request(req, null);
+        assertSuccessfulResponse(resp, "hello, world2!");
+    }
+
+    @Test
+    public void testRequestWithEmptyBody() throws Exception {
+        HttpReq req = createDefaultRequest()
+            .method("GET")
+            .body("")
+            .timeout(Duration.ofSeconds(5))
+            .build();
+        HttpResp resp = HttpKit.request(req, Proxy.NO_PROXY);
+        assertSuccessfulResponse(resp, "hello, world2!");
+    }
+
+    @Test
+    public void testRequestWithNoBodyResponse() throws Exception {
+        HttpReq req = createDefaultRequest()
+            .method("GET")
+            .body("no-body")
+            .build();
+        HttpResp resp = HttpKit.request(req);
+        assertEquals("200", resp.statusCode());
+        assertEquals("OK", resp.statusText());
+        checkRespHeaders(resp);
+        assertNull(resp.bodyString());
+    }
+
+    @Test
+    public void testRequestWithCustomStatusCode() throws Exception {
+        HttpReq req = createDefaultRequest()
+            .method("GET")
+            .body("no-code")
+            .build();
+        HttpResp resp = HttpKit.request(req);
+        assertEquals("999", resp.statusCode());
+        assertEquals("Unknown", resp.statusText());
+        checkRespHeaders(resp);
+        assertEquals("hello, world2!", resp.bodyString());
+    }
+
+    @Test
+    public void testRequestWithCustomBufferSize() throws Exception {
+        HttpReq req = createDefaultRequest()
+            .method("GET")
+            .timeout(Duration.ofSeconds(5))
+            .build();
+        HttpResp resp = HttpCaller.newBuilder().bufSize(1024).build().request(req);
+        assertSuccessfulResponse(resp, "hello, world2!");
+    }
+
+    @Test
+    public void testRequestWithProxy() throws Exception {
+        Proxy proxy = new Proxy(
+            Proxy.Type.HTTP,
+            new InetSocketAddress(httpServer.getURI().getHost(), httpServer.getURI().getPort())
+        );
+        HttpReq req = createDefaultRequest()
+            .method("GET")
+            .timeout(Duration.ofSeconds(5))
+            .build();
+        HttpResp resp = HttpKit.request(req, proxy);
+        assertSuccessfulResponse(resp, "hello, world2!");
+    }
+
+    @Test
+    public void testRequestBuilderValidation() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> HttpReq.newBuilder().build());
+    }
+
+    @Test
+    public void testUrlBuilding() throws Exception {
         String url = TEST_URL + "?" +
             URLEncoder.encode("wd", "UTF-8") + "=" +
             URLEncoder.encode("hello, 中文", "UTF-8").replace("+", "%20") +
@@ -264,28 +219,21 @@ public class HttpTest implements TestPrint, DataGen {
             url
         );
         printFor("url", url);
-        assertEquals(
-            "%20%20%20",
-            HttpKit.encodeUrl("   ")
-        );
-        assertEquals(
-            TEST_URL,
-            HttpKit.buildUrl(TEST_URL, MapKit.map()).toString()
-        );
+    }
+
+    @Test
+    public void testUrlEncoding() throws Exception {
+        assertEquals("%20%20%20", HttpKit.encodeUrl("   "));
+        assertEquals(TEST_URL, HttpKit.buildUrl(TEST_URL, MapKit.map()).toString());
         assertThrows(NetException.class, () -> HttpKit.encodeUrl("abc", ErrorCharset.SINGLETON));
     }
 
     @Test
-    public void testContentType() throws Exception {
+    public void testContentTypeHandling() throws Exception {
         assertNull(HttpKit.contentCharset("no-content"));
-        // no-content
-        HttpReq req = HttpReq.newBuilder()
-            .url("http://localhost:" + httpServer.getURI().getPort())
+
+        HttpReq req = createDefaultRequest()
             .method("GET")
-            .headers(MapKit.map(
-                "X-HEADER", Collections.singletonList("hello!"),
-                "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
-            ))
             .body("no-content")
             .build();
         HttpResp resp = HttpKit.request(req);
@@ -294,136 +242,150 @@ public class HttpTest implements TestPrint, DataGen {
     }
 
     @Test
-    public void testRequestBody() throws Exception {
+    public void testRequestBodyWithInputStream() throws Exception {
         String text = "hello, world!";
         byte[] bytes = text.getBytes(CharsKit.defaultCharset());
-        {
-            // input stream
-            ByteArrayInputStream data = new ByteArrayInputStream(bytes);
-            HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.getURI().getPort())
-                .method("POST")
-                .headers(MapKit.map(
-                    "X-HEADER", Collections.singletonList("hello!"),
-                    "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
-                ))
-                .body(data)
-                .build();
-            HttpReq.Body body = req.body();
-            assertNotNull(body);
-            assertEquals(HttpReq.Body.Type.INPUT_STREAM, body.type());
-            assertSame(data, body.toInputStream());
-            assertEquals(text, body.toText());
-            data.reset();
-            assertArrayEquals(bytes, body.toByteArray());
-            data.reset();
-            assertEquals(ByteBuffer.wrap(bytes), body.toByteBuffer());
-            data.reset();
-            HttpResp resp = HttpKit.request(req, null);
-            assertEquals("200", resp.statusCode());
-            assertEquals("OK", resp.statusText());
-            checkRespHeaders(resp);
-            String bodyString = resp.bodyString();
-            assertEquals("hello, world2!", bodyString);
-        }
-        {
-            // text
-            HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.getURI().getPort())
-                .method("POST")
-                .headers(MapKit.map(
-                    "X-HEADER", Collections.singletonList("hello!"),
-                    "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
-                ))
-                .body(text)
-                .build();
-            HttpReq.Body body = req.body();
-            assertNotNull(body);
-            assertEquals(HttpReq.Body.Type.TEXT, body.type());
-            assertArrayEquals(bytes, IOKit.read(body.toInputStream()));
-            assertSame(text, body.toText());
-            assertArrayEquals(bytes, body.toByteArray());
-            assertEquals(ByteBuffer.wrap(bytes), body.toByteBuffer());
-            HttpResp resp = HttpKit.request(req, null);
-            assertEquals("200", resp.statusCode());
-            assertEquals("OK", resp.statusText());
-            checkRespHeaders(resp);
-            String bodyString = resp.bodyString();
-            assertEquals("hello, world2!", bodyString);
-        }
-        {
-            // byte array
-            HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.getURI().getPort())
-                .method("POST")
-                .headers(MapKit.map(
-                    "X-HEADER", Collections.singletonList("hello!"),
-                    "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
-                ))
-                .body(bytes)
-                .build();
-            HttpReq.Body body = req.body();
-            assertNotNull(body);
-            assertEquals(HttpReq.Body.Type.BYTE_ARRAY, body.type());
-            assertArrayEquals(bytes, IOKit.read(body.toInputStream()));
-            assertEquals(text, body.toText());
-            assertSame(bytes, body.toByteArray());
-            assertEquals(ByteBuffer.wrap(bytes), body.toByteBuffer());
-            HttpResp resp = HttpKit.request(req, null);
-            assertEquals("200", resp.statusCode());
-            assertEquals("OK", resp.statusText());
-            checkRespHeaders(resp);
-            String bodyString = resp.bodyString();
-            assertEquals("hello, world2!", bodyString);
-        }
-        {
-            // byte buffer
-            ByteBuffer buffer = ByteBuffer.wrap(bytes);
-            HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.getURI().getPort())
-                .method("POST")
-                .headers(MapKit.map(
-                    "X-HEADER", Collections.singletonList("hello!"),
-                    "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
-                ))
-                .body(buffer)
-                .build();
-            HttpReq.Body body = req.body();
-            assertNotNull(body);
-            assertEquals(HttpReq.Body.Type.BYTE_BUFFER, body.type());
-            buffer.mark();
-            assertArrayEquals(bytes, IOKit.read(body.toInputStream()));
-            buffer.reset();
-            assertEquals(text, body.toText());
-            buffer.reset();
-            assertArrayEquals(bytes, body.toByteArray());
-            buffer.reset();
-            assertSame(buffer, body.toByteBuffer());
-            HttpResp resp = HttpKit.request(req, null);
-            assertEquals("200", resp.statusCode());
-            assertEquals("OK", resp.statusText());
-            checkRespHeaders(resp);
-            String bodyString = resp.bodyString();
-            assertEquals("hello, world2!", bodyString);
-        }
+        ByteArrayInputStream data = new ByteArrayInputStream(bytes);
+
+        HttpReq req = createDefaultRequest()
+            .method("POST")
+            .body(data)
+            .build();
+
+        HttpReq.Body body = req.body();
+        assertNotNull(body);
+        assertEquals(HttpReq.Body.Type.INPUT_STREAM, body.type());
+
+        data.reset();
+        assertArrayEquals(bytes, IOKit.read(body.toInputStream()));
+
+        data.reset();
+        assertEquals(text, body.toText());
+
+        data.reset();
+        assertArrayEquals(bytes, body.toByteArray());
+
+        data.reset();
+        assertEquals(ByteBuffer.wrap(bytes), body.toByteBuffer());
+
+        data.reset();
+        HttpResp resp = HttpKit.request(req, null);
+        assertSuccessfulResponse(resp, "hello, world2!");
     }
 
     @Test
-    public void testException() throws Exception {
-        {
-            // HttpNetException
-            assertThrows(HttpNetException.class, () -> {
-                throw new HttpNetException();
-            });
-            assertThrows(HttpNetException.class, () -> {
-                throw new HttpNetException("");
-            });
-            assertThrows(HttpNetException.class, () -> {
-                throw new HttpNetException("", new RuntimeException());
-            });
-            assertThrows(HttpNetException.class, () -> {
-                throw new HttpNetException(new RuntimeException());
-            });
-        }
+    public void testRequestBodyWithText() throws Exception {
+        String text = "hello, world!";
+        byte[] bytes = text.getBytes(CharsKit.defaultCharset());
+
+        HttpReq req = createDefaultRequest()
+            .method("POST")
+            .body(text)
+            .build();
+
+        HttpReq.Body body = req.body();
+        assertNotNull(body);
+        assertEquals(HttpReq.Body.Type.TEXT, body.type());
+        assertArrayEquals(bytes, IOKit.read(body.toInputStream()));
+        assertEquals(text, body.toText());
+        assertArrayEquals(bytes, body.toByteArray());
+        assertEquals(ByteBuffer.wrap(bytes), body.toByteBuffer());
+
+        HttpResp resp = HttpKit.request(req, null);
+        assertSuccessfulResponse(resp, "hello, world2!");
+    }
+
+    @Test
+    public void testRequestBodyWithByteArray() throws Exception {
+        String text = "hello, world!";
+        byte[] bytes = text.getBytes(CharsKit.defaultCharset());
+
+        HttpReq req = createDefaultRequest()
+            .method("POST")
+            .body(bytes)
+            .build();
+
+        HttpReq.Body body = req.body();
+        assertNotNull(body);
+        assertEquals(HttpReq.Body.Type.BYTE_ARRAY, body.type());
+        assertArrayEquals(bytes, IOKit.read(body.toInputStream()));
+        assertEquals(text, body.toText());
+        assertArrayEquals(bytes, body.toByteArray());
+        assertEquals(ByteBuffer.wrap(bytes), body.toByteBuffer());
+
+        HttpResp resp = HttpKit.request(req, null);
+        assertSuccessfulResponse(resp, "hello, world2!");
+    }
+
+    @Test
+    public void testRequestBodyWithByteBuffer() throws Exception {
+        String text = "hello, world!";
+        byte[] bytes = text.getBytes(CharsKit.defaultCharset());
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+
+        HttpReq req = createDefaultRequest()
+            .method("POST")
+            .body(buffer)
+            .build();
+
+        HttpReq.Body body = req.body();
+        assertNotNull(body);
+        assertEquals(HttpReq.Body.Type.BYTE_BUFFER, body.type());
+
+        buffer.mark();
+        assertArrayEquals(bytes, IOKit.read(body.toInputStream()));
+        buffer.reset();
+
+        buffer.mark();
+        assertEquals(text, body.toText());
+        buffer.reset();
+
+        buffer.mark();
+        assertArrayEquals(bytes, body.toByteArray());
+        buffer.reset();
+
+        ByteBuffer bodyBuffer = body.toByteBuffer();
+        assertEquals(buffer.position(), bodyBuffer.position());
+        assertEquals(buffer.limit(), bodyBuffer.limit());
+        buffer.reset();
+        bodyBuffer.reset();
+        assertArrayEquals(buffer.array(), bodyBuffer.array());
+
+        buffer.mark();
+        HttpResp resp = HttpKit.request(req, null);
+        assertSuccessfulResponse(resp, "hello, world2!");
+    }
+
+    @Test
+    public void testHttpNetException() throws Exception {
+        assertThrows(HttpNetException.class, () -> {throw new HttpNetException();});
+        assertThrows(HttpNetException.class, () -> {throw new HttpNetException("");});
+        assertThrows(HttpNetException.class, () -> {throw new HttpNetException("", new RuntimeException());});
+        assertThrows(HttpNetException.class, () -> {throw new HttpNetException(new RuntimeException());});
+    }
+
+    private HttpReq.Builder createDefaultRequest() {
+        return HttpReq.newBuilder()
+            .url("http://localhost:" + httpServer.getURI().getPort())
+            .headers(MapKit.map(
+                "X-HEADER", Collections.singletonList("hello!"),
+                "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
+            ));
+    }
+
+    private void assertSuccessfulResponse(HttpResp resp, String expectedBody) {
+        assertEquals("200", resp.statusCode());
+        assertEquals("OK", resp.statusText());
+        checkRespHeaders(resp);
+        assertEquals(expectedBody, resp.bodyString());
+    }
+
+    private void checkRespHeaders(HttpResp resp) {
+        assertEquals("HTTP/1.1", resp.protocolVersion());
+        String contentType = resp.contentType();
+        assertNotNull(contentType);
+        assertEquals("text/html;charset=UTF-8".toLowerCase(), contentType.toLowerCase());
+        assertEquals(CharsKit.UTF_8, resp.bodyCharset());
+        assertEquals(resp.headers().get("X-HEADER"), Collections.singletonList("hello2!"));
     }
 }
