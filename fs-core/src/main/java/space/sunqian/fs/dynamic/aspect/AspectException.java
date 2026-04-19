@@ -1,4 +1,4 @@
-package space.sunqian.fs.dynamic.aop;
+package space.sunqian.fs.dynamic.aspect;
 
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.exception.FsRuntimeException;

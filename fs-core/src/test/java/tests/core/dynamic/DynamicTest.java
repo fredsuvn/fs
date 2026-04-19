@@ -37,11 +37,7 @@ public class DynamicTest {
     }
 
     @Test
-    public void testExceptions() {
-        testDynamicException();
-    }
-
-    private void testDynamicException() {
+    public void testDynamicException() {
         assertThrows(DynamicException.class, () -> {throw new DynamicException();});
         assertThrows(DynamicException.class, () -> {throw new DynamicException("");});
         assertThrows(DynamicException.class, () -> {throw new DynamicException("", new RuntimeException());});

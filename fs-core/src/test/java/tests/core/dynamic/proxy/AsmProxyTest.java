@@ -523,12 +523,7 @@ public class AsmProxyTest implements TestPrint {
     }
 
     private void testInterA(InterA obj, IntVar counter) {
-        assertFalse(obj.equals(""));
-        assertEquals(1, counter.get());
-        assertEquals(obj.hashCode(), Fs.id(obj));
-        assertEquals(2, counter.get());
-        assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
-        assertEquals(5, counter.get());
+        testObjectMethods(obj, counter, 1);
         assertThrows(AbstractMethodError.class, obj::a1);
         assertEquals(6, counter.get());
         assertThrows(AbstractMethodError.class, obj::a2);
@@ -553,13 +548,17 @@ public class AsmProxyTest implements TestPrint {
         assertEquals(16, counter.get());
     }
 
-    private void testInterB(InterB obj, IntVar counter) {
+    private void testObjectMethods(Object obj, IntVar counter, int expectedCounter) {
         assertFalse(obj.equals(""));
-        assertEquals(1, counter.get());
+        assertEquals(expectedCounter, counter.get());
         assertEquals(obj.hashCode(), Fs.id(obj));
-        assertEquals(2, counter.get());
+        assertEquals(expectedCounter + 1, counter.get());
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
-        assertEquals(5, counter.get());
+        assertEquals(expectedCounter + 4, counter.get());
+    }
+
+    private void testInterB(InterB obj, IntVar counter) {
+        testObjectMethods(obj, counter, 1);
         assertThrows(AbstractMethodError.class, () -> obj.b1(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         assertEquals(6, counter.get());
         assertThrows(AbstractMethodError.class, () -> obj.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
@@ -585,12 +584,7 @@ public class AsmProxyTest implements TestPrint {
     }
 
     private void testInterD(InterD obj, ClsD cd, IntVar counter) {
-        assertFalse(obj.equals(""));
-        assertEquals(1, counter.get());
-        assertEquals(obj.hashCode(), Fs.id(obj));
-        assertEquals(2, counter.get());
-        assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
-        assertEquals(5, counter.get());
+        testObjectMethods(obj, counter, 1);
         assertEquals(
             obj.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
             cd.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
@@ -646,65 +640,35 @@ public class AsmProxyTest implements TestPrint {
     }
 
     private void testInterC(InterC obj1, InterC<String> obj2, IntVar counter) {
-        assertFalse(obj1.equals(""));
-        assertEquals(1, counter.get());
-        assertEquals(obj1.hashCode(), Fs.id(obj1));
-        assertEquals(2, counter.get());
-        assertEquals(obj1.toString(), obj1.getClass().getName() + '@' + Integer.toHexString(obj1.hashCode()));
-        assertEquals(5, counter.get());
+        testObjectMethods(obj1, counter, 1);
         assertEquals("aaa", obj1.c1("aaa"));
         assertEquals(6, counter.get());
         counter.clear();
-        assertFalse(obj2.equals(""));
-        assertEquals(1, counter.get());
-        assertEquals(obj2.hashCode(), Fs.id(obj2));
-        assertEquals(2, counter.get());
-        assertEquals(obj2.toString(), obj2.getClass().getName() + '@' + Integer.toHexString(obj2.hashCode()));
-        assertEquals(5, counter.get());
+        testObjectMethods(obj2, counter, 1);
         String c2Str = obj2.c1("bbb");
         assertEquals("bbb", c2Str);
         assertEquals(6, counter.get());
     }
 
     private void testClsA(ClsA obj, IntVar counter) {
-        assertFalse(obj.equals(""));
-        assertEquals(1, counter.get());
-        assertEquals(obj.hashCode(), Fs.id(obj));
-        assertEquals(2, counter.get());
-        assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
-        assertEquals(5, counter.get());
+        testObjectMethods(obj, counter, 1);
         assertEquals("aaa", obj.a1("aaa"));
-        assertEquals(7, counter.get());// public + protected
+        assertEquals(7, counter.get());
     }
 
     private void testClsB(ClsB obj1, ClsB<String> obj2, IntVar counter) {
-        assertFalse(obj1.equals(""));
-        assertEquals(1, counter.get());
-        assertEquals(obj1.hashCode(), Fs.id(obj1));
-        assertEquals(2, counter.get());
-        assertEquals(obj1.toString(), obj1.getClass().getName() + '@' + Integer.toHexString(obj1.hashCode()));
-        assertEquals(5, counter.get());
+        testObjectMethods(obj1, counter, 1);
         assertEquals("aaa", obj1.b1("aaa"));
-        assertEquals(7, counter.get());// public + protected
+        assertEquals(7, counter.get());
         counter.clear();
-        assertFalse(obj2.equals(""));
-        assertEquals(1, counter.get());
-        assertEquals(obj2.hashCode(), Fs.id(obj2));
-        assertEquals(2, counter.get());
-        assertEquals(obj2.toString(), obj2.getClass().getName() + '@' + Integer.toHexString(obj2.hashCode()));
-        assertEquals(5, counter.get());
+        testObjectMethods(obj2, counter, 1);
         String c2Str = obj2.b1("bbb");
         assertEquals("bbb", c2Str);
-        assertEquals(7, counter.get());// public + protected
+        assertEquals(7, counter.get());
     }
 
     private void testClsC(ClsC obj, IntVar counter) {
-        assertFalse(obj.equals(""));
-        assertEquals(1, counter.get());
-        assertEquals(obj.hashCode(), Fs.id(obj));
-        assertEquals(2, counter.get());
-        assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
-        assertEquals(5, counter.get());
+        testObjectMethods(obj, counter, 1);
         assertEquals("aaa", obj.b1("aaa"));
         assertEquals(6, counter.get());
         ClsB<String> b1 = Fs.as(obj);

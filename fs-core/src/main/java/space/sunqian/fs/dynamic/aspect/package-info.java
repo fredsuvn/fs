@@ -8,9 +8,9 @@
  * <p>
  * Core interfaces:
  * <ul>
- *     <li>{@link space.sunqian.fs.dynamic.aop.AspectMaker}</li>
- *     <li>{@link space.sunqian.fs.dynamic.aop.AspectSpec}</li>
- *     <li>{@link space.sunqian.fs.dynamic.aop.AspectHandler}</li>
+ *     <li>{@link space.sunqian.fs.dynamic.aspect.AspectMaker}</li>
+ *     <li>{@link space.sunqian.fs.dynamic.aspect.AspectSpec}</li>
+ *     <li>{@link space.sunqian.fs.dynamic.aspect.AspectHandler}</li>
  * </ul>
  */
-package space.sunqian.fs.dynamic.aop;
+package space.sunqian.fs.dynamic.aspect;

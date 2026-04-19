@@ -1,0 +1,557 @@
+package tests.core.dynamic.aspect;
+
+import org.junit.jupiter.api.Test;
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.base.value.BooleanVar;
+import space.sunqian.fs.base.value.IntVar;
+import space.sunqian.fs.base.value.Var;
+import space.sunqian.fs.dynamic.aspect.AspectException;
+import space.sunqian.fs.dynamic.aspect.AspectHandler;
+import space.sunqian.fs.dynamic.aspect.AspectMaker;
+import space.sunqian.fs.dynamic.aspect.AspectSpec;
+
+import java.lang.reflect.Method;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class AsmAspectTest {
+
+    @Test
+    public void testSimple() {
+        IntVar count = IntVar.of(0);
+        BooleanVar replace = BooleanVar.of(false);
+        AspectHandler handler = createAspectHandler(count, replace);
+
+        testSimpleForClass(count, replace, handler, SimpleCls.class);
+        testSimpleForClass(count, replace, handler, ComplexCls.class);
+        testAspectException();
+    }
+
+    private AspectHandler createAspectHandler(IntVar count, BooleanVar replace) {
+        return new AspectHandler() {
+            @Override
+            public boolean needsAspect(@Nonnull Method method) {
+                return true;
+            }
+
+            @Override
+            public void beforeInvoking(@Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+                if (replace.get()) {
+                    args[0] = "b";
+                }
+                count.getAndIncrement();
+            }
+
+            @Override
+            public @Nullable Object afterReturning(@Nullable Object result, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+                if (replace.get()) {
+                    assertEquals("b", args[0]);
+                } else {
+                    assertEquals("a", args[0]);
+                }
+                count.getAndIncrement();
+                return result;
+            }
+
+            @Override
+            public @Nullable Object afterThrowing(@Nonnull Throwable ex, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) {
+                if (replace.get()) {
+                    assertEquals("b", args[0]);
+                } else {
+                    assertEquals("a", args[0]);
+                }
+                count.getAndIncrement();
+                Object[] result = (Object[]) args[args.length - 1];
+                return result[0];
+            }
+        };
+    }
+
+    private <T extends SimpleCls> void testSimpleForClass(IntVar count, BooleanVar replace, AspectHandler handler, Class<T> cls) {
+        testStringMethod(count, replace, handler, cls);
+        testVoidMethod(count, replace, handler, cls);
+        testBooleanMethod(count, replace, handler, cls);
+        testByteMethod(count, replace, handler, cls);
+        testCharMethod(count, replace, handler, cls);
+        testShortMethod(count, replace, handler, cls);
+        testIntMethod(count, replace, handler, cls);
+        testLongMethod(count, replace, handler, cls);
+        testFloatMethod(count, replace, handler, cls);
+        testDoubleMethod(count, replace, handler, cls);
+        testThrowMethod(count, replace, handler, cls);
+    }
+
+    private <T extends SimpleCls> void testStringMethod(IntVar count, BooleanVar replace, AspectHandler handler, Class<T> cls) {
+        AspectSpec spec = createAspectSpec(cls, handler);
+        SimpleCls sc = spec.newInstance();
+
+        // Test with original parameter
+        assertEquals(0, count.get());
+        assertEquals(
+            "atrue234567.08.0",
+            sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(2, count.get());
+
+        // Test with replaced parameter
+        replace.set(true);
+        assertEquals(
+            "btrue234567.08.0",
+            sc.getString("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d)
+        );
+        assertEquals(4, count.get());
+
+        // Reset variables
+        resetTestVariables(count, replace);
+
+        // Test AspectSpec properties
+        assertAspectSpecProperties(spec, cls, sc, handler);
+    }
+
+    private <T extends SimpleCls> void testVoidMethod(IntVar count, BooleanVar replace, AspectHandler handler, Class<T> cls) {
+        AspectSpec spec = createAspectSpec(cls, handler);
+        SimpleCls sc = spec.newInstance();
+
+        // Test with original parameter
+        assertEquals(0, count.get());
+        Object[] result = new Object[1];
+        sc.getVoid("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result);
+        assertEquals("atrue234567.08.0", result[0]);
+        assertEquals(2, count.get());
+
+        // Test with replaced parameter
+        replace.set(true);
+        result[0] = null;
+        sc.getVoid("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result);
+        assertEquals("btrue234567.08.0", result[0]);
+        assertEquals(4, count.get());
+
+        // Reset variables
+        resetTestVariables(count, replace);
+    }
+
+    private <T extends SimpleCls> void testBooleanMethod(IntVar count, BooleanVar replace, AspectHandler handler, Class<T> cls) {
+        AspectSpec spec = createAspectSpec(cls, handler);
+        SimpleCls sc = spec.newInstance();
+
+        // Test with true value
+        assertEquals(0, count.get());
+        assertEquals(true, sc.getBoolean("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d));
+        assertEquals(2, count.get());
+
+        // Test with false value
+        assertEquals(false, sc.getBoolean("a", false, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d));
+        assertEquals(4, count.get());
+
+        // Reset variables
+        resetTestVariables(count, replace);
+    }
+
+    private <T extends SimpleCls> void testByteMethod(IntVar count, BooleanVar replace, AspectHandler handler, Class<T> cls) {
+        AspectSpec spec = createAspectSpec(cls, handler);
+        SimpleCls sc = spec.newInstance();
+
+        // Test with value 2
+        assertEquals(0, count.get());
+        assertEquals(2, sc.getByte("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d));
+        assertEquals(2, count.get());
+
+        // Test with value 20
+        assertEquals(20, sc.getByte("a", true, (byte) 20, '3', (short) 4, 5, 6L, 7.0f, 8.0d));
+        assertEquals(4, count.get());
+
+        // Reset variables
+        resetTestVariables(count, replace);
+    }
+
+    private <T extends SimpleCls> void testCharMethod(IntVar count, BooleanVar replace, AspectHandler handler, Class<T> cls) {
+        AspectSpec spec = createAspectSpec(cls, handler);
+        SimpleCls sc = spec.newInstance();
+
+        // Test with '3'
+        assertEquals(0, count.get());
+        assertEquals('3', sc.getChar("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d));
+        assertEquals(2, count.get());
+
+        // Test with '6'
+        assertEquals('6', sc.getChar("a", true, (byte) 2, '6', (short) 4, 5, 6L, 7.0f, 8.0d));
+        assertEquals(4, count.get());
+
+        // Reset variables
+        resetTestVariables(count, replace);
+    }
+
+    private <T extends SimpleCls> void testShortMethod(IntVar count, BooleanVar replace, AspectHandler handler, Class<T> cls) {
+        AspectSpec spec = createAspectSpec(cls, handler);
+        SimpleCls sc = spec.newInstance();
+
+        // Test with value 4
+        assertEquals(0, count.get());
+        assertEquals(4, sc.getShort("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d));
+        assertEquals(2, count.get());
+
+        // Test with value 40
+        assertEquals(40, sc.getShort("a", true, (byte) 2, '3', (short) 40, 5, 6L, 7.0f, 8.0d));
+        assertEquals(4, count.get());
+
+        // Reset variables
+        resetTestVariables(count, replace);
+    }
+
+    private <T extends SimpleCls> void testIntMethod(IntVar count, BooleanVar replace, AspectHandler handler, Class<T> cls) {
+        AspectSpec spec = createAspectSpec(cls, handler);
+        SimpleCls sc = spec.newInstance();
+
+        // Test with value 5
+        assertEquals(0, count.get());
+        assertEquals(5, sc.getInt("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d));
+        assertEquals(2, count.get());
+
+        // Test with value 50
+        assertEquals(50, sc.getInt("a", true, (byte) 2, '3', (short) 4, 50, 6L, 7.0f, 8.0d));
+        assertEquals(4, count.get());
+
+        // Reset variables
+        resetTestVariables(count, replace);
+    }
+
+    private <T extends SimpleCls> void testLongMethod(IntVar count, BooleanVar replace, AspectHandler handler, Class<T> cls) {
+        AspectSpec spec = createAspectSpec(cls, handler);
+        SimpleCls sc = spec.newInstance();
+
+        // Test with value 6L
+        assertEquals(0, count.get());
+        assertEquals(6L, sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d));
+        assertEquals(2, count.get());
+
+        // Test with value 60L
+        assertEquals(60L, sc.getLong("a", true, (byte) 2, '3', (short) 4, 5, 60L, 7.0f, 8.0d));
+        assertEquals(4, count.get());
+
+        // Reset variables
+        resetTestVariables(count, replace);
+    }
+
+    private <T extends SimpleCls> void testFloatMethod(IntVar count, BooleanVar replace, AspectHandler handler, Class<T> cls) {
+        AspectSpec spec = createAspectSpec(cls, handler);
+        SimpleCls sc = spec.newInstance();
+
+        // Test with value 7.0f
+        assertEquals(0, count.get());
+        assertEquals(7.0f, sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d));
+        assertEquals(2, count.get());
+
+        // Test with value 70.0f
+        assertEquals(70.0f, sc.getFloat("a", true, (byte) 2, '3', (short) 4, 5, 6L, 70.0f, 8.0d));
+        assertEquals(4, count.get());
+
+        // Reset variables
+        resetTestVariables(count, replace);
+    }
+
+    private <T extends SimpleCls> void testDoubleMethod(IntVar count, BooleanVar replace, AspectHandler handler, Class<T> cls) {
+        AspectSpec spec = createAspectSpec(cls, handler);
+        SimpleCls sc = spec.newInstance();
+
+        // Test with value 8.0
+        assertEquals(0, count.get());
+        assertEquals(8.0, sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d));
+        assertEquals(2, count.get());
+
+        // Test with value 80.0
+        assertEquals(80.0, sc.getDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 80.0d));
+        assertEquals(4, count.get());
+
+        // Reset variables
+        resetTestVariables(count, replace);
+    }
+
+    private <T extends SimpleCls> void testThrowMethod(IntVar count, BooleanVar replace, AspectHandler handler, Class<T> cls) {
+        AspectSpec spec = createAspectSpec(cls, handler);
+        SimpleCls sc = spec.newInstance();
+
+        // Test exception handling
+        assertEquals(0, count.get());
+        Object[] result = new Object[1];
+        assertEquals(8.0, sc.throwDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, result));
+        assertEquals(8.0, result[0]);
+        assertEquals(2, count.get());
+
+        // Reset variables
+        resetTestVariables(count, replace);
+
+        // Test direct throw
+        testDirectThrow(cls);
+        resetTestVariables(count, replace);
+    }
+
+    private <T extends SimpleCls> void testDirectThrow(Class<T> cls) {
+        AspectSpec spec = createAspectSpec(cls, new AspectHandler() {
+            @Override
+            public boolean needsAspect(@Nonnull Method method) {
+                return true;
+            }
+
+            @Override
+            public void beforeInvoking(@Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) {
+            }
+
+            @Override
+            public @Nullable Object afterReturning(@Nullable Object result, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) {
+                return result;
+            }
+
+            @Override
+            public @Nullable Object afterThrowing(@Nonnull Throwable ex, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) {
+                throw new AspectTestException(ex);
+            }
+        });
+
+        SimpleCls sc = spec.newInstance();
+        AspectTestException ex = assertThrows(AspectTestException.class, () ->
+            sc.throwDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, null)
+        );
+        assertTrue(ex.getCause() instanceof NullPointerException);
+    }
+
+    private void testAspectException() {
+        // Test exception when handler is null
+        assertThrows(AspectException.class, () -> AspectMaker.byAsm().make(SimpleCls.class, null));
+    }
+
+    @Test
+    public void testComplex() {
+        IntVar count = IntVar.of(0);
+        AspectHandler handler = createComplexAspectHandler(count);
+        testComplexInteractions(handler, count);
+    }
+
+    private AspectHandler createComplexAspectHandler(IntVar count) {
+        return new AspectHandler() {
+            @Override
+            public boolean needsAspect(@Nonnull Method method) {
+                return !method.getDeclaringClass().equals(Object.class);
+            }
+
+            @Override
+            public void beforeInvoking(@Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+                count.getAndIncrement();
+            }
+
+            @Override
+            public @Nullable Object afterReturning(@Nullable Object result, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+                count.getAndIncrement();
+                return result;
+            }
+
+            @Override
+            public @Nullable Object afterThrowing(@Nonnull Throwable ex, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) {
+                return null;
+            }
+        };
+    }
+
+    private void testComplexInteractions(AspectHandler handler, IntVar count) {
+        AspectSpec spec = createAspectSpec(ComplexCls.class, handler);
+        ComplexCls cc = spec.newInstance();
+
+        // Test inter1 method
+        assertEquals(0, count.get());
+        assertEquals("inter1", cc.inter1());
+        assertEquals(2, count.get());
+
+        // Test inter2 methods
+        assertEquals(11L, cc.inter2(11L));
+        assertEquals(4, count.get());
+        assertEquals("1111", cc.inter2(11L, 11L));
+        assertEquals(6, count.get());
+        assertEquals("22L11", cc.inter2("22L", 11L));
+        assertEquals(8, count.get());
+
+        // Test inter3 methods
+        assertEquals(888, cc.inter3(888));
+        assertEquals(10, count.get());
+        assertEquals("8881", cc.inter3(888, 1L));
+        assertEquals(12, count.get());
+    }
+
+    @Test
+    public void testGeneric() {
+        Var<Object> arg = Var.of(null);
+        AspectHandler handler = createGenericAspectHandler(arg);
+        testGenericInteractions(handler, arg);
+    }
+
+    private AspectHandler createGenericAspectHandler(Var<Object> arg) {
+        return new AspectHandler() {
+            @Override
+            public boolean needsAspect(@Nonnull Method method) {
+                return !method.getDeclaringClass().equals(Object.class);
+            }
+
+            @Override
+            public void beforeInvoking(@Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+                arg.set(args[0]);
+            }
+
+            @Override
+            public @Nullable Object afterReturning(@Nullable Object result, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+                return result;
+            }
+
+            @Override
+            public @Nullable Object afterThrowing(@Nonnull Throwable ex, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) {
+                return null;
+            }
+        };
+    }
+
+    private void testGenericInteractions(AspectHandler handler, Var<Object> arg) {
+        AspectSpec spec = createAspectSpec(SimpleGeneric.class, handler);
+
+        // Test with String type
+        SimpleGeneric<String> strSg = spec.newInstance();
+        assertEquals("sss", strSg.generic("sss"));
+        assertEquals("sss", arg.get());
+
+        // Test with Integer type
+        SimpleGeneric<Integer> intSg = spec.newInstance();
+        assertEquals(888, intSg.generic(888));
+        assertEquals(888, arg.get());
+    }
+
+    // Helper methods
+    private <T> AspectSpec createAspectSpec(Class<T> cls, AspectHandler handler) {
+        return AspectMaker.byAsm().make(cls, handler);
+    }
+
+    private void resetTestVariables(IntVar count, BooleanVar replace) {
+        count.clear();
+        replace.clear();
+    }
+
+    private <T extends SimpleCls> void assertAspectSpecProperties(AspectSpec spec, Class<T> cls, SimpleCls instance, AspectHandler handler) {
+        assertEquals(spec.advisedClass(), cls);
+        assertEquals(spec.aspectClass(), instance.getClass());
+        assertEquals(spec.aspectHandler(), handler);
+    }
+
+    // Test classes
+    public static class SimpleCls {
+        public String getString(String a, boolean p1, byte p2, char p3, short p4, int p5, long p6, float p7, double p8) {
+            return a + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
+        }
+
+        public void getVoid(String a, boolean p1, byte p2, char p3, short p4, int p5, long p6, float p7, double p8, Object[] result) {
+            result[0] = a + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
+        }
+
+        public boolean getBoolean(String a, boolean p1, byte p2, char p3, short p4, int p5, long p6, float p7, double p8) {
+            return p1;
+        }
+
+        public byte getByte(String a, boolean p1, byte p2, char p3, short p4, int p5, long p6, float p7, double p8) {
+            return p2;
+        }
+
+        public char getChar(String a, boolean p1, byte p2, char p3, short p4, int p5, long p6, float p7, double p8) {
+            return p3;
+        }
+
+        public short getShort(String a, boolean p1, byte p2, char p3, short p4, int p5, long p6, float p7, double p8) {
+            return p4;
+        }
+
+        public int getInt(String a, boolean p1, byte p2, char p3, short p4, int p5, long p6, float p7, double p8) {
+            return p5;
+        }
+
+        public long getLong(String a, boolean p1, byte p2, char p3, short p4, int p5, long p6, float p7, double p8) {
+            return p6;
+        }
+
+        public float getFloat(String a, boolean p1, byte p2, char p3, short p4, int p5, long p6, float p7, double p8) {
+            return p7;
+        }
+
+        public double getDouble(String a, boolean p1, byte p2, char p3, short p4, int p5, long p6, float p7, double p8) {
+            return p8;
+        }
+
+        public double throwDouble(String a, boolean p1, byte p2, char p3, short p4, int p5, long p6, float p7, double p8, Object[] result) {
+            result[0] = p8;
+            throw new AspectTestException();
+        }
+
+        // Test modifiers:
+        public static void testModifierFilter1() {}
+
+        public final void testModifierFilter2() {}
+
+        private void testModifierFilter3() {}
+
+        private static void testModifierFilter4() {}
+    }
+
+    public static abstract class SimpleCls2 extends SimpleCls implements Inter1 {}
+
+    public static abstract class SimpleCls3 extends SimpleCls2 implements Inter2<Long> {}
+
+    public static class ComplexCls extends SimpleCls3 implements Inter3 {
+        @Override
+        public String inter1() {
+            return "inter1";
+        }
+
+        @Override
+        public Long inter2(Long aLong) {
+            return aLong;
+        }
+
+        @Override
+        public <T> T inter3(T t) {
+            return t;
+        }
+    }
+
+    public static class SimpleGeneric<T> {
+        public T generic(T t) {
+            return t;
+        }
+    }
+
+    public interface Inter1 {
+        String inter1();
+
+        default String inter2(String s, long l) {
+            return s + l;
+        }
+    }
+
+    public interface Inter2<T> {
+        T inter2(T t);
+
+        default String inter2(T s, long l) {
+            return s.toString() + l;
+        }
+    }
+
+    public interface Inter3 {
+        <T> T inter3(T t);
+
+        default <T> String inter3(T s, long l) {
+            return s.toString() + l;
+        }
+    }
+
+    private static class AspectTestException extends RuntimeException {
+        public AspectTestException() {}
+
+        public AspectTestException(Throwable cause) {
+            super(cause);
+        }
+    }
+}

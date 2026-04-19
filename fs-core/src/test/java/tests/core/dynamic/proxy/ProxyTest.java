@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.dynamic.proxy.ProxyException;
 import space.sunqian.fs.dynamic.proxy.ProxyHandler;
 import space.sunqian.fs.dynamic.proxy.ProxyInvoker;
 import space.sunqian.fs.dynamic.proxy.ProxyMaker;
@@ -25,9 +26,9 @@ public class ProxyTest {
     private void testProxyWithMaker(ProxyMaker maker) throws Exception {
         String result = "ssssssss";
         ProxyHandler handler = createProxyHandler(result);
-        ProxySpec pc = maker.make(null, Fs.list(InterA.class), handler);
-        InterA pa = pc.newInstance();
-        testProxyBehavior(pa, result);
+        ProxySpec spec = maker.make(null, Fs.list(InterA.class), handler);
+        InterA proxy = spec.newInstance();
+        testProxyBehavior(proxy, result);
     }
 
     private ProxyHandler createProxyHandler(String result) {
@@ -49,9 +50,17 @@ public class ProxyTest {
         };
     }
 
-    private void testProxyBehavior(InterA pa, String result) {
-        assertThrows(AbstractMethodError.class, pa::a1);
-        assertSame(pa.a2(), result);
+    private void testProxyBehavior(InterA proxy, String result) {
+        assertThrows(AbstractMethodError.class, proxy::a1);
+        assertSame(proxy.a2(), result);
+    }
+
+    @Test
+    public void testProxyException() {
+        assertThrows(ProxyException.class, () -> {throw new ProxyException();});
+        assertThrows(ProxyException.class, () -> {throw new ProxyException("");});
+        assertThrows(ProxyException.class, () -> {throw new ProxyException("", new RuntimeException());});
+        assertThrows(ProxyException.class, () -> {throw new ProxyException(new RuntimeException());});
     }
 
     public interface InterA {

@@ -1,4 +1,4 @@
-package space.sunqian.fs.dynamic.aop.asm;
+package space.sunqian.fs.dynamic.aspect.asm;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -11,10 +11,10 @@ import space.sunqian.fs.asm.MethodVisitor;
 import space.sunqian.fs.asm.Opcodes;
 import space.sunqian.fs.base.system.JvmKit;
 import space.sunqian.fs.dynamic.DynamicClassLoader;
-import space.sunqian.fs.dynamic.aop.AspectException;
-import space.sunqian.fs.dynamic.aop.AspectHandler;
-import space.sunqian.fs.dynamic.aop.AspectMaker;
-import space.sunqian.fs.dynamic.aop.AspectSpec;
+import space.sunqian.fs.dynamic.aspect.AspectException;
+import space.sunqian.fs.dynamic.aspect.AspectHandler;
+import space.sunqian.fs.dynamic.aspect.AspectMaker;
+import space.sunqian.fs.dynamic.aspect.AspectSpec;
 import space.sunqian.fs.dynamic.proxy.ProxyKit;
 import space.sunqian.fs.third.asm.AsmKit;
 
