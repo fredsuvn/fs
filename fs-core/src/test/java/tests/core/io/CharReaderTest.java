@@ -51,106 +51,119 @@ public class CharReaderTest implements DataGen {
         testReadChars(128, 1024);
 
         // error
-        {
-            TestReader tr = new TestReader(new CharArrayReader(new char[10]));
-            tr.setNextOperation(ReadOps.THROW, 99);
-            assertThrows(IORuntimeException.class, () -> CharReader.from(tr).skip(100));
-        }
+        testReadCharsError();
+    }
+
+    private void testReadCharsError() throws Exception {
+        TestReader tr = new TestReader(new CharArrayReader(new char[10]));
+        tr.setNextOperation(ReadOps.THROW, 99);
+        assertThrows(IORuntimeException.class, () -> CharReader.from(tr).skip(100));
     }
 
     private void testReadChars(int dataSize, int readSize) throws Exception {
-        {
-            // reader
-            char[] data = randomChars(dataSize);
-            testReadChars(CharReader.from(new CharArrayReader(data)), data, readSize, false);
-            testSkipChars(CharReader.from(new CharArrayReader(data)), data, readSize);
-            testReadChars(CharReader.from(new OneCharReader(data)), data, readSize, false);
-            testSkipChars(CharReader.from(new OneCharReader(data)), data, readSize);
-            TestReader tr = new TestReader(new CharArrayReader(data));
-            tr.setNextOperation(ReadOps.READ_ZERO);
-            testSkipChars(CharReader.from(tr), data, readSize);
-        }
-        {
-            // char array
-            char[] data = randomChars(dataSize);
-            testReadChars(CharReader.from(data), data, readSize, true);
-            testSkipChars(CharReader.from(data), data, readSize);
-            char[] dataPadding = new char[data.length + 66];
-            System.arraycopy(data, 0, dataPadding, 33, data.length);
+        char[] data = randomChars(dataSize);
+
+        // reader
+        testCharReaderFromReader(data, readSize);
+
+        // char array
+        testCharReaderFromCharArray(data, readSize);
+
+        // char sequence
+        testCharReaderFromCharSequence(data, readSize);
+
+        // buffer
+        testCharReaderFromBuffer(data, readSize);
+
+        // limited
+        testCharReaderWithLimit(data, readSize);
+    }
+
+    private void testCharReaderFromReader(char[] data, int readSize) throws Exception {
+        testReadChars(CharReader.from(new CharArrayReader(data)), data, readSize, false);
+        testSkipChars(CharReader.from(new CharArrayReader(data)), data, readSize);
+        testReadChars(CharReader.from(new OneCharReader(data)), data, readSize, false);
+        testSkipChars(CharReader.from(new OneCharReader(data)), data, readSize);
+        TestReader tr = new TestReader(new CharArrayReader(data));
+        tr.setNextOperation(ReadOps.READ_ZERO);
+        testSkipChars(CharReader.from(tr), data, readSize);
+    }
+
+    private void testCharReaderFromCharArray(char[] data, int readSize) throws Exception {
+        testReadChars(CharReader.from(data), data, readSize, true);
+        testSkipChars(CharReader.from(data), data, readSize);
+        char[] dataPadding = new char[data.length + 66];
+        System.arraycopy(data, 0, dataPadding, 33, data.length);
+        testReadChars(
+            CharReader.from(dataPadding, 33, data.length),
+            Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
+            readSize, true
+        );
+        testSkipChars(CharReader.from(dataPadding, 33, data.length), data, readSize);
+    }
+
+    private void testCharReaderFromCharSequence(char[] data, int readSize) throws Exception {
+        String dataStr = new String(data);
+        testReadChars(CharReader.from(dataStr), data, readSize, true);
+        testSkipChars(CharReader.from(data), data, readSize);
+        char[] dataPadding = new char[data.length + 66];
+        System.arraycopy(data, 0, dataPadding, 33, data.length);
+        String dataStrPadding = new String(dataPadding);
+        testReadChars(
+            CharReader.from(dataStrPadding, 33, 33 + data.length),
+            Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
+            readSize, true
+        );
+        testSkipChars(CharReader.from(dataStrPadding, 33, 33 + data.length), data, readSize);
+    }
+
+    private void testCharReaderFromBuffer(char[] data, int readSize) throws Exception {
+        testReadChars(CharReader.from(CharBuffer.wrap(data)), data, readSize, true);
+        testSkipChars(CharReader.from(CharBuffer.wrap(data)), data, readSize);
+    }
+
+    private void testCharReaderWithLimit(char[] data, int readSize) throws Exception {
+        testReadChars(
+            CharReader.from(data).limit(data.length),
+            data,
+            readSize, true
+        );
+        testSkipChars(
+            CharReader.from(data),
+            data,
+            readSize
+        );
+        testReadChars(
+            CharReader.from(data).limit(data.length + 5),
+            data,
+            readSize, true
+        );
+        testSkipChars(
+            CharReader.from(data).limit(data.length + 5),
+            data,
+            readSize
+        );
+        testReadChars(
+            CharReader.from(new CharArrayReader(data)).limit(data.length + 5),
+            data,
+            readSize, false
+        );
+        testSkipChars(
+            CharReader.from(new CharArrayReader(data)).limit(data.length + 5),
+            data,
+            readSize
+        );
+        if (data.length > 5) {
             testReadChars(
-                CharReader.from(dataPadding, 33, data.length),
-                Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
-                readSize, true
-            );
-            testSkipChars(CharReader.from(dataPadding, 33, data.length), data, readSize);
-        }
-        {
-            // char sequence
-            char[] data = randomChars(dataSize);
-            String dataStr = new String(data);
-            testReadChars(CharReader.from(dataStr), data, readSize, true);
-            testSkipChars(CharReader.from(data), data, readSize);
-            char[] dataPadding = new char[data.length + 66];
-            System.arraycopy(data, 0, dataPadding, 33, data.length);
-            String dataStrPadding = new String(dataPadding);
-            testReadChars(
-                CharReader.from(dataStrPadding, 33, 33 + data.length),
-                Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
-                readSize, true
-            );
-            testSkipChars(CharReader.from(dataStrPadding, 33, 33 + data.length), data, readSize);
-        }
-        {
-            // buffer
-            char[] data = randomChars(dataSize);
-            testReadChars(CharReader.from(CharBuffer.wrap(data)), data, readSize, true);
-            testSkipChars(CharReader.from(CharBuffer.wrap(data)), data, readSize);
-        }
-        {
-            // limited
-            char[] data = randomChars(dataSize);
-            testReadChars(
-                CharReader.from(data).limit(data.length),
-                data,
+                CharReader.from(data).limit(data.length - 5),
+                Arrays.copyOf(data, data.length - 5),
                 readSize, true
             );
             testSkipChars(
-                CharReader.from(data),
-                data,
+                CharReader.from(data).limit(data.length - 5),
+                Arrays.copyOf(data, data.length - 5),
                 readSize
             );
-            testReadChars(
-                CharReader.from(data).limit(data.length + 5),
-                data,
-                readSize, true
-            );
-            testSkipChars(
-                CharReader.from(data).limit(data.length + 5),
-                data,
-                readSize
-            );
-            testReadChars(
-                CharReader.from(new CharArrayReader(data)).limit(data.length + 5),
-                data,
-                readSize, false
-            );
-            testSkipChars(
-                CharReader.from(new CharArrayReader(data)).limit(data.length + 5),
-                data,
-                readSize
-            );
-            if (data.length > 5) {
-                testReadChars(
-                    CharReader.from(data).limit(data.length - 5),
-                    Arrays.copyOf(data, data.length - 5),
-                    readSize, true
-                );
-                testSkipChars(
-                    CharReader.from(data).limit(data.length - 5),
-                    Arrays.copyOf(data, data.length - 5),
-                    readSize
-                );
-            }
         }
     }
 

@@ -51,51 +51,66 @@ public class IOImplsTest implements DataGen {
         testInputStream(256);
         testInputStream(512);
         testInputStream(1024);
-        {
-            // empty
-            testInputStream(IOKit.emptyInputStream(), new byte[0], true, false, false);
-        }
-        {
-            // error
-            RandomAccessFile raf = new FakeFile(new byte[0]);
-            raf.close();
-            assertThrows(IllegalArgumentException.class, () -> IOKit.newInputStream(raf, -1));
-            assertThrows(IORuntimeException.class, () -> IOKit.newInputStream(raf, 0));
-        }
-        {
-            // illegal argument
-            assertThrows(IllegalArgumentException.class, () ->
-                IOKit.limitedInputStream(new ByteArrayInputStream(new byte[0]), -1));
-            assertThrows(IllegalArgumentException.class, () ->
-                IOKit.limitedOutputStream(new ByteArrayOutputStream(), -1));
-            assertThrows(IllegalArgumentException.class, () ->
-                IOKit.limitedReader(new CharArrayReader(new char[0]), -1));
-            assertThrows(IllegalArgumentException.class, () ->
-                IOKit.limitedWriter(new CharArrayWriter(), -1));
-        }
-        {
-            // limited
-            assertEquals(
-                -1,
-                IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read()
-            );
-            assertEquals(
-                -1,
-                IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read(new byte[100])
-            );
-        }
-        {
-            // ByteReader
-            TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
-            tin.setNextOperation(ReadOps.THROW, 99);
-            ByteReader reader = ByteReader.from(tin);
-            InputStream in = reader.asInputStream();
-            assertThrows(IOException.class, in::read);
-            assertThrows(IOException.class, () -> in.read(new byte[10]));
-            assertThrows(IOException.class, () -> in.skip(1));
-            assertThrows(IOException.class, in::reset);
-            assertThrows(IOException.class, in::close);
-        }
+
+        // empty
+        testEmptyInputStream();
+
+        // error
+        testInputStreamError();
+
+        // illegal argument
+        testInputStreamIllegalArgument();
+
+        // limited
+        testLimitedInputStream();
+
+        // ByteReader
+        testByteReaderAsInputStream();
+    }
+
+    private void testEmptyInputStream() throws Exception {
+        testInputStream(IOKit.emptyInputStream(), new byte[0], true, false, false);
+    }
+
+    private void testInputStreamError() throws Exception {
+        RandomAccessFile raf = new FakeFile(new byte[0]);
+        raf.close();
+        assertThrows(IllegalArgumentException.class, () -> IOKit.newInputStream(raf, -1));
+        assertThrows(IORuntimeException.class, () -> IOKit.newInputStream(raf, 0));
+    }
+
+    private void testInputStreamIllegalArgument() throws Exception {
+        assertThrows(IllegalArgumentException.class, () ->
+            IOKit.limitedInputStream(new ByteArrayInputStream(new byte[0]), -1));
+        assertThrows(IllegalArgumentException.class, () ->
+            IOKit.limitedOutputStream(new ByteArrayOutputStream(), -1));
+        assertThrows(IllegalArgumentException.class, () ->
+            IOKit.limitedReader(new CharArrayReader(new char[0]), -1));
+        assertThrows(IllegalArgumentException.class, () ->
+            IOKit.limitedWriter(new CharArrayWriter(), -1));
+    }
+
+    private void testLimitedInputStream() throws Exception {
+        assertEquals(
+            -1,
+            IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read()
+        );
+        assertEquals(
+            -1,
+            IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read(new byte[100])
+        );
+    }
+
+    private void testByteReaderAsInputStream() throws Exception {
+        TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
+        tin.setNextOperation(ReadOps.THROW, 99);
+        ByteReader reader = ByteReader.from(tin);
+        InputStream in = reader.asInputStream();
+        assertThrows(IOException.class, in::read);
+        assertThrows(IOException.class, () -> in.read(new byte[10]));
+        assertThrows(IOException.class, () -> in.skip(1));
+        assertThrows(IOException.class, in::reset);
+        assertThrows(IOException.class, in::close);
     }
 
     private void testInputStream(int dataSize) throws Exception {

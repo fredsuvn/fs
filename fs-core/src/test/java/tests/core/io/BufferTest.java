@@ -572,105 +572,120 @@ public class BufferTest implements DataGen {
     }
 
     private void testProcess(int size) {
-        {
-            // bytes
-            ByteArrayOperator operator = (src, srcOff, dst, dstOff, len) -> {
-                System.arraycopy(src, srcOff, dst, dstOff, len);
-                System.arraycopy(src, srcOff, dst, dstOff + len, len);
-                return len * 2;
-            };
-            byte[] data = randomBytes(size);
-            byte[] expected = new byte[size * 2];
-            System.arraycopy(data, 0, expected, 0, size);
-            System.arraycopy(data, 0, expected, size, size);
-            // heap -> heap
-            ByteBuffer src1 = ByteBuffer.wrap(data);
-            ByteBuffer dst1 = ByteBuffer.allocate(size * 2);
-            assertEquals(BufferKit.process(src1, dst1, operator), size * 2);
-            assertEquals(src1.position(), size);
-            assertEquals(dst1.position(), size * 2);
-            dst1.flip();
-            assertArrayEquals(BufferKit.read(dst1), size == 0 ? null : expected);
-            // heap -> direct
-            ByteBuffer src2 = ByteBuffer.wrap(data);
-            ByteBuffer dst2 = ByteBuffer.allocateDirect(size * 2);
-            assertEquals(BufferKit.process(src2, dst2, operator), size * 2);
-            assertEquals(src2.position(), size);
-            assertEquals(dst2.position(), size * 2);
-            dst2.flip();
-            assertArrayEquals(BufferKit.read(dst2), size == 0 ? null : expected);
-            // direct -> heap
-            ByteBuffer src3 = BufferKit.copyDirect(data);
-            ByteBuffer dst3 = ByteBuffer.allocate(size * 2);
-            assertEquals(BufferKit.process(src3, dst3, operator), size * 2);
-            assertEquals(src3.position(), size);
-            assertEquals(dst3.position(), size * 2);
-            dst3.flip();
-            assertArrayEquals(BufferKit.read(dst3), size == 0 ? null : expected);
-            // direct -> direct
-            ByteBuffer src4 = BufferKit.copyDirect(data);
-            ByteBuffer dst4 = ByteBuffer.allocateDirect(size * 2);
-            assertEquals(BufferKit.process(src4, dst4, operator), size * 2);
-            assertEquals(src4.position(), size);
-            assertEquals(dst4.position(), size * 2);
-            dst4.flip();
-            assertArrayEquals(BufferKit.read(dst4), size == 0 ? null : expected);
-            // exception
-            assertThrows(IORuntimeException.class, () ->
-                BufferKit.process(src4, dst4, (src, srcOff, dst, dstOff, len) -> {
-                    throw new Exception();
-                })
-            );
-        }
-        {
-            // chars
-            CharArrayOperator operator = (src, srcOff, dst, dstOff, len) -> {
-                System.arraycopy(src, srcOff, dst, dstOff, len);
-                System.arraycopy(src, srcOff, dst, dstOff + len, len);
-                return len * 2;
-            };
-            char[] data = randomChars(size);
-            char[] expected = new char[size * 2];
-            System.arraycopy(data, 0, expected, 0, size);
-            System.arraycopy(data, 0, expected, size, size);
-            // heap -> heap
-            CharBuffer src1 = CharBuffer.wrap(data);
-            CharBuffer dst1 = CharBuffer.allocate(size * 2);
-            assertEquals(BufferKit.process(src1, dst1, operator), size * 2);
-            assertEquals(src1.position(), size);
-            assertEquals(dst1.position(), size * 2);
-            dst1.flip();
-            assertArrayEquals(BufferKit.read(dst1), size == 0 ? null : expected);
-            // heap -> direct
-            CharBuffer src2 = CharBuffer.wrap(data);
-            CharBuffer dst2 = BufferKit.directCharBuffer(size * 2);
-            assertEquals(BufferKit.process(src2, dst2, operator), size * 2);
-            assertEquals(src2.position(), size);
-            assertEquals(dst2.position(), size * 2);
-            dst2.flip();
-            assertArrayEquals(BufferKit.read(dst2), size == 0 ? null : expected);
-            // direct -> heap
-            CharBuffer src3 = BufferKit.copyDirect(data);
-            CharBuffer dst3 = CharBuffer.allocate(size * 2);
-            assertEquals(BufferKit.process(src3, dst3, operator), size * 2);
-            assertEquals(src3.position(), size);
-            assertEquals(dst3.position(), size * 2);
-            dst3.flip();
-            assertArrayEquals(BufferKit.read(dst3), size == 0 ? null : expected);
-            // direct -> direct
-            CharBuffer src4 = BufferKit.copyDirect(data);
-            CharBuffer dst4 = BufferKit.directCharBuffer(size * 2);
-            assertEquals(BufferKit.process(src4, dst4, operator), size * 2);
-            assertEquals(src4.position(), size);
-            assertEquals(dst4.position(), size * 2);
-            dst4.flip();
-            assertArrayEquals(BufferKit.read(dst4), size == 0 ? null : expected);
-            // exception
-            assertThrows(IORuntimeException.class, () ->
-                BufferKit.process(src4, dst4, (src, srcOff, dst, dstOff, len) -> {
-                    throw new Exception();
-                })
-            );
-        }
+        // Test byte buffer processing
+        testByteProcess(size);
+
+        // Test char buffer processing
+        testCharProcess(size);
+    }
+
+    private void testByteProcess(int size) {
+        ByteArrayOperator operator = (src, srcOff, dst, dstOff, len) -> {
+            System.arraycopy(src, srcOff, dst, dstOff, len);
+            System.arraycopy(src, srcOff, dst, dstOff + len, len);
+            return len * 2;
+        };
+        byte[] data = randomBytes(size);
+        byte[] expected = new byte[size * 2];
+        System.arraycopy(data, 0, expected, 0, size);
+        System.arraycopy(data, 0, expected, size, size);
+
+        // heap -> heap
+        ByteBuffer src1 = ByteBuffer.wrap(data);
+        ByteBuffer dst1 = ByteBuffer.allocate(size * 2);
+        assertEquals(BufferKit.process(src1, dst1, operator), size * 2);
+        assertEquals(src1.position(), size);
+        assertEquals(dst1.position(), size * 2);
+        dst1.flip();
+        assertArrayEquals(BufferKit.read(dst1), size == 0 ? null : expected);
+
+        // heap -> direct
+        ByteBuffer src2 = ByteBuffer.wrap(data);
+        ByteBuffer dst2 = ByteBuffer.allocateDirect(size * 2);
+        assertEquals(BufferKit.process(src2, dst2, operator), size * 2);
+        assertEquals(src2.position(), size);
+        assertEquals(dst2.position(), size * 2);
+        dst2.flip();
+        assertArrayEquals(BufferKit.read(dst2), size == 0 ? null : expected);
+
+        // direct -> heap
+        ByteBuffer src3 = BufferKit.copyDirect(data);
+        ByteBuffer dst3 = ByteBuffer.allocate(size * 2);
+        assertEquals(BufferKit.process(src3, dst3, operator), size * 2);
+        assertEquals(src3.position(), size);
+        assertEquals(dst3.position(), size * 2);
+        dst3.flip();
+        assertArrayEquals(BufferKit.read(dst3), size == 0 ? null : expected);
+
+        // direct -> direct
+        ByteBuffer src4 = BufferKit.copyDirect(data);
+        ByteBuffer dst4 = ByteBuffer.allocateDirect(size * 2);
+        assertEquals(BufferKit.process(src4, dst4, operator), size * 2);
+        assertEquals(src4.position(), size);
+        assertEquals(dst4.position(), size * 2);
+        dst4.flip();
+        assertArrayEquals(BufferKit.read(dst4), size == 0 ? null : expected);
+
+        // exception
+        assertThrows(IORuntimeException.class, () ->
+            BufferKit.process(src4, dst4, (src, srcOff, dst, dstOff, len) -> {
+                throw new Exception();
+            })
+        );
+    }
+
+    private void testCharProcess(int size) {
+        CharArrayOperator operator = (src, srcOff, dst, dstOff, len) -> {
+            System.arraycopy(src, srcOff, dst, dstOff, len);
+            System.arraycopy(src, srcOff, dst, dstOff + len, len);
+            return len * 2;
+        };
+        char[] data = randomChars(size);
+        char[] expected = new char[size * 2];
+        System.arraycopy(data, 0, expected, 0, size);
+        System.arraycopy(data, 0, expected, size, size);
+
+        // heap -> heap
+        CharBuffer src1 = CharBuffer.wrap(data);
+        CharBuffer dst1 = CharBuffer.allocate(size * 2);
+        assertEquals(BufferKit.process(src1, dst1, operator), size * 2);
+        assertEquals(src1.position(), size);
+        assertEquals(dst1.position(), size * 2);
+        dst1.flip();
+        assertArrayEquals(BufferKit.read(dst1), size == 0 ? null : expected);
+
+        // heap -> direct
+        CharBuffer src2 = CharBuffer.wrap(data);
+        CharBuffer dst2 = BufferKit.directCharBuffer(size * 2);
+        assertEquals(BufferKit.process(src2, dst2, operator), size * 2);
+        assertEquals(src2.position(), size);
+        assertEquals(dst2.position(), size * 2);
+        dst2.flip();
+        assertArrayEquals(BufferKit.read(dst2), size == 0 ? null : expected);
+
+        // direct -> heap
+        CharBuffer src3 = BufferKit.copyDirect(data);
+        CharBuffer dst3 = CharBuffer.allocate(size * 2);
+        assertEquals(BufferKit.process(src3, dst3, operator), size * 2);
+        assertEquals(src3.position(), size);
+        assertEquals(dst3.position(), size * 2);
+        dst3.flip();
+        assertArrayEquals(BufferKit.read(dst3), size == 0 ? null : expected);
+
+        // direct -> direct
+        CharBuffer src4 = BufferKit.copyDirect(data);
+        CharBuffer dst4 = BufferKit.directCharBuffer(size * 2);
+        assertEquals(BufferKit.process(src4, dst4, operator), size * 2);
+        assertEquals(src4.position(), size);
+        assertEquals(dst4.position(), size * 2);
+        dst4.flip();
+        assertArrayEquals(BufferKit.read(dst4), size == 0 ? null : expected);
+
+        // exception
+        assertThrows(IORuntimeException.class, () ->
+            BufferKit.process(src4, dst4, (src, srcOff, dst, dstOff, len) -> {
+                throw new Exception();
+            })
+        );
     }
 }

@@ -597,17 +597,17 @@ public class CharProcessorTest implements DataGen, Asserter {
     }
 
     @Test
-    public void testTo() throws Exception {
-        testTo(0, 123);
-        testTo(123, 123);
-        testTo(123, 1234);
-        testTo(123, 1);
-        testTo(123, 2);
-        testTo(123, 3);
-        testTo(128, 16);
+    public void testToMethods() throws Exception {
+        testToMethods(0, 123);
+        testToMethods(123, 123);
+        testToMethods(123, 1234);
+        testToMethods(123, 1);
+        testToMethods(123, 2);
+        testToMethods(123, 3);
+        testToMethods(128, 16);
     }
 
-    private void testTo(int totalSize, int readBlockSize) throws Exception {
+    private void testToMethods(int totalSize, int readBlockSize) throws Exception {
         IntVar endCount = IntVar.of(0);
         char[] data = randomChars(totalSize, 'a', 'z');
         String str = new String(data);

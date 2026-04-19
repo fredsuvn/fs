@@ -52,105 +52,118 @@ public class ByteReaderTest implements DataGen {
         testReadBytes(128, 1024);
 
         // error
-        {
-            TestInputStream tr = new TestInputStream(new ByteArrayInputStream(new byte[10]));
-            tr.setNextOperation(ReadOps.THROW, 99);
-            assertThrows(IORuntimeException.class, () -> ByteReader.from(tr).skip(100));
-            assertThrows(IORuntimeException.class, () -> ByteReader.from(Channels.newChannel(tr)).skip(100));
-        }
+        testReadBytesError();
+    }
+
+    private void testReadBytesError() throws Exception {
+        TestInputStream tr = new TestInputStream(new ByteArrayInputStream(new byte[10]));
+        tr.setNextOperation(ReadOps.THROW, 99);
+        assertThrows(IORuntimeException.class, () -> ByteReader.from(tr).skip(100));
+        assertThrows(IORuntimeException.class, () -> ByteReader.from(Channels.newChannel(tr)).skip(100));
     }
 
     private void testReadBytes(int dataSize, int readSize) throws Exception {
-        {
-            // input stream
-            byte[] data = randomBytes(dataSize);
-            testReadBytes(ByteReader.from(new ByteArrayInputStream(data)), data, readSize, false);
-            testSkipBytes(ByteReader.from(new ByteArrayInputStream(data)), data, readSize);
-            testReadBytes(ByteReader.from(new OneByteInputStream(data)), data, readSize, false);
-            testSkipBytes(ByteReader.from(new OneByteInputStream(data)), data, readSize);
-            TestInputStream tr = new TestInputStream(new ByteArrayInputStream(data));
-            tr.setNextOperation(ReadOps.READ_ZERO);
-            testSkipBytes(ByteReader.from(tr), data, readSize);
-        }
-        {
-            // channel
-            byte[] data = randomBytes(dataSize);
+        byte[] data = randomBytes(dataSize);
+
+        // input stream
+        testByteReaderFromInputStream(data, readSize);
+
+        // channel
+        testByteReaderFromChannel(data, readSize);
+
+        // byte array
+        testByteReaderFromByteArray(data, readSize);
+
+        // buffer
+        testByteReaderFromBuffer(data, readSize);
+
+        // limited
+        testByteReaderWithLimit(data, readSize);
+    }
+
+    private void testByteReaderFromInputStream(byte[] data, int readSize) throws Exception {
+        testReadBytes(ByteReader.from(new ByteArrayInputStream(data)), data, readSize, false);
+        testSkipBytes(ByteReader.from(new ByteArrayInputStream(data)), data, readSize);
+        testReadBytes(ByteReader.from(new OneByteInputStream(data)), data, readSize, false);
+        testSkipBytes(ByteReader.from(new OneByteInputStream(data)), data, readSize);
+        TestInputStream tr = new TestInputStream(new ByteArrayInputStream(data));
+        tr.setNextOperation(ReadOps.READ_ZERO);
+        testSkipBytes(ByteReader.from(tr), data, readSize);
+    }
+
+    private void testByteReaderFromChannel(byte[] data, int readSize) throws Exception {
+        testReadBytes(
+            ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))),
+            data, readSize, false
+        );
+        testSkipBytes(ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))), data, readSize);
+        testReadBytes(
+            ByteReader.from(Channels.newChannel(new OneByteInputStream(data))),
+            data, readSize, false
+        );
+        testSkipBytes(ByteReader.from(Channels.newChannel(new OneByteInputStream(data))), data, readSize);
+    }
+
+    private void testByteReaderFromByteArray(byte[] data, int readSize) throws Exception {
+        testReadBytes(ByteReader.from(data), data, readSize, true);
+        testSkipBytes(ByteReader.from(data), data, readSize);
+        byte[] dataPadding = new byte[data.length + 66];
+        System.arraycopy(data, 0, dataPadding, 33, data.length);
+        testReadBytes(
+            ByteReader.from(dataPadding, 33, data.length),
+            Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
+            readSize, true
+        );
+        testSkipBytes(ByteReader.from(dataPadding, 33, data.length), data, readSize);
+    }
+
+    private void testByteReaderFromBuffer(byte[] data, int readSize) throws Exception {
+        testReadBytes(ByteReader.from(ByteBuffer.wrap(data)), data, readSize, true);
+        testSkipBytes(ByteReader.from(ByteBuffer.wrap(data)), data, readSize);
+    }
+
+    private void testByteReaderWithLimit(byte[] data, int readSize) throws Exception {
+        testReadBytes(
+            ByteReader.from(data).limit(data.length),
+            data,
+            readSize, true
+        );
+        testSkipBytes(
+            ByteReader.from(data),
+            data,
+            readSize
+        );
+        testReadBytes(
+            ByteReader.from(data).limit(data.length + 5),
+            data,
+            readSize, true
+        );
+        testSkipBytes(
+            ByteReader.from(data).limit(data.length + 5),
+            data,
+            readSize
+        );
+        testReadBytes(
+            ByteReader.from(new ByteArrayInputStream(data)).limit(data.length + 5),
+            data,
+            readSize, false
+        );
+        testSkipBytes(
+            ByteReader.from(new ByteArrayInputStream(data)).limit(data.length + 5),
+            data,
+            readSize
+        );
+        if (data.length > 5) {
             testReadBytes(
-                ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))),
-                data, readSize, false
-            );
-            testSkipBytes(ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))), data, readSize);
-            testReadBytes(
-                ByteReader.from(Channels.newChannel(new OneByteInputStream(data))),
-                data, readSize, false
-            );
-            testSkipBytes(ByteReader.from(Channels.newChannel(new OneByteInputStream(data))), data, readSize);
-        }
-        {
-            // byte array
-            byte[] data = randomBytes(dataSize);
-            testReadBytes(ByteReader.from(data), data, readSize, true);
-            testSkipBytes(ByteReader.from(data), data, readSize);
-            byte[] dataPadding = new byte[data.length + 66];
-            System.arraycopy(data, 0, dataPadding, 33, data.length);
-            testReadBytes(
-                ByteReader.from(dataPadding, 33, data.length),
-                Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
-                readSize, true
-            );
-            testSkipBytes(ByteReader.from(dataPadding, 33, data.length), data, readSize);
-        }
-        {
-            // buffer
-            byte[] data = randomBytes(dataSize);
-            testReadBytes(ByteReader.from(ByteBuffer.wrap(data)), data, readSize, true);
-            testSkipBytes(ByteReader.from(ByteBuffer.wrap(data)), data, readSize);
-        }
-        {
-            // limited
-            byte[] data = randomBytes(dataSize);
-            testReadBytes(
-                ByteReader.from(data).limit(data.length),
-                data,
+                ByteReader.from(data).limit(data.length - 5),
+                Arrays.copyOf(data, data.length - 5),
                 readSize, true
             );
             testSkipBytes(
-                ByteReader.from(data),
-                data,
+                ByteReader.from(data).limit(data.length - 5),
+                Arrays.copyOf(data, data.length - 5),
                 readSize
             );
-            testReadBytes(
-                ByteReader.from(data).limit(data.length + 5),
-                data,
-                readSize, true
-            );
-            testSkipBytes(
-                ByteReader.from(data).limit(data.length + 5),
-                data,
-                readSize
-            );
-            testReadBytes(
-                ByteReader.from(new ByteArrayInputStream(data)).limit(data.length + 5),
-                data,
-                readSize, false
-            );
-            testSkipBytes(
-                ByteReader.from(new ByteArrayInputStream(data)).limit(data.length + 5),
-                data,
-                readSize
-            );
-            if (data.length > 5) {
-                testReadBytes(
-                    ByteReader.from(data).limit(data.length - 5),
-                    Arrays.copyOf(data, data.length - 5),
-                    readSize, true
-                );
-                testSkipBytes(
-                    ByteReader.from(data).limit(data.length - 5),
-                    Arrays.copyOf(data, data.length - 5),
-                    readSize
-                );
-            }
         }
     }
 

@@ -451,364 +451,384 @@ public class IOOperatorTest implements DataGen {
     }
 
     private void testReadBytesTo(IOOperator reader, int totalSize, int readSize) throws Exception {
-        {
-            // stream to stream
-            byte[] data = randomBytes(totalSize);
-            BytesBuilder builder = new BytesBuilder();
+        // stream to stream
+        testReadBytesToStreamToStream(reader, totalSize, readSize);
+        // stream to channel
+        testReadBytesToStreamToChannel(reader, totalSize, readSize);
+        // stream to array
+        testReadBytesToStreamToArray(reader, totalSize, readSize);
+        // stream to heap buffer
+        testReadBytesToStreamToHeapBuffer(reader, totalSize, readSize);
+        // stream to direct buffer
+        testReadBytesToStreamToDirectBuffer(reader, totalSize, readSize);
+        // channel to channel
+        testReadBytesToChannelToChannel(reader, totalSize, readSize);
+        // channel to stream
+        testReadBytesToChannelToStream(reader, totalSize, readSize);
+        // channel to array
+        testReadBytesToChannelToArray(reader, totalSize, readSize);
+        // channel to heap buffer
+        testReadBytesToChannelToHeapBuffer(reader, totalSize, readSize);
+        // channel to direct buffer
+        testReadBytesToChannelToDirectBuffer(reader, totalSize, readSize);
+    }
+
+    private void testReadBytesToStreamToStream(IOOperator reader, int totalSize, int readSize) throws Exception {
+        byte[] data = randomBytes(totalSize);
+        BytesBuilder builder = new BytesBuilder();
+        assertEquals(
+            reader.readTo(new ByteArrayInputStream(data), builder),
+            totalSize
+        );
+        assertArrayEquals(builder.toByteArray(), data);
+        builder.reset();
+        assertEquals(
+            reader.readTo(new ByteArrayInputStream(data), builder, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertArrayEquals(
+            builder.toByteArray(),
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        );
+        builder.reset();
+        assertEquals(
+            reader.readTo(new OneByteInputStream(data), builder),
+            totalSize
+        );
+        assertArrayEquals(builder.toByteArray(), data);
+        builder.reset();
+        assertEquals(
+            reader.readTo(new OneByteInputStream(data), builder, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertArrayEquals(
+            builder.toByteArray(),
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        );
+        builder.reset();
+    }
+
+    private void testReadBytesToStreamToChannel(IOOperator reader, int totalSize, int readSize) throws Exception {
+        byte[] data = randomBytes(totalSize);
+        BytesBuilder builder = new BytesBuilder();
+        WritableByteChannel channel = Channels.newChannel(builder);
+        assertEquals(
+            reader.readTo(new ByteArrayInputStream(data), channel),
+            totalSize
+        );
+        assertArrayEquals(builder.toByteArray(), data);
+        builder.reset();
+        assertEquals(
+            reader.readTo(new ByteArrayInputStream(data), channel, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertArrayEquals(
+            builder.toByteArray(),
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        );
+        builder.reset();
+        assertEquals(
+            reader.readTo(new OneByteInputStream(data), channel),
+            totalSize
+        );
+        assertArrayEquals(builder.toByteArray(), data);
+        builder.reset();
+        assertEquals(
+            reader.readTo(new OneByteInputStream(data), channel, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertArrayEquals(
+            builder.toByteArray(),
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        );
+        // write one byte channel
+        channel = new OneByteWritableChannel(builder);
+        builder.reset();
+        assertEquals(
+            reader.readTo(new ByteArrayInputStream(data), channel),
+            totalSize
+        );
+        assertArrayEquals(builder.toByteArray(), data);
+        builder.reset();
+        assertEquals(
+            reader.readTo(new ByteArrayInputStream(data), channel, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertArrayEquals(
+            builder.toByteArray(),
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        );
+        builder.reset();
+        assertEquals(
+            reader.readTo(new OneByteInputStream(data), channel),
+            totalSize
+        );
+        assertArrayEquals(builder.toByteArray(), data);
+        builder.reset();
+        assertEquals(
+            reader.readTo(new OneByteInputStream(data), channel, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertArrayEquals(
+            builder.toByteArray(),
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        );
+    }
+
+    private void testReadBytesToStreamToArray(IOOperator reader, int totalSize, int readSize) throws Exception {
+        byte[] data = randomBytes(totalSize);
+        byte[] dst = new byte[data.length];
+        assertEquals(
+            reader.readTo(new ByteArrayInputStream(data), dst),
+            totalSize
+        );
+        assertArrayEquals(dst, data);
+        if (readSize >= 0 && readSize <= totalSize) {
+            dst = new byte[data.length];
             assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), builder),
-                totalSize
-            );
-            assertArrayEquals(builder.toByteArray(), data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), builder, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
+                reader.readTo(new ByteArrayInputStream(data), dst, 0, readSize),
+                readSize
             );
             assertArrayEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+                Arrays.copyOf(dst, readSize),
+                Arrays.copyOf(data, readSize)
             );
-            builder.reset();
-            assertEquals(
-                reader.readTo(new OneByteInputStream(data), builder),
-                totalSize
-            );
-            assertArrayEquals(builder.toByteArray(), data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(new OneByteInputStream(data), builder, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertArrayEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-            builder.reset();
-        }
-        {
-            // stream to channel
-            byte[] data = randomBytes(totalSize);
-            BytesBuilder builder = new BytesBuilder();
-            WritableByteChannel channel = Channels.newChannel(builder);
-            assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), channel),
-                totalSize
-            );
-            assertArrayEquals(builder.toByteArray(), data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), channel, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertArrayEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-            builder.reset();
-            assertEquals(
-                reader.readTo(new OneByteInputStream(data), channel),
-                totalSize
-            );
-            assertArrayEquals(builder.toByteArray(), data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(new OneByteInputStream(data), channel, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertArrayEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-            // write one byte channel
-            channel = new OneByteWritableChannel(builder);
-            builder.reset();
-            assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), channel),
-                totalSize
-            );
-            assertArrayEquals(builder.toByteArray(), data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), channel, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertArrayEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-            builder.reset();
-            assertEquals(
-                reader.readTo(new OneByteInputStream(data), channel),
-                totalSize
-            );
-            assertArrayEquals(builder.toByteArray(), data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(new OneByteInputStream(data), channel, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertArrayEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-        }
-        {
-            // stream to array
-            byte[] data = randomBytes(totalSize);
-            byte[] dst = new byte[data.length];
-            assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), dst),
-                totalSize
-            );
-            assertArrayEquals(dst, data);
-            if (readSize >= 0 && readSize <= totalSize) {
+            if (readSize <= totalSize - 1) {
                 dst = new byte[data.length];
-                assertEquals(
-                    reader.readTo(new ByteArrayInputStream(data), dst, 0, readSize),
-                    readSize
-                );
-                assertArrayEquals(
-                    Arrays.copyOf(dst, readSize),
-                    Arrays.copyOf(data, readSize)
-                );
-                if (readSize <= totalSize - 1) {
-                    dst = new byte[data.length];
-                    assertEquals(
-                        reader.readTo(new ByteArrayInputStream(data), dst, 1, readSize),
-                        readSize
-                    );
-                    assertArrayEquals(
-                        Arrays.copyOfRange(dst, 1, 1 + readSize),
-                        Arrays.copyOf(data, readSize)
-                    );
-                }
-            }
-            if (readSize > totalSize) {
-                dst = new byte[readSize];
-                assertEquals(
-                    reader.readTo(new ByteArrayInputStream(data), dst, 0, readSize),
-                    totalSize
-                );
-                assertArrayEquals(
-                    Arrays.copyOf(dst, totalSize),
-                    data
-                );
-                dst = new byte[readSize + 1];
                 assertEquals(
                     reader.readTo(new ByteArrayInputStream(data), dst, 1, readSize),
-                    totalSize
-                );
-                assertArrayEquals(
-                    Arrays.copyOfRange(dst, 1, 1 + totalSize),
-                    data
-                );
-            }
-        }
-        {
-            // stream to heap buffer
-            byte[] data = randomBytes(totalSize);
-            ByteBuffer dst = ByteBuffer.allocate(data.length);
-            assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), dst),
-                totalSize
-            );
-            assertEquals(dst.flip(), ByteBuffer.wrap(data));
-            dst = ByteBuffer.allocate(data.length);
-            assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertEquals(dst.flip(), ByteBuffer.wrap(
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            ));
-        }
-        {
-            // stream to direct buffer
-            byte[] data = randomBytes(totalSize);
-            ByteBuffer dst = ByteBuffer.allocateDirect(data.length);
-            assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), dst),
-                totalSize
-            );
-            assertEquals(dst.flip(), ByteBuffer.wrap(data));
-            dst = ByteBuffer.allocateDirect(data.length);
-            assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertEquals(dst.flip(), ByteBuffer.wrap(
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            ));
-        }
-        {
-            // channel to channel
-            byte[] data = randomBytes(totalSize);
-            BytesBuilder builder = new BytesBuilder();
-            assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder)),
-                totalSize
-            );
-            assertArrayEquals(builder.toByteArray(), data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(
-                    Channels.newChannel(new ByteArrayInputStream(data)),
-                    Channels.newChannel(builder),
-                    readSize < 0 ? totalSize : readSize
-                ),
-                actualReadSize(totalSize, readSize)
-            );
-            assertArrayEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-            builder.reset();
-            // write one byte channel
-            WritableByteChannel wch = new OneByteWritableChannel(builder);
-            builder.reset();
-            assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), wch),
-                totalSize
-            );
-            assertArrayEquals(builder.toByteArray(), data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), wch, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertArrayEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-            builder.reset();
-            assertEquals(
-                reader.readTo(Channels.newChannel(new OneByteInputStream(data)), wch),
-                totalSize
-            );
-            assertArrayEquals(builder.toByteArray(), data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(Channels.newChannel(new OneByteInputStream(data)), wch, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertArrayEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-        }
-        {
-            // channel to stream
-            byte[] data = randomBytes(totalSize);
-            BytesBuilder builder = new BytesBuilder();
-            assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), builder),
-                totalSize
-            );
-            assertArrayEquals(builder.toByteArray(), data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(
-                    Channels.newChannel(new ByteArrayInputStream(data)),
-                    builder,
-                    readSize < 0 ? totalSize : readSize
-                ),
-                actualReadSize(totalSize, readSize)
-            );
-            assertArrayEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-            builder.reset();
-        }
-        {
-            // channel to array
-            byte[] data = randomBytes(totalSize);
-            byte[] dst = new byte[data.length];
-            assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
-                totalSize
-            );
-            assertArrayEquals(dst, data);
-            if (readSize >= 0 && readSize <= totalSize) {
-                dst = new byte[data.length];
-                assertEquals(
-                    reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 0, readSize),
                     readSize
                 );
                 assertArrayEquals(
-                    Arrays.copyOf(dst, readSize),
+                    Arrays.copyOfRange(dst, 1, 1 + readSize),
                     Arrays.copyOf(data, readSize)
                 );
-                if (readSize <= totalSize - 1) {
-                    dst = new byte[data.length];
-                    assertEquals(
-                        reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 1, readSize),
-                        readSize
-                    );
-                    assertArrayEquals(
-                        Arrays.copyOfRange(dst, 1, 1 + readSize),
-                        Arrays.copyOf(data, readSize)
-                    );
-                }
             }
-            if (readSize > totalSize) {
-                dst = new byte[readSize];
-                assertEquals(
-                    reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 0, readSize),
-                    totalSize
-                );
-                assertArrayEquals(
-                    Arrays.copyOf(dst, totalSize),
-                    data
-                );
-                dst = new byte[readSize + 1];
+        }
+        if (readSize > totalSize) {
+            dst = new byte[readSize];
+            assertEquals(
+                reader.readTo(new ByteArrayInputStream(data), dst, 0, readSize),
+                totalSize
+            );
+            assertArrayEquals(
+                Arrays.copyOf(dst, totalSize),
+                data
+            );
+            dst = new byte[readSize + 1];
+            assertEquals(
+                reader.readTo(new ByteArrayInputStream(data), dst, 1, readSize),
+                totalSize
+            );
+            assertArrayEquals(
+                Arrays.copyOfRange(dst, 1, 1 + totalSize),
+                data
+            );
+        }
+    }
+
+    private void testReadBytesToStreamToHeapBuffer(IOOperator reader, int totalSize, int readSize) throws Exception {
+        byte[] data = randomBytes(totalSize);
+        ByteBuffer dst = ByteBuffer.allocate(data.length);
+        assertEquals(
+            reader.readTo(new ByteArrayInputStream(data), dst),
+            totalSize
+        );
+        assertEquals(dst.flip(), ByteBuffer.wrap(data));
+        dst = ByteBuffer.allocate(data.length);
+        assertEquals(
+            reader.readTo(new ByteArrayInputStream(data), dst, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertEquals(dst.flip(), ByteBuffer.wrap(
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        ));
+    }
+
+    private void testReadBytesToStreamToDirectBuffer(IOOperator reader, int totalSize, int readSize) throws Exception {
+        byte[] data = randomBytes(totalSize);
+        ByteBuffer dst = ByteBuffer.allocateDirect(data.length);
+        assertEquals(
+            reader.readTo(new ByteArrayInputStream(data), dst),
+            totalSize
+        );
+        assertEquals(dst.flip(), ByteBuffer.wrap(data));
+        dst = ByteBuffer.allocateDirect(data.length);
+        assertEquals(
+            reader.readTo(new ByteArrayInputStream(data), dst, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertEquals(dst.flip(), ByteBuffer.wrap(
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        ));
+    }
+
+    private void testReadBytesToChannelToChannel(IOOperator reader, int totalSize, int readSize) throws Exception {
+        byte[] data = randomBytes(totalSize);
+        BytesBuilder builder = new BytesBuilder();
+        assertEquals(
+            reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder)),
+            totalSize
+        );
+        assertArrayEquals(builder.toByteArray(), data);
+        builder.reset();
+        assertEquals(
+            reader.readTo(
+                Channels.newChannel(new ByteArrayInputStream(data)),
+                Channels.newChannel(builder),
+                readSize < 0 ? totalSize : readSize
+            ),
+            actualReadSize(totalSize, readSize)
+        );
+        assertArrayEquals(
+            builder.toByteArray(),
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        );
+        builder.reset();
+        // write one byte channel
+        WritableByteChannel wch = new OneByteWritableChannel(builder);
+        builder.reset();
+        assertEquals(
+            reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), wch),
+            totalSize
+        );
+        assertArrayEquals(builder.toByteArray(), data);
+        builder.reset();
+        assertEquals(
+            reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), wch, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertArrayEquals(
+            builder.toByteArray(),
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        );
+        builder.reset();
+        assertEquals(
+            reader.readTo(Channels.newChannel(new OneByteInputStream(data)), wch),
+            totalSize
+        );
+        assertArrayEquals(builder.toByteArray(), data);
+        builder.reset();
+        assertEquals(
+            reader.readTo(Channels.newChannel(new OneByteInputStream(data)), wch, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertArrayEquals(
+            builder.toByteArray(),
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        );
+    }
+
+    private void testReadBytesToChannelToStream(IOOperator reader, int totalSize, int readSize) throws Exception {
+        byte[] data = randomBytes(totalSize);
+        BytesBuilder builder = new BytesBuilder();
+        assertEquals(
+            reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), builder),
+            totalSize
+        );
+        assertArrayEquals(builder.toByteArray(), data);
+        builder.reset();
+        assertEquals(
+            reader.readTo(
+                Channels.newChannel(new ByteArrayInputStream(data)),
+                builder,
+                readSize < 0 ? totalSize : readSize
+            ),
+            actualReadSize(totalSize, readSize)
+        );
+        assertArrayEquals(
+            builder.toByteArray(),
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        );
+        builder.reset();
+    }
+
+    private void testReadBytesToChannelToArray(IOOperator reader, int totalSize, int readSize) throws Exception {
+        byte[] data = randomBytes(totalSize);
+        byte[] dst = new byte[data.length];
+        assertEquals(
+            reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
+            totalSize
+        );
+        assertArrayEquals(dst, data);
+        if (readSize >= 0 && readSize <= totalSize) {
+            dst = new byte[data.length];
+            assertEquals(
+                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 0, readSize),
+                readSize
+            );
+            assertArrayEquals(
+                Arrays.copyOf(dst, readSize),
+                Arrays.copyOf(data, readSize)
+            );
+            if (readSize <= totalSize - 1) {
+                dst = new byte[data.length];
                 assertEquals(
                     reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 1, readSize),
-                    totalSize
+                    readSize
                 );
                 assertArrayEquals(
-                    Arrays.copyOfRange(dst, 1, 1 + totalSize),
-                    data
+                    Arrays.copyOfRange(dst, 1, 1 + readSize),
+                    Arrays.copyOf(data, readSize)
                 );
             }
         }
-        {
-            // channel to heap buffer
-            byte[] data = randomBytes(totalSize);
-            ByteBuffer dst = ByteBuffer.allocate(data.length);
+        if (readSize > totalSize) {
+            dst = new byte[readSize];
             assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
+                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 0, readSize),
                 totalSize
             );
-            assertEquals(dst.flip(), ByteBuffer.wrap(data));
-            dst = ByteBuffer.allocate(data.length);
-            assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
+            assertArrayEquals(
+                Arrays.copyOf(dst, totalSize),
+                data
             );
-            assertEquals(dst.flip(), ByteBuffer.wrap(
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            ));
-        }
-        {
-            // channel to direct buffer
-            byte[] data = randomBytes(totalSize);
-            ByteBuffer dst = ByteBuffer.allocateDirect(data.length);
+            dst = new byte[readSize + 1];
             assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
+                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 1, readSize),
                 totalSize
             );
-            assertEquals(dst.flip(), ByteBuffer.wrap(data));
-            dst = ByteBuffer.allocateDirect(data.length);
-            assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
+            assertArrayEquals(
+                Arrays.copyOfRange(dst, 1, 1 + totalSize),
+                data
             );
-            assertEquals(dst.flip(), ByteBuffer.wrap(
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            ));
         }
+    }
+
+    private void testReadBytesToChannelToHeapBuffer(IOOperator reader, int totalSize, int readSize) throws Exception {
+        byte[] data = randomBytes(totalSize);
+        ByteBuffer dst = ByteBuffer.allocate(data.length);
+        assertEquals(
+            reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
+            totalSize
+        );
+        assertEquals(dst.flip(), ByteBuffer.wrap(data));
+        dst = ByteBuffer.allocate(data.length);
+        assertEquals(
+            reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertEquals(dst.flip(), ByteBuffer.wrap(
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        ));
+    }
+
+    private void testReadBytesToChannelToDirectBuffer(IOOperator reader, int totalSize, int readSize) throws Exception {
+        byte[] data = randomBytes(totalSize);
+        ByteBuffer dst = ByteBuffer.allocateDirect(data.length);
+        assertEquals(
+            reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
+            totalSize
+        );
+        assertEquals(dst.flip(), ByteBuffer.wrap(data));
+        dst = ByteBuffer.allocateDirect(data.length);
+        assertEquals(
+            reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertEquals(dst.flip(), ByteBuffer.wrap(
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        ));
     }
 
     @Test
@@ -1369,129 +1389,137 @@ public class IOOperatorTest implements DataGen {
     }
 
     private void testReadCharsTo(IOOperator reader, int totalSize, int readSize) throws Exception {
-        {
-            // reader to appender
-            char[] data = randomChars(totalSize);
-            CharsBuilder builder = new CharsBuilder();
+        // reader to appender
+        testReadCharsToReaderToAppender(reader, totalSize, readSize);
+        // reader to array
+        testReadCharsToReaderToArray(reader, totalSize, readSize);
+        // reader to heap buffer
+        testReadCharsToReaderToHeapBuffer(reader, totalSize, readSize);
+        // reader to direct buffer
+        testReadCharsToReaderToDirectBuffer(reader, totalSize, readSize);
+    }
+
+    private void testReadCharsToReaderToAppender(IOOperator reader, int totalSize, int readSize) throws Exception {
+        char[] data = randomChars(totalSize);
+        CharsBuilder builder = new CharsBuilder();
+        assertEquals(
+            reader.readTo(new CharArrayReader(data), builder),
+            totalSize
+        );
+        assertArrayEquals(builder.toCharArray(), data);
+        builder.reset();
+        assertEquals(
+            reader.readTo(new CharArrayReader(data), builder, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertArrayEquals(
+            builder.toCharArray(),
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        );
+        builder.reset();
+        assertEquals(
+            reader.readTo(new OneCharReader(data), builder),
+            totalSize
+        );
+        assertArrayEquals(builder.toCharArray(), data);
+        builder.reset();
+        assertEquals(
+            reader.readTo(new OneCharReader(data), builder, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertArrayEquals(
+            builder.toCharArray(),
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        );
+        builder.reset();
+    }
+
+    private void testReadCharsToReaderToArray(IOOperator reader, int totalSize, int readSize) throws Exception {
+        char[] data = randomChars(totalSize);
+        char[] dst = new char[data.length];
+        assertEquals(
+            reader.readTo(new CharArrayReader(data), dst),
+            totalSize
+        );
+        assertArrayEquals(dst, data);
+        if (readSize >= 0 && readSize <= totalSize) {
+            dst = new char[data.length];
             assertEquals(
-                reader.readTo(new CharArrayReader(data), builder),
-                totalSize
-            );
-            assertArrayEquals(builder.toCharArray(), data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(new CharArrayReader(data), builder, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
+                reader.readTo(new CharArrayReader(data), dst, 0, readSize),
+                readSize
             );
             assertArrayEquals(
-                builder.toCharArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+                Arrays.copyOf(dst, readSize),
+                Arrays.copyOf(data, readSize)
             );
-            builder.reset();
-            assertEquals(
-                reader.readTo(new OneCharReader(data), builder),
-                totalSize
-            );
-            assertArrayEquals(builder.toCharArray(), data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(new OneCharReader(data), builder, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertArrayEquals(
-                builder.toCharArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-            builder.reset();
-        }
-        {
-            // reader to array
-            char[] data = randomChars(totalSize);
-            char[] dst = new char[data.length];
-            assertEquals(
-                reader.readTo(new CharArrayReader(data), dst),
-                totalSize
-            );
-            assertArrayEquals(dst, data);
-            if (readSize >= 0 && readSize <= totalSize) {
+            if (readSize <= totalSize - 1) {
                 dst = new char[data.length];
                 assertEquals(
-                    reader.readTo(new CharArrayReader(data), dst, 0, readSize),
+                    reader.readTo(new CharArrayReader(data), dst, 1, readSize),
                     readSize
                 );
                 assertArrayEquals(
-                    Arrays.copyOf(dst, readSize),
+                    Arrays.copyOfRange(dst, 1, 1 + readSize),
                     Arrays.copyOf(data, readSize)
                 );
-                if (readSize <= totalSize - 1) {
-                    dst = new char[data.length];
-                    assertEquals(
-                        reader.readTo(new CharArrayReader(data), dst, 1, readSize),
-                        readSize
-                    );
-                    assertArrayEquals(
-                        Arrays.copyOfRange(dst, 1, 1 + readSize),
-                        Arrays.copyOf(data, readSize)
-                    );
-                }
-            }
-            if (readSize > totalSize) {
-                dst = new char[readSize];
-                assertEquals(
-                    reader.readTo(new CharArrayReader(data), dst, 0, readSize),
-                    totalSize
-                );
-                assertArrayEquals(
-                    Arrays.copyOf(dst, totalSize),
-                    data
-                );
-                dst = new char[readSize + 1];
-                assertEquals(
-                    reader.readTo(new CharArrayReader(data), dst, 1, readSize),
-                    totalSize
-                );
-                assertArrayEquals(
-                    Arrays.copyOfRange(dst, 1, 1 + totalSize),
-                    data
-                );
             }
         }
-        {
-            // reader to heap buffer
-            char[] data = randomChars(totalSize);
-            CharBuffer dst = CharBuffer.allocate(data.length);
+        if (readSize > totalSize) {
+            dst = new char[readSize];
             assertEquals(
-                reader.readTo(new CharArrayReader(data), dst),
+                reader.readTo(new CharArrayReader(data), dst, 0, readSize),
                 totalSize
             );
-            assertEquals(dst.flip(), CharBuffer.wrap(data));
-            dst = CharBuffer.allocate(data.length);
-            assertEquals(
-                reader.readTo(new CharArrayReader(data), dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
+            assertArrayEquals(
+                Arrays.copyOf(dst, totalSize),
+                data
             );
-            assertEquals(dst.flip(), CharBuffer.wrap(
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            ));
-        }
-        {
-            // reader to direct buffer
-            char[] data = randomChars(totalSize);
-            CharBuffer dst = BufferKit.directCharBuffer(data.length * 2);
+            dst = new char[readSize + 1];
             assertEquals(
-                reader.readTo(new CharArrayReader(data), dst),
+                reader.readTo(new CharArrayReader(data), dst, 1, readSize),
                 totalSize
             );
-            assertEquals(dst.flip(), CharBuffer.wrap(data));
-            dst = BufferKit.directCharBuffer(data.length * 2);
-            assertEquals(
-                reader.readTo(new CharArrayReader(data), dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
+            assertArrayEquals(
+                Arrays.copyOfRange(dst, 1, 1 + totalSize),
+                data
             );
-            assertEquals(dst.flip(), CharBuffer.wrap(
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            ));
         }
+    }
+
+    private void testReadCharsToReaderToHeapBuffer(IOOperator reader, int totalSize, int readSize) throws Exception {
+        char[] data = randomChars(totalSize);
+        CharBuffer dst = CharBuffer.allocate(data.length);
+        assertEquals(
+            reader.readTo(new CharArrayReader(data), dst),
+            totalSize
+        );
+        assertEquals(dst.flip(), CharBuffer.wrap(data));
+        dst = CharBuffer.allocate(data.length);
+        assertEquals(
+            reader.readTo(new CharArrayReader(data), dst, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertEquals(dst.flip(), CharBuffer.wrap(
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        ));
+    }
+
+    private void testReadCharsToReaderToDirectBuffer(IOOperator reader, int totalSize, int readSize) throws Exception {
+        char[] data = randomChars(totalSize);
+        CharBuffer dst = BufferKit.directCharBuffer(data.length * 2);
+        assertEquals(
+            reader.readTo(new CharArrayReader(data), dst),
+            totalSize
+        );
+        assertEquals(dst.flip(), CharBuffer.wrap(data));
+        dst = BufferKit.directCharBuffer(data.length * 2);
+        assertEquals(
+            reader.readTo(new CharArrayReader(data), dst, readSize < 0 ? totalSize : readSize),
+            actualReadSize(totalSize, readSize)
+        );
+        assertEquals(dst.flip(), CharBuffer.wrap(
+            (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+        ));
     }
 
     @Test
