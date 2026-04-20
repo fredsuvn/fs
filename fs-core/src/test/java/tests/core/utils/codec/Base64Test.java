@@ -17,54 +17,58 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class Base64Test implements DataGen {
 
     @Test
-    public void testBase64() {
-        {
-            // instance
-            assertSame(Base64Kit.encoder(), Base64Kit.encoder());
-            assertSame(Base64Kit.encoder(true, true), Base64Kit.encoder(true, true));
-            assertSame(Base64Kit.encoder(true, false), Base64Kit.encoder(true, false));
-            assertSame(Base64Kit.encoder(false, true), Base64Kit.encoder(false, true));
-            assertSame(Base64Kit.encoder(false, false), Base64Kit.encoder(false, false));
-            assertSame(Base64Kit.decoder(), Base64Kit.decoder());
-            assertSame(Base64Kit.decoder(false), Base64Kit.decoder(false));
+    public void testBase64EncoderInstanceCaching() {
+        assertSame(Base64Kit.encoder(), Base64Kit.encoder());
+        assertSame(Base64Kit.encoder(true, true), Base64Kit.encoder(true, true));
+        assertSame(Base64Kit.encoder(true, false), Base64Kit.encoder(true, false));
+        assertSame(Base64Kit.encoder(false, true), Base64Kit.encoder(false, true));
+        assertSame(Base64Kit.encoder(false, false), Base64Kit.encoder(false, false));
+    }
+
+    @Test
+    public void testBase64DecoderInstanceCaching() {
+        assertSame(Base64Kit.decoder(), Base64Kit.decoder());
+        assertSame(Base64Kit.decoder(false), Base64Kit.decoder(false));
+    }
+
+    @Test
+    public void testBase64EncodingDecoding() {
+        for (int i = 0; i < 32; i++) {
+            testBase64(i);
         }
-        {
-            // encoding/decoding
-            for (int i = 0; i < 32; i++) {
-                testBase64(i);
-            }
-            testBase64(1333);
-        }
-        {
-            // url safe
-            String urlSafe = "+/==";
-            assertArrayEquals(
-                Base64Kit.decoder().decode(urlSafe),
-                Base64.getDecoder().decode(urlSafe)
-            );
-        }
-        {
-            // exception
-            Base64Kit.Base64Exception e;
-            String err1 = "+/%==";
-            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err1));
-            assertEquals(2, e.position());
-            String err2 = "+/+/=";
-            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err2));
-            assertEquals(4, e.position());
-            String err3 = "+/==0";
-            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err3));
-            assertEquals(4, e.position());
-            String err4 = "+/=0=";
-            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err4));
-            assertEquals(3, e.position());
-            String err5 = "+/=";
-            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err5));
-            assertEquals(2, e.position());
-            String err6 = "+/h==";
-            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err6));
-            assertEquals(4, e.position());
-        }
+        testBase64(1333);
+    }
+
+    @Test
+    public void testBase64UrlSafeDecoding() {
+        String urlSafe = "+/==";
+        assertArrayEquals(
+            Base64Kit.decoder().decode(urlSafe),
+            Base64.getDecoder().decode(urlSafe)
+        );
+    }
+
+    @Test
+    public void testBase64ExceptionHandling() {
+        Base64Kit.Base64Exception e;
+        String err1 = "+/%==";
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err1));
+        assertEquals(2, e.position());
+        String err2 = "+/+/=";
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err2));
+        assertEquals(4, e.position());
+        String err3 = "+/==0";
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err3));
+        assertEquals(4, e.position());
+        String err4 = "+/=0=";
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err4));
+        assertEquals(3, e.position());
+        String err5 = "+/=";
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err5));
+        assertEquals(2, e.position());
+        String err6 = "+/h==";
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err6));
+        assertEquals(4, e.position());
     }
 
     private void testBase64(int size) {

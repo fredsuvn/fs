@@ -18,34 +18,36 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 public class CryptoTest implements DataGen {
 
     @Test
-    public void testCipher() throws Exception {
-        {
-            KeyGenerator aesKeyGenerator = KeyGenerator.getInstance("AES");
-            aesKeyGenerator.init(128);
-            SecretKey aesKey = aesKeyGenerator.generateKey();
-            Cipher aesCipher = Cipher.getInstance("AES");
-            testCipher(aesCipher, aesKey, aesKey, 1024, 16, 32);
-            testCipher(aesCipher, aesKey, aesKey, 1111, 16, 32);
-            testCipher(aesCipher, aesKey, aesKey, 3337, 16, 32);
-        }
-        {
-            KeyPairGenerator rsaKeyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            rsaKeyPairGenerator.initialize(1024);
-            KeyPair rsaKeyPair = rsaKeyPairGenerator.generateKeyPair();
-            Cipher rsaCipher = Cipher.getInstance("RSA");
-            testCipher(rsaCipher, rsaKeyPair.getPublic(), rsaKeyPair.getPrivate(), 1024, 111, 128);
-            testCipher(rsaCipher, rsaKeyPair.getPublic(), rsaKeyPair.getPrivate(), 1024, 22, 128);
-            testCipher(rsaCipher, rsaKeyPair.getPublic(), rsaKeyPair.getPrivate(), 1111, 111, 128);
-            testCipher(rsaCipher, rsaKeyPair.getPublic(), rsaKeyPair.getPrivate(), 3337, 22, 128);
-        }
-        {
-            KeyPairGenerator rsaKeyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            rsaKeyPairGenerator.initialize(2048);
-            KeyPair rsaKeyPair = rsaKeyPairGenerator.generateKeyPair();
-            Cipher rsaCipher = Cipher.getInstance("RSA");
-            testCipher(rsaCipher, rsaKeyPair.getPublic(), rsaKeyPair.getPrivate(), 9999, 245, 256);
-            testCipher(rsaCipher, rsaKeyPair.getPublic(), rsaKeyPair.getPrivate(), 9999, 99, 256);
-        }
+    public void testCipherWithAES() throws Exception {
+        KeyGenerator aesKeyGenerator = KeyGenerator.getInstance("AES");
+        aesKeyGenerator.init(128);
+        SecretKey aesKey = aesKeyGenerator.generateKey();
+        Cipher aesCipher = Cipher.getInstance("AES");
+        testCipher(aesCipher, aesKey, aesKey, 1024, 16, 32);
+        testCipher(aesCipher, aesKey, aesKey, 1111, 16, 32);
+        testCipher(aesCipher, aesKey, aesKey, 3337, 16, 32);
+    }
+
+    @Test
+    public void testCipherWithRSA1024() throws Exception {
+        KeyPairGenerator rsaKeyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        rsaKeyPairGenerator.initialize(1024);
+        KeyPair rsaKeyPair = rsaKeyPairGenerator.generateKeyPair();
+        Cipher rsaCipher = Cipher.getInstance("RSA");
+        testCipher(rsaCipher, rsaKeyPair.getPublic(), rsaKeyPair.getPrivate(), 1024, 111, 128);
+        testCipher(rsaCipher, rsaKeyPair.getPublic(), rsaKeyPair.getPrivate(), 1024, 22, 128);
+        testCipher(rsaCipher, rsaKeyPair.getPublic(), rsaKeyPair.getPrivate(), 1111, 111, 128);
+        testCipher(rsaCipher, rsaKeyPair.getPublic(), rsaKeyPair.getPrivate(), 3337, 22, 128);
+    }
+
+    @Test
+    public void testCipherWithRSA2048() throws Exception {
+        KeyPairGenerator rsaKeyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        rsaKeyPairGenerator.initialize(2048);
+        KeyPair rsaKeyPair = rsaKeyPairGenerator.generateKeyPair();
+        Cipher rsaCipher = Cipher.getInstance("RSA");
+        testCipher(rsaCipher, rsaKeyPair.getPublic(), rsaKeyPair.getPrivate(), 9999, 245, 256);
+        testCipher(rsaCipher, rsaKeyPair.getPublic(), rsaKeyPair.getPrivate(), 9999, 99, 256);
     }
 
     private void testCipher(

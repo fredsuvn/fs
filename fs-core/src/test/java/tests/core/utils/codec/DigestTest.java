@@ -12,8 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 public class DigestTest implements DataGen {
 
     @Test
-    public void testDigest() throws Exception {
+    public void testDigestWithBlockSize16() throws Exception {
         testDigest(MessageDigest.getInstance("MD5"), 1024, 16);
+    }
+
+    @Test
+    public void testDigestWithBlockSize97() throws Exception {
         testDigest(MessageDigest.getInstance("MD5"), 3337, 97);
     }
 

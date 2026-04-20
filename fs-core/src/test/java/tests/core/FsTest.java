@@ -45,13 +45,25 @@ public class FsTest implements Asserter, TestPrint {
     }
 
     @Test
-    public void testBase() {
+    public void testBaseWithLibInfo() {
         assertNotNull(Fs.LIB_NAME);
         assertNotNull(Fs.LIB_VERSION);
+    }
+
+    @Test
+    public void testBaseWithNullString() {
         assertEquals(Fs.NULL_STRING, Objects.toString(null));
+    }
+
+    @Test
+    public void testBaseWithAsMethod() {
         String hello = "hello";
         assertSame(hello, Fs.as(hello));
         assertSame(hello, Fs.asNonnull(hello));
+    }
+
+    @Test
+    public void testBaseWithNonnullMethod() {
         assertEquals("123", Fs.nonnull("123", "456"));
         assertEquals("456", Fs.nonnull(null, "456"));
         assertEquals("123", Fs.nonnull("123", () -> "456"));
@@ -59,61 +71,91 @@ public class FsTest implements Asserter, TestPrint {
     }
 
     @Test
-    public void testUnchecked() {
-        {
-            // uncheck no return
-            int[] i = {0};
-            assertEquals(0, i[0]);
-            Fs.uncheck(() -> {
-                i[0]++;
-            }, RuntimeException::new);
-            assertEquals(1, i[0]);
-            assertThrows(ArrayIndexOutOfBoundsException.class, () -> Fs.uncheck(() -> {
-                i[1]++;
-            }, e -> {
-                assertInstanceOf(ArrayIndexOutOfBoundsException.class, e);
-                return (ArrayIndexOutOfBoundsException) e;
-            }));
-        }
-        {
-            // uncheck return
-            assertEquals(1, Fs.uncheck(() -> 1, RuntimeException::new));
-            Exception cause = new Exception();
-            assertThrows(UnreachablePointException.class, () -> Fs.uncheck(() -> {
-                throw cause;
-            }, e -> {
-                assertSame(e, cause);
-                return new UnreachablePointException(e);
-            }));
-            // ignore
-            Fs.uncheck(() -> {
-                throw new Exception();
-            });
-        }
-        {
-            // call
-            Exception cause = new Exception();
-            assertEquals(1, Fs.call(() -> 1, 2));
-            assertEquals(2, Fs.call(() -> throwEx(cause), 2));
-            assertEquals(1, Fs.call(() -> 1).get(e -> 2));
-            assertEquals(2, Fs.call(() -> throwEx(cause)).get(e -> {
-                assertSame(e, cause);
-                return 2;
-            }));
-        }
-        {
-            // uncheck actions
-            int[] i = {0};
-            assertEquals(0, i[0]);
-            Fs.uncheck(Arrays.asList(
-                () -> i[0]++,
-                () -> i[0]++,
-                () -> i[0]++
-            ), UnreachablePointException::new);
-            assertEquals(3, i[0]);
+    public void testUncheckedWithNoReturn() {
+        int[] i = {0};
+        assertEquals(0, i[0]);
+        Fs.uncheck(() -> {
+            i[0]++;
+        }, RuntimeException::new);
+        assertEquals(1, i[0]);
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> Fs.uncheck(() -> {
+            i[1]++;
+        }, e -> {
+            assertInstanceOf(ArrayIndexOutOfBoundsException.class, e);
+            return (ArrayIndexOutOfBoundsException) e;
+        }));
+    }
 
-            int[] j = {0};
-            assertThrows(ArrayIndexOutOfBoundsException.class, () -> Fs.uncheck(Arrays.asList(
+    @Test
+    public void testUncheckedWithReturn() {
+        assertEquals(1, Fs.uncheck(() -> 1, RuntimeException::new));
+        Exception cause = new Exception();
+        assertThrows(UnreachablePointException.class, () -> Fs.uncheck(() -> {
+            throw cause;
+        }, e -> {
+            assertSame(e, cause);
+            return new UnreachablePointException(e);
+        }));
+        // ignore
+        Fs.uncheck(() -> {
+            throw new Exception();
+        });
+    }
+
+    @Test
+    public void testCallMethod() {
+        Exception cause = new Exception();
+        assertEquals(1, Fs.call(() -> 1, 2));
+        assertEquals(2, Fs.call(() -> throwEx(cause), 2));
+        assertEquals(1, Fs.call(() -> 1).get(e -> 2));
+        assertEquals(2, Fs.call(() -> throwEx(cause)).get(e -> {
+            assertSame(e, cause);
+            return 2;
+        }));
+    }
+
+    @Test
+    public void testUncheckedWithActions() {
+        int[] i = {0};
+        assertEquals(0, i[0]);
+        Fs.uncheck(Arrays.asList(
+            () -> i[0]++,
+            () -> i[0]++,
+            () -> i[0]++
+        ), UnreachablePointException::new);
+        assertEquals(3, i[0]);
+
+        int[] j = {0};
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> Fs.uncheck(Arrays.asList(
+            () -> i[1]++,
+            () -> {
+                j[0]++;
+                i[1]++;
+            },
+            () -> i[1]++
+        ), e -> {
+            assertInstanceOf(ArrayIndexOutOfBoundsException.class, e);
+            Throwable[] suppressed = e.getSuppressed();
+            assertEquals(2, suppressed.length);
+            assertInstanceOf(ArrayIndexOutOfBoundsException.class, suppressed[0]);
+            assertInstanceOf(ArrayIndexOutOfBoundsException.class, suppressed[1]);
+            return (ArrayIndexOutOfBoundsException) e;
+        }));
+        assertEquals(1, j[0]);
+    }
+
+    @Test
+    public void testUncheckedWithActionsAndStopOnError() {
+        int[] i = {0};
+        Fs.uncheck(Arrays.asList(
+            () -> i[0]++,
+            () -> i[0]++,
+            () -> i[0]++
+        ), UnreachablePointException::new, true);
+        assertEquals(3, i[0]);
+
+        int[] j = {0};
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> Fs.uncheck(Arrays.asList(
                 () -> i[1]++,
                 () -> {
                     j[0]++;
@@ -122,37 +164,12 @@ public class FsTest implements Asserter, TestPrint {
                 () -> i[1]++
             ), e -> {
                 assertInstanceOf(ArrayIndexOutOfBoundsException.class, e);
-                Throwable[] suppressed = e.getSuppressed();
-                assertEquals(2, suppressed.length);
-                assertInstanceOf(ArrayIndexOutOfBoundsException.class, suppressed[0]);
-                assertInstanceOf(ArrayIndexOutOfBoundsException.class, suppressed[1]);
+                assertEquals(0, e.getSuppressed().length);
                 return (ArrayIndexOutOfBoundsException) e;
-            }));
-            assertEquals(1, j[0]);
-
-            Fs.uncheck(Arrays.asList(
-                () -> i[0]++,
-                () -> i[0]++,
-                () -> i[0]++
-            ), UnreachablePointException::new, true);
-            assertEquals(6, i[0]);
-
-            assertThrows(ArrayIndexOutOfBoundsException.class, () -> Fs.uncheck(Arrays.asList(
-                    () -> i[1]++,
-                    () -> {
-                        j[0]++;
-                        i[1]++;
-                    },
-                    () -> i[1]++
-                ), e -> {
-                    assertInstanceOf(ArrayIndexOutOfBoundsException.class, e);
-                    assertEquals(0, e.getSuppressed().length);
-                    return (ArrayIndexOutOfBoundsException) e;
-                },
-                true
-            ));
-            assertEquals(1, j[0]);
-        }
+            },
+            true
+        ));
+        assertEquals(0, j[0]);
     }
 
     private int throwEx(Exception cause) throws Exception {
@@ -226,61 +243,61 @@ public class FsTest implements Asserter, TestPrint {
     }
 
     @Test
-    public void testShortcut() throws Exception {
+    public void testShortcutWithCollectionMethods() {
+        Integer[] array = {1, 2, 3, 4};
+        assertSame(Fs.array(array), array);
+        assertEquals(Fs.list(array), Arrays.asList(array));
+        assertEquals(Fs.arrayList(array), Arrays.asList(array));
+        assertEquals(Fs.linkedList(array), Arrays.asList(array));
+        assertEquals(Fs.set(array), new LinkedHashSet<>(Arrays.asList(array)));
+        assertEquals(Fs.hashSet(array), new HashSet<>(Arrays.asList(array)));
+        assertEquals(Fs.linkedHashSet(array), new LinkedHashSet<>(Arrays.asList(array)));
+        Map<Integer, Integer> map = new LinkedHashMap<>();
+        map.put(1, 2);
+        map.put(3, 4);
+        assertEquals(Fs.map(1, 2, 3, 4), map);
+        assertEquals(Fs.hashMap(1, 2, 3, 4), new HashMap<>(map));
+        assertEquals(Fs.linkedHashMap(1, 2, 3, 4), map);
+        assertEquals(Fs.stream(1, 2, 3).collect(Collectors.toList()), Fs.list(1, 2, 3));
+        assertEquals(Fs.stream(Fs.list(1, 2, 3)).collect(Collectors.toList()), Fs.list(1, 2, 3));
+    }
+
+    @Test
+    public void testShortcutWithThreadMethods() throws Exception {
+        Fs.sleep(1);
+        Fs.sleep(Duration.ofMillis(1));
+        // Kit.sleep() will be tested in ThreadTest
+    }
+
+    @Test
+    public void testShortcutWithProcessMethods() throws Exception {
         {
-            // collection
-            Integer[] array = {1, 2, 3, 4};
-            assertSame(Fs.array(array), array);
-            assertEquals(Fs.list(array), Arrays.asList(array));
-            assertEquals(Fs.arrayList(array), Arrays.asList(array));
-            assertEquals(Fs.linkedList(array), Arrays.asList(array));
-            assertEquals(Fs.set(array), new LinkedHashSet<>(Arrays.asList(array)));
-            assertEquals(Fs.hashSet(array), new HashSet<>(Arrays.asList(array)));
-            assertEquals(Fs.linkedHashSet(array), new LinkedHashSet<>(Arrays.asList(array)));
-            Map<Integer, Integer> map = new LinkedHashMap<>();
-            map.put(1, 2);
-            map.put(3, 4);
-            assertEquals(Fs.map(1, 2, 3, 4), map);
-            assertEquals(Fs.hashMap(1, 2, 3, 4), new HashMap<>(map));
-            assertEquals(Fs.linkedHashMap(1, 2, 3, 4), map);
-            assertEquals(Fs.stream(1, 2, 3).collect(Collectors.toList()), Fs.list(1, 2, 3));
-            assertEquals(Fs.stream(Fs.list(1, 2, 3)).collect(Collectors.toList()), Fs.list(1, 2, 3));
-        }
-        {
-            // thread
-            Fs.sleep(1);
-            Fs.sleep(Duration.ofMillis(1));
-            // Kit.sleep() will be tested in ThreadTest
-        }
-        {
-            // process
-            {
-                Process process;
-                if (OSKit.isWindows()) {
-                    process = Fs.process("cmd.exe", "/c", "dir");
-                } else {
-                    process = Fs.process("ls", "-l");
-                }
-                printProcess("split cmd", process);
-                process.destroyForcibly();
+            Process process;
+            if (OSKit.isWindows()) {
+                process = Fs.process("cmd.exe", "/c", "dir");
+            } else {
+                process = Fs.process("ls", "-l");
             }
-            {
-                Process process;
-                if (OSKit.isWindows()) {
-                    process = Fs.process("cmd.exe /c dir");
-                } else {
-                    process = Fs.process("ls -l");
-                }
-                printProcess("one cmd", process);
-                process.destroyForcibly();
-            }
+            printProcess("split cmd", process);
+            process.destroyForcibly();
         }
         {
-            // getting property
-            MapProps mapProps = new MapProps(111L);
-            assertEquals(111L, Fs.getValue(mapProps, "longNum"));
-            assertEquals(111L, Fs.getValue(mapProps, "longNum", ObjectSchemaParser.defaultParser()));
+            Process process;
+            if (OSKit.isWindows()) {
+                process = Fs.process("cmd.exe /c dir");
+            } else {
+                process = Fs.process("ls -l");
+            }
+            printProcess("one cmd", process);
+            process.destroyForcibly();
         }
+    }
+
+    @Test
+    public void testShortcutWithGetProperty() {
+        MapProps mapProps = new MapProps(111L);
+        assertEquals(111L, Fs.getValue(mapProps, "longNum"));
+        assertEquals(111L, Fs.getValue(mapProps, "longNum", ObjectSchemaParser.defaultParser()));
     }
 
     private void printProcess(String title, Process process) {

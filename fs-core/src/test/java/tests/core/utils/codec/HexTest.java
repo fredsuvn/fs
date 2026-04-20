@@ -17,67 +17,71 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class HexTest implements DataGen {
 
     @Test
-    public void testHex() {
-        {
-            // instance
-            assertSame(HexKit.encoder(), HexKit.encoder());
-            assertSame(HexKit.encoder(false), HexKit.encoder(false));
-            assertSame(HexKit.decoder(), HexKit.decoder());
-            assertSame(HexKit.decoder(false), HexKit.decoder(false));
-        }
-        {
-            // encoding/decoding
-            for (int i = 0; i < 32; i++) {
-                testHex(i);
-            }
-            testHex(1333);
-        }
-        {
-            // exception
-            HexKit.HexException e;
-            byte[] errorLen = new byte[3];
-            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorLen));
-            assertEquals(-1, e.position());
-            byte[] errorChar = new byte[2];
-            errorChar[0] = '0' - 1;
-            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(0, e.position());
-            errorChar[0] = '9' + 1;
-            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(0, e.position());
-            errorChar[0] = 'A' - 1;
-            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(0, e.position());
-            errorChar[0] = 'F' + 1;
-            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(0, e.position());
-            errorChar[0] = 'a' - 1;
-            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(0, e.position());
-            errorChar[0] = 'f' + 1;
-            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(0, e.position());
-            errorChar[0] = '0';
-            errorChar[1] = '0' - 1;
-            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(1, e.position());
-            errorChar[1] = '9' + 1;
-            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(1, e.position());
-            errorChar[1] = 'A' - 1;
-            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(1, e.position());
-            errorChar[1] = 'F' + 1;
-            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(1, e.position());
-            errorChar[1] = 'a' - 1;
-            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(1, e.position());
-            errorChar[1] = 'f' + 1;
-            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
-            assertEquals(1, e.position());
-        }
+    public void testHexEncoderInstanceCaching() {
+        assertSame(HexKit.encoder(), HexKit.encoder());
+        assertSame(HexKit.encoder(false), HexKit.encoder(false));
     }
+
+    @Test
+    public void testHexDecoderInstanceCaching() {
+        assertSame(HexKit.decoder(), HexKit.decoder());
+        assertSame(HexKit.decoder(false), HexKit.decoder(false));
+    }
+
+    @Test
+    public void testHexEncodingDecoding() {
+        for (int i = 0; i < 32; i++) {
+            testHex(i);
+        }
+        testHex(1333);
+    }
+
+    @Test
+    public void testHexExceptionHandling() {
+        HexKit.HexException e;
+        byte[] errorLen = new byte[3];
+        e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorLen));
+        assertEquals(-1, e.position());
+        byte[] errorChar = new byte[2];
+        errorChar[0] = '0' - 1;
+        e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+        assertEquals(0, e.position());
+        errorChar[0] = '9' + 1;
+        e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+        assertEquals(0, e.position());
+        errorChar[0] = 'A' - 1;
+        e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+        assertEquals(0, e.position());
+        errorChar[0] = 'F' + 1;
+        e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+        assertEquals(0, e.position());
+        errorChar[0] = 'a' - 1;
+        e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+        assertEquals(0, e.position());
+        errorChar[0] = 'f' + 1;
+        e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+        assertEquals(0, e.position());
+        errorChar[0] = '0';
+        errorChar[1] = '0' - 1;
+        e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+        assertEquals(1, e.position());
+        errorChar[1] = '9' + 1;
+        e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+        assertEquals(1, e.position());
+        errorChar[1] = 'A' - 1;
+        e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+        assertEquals(1, e.position());
+        errorChar[1] = 'F' + 1;
+        e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+        assertEquals(1, e.position());
+        errorChar[1] = 'a' - 1;
+        e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+        assertEquals(1, e.position());
+        errorChar[1] = 'f' + 1;
+        e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+        assertEquals(1, e.position());
+    }
+
 
     private void testHex(int size) {
         byte[] src = randomBytes(size);

@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ThirdTest implements TestPrint {
 
     @Test
-    public void testThirdClassName() throws Exception {
+    public void testThirdClassNameGeneration() throws Exception {
         String className = ThirdKit.thirdClassName("protobuf", "ProtobufSchemaHandler");
         assertEquals(ThirdKit.class.getPackage().getName() + ".protobuf.ProtobufSchemaHandler", className);
     }

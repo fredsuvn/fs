@@ -75,54 +75,67 @@ public class JdbcTest {
     }
 
     @Test
-    public void testJdbcQuery() throws Exception {
+    public void testJdbcQueryWithClassMapping() throws Exception {
         PreparedStatement preparedStatement = h2Connection.prepareStatement(
             "select * from `user`"
         );
-        {
-            // default name mapper for Class<User>
-            ResultSet resultSet = preparedStatement.executeQuery();
-            List<User> users = JdbcKit.toObject(
-                resultSet,
-                User.class
-            );
-            checkQueryResult(users);
-            resultSet.close();
-        }
-        {
-            // default name mapper for TypeRef<User>
-            ResultSet resultSet = preparedStatement.executeQuery();
-            List<Map<String, Object>> users = JdbcKit.toObject(
-                resultSet,
-                new TypeRef<Map<String, Object>>() {}
-            );
-            checkQueryMapResult(users);
-            resultSet.close();
-        }
-        {
-            // default name mapper for Type
-            ResultSet resultSet = preparedStatement.executeQuery();
-            List<Map<String, Object>> users = Fs.as(JdbcKit.toObject(
-                resultSet,
-                new TypeRef<Map<String, Object>>() {}.type()
-            ));
-            checkQueryMapResult(users);
-            resultSet.close();
-        }
-        {
-            // lower case name mapper
-            ResultSet resultSet = preparedStatement.executeQuery();
-            List<User> users = JdbcKit.toObject(
-                resultSet,
-                User.class,
-                s ->
-                    s.toLowerCase()
-                        .replace("_", "")
-                        .replace("n", "N")
-            );
-            checkQueryResult(users);
-            resultSet.close();
-        }
+        // default name mapper for Class<User>
+        ResultSet resultSet = preparedStatement.executeQuery();
+        List<User> users = JdbcKit.toObject(
+            resultSet,
+            User.class
+        );
+        checkQueryResult(users);
+        resultSet.close();
+    }
+
+    @Test
+    public void testJdbcQueryWithTypeRefMapping() throws Exception {
+        PreparedStatement preparedStatement = h2Connection.prepareStatement(
+            "select * from `user`"
+        );
+        // default name mapper for TypeRef<User>
+        ResultSet resultSet = preparedStatement.executeQuery();
+        List<Map<String, Object>> users = JdbcKit.toObject(
+            resultSet,
+            new TypeRef<Map<String, Object>>() {}
+        );
+        checkQueryMapResult(users);
+        resultSet.close();
+    }
+
+    @Test
+    public void testJdbcQueryWithTypeMapping() throws Exception {
+        PreparedStatement preparedStatement = h2Connection.prepareStatement(
+            "select * from `user`"
+        );
+        // default name mapper for Type
+        ResultSet resultSet = preparedStatement.executeQuery();
+        List<Map<String, Object>> users = Fs.as(JdbcKit.toObject(
+            resultSet,
+            new TypeRef<Map<String, Object>>() {}.type()
+        ));
+        checkQueryMapResult(users);
+        resultSet.close();
+    }
+
+    @Test
+    public void testJdbcQueryWithCustomNameMapper() throws Exception {
+        PreparedStatement preparedStatement = h2Connection.prepareStatement(
+            "select * from `user`"
+        );
+        // lower case name mapper
+        ResultSet resultSet = preparedStatement.executeQuery();
+        List<User> users = JdbcKit.toObject(
+            resultSet,
+            User.class,
+            s ->
+                s.toLowerCase()
+                    .replace("_", "")
+                    .replace("n", "N")
+        );
+        checkQueryResult(users);
+        resultSet.close();
     }
 
     private void checkQueryResult(List<User> users) {

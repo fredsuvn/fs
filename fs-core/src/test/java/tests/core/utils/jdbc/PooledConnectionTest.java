@@ -31,7 +31,8 @@ public class PooledConnectionTest {
     // private static final String DB_PASSWORD = "";
 
     @Test
-    public void testConnectionWrapper() throws Exception {
+    public void testConnectionWrapperFunctionality() throws Exception {
+        // Create pool with mocked connection factory
         SimpleJdbcPool pool = SimpleJdbcPool.newBuilder()
             .driverClassName("DB_DRIVER")
             .url("DB_URL")
@@ -44,8 +45,12 @@ public class PooledConnectionTest {
                 (driverClassName, url, username, password) ->
                     Mocker.mock(Connection.class))
             .build();
+
+        // Get connection and verify it's not closed
         Connection conn = pool.getConnection();
         assertFalse(conn.isClosed());
+
+        // Test all connection methods except close and isClosed
         List<Method> methods = Arrays.asList(Connection.class.getMethods()).stream()
             .filter(method -> !method.getName().equals("close") && !method.getName().equals("isClosed"))
             .collect(Collectors.toList());
@@ -59,15 +64,18 @@ public class PooledConnectionTest {
             method.invoke(conn, args);
             argsList.add(args);
         }
+
+        // Close connection and verify it's closed
         conn.close();
         assertTrue(conn.isClosed());
+
+        // Verify methods throw exceptions after close
         int i = 0;
         for (Method method : methods) {
             Object[] args = argsList.get(i++);
             InvocationTargetException e = assertThrows(InvocationTargetException.class, () -> method.invoke(conn, args));
             Class<?>[] exceptionTypes = method.getExceptionTypes();
             if (exceptionTypes.length > 0 && SQLClientInfoException.class.equals(exceptionTypes[0])) {
-
                 assertInstanceOf(SQLClientInfoException.class, e.getCause());
             } else {
                 assertInstanceOf(SQLException.class, e.getCause());
