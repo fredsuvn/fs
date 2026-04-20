@@ -20,7 +20,6 @@ public class TypeRefTest {
         ParameterizedType parameterizedType = new TypeRef<List<String>>() {
         }.asParameterized();
         assertEquals(parameterizedType, listType);
-        ;
         assertEquals(String.class, new TypeRef<String>() {
         }.type());
 

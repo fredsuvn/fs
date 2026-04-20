@@ -35,10 +35,14 @@ public class ClassTest implements Asserter {
         Field i1 = Inter1.class.getDeclaredField("i1");
         Field i2 = Inter2.class.getDeclaredField("i2");
         Field i3 = Inter3.class.getDeclaredField("i3");
+
+        // Test getField method
         assertEquals(ClassKit.getField(Cls3.class, "c3"), c3);
         assertEquals(ClassKit.getField(Cls3.class, "pc3"), pc3);
         assertNull(ClassKit.getField(Cls3.class, "pc3", false));
         assertNull(ClassKit.getField(Cls3.class, "x"));
+
+        // Test searchField method
         assertEquals(ClassKit.searchField(Cls3.class, "c1"), c1);
         assertEquals(ClassKit.searchField(Cls3.class, "c2"), c2);
         assertEquals(ClassKit.searchField(Cls3.class, "c3"), c3);
@@ -63,10 +67,14 @@ public class ClassTest implements Asserter {
         Method im2 = Inter2.class.getDeclaredMethod("im2");
         Method im3 = Inter3.class.getDeclaredMethod("im3");
         Class<?>[] params = {};
+
+        // Test getMethod method
         assertEquals(ClassKit.getMethod(Cls3.class, "cm3", params), cm3);
         assertEquals(ClassKit.getMethod(Cls3.class, "pcm3", params), pcm3);
         assertNull(ClassKit.getMethod(Cls3.class, "pcm3", params, false));
         assertNull(ClassKit.getMethod(Cls3.class, "x", params));
+
+        // Test searchMethod method
         assertEquals(ClassKit.searchMethod(Cls3.class, "cm1", params), cm1);
         assertEquals(ClassKit.searchMethod(Cls3.class, "cm2", params), cm2);
         assertEquals(ClassKit.searchMethod(Cls3.class, "cm3", params), cm3);
@@ -82,6 +90,8 @@ public class ClassTest implements Asserter {
         // constructors:
         Constructor<?> cl3 = Cls3.class.getConstructor();
         Constructor<?> pcl3 = Cls3.class.getDeclaredConstructor(int.class);
+
+        // Test getConstructor method
         assertEquals(ClassKit.getConstructor(Cls3.class, params), cl3);
         assertEquals(ClassKit.getConstructor(Cls3.class, Fs.array(int.class)), pcl3);
         assertNull(ClassKit.getConstructor(Cls3.class, Fs.array(int.class), false));
