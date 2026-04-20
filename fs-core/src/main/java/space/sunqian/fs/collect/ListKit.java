@@ -219,7 +219,7 @@ public class ListKit {
 
     /**
      * Returns a new list instance with the given list type and initial capacity. If the given list type is unsupported,
-     * returns {@code null}. The supported list types follow the {@link #listFunction(Type)}.
+     * returns {@code null}. The supported list types follow the {@link #newFunction(Type)}.
      *
      * @param listType        the given list type
      * @param initialCapacity the initial capacity
@@ -227,15 +227,15 @@ public class ListKit {
      * @return a new list instance, or {@code null} if the given list type is unsupported
      */
     public static <T> @Nullable List<T> newList(@Nonnull Type listType, int initialCapacity) {
-        IntFunction<@Nonnull List<T>> listFunction = listFunction(listType);
-        if (listFunction == null) {
+        IntFunction<@Nonnull List<T>> function = newFunction(listType);
+        if (function == null) {
             return null;
         }
-        return listFunction.apply(initialCapacity);
+        return function.apply(initialCapacity);
     }
 
     /**
-     * Returns an instance of {@link IntFunction} that creates a new list instance with the given list type. If the
+     * Returns a new instance of {@link IntFunction} that creates a new list instance with the given list type. If the
      * given list type is unsupported, returns {@code null}. The supported list types are:
      * <ul>
      *     <li>{@link Iterable}</li>
@@ -249,10 +249,10 @@ public class ListKit {
      *
      * @param listType the given list type
      * @param <T>      the type of the list elements
-     * @return an instance of {@link IntFunction} that creates a new list instance with the given list type, or
+     * @return a new instance of {@link IntFunction} that creates a new list instance with the given list type, or
      * {@code null} if the given list type is unsupported
      */
-    public static <T> @Nullable IntFunction<@Nonnull List<T>> listFunction(@Nonnull Type listType) {
+    public static <T> @Nullable IntFunction<@Nonnull List<T>> newFunction(@Nonnull Type listType) {
         return Fs.as(CollectBack.listFunction(listType));
     }
 

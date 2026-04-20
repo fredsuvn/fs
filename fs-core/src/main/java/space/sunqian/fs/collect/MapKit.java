@@ -324,7 +324,7 @@ public class MapKit {
 
     /**
      * Returns a new map instance with the given map type and initial capacity. If the given map type is unsupported,
-     * returns {@code null}. The supported map types follow the {@link #mapFunction(Type)}.
+     * returns {@code null}. The supported map types follow the {@link #newFunction(Type)}.
      *
      * @param mapType         the given map type
      * @param initialCapacity the initial capacity
@@ -333,16 +333,16 @@ public class MapKit {
      * @return a new map instance, or {@code null} if the given map type is unsupported
      */
     public static <K, V> @Nullable Map<K, V> newMap(@Nonnull Type mapType, int initialCapacity) {
-        IntFunction<@Nonnull Map<K, V>> mapFunction = mapFunction(mapType);
-        if (mapFunction == null) {
+        IntFunction<@Nonnull Map<K, V>> function = newFunction(mapType);
+        if (function == null) {
             return null;
         }
-        return mapFunction.apply(initialCapacity);
+        return function.apply(initialCapacity);
     }
 
     /**
-     * Returns an instance of {@link IntFunction} that creates a new map instance with the given map type. If the given
-     * map type is unsupported, returns {@code null}. The supported map types are:
+     * Returns a new instance of {@link IntFunction} that creates a new map instance with the given map type. If the
+     * given map type is unsupported, returns {@code null}. The supported map types are:
      * <ul>
      *     <li>{@link Map}</li>
      *     <li>{@link AbstractMap}</li>
@@ -358,10 +358,10 @@ public class MapKit {
      * @param maType the given map type
      * @param <K>    the type of the map keys
      * @param <V>    the type of the map values
-     * @return an instance of {@link IntFunction} that creates a new map instance with the given map type, or
+     * @return a new instance of {@link IntFunction} that creates a new map instance with the given map type, or
      * {@code null} if the given map type is unsupported
      */
-    public static <K, V> @Nullable IntFunction<@Nonnull Map<K, V>> mapFunction(@Nonnull Type maType) {
+    public static <K, V> @Nullable IntFunction<@Nonnull Map<K, V>> newFunction(@Nonnull Type maType) {
         return Fs.as(CollectBack.mapFunction(maType));
     }
 

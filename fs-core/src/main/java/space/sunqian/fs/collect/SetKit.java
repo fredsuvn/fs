@@ -110,7 +110,7 @@ public class SetKit {
 
     /**
      * Returns a new set instance with the given set type and initial capacity. If the given set type is unsupported,
-     * returns {@code null}. The supported set types follow the {@link #setFunction(Type)}.
+     * returns {@code null}. The supported set types follow the {@link #newFunction(Type)}.
      *
      * @param setType         the given set type
      * @param initialCapacity the initial capacity
@@ -118,16 +118,16 @@ public class SetKit {
      * @return a new set instance, or {@code null} if the given set type is unsupported
      */
     public static <T> @Nullable Set<T> newSet(@Nonnull Type setType, int initialCapacity) {
-        IntFunction<@Nonnull Set<T>> setFunction = setFunction(setType);
-        if (setFunction == null) {
+        IntFunction<@Nonnull Set<T>> function = newFunction(setType);
+        if (function == null) {
             return null;
         }
-        return setFunction.apply(initialCapacity);
+        return function.apply(initialCapacity);
     }
 
     /**
-     * Returns an instance of {@link IntFunction} that creates a new set instance with the given set type. If the given
-     * set type is unsupported, returns {@code null}. The supported set types are:
+     * Returns a new instance of {@link IntFunction} that creates a new set instance with the given set type. If the
+     * given set type is unsupported, returns {@code null}. The supported set types are:
      * <ul>
      *     <li>{@link Iterable}</li>
      *     <li>{@link Collection}</li>
@@ -142,10 +142,10 @@ public class SetKit {
      *
      * @param setType the given set type
      * @param <T>     the type of the set elements
-     * @return an instance of {@link IntFunction} that creates a new set instance with the given set type, or
+     * @return a new instance of {@link IntFunction} that creates a new set instance with the given set type, or
      * {@code null} if the given set type is unsupported
      */
-    public static <T> @Nullable IntFunction<@Nonnull Set<T>> setFunction(@Nonnull Type setType) {
+    public static <T> @Nullable IntFunction<@Nonnull Set<T>> newFunction(@Nonnull Type setType) {
         return Fs.as(CollectBack.setFunction(setType));
     }
 
