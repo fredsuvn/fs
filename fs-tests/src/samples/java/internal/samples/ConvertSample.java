@@ -27,7 +27,7 @@ import space.sunqian.fs.object.convert.ObjectConverter;
  *   </li>
  * </ul>
  */
-public class ObjectSamples {
+public class ConvertSample {
 
     public static void main(String[] args) {
         demonstrateBasicObjectConversion();
