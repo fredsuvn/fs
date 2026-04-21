@@ -136,7 +136,7 @@ import java.util.function.IntFunction;
  *     <td>Array and Collection Objects</td>
  *     <td>Array or Iterable Objects</td>
  *     <td>Array created using reflection. Collection created using its constructor, the supported collection types
- *     follow the {@link SetKit#setFunction(Type)} and {@link ListKit#listFunction(Type)}. After creating the container,
+ *     follow the {@link SetKit#newFunction(Type)} and {@link ListKit#newFunction(Type)}. After creating the container,
  *     uses the {@code converter} parameter to handle component types.
  *     </td>
  * </tr>
@@ -146,7 +146,7 @@ import java.util.function.IntFunction;
  *     <td>Generating data object is based on {@link ConvertOption#builderOperatorProvider(BuilderOperatorProvider)} and
  *     {@link ConvertOption#objectCopier(ObjectCopier)}. Generating map using its constructor, and copying properties
  *     also using {@link ConvertOption#objectCopier(ObjectCopier)}. The supported map types follow the
- *     {@link MapKit#mapFunction(Type)}.
+ *     {@link MapKit#newFunction(Type)}.
  *     </td>
  * </tr>
  * </table>
@@ -246,9 +246,9 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
 
     private @Nullable IntFunction<Collection<Object>> collectionFunction(@Nonnull Class<?> collectionType) {
         if (Set.class.isAssignableFrom(collectionType)) {
-            return Fs.as(SetKit.setFunction(collectionType));
+            return Fs.as(SetKit.newFunction(collectionType));
         }
-        return Fs.as(ListKit.listFunction(collectionType));
+        return Fs.as(ListKit.newFunction(collectionType));
     }
 
     private Object toArray(
@@ -396,7 +396,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
-        IntFunction<Map<Object, Object>> mapFunc = MapKit.mapFunction(rawTarget);
+        IntFunction<Map<Object, Object>> mapFunc = MapKit.newFunction(rawTarget);
         ObjectCopier objectCopier = ConvertOption.getObjectCopier(options);
         if (mapFunc != null) {
             Object targetObject = mapFunc.apply(0);
