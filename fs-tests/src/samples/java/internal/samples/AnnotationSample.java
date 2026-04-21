@@ -13,6 +13,7 @@ import space.sunqian.annotation.SimpleClass;
 import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.annotation.ValueClass;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,6 +41,18 @@ import java.util.List;
  *   </li>
  *   <li>
  *     Export control: Mark classes as non-exported
+ *   </li>
+ *   <li>
+ *     Thread safety: Mark classes as thread-safe
+ *   </li>
+ *   <li>
+ *     Value classes: Mark classes as value objects
+ *   </li>
+ *   <li>
+ *     Simple classes: Mark classes as simple data holders
+ *   </li>
+ *   <li>
+ *     Retained parameters: Mark parameters that should be retained
  *   </li>
  * </ul>
  * <p>
@@ -86,9 +99,11 @@ import java.util.List;
 public class AnnotationSample {
 
     /**
-     * Demonstrates null safety annotations for fields.
+     * Demonstrates null safety annotations for fields, parameters, and return types.
      */
     public static void demonstrateNullSafetyAnnotations() {
+        System.out.println("=== Null Safety Annotations ===");
+
         // Nullable field - can be null
         @Nullable String nullable = null;
         System.out.println("Nullable value: " + nullable);
@@ -136,6 +151,14 @@ public class AnnotationSample {
     public static class NullableClass {
         private final String nullable1 = null;
         private final String nullable2 = null;
+
+        @Override
+        public String toString() {
+            return "NullableClass{" +
+                "nullable1='" + nullable1 + '\'' +
+                ", nullable2='" + nullable2 + '\'' +
+                '}';
+        }
     }
 
     /**
@@ -145,19 +168,53 @@ public class AnnotationSample {
     public static class NonNullClass {
         private final String nonNull1 = "nonNull1";
         private final String nonNull2 = "nonNull2";
+
+        @Override
+        public String toString() {
+            return "NonNullClass{" +
+                "nonNull1='" + nonNull1 + '\'' +
+                ", nonNull2='" + nonNull2 + '\'' +
+                '}';
+        }
     }
 
     /**
      * Demonstrates non-exported annotation for a class. This class is thread-safe but not exported.
      */
     @NonExported
-    public static class ThreadSafeClass {}
+    @ThreadSafe
+    public static class NonExportedThreadSafeClass {
+        private final Object lock = new Object();
+        private int count = 0;
+
+        public void increment() {
+            synchronized (lock) {
+                count++;
+            }
+        }
+
+        public int getCount() {
+            synchronized (lock) {
+                return count;
+            }
+        }
+    }
 
     /**
      * Demonstrates non-exported annotation for a class. This class is public but not exported.
      */
     @NonExported
-    public static class NonExportedClass {}
+    public static class NonExportedClass {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
 
     /**
      * Demonstrates thread-safe annotation for a class. This class is designed to be thread-safe.
@@ -177,6 +234,13 @@ public class AnnotationSample {
             synchronized (lock) {
                 return count;
             }
+        }
+
+        @Override
+        public String toString() {
+            return "ThreadSafeExample{" +
+                "count=" + getCount() +
+                '}';
         }
     }
 
@@ -213,6 +277,14 @@ public class AnnotationSample {
         public int hashCode() {
             return 31 * x + y;
         }
+
+        @Override
+        public String toString() {
+            return "Point{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
+        }
     }
 
     /**
@@ -238,6 +310,14 @@ public class AnnotationSample {
         public void setAge(int age) {
             this.age = age;
         }
+
+        @Override
+        public String toString() {
+            return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+        }
     }
 
     /**
@@ -253,37 +333,63 @@ public class AnnotationSample {
         demonstrateNullSafetyAnnotations();
 
         // Test cached result
+        System.out.println("\n=== Cached Result Annotation ===");
         System.out.println("First call to cachedString(): " + cachedString());
         System.out.println("Second call to cachedString(): " + cachedString());
 
         // Test out parameter
-        List<String> list = new java.util.ArrayList<>();
+        System.out.println("\n=== Out Parameter Annotation ===");
+        List<String> list = new ArrayList<>();
         demonstrateOutParam(list);
         System.out.println("List after out param: " + list);
 
         // Test array parameter
+        System.out.println("\n=== Array Parameter Annotation ===");
         Object[] result = demonstrateArrayParam("a", "b", "c");
         System.out.println("Array result: " + java.util.Arrays.toString(result));
 
         // Test retained parameter
+        System.out.println("\n=== Retained Parameter Annotation ===");
         String[] retainedResult = demonstrateRetainedParam("x", "y", "z");
         System.out.println("Retained array result: " + java.util.Arrays.toString(retainedResult));
 
         // Test thread-safe class
+        System.out.println("\n=== Thread Safe Annotation ===");
         ThreadSafeExample threadSafeExample = new ThreadSafeExample();
         threadSafeExample.increment();
         System.out.println("Thread-safe count: " + threadSafeExample.getCount());
 
         // Test value class
+        System.out.println("\n=== Value Class Annotation ===");
         Point point1 = new Point(1, 2);
         Point point2 = new Point(1, 2);
+        System.out.println("Point1: " + point1);
+        System.out.println("Point2: " + point2);
         System.out.println("Point1 equals Point2: " + point1.equals(point2));
         System.out.println("Point1 hash code: " + point1.hashCode());
 
         // Test simple class
+        System.out.println("\n=== Simple Class Annotation ===");
         Person person = new Person();
         person.setName("John");
         person.setAge(30);
-        System.out.println("Person: " + person.getName() + ", " + person.getAge());
+        System.out.println("Person: " + person);
+
+        // Test default nullability annotations
+        System.out.println("\n=== Default Nullability Annotations ===");
+        NullableClass nullableClass = new NullableClass();
+        System.out.println("NullableClass: " + nullableClass);
+        NonNullClass nonNullClass = new NonNullClass();
+        System.out.println("NonNullClass: " + nonNullClass);
+
+        // Test non-exported annotation
+        System.out.println("\n=== Non-Exported Annotation ===");
+        NonExportedClass nonExportedClass = new NonExportedClass();
+        nonExportedClass.setName("Non-Exported");
+        System.out.println("NonExportedClass: " + nonExportedClass.getName());
+
+        NonExportedThreadSafeClass nonExportedThreadSafeClass = new NonExportedThreadSafeClass();
+        nonExportedThreadSafeClass.increment();
+        System.out.println("NonExportedThreadSafeClass count: " + nonExportedThreadSafeClass.getCount());
     }
 }

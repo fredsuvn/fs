@@ -4,11 +4,13 @@ import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
+import space.sunqian.fs.collect.StreamKit;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Sample: Collection Utilities Usage
@@ -29,6 +31,9 @@ import java.util.Set;
  *   <li>
  *     Set operations
  *   </li>
+ *   <li>
+ *     Stream operations
+ *   </li>
  * </ul>
  * <p>
  * Key Classes:
@@ -45,6 +50,9 @@ import java.util.Set;
  *   <li>
  *     {@link SetKit}: Set operation utilities
  *   </li>
+ *   <li>
+ *     {@link StreamKit}: Stream operation utilities
+ *   </li>
  * </ul>
  */
 public class CollectionSample {
@@ -54,6 +62,7 @@ public class CollectionSample {
         demonstrateListOperations();
         demonstrateMapOperations();
         demonstrateSetOperations();
+        demonstrateStreamOperations();
     }
 
     /**
@@ -111,6 +120,14 @@ public class CollectionSample {
         // Create immutable list
         List<String> immutableList = ListKit.list("a", "b", "c", "d");
         System.out.println("Immutable list: " + immutableList);
+
+        // Create ArrayList
+        List<String> arrayList = ListKit.arrayList("x", "y", "z");
+        System.out.println("ArrayList: " + arrayList);
+
+        // Create LinkedList
+        List<String> linkedList = ListKit.linkedList("1", "2", "3");
+        System.out.println("LinkedList: " + linkedList);
     }
 
     /**
@@ -141,6 +158,20 @@ public class CollectionSample {
 
         // Get value by key
         System.out.println("Value for 'a': " + map.get("a"));
+
+        // Create HashMap
+        Map<String, String> hashMap = MapKit.hashMap(
+            "name", "John",
+            "age", "30"
+        );
+        System.out.println("HashMap: " + hashMap);
+
+        // Create LinkedHashMap
+        Map<String, String> linkedHashMap = MapKit.linkedHashMap(
+            "first", "value1",
+            "second", "value2"
+        );
+        System.out.println("LinkedHashMap: " + linkedHashMap);
     }
 
     /**
@@ -161,5 +192,39 @@ public class CollectionSample {
 
         // Check if set contains element
         System.out.println("Contains 'b': " + set.contains("b"));
+
+        // Create HashSet
+        Set<String> hashSet = SetKit.hashSet("x", "y", "z");
+        System.out.println("HashSet: " + hashSet);
+
+        // Create LinkedHashSet
+        Set<String> linkedHashSet = SetKit.linkedHashSet("1", "2", "3");
+        System.out.println("LinkedHashSet: " + linkedHashSet);
+    }
+
+    /**
+     * Demonstrates stream operations.
+     */
+    public static void demonstrateStreamOperations() {
+        System.out.println("\n=== Stream Operations ===");
+
+        // Create stream from array
+        String[] fruits = {"apple", "banana", "orange", "grape"};
+        System.out.println("Original fruits: " + Arrays.toString(fruits));
+
+        // Stream operations
+        List<String> filteredFruits = StreamKit.stream(fruits)
+            .filter(fruit -> fruit.length() > 5)
+            .collect(Collectors.toList());
+        System.out.println("Filtered fruits (length > 5): " + filteredFruits);
+
+        // Stream from iterable
+        List<Integer> numbers = ListKit.list(1, 2, 3, 4, 5);
+        System.out.println("Original numbers: " + numbers);
+
+        int sum = StreamKit.stream(numbers)
+            .mapToInt(Integer::intValue)
+            .sum();
+        System.out.println("Sum of numbers: " + sum);
     }
 }

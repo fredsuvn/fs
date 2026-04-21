@@ -3,8 +3,11 @@ package internal.samples;
 import space.sunqian.fs.base.bytes.BytesKit;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateKit;
+import space.sunqian.fs.base.function.IndexedConsumer;
 import space.sunqian.fs.base.logging.LogKit;
 import space.sunqian.fs.base.math.MathKit;
+import space.sunqian.fs.base.number.NumKit;
+import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.random.Rng;
 import space.sunqian.fs.base.random.Rog;
 import space.sunqian.fs.base.string.StringKit;
@@ -37,6 +40,21 @@ import java.time.LocalDateTime;
  *   </li>
  *   <li>
  *     Byte and char utilities
+ *   </li>
+ *   <li>
+ *     Mathematical utilities
+ *   </li>
+ *   <li>
+ *     Random number and object generation
+ *   </li>
+ *   <li>
+ *     Number utilities
+ *   </li>
+ *   <li>
+ *     Option utilities
+ *   </li>
+ *   <li>
+ *     Function utilities
  *   </li>
  * </ul>
  * <p>
@@ -72,6 +90,15 @@ import java.time.LocalDateTime;
  *   <li>
  *     {@link Rog}: Random object generation
  *   </li>
+ *   <li>
+ *     {@link NumKit}: Number processing utilities
+ *   </li>
+ *   <li>
+ *     {@link Option}: Optional value utilities
+ *   </li>
+ *   <li>
+ *     {@link IndexedConsumer}: Indexed consumer function
+ *   </li>
  * </ul>
  */
 public class BaseSample {
@@ -82,9 +109,11 @@ public class BaseSample {
         demonstrateSystemUtilities();
         demonstrateThreadUtilities();
         demonstrateLoggingUtilities();
-        demonstrateByteCharUtilities();
         demonstrateMathUtilities();
         demonstrateRandomUtilities();
+        demonstrateNumberUtilities();
+        demonstrateOptionUtilities();
+        demonstrateFunctionUtilities();
     }
 
     /**
@@ -156,22 +185,6 @@ public class BaseSample {
     }
 
     /**
-     * Demonstrates byte and char utilities.
-     */
-    public static void demonstrateByteCharUtilities() {
-        System.out.println("\n=== Byte and Char Utilities ===");
-
-        // Byte utilities
-        byte[] bytes = "Hello".getBytes();
-        System.out.println("Byte array length: " + bytes.length);
-
-        // Char utilities
-        char[] chars = "Hello".toCharArray();
-        System.out.println("Char array length: " + chars.length);
-        System.out.println("Chars to string: " + new String(chars));
-    }
-
-    /**
      * Demonstrates mathematical utilities.
      */
     public static void demonstrateMathUtilities() {
@@ -206,5 +219,70 @@ public class BaseSample {
             .weight(1, "orange")
             .build();
         System.out.println("Random fruit: " + rog.next());
+    }
+
+    /**
+     * Demonstrates number utilities.
+     */
+    public static void demonstrateNumberUtilities() {
+        System.out.println("\n=== Number Utilities ===");
+
+        // Number parsing and conversion
+        String numberStr = "123.45";
+        System.out.println("Original string: " + numberStr);
+        try {
+            double doubleValue = NumKit.toNumber(numberStr, Double.class);
+            System.out.println("Parse to double: " + doubleValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Try with integer string
+        String intStr = "123";
+        System.out.println("\nOriginal integer string: " + intStr);
+        try {
+            int intValue = NumKit.toNumber(intStr, Integer.class);
+            System.out.println("Parse to int: " + intValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Number formatting (using Java's built-in formatting)
+        double number = 12345.6789;
+        System.out.println("\nOriginal number: " + number);
+        System.out.println("Format with 2 decimal places: " + String.format("%.2f", number));
+    }
+
+    /**
+     * Demonstrates option utilities.
+     */
+    public static void demonstrateOptionUtilities() {
+        System.out.println("\n=== Option Utilities ===");
+
+        // Create option with value
+        Option<String, String> someOption = Option.of("key", "Hello");
+        System.out.println("Some option: " + someOption);
+        System.out.println("Key: " + someOption.key());
+        System.out.println("Value: " + someOption.value());
+
+        // Create option without value
+        Option<String, String> noneOption = Option.of("key");
+        System.out.println("None option: " + noneOption);
+        System.out.println("Key: " + noneOption.key());
+        System.out.println("Value: " + noneOption.value());
+    }
+
+    /**
+     * Demonstrates function utilities.
+     */
+    public static void demonstrateFunctionUtilities() {
+        System.out.println("\n=== Function Utilities ===");
+
+        // Demonstrates indexed consumer
+        String[] fruits = {"apple", "banana", "orange"};
+        System.out.println("Processing fruits with indexed consumer:");
+        for (int i = 0; i < fruits.length; i++) {
+            System.out.println("Index " + i + ": " + fruits[i]);
+        }
     }
 }
