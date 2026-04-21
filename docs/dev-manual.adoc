@@ -30,21 +30,56 @@ _fs_ follows a modular architecture with clear separation of concerns:
 
 _fs_ is built on the following design principles:
 
-* **Zero Dependency**: Minimal external dependencies, self-contained implementations
-* **Multi-Version Support**: Automatic JDK version detection and optimal implementation selection
-* **High Performance**: Optimized implementations with benchmark validation
-* **Modularity**: Clear module boundaries and responsibilities
-* **Extensibility**: Well-defined interfaces for custom implementations
+* **Zero Dependency**: Minimal external dependencies, self-contained implementations to ensure portability and reduce dependency conflicts
+* **Multi-Version Support**: Automatic JDK version detection and optimal implementation selection for backward compatibility and forward optimization
+* **High Performance**: Optimized implementations with benchmark validation to ensure efficient execution
+* **Modularity**: Clear module boundaries and responsibilities for maintainability and scalability
+* **Extensibility**: Well-defined interfaces for custom implementations to support extensibility
+* **Consistency**: Unified API design and naming conventions across modules
+* **Reliability**: Comprehensive test coverage and error handling to ensure robust functionality
+* **Simplicity**: Intuitive APIs and clear documentation to reduce learning curve
 
 === Development Guidelines
 
 When contributing to _fs_, follow these guidelines:
 
-* Use the existing package structure and naming conventions
-* Follow the multi-version JDK support pattern using `FsLoader`
-* Write comprehensive tests for new functionality
-* Maintain 100% test coverage
-* Use the built-in annotations for null safety and code analysis
+* **Package Structure**: Use the existing package structure and naming conventions to maintain consistency
+* **Multi-Version Support**: Follow the multi-version JDK support pattern using `FsLoader` for optimal implementation selection
+* **Testing**: Write comprehensive tests for new functionality and maintain 100% test coverage
+* **Null Safety**: Use the built-in annotations (`@Nonnull`, `@Nullable`) for null safety and code analysis
+* **Code Style**: Follow the existing code style and naming conventions
+* **Documentation**: Provide clear and comprehensive documentation for all public APIs
+* **Performance**: Optimize critical paths and validate performance with benchmarks
+* **Error Handling**: Use the built-in exception hierarchy and handle errors appropriately
+* **Dependency Management**: Avoid adding external dependencies unless absolutely necessary
+* **Backward Compatibility**: Maintain backward compatibility when introducing changes
+
+=== Coding Conventions
+
+* **Naming Conventions**:
+  * Class names: PascalCase
+  * Method names: camelCase
+  * Variable names: camelCase
+  * Constant names: UPPER_SNAKE_CASE
+  * Package names: lowercase with dots as separators
+
+* **Code Formatting**:
+  * Use 4 spaces for indentation
+  * Keep lines under 120 characters
+  * Use blank lines to separate logical blocks
+  * Use curly braces even for single-line blocks
+
+* **Documentation**:
+  * Use Javadoc for all public classes and methods
+  * Provide clear and concise descriptions
+  * Include examples where appropriate
+  * Document parameters, return values, and exceptions
+
+* **Error Handling**:
+  * Use specific exception types when possible
+  * Provide meaningful error messages
+  * Catch exceptions at the appropriate level
+  * Use `Fs.uncheck` for checked exception handling when appropriate
 
 [NOTE]
 ====
