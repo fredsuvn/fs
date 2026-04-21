@@ -65,10 +65,10 @@ public class Fs {
 
     /**
      * Version of this lib, current version:
-     * <pre>{@code 0.0.3-SNAPSHOT }</pre>
+     * <pre>{@code 0.0.4-SNAPSHOT }</pre>
      */
     @AutoVersion
-    public static final @Nonnull String LIB_VERSION = "0.0.3-SNAPSHOT";
+    public static final @Nonnull String LIB_VERSION = "0.0.4-SNAPSHOT";
 
     /**
      * String value for {@code null}.
