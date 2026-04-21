@@ -68,7 +68,8 @@ Samples should cover the following categories:
 - Include clear comments explaining the code
 - Provide both basic and advanced usage examples
 - Ensure samples are well-tested and functional
-- Each sample class only mainly demonstrates usages and features for one class/interface/package (or related classes/interfaces).
+- Each sample class only mainly demonstrates usages and features for one class/interface/package (or related classes/interfaces)
+- Using English comments for the samples
 
 ## Output Format
 
@@ -90,7 +91,7 @@ The README.md's "Documents and Samples" section should include:
 
 ## Sample Code Templates
 
-When creating a new sample, follow this structure to ensure consistency and clarity.
+When creating a new sample, follow this structure to ensure consistency and clarity. See [examples.md](./examples.md) for detailed examples.
 
 ### Step 1: Define the Sample Purpose
 
@@ -100,180 +101,22 @@ At the beginning of each sample file, include a comment block that clearly state
 - Why this feature is useful
 - Key use cases
 
-```java
-/**
- * Sample: SimpleCache Usage
- * <p>
- * Purpose: Demonstrate how to quickly create a cache for frequently accessed data.
- * <p>
- * Use Cases:
- * - Cache computation results to avoid redundant calculations
- * - Store frequently accessed data to improve performance
- * - Reduce database or network calls by caching results
- */
-```
-
 ### Step 2: Provide Multiple Implementation Variations
 
 Show different ways to create/use the feature, from simple to complex:
 
-#### Variation 1: Quickest and Simplest
+### Step 3: Update README.md
 
-```java
-// Create a simple soft-reference cache with default settings
-// Best for: General-purpose caching with automatic memory management
-SimpleCache<String, String> cache = SimpleCache.ofSoft();
-String value = cache.get("key", k -> "computed value");
-```
-
-#### Variation 2: With Specific Reference Type
-
-```java
-// Use strong reference when you need guaranteed retention
-// Best for: Small, important data that should not be garbage collected
-SimpleCache<String, byte[]> strongCache = SimpleCache.ofStrong();
-
-// Use weak reference for cache entries that should not prevent GC
-// Best for: Caching that should not cause memory leaks
-SimpleCache<Object, Object> weakCache = SimpleCache.ofWeak();
-```
-
-#### Variation 3: With Complex Settings
-
-```java
-// Create a cache with custom expiration and size limits
-// Best for: Fine-tuned cache behavior for specific scenarios
-SimpleCache<String, String> customCache = SimpleCache.<String, String>builder()
-    .referenceType(ReferenceType.SOFT)
-    .maximumSize(1000)
-    .expirationTime(3600_000) // 1 hour in milliseconds
-    .removalListener((key, value, cause) -> {
-        System.out.println("Removed: " + key + " due to " + cause);
-    })
-    .build();
-```
-
-### Step 3: README Documentation Format
-
-When updating the README.md "Documents and Samples" section, add short snippets of **Step 2** to the README.md section, and add links to the complete sample files like:
-
-```markdown
-[Complete CacheSample](./fs-tests/src/samples/java/internal/samples/CacheSample.java)
-```
+When updating the README.md "Documents and Samples" section, add short snippets of the sample code to the README.md section, and add links to the complete sample files.
 
 ## Example: Complete Sample Creation Flow
 
-### 1. Create the Sample File
+For a complete example demonstrating the sample creation flow including:
 
-**File:** `fs-tests/src/samples/java/internal/samples/CacheSample.java`
+1. Creating the Sample File
+2. Updating README.md with snippets and links
 
-```java
-package internal.samples;
-
-import space.sunqian.fs.cache.SimpleCache;
-import java.lang.ref.ReferenceType;
-import java.util.concurrent.atomic.AtomicInteger;
-
-/**
- * Sample: SimpleCache Usage
- *
- * Purpose: Demonstrate how to quickly create a cache for frequently accessed data.
- *
- * Use Cases:
- * - Cache computation results to avoid redundant calculations
- * - Store frequently accessed data to improve performance
- * - Reduce database or network calls by caching results
- *
- * Key Classes:
- * - SimpleCache: The main cache interface
- * - ReferenceType: Determines how cache entries are stored (soft, weak, strong)
- */
-public class CacheSample {
-
-    /**
-     * Demonstrates the simplest way to create a cache.
-     * Uses soft references for automatic memory management.
-     */
-    public static void demonstrateBasicUsage() {
-        SimpleCache<String, String> cache = SimpleCache.ofSoft();
-        String value = cache.get("key", k -> "computed " + k);
-        System.out.println("Cached value: " + value);
-    }
-
-    /**
-     * Demonstrates different reference types for cache entries.
-     */
-    public static void demonstrateReferenceTypes() {
-        // Soft reference - garbage collected under memory pressure
-        SimpleCache<String, byte[]> softCache = SimpleCache.ofSoft();
-
-        // Weak reference - garbage collected when not strongly referenced elsewhere
-        SimpleCache<Object, Object> weakCache = SimpleCache.ofWeak();
-
-        // Strong reference - never garbage collected unless explicitly removed
-        SimpleCache<String, String> strongCache = SimpleCache.ofStrong();
-    }
-
-    /**
-     * Demonstrates cache with complex settings including
-     * custom size limits, expiration, and removal listener.
-     */
-    public static void demonstrateAdvancedSettings() {
-        AtomicInteger removeCount = new AtomicInteger(0);
-
-        SimpleCache<String, String> customCache = SimpleCache.<String, String>builder()
-            .referenceType(ReferenceType.SOFT)
-            .maximumSize(1000)
-            .expirationTime(3600_000) // 1 hour
-            .removalListener((key, value, cause) -> {
-                removeCount.incrementAndGet();
-                System.out.println("Removed: " + key + " due to " + cause);
-            })
-            .build();
-
-        // Usage
-        String result = customCache.get("data", k -> expensiveComputation(k));
-        System.out.println("Result: " + result + ", Removed count: " + removeCount.get());
-    }
-
-    private static String expensiveComputation(String input) {
-        // Simulate expensive operation
-        return "computed-" + input;
-    }
-}
-```
-
-### 2. Update README.md
-
-Add to the "Documents and Samples" section:
-
-```markdown
-### SimpleCache
-
-Quickly create a cache for frequently accessed data.
-
-**Basic usage with soft reference (auto memory management):**
-```java
-SimpleCache<String, String> cache = SimpleCache.ofSoft();
-String value = cache.get("key", k -> "computed value");
-```
-
-**Using strong or weak references:**
-```java
-SimpleCache<String, byte[]> strongCache = SimpleCache.ofStrong();
-SimpleCache<Object, Object> weakCache = SimpleCache.ofWeak();
-```
-
-**With custom size limits and expiration:**
-```java
-SimpleCache<String, String> cache = SimpleCache.<String, String>builder()
-    .maximumSize(1000)
-    .expirationTime(3600_000)
-    .build();
-```
-
-[Complete CacheSample](./fs-tests/src/samples/java/internal/samples/CacheSample.java)
-```
+Please refer to [examples.md](./examples.md).
 
 ## Conclusion
 
