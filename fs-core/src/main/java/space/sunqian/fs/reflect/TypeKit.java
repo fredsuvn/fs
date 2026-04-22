@@ -768,12 +768,14 @@ public class TypeKit {
                 return false;
             }
             if (o instanceof ParameterizedTypeImpl) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 ParameterizedTypeImpl that = (ParameterizedTypeImpl) o;
                 return Objects.equals(ownerType, that.ownerType) &&
                     Objects.equals(rawType, that.rawType) &&
                     Arrays.equals(actualTypeArguments, that.actualTypeArguments);
             }
             if (o instanceof ParameterizedType) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 ParameterizedType that = (ParameterizedType) o;
                 return Objects.equals(ownerType, that.getOwnerType()) &&
                     Objects.equals(rawType, that.getRawType()) &&
@@ -851,11 +853,13 @@ public class TypeKit {
                 return false;
             }
             if (o instanceof WildcardTypeImpl) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 WildcardTypeImpl that = (WildcardTypeImpl) o;
                 return Arrays.equals(lowerBounds, that.lowerBounds) &&
                     Arrays.equals(upperBounds, that.upperBounds);
             }
             if (o instanceof WildcardType) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 WildcardType that = (WildcardType) o;
                 return Arrays.equals(lowerBounds, that.getLowerBounds()) &&
                     Arrays.equals(upperBounds, that.getUpperBounds());
@@ -908,6 +912,7 @@ public class TypeKit {
                 return false;
             }
             if (o instanceof GenericArrayType) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 GenericArrayType other = (GenericArrayType) o;
                 return Objects.equals(componentType, other.getGenericComponentType());
             }

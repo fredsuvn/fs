@@ -69,6 +69,7 @@ public interface Invocable {
      * @param mode   specifies the implementation of the returned instance
      * @return a new {@link Invocable} represents the specified method
      */
+    @SuppressWarnings("EnhancedSwitchMigration")
     static @Nonnull Invocable of(@Nonnull Method method, @Nonnull InvocationMode mode) {
         switch (mode) {
             case METHOD_HANDLE:
@@ -87,6 +88,7 @@ public interface Invocable {
      * @param mode        specifies the implementation of the returned instance
      * @return a new {@link Invocable} represents the specified constructor
      */
+    @SuppressWarnings("EnhancedSwitchMigration")
     static @Nonnull Invocable of(@Nonnull Constructor<?> constructor, @Nonnull InvocationMode mode) {
         switch (mode) {
             case METHOD_HANDLE:

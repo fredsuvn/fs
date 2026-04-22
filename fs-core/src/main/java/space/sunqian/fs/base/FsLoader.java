@@ -119,6 +119,7 @@ public class FsLoader {
                 continue;
             }
             if (obj instanceof Class<?>) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 Class<?> cls = (Class<?>) obj;
                 Object o = ClassKit.newInstance(cls);
                 if (o != null) {

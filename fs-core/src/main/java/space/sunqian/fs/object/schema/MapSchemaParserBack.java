@@ -47,6 +47,7 @@ final class MapSchemaParserBack {
 
             private MapSchemaImpl(@Nonnull Type type) throws ReflectionException {
                 if (type instanceof MapType) {
+                    @SuppressWarnings("PatternVariableCanBeUsed")
                     MapType mapType = (MapType) type;
                     this.type = mapType.mapType();
                     this.keyType = mapType.keyType();

@@ -97,6 +97,7 @@ enum HttpServiceImplByJ11 implements HttpService {
             };
         }
 
+        @SuppressWarnings("EnhancedSwitchMigration")
         private @Nonnull HttpRequest.BodyPublisher toBodyPublisher(@Nonnull HttpReq.Body body) {
             switch (body.type()) {
                 case INPUT_STREAM:

@@ -32,6 +32,7 @@ public class CommonSchemaHandler extends AbstractObjectSchemaHandler {
         return INST;
     }
 
+    @SuppressWarnings("EnhancedSwitchMigration")
     @Override
     protected @Nullable AccessorInfo resolveAccessor(@Nonnull Method method) {
         int parameterCount = method.getParameterCount();

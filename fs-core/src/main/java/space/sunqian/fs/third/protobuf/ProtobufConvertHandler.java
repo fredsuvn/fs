@@ -63,6 +63,7 @@ public class ProtobufConvertHandler implements ObjectConverter.Handler {
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
         if (src instanceof ByteString) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
             ByteString bs = (ByteString) src;
             return converter.asHandler().convert(bs.asReadOnlyByteBuffer(), srcType, targetType, converter, options);
         } else if (targetType.equals(ByteString.class)) {

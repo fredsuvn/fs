@@ -129,6 +129,7 @@ public class NumKit {
             }
             if (BigInteger.class.equals(numType)) {
                 if (num instanceof BigDecimal) {
+                    @SuppressWarnings("PatternVariableCanBeUsed")
                     BigDecimal decimal = (BigDecimal) num;
                     return Fs.as(decimal.toBigInteger());
                 }
@@ -136,6 +137,7 @@ public class NumKit {
             }
             if (BigDecimal.class.equals(numType)) {
                 if (num instanceof BigInteger) {
+                    @SuppressWarnings("PatternVariableCanBeUsed")
                     BigInteger integer = (BigInteger) num;
                     return Fs.as(new BigDecimal(integer));
                 }

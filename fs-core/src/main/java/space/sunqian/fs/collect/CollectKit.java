@@ -68,6 +68,7 @@ public class CollectKit {
      */
     public static <T> T @Nonnull [] toArray(@Nonnull Iterable<?> it, @Nonnull Class<?> componentType) {
         if (it instanceof Collection) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
             Collection<?> collection = (Collection<?>) it;
             T[] array = ArrayKit.newArray(componentType, collection.size());
             collection.toArray(array);

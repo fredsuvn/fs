@@ -32,6 +32,7 @@ final class OptionImpl<K, V> implements Option<K, V> {
         if (!(object instanceof Option)) {
             return false;
         }
+        @SuppressWarnings("PatternVariableCanBeUsed")
         Option<?, ?> other = (Option<?, ?>) object;
         return Objects.equals(key, other.key()) && Objects.equals(value, other.value());
     }

@@ -88,10 +88,12 @@ final class SqlBack {
         public @Nonnull SqlBuilder append(@Nonnull String sql, @Nullable Object param) {
             sqlBuilder.append(sql);
             if (param instanceof Collection<?>) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 Collection<?> collection = (Collection<?>) param;
                 parameters().addAll(collection);
                 sqlBuilder.append(join(collection));
             } else if (param instanceof Iterable<?>) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 Iterable<?> iterable = (Iterable<?>) param;
                 Collection<?> collection = ListKit.toList(iterable);
                 parameters().addAll(collection);

@@ -130,6 +130,7 @@ final class DIContainerImpl implements DIContainer {
         }
     }
 
+    @SuppressWarnings("SimplifyStreamApiCallChains")
     private void configureComponentDependencies(
         @Nonnull Map<@Nonnull Type, @Nonnull Res> resMap
     ) {

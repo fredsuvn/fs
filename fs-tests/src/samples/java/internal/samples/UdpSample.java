@@ -54,7 +54,7 @@ public class UdpSample {
         UdpServer udpServer = UdpServer.newBuilder()
             .handler(new UdpServerHandler() {
                 @Override
-                public void channelRead(@Nonnull java.nio.channels.DatagramChannel channel, @Nonnull byte[] data, @Nonnull java.net.SocketAddress address) throws Exception {
+                public void channelRead(@Nonnull java.nio.channels.DatagramChannel channel, byte @Nonnull [] data, @Nonnull java.net.SocketAddress address) throws Exception {
                     // Read message from client
                     String msg = new String(data);
                     System.out.println("Received message from " + address + ": " + msg);

@@ -233,6 +233,7 @@ final class NameFormatterBack {
         private final @Nonnull CharSequence delimiter;
         private final @Nonnull NameFormatter.Appender appender;
 
+        @SuppressWarnings("SizeReplaceableByIsEmpty")
         private DelimiterFormatter(
             @Nonnull CharSequence delimiter, @Nonnull NameFormatter.Appender appender
         ) throws IllegalArgumentException {

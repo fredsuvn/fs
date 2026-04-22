@@ -188,6 +188,7 @@ public class Checker {
      * @param endBound   the end boundary, exclusive
      * @return whether the given position is between the start boundary (inclusive) and the end boundary (exclusive)
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isInBounds(int pos, int startBound, int endBound) {
         return pos >= startBound && pos < endBound;
     }

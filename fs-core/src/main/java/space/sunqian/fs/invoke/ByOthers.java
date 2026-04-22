@@ -20,6 +20,7 @@ final class ByOthers {
     //     System.out.println(builder);
     // }
 
+    @SuppressWarnings("EnhancedSwitchMigration")
     static @Nullable Object invokeInstance(MethodHandle handle, Object inst, @Nullable Object... args) throws Throwable {
         switch (args.length) {
             case 0:
@@ -299,6 +300,7 @@ final class ByOthers {
     //     System.out.println(builder);
     // }
 
+    @SuppressWarnings("EnhancedSwitchMigration")
     static @Nullable Object invokeStatic(MethodHandle handle, @Nullable Object... args) throws Throwable {
         switch (args.length) {
             case 0:

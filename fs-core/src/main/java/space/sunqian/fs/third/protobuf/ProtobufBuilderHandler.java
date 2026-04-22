@@ -54,6 +54,7 @@ public class ProtobufBuilderHandler implements BuilderOperatorProvider.Handler {
         if (!(target instanceof Class<?>)) {
             return null;
         }
+        @SuppressWarnings("PatternVariableCanBeUsed")
         Class<?> rawTarget = (Class<?>) target;
         boolean isProtobuf = false;
         boolean isBuilder = false;

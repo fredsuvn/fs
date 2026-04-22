@@ -6,7 +6,6 @@ import space.sunqian.annotation.RetainedParam;
 import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.value.Var;
-import space.sunqian.fs.dynamic.DynamicClassLoader;
 import space.sunqian.fs.dynamic.proxy.ProxyException;
 import space.sunqian.fs.dynamic.proxy.ProxyHandler;
 import space.sunqian.fs.dynamic.proxy.ProxyInvoker;
@@ -42,10 +41,6 @@ public class JdkProxyMaker implements ProxyMaker {
         @Nonnull @RetainedParam List<@Nonnull Class<?>> interfaces,
         @Nonnull ProxyHandler proxyHandler
     ) throws ProxyException {
-        Class<?> proxyClass = Proxy.getProxyClass(
-            new DynamicClassLoader(),
-            interfaces.toArray(new Class<?>[0])
-        );
         Map<Method, Var<ProxyInvoker>> proxiedMethods = new HashMap<>();
         Map<Method, Var<Invocable>> unproxiedMethods = new HashMap<>();
         for (Class<?> anInterface : interfaces) {
@@ -66,6 +61,7 @@ public class JdkProxyMaker implements ProxyMaker {
             new HashMap<>(proxiedMethods),
             new HashMap<>(unproxiedMethods)
         );
+        Class<?> proxyClass = JdkService.INST.getProxyClass(interfaces, invocationHandler);
         return new JdkProxySpec(proxyClass, interfaces, proxyHandler, invocationHandler);
     }
 

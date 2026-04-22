@@ -187,6 +187,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             return null;
         }
         if (targetType instanceof Class<?>) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
             Class<?> targetClass = (Class<?>) targetType;
             // to enum:
             if (targetClass.isEnum()) {
@@ -229,6 +230,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             // to generic array:
             return toArray(src, srcType, (GenericArrayType) targetType, converter, options);
         } else if (targetType instanceof ParameterizedType) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
             ParameterizedType paramType = (ParameterizedType) targetType;
             Class<?> rawTarget = (Class<?>) paramType.getRawType();
             IntFunction<Collection<Object>> collectionFunc = collectionFunction(rawTarget);
@@ -295,6 +297,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         if (srcType instanceof Class<?>) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
             Class<?> srcClass = (Class<?>) srcType;
             if (srcClass.isArray()) {
                 ArrayOperator srcOperator = ArrayOperator.of(srcClass);
@@ -318,6 +321,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         if (src instanceof Collection<?>) {
             srcCollection = (Collection<?>) src;
         } else if (src instanceof Iterable<?>) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
             Iterable<?> iter = (Iterable<?>) src;
             srcCollection = CollectKit.addAll(new ArrayList<>(), iter);
         } else {
@@ -343,6 +347,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         if (srcType instanceof Class<?>) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
             Class<?> srcClass = (Class<?>) srcType;
             if (srcClass.isArray()) {
                 ArrayOperator srcOperator = ArrayOperator.of(srcClass);
@@ -365,6 +370,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         if (src instanceof Collection<?>) {
             srcCollection = (Collection<?>) src;
         } else if (src instanceof Iterable<?>) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
             Iterable<?> iter = (Iterable<?>) src;
             srcCollection = CollectKit.addAll(new ArrayList<>(), iter);
         } else {
@@ -534,6 +540,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                     return ((Date) src).getTime();
                 }
                 if (src instanceof TemporalAccessor) {
+                    @SuppressWarnings("PatternVariableCanBeUsed")
                     TemporalAccessor ta = (TemporalAccessor) src;
                     DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
                     Date date = dateFormatter.convert(ta, Date.class);
@@ -541,6 +548,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 }
             }
             if (src instanceof Number) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 Number srcNum = (Number) src;
                 return NumKit.toNumber(srcNum, target);
             }

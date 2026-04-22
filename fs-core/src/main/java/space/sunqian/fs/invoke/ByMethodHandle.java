@@ -56,6 +56,7 @@ final class ByMethodHandle {
         }
     }
 
+    @SuppressWarnings("EnhancedSwitchMigration")
     static @Nonnull Invocable newInvocable(@Nonnull MethodHandle handle, boolean isStatic) {
         switch (handle.type().parameterCount()) {
             case 0:
