@@ -51,7 +51,8 @@ jobs:
       - name: Commit and push results
         run: |
           git add docs/jmh/results.json
-          git commit -m 'Run jmh-run.yml and update JMH benchmark results via GitHub Actions'
+          git commit -m 'Run jmh-run.yml and update JMH benchmark results via GitHub Actions' || echo "No changes to commit"
+          git pull --rebase origin ${{ github.ref_name }}
           git push origin HEAD:${{ github.ref_name }}
 
       # Clone the target repository
