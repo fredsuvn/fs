@@ -63,12 +63,12 @@ jmh {
   resultFormat = "json"
   includeTests = false
 
-  //includes = listOf(
+  includes = listOf(
     //"internal.benchmark.(CopyPropertiesJmh|CopyPropertiesWithAnnotationsJmh)"
     //"internal.benchmark.AspectJmh"
     //"internal.benchmark.TcpServerJmh"
-    //"internal.benchmark.JsonParseJmh"
-  //)
+    "internal.benchmark.JsonParseJmh"
+  )
 }
 
 tasks.test {
