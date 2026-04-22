@@ -73,7 +73,7 @@ jobs:
       - name: Create jmh directory
         run: |
           mkdir -p fs-docs/docs/fs/jmh/
-          cp fs-tests/build/results/jmh/results.json fs-docs/docs/fs/jmh/results.json
+          cp docs/jmh/results-${{ steps.get_version.outputs.version }}.json fs-docs/docs/fs/jmh/results.json
 
       # Commit changes to fs-docs repository
       - name: Commit and push results.json to fs-docs:main branch
