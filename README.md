@@ -1,30 +1,284 @@
 # _fs_: a lightweight, high-performance, zero-dependency tool lib for java
 
-### ![](docs/fs.svg) | [JavaDoc](https://fredsuvn.github.io/fs-docs/docs/fs/docs/javadoc/index.html) | [Coverage](https://fredsuvn.github.io/fs-docs/docs/fs/reports/jacoco/test/html/index.html) | [JMH](https://fredsuvn.github.io/fs-docs/tools/jmh-visualizer/jmh-visualizer.html?resultsPath=../../docs/fs/jmh/results.json) | [DevDoc](docs/dev-manual.adoc)
+### ![](docs/fs.svg) | [JavaDoc](https://fredsuvn.github.io/fs-docs/docs/fs/docs/javadoc/index.html) | [Coverage](https://fredsuvn.github.io/fs-docs/docs/fs/reports/jacoco/test/html/index.html) | [JMH](https://fredsuvn.github.io/fs-docs/tools/jmh-visualizer/jmh-visualizer.html?resultsPath=../../docs/fs/jmh/results.json) | [DevDoc](docs/dev/dev.adoc) | [Samples](fs-tests/src/samples)
 
 ## Overview
 
 _fs_ is a lightweight, multi-version JDK support, high-performance, zero-dependency tool lib for java.
 
-### Quick Start
+## Quick Start
+
+### Installation
 
 #### Gradle
 
 ```kotlin-dsl
 dependencies {
-    implementation("space.sunqian.fs:fs-all:0.0.3-SNAPSHOT")
+    implementation("space.sunqian.fs:fs-all:0.0.4-SNAPSHOT")
 }
 ```
 
 #### Maven
 
 ```xml
-
 <dependency>
   <groupId>space.sunqian.fs</groupId>
   <artifactId>fs-all</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.0.4-SNAPSHOT</version>
 </dependency>
+```
+
+### Basic Usage
+
+#### Import the core class and other required classes
+
+```java
+// Core class
+import space.sunqian.fs.Fs;
+
+// I/O classes
+import space.sunqian.fs.io.ByteReader;
+import space.sunqian.fs.io.CharReader;
+import space.sunqian.fs.io.ByteProcessor;
+import space.sunqian.fs.io.ByteTransformer;
+
+// Networking classes
+import space.sunqian.fs.net.tcp.TcpServer;
+import space.sunqian.fs.net.tcp.TcpServerHandler;
+import space.sunqian.fs.net.tcp.TcpServerHandlerContext;
+import space.sunqian.fs.net.tcp.TcpClient;
+import space.sunqian.fs.net.udp.UdpSender;
+import space.sunqian.fs.net.udp.UdpServer;
+import space.sunqian.fs.net.udp.UdpServerHandler;
+import space.sunqian.fs.net.udp.UdpServerHandlerContext;
+
+// Invoke classes
+import space.sunqian.fs.invoke.Invocable;
+import space.sunqian.fs.invoke.InvocationMode;
+import space.sunqian.fs.invoke.InvokeKit;
+import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
+
+// Dynamic programming classes
+import space.sunqian.fs.dynamic.proxy.ProxyMaker;
+import space.sunqian.fs.dynamic.proxy.ProxyHandler;
+import space.sunqian.fs.dynamic.proxy.ProxyInvoker;
+import space.sunqian.fs.dynamic.aspect.AspectMaker;
+import space.sunqian.fs.dynamic.aspect.AspectHandler;
+import java.util.Collections;
+
+// Other required classes
+import java.io.InputStream;
+import java.io.Reader;
+import java.nio.ByteBuffer;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+```
+
+#### Example 1: Lang operations
+
+```java
+// Null safety
+String value = Fs.nonnull(input, "default");
+
+// Object equality
+boolean equals = Fs.equals(obj1, obj2);
+
+// Hash code generation
+int hashCode = Fs.hashCode(obj);
+
+// String conversion
+String str = Fs.toString(obj);
+```
+
+#### Example 2: Collection operations
+
+```java
+// Create collections
+List<String> list = Fs.list("a", "b", "c");
+Set<String> set = Fs.set("x", "y", "z");
+Map<String, Integer> map = Fs.map("key1", 1, "key2", 2);
+
+// Stream operations
+Stream<String> stream = Fs.stream(list);
+```
+
+#### Example 3: Object conversion and property copying
+
+```java
+// Object conversion
+TargetType target = Fs.convert(source, TargetType.class);
+
+// Property copying
+Fs.copyProperties(source, target);
+```
+
+#### Example 4: I/O operations (Reader, Processor, Transformer)
+
+```java
+// ByteReader usage
+ByteReader byteReader = ByteReader.from(inputStream);
+byte[] buffer = new byte[1024];
+int read = byteReader.readTo(buffer);
+
+// CharReader usage
+CharReader charReader = CharReader.from(reader);
+char[] charBuffer = new char[1024];
+int charRead = charReader.readTo(charBuffer);
+
+// ByteProcessor usage with ByteTransformer
+ByteProcessor processor = ByteProcessor.from(inputStream)
+    .transformer((data, end) -> {
+        // Transform bytes here
+        return data;
+    });
+byte[] processed = processor.toByteArray();
+
+// CharProcessor usage with CharTransformer
+CharProcessor charProcessor = CharProcessor.from(reader)
+    .transformer((data, end) -> {
+        // Transform chars here
+        return data;
+    });
+String processedString = charProcessor.toString();
+```
+
+#### Example 5: Networking (TCP, UDP)
+
+```java
+// TCP Server
+TcpServer tcpServer = TcpServer.builder()
+    .address(8080)
+    .handler(new TcpServerHandler() {
+        @Override
+        public void channelRead(TcpServerHandlerContext ctx, ByteBuffer msg) {
+            ctx.writeAndFlush(msg);
+        }
+    })
+    .build();
+tcpServer.start();
+
+// TCP Client
+TcpClient tcpClient = TcpClient.builder()
+    .address("localhost", 8080)
+    .build();
+tcpClient.connect();
+tcpClient.send(ByteBuffer.wrap("Hello".getBytes()));
+
+// UDP Sender
+UdpSender udpSender = UdpSender.builder().build();
+InetSocketAddress remoteAddress = new InetSocketAddress("localhost", 8081);
+udpSender.sendData(remoteAddress, "Hello".getBytes());
+
+// UDP Server
+UdpServer udpServer = UdpServer.builder()
+    .address(8081)
+    .handler(new UdpServerHandler() {
+        @Override
+        public void datagramReceived(UdpServerHandlerContext ctx, ByteBuffer msg, InetSocketAddress remoteAddress) {
+            // Handle UDP datagram
+        }
+    })
+    .build();
+udpServer.start();
+```
+
+#### Example 6: Invoke operations
+
+```java
+// Get method via reflection
+Method method = obj.getClass().getMethod("methodName", Param1.class, Param2.class);
+
+// Create Invocable with recommended mode (auto-selected based on environment)
+Invocable invocable = Invocable.of(method);
+Object result = invocable.invoke(obj, param1, param2);
+
+// Create Invocable with specific mode - Reflection
+Invocable reflectionInvocable = Invocable.of(method, InvocationMode.REFLECTION);
+Object result2 = reflectionInvocable.invoke(obj, param1, param2);
+
+// Create Invocable with specific mode - Method Handle
+Invocable methodHandleInvocable = Invocable.of(method, InvocationMode.METHOD_HANDLE);
+Object result3 = methodHandleInvocable.invoke(obj, param1, param2);
+
+// Create Invocable with specific mode - ASM (high performance)
+Invocable asmInvocable = Invocable.of(method, InvocationMode.ASM);
+Object result4 = asmInvocable.invoke(obj, param1, param2);
+
+// Invoke static method
+Method staticMethod = SomeClass.class.getMethod("staticMethod", String.class);
+Invocable staticInvocable = Invocable.of(staticMethod);
+Object staticResult = staticInvocable.invoke(null, "staticParam");
+
+// Invoke constructor
+Constructor<?> constructor = SomeClass.class.getConstructor(String.class);
+Invocable constructorInvocable = Invocable.of(constructor);
+Object newInstance = constructorInvocable.invoke(null, "constructorParam");
+
+// Use MethodHandle directly via InvokeKit
+MethodHandle handle = MethodHandles.lookup().unreflect(method);
+Object directResult = InvokeKit.invokeInstance(handle, obj, param1, param2);
+```
+
+#### Example 7: Dynamic programming (Proxy, Aspect)
+
+```java
+// Dynamic Proxy using ASM
+Hello proxy = ProxyMaker.byAsm().make(Hello.class, Collections.emptyList(), new ProxyHandler() {
+    @Override
+    public boolean needsProxy(@Nonnull Method method) {
+      return method.getName().equals("hello");
+    }
+
+    @Override
+    public @Nonnull Object invoke(
+      @Nonnull Object proxy, @Nonnull Method method, @Nonnull ProxyInvoker invoker, Object @Nonnull ... args
+    ) throws Throwable {
+      System.out.println("Proxy: Before invoking hello()");
+      Object result = invoker.invokeSuper(proxy, args);
+      System.out.println("Proxy: After invoking hello()");
+      return result + "[proxy]";
+    }
+  }).newInstance();
+
+// Call method on proxy
+String proxyResult = proxy.hello();
+
+// Aspect-oriented programming using ASM
+Hello aspect = AspectMaker.byAsm().make(Hello.class, new AspectHandler() {
+  @Override
+  public boolean needsAspect(@Nonnull Method method) {
+    return method.getName().equals("hello");
+  }
+
+  @Override
+  public void beforeInvoking(@Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+    System.out.println("Aspect: Before invoking hello()");
+  }
+
+  @Override
+  public @Nonnull Object afterReturning(@Nullable Object result, @Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+    System.out.println("Aspect: After returning from hello()");
+    return result + "[aspect]";
+  }
+
+  @Override
+  public @Nullable Object afterThrowing(@Nonnull Throwable ex, @Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target) {
+    System.out.println("Aspect: After throwing exception");
+    return null;
+  }
+}).newInstance();
+
+// Call method on aspect-enhanced object
+String aspectResult = aspect.hello();
+
+// Sample Hello class
+class Hello {
+  public String hello() {
+    System.out.println("Hello.hello() called");
+    return "hello";
+  }
+}
 ```
 
 ### Documents
@@ -32,7 +286,7 @@ dependencies {
 - For Users:
   * [JavaDoc](https://fredsuvn.github.io/fs-docs/docs/fs/docs/javadoc/index.html)
 - For Developers:
-  * [DevDoc](docs/dev-manual.adoc)
+  * [DevDoc](docs/dev/dev.adoc)
 
 ### Core Modules
 

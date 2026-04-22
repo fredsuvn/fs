@@ -7,7 +7,7 @@
 :emaill: fredsuvn@163.com
 :url: https://github.com/fredsuvn
 
-image:fs.svg[]
+image:../fs.svg[]
 
 == Overview
 
@@ -218,14 +218,94 @@ It depends on _fs-annotation_.
 
 _fs-core_ is organized into functional packages with clear responsibilities:
 
+* **Root Package** (`space.sunqian.fs`): Core utilities and global access point
+  * **Fs Class**: The core utility class providing comprehensive functionality
+
 * **Base Utilities** (`space.sunqian.fs.base`): Fundamental utilities for common operations
+  * **Common Base**: `Checker`, `FsLoader` for core functionality
+  * **Language Extensions**: `lang` package for language enhancements
+  * **Functional Extensions**: `function`, `value`, `option` packages
+  * **Base Utility Modules**: `bytes`, `chars`, `date`, `exception`, `logging`, `math`, `number`, `process`, `random`, `string`, `system`, `thread`
+
+* **Cache** (`space.sunqian.fs.cache`): Lightweight caching implementation
+  * **SimpleCache**: Soft/weak reference-based caching
+  * **CacheFunction**: Map-based cache functionality
+  * **Usage Example**: `SimpleCache.ofSoft()`, `SimpleCache.ofWeak()`
+
 * **Collections & Data** (`space.sunqian.fs.collect`, `space.sunqian.fs.data`): Enhanced collection and data processing
+  * **Collection Utilities** (`collect`): Array, List, Set, Map operations
+    * **Kits**: CollectKit, ListKit, SetKit, MapKit, ArrayKit, StreamKit
+    * **Interfaces**: ArrayOperator
+  * **Data Processing** (`data`): JSON, Properties handling
+    * **Core Interfaces**: ByteData, CharData, ByteDataParser, CharDataParser, ByteDataFormatter, CharDataFormatter
+    * **Utilities**: DataKit
+    * **Subpackages**: json, properties
+
+* **Concurrency** (`space.sunqian.fs.concurrent`): Concurrent programming utilities
+  * **FutureKit**: Future-related utilities
+
 * **I/O Operations** (`space.sunqian.fs.io`): Byte/char processing and file operations
+  * **Core Utilities**: IOKit, BufferKit
+  * **Data Reading**: ByteReader, CharReader, ByteSegment, CharSegment
+  * **Data Transformation**: ByteProcessor, ByteTransformer, CharProcessor, CharTransformer
+  * **Stream Implementation**: DoReadStream, DoReadReader, DoWriteStream, DoWriteWriter
+  * **Subpackages**: file (FileKit, FileRef), communicate (Channel interfaces)
+
 * **Networking** (`space.sunqian.fs.net`): HTTP, TCP, UDP with adaptive implementations
+  * **Core Utilities**: NetKit
+  * **Core Interfaces**: NetClient, NetServer
+  * **Subpackages**:
+    * **http**: HTTP client with JDK version-adaptive implementations
+    * **tcp**: TCP client/server with builder patterns and handlers
+    * **udp**: UDP sender/server with datagram communication
+
 * **Object Manipulation** (`space.sunqian.fs.object`): Schema, building, conversion, and pooling
+  * **Core Utilities**: ObjectKit
+  * **Core Exception**: ObjectException
+  * **Subpackages**:
+    * **schema**: Object schema definition and parsing
+    * **builder**: Object building with builder patterns
+    * **convert**: Object conversion and property copying
+    * **pool**: Object pooling interfaces
+    * **annotation**: Annotations for object-related operations
+
 * **Dynamic Programming** (`space.sunqian.fs.dynamic`, `space.sunqian.fs.invoke`): Proxy, AOP, and reflection
+  * **Core Utilities** (`dynamic`): DynamicKit, DynamicClassLoader
+  * **Subpackages** (`dynamic`):
+    * **proxy**: JDK and ASM-based dynamic proxy
+    * **aspect**: Aspect-oriented programming (AOP) support
+  * **Invocation** (`invoke`): Reflection and method-handle based invocation
+
 * **Dependency Injection** (`space.sunqian.fs.di`): Lightweight DI container
+  * **Core Interfaces**: DIContainer, DIComponent, DIAspectHandler
+  * **Utilities**: DIKit
+  * **Key Features**:
+    * Component lifecycle management
+    * Dependency resolution and injection
+    * AOP integration
+    * Parent-child container hierarchy
+  * **Usage Example**: Builder pattern for container creation with component registration
+
+* **Reflection** (`space.sunqian.fs.reflect`): Reflection utilities and type handling
+  * **Utilities**: TypeKit, ClassKit
+  * **Classes**: TypeRef
+  * **Key Features**:
+    * Type compatibility checking
+    * Class manipulation utilities
+    * Type reference handling
+
+* **Third-party Integration** (`space.sunqian.fs.third`): Integration with third-party libraries
+  * **Utilities**: ThirdKit
+  * **Subpackages**:
+    * **asm**: Embedded ASM framework for bytecode manipulation
+    * **protobuf**: Protocol Buffers support for object conversion
+
 * **Utilities** (`space.sunqian.fs.utils`): Codec, event bus, JDBC, versioning
+  * **Subpackages**:
+    * **codec**: Base64, Hex, Crypto, Digest utilities
+    * **eventbus**: Publish-subscribe communication
+    * **jdbc**: Database operations and SQL handling
+    * **version**: Semantic versioning support
 
 === Multi-Version JDK Support
 
@@ -403,4 +483,4 @@ Publishing configuration includes:
 * Performance impact analysis
 * Documentation updates included
 
-image::fs.svg[]
+image::../fs.svg[]
