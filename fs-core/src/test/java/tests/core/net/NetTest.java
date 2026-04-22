@@ -53,7 +53,7 @@ public class NetTest implements TestPrint {
 
     @Test
     public void testNetSelectorRebuildOnSelect() throws Exception {
-        NetSelector selector = NetSelector.open(3);
+        NetSelector selector = NetSelector.open(1);
         Selector s1 = selector.selector();
 
         SocketChannel c1 = SocketChannel.open();
@@ -67,8 +67,8 @@ public class NetTest implements TestPrint {
         Set<SelectionKey> keys = new HashSet<>(s1.keys());
         selector.cancel(c2);
         // selector.select(1);
-        for (int i = 0; i < 3; i++) {
-            selector.select(100);
+        for (int i = 0; i < 10; i++) {
+            selector.select(1);
         }
 
         Selector s2 = selector.selector();
