@@ -23,8 +23,6 @@ jobs:
 
       - name: Generate Javadoc in fs-all module
         run: gradle :fs-all:javadoc
-      - name: Run tests
-        run: gradle :fs-core:testByJava8 --info --console=plain
       - name: Generate JaCoCo in fs-all module
         run: gradle :fs-all:jacocoTestReport
       - name: Generate aggregated tests report in fs-all module
