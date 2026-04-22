@@ -35,6 +35,10 @@ tasks.named<Jar>("jar") {
   )
   duplicatesStrategy = DuplicatesStrategy.INCLUDE
   //archiveFileName.set("fs.jar")
+
+  manifest {
+    attributes("Implementation-Version" to rootProject.version)
+  }
 }
 
 tasks.named<Jar>("sourcesJar") {

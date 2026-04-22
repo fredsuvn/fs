@@ -25,3 +25,9 @@ tasks.test {
     html.required = false
   }
 }
+
+tasks.named<Jar>("jar") {
+  manifest {
+    attributes("Implementation-Version" to rootProject.version)
+  }
+}

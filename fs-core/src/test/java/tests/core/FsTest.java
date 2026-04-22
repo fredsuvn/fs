@@ -42,6 +42,8 @@ public class FsTest implements Asserter, TestPrint {
     @Test
     public void testVersion() {
         printFor("Fs.LIB_VERSION: " + Fs.LIB_VERSION);
+        printFor("Implementation-Version: " + Fs.class.getPackage().getImplementationVersion());
+        // assertEquals(Fs.LIB_VERSION, Fs.class.getPackage().getImplementationVersion());
     }
 
     @Test

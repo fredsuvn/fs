@@ -358,3 +358,9 @@ tasks.register("fsVersion") {
     }
   }
 }
+
+tasks.named<Jar>("jar") {
+  manifest {
+    attributes("Implementation-Version" to rootProject.version)
+  }
+}
