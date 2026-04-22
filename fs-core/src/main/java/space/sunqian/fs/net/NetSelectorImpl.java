@@ -28,6 +28,7 @@ final class NetSelectorImpl implements NetSelector {
     public int select(long timeout) throws NetException {
         return Fs.uncheck(() -> {
             int keysNum = selector.select(timeout);
+            System.out.println("Selected " + keysNum + " keys");
             if (keysNum == 0) {
                 emptySelectCount++;
                 if (emptySelectCount >= EMPTY_SELECT_THRESHOLD) {
