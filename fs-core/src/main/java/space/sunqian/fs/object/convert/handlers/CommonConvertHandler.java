@@ -3,22 +3,24 @@ package space.sunqian.fs.object.convert.handlers;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.lang.EnumKit;
+import space.sunqian.fs.base.number.NumFormatter;
 import space.sunqian.fs.base.number.NumKit;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ArrayOperator;
 import space.sunqian.fs.collect.CollectKit;
+import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.collect.MapKit;
+import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOOperator;
+import space.sunqian.fs.object.builder.BuilderOperator;
+import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 import space.sunqian.fs.object.convert.ConvertOption;
-import space.sunqian.fs.object.convert.DataMapper;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.data.ObjectBuilder;
-import space.sunqian.fs.object.data.ObjectBuilderProvider;
-import space.sunqian.fs.reflect.ClassKit;
+import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.reflect.ReflectionException;
 import space.sunqian.fs.reflect.TypeKit;
 
@@ -40,32 +42,18 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAccessor;
-import java.util.AbstractList;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.IntFunction;
 
 /**
  * The common implementation of {@link ObjectConverter.Handler}, also be the default last handler of
- * {@link ObjectConverter#defaultConverter()}.
+ * {@link ObjectConverter#defaultConverter()}. Using {@link #getInstance()} can get a same one instance of this
+ * handler.
  * <p>
  * This handler providers the common conversion logic for all types. This is a table showing the conversion logic of
  * this handler for different target types:
@@ -76,7 +64,7 @@ import java.util.function.IntFunction;
  *     <th>Conversion Logic</th>
  * </tr>
  * <tr>
- *     <td rowspan="5">{@link String}, {@link CharSequence}</td>
+ *     <td rowspan="6">{@link String}, {@link CharSequence}</td>
  *     <td>{@link InputStream}, {@link ReadableByteChannel}, {@link Reader}, {@link ByteBuffer}, {@code byte[]}</td>
  *     <td>Using {@link ConvertOption#ioOperator(IOOperator)} and {@link ConvertOption#charset(Charset)}
  *     to decode to string.</td>
@@ -91,7 +79,11 @@ import java.util.function.IntFunction;
  * </tr>
  * <tr>
  *     <td>Date and Time Objects</td>
- *     <td>Using {@link ConvertOption#timeFormatter(DateFormatter)} to handle.</td>
+ *     <td>Using {@link ConvertOption#dateFormatter(DateFormatter)} to handle.</td>
+ * </tr>
+ * <tr>
+ *     <td>Numbers</td>
+ *     <td>Using {@link NumFormatter#format(Number)}.</td>
  * </tr>
  * <tr>
  *     <td>Others</td>
@@ -128,11 +120,11 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td rowspan="2">Date and Time</td>
  *     <td>{@link String} and Other Date Time Objects</td>
- *     <td>Using {@link ConvertOption#timeFormatter(DateFormatter)} to handle.</td>
+ *     <td>Using {@link ConvertOption#dateFormatter(DateFormatter)} to handle.</td>
  * </tr>
  * <tr>
  *     <td>{@code long} and {@link Long}</td>
- *     <td>Treated as an epoch milliseconds, then using {@link ConvertOption#timeFormatter(DateFormatter)} to
+ *     <td>Treated as an epoch milliseconds, then using {@link ConvertOption#dateFormatter(DateFormatter)} to
  *     handle.</td>
  * </tr>
  * <tr>
@@ -143,98 +135,122 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td>Array and Collection Objects</td>
  *     <td>Array or Iterable Objects</td>
- *     <td>Array created using reflection. Collection created using its constructor, the supported collection types:
- *     {@link Iterable}, {@link Collection}, {@link List}, {@link AbstractList}, {@link ArrayList}, {@link LinkedList},
- *     {@link CopyOnWriteArrayList}, {@link Set}, {@link LinkedHashSet}, {@link HashSet}, {@link TreeSet},
- *     {@link ConcurrentSkipListSet}. After creating the container, uses the {@code converter} parameter to handle
- *     component types.
+ *     <td>Array created using reflection. Collection created using its constructor, the supported collection types
+ *     follow the {@link SetKit#newFunction(Type)} and {@link ListKit#newFunction(Type)}. After creating the container,
+ *     uses the {@code converter} parameter to handle component types.
  *     </td>
  * </tr>
  * <tr>
  *     <td>Map and Data Objects</td>
  *     <td>Any Objects</td>
- *     <td>Generating data object is based on {@link ConvertOption#builderProvider(ObjectBuilderProvider)} and
- *     {@link ConvertOption#dataMapper(DataMapper)}. Generating map using its constructor, and copying properties
- *     also using {@link ConvertOption#dataMapper(DataMapper)}. The supported map types:
- *     {@link Map}, {@link AbstractMap}, {@link LinkedHashMap}, {@link HashMap}, {@link TreeMap}, {@link ConcurrentMap},
- *     {@link ConcurrentHashMap}, {@link Hashtable}, {@link ConcurrentSkipListMap}.
+ *     <td>Generating data object is based on {@link ConvertOption#builderOperatorProvider(BuilderOperatorProvider)} and
+ *     {@link ConvertOption#objectCopier(ObjectCopier)}. Generating map using its constructor, and copying properties
+ *     also using {@link ConvertOption#objectCopier(ObjectCopier)}. The supported map types follow the
+ *     {@link MapKit#newFunction(Type)}.
  *     </td>
  * </tr>
  * </table>
  * <p>
- * Note that this handler typically creates new objects and does not perform the same handing as
- * {@link AssignableConvertHandler}.
+ * Note:
+ * <ul>
+ *     <li>
+ *         This handler typically creates new objects for each conversion, and does not perform the same handing as
+ *         {@link AssignableConvertHandler};
+ *     </li>
+ *     <li>
+ *         This handler directly returns {@code null} when the source is {@code null};
+ *     </li>
+ * </ul>
+ *
+ * @author SunQian
  */
 public class CommonConvertHandler implements ObjectConverter.Handler {
+
+    private static final @Nonnull CommonConvertHandler INST = new CommonConvertHandler();
+
+    /**
+     * Returns a same one instance of this handler.
+     */
+    public static @Nonnull CommonConvertHandler getInstance() {
+        return INST;
+    }
 
     @Override
     public Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
-        @Nonnull Type target,
+        @Nonnull Type targetType,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
         if (src == null) {
-            return ObjectConverter.Status.HANDLER_CONTINUE;
+            return null;
         }
-        if (target instanceof Class<?>) {
-            Class<?> targetClass = (Class<?>) target;
+        if (targetType instanceof Class<?>) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
+            Class<?> targetClass = (Class<?>) targetType;
+            // to enum:
             if (targetClass.isEnum()) {
-                // to enum:
                 String name = src.toString();
                 return EnumKit.findEnum(Fs.as(targetClass), name);
             }
+            // string to byte[], char[], ByteBuffer, CharBuffer:
             if (srcType.equals(String.class)) {
-                if (target.equals(byte[].class) || target.equals(ByteBuffer.class)) {
-                    Charset charset = Fs.nonnull(
-                        Option.findValue(ConvertOption.CHARSET, options),
-                        CharsKit.defaultCharset()
-                    );
+                if (targetType.equals(byte[].class) || targetType.equals(ByteBuffer.class)) {
+                    Charset charset = ConvertOption.getCharset(options);
                     byte[] bytes = ((String) src).getBytes(charset);
-                    return target.equals(ByteBuffer.class) ? ByteBuffer.wrap(bytes) : bytes;
+                    return targetType.equals(ByteBuffer.class) ? ByteBuffer.wrap(bytes) : bytes;
                 }
-                if (target.equals(char[].class)) {
+                if (targetType.equals(char[].class)) {
                     return ((String) src).toCharArray();
                 }
-                if (target.equals(CharBuffer.class)) {
+                if (targetType.equals(CharBuffer.class)) {
                     return CharBuffer.wrap((String) src);
                 }
             }
+            // to array:
             if (targetClass.isArray()) {
-                // to array
                 return toArray(src, srcType, targetClass, converter, options);
             }
             ClassHandler classHandler = TargetClasses.get(targetClass);
+            // to target class:
             if (classHandler != null) {
                 return classHandler.convert(src, srcType, targetClass, converter, options);
             }
-            IntFunction<Collection<Object>> collectionFunc = CollectionClasses.get(targetClass);
+            IntFunction<Collection<Object>> collectionFunc = collectionFunction(targetClass);
+            // to collection:
             if (collectionFunc != null) {
-                // to collection
                 return toCollection(
                     src, srcType, collectionFunc, targetClass.getTypeParameters()[0], converter, options
                 );
             }
-            // to map or data object
-            return toDataObject(src, srcType, targetClass, target, converter, options);
-        } else if (target instanceof GenericArrayType) {
-            // to generic array
-            return toArray(src, srcType, (GenericArrayType) target, converter, options);
-        } else if (target instanceof ParameterizedType) {
-            ParameterizedType paramType = (ParameterizedType) target;
+            // to map or data object:
+            return toDataObject(src, srcType, targetClass, targetType, converter, options);
+        } else if (targetType instanceof GenericArrayType) {
+            // to generic array:
+            return toArray(src, srcType, (GenericArrayType) targetType, converter, options);
+        } else if (targetType instanceof ParameterizedType) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
+            ParameterizedType paramType = (ParameterizedType) targetType;
             Class<?> rawTarget = (Class<?>) paramType.getRawType();
-            IntFunction<Collection<Object>> collectionFunc = CollectionClasses.get(rawTarget);
+            IntFunction<Collection<Object>> collectionFunc = collectionFunction(rawTarget);
+            // to collection:
             if (collectionFunc != null) {
-                // to collection
                 return toCollection(
                     src, srcType, collectionFunc, paramType.getActualTypeArguments()[0], converter, options
                 );
             }
-            // to map or data object
-            return toDataObject(src, srcType, rawTarget, target, converter, options);
+            // to map or data object:
+            return toDataObject(src, srcType, rawTarget, targetType, converter, options);
         }
         return ObjectConverter.Status.HANDLER_CONTINUE;
+    }
+
+    private @Nullable IntFunction<Collection<Object>> collectionFunction(@Nonnull Class<?> collectionType) {
+        if (Set.class.isAssignableFrom(collectionType)) {
+            return Fs.as(SetKit.newFunction(collectionType));
+        }
+        return Fs.as(ListKit.newFunction(collectionType));
     }
 
     private Object toArray(
@@ -281,6 +297,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         if (srcType instanceof Class<?>) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
             Class<?> srcClass = (Class<?>) srcType;
             if (srcClass.isArray()) {
                 ArrayOperator srcOperator = ArrayOperator.of(srcClass);
@@ -304,6 +321,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         if (src instanceof Collection<?>) {
             srcCollection = (Collection<?>) src;
         } else if (src instanceof Iterable<?>) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
             Iterable<?> iter = (Iterable<?>) src;
             srcCollection = CollectKit.addAll(new ArrayList<>(), iter);
         } else {
@@ -329,6 +347,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         if (srcType instanceof Class<?>) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
             Class<?> srcClass = (Class<?>) srcType;
             if (srcClass.isArray()) {
                 ArrayOperator srcOperator = ArrayOperator.of(srcClass);
@@ -351,6 +370,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         if (src instanceof Collection<?>) {
             srcCollection = (Collection<?>) src;
         } else if (src instanceof Iterable<?>) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
             Iterable<?> iter = (Iterable<?>) src;
             srcCollection = CollectKit.addAll(new ArrayList<>(), iter);
         } else {
@@ -382,74 +402,21 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
-        IntFunction<Object> mapFunc = MapClasses.get(rawTarget);
-        DataMapper dataMapper = Fs.nonnull(
-            Option.findValue(ConvertOption.DATA_MAPPER, options),
-            DataMapper.defaultMapper()
-        );
+        IntFunction<Map<Object, Object>> mapFunc = MapKit.newFunction(rawTarget);
+        ObjectCopier objectCopier = ConvertOption.getObjectCopier(options);
         if (mapFunc != null) {
             Object targetObject = mapFunc.apply(0);
-            dataMapper.copyProperties(src, srcType, targetObject, target, converter, options);
+            objectCopier.copyProperties(src, srcType, targetObject, target, converter, options);
             return targetObject;
         } else {
-            ObjectBuilderProvider builderProvider = Fs.nonnull(
-                Option.findValue(ConvertOption.BUILDER_PROVIDER, options),
-                ObjectBuilderProvider.defaultProvider()
-            );
-            ObjectBuilder builder = builderProvider.builder(target);
-            if (builder == null) {
+            BuilderOperatorProvider builderProvider = ConvertOption.getBuilderOperatorProvider(options);
+            BuilderOperator operator = builderProvider.forType(target);
+            if (operator == null) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
             }
-            Object targetBuilder = builder.newBuilder();
-            dataMapper.copyProperties(src, srcType, targetBuilder, builder.builderType(), converter, options);
-            return builder.build(targetBuilder);
-        }
-    }
-
-    private static final class CollectionClasses {
-
-        private static final @Nonnull Map<@Nonnull Type, @Nonnull IntFunction<@Nonnull Collection<Object>>> CLASS_MAP;
-
-        static {
-            CLASS_MAP = new HashMap<>();
-            CLASS_MAP.put(Iterable.class, ArrayList::new);
-            CLASS_MAP.put(Collection.class, HashSet::new);
-            CLASS_MAP.put(List.class, ArrayList::new);
-            CLASS_MAP.put(AbstractList.class, ArrayList::new);
-            CLASS_MAP.put(ArrayList.class, ArrayList::new);
-            CLASS_MAP.put(LinkedList.class, size -> new LinkedList<>());
-            CLASS_MAP.put(CopyOnWriteArrayList.class, size -> new CopyOnWriteArrayList<>());
-            CLASS_MAP.put(Set.class, HashSet::new);
-            CLASS_MAP.put(LinkedHashSet.class, LinkedHashSet::new);
-            CLASS_MAP.put(HashSet.class, HashSet::new);
-            CLASS_MAP.put(TreeSet.class, size -> new TreeSet<>());
-            CLASS_MAP.put(ConcurrentSkipListSet.class, size -> new ConcurrentSkipListSet<>());
-        }
-
-        public static @Nullable IntFunction<@Nonnull Collection<Object>> get(@Nonnull Class<?> target) {
-            return CLASS_MAP.get(target);
-        }
-    }
-
-    private static final class MapClasses {
-
-        private static final @Nonnull Map<@Nonnull Type, @Nonnull IntFunction<@Nonnull Object>> CLASS_MAP;
-
-        static {
-            CLASS_MAP = new HashMap<>();
-            CLASS_MAP.put(Map.class, HashMap::new);
-            CLASS_MAP.put(AbstractMap.class, HashMap::new);
-            CLASS_MAP.put(LinkedHashMap.class, LinkedHashMap::new);
-            CLASS_MAP.put(HashMap.class, HashMap::new);
-            CLASS_MAP.put(TreeMap.class, size -> new TreeMap<>());
-            CLASS_MAP.put(ConcurrentMap.class, ConcurrentHashMap::new);
-            CLASS_MAP.put(ConcurrentHashMap.class, ConcurrentHashMap::new);
-            CLASS_MAP.put(Hashtable.class, Hashtable::new);
-            CLASS_MAP.put(ConcurrentSkipListMap.class, size -> new ConcurrentSkipListMap<>());
-        }
-
-        public static @Nullable IntFunction<@Nonnull Object> get(@Nonnull Class<?> target) {
-            return CLASS_MAP.get(target);
+            Object targetBuilder = operator.createBuilder();
+            objectCopier.copyProperties(src, srcType, targetBuilder, operator.builderType(), converter, options);
+            return operator.buildTarget(targetBuilder);
         }
     }
 
@@ -472,7 +439,6 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             HANDLER_MAP.put(String.class, StringClassHandler.INST);
             HANDLER_MAP.put(CharSequence.class, StringClassHandler.INST);
             HANDLER_MAP.put(boolean.class, BooleanClassHandler.INST);
-            HANDLER_MAP.put(Boolean.class, BooleanClassHandler.INST);
             HANDLER_MAP.put(byte.class, NumberClassHandler.INST);
             HANDLER_MAP.put(short.class, NumberClassHandler.INST);
             HANDLER_MAP.put(char.class, NumberClassHandler.INST);
@@ -480,6 +446,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             HANDLER_MAP.put(long.class, NumberClassHandler.INST);
             HANDLER_MAP.put(float.class, NumberClassHandler.INST);
             HANDLER_MAP.put(double.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(Boolean.class, BooleanClassHandler.INST);
             HANDLER_MAP.put(Byte.class, NumberClassHandler.INST);
             HANDLER_MAP.put(Short.class, NumberClassHandler.INST);
             HANDLER_MAP.put(Character.class, NumberClassHandler.INST);
@@ -490,13 +457,13 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             HANDLER_MAP.put(BigInteger.class, NumberClassHandler.INST);
             HANDLER_MAP.put(BigDecimal.class, NumberClassHandler.INST);
             HANDLER_MAP.put(Number.class, NumberClassHandler.INST);
-            HANDLER_MAP.put(Date.class, TimeClassHandler.INST);
-            HANDLER_MAP.put(Instant.class, TimeClassHandler.INST);
-            HANDLER_MAP.put(LocalDateTime.class, TimeClassHandler.INST);
-            HANDLER_MAP.put(ZonedDateTime.class, TimeClassHandler.INST);
-            HANDLER_MAP.put(OffsetDateTime.class, TimeClassHandler.INST);
-            HANDLER_MAP.put(LocalDate.class, TimeClassHandler.INST);
-            HANDLER_MAP.put(LocalTime.class, TimeClassHandler.INST);
+            HANDLER_MAP.put(Date.class, DateClassHandler.INST);
+            HANDLER_MAP.put(Instant.class, DateClassHandler.INST);
+            HANDLER_MAP.put(LocalDateTime.class, DateClassHandler.INST);
+            HANDLER_MAP.put(ZonedDateTime.class, DateClassHandler.INST);
+            HANDLER_MAP.put(OffsetDateTime.class, DateClassHandler.INST);
+            HANDLER_MAP.put(LocalDate.class, DateClassHandler.INST);
+            HANDLER_MAP.put(LocalTime.class, DateClassHandler.INST);
         }
 
         public static @Nullable CommonConvertHandler.ClassHandler get(@Nonnull Class<?> target) {
@@ -519,37 +486,26 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             if (src instanceof char[]) {
                 return new String((char[]) src);
             }
-            if (src instanceof BigDecimal) {
-                return ((BigDecimal) src).toPlainString();
+            if (src instanceof Number) {
+                NumFormatter numFormatter = ConvertOption.getNumFormatter(options);
+                return numFormatter.format((Number) src);
             }
             if (src instanceof Date) {
-                DateFormatter dateFormatter = Fs.nonnull(
-                    Option.findValue(ConvertOption.TIME_FORMATTER, options),
-                    DateFormatter.defaultFormatter()
-                );
+                DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
                 return dateFormatter.format((Date) src);
             }
             if (src instanceof TemporalAccessor) {
-                DateFormatter dateFormatter = Fs.nonnull(
-                    Option.findValue(ConvertOption.TIME_FORMATTER, options),
-                    DateFormatter.defaultFormatter()
-                );
+                DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
                 return dateFormatter.format((TemporalAccessor) src);
             }
-            Charset charset = Fs.nonnull(
-                Option.findValue(ConvertOption.CHARSET, options),
-                CharsKit.defaultCharset()
-            );
+            Charset charset = ConvertOption.getCharset(options);
             if (src instanceof byte[]) {
                 return new String((byte[]) src, charset);
             }
             if (src instanceof ByteBuffer) {
                 return BufferKit.string((ByteBuffer) src, charset);
             }
-            IOOperator ioOperator = Fs.nonnull(
-                Option.findValue(ConvertOption.IO_OPERATOR, options),
-                IOOperator.defaultOperator()
-            );
+            IOOperator ioOperator = ConvertOption.getIOOperator(options);
             if (src instanceof Reader) {
                 return ioOperator.string((Reader) src);
             }
@@ -578,24 +534,21 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             if (src instanceof String) {
                 return NumKit.toNumber((String) src, target);
             }
-            if (!(srcType instanceof Class<?>)) {
-                return ObjectConverter.Status.HANDLER_CONTINUE;
-            }
+            // date to long
             if (target.equals(Long.class) || target.equals(long.class)) {
-                if (srcType.equals(Date.class)) {
+                if (src instanceof Date) {
                     return ((Date) src).getTime();
                 }
-                if (TemporalAccessor.class.isAssignableFrom((Class<?>) srcType)) {
+                if (src instanceof TemporalAccessor) {
+                    @SuppressWarnings("PatternVariableCanBeUsed")
                     TemporalAccessor ta = (TemporalAccessor) src;
-                    DateFormatter dateFormatter = Fs.nonnull(
-                        Option.findValue(ConvertOption.TIME_FORMATTER, options),
-                        DateFormatter.defaultFormatter()
-                    );
+                    DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
                     Date date = dateFormatter.convert(ta, Date.class);
                     return date.getTime();
                 }
             }
-            if (Number.class.isAssignableFrom(ClassKit.wrapperClass((Class<?>) srcType))) {
+            if (src instanceof Number) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 Number srcNum = (Number) src;
                 return NumKit.toNumber(srcNum, target);
             }
@@ -628,7 +581,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         }
     }
 
-    private enum TimeClassHandler implements ClassHandler {
+    private enum DateClassHandler implements ClassHandler {
 
         INST;
 
@@ -640,24 +593,19 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) {
-            DateFormatter dateFormatter = Fs.nonnull(
-                Option.findValue(ConvertOption.TIME_FORMATTER, options),
-                DateFormatter.defaultFormatter()
-            );
-            if (srcType.equals(String.class)) {
+            DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
+            if (src instanceof String) {
                 return dateFormatter.parse((String) src, target);
             }
-            if (srcType.equals(Date.class)) {
+            if (src instanceof Date) {
                 return dateFormatter.convert((Date) src, target);
             }
-            if (srcType.equals(long.class) || srcType.equals(Long.class)) {
+            if (src instanceof Long) {
                 Date date = new Date((Long) src);
                 return dateFormatter.convert(date, target);
             }
-            if (srcType instanceof Class<?>) {
-                if (TemporalAccessor.class.isAssignableFrom((Class<?>) srcType)) {
-                    return dateFormatter.convert((TemporalAccessor) src, target);
-                }
+            if (src instanceof TemporalAccessor) {
+                return dateFormatter.convert((TemporalAccessor) src, target);
             }
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }

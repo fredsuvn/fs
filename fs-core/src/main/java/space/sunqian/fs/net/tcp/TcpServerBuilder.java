@@ -10,16 +10,17 @@ import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.io.communicate.AbstractChannelContext;
 import space.sunqian.fs.net.NetException;
+import space.sunqian.fs.net.NetSelector;
 import space.sunqian.fs.net.NetServer;
 
 import java.net.InetSocketAddress;
 import java.net.SocketOption;
 import java.net.StandardSocketOptions;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,7 +44,7 @@ public class TcpServerBuilder {
     private @Nullable ThreadFactory mainThreadFactory;
     private @Nullable ThreadFactory workerThreadFactory;
     private final @Nonnull Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
-    private long selectTimeout = 0;
+    // private long selectTimeout = 0;
     private int bufSize = IOKit.bufferSize();
 
     /**
@@ -100,15 +101,15 @@ public class TcpServerBuilder {
     }
 
     /**
-     * Sets the buffer size for advanced IO operations. Note this buffer size is not the kernel network buffer size, it
-     * is an I/O advanced operations buffer size.
+     * Sets the I/O buffer size for advanced IO operations, typically used for read/write operations on
+     * {@link IOOperator}. The default size is {@link IOKit#bufferSize()}.
      *
-     * @param bufSize the buffer size for advanced IO operations
+     * @param bufSize the I/O buffer size for advanced IO operations
      * @return this builder
-     * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
+     * @throws IllegalArgumentException if the I/O buffer size is negative or {@code 0}
      */
-    public @Nonnull TcpServerBuilder bufferSize(int bufSize) throws IllegalArgumentException {
-        Checker.checkArgument(bufSize > 0, "bufSize must be positive");
+    public @Nonnull TcpServerBuilder ioBufferSize(int bufSize) throws IllegalArgumentException {
+        Checker.checkArgument(bufSize > 0, "ioBufferSize must be positive");
         this.bufSize = bufSize;
         return this;
     }
@@ -129,21 +130,21 @@ public class TcpServerBuilder {
         return this;
     }
 
-    /**
-     * Sets the timeout for underlying {@link Selector#select(long)}, in milliseconds. This timeout must {@code >= 0},
-     * and will affect the triggering interval of {@link TcpServerHandler#channelLoop(TcpContext)}. If it is {@code 0},
-     * there may be a large interval or even never triggering.
-     *
-     * @param selectTimeout the timeout for underlying {@link Selector#select(long)}, in milliseconds, must
-     *                      {@code >= 0}
-     * @return this builder
-     * @throws IllegalArgumentException if the timeout is negative
-     */
-    public @Nonnull TcpServerBuilder selectTimeout(long selectTimeout) throws IllegalArgumentException {
-        Checker.checkArgument(selectTimeout >= 0, "selectTimeout must >= 0");
-        this.selectTimeout = selectTimeout;
-        return this;
-    }
+    // /**
+    //  * Sets the timeout for underlying {@link NetSelector#select(long)}, in milliseconds. This timeout must
+    //  * {@code >= 0}, and will affect the triggering interval of {@link TcpServerHandler#channelLoop(TcpContext)}. If it
+    //  * is {@code 0}, there may be a large interval or even never triggering.
+    //  *
+    //  * @param selectTimeout the timeout for underlying {@link NetSelector#select(long)}, in milliseconds, must
+    //  *                      {@code >= 0}
+    //  * @return this builder
+    //  * @throws IllegalArgumentException if the timeout is negative
+    //  */
+    // public @Nonnull TcpServerBuilder selectTimeout(long selectTimeout) throws IllegalArgumentException {
+    //     Checker.checkArgument(selectTimeout >= 0, "selectTimeout must >= 0");
+    //     this.selectTimeout = selectTimeout;
+    //     return this;
+    // }
 
     /**
      * Binds the server's socket to the automatically assigned address and configures the socket to listen for
@@ -190,7 +191,7 @@ public class TcpServerBuilder {
                 workerThreadFactory,
                 workerThreadNum,
                 socketOptions,
-                selectTimeout,
+                // selectTimeout,
                 backlog,
                 bufSize
             ),
@@ -201,8 +202,8 @@ public class TcpServerBuilder {
     private static final class TcpServerImpl implements TcpServer, Runnable {
 
         private final @Nonnull ServerSocketChannel server;
-        private final @Nonnull Selector mainSelector;
-        private final long selectTimeout;
+        private final @Nonnull NetSelector mainSelector;
+        // private final long selectTimeout;
         private final @Nonnull Thread mainThread;
         private final @Nonnull WorkerImpl @Nonnull [] workers;
         private final @Nonnull TcpServerHandler handler;
@@ -219,21 +220,21 @@ public class TcpServerBuilder {
             @Nullable ThreadFactory workerthreadFactory,
             int workThreadNum,
             Map<SocketOption<?>, Object> socketOptions,
-            long selectTimeout,
+            // long selectTimeout,
             int backlog,
             int bufSize
         ) throws Exception {
             this.server = ServerSocketChannel.open();
-            this.mainSelector = Selector.open();
+            this.mainSelector = NetSelector.open();
             this.handler = handler;
             this.mainThread = newThread(mainthreadFactory, this);
             this.workers = new WorkerImpl[workThreadNum];
-            this.selectTimeout = selectTimeout;
+            // this.selectTimeout = selectTimeout;
             this.bufSize = bufSize;
             server.configureBlocking(false);
             socketOptions.forEach((name, value) ->
                 Fs.uncheck(() -> server.setOption(Fs.as(name), value), NetException::new));
-            server.register(mainSelector, SelectionKey.OP_ACCEPT);
+            server.register(mainSelector.selector(), SelectionKey.OP_ACCEPT);
             for (int i = 0; i < workThreadNum; i++) {
                 WorkerImpl worker = new WorkerImpl();
                 workers[i] = worker;
@@ -304,7 +305,7 @@ public class TcpServerBuilder {
         }
 
         private void doMainWork() throws Exception {
-            mainSelector.select();
+            mainSelector.select(0);
             Set<SelectionKey> selectedKeys = mainSelector.selectedKeys();
             Iterator<SelectionKey> keys = selectedKeys.iterator();
             while (keys.hasNext()) {
@@ -328,7 +329,7 @@ public class TcpServerBuilder {
             int index = 0;
             int minClientCount = Integer.MAX_VALUE;
             for (int i = 0; i < workers.length; i++) {
-                int clientCount = workers[i].clientSet.size();
+                int clientCount = workers[i].clients.size();
                 if (clientCount < minClientCount) {
                     minClientCount = clientCount;
                     index = i;
@@ -362,8 +363,8 @@ public class TcpServerBuilder {
 
         private final class WorkerImpl implements Worker, Runnable {
 
-            private final @Nonnull Selector selector;
-            private final @Nonnull Set<ContextImpl> clientSet = new HashSet<>();
+            private final @Nonnull NetSelector selector;
+            private final @Nonnull List<ClientImpl> clients = new ArrayList<>();
 
             // the thread this worker starts on
             private Thread thread;
@@ -371,7 +372,7 @@ public class TcpServerBuilder {
             private volatile @Nonnull AcceptedEvent acceptedEvent = new AcceptedEvent();
 
             private WorkerImpl() {
-                this.selector = Fs.uncheck(Selector::open, NetException::new);
+                this.selector = NetSelector.open();
             }
 
             public void registerClient(SocketChannel client) {
@@ -415,11 +416,11 @@ public class TcpServerBuilder {
                 while (true) {
                     SocketChannel channel = event.channel;
                     if (channel != null) {
-                        ContextImpl context = new ContextImpl(channel, bufSize);
-                        clientSet.add(context);
-                        registerRead(context);
+                        ClientImpl client = new ClientImpl(channel, bufSize);
+                        clients.add(client);
+                        registerRead(client);
                         event.channel = null;
-                        TcpKit.channelOpen(handler, context);
+                        TcpKit.channelOpen(handler, client);
                     }
                     AcceptedEvent next = event.next;
                     if (next == null) {
@@ -431,40 +432,38 @@ public class TcpServerBuilder {
                 }
             }
 
-            @SuppressWarnings("resource")
-            private void registerRead(ContextImpl context) throws Exception {
-                SocketChannel channel = context.channel();
+            private void registerRead(ClientImpl client) throws Exception {
+                @SuppressWarnings("resource")
+                SocketChannel channel = client.channel();
                 channel.configureBlocking(false);
-                channel.register(selector, SelectionKey.OP_READ, context);
+                channel.register(selector.selector(), SelectionKey.OP_READ, client);
             }
 
             private void handleRead() throws Exception {
-                int keysNum = selector.select(selectTimeout);
-                if (keysNum == 0) {
-                    return;
-                }
+                selector.select(0);
                 Set<SelectionKey> selectedKeys = selector.selectedKeys();
                 Iterator<SelectionKey> keys = selectedKeys.iterator();
                 while (keys.hasNext()) {
                     SelectionKey key = keys.next();
                     keys.remove();
-                    TcpKit.channelRead(handler, (ContextImpl) key.attachment());
+                    TcpKit.channelRead(handler, (ClientImpl) key.attachment());
                 }
             }
 
             private void handleLoop() {
-                for (ContextImpl context : clientSet) {
-                    TcpKit.channelLoop(handler, context);
+                for (ClientImpl client : clients) {
+                    TcpKit.channelLoop(handler, client);
                 }
             }
 
-            @SuppressWarnings("resource")
             private void handleClose() {
-                Iterator<ContextImpl> iterator = clientSet.iterator();
+                Iterator<ClientImpl> iterator = clients.iterator();
                 while (iterator.hasNext()) {
-                    ContextImpl context = iterator.next();
-                    if (!context.channel().isOpen()) {
-                        context.close();
+                    ClientImpl client = iterator.next();
+                    //@SuppressWarnings("resource")
+                    ByteChannel channel = client.channel();
+                    if (!channel.isOpen()) {
+                        client.close();
                         iterator.remove();
                     }
                 }
@@ -472,7 +471,7 @@ public class TcpServerBuilder {
 
             @Override
             public int connectionNumber() {
-                return clientSet.size();
+                return clients.size();
             }
 
             @Override
@@ -481,12 +480,12 @@ public class TcpServerBuilder {
             }
 
             private void releaseClients() {
-                for (ContextImpl context : clientSet) {
-                    context.close();
+                for (ClientImpl client : clients) {
+                    client.close();
                 }
             }
 
-            private final class ContextImpl extends AbstractChannelContext<SocketChannel> implements TcpContext {
+            private final class ClientImpl extends AbstractChannelContext<SocketChannel> implements TcpContext {
 
                 // private final @Nonnull SocketChannel channel;
                 private final @Nonnull InetSocketAddress clientAddress;
@@ -495,7 +494,7 @@ public class TcpServerBuilder {
 
                 private volatile boolean closed = false;
 
-                private ContextImpl(@Nonnull SocketChannel channel, int bufSize) throws IllegalArgumentException {
+                private ClientImpl(@Nonnull SocketChannel channel, int bufSize) throws IllegalArgumentException {
                     super(channel);
                     this.clientAddress = (InetSocketAddress) Fs.uncheck(channel::getRemoteAddress, NetException::new);
                     this.serverAddress = (InetSocketAddress) Fs.uncheck(channel::getLocalAddress, NetException::new);
@@ -520,7 +519,7 @@ public class TcpServerBuilder {
                     Fs.uncheck(() -> {
                         SocketChannel channel = channel();
                         channel.close();
-                        channel.keyFor(selector).cancel();
+                        selector.cancel(channel);
                         TcpKit.channelClose(handler, this);
                     }, NetException::new);
                     closed = true;

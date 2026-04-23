@@ -6,13 +6,21 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.OutParam;
 import space.sunqian.fs.Fs;
 
+import java.lang.reflect.Type;
+import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -55,8 +63,8 @@ public class MapKit {
      * <p>
      * The behavior of this method is equivalent to:
      * <pre>{@code
-     *  return Collections.unmodifiableMap(linkedHashMap(array));
-     *  }</pre>
+     * return Collections.unmodifiableMap(linkedHashMap(array));
+     * }</pre>
      *
      * @param array the given array
      * @param <K>   the key type
@@ -312,6 +320,49 @@ public class MapKit {
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    /**
+     * Returns a new map instance with the given map type and initial capacity. If the given map type is unsupported,
+     * returns {@code null}. The supported map types follow the {@link #newFunction(Type)}.
+     *
+     * @param mapType         the given map type
+     * @param initialCapacity the initial capacity
+     * @param <K>             the type of the map keys
+     * @param <V>             the type of the map values
+     * @return a new map instance, or {@code null} if the given map type is unsupported
+     */
+    public static <K, V> @Nullable Map<K, V> newMap(@Nonnull Type mapType, int initialCapacity) {
+        IntFunction<@Nonnull Map<K, V>> function = newFunction(mapType);
+        if (function == null) {
+            return null;
+        }
+        return function.apply(initialCapacity);
+    }
+
+    /**
+     * Returns a new instance of {@link IntFunction} that creates a new map instance with the given map type. If the
+     * given map type is unsupported, returns {@code null}. The supported map types are:
+     * <ul>
+     *     <li>{@link Map}</li>
+     *     <li>{@link AbstractMap}</li>
+     *     <li>{@link LinkedHashMap}</li>
+     *     <li>{@link HashMap}</li>
+     *     <li>{@link TreeMap}</li>
+     *     <li>{@link ConcurrentMap}</li>
+     *     <li>{@link ConcurrentHashMap}</li>
+     *     <li>{@link Hashtable}</li>
+     *     <li>{@link ConcurrentSkipListMap}</li>
+     * </ul>
+     *
+     * @param maType the given map type
+     * @param <K>    the type of the map keys
+     * @param <V>    the type of the map values
+     * @return a new instance of {@link IntFunction} that creates a new map instance with the given map type, or
+     * {@code null} if the given map type is unsupported
+     */
+    public static <K, V> @Nullable IntFunction<@Nonnull Map<K, V>> newFunction(@Nonnull Type maType) {
+        return Fs.as(CollectBack.mapFunction(maType));
     }
 
     private MapKit() {

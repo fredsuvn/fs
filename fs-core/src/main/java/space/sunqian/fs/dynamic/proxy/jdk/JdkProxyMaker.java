@@ -6,7 +6,6 @@ import space.sunqian.annotation.RetainedParam;
 import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.value.Var;
-import space.sunqian.fs.dynamic.DynamicClassLoader;
 import space.sunqian.fs.dynamic.proxy.ProxyException;
 import space.sunqian.fs.dynamic.proxy.ProxyHandler;
 import space.sunqian.fs.dynamic.proxy.ProxyInvoker;
@@ -42,10 +41,6 @@ public class JdkProxyMaker implements ProxyMaker {
         @Nonnull @RetainedParam List<@Nonnull Class<?>> interfaces,
         @Nonnull ProxyHandler proxyHandler
     ) throws ProxyException {
-        Class<?> proxyClass = Proxy.getProxyClass(
-            new DynamicClassLoader(),
-            interfaces.toArray(new Class<?>[0])
-        );
         Map<Method, Var<ProxyInvoker>> proxiedMethods = new HashMap<>();
         Map<Method, Var<Invocable>> unproxiedMethods = new HashMap<>();
         for (Class<?> anInterface : interfaces) {
@@ -66,6 +61,7 @@ public class JdkProxyMaker implements ProxyMaker {
             new HashMap<>(proxiedMethods),
             new HashMap<>(unproxiedMethods)
         );
+        Class<?> proxyClass = JdkService.INST.getProxyClass(interfaces, invocationHandler);
         return new JdkProxySpec(proxyClass, interfaces, proxyHandler, invocationHandler);
     }
 
@@ -84,7 +80,7 @@ public class JdkProxyMaker implements ProxyMaker {
                     invocable = buildSuperInvoker(method);
                     invocableVar.set(invocable);
                 }
-                return invocable.invokeChecked(proxy, nonnullArgs);
+                return invocable.invokeDirectly(proxy, nonnullArgs);
             }
             @Nullable ProxyInvoker invoker = invokerVar.get();
             if (invoker == null) {
@@ -108,12 +104,12 @@ public class JdkProxyMaker implements ProxyMaker {
 
         @Override
         public @Nullable Object invoke(@Nonnull Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
-            return virtualInvoker.invokeChecked(inst, args);
+            return virtualInvoker.invokeDirectly(inst, args);
         }
 
         @Override
         public @Nullable Object invokeSuper(@Nonnull Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
-            return superInvoker.invokeChecked(inst, args);
+            return superInvoker.invokeDirectly(inst, args);
         }
     }
 
@@ -171,7 +167,7 @@ public class JdkProxyMaker implements ProxyMaker {
                 throw new AbstractMethodError(method.toString());
             };
         }
-        return DefaultMethodService.INST.getDefaultMethodInvocable(method);
+        return JdkService.INST.getDefaultMethodInvocable(method);
     }
 
     /**

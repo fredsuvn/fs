@@ -19,6 +19,7 @@ dependencies {
   api("org.slf4j:slf4j-api")
   api("org.apache.commons:commons-lang3")
   api("org.apache.commons:commons-collections4")
+  api("org.apache.commons:commons-text")
   api("commons-beanutils:commons-beanutils")
   api("commons-io:commons-io")
   api("commons-codec:commons-codec")
@@ -34,6 +35,11 @@ dependencies {
   api("org.projectlombok:lombok")
   api("org.mockito:mockito-core")
   api("org.jboss:jboss-vfs")
+  //api("com.fasterxml.jackson.core:jackson-core")
+  api("com.fasterxml.jackson.core:jackson-databind")
+  api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+  // only jdk17
+  //api("org.springframework.boot:spring-boot-starter")
 }
 
 val javaVersionFrom = project.property("javaLangVersionFrom") as JavaLanguageVersion

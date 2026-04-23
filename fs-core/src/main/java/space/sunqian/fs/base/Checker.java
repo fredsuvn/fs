@@ -6,7 +6,7 @@ import space.sunqian.fs.base.exception.UnreachablePointException;
 import java.util.NoSuchElementException;
 
 /**
- * This class is the core utilities for checking and verifying parameters.
+ * This class is the global checking utilities for checking and verifying parameters.
  *
  * @author sunqian
  */
@@ -188,6 +188,7 @@ public class Checker {
      * @param endBound   the end boundary, exclusive
      * @return whether the given position is between the start boundary (inclusive) and the end boundary (exclusive)
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isInBounds(int pos, int startBound, int endBound) {
         return pos >= startBound && pos < endBound;
     }

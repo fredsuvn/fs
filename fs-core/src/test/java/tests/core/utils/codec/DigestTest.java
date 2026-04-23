@@ -1,0 +1,32 @@
+package tests.core.utils.codec;
+
+import internal.utils.DataGen;
+import org.junit.jupiter.api.Test;
+import space.sunqian.fs.io.ByteProcessor;
+import space.sunqian.fs.utils.codec.DigestKit;
+
+import java.security.MessageDigest;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+
+public class DigestTest implements DataGen {
+
+    @Test
+    public void testDigestWithBlockSize16() throws Exception {
+        testDigest(MessageDigest.getInstance("MD5"), 1024, 16);
+    }
+
+    @Test
+    public void testDigestWithBlockSize97() throws Exception {
+        testDigest(MessageDigest.getInstance("MD5"), 3337, 97);
+    }
+
+    private void testDigest(MessageDigest digest, int totalSize, int blockSize) {
+        byte[] data = randomBytes(totalSize);
+        byte[] enBytes = ByteProcessor.from(data)
+            .readBlockSize(blockSize)
+            .transformer(DigestKit.digestTransformer(digest))
+            .toByteArray();
+        assertArrayEquals(enBytes, digest.digest(data));
+    }
+}

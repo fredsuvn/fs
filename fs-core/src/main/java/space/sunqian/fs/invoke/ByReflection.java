@@ -37,7 +37,7 @@ final class ByReflection {
         }
 
         @Override
-        public Object invokeChecked(
+        public Object invokeDirectly(
             @Nullable Object inst, @Nullable Object @Nonnull ... args
         ) throws Throwable {
             try {
@@ -68,7 +68,7 @@ final class ByReflection {
         }
 
         @Override
-        public @Nullable Object invokeChecked(
+        public @Nullable Object invokeDirectly(
             @Nullable Object inst, @Nullable Object @Nonnull ... args
         ) throws Throwable {
             try {

@@ -6,8 +6,8 @@ import space.sunqian.fs.base.value.Span;
 import java.util.Objects;
 
 /**
- * Name formatter, used to parse or format a given name. A name formatter represents a formatting scheme, such as
- * {@code Camel Case}, {@code Snake Case}, {@code File Naming}, etc.
+ * Name formatter, which is used to parse or format a given name. A name formatter represents a formatting scheme, such
+ * as {@code Camel Case}, {@code Snake Case}, {@code File Naming}, etc.
  *
  * @author sunqian
  */
@@ -36,16 +36,34 @@ public interface NameFormatter {
     }
 
     /**
-     * Returns a new {@link NameFormatter} base on the specified delimiter (e.g. {@code some-name}, {@code some_name}).
+     * Returns a new {@link NameFormatter} base on the specified delimiter, and keeps the original case of the word
+     * (e.g. {@code some-Name}, {@code some_Name}).
      *
      * @param delimiter the specified delimiter
-     * @return a new {@link NameFormatter} base on the specified delimiter (e.g. {@code some-name}, {@code some_name})
+     * @return a new {@link NameFormatter} base on the specified delimiter, the original case is kept
      * @throws IllegalArgumentException if the delimiter is empty
      */
-    static @Nonnull NameFormatter delimiterCase(
+    static @Nonnull NameFormatter delimiter(
         @Nonnull CharSequence delimiter
     ) throws IllegalArgumentException {
-        return delimiterCase(delimiter, simpleAppender());
+        return delimiter(delimiter, simpleAppender());
+    }
+
+    /**
+     * Returns a new {@link NameFormatter} base on the specified delimiter, and specifies the case of the word (e.g.
+     * {@code some-name}, {@code SOME_NAME}).
+     *
+     * @param delimiter the specified delimiter
+     * @param lower     specifies the case of the word, {@code true} for lower, {@code false} for upper
+     * @return a new {@link NameFormatter} base on the specified delimiter, the case is specified
+     * @throws IllegalArgumentException if the delimiter is empty
+     */
+    static @Nonnull NameFormatter delimiter(
+        @Nonnull CharSequence delimiter, boolean lower
+    ) throws IllegalArgumentException {
+        return delimiter(delimiter, lower ?
+            NameFormatterBack.LowerAppender.INST : NameFormatterBack.UpperAppender.INST
+        );
     }
 
     /**
@@ -56,10 +74,10 @@ public interface NameFormatter {
      * @return a new {@link NameFormatter} base on the specified delimiter (e.g. {@code some-name}, {@code some_name})
      * @throws IllegalArgumentException if the delimiter is empty
      */
-    static @Nonnull NameFormatter delimiterCase(
+    static @Nonnull NameFormatter delimiter(
         @Nonnull CharSequence delimiter, @Nonnull NameFormatter.Appender appender
     ) throws IllegalArgumentException {
-        return NameFormatterBack.delimiterCase(delimiter, appender);
+        return NameFormatterBack.delimiter(delimiter, appender);
     }
 
     /**
@@ -160,33 +178,33 @@ public interface NameFormatter {
      * that define the range of each word within the given original name. The joined name will be appended to the
      * specified destination appendable.
      *
-     * @param originalName the given original name where the word spans are derived
-     * @param wordSpans    the array of {@link Span} that define the range of each word within the given original name
-     * @param dst          the specified destination appendable
+     * @param origin    the given original name where the word spans are derived
+     * @param wordSpans the array of {@link Span} that define the range of each word within the given original name
+     * @param dst       the specified destination appendable
      * @throws NameFormatException if failed to join the words
      */
     void format(
-        @Nonnull CharSequence originalName,
+        @Nonnull CharSequence origin,
         @Nonnull Span @Nonnull [] wordSpans,
         @Nonnull Appendable dst
     ) throws NameFormatException;
 
     /**
-     * Converts the given name from this name formatter to the other specified name formatter. This method is equivalent
-     * to: {@code otherFormatter.format(name, tokenize(name))}.
+     * Converts the given original name from this name formatter to the specified name formatter. This method is
+     * equivalent to: {@code toFormatter.format(origin, tokenize(name))}.
      *
-     * @param name           the given name
-     * @param otherFormatter the other specified name formatter
+     * @param origin      the given name
+     * @param toFormatter the specified name formatter to convert to
      * @return the converted name
      * @throws NameFormatException if the conversion is not supported for the given name
      */
     default @Nonnull String format(
-        @Nonnull CharSequence name, @Nonnull NameFormatter otherFormatter
+        @Nonnull CharSequence origin, @Nonnull NameFormatter toFormatter
     ) throws NameFormatException {
-        if (Objects.equals(this, otherFormatter)) {
-            return name.toString();
+        if (Objects.equals(this, toFormatter)) {
+            return origin.toString();
         }
-        return otherFormatter.format(name, tokenize(name));
+        return toFormatter.format(origin, tokenize(origin));
     }
 
     /**
@@ -198,15 +216,15 @@ public interface NameFormatter {
          * Appends the word into the specified {@link Appendable}, the word is specified by the given span that define
          * the range of the word within the given original name.
          *
-         * @param dst          the specified {@link Appendable}
-         * @param originalName the given original name where the word span is derived
-         * @param span         the span that define the range of the word within the given original name
-         * @param index        the index of the word in the returned list of {@link #tokenize(CharSequence)}
+         * @param dst    the specified {@link Appendable}
+         * @param origin the given original name where the word span is derived
+         * @param span   the span that define the range of the word within the given original name
+         * @param index  the index of the word in the returned list of {@link #tokenize(CharSequence)}
          * @throws Exception if failed to append
          */
         void append(
             @Nonnull Appendable dst,
-            @Nonnull CharSequence originalName,
+            @Nonnull CharSequence origin,
             @Nonnull Span span,
             int index
         ) throws Exception;

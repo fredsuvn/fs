@@ -23,6 +23,7 @@ public class StringKit {
      * @param str the given string
      * @return whether the given string is {@code null} or empty
      */
+    @SuppressWarnings("SizeReplaceableByIsEmpty")
     public static boolean isEmpty(@Nullable CharSequence str) {
         return str == null || str.length() == 0;
     }
@@ -208,6 +209,7 @@ public class StringKit {
      * @param str the given string
      * @return the capitalized string
      */
+    @SuppressWarnings("SizeReplaceableByIsEmpty")
     public static @Nonnull String capitalize(@Nonnull CharSequence str) {
         if (str.length() == 0) {
             return str.toString();
@@ -261,6 +263,7 @@ public class StringKit {
      * @param str the given string
      * @return the converted string
      */
+    @SuppressWarnings("SizeReplaceableByIsEmpty")
     public static @Nonnull String upperCase(@Nonnull CharSequence str) {
         if (str.length() == 0) {
             return str.toString();
@@ -278,6 +281,7 @@ public class StringKit {
      * @param str the given string
      * @return the converted string
      */
+    @SuppressWarnings("SizeReplaceableByIsEmpty")
     public static @Nonnull String lowerCase(@Nonnull CharSequence str) {
         if (str.length() == 0) {
             return str.toString();
@@ -424,6 +428,7 @@ public class StringKit {
      * @return the first index of the specified substring in the specified string, starting at the specified index, or
      * {@code -1} if not found
      */
+    @SuppressWarnings("SizeReplaceableByIsEmpty")
     public static int indexOf(CharSequence str, CharSequence sub, int index) {
         if ((str instanceof String) && (sub instanceof String)) {
             return ((String) str).indexOf((String) sub, index);
@@ -479,6 +484,7 @@ public class StringKit {
      * @return the last index of the specified substring in the specified string, searching backward starting at the
      * specified index, or {@code -1} if not found
      */
+    @SuppressWarnings("SizeReplaceableByIsEmpty")
     public static int lastIndexOf(CharSequence str, CharSequence sub, int index) {
         if ((str instanceof String) && (sub instanceof String)) {
             return ((String) str).lastIndexOf((String) sub, index);
@@ -726,6 +732,32 @@ public class StringKit {
                 dst[dstOff + i] = src.charAt(srcOff + i);
             }
         }
+    }
+
+    /**
+     * Returns {@code true} if the given {@link CharSequence} is enabled, otherwise {@code false}.
+     * <p>
+     * A {@link CharSequence} is enabled if it is equal-case-insensitive to any of the following strings:
+     * <ul>
+     *     <li>{@code true}</li>
+     *     <li>{@code on}</li>
+     *     <li>{@code enabled}</li>
+     *     <li>{@code yes}</li>
+     *     <li>{@code y}</li>
+     *     <li>{@code 1}</li>
+     * </ul>
+     *
+     * @param cs the given {@link CharSequence} to check
+     * @return {@code true} if the given {@link CharSequence} is enabled, otherwise {@code false}
+     */
+    public static boolean isEnabled(@Nonnull CharSequence cs) {
+        String str = cs.toString();
+        return str.equalsIgnoreCase("true")
+            || str.equalsIgnoreCase("on")
+            || str.equalsIgnoreCase("enabled")
+            || str.equalsIgnoreCase("yes")
+            || str.equalsIgnoreCase("y")
+            || str.equalsIgnoreCase("1");
     }
 
     private StringKit() {

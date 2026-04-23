@@ -95,6 +95,19 @@ public class TypeKit {
     }
 
     /**
+     * Returns the wrapper type if the given type is primitive, else return the given type itself.
+     *
+     * @param type the given type
+     * @return the wrapper type if the given type is primitive, else return the given type itself
+     */
+    public static @Nonnull Type wrapperType(@Nonnull Type type) {
+        if (type instanceof Class<?>) {
+            return ClassKit.wrapperClass((Class<?>) type);
+        }
+        return type;
+    }
+
+    /**
      * Returns the last name of the given type. The last name is sub-string after last dot(.) For example: the last name
      * of {@code java.lang.String} is {@code String}.
      *
@@ -225,16 +238,120 @@ public class TypeKit {
     }
 
     /**
-     * Returns whether a type can be assigned by another type. This method is {@link Type} version of
+     * Returns whether a type can be assigned by another type, it is {@link Type} version of
      * {@link Class#isAssignableFrom(Class)}, supporting {@link Class}, {@link ParameterizedType}, {@link WildcardType},
      * {@link TypeVariable} and {@link GenericArrayType}.
+     * <p>
+     * This method is equivalent to {@link #isAssignable(Type, Type, boolean)} with {@code rawCompatible} set to
+     * {@code true}:
+     * <pre>{@code
+     * return isAssignable(assigned, assignee, true);
+     * }</pre>
      *
      * @param assigned the type to be assigned
      * @param assignee the assignee type
      * @return whether a type can be assigned by another type
      */
     public static boolean isAssignable(@Nonnull Type assigned, @Nonnull Type assignee) {
-        return AssignBack.isAssignable(assigned, assignee);
+        return isAssignable(assigned, assignee, true);
+    }
+
+    /**
+     * Returns whether a type can be assigned by another type in compatibility, it is {@link Type} version of
+     * {@link Class#isAssignableFrom(Class)}, supporting {@link Class}, {@link ParameterizedType}, {@link WildcardType},
+     * {@link TypeVariable} and {@link GenericArrayType}.
+     * <p>
+     * This method doesn't support assign a generic declaration from its raw type, it is equivalent to
+     * {@link #isAssignable(Type, Type, boolean)} with {@code rawCompatible} set to {@code false}:
+     * <pre>{@code
+     * return isAssignable(assigned, assignee, false);
+     * }</pre>
+     *
+     * @param assigned the type to be assigned
+     * @param assignee the assignee type
+     * @return whether a type can be assigned by another type
+     */
+    public static boolean isCompatible(@Nonnull Type assigned, @Nonnull Type assignee) {
+        return isAssignable(assigned, assignee, false);
+    }
+
+    /**
+     * Returns whether a type can be assigned by another type, it is {@link Type} version of
+     * {@link Class#isAssignableFrom(Class)}, supporting {@link Class}, {@link ParameterizedType}, {@link WildcardType},
+     * {@link TypeVariable} and {@link GenericArrayType}.
+     * <p>
+     * The parameter {@code rawCompatible} specifies if it is compatible to assign a generic declaration from its raw
+     * type, for example:
+     * <pre>{@code
+     * ArrayList list = new ArrayList();
+     * List<String> strList = list;
+     * }</pre>
+     * Note that the above code is legal and can be compiled successfully (because it needs to be compatible with the
+     * old version codes which is {@code <= 1.5}). Setting {@code rawCompatible} to {@code false} will disable this
+     * feature.
+     *
+     * @param assigned      the type to be assigned
+     * @param assignee      the assignee type
+     * @param rawCompatible whether it is compatible to assign a generic declaration from its raw type
+     * @return whether a type can be assigned by another type
+     */
+    public static boolean isAssignable(@Nonnull Type assigned, @Nonnull Type assignee, boolean rawCompatible) {
+        return AssignBack.isAssignable(assigned, assignee, rawCompatible);
+    }
+
+    /**
+     * Resolves and returns the actual type arguments of the given type, based on the type parameters of the specified
+     * base type, in order of those type parameters.
+     * <p>
+     * For example, here is a base type: {@code interface Base<A, B, C>}, and a subtype to be resolved:
+     * {@code class Sub implements Base<String, Integer, Long>}. The result of the
+     * {@code resolveActualTypeArguments(subtype, base)} will be the list of:
+     * {@code [String.class, Integer.class, Long.class]}.
+     * <p>
+     * The given type to be resolved must be a {@link Class}, {@link ParameterizedType} or array. If it is a
+     * {@link Class}, it must be a sub or same type of the base type; if it is a {@link ParameterizedType}, its raw type
+     * must be a sub or same type of the base type; if it is an array, the base type must also be an array, and this
+     * method calls itself with their component types.
+     * <p>
+     * Note this method does not guarantee that all type parameters can be resolved, and unresolved type parameters will
+     * be directly returned to the list at the corresponding index.
+     *
+     * @param type     the given type to be resolved
+     * @param baseType the specified base type
+     * @return the actual type arguments of the given type, based on the type parameters of the specified base type, in
+     * order of those type parameters, may return {@code null} if the given type cannot be resolved
+     */
+    public static @Nullable List<@Nonnull Type> getActualTypeArguments(
+        @Nonnull Type type, @Nonnull Class<?> baseType
+    ) {
+        if (baseType.isArray()) {
+            Type componentType = TypeKit.getComponentType(type);
+            if (componentType == null) {
+                return null;
+            }
+            return resolveActualTypeArguments(componentType, baseType.getComponentType());
+        }
+        @Nullable Class<?> cls = TypeKit.toRuntimeClass(type);
+        if (cls == null) {
+            return null;
+        }
+        if (!baseType.isAssignableFrom(cls)) {
+            return null;
+        }
+        // Resolves:
+        TypeVariable<?>[] typeParameters = baseType.getTypeParameters();
+        if (ArrayKit.isEmpty(typeParameters)) {
+            return Collections.emptyList();
+        }
+        Map<TypeVariable<?>, Type> typeArguments = typeParametersMapping(type);
+        Set<Type> stack = new HashSet<>();
+        return Fs.stream(typeParameters)
+            .map(typeVariable -> {
+                Type actualType = MapKit.resolveChain(typeArguments, typeVariable, stack);
+                stack.clear();
+                return Fs.nonnull(actualType, typeVariable);
+            })
+            .collect(Collectors.toList());
     }
 
     /**
@@ -263,52 +380,31 @@ public class TypeKit {
     public static @Nonnull List<@Nonnull Type> resolveActualTypeArguments(
         @Nonnull Type type, @Nonnull Class<?> baseType
     ) throws ReflectionException {
-        if (baseType.isArray()) {
-            Type componentType = TypeKit.getComponentType(type);
-            if (componentType == null) {
-                throw new ReflectionException("Unsupported resolving between " + type + " and " + baseType);
-            }
-            return resolveActualTypeArguments(componentType, baseType.getComponentType());
+        List<Type> ret = getActualTypeArguments(type, baseType);
+        if (ret == null) {
+            throw new ReflectionException(
+                "Resolving actual type arguments failed for [" + type + "] with base type [" + baseType + "]."
+            );
         }
-        @Nullable Class<?> cls = TypeKit.toRuntimeClass(type);
-        if (cls == null) {
-            throw new ReflectionException("Unsupported type: " + type + ".");
-        }
-        if (!baseType.isAssignableFrom(cls)) {
-            throw new ReflectionException("Unsupported resolving between " + type + " and " + baseType);
-        }
-        // Resolves:
-        TypeVariable<?>[] typeParameters = baseType.getTypeParameters();
-        if (ArrayKit.isEmpty(typeParameters)) {
-            return Collections.emptyList();
-        }
-        Map<TypeVariable<?>, Type> typeArguments = typeParametersMapping(type);
-        Set<Type> stack = new HashSet<>();
-        return Fs.stream(typeParameters)
-            .map(typeVariable -> {
-                Type actualType = MapKit.resolveChain(typeArguments, typeVariable, stack);
-                stack.clear();
-                return Fs.nonnull(actualType, typeVariable);
-            })
-            .collect(Collectors.toList());
+        return ret;
     }
 
     /**
      * Returns a map contains the mapping of type parameters for the given type, the key is type parameter, and the
      * value is the actual type argument or inherited type parameter. For example, these types:
      * <pre>{@code
-     *     class X extends Y<Integer, Long>
-     *     class Y<K, V> implements Z<Float, Double, V>
-     *     interface Z<T, U, R>
+     * class X extends Y<Integer, Long>
+     * class Y<K, V> implements Z<Float, Double, V>
+     * interface Z<T, U, R>
      * }</pre>
      * <p>
      * The result of {@code resolveTypeParameterMapping(X.class)} will be:
      * <pre>{@code
-     *     T -> Float
-     *     U -> Double
-     *     R -> V
-     *     K -> Integer
-     *     V -> Long
+     * T -> Float
+     * U -> Double
+     * R -> V
+     * K -> Integer
+     * V -> Long
      * }</pre>
      *
      * @param type the given type
@@ -672,12 +768,14 @@ public class TypeKit {
                 return false;
             }
             if (o instanceof ParameterizedTypeImpl) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 ParameterizedTypeImpl that = (ParameterizedTypeImpl) o;
                 return Objects.equals(ownerType, that.ownerType) &&
                     Objects.equals(rawType, that.rawType) &&
                     Arrays.equals(actualTypeArguments, that.actualTypeArguments);
             }
             if (o instanceof ParameterizedType) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 ParameterizedType that = (ParameterizedType) o;
                 return Objects.equals(ownerType, that.getOwnerType()) &&
                     Objects.equals(rawType, that.getRawType()) &&
@@ -755,11 +853,13 @@ public class TypeKit {
                 return false;
             }
             if (o instanceof WildcardTypeImpl) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 WildcardTypeImpl that = (WildcardTypeImpl) o;
                 return Arrays.equals(lowerBounds, that.lowerBounds) &&
                     Arrays.equals(upperBounds, that.upperBounds);
             }
             if (o instanceof WildcardType) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 WildcardType that = (WildcardType) o;
                 return Arrays.equals(lowerBounds, that.getLowerBounds()) &&
                     Arrays.equals(upperBounds, that.getUpperBounds());
@@ -812,6 +912,7 @@ public class TypeKit {
                 return false;
             }
             if (o instanceof GenericArrayType) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 GenericArrayType other = (GenericArrayType) o;
                 return Objects.equals(componentType, other.getGenericComponentType());
             }

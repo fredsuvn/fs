@@ -14,19 +14,33 @@ import java.util.Objects;
 
 /**
  * The default first {@link ObjectConverter.Handler} of {@link ObjectConverter#defaultConverter()}, mainly used to
- * determine whether it is possible to return the source object directly without creating a new object. Its conversion
- * logic is:
+ * determine whether it is possible to return the source object directly without creating a new object. Using
+ * {@link #getInstance()} can get a same one instance of this handler.
+ * <p>
+ * Its conversion logic is:
  * <ol>
+ *     <li>
+ *         If the specified source type is a {@link WildcardType} or {@link TypeVariable}, and it represents {@code ?}
+ *         or {@code ? extends Object} or raw {@code T} or {@code T extends Object}, this handler will use
+ *         {@link Object#getClass()} as the actual source type (or {@code Object.class} if the source object is
+ *         {@code null}) to convert, the codes are simplified as:
+ *         {@code return converter.convert(src, src == null ? Object.class : src.getClass(), targetType, options)};
+ *     </li>
+ *     <li>
+ *         If the conversion enables {@link ConvertOption#NEW_INSTANCE_MODE}, returns
+ *         {@link ObjectConverter.Status#HANDLER_CONTINUE} for any source type;
+ *     </li>
  *     <li>
  *         If the specified source type equals to the target type, returns the source object itself;
  *     </li>
  *     <li>
- *         If the {@link ConvertOption#STRICT_TYPE_MODE} option is enabled, returns
+ *         If the conversion enables {@link ConvertOption#STRICT_TARGET_TYPE_MODE}, returns
  *         {@link ObjectConverter.Status#HANDLER_CONTINUE} for target type of {@link WildcardType};
- *         Otherwise, recursively convert their bounds type using the {@code converter} parameter;
+ *         Otherwise, recursively convert their lower/upper bounds type via the {@code converter} parameter;
  *     </li>
  *     <li>
- *         If the target type is assignable from the specified source type, returns the source object itself;
+ *         Using {@link TypeKit#isCompatible(Type, Type)} to check if the target type is compatible with the specified
+ *         source type, and returns the source object itself if it is compatible;
  *     </li>
  *     <li>
  *         Otherwise, returns {@link ObjectConverter.Status#HANDLER_CONTINUE}.
@@ -37,39 +51,78 @@ import java.util.Objects;
  */
 public class AssignableConvertHandler implements ObjectConverter.Handler {
 
+    private static final @Nonnull AssignableConvertHandler INST = new AssignableConvertHandler();
+
+    /**
+     * Returns a same one instance of this handler.
+     */
+    public static @Nonnull AssignableConvertHandler getInstance() {
+        return INST;
+    }
+
     @Override
     public Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
-        @Nonnull Type target,
+        @Nonnull Type targetType,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
-        if (Objects.equals(target, srcType)) {
+        if (srcType instanceof WildcardType) {
+            if (isUndefined((WildcardType) srcType)) {
+                return converter.convert(src, ensureType(src), targetType, options);
+            }
+        }
+        if (srcType instanceof TypeVariable) {
+            if (isUndefined((TypeVariable<?>) srcType)) {
+                return converter.convert(src, ensureType(src), targetType, options);
+            }
+        }
+        if (ConvertOption.isNewInstanceMode(options)) {
+            return ObjectConverter.Status.HANDLER_CONTINUE;
+        }
+        if (Objects.equals(targetType, srcType)) {
             return src;
         }
-        if (Option.containsKey(ConvertOption.STRICT_TYPE_MODE, options)) {
+        if (ConvertOption.isStrictTargetTypeMode(options)) {
             // strict mode, wildcard is unsupported
-            if (target instanceof WildcardType) {
+            if (targetType instanceof WildcardType) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
             }
         } else {
             // non-strict mode, wildcard and type variable will be considered as their bounds type
-            if (target instanceof WildcardType) {
-                WildcardType wildcard = (WildcardType) target;
+            if (targetType instanceof WildcardType) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
+                WildcardType wildcard = (WildcardType) targetType;
                 Type superType = TypeKit.getLowerBound(wildcard);
-                if (superType != null) {
-                    return converter.convert(src, srcType, superType, options);
-                }
-                return converter.convert(src, srcType, TypeKit.getUpperBound(wildcard), options);
+                superType = superType != null ? superType : TypeKit.getUpperBound(wildcard);
+                return converter.convert(src, srcType, superType, options);
             }
-            if (target instanceof TypeVariable<?>) {
-                return converter.convert(src, srcType, ((TypeVariable<?>) target).getBounds()[0], options);
+            if (targetType instanceof TypeVariable<?>) {
+                return converter.convert(src, srcType, ((TypeVariable<?>) targetType).getBounds()[0], options);
             }
         }
-        if (TypeKit.isAssignable(target, srcType)) {
+        if (TypeKit.isCompatible(targetType, srcType)) {
             return src;
         }
         return ObjectConverter.Status.HANDLER_CONTINUE;
+    }
+
+    private boolean isUndefined(WildcardType type) {
+        Type lowerBound = TypeKit.getLowerBound(type);
+        if (lowerBound == null) {
+            Type upperBound = TypeKit.getUpperBound(type);
+            return Object.class.equals(upperBound);
+        }
+        return false;
+    }
+
+    private boolean isUndefined(TypeVariable<?> type) {
+        Type upperBound = TypeKit.getFirstBound(type);
+        return Object.class.equals(upperBound);
+    }
+
+    private @Nonnull Type ensureType(@Nullable Object src) {
+        return src == null ? Object.class : src.getClass();
     }
 }

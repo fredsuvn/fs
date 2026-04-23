@@ -6,19 +6,19 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.value.Val;
 import space.sunqian.fs.base.value.Var;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
  * This is a skeletal implementation of {@link SimpleCache} to minimize the effort required to implement the interface.
  * To implement a cache, just need to override the {@link #generate(Object, Object)} and {@link #clean()}.
  * <p>
- * This implementation is based on an underlying {@link ConcurrentMap}, which is a protected field: {@link #cacheMap}.
- * The type of {@link #cacheMap}'s value is {@link Value}, which wraps the actual value to be cached. Every time this
- * cache is invoked, {@link #clean()} is executed to clear expired values. Therefore, it is necessary to correctly
- * implement the storage and invalidation behavior of cached data in {@link #generate(Object, Object)} and
- * {@link #clean()}.
+ * This implementation is based on an underlying {@link Map}, which is a protected field: {@link #cacheMap}, which
+ * should be initialized in the constructor {@link #AbstractSimpleCache(Map)}. The type of {@link #cacheMap}'s value is
+ * {@link Value}, which wraps the actual value to be cached. Every time this cache is invoked, {@link #clean()} is
+ * executed to clear expired values. Therefore, it is necessary to correctly implement the storage and invalidation
+ * behavior of cached data in {@link #generate(Object, Object)} and {@link #clean()}.
  *
  * @param <K> the key type
  * @param <V> the value type
@@ -31,7 +31,16 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
     /**
      * The underlying cache map, which is used to store the cache value.
      */
-    protected final @Nonnull ConcurrentMap<K, Value<K>> cacheMap = new ConcurrentHashMap<>();
+    protected final @Nonnull Map<K, Value<K>> cacheMap;
+
+    /**
+     * Constructs with the specified map as the underlying cache map.
+     *
+     * @param cacheMap the specified map as the underlying cache map
+     */
+    protected AbstractSimpleCache(@Nonnull Map<K, Value<K>> cacheMap) {
+        this.cacheMap = cacheMap;
+    }
 
     /**
      * Generates a cache value wrapper with the given cache key and cache value. Note the value is masked and non-null.
@@ -71,7 +80,7 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
     }
 
     @Override
-    public @Nullable V get(@Nonnull K key, @Nonnull Function<? super @Nonnull K, ? extends @Nullable V> producer) {
+    public @Nullable V get(@Nonnull K key, @Nonnull Function<? super @Nonnull K, ? extends @Nullable V> loader) {
         clean();
         @Nullable Value<K> cv = cacheMap.get(key);
         if (cv != null) {
@@ -89,7 +98,7 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
                     return old;
                 }
             }
-            @Nullable V newV = producer.apply(key);
+            @Nullable V newV = loader.apply(key);
             value.set(newV);
             return generate(key, maskValue(newV));
         });
@@ -99,7 +108,7 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
     @Override
     public @Nullable Val<V> getVal(
         @Nonnull K key,
-        @Nonnull Function<? super @Nonnull K, ? extends @Nullable Val<? extends @Nullable V>> producer
+        @Nonnull Function<? super @Nonnull K, ? extends @Nullable Val<? extends @Nullable V>> loader
     ) {
         clean();
         @Nullable Value<K> cv = cacheMap.get(key);
@@ -118,7 +127,7 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
                     return old;
                 }
             }
-            @Nullable Val<? extends V> newV = producer.apply(key);
+            @Nullable Val<? extends V> newV = loader.apply(key);
             if (newV == null) {
                 value.set(NULL_VAL);
                 return null;
@@ -166,6 +175,19 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
             v.invalid();
         });
         clean();
+    }
+
+    @Override
+    public @Nonnull Map<K, V> copyEntries() {
+        clean();
+        Map<K, V> map = new LinkedHashMap<>(size());
+        cacheMap.forEach((k, v) -> {
+            Object raw = v.refValue();
+            if (raw != null) {
+                map.put(k, unmaskRawValue(raw));
+            }
+        });
+        return map;
     }
 
     private @Nonnull Object maskValue(@Nullable V value) {

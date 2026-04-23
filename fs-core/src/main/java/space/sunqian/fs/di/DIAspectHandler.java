@@ -1,7 +1,7 @@
 package space.sunqian.fs.di;
 
 import space.sunqian.annotation.Nonnull;
-import space.sunqian.fs.dynamic.aop.AspectHandler;
+import space.sunqian.fs.dynamic.aspect.AspectHandler;
 
 import java.lang.reflect.Type;
 

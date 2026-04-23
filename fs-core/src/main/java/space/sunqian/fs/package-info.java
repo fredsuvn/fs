@@ -1,21 +1,18 @@
 /**
  * The root package of fs, provides root supports for fs:
  * <p>
- * Global kits:
+ * Global core kits:
  * <ul>
- *     <li>{@link space.sunqian.fs.Fs}: the core utilities kit;</li>
- *     <li>{@link space.sunqian.fs.FsLoader}: the loader for implementations of fs;</li>
+ *     <li>{@link space.sunqian.fs.Fs}: the core utilities of this lib;</li>
  * </ul>
  * Sub-packages for specific functions:
  * <ul>
  *     <li>{@link space.sunqian.fs.base}</li>
  *     <li>{@link space.sunqian.fs.cache}</li>
- *     <li>{@link space.sunqian.fs.codec}</li>
  *     <li>{@link space.sunqian.fs.collect}</li>
  *     <li>{@link space.sunqian.fs.concurrent}</li>
  *     <li>{@link space.sunqian.fs.di}</li>
  *     <li>{@link space.sunqian.fs.dynamic}</li>
- *     <li>{@link space.sunqian.fs.eventbus}</li>
  *     <li>{@link space.sunqian.fs.invoke}</li>
  *     <li>{@link space.sunqian.fs.io}</li>
  *     <li>{@link space.sunqian.fs.net}</li>

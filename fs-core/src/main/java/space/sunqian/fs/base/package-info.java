@@ -1,9 +1,10 @@
 /**
  * This package is the base package for this lib, provides basic supports.
  * <p>
- * Global kits:
+ * Common base utilities:
  * <ul>
  *     <li>{@link space.sunqian.fs.base.Checker}: the core kit for checking and verifying;</li>
+ *     <li>{@link space.sunqian.fs.base.FsLoader}: the loader for various implementations of fs;</li>
  * </ul>
  * <p>
  * Extensions for language base:

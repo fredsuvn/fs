@@ -20,7 +20,7 @@ final class ByAsm {
     private static final @Nonnull String INVOCABLE_NAME = JvmKit.toInternalName(Invocable.class);
     private static final @Nonnull String @Nonnull [] INTERFACES = new String[]{INVOCABLE_NAME};
     private static final @Nonnull Method INVOKE_CHECKED = Fs.uncheck(
-        () -> Invocable.class.getMethod("invokeChecked", Object.class, Object[].class),
+        () -> Invocable.class.getMethod("invokeDirectly", Object.class, Object[].class),
         InvocationException::new
     );
     private static final @Nonnull String @Nonnull [] INVOKE_CHECKED_EXCEPTIONS = {JvmKit.toInternalName(Throwable.class)};
@@ -44,18 +44,18 @@ final class ByAsm {
         return generate(bytecode);
     }
 
-    private static String buildClassName() {
+    private static @Nonnull String buildClassName() {
         Package pkg = ByAsm.class.getPackage();
         return AsmKit.newClassInternalName(pkg);
     }
 
-    private static Invocable generate(byte[] bytecode) {
+    private static @Nonnull Invocable generate(byte[] bytecode) {
         DynamicClassLoader classLoader = new DynamicClassLoader();
         Class<?> cls = classLoader.loadClass(null, bytecode);
         return Fs.uncheck(() -> Fs.as(cls.getDeclaredConstructor().newInstance()), InvocationException::new);
     }
 
-    private static ClassWriter generateClassBody(String className) {
+    private static @Nonnull ClassWriter generateClassBody(@Nonnull String className) {
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classWriter.visit(
             Opcodes.V1_8,
@@ -69,7 +69,7 @@ final class ByAsm {
             MethodVisitor visitor = classWriter.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 AsmKit.CONSTRUCTOR_NAME,
-                AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR,
+                AsmKit.EMPTY_METHOD_DESCRIPTOR,
                 null,
                 null
             );
@@ -78,7 +78,7 @@ final class ByAsm {
                 Opcodes.INVOKESPECIAL,
                 AsmKit.OBJECT_NAME,
                 AsmKit.CONSTRUCTOR_NAME,
-                AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR,
+                AsmKit.EMPTY_METHOD_DESCRIPTOR,
                 false
             );
             visitor.visitInsn(Opcodes.RETURN);
@@ -88,7 +88,7 @@ final class ByAsm {
         return classWriter;
     }
 
-    private static void generateMethodInvoker(ClassWriter classWriter, Method method) {
+    private static void generateMethodInvoker(@Nonnull ClassWriter classWriter, @Nonnull Method method) {
         MethodVisitor visitor = classWriter.visitMethod(
             Opcodes.ACC_PUBLIC | Opcodes.ACC_VARARGS,
             INVOKE_CHECKED.getName(),
@@ -129,7 +129,9 @@ final class ByAsm {
         visitor.visitEnd();
     }
 
-    private static void generateConstructorInvoker(ClassWriter classWriter, Constructor<?> constructor) {
+    private static void generateConstructorInvoker(
+        @Nonnull ClassWriter classWriter, @Nonnull Constructor<?> constructor
+    ) {
         MethodVisitor visitor = classWriter.visitMethod(
             Opcodes.ACC_PUBLIC | Opcodes.ACC_VARARGS,
             INVOKE_CHECKED.getName(),
@@ -156,7 +158,7 @@ final class ByAsm {
         visitor.visitEnd();
     }
 
-    private static void loadParameters(MethodVisitor visitor, Executable executable) {
+    private static void loadParameters(@Nonnull MethodVisitor visitor, @Nonnull Executable executable) {
         int pIndex = 0;
         for (Parameter parameter : executable.getParameters()) {
             // get args

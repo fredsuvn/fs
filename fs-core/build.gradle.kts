@@ -1,13 +1,13 @@
 plugins {
   `java-library`
   jacoco
-  `maven-publish`
-  signing
   id("com.google.protobuf")
   id("fs")
+  id("fs-publish")
 }
 
 description = "Core of fs, including core kits and interfaces with their default implementations."
+val publishType by extra { "jar" }
 
 val projectVersion: String by project
 val toJavaVersion: JavaLanguageVersion by project
@@ -16,10 +16,11 @@ dependencies {
 
   annotationProcessor(platform(project(":fs-dependencies")))
   annotationProcessor("org.projectlombok:lombok")
+  annotationProcessor(project(":fs-build"))
 
   compileOnly(platform(project(":fs-dependencies")))
-
-  //compileOnly("org.projectlombok:lombok")
+  compileOnly(project(":fs-build"))
+  compileOnly("org.projectlombok:lombok")
   //compileOnly("org.springframework:spring-core")
   //compileOnly("cglib:cglib")
   compileOnly("com.google.protobuf:protobuf-java")
@@ -45,6 +46,9 @@ dependencies {
   testImplementation("org.eclipse.jetty:jetty-server")
   testImplementation("org.eclipse.jetty:jetty-servlet")
   testImplementation("javax.servlet:javax.servlet-api")
+
+  // h2 database
+  testImplementation("com.h2database:h2")
 }
 
 java {
@@ -74,14 +78,20 @@ val javaVersionTo = project.property("javaLangVersionTo") as JavaLanguageVersion
 val javaVerFrom = javaVersionFrom.asInt()
 val javaVerTo = javaVersionTo.asInt()
 
+// built classes for each java version
+val mainBuildDir = layout.buildDirectory.dir("classes/java-tmp/main")
+val testBuildDir = layout.buildDirectory.dir("classes/java-tmp/test")
+
 // java8 base
 tasks.register("compileJava${javaVerFrom}", JavaCompile::class) {
   group = "compile"
-  //dependsOn(tasks.compileJava)
+  val fsVersion = tasks.named("fsVersion")
+  dependsOn(fsVersion)
   source = sourceSets.main.get().allJava
   classpath = sourceSets.main.get().compileClasspath
   exclude("**/*${implByJvm}*.java")
-  destinationDirectory = layout.buildDirectory.dir("classes/java/main").get().asFile
+  //destinationDirectory = layout.buildDirectory.dir("classes/java/main").get().asFile
+  destinationDirectory = mainBuildDir.map { it.dir("java$javaVerFrom") }.get().asFile
   javaCompiler = javaToolchains.compilerFor {
     languageVersion = javaVersionFrom
   }
@@ -96,9 +106,14 @@ tasks.register("compileJava${javaVerFrom}", JavaCompile::class) {
     val lastCompileTask = tasks.named<JavaCompile>("compileJava${javaVersion - 1}")
     dependsOn(lastCompileTask)
     source = sourceSets.main.get().allJava
-    classpath = sourceSets.main.get().compileClasspath + files(lastCompileTask.get().destinationDirectory)
+    //classpath = sourceSets.main.get().compileClasspath + files(lastCompileTask.get().destinationDirectory)
+    val previousOutputs = ((javaVerFrom) until javaVersion).map { prevVersion ->
+      tasks.named<JavaCompile>("compileJava$prevVersion").get().destinationDirectory
+    }
+    classpath = sourceSets.main.get().compileClasspath + files(previousOutputs)
     include("**/*${implByJvm + javaVersion}.java")
-    destinationDirectory = layout.buildDirectory.dir("classes/java/main").get().asFile
+    //destinationDirectory = layout.buildDirectory.dir("classes/java/main").get().asFile
+    destinationDirectory = mainBuildDir.map { it.dir("java$javaVersion") }.get().asFile
     javaCompiler = javaToolchains.compilerFor {
       languageVersion = javaVersionTo
     }
@@ -108,31 +123,41 @@ tasks.register("compileJava${javaVerFrom}", JavaCompile::class) {
   }
 }
 
+val syncCompiledClasses by tasks.registering(Sync::class) {
+  group = "compile"
+  description = "Sync all version-specific class files to the main build directory"
+  ((javaVerFrom)..javaVerTo).forEach { version ->
+    from(tasks.named<JavaCompile>("compileJava$version").get().destinationDirectory)
+  }
+  into(layout.buildDirectory.dir("classes/java/main").get().asFile)
+  //duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
 val compileJavaHighest = tasks.named<JavaCompile>("compileJava$javaVerTo")
 
 tasks.compileJava {
   group = "compile"
   enabled = false
-  dependsOn(compileJavaHighest)
+  dependsOn(compileJavaHighest, syncCompiledClasses)
 }
 
 tasks.named("classes") {
-  dependsOn(compileJavaHighest)
-}
-
-tasks.compileTestJava {
-  group = "compile"
-  enabled = false
+  dependsOn(compileJavaHighest, syncCompiledClasses)
 }
 
 // java8 base
-tasks.register("compileTestJava$javaVerFrom", JavaCompile::class) {
+tasks.register("compileTestJava${javaVerFrom}", JavaCompile::class) {
   group = "compile"
-  dependsOn(compileJavaHighest)
+  dependsOn(tasks.compileJava)
   source = sourceSets.test.get().allJava
   classpath = sourceSets.test.get().compileClasspath
-  exclude("**/*${implByJvm}*Test.java")
-  destinationDirectory = file(layout.buildDirectory.dir("classes/java/test"))
+  //exclude("**/*${implByJvm}*Test.java")
+  val excludeList = ((javaVerFrom + 1)..javaVerTo).map { version ->
+    "**/*TestJ${version}.java"
+  }
+  exclude(excludeList)
+  //destinationDirectory = layout.buildDirectory.dir("classes/java/test").get().asFile
+  destinationDirectory = testBuildDir.map { it.dir("java$javaVerFrom") }.get().asFile
   javaCompiler = javaToolchains.compilerFor {
     languageVersion = javaVersionFrom
   }
@@ -144,11 +169,18 @@ tasks.register("compileTestJava$javaVerFrom", JavaCompile::class) {
   val taskName = "compileTestJava$javaVersion"
   tasks.register(taskName, JavaCompile::class) {
     group = "compile"
-    dependsOn(tasks.named("compileTestJava${javaVersion - 1}"))
+    val lastCompileTask = tasks.named<JavaCompile>("compileTestJava${javaVersion - 1}")
+    dependsOn(lastCompileTask)
     source = sourceSets.test.get().allJava
-    classpath = sourceSets.test.get().compileClasspath
-    include("**/*${implByJvm + javaVersion}Test.java")
-    destinationDirectory = file(layout.buildDirectory.dir("classes/java/test"))
+    //classpath = sourceSets.test.get().compileClasspath + files(lastCompileTask.get().destinationDirectory)
+    val previousOutputs = ((javaVerFrom) until javaVersion).map { prevVersion ->
+      tasks.named<JavaCompile>("compileTestJava$prevVersion").get().destinationDirectory
+    }
+    classpath = sourceSets.test.get().compileClasspath + files(previousOutputs)
+    //include("**/*${implByJvm + javaVersion}Test.java")
+    include("**/*TestJ${javaVersion}.java")
+    //destinationDirectory = layout.buildDirectory.dir("classes/java/test").get().asFile
+    destinationDirectory = testBuildDir.map { it.dir("java$javaVersion") }.get().asFile
     javaCompiler = javaToolchains.compilerFor {
       languageVersion = javaVersionTo
     }
@@ -158,10 +190,26 @@ tasks.register("compileTestJava$javaVerFrom", JavaCompile::class) {
   }
 }
 
+val syncCompiledTestClasses by tasks.registering(Sync::class) {
+  group = "compile"
+  description = "Sync all version-specific test class files to the test build directory"
+  ((javaVerFrom)..javaVerTo).forEach { version ->
+    from(tasks.named<JavaCompile>("compileTestJava$version").get().destinationDirectory)
+  }
+  into(layout.buildDirectory.dir("classes/java/test").get().asFile)
+  //duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
 val compileTestJavaHighest = tasks.named<JavaCompile>("compileTestJava$javaVerTo")
 
-tasks.named("compileTestJava") {
-  dependsOn(tasks.named("generateTestProto"), compileTestJavaHighest)
+tasks.compileTestJava {
+  group = "compile"
+  enabled = false
+  dependsOn(tasks.named("generateTestProto"), compileTestJavaHighest, syncCompiledTestClasses)
+}
+
+tasks.named("testClasses") {
+  dependsOn(tasks.named("generateTestProto"), compileTestJavaHighest, syncCompiledTestClasses)
 }
 
 tasks.named<Jar>("sourcesJar") {
@@ -170,32 +218,14 @@ tasks.named<Jar>("sourcesJar") {
 }
 
 tasks.test {
-  include("**/*Test.class", "**/*TestKt.class")
-  exclude("**/*${implByJvm}*Test.class")
-  useJUnitPlatform {
-    excludeTags("J17Only")
-  }
-  javaLauncher = javaToolchains.launcherFor {
-    languageVersion = javaVersionFrom
-  }
-  failOnNoDiscoveredTests = false
-  reports {
-    html.required = false
-  }
-}
-
-val testJavaHighest by tasks.registering(Test::class) {
   dependsOn(compileTestJavaHighest)
-  group = "verification"
-  testClassesDirs = fileTree(layout.buildDirectory.dir("classes/java/test"))
-  classpath = sourceSets.test.get().runtimeClasspath
-  ((javaVerFrom + 1)..javaVerTo).forEach { jv ->
-    classpath += files(tasks.named<JavaCompile>("compileJava$jv").get().destinationDirectory)
-    classpath += files(tasks.named<JavaCompile>("compileTestJava$jv").get().destinationDirectory)
+  val includeList = ((javaVerFrom + 1)..javaVerTo).map { version ->
+    "**/*TestJ${version}.class"
   }
-  useJUnitPlatform {
-    includeTags("J17Also", "J17Only")
-  }
+  include("**/*Test.class", "**/*TestKt.class", *includeList.toTypedArray())
+  useJUnitPlatform()
+  //testClassesDirs = fileTree(layout.buildDirectory.dir("classes/java/test"))
+  //classpath = sourceSets.test.get().runtimeClasspath
   javaLauncher = javaToolchains.launcherFor {
     languageVersion = javaVersionTo
   }
@@ -205,7 +235,47 @@ val testJavaHighest by tasks.registering(Test::class) {
   }
 }
 
-tasks.check.get().dependsOn(tasks.test, testJavaHighest)
+val testByJava8 by tasks.registering(Test::class) {
+  dependsOn(compileTestJavaHighest)
+  group = "verification"
+  include("**/*Test.class", "**/*TestKt.class")
+  //exclude("**/*${implByJvm}*Test.class")
+  useJUnitPlatform {
+    excludeTags("J17Only")
+  }
+  testClassesDirs = fileTree(layout.buildDirectory.dir("classes/java/test"))
+  classpath = sourceSets.test.get().runtimeClasspath
+  javaLauncher = javaToolchains.launcherFor {
+    languageVersion = javaVersionFrom
+  }
+  failOnNoDiscoveredTests = false
+  reports {
+    html.required = false
+  }
+}
+
+val testByJava17 by tasks.registering(Test::class) {
+  dependsOn(compileTestJavaHighest)
+  group = "verification"
+  val includeList = ((javaVerFrom + 1)..javaVerTo).map { version ->
+    "**/*TestJ${version}.class"
+  }
+  include("**/*Test.class", "**/*TestKt.class", *includeList.toTypedArray())
+  useJUnitPlatform {
+    includeTags("J17Also", "J17Only")
+  }
+  testClassesDirs = fileTree(layout.buildDirectory.dir("classes/java/test"))
+  classpath = sourceSets.test.get().runtimeClasspath
+  javaLauncher = javaToolchains.launcherFor {
+    languageVersion = javaVersionTo
+  }
+  failOnNoDiscoveredTests = false
+  reports {
+    html.required = false
+  }
+}
+
+tasks.check.get().dependsOn(tasks.test, testByJava8, testByJava17)
 
 tasks.named<Javadoc>("javadoc") {
   val ops = options as StandardJavadocDocletOptions
@@ -271,47 +341,26 @@ fun deleteProtoGeneratedFiles() {
   delete(protobuf.generatedFilesBaseDir)
 }
 
-publishing {
-  publications {
-    create<MavenPublication>("main") {
-      from(components["java"])
-      val projectInfo: ProjectInfo by rootProject.extra
-      pom {
-        version = projectInfo.version
-        group = rootProject.group
-        name = project.name
-        description = project.description
-        url = projectInfo.url
-        licenses {
-          projectInfo.licenses.forEach {
-            license {
-              name.set(it.name)
-              url.set(it.url)
-            }
-          }
-        }
-        developers {
-          projectInfo.developers.forEach {
-            developer {
-              id.set(it.id)
-              name.set(it.name)
-              email.set(it.email)
-              url.set(it.url)
-            }
-          }
-        }
-        scm {
-          connection = projectInfo.scm.connection
-          developerConnection = projectInfo.scm.developerConnection
-          url = projectInfo.scm.url
-        }
-      }
+tasks.register("fsVersion") {
+  group = "version"
+  description = "Set FS.LIB_VERSION"
+  doLast {
+    val fsVersion = rootProject.version.toString()
+    val originCodes = file("src/main/java/space/sunqian/fs/Fs.java")
+      .readText()
+    val fieldRegex = "LIB_VERSION = \"([^\"]*)\"".toRegex()
+    val commentRegex = "\\* \\<pre\\>\\{@code ([^ ]*) \\}\\</pre\\>".toRegex()
+    val newCodes = fieldRegex.replace(originCodes, "LIB_VERSION = \"$fsVersion\"")
+      .let { commentRegex.replace(it, "* <pre>{@code $fsVersion }</pre>") }
+    //println("Replace: $originCodes -> $newCodes")
+    if (newCodes != originCodes) {
+      file("src/main/java/space/sunqian/fs/Fs.java").writeText(newCodes)
     }
-  }
-  repositories {
-    mavenLocal()
   }
 }
 
-signing {
+tasks.named<Jar>("jar") {
+  manifest {
+    attributes("Implementation-Version" to rootProject.version)
+  }
 }

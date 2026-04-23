@@ -17,7 +17,7 @@ import java.nio.charset.Charset;
  *
  * @param <C> the type of underlying channel
  * @author sunqian
- * @implSpec The default I/O methods of this interface use {@link IOKit} to write data to the underlying channel.
+ * @implNote The default I/O methods of this interface use {@link IOKit} to write data to the underlying channel.
  */
 public interface ChannelWriter<C extends WritableByteChannel> {
 

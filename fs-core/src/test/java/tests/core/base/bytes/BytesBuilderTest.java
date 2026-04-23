@@ -1,0 +1,203 @@
+package tests.core.base.bytes;
+
+import internal.utils.Asserter;
+import internal.utils.DataGen;
+import org.junit.jupiter.api.Test;
+import space.sunqian.fs.base.bytes.BytesBuilder;
+import space.sunqian.fs.base.bytes.BytesKit;
+import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.io.IOKit;
+import space.sunqian.fs.io.IORuntimeException;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class BytesBuilderTest implements DataGen, Asserter {
+
+    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
+    @Test
+    public void testBytesBuilderInitialization() {
+        assertThrows(IllegalArgumentException.class, () -> new BytesBuilder(-1));
+        assertThrows(IllegalArgumentException.class, () -> new BytesBuilder(10, -2));
+        assertThrows(IllegalArgumentException.class, () -> new BytesBuilder(10, 2));
+    }
+
+    @Test
+    public void testBytesBuilderAppendMethods() throws Exception {
+        testBytesBuilderAppendMethods(512);
+        testBytesBuilderAppendMethods(1024);
+    }
+
+    @Test
+    public void testBytesBuilderWriteToExceptions() {
+        BytesBuilder bb = new BytesBuilder();
+        bb.append(1);
+        assertThrows(IORuntimeException.class, () -> bb.writeTo(new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                throw new IOException();
+            }
+        }));
+        ByteBuffer bufEmpty = ByteBuffer.allocate(0);
+        assertThrows(IORuntimeException.class, () -> bb.writeTo(bufEmpty));
+    }
+
+    @Test
+    public void testBytesBuilderMemoryLimits() throws Exception {
+        // test big memory!
+        Method grow = BytesBuilder.class.getDeclaredMethod("grow", int.class);
+        BytesBuilder bbs = new BytesBuilder(1, 1);
+        bbs.write(1);
+        assertThrows(IllegalStateException.class, () -> bbs.write(1));
+        BytesBuilder bbs2 = new BytesBuilder(2, 3);
+        bbs2.write(1);
+        bbs2.write(1);
+        bbs2.write(1);
+        assertThrows(IllegalStateException.class, () -> bbs2.write(1));
+        invokeThrows(IllegalStateException.class, grow, new BytesBuilder(), MAX_ARRAY_SIZE + 10);
+        Method newCapacity = BytesBuilder.class.getDeclaredMethod("newCapacity", int.class, int.class);
+        newCapacity.setAccessible(true);
+        assertEquals(MAX_ARRAY_SIZE, newCapacity.invoke(new BytesBuilder(), -1, 1));
+    }
+
+    private void testBytesBuilderAppendMethods(int size) throws Exception {
+        char[] cs = randomChars(size, '0', '9');
+        byte[] bs = new String(cs).getBytes();
+        BytesBuilder bb = new BytesBuilder();
+
+        // Test basic append operations
+        testBasicAppendOperations(bb, bs, cs);
+
+        // Test reset and trim operations
+        testResetAndTrimOperations(bb, bs);
+
+        // Test writeTo operations
+        testWriteToOperations(bb);
+    }
+
+    private void testBasicAppendOperations(BytesBuilder bb, byte[] bs, char[] cs) throws Exception {
+        bb.close();
+        bb.trim();
+
+        // Append single byte
+        bb.append(bs[0]);
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 1));
+
+        // Append byte array range
+        bb.append(Arrays.copyOfRange(bs, 1, 10));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 10));
+
+        // Append byte array with offset and length
+        bb.append(bs, 10, 10);
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 20));
+
+        // Append ByteBuffer
+        ByteBuffer buffer = ByteBuffer.wrap(Arrays.copyOfRange(bs, 20, 25));
+        bb.append(buffer);
+        assertEquals(5, buffer.position());
+        assertFalse(buffer.hasRemaining());
+
+        // Append ByteBuffer with position
+        ByteBuffer arrayBuf = ByteBuffer.wrap(bs, 20, 10);
+        arrayBuf.get(new byte[5]);
+        bb.append(arrayBuf);
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 30));
+
+        // Append InputStream
+        bb.append(IOKit.newInputStream(Arrays.copyOfRange(bs, 30, 40)));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 40));
+
+        // Append another BytesBuilder
+        BytesBuilder bb2 = new BytesBuilder();
+        bb2.append(Arrays.copyOfRange(bs, 40, 50));
+        bb.append(bb2);
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 50));
+
+        // Append InputStream with length
+        bb.append(IOKit.newInputStream(Arrays.copyOfRange(bs, 50, 60)), 1);
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 60));
+
+        // Append direct ByteBuffer
+        ByteBuffer buffer2 = ByteBuffer.allocateDirect(10);
+        buffer2.put(ByteBuffer.wrap(Arrays.copyOfRange(bs, 60, 70)));
+        buffer2.flip();
+        bb.append(buffer2);
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 70));
+        assertEquals(10, buffer2.position());
+        assertFalse(buffer2.hasRemaining());
+
+        // Append empty direct ByteBuffer
+        bb.append(ByteBuffer.allocateDirect(0));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 70));
+
+        // Append empty buffer
+        bb.append(BytesKit.emptyBuffer());
+
+        // Test exception cases
+        assertThrows(IORuntimeException.class, () -> bb.append(new InputStream() {
+            @Override
+            public int read() throws IOException {
+                throw new IOException();
+            }
+        }));
+        assertThrows(IllegalArgumentException.class, () ->
+            bb.append(new ByteArrayInputStream(new byte[0]), -1)
+        );
+
+        // Test size and conversion methods
+        assertEquals(70, bb.size());
+        assertEquals(bb.toByteBuffer(), ByteBuffer.wrap(bs, 0, 70));
+        assertArrayEquals(Arrays.copyOf(cs, 70), bb.toString().toCharArray());
+        assertArrayEquals(Arrays.copyOf(cs, 70), bb.toString("utf-8").toCharArray());
+        assertArrayEquals(Arrays.copyOf(cs, 70), bb.toString(CharsKit.UTF_8).toCharArray());
+    }
+
+    private void testResetAndTrimOperations(BytesBuilder bb, byte[] bs) {
+        // Test reset operation
+        bb.reset();
+        bb.append(bs[0]);
+        bb.append(bs[1]);
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 2));
+
+        bb.reset();
+        bb.append(bs[0]);
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 1));
+
+        // Test reset and trim combination
+        bb.reset();
+        bb.trim();
+        bb.append(bs[0]);
+        bb.append(bs[1]);
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 2));
+
+        bb.trim();
+        bb.reset();
+        bb.trim();
+        bb.append(bs[0]);
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 1));
+    }
+
+    private void testWriteToOperations(BytesBuilder bb) throws IOException {
+        // Test writeTo OutputStream
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        bb.writeTo(out);
+        assertArrayEquals(bb.toByteArray(), out.toByteArray());
+
+        // Test writeTo ByteBuffer
+        ByteBuffer bufOut = ByteBuffer.allocate(1);
+        bb.writeTo(bufOut);
+        assertArrayEquals(bb.toByteArray(), bufOut.array());
+    }
+}

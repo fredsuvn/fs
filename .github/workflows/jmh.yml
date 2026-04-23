@@ -38,10 +38,15 @@ jobs:
       - name: Run JMH benchmarks
         run: gradle :fs-tests:jmh
 
+      - name: Get project version
+        id: get_version
+        run: echo "$(gradle -q printVersion | grep -E -o '^version=.*$')" >> $GITHUB_OUTPUT
+        shell: bash
+
       - name: Copy results to docs directory with timestamp and update main results.json
         run: |
           mkdir -p docs/jmh
-          cp fs-tests/build/results/jmh/results.json docs/jmh/results.json
+          cp fs-tests/build/results/jmh/results.json docs/jmh/results-${{ steps.get_version.outputs.version }}.json
 
       - name: Configure Git
         run: |
@@ -50,8 +55,9 @@ jobs:
 
       - name: Commit and push results
         run: |
-          git add docs/jmh/results.json
-          git commit -m 'Run jmh-run.yml and update JMH benchmark results via GitHub Actions'
+          git add docs/jmh/results-${{ steps.get_version.outputs.version }}.json
+          git commit -m 'Run jmh-run.yml and update JMH benchmark results via GitHub Actions' || echo "No changes to commit"
+          git pull --rebase origin ${{ github.ref_name }}
           git push origin HEAD:${{ github.ref_name }}
 
       # Clone the target repository
@@ -67,7 +73,7 @@ jobs:
       - name: Create jmh directory
         run: |
           mkdir -p fs-docs/docs/fs/jmh/
-          cp fs-tests/build/results/jmh/results.json fs-docs/docs/fs/jmh/results.json
+          cp docs/jmh/results-${{ steps.get_version.outputs.version }}.json fs-docs/docs/fs/jmh/results.json
 
       # Commit changes to fs-docs repository
       - name: Commit and push results.json to fs-docs:main branch

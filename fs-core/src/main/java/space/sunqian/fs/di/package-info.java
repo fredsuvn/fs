@@ -171,7 +171,9 @@
  *       mode.
  *   </li>
  *   <li>
- *       Inject component instances into their corresponding fields.
+ *       Inject component instances into their corresponding fields, using
+ *       {@link space.sunqian.fs.reflect.TypeKit#isCompatible(java.lang.reflect.Type, java.lang.reflect.Type)} to check
+ *       if the field type is compatible with the component type.
  *   </li>
  *   <li>
  *       After injection completes, find out all component instances that implement the

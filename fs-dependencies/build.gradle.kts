@@ -1,11 +1,11 @@
 plugins {
   `java-platform`
-  `maven-publish`
-  signing
   id("fs")
+  id("fs-publish")
 }
 
 description = "Dependencies management of fs."
+val publishType by extra { "pom" }
 
 javaPlatform {
   allowDependencies()
@@ -33,16 +33,19 @@ dependencies {
     //api("org.testng:testng:7.5.1")
     api("org.openjdk.jmh:jmh-core:1.37")
     api("org.openjdk.jmh:jmh-generator-annprocess:1.37")
-    api("org.mockito:mockito-core:5.5.0")
+    //api("org.mockito:mockito-core:5.21.0")
+    api("org.mockito:mockito-core:4.11.0")
 
     //commons
     api("org.apache.commons:commons-lang3:3.13.0")
     api("org.apache.commons:commons-collections4:4.4")
-    api("commons-beanutils:commons-beanutils:1.9.4")
+    api("org.apache.commons:commons-text:1.15.0")
+    api("commons-beanutils:commons-beanutils:1.11.0")
     api("commons-io:commons-io:2.14.0")
     api("commons-codec:commons-codec:1.16.0")
-    api("cn.hutool:hutool-all:5.8.22")
+    api("cn.hutool:hutool-all:5.8.43")
     api("org.jboss:jboss-vfs:3.3.2.Final")
+    api("org.springframework.boot:spring-boot-starter:4.0.3")
 
     //cache
     api("com.google.guava:guava:32.1.3-jre")
@@ -55,7 +58,10 @@ dependencies {
     //kotlin
     val kotlinVersion: String by project
     api("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-    api("org.jetbrains.kotlin:kotlin-test-testng:$kotlinVersion")
+    api("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+    api("org.jetbrains.kotlin:kotlin-test:${kotlinVersion}")
+    api("org.jetbrains.kotlin:kotlin-test-junit5:${kotlinVersion}")
+    //api("org.jetbrains.kotlin:kotlin-test-testng:$kotlinVersion")
 
     //generator
     //api("cglib:cglib:3.3.0")
@@ -66,6 +72,9 @@ dependencies {
     api("io.netty:netty-all:4.1.100.Final")
     api("jakarta.annotation:jakarta.annotation-api:2.1.1")
     api("org.eclipse.jetty:jetty-bom:9.4.58.v20250814")
+
+    // database
+    api("com.h2database:h2:2.4.240")
 
     //template
     api("org.apache.velocity:velocity-engine-core:2.3")
@@ -78,50 +87,11 @@ dependencies {
 
     //config
     api("org.yaml:snakeyaml:2.2")
-  }
-}
 
-publishing {
-  publications {
-    create<MavenPublication>("main") {
-      from(components["javaPlatform"])
-      val projectInfo: ProjectInfo by rootProject.extra
-      pom {
-        version = projectInfo.version
-        group = rootProject.group
-        name = project.name
-        description = project.description
-        url = projectInfo.url
-        licenses {
-          projectInfo.licenses.forEach {
-            license {
-              name.set(it.name)
-              url.set(it.url)
-            }
-          }
-        }
-        developers {
-          projectInfo.developers.forEach {
-            developer {
-              id.set(it.id)
-              name.set(it.name)
-              email.set(it.email)
-              url.set(it.url)
-            }
-          }
-        }
-        scm {
-          connection = projectInfo.scm.connection
-          developerConnection = projectInfo.scm.developerConnection
-          url = projectInfo.scm.url
-        }
-      }
-    }
+    //data
+    //api("com.fasterxml.jackson.core:jackson-core:2.21.1")
+    api("com.fasterxml.jackson.core:jackson-databind:2.21.1")
+    api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.1")
+    api("com.alibaba.fastjson2:fastjson2:2.0.61")
   }
-  repositories {
-    mavenLocal()
-  }
-}
-
-signing {
 }

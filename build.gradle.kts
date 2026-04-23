@@ -1,3 +1,5 @@
+import space.sunqian.fs.build.gradle.*
+
 plugins {
   id("fs")
 }
@@ -64,6 +66,6 @@ tasks.register("printVersion") {
   group = "version"
   description = "Prints the project version"
   doLast {
-    println(project.version)
+    println("version=${project.version}")
   }
 }

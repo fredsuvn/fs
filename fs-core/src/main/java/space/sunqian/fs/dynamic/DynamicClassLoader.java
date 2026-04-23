@@ -25,6 +25,16 @@ public class DynamicClassLoader extends ClassLoader {
     }
 
     /**
+     * Constructs a new {@link DynamicClassLoader} instance with the specified parent class loader.
+     *
+     * @param parent the specified parent class loader, {@code null} is permitted but there is no guarantee that all
+     *               platform classes are visible
+     */
+    public DynamicClassLoader(@Nullable ClassLoader parent) {
+        super(parent);
+    }
+
+    /**
      * Loads and returns a class from the specified byte data.
      * <p>
      * A class should only be loaded once in a loader, so if the class has been loaded before, it will be returned

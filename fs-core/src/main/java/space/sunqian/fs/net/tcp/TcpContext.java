@@ -18,7 +18,7 @@ import java.nio.channels.SocketChannel;
  * state and attachments throughout the channel's lifecycle.
  *
  * @author sunqian
- * @implSpec The default I/O methods of this interface use {@link IOKit} to read and write data from the underlying
+ * @implNote The default I/O methods of this interface use {@link IOKit} to read and write data from the underlying
  * channel, inherited from {@link ChannelReader} and {@link ChannelWriter}.
  */
 public interface TcpContext extends ChannelContext<SocketChannel> {

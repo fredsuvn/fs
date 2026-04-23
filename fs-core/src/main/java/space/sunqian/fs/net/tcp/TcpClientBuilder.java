@@ -8,12 +8,13 @@ import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.io.communicate.AbstractChannelContext;
 import space.sunqian.fs.net.NetException;
+import space.sunqian.fs.net.NetSelector;
 
 import java.net.InetSocketAddress;
 import java.net.SocketOption;
 import java.net.StandardSocketOptions;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -32,15 +33,15 @@ public class TcpClientBuilder {
     private final @Nonnull Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
 
     /**
-     * Sets the buffer size for advanced IO operations. Note this buffer size is not the kernel network buffer size, it
-     * is an I/O advanced operations buffer size.
+     * Sets the I/O buffer size for advanced IO operations, typically used for read/write operations on
+     * {@link IOOperator}. The default size is {@link IOKit#bufferSize()}.
      *
-     * @param bufSize the buffer size for advanced IO operations
+     * @param bufSize the I/O buffer size for advanced IO operations
      * @return this builder
-     * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
+     * @throws IllegalArgumentException if the I/O buffer size is negative or {@code 0}
      */
-    public @Nonnull TcpClientBuilder bufferSize(int bufSize) throws IllegalArgumentException {
-        Checker.checkArgument(bufSize > 0, "bufSize must be positive");
+    public @Nonnull TcpClientBuilder ioBufferSize(int bufSize) throws IllegalArgumentException {
+        Checker.checkArgument(bufSize > 0, "ioBufferSize must be positive");
         this.bufSize = bufSize;
         return this;
     }
@@ -98,10 +99,10 @@ public class TcpClientBuilder {
         // private final @Nonnull SocketChannel client;
         private final @Nonnull InetSocketAddress localAddress;
         private final @Nonnull InetSocketAddress remoteAddress;
-        private final @Nonnull Selector selector;
+        private final @Nonnull NetSelector selector;
         private final @Nonnull IOOperator ioOperator;
 
-        private volatile boolean closed = false;
+        // private volatile boolean closed = false;
 
         @SuppressWarnings("resource")
         private TcpClientImpl(
@@ -115,28 +116,24 @@ public class TcpClientBuilder {
             this.remoteAddress = remoteAddress;
             socketOptions.forEach((name, value) ->
                 Fs.uncheck(() -> client.setOption(Fs.as(name), value), NetException::new));
-            this.selector = Selector.open();
+            this.selector = NetSelector.open();
             client.bind(localAddress);
             this.localAddress = (InetSocketAddress) client.getLocalAddress();
             client.configureBlocking(true);
             client.connect(remoteAddress);
             client.configureBlocking(false);
-            client.register(selector, SelectionKey.OP_READ);
+            client.register(selector.selector(), SelectionKey.OP_READ);
             this.ioOperator = IOOperator.get(bufSize);
         }
 
         @Override
         public synchronized void close() throws NetException {
-            if (closed) {
-                return;
-            }
             Fs.uncheck(() -> {
                 SocketChannel client = channel();
                 client.close();
-                client.keyFor(selector).cancel();
+                selector.cancel(client);
                 selector.close();
             }, NetException::new);
-            closed = true;
         }
 
         @Override
@@ -149,31 +146,31 @@ public class TcpClientBuilder {
             return localAddress;
         }
 
-        @SuppressWarnings("resource")
         @Override
         public boolean isConnected() {
+            @SuppressWarnings("resource")
             SocketChannel client = channel();
             return client.isConnected();
         }
 
         @Override
         public boolean isClosed() {
-            return closed;
+            @SuppressWarnings("resource")
+            ByteChannel channel = channel();
+            return !channel.isOpen();
         }
 
         @Override
         public void readWait() {
-            Fs.uncheck(() -> {
-                selector.select();
-                Set<SelectionKey> selectedKeys = selector.selectedKeys();
-                Iterator<SelectionKey> keys = selectedKeys.iterator();
-                while (keys.hasNext()) {
-                    // SelectionKey key = keys.next();
-                    keys.next();
-                    // ignored
-                    keys.remove();
-                }
-            }, NetException::new);
+            selector.select(0);
+            Set<SelectionKey> selectedKeys = selector.selectedKeys();
+            Iterator<SelectionKey> keys = selectedKeys.iterator();
+            while (keys.hasNext()) {
+                // SelectionKey key = keys.next();
+                keys.next();
+                // ignored
+                keys.remove();
+            }
         }
 
         @Override

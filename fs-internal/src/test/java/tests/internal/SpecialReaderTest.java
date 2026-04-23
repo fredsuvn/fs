@@ -1,9 +1,9 @@
 package tests.internal;
 
-import internal.test.ReadOps;
-import internal.test.TestIOException;
-import internal.test.TestInputStream;
-import internal.test.TestReader;
+import internal.utils.ReadOps;
+import internal.utils.TestIOException;
+import internal.utils.TestInputStream;
+import internal.utils.TestReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -25,7 +25,7 @@ public class SpecialReaderTest {
         testReadBytes();
         testReadByte();
         testSkipBytes();
-        testAvailable();
+        testAvailableBytes();
 
         // others
         ByteArrayInputStream in = new ByteArrayInputStream(new byte[0]);
@@ -52,9 +52,11 @@ public class SpecialReaderTest {
         assertTrue(test.markSupported());
         test.markSupported(null);
         assertEquals(ms, test.markSupported());
+        test.setNextOperation(ReadOps.THROW);
+        assertThrows(TestIOException.class, () -> test.mark(0));
     }
 
-    public void testReadBytes() throws Exception {
+    private void testReadBytes() throws Exception {
         byte[] bytes = new byte[]{1, 2, 3, 4, 5, 6};
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         TestInputStream test = new TestInputStream(in);
@@ -86,9 +88,11 @@ public class SpecialReaderTest {
         assertThrows(IOException.class, () -> test.read(dest));
         in.reset();
         Arrays.fill(dest, (byte) 9);
+        test.setNextOperation(ReadOps.READ_ZERO);
+        assertEquals(0, test.read(dest));
     }
 
-    public void testReadByte() throws Exception {
+    private void testReadByte() throws Exception {
         byte[] bytes = new byte[]{1, 2, 3, 4, 5, 6};
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         TestInputStream test = new TestInputStream(in);
@@ -96,7 +100,6 @@ public class SpecialReaderTest {
         in.reset();
 
         test.setNextOperation(ReadOps.READ_NORMAL);
-        ;
         assertEquals(1, test.read());
         in.reset();
 
@@ -111,9 +114,11 @@ public class SpecialReaderTest {
         test.setNextOperation(ReadOps.THROW);
         assertThrows(IOException.class, () -> test.read());
         in.reset();
+        test.setNextOperation(ReadOps.READ_ZERO);
+        assertEquals(-1, test.read());
     }
 
-    public void testSkipBytes() throws Exception {
+    private void testSkipBytes() throws Exception {
         byte[] bytes = new byte[]{1, 2, 3, 4, 5, 6};
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         TestInputStream test = new TestInputStream(in);
@@ -121,7 +126,6 @@ public class SpecialReaderTest {
         in.reset();
 
         test.setNextOperation(ReadOps.READ_NORMAL);
-        ;
         assertEquals(6, test.skip(6));
         in.reset();
 
@@ -136,9 +140,11 @@ public class SpecialReaderTest {
         test.setNextOperation(ReadOps.THROW);
         assertThrows(IOException.class, () -> test.skip(6));
         in.reset();
+        assertEquals(6, test.skip(6));
+        in.reset();
     }
 
-    public void testAvailable() throws Exception {
+    private void testAvailableBytes() throws Exception {
         byte[] bytes = new byte[]{1, 2, 3, 4, 5, 6};
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         TestInputStream test = new TestInputStream(in);
@@ -167,7 +173,6 @@ public class SpecialReaderTest {
         testReadChars();
         testReadChar();
         testSkipChars();
-        testAvailable();
 
         // others
         CharArrayReader in = new CharArrayReader(new char[0]);
@@ -196,7 +201,7 @@ public class SpecialReaderTest {
         assertEquals(ms, test.markSupported());
     }
 
-    public void testReadChars() throws Exception {
+    private void testReadChars() throws Exception {
         char[] chars = new char[]{1, 2, 3, 4, 5, 6};
         CharArrayReader in = new CharArrayReader(chars);
         TestReader test = new TestReader(in);
@@ -230,7 +235,7 @@ public class SpecialReaderTest {
         Arrays.fill(dest, (char) 9);
     }
 
-    public void testReadChar() throws Exception {
+    private void testReadChar() throws Exception {
         char[] chars = new char[]{1, 2, 3, 4, 5, 6};
         CharArrayReader in = new CharArrayReader(chars);
         TestReader test = new TestReader(in);
@@ -238,7 +243,6 @@ public class SpecialReaderTest {
         in.reset();
 
         test.setNextOperation(ReadOps.READ_NORMAL);
-        ;
         assertEquals(1, test.read());
         in.reset();
 
@@ -255,7 +259,7 @@ public class SpecialReaderTest {
         in.reset();
     }
 
-    public void testSkipChars() throws Exception {
+    private void testSkipChars() throws Exception {
         char[] chars = new char[]{1, 2, 3, 4, 5, 6};
         CharArrayReader in = new CharArrayReader(chars);
         TestReader test = new TestReader(in);
@@ -263,7 +267,6 @@ public class SpecialReaderTest {
         in.reset();
 
         test.setNextOperation(ReadOps.READ_NORMAL);
-        ;
         assertEquals(6, test.skip(6));
         in.reset();
 

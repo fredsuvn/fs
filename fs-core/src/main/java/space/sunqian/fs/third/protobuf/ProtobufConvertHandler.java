@@ -9,28 +9,37 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnsupportedEnvException;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.data.ObjectBuilderProvider;
 
 import java.lang.reflect.Type;
 import java.util.List;
 
 /**
- * {@link ObjectBuilderProvider.Handler} implementation for
+ * {@link ObjectConverter.Handler} implementation for
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
- * ObjectConverter converter = ObjectConverter
- *     .defaultConverter()
- *     .withFirstHandler(new ProtobufConvertHandler());
+ * ObjectConverter converter = ...;
+ * ObjectConverter protoConverter = converter
+ *     .withFirstHandler(ProtobufConvertHandler.getInstance());
  * }</pre>
  * <p>
  * This handler provides support for {@link ProtocolStringList} and {@link ByteString}.
  * <p>
- * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment.
+ * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
+ * environment, the {@link ObjectConverter#defaultConverter()} will automatically load this handler.
  *
  * @author sunqian
  */
 public class ProtobufConvertHandler implements ObjectConverter.Handler {
+
+    private static final @Nonnull ProtobufConvertHandler INST = new ProtobufConvertHandler();
+
+    /**
+     * Returns a same one instance of this handler.
+     */
+    public static @Nonnull ProtobufConvertHandler getInstance() {
+        return INST;
+    }
 
     /**
      * Constructs a new handler instance. This constructor will check whether the protobuf package is available in the
@@ -46,7 +55,7 @@ public class ProtobufConvertHandler implements ObjectConverter.Handler {
     public Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
-        @Nonnull Type target,
+        @Nonnull Type targetType,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
@@ -54,14 +63,15 @@ public class ProtobufConvertHandler implements ObjectConverter.Handler {
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
         if (src instanceof ByteString) {
+            @SuppressWarnings("PatternVariableCanBeUsed")
             ByteString bs = (ByteString) src;
-            return converter.asHandler().convert(bs.asReadOnlyByteBuffer(), srcType, target, converter, options);
-        } else if (target.equals(ByteString.class)) {
+            return converter.asHandler().convert(bs.asReadOnlyByteBuffer(), srcType, targetType, converter, options);
+        } else if (targetType.equals(ByteString.class)) {
             Object ret = converter.asHandler().convert(src, srcType, byte[].class, converter, options);
             if (ret instanceof byte[]) {
                 return ByteString.copyFrom((byte[]) ret);
             }
-        } else if (target.equals(ProtocolStringList.class)) {
+        } else if (targetType.equals(ProtocolStringList.class)) {
             Object ret = converter.asHandler().convert(
                 src, srcType, ProtobufSchemaHandler.StringListTypeRef.SINGLETON.type(), converter, options
             );

@@ -4,7 +4,6 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.io.communicate.ChannelHandler;
 
-import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
@@ -61,8 +60,8 @@ public interface TcpServerHandler extends ChannelHandler<TcpContext, SocketChann
     void channelRead(@Nonnull TcpContext context) throws Exception;
 
     /**
-     * This method is invoked for all active clients in the event loop after each selector wake-up
-     * ({@link Selector#select(long)}). It can be used to uniformly handle some issues, such as connection heartbeats.
+     * This method is invoked for all active clients in the event loop after the selector wake-up. It can be used to
+     * uniformly handle some issues, such as connection heartbeats.
      * <p>
      * Note the default implementation does nothing.
      *

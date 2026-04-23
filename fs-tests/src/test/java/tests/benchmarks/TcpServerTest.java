@@ -1,31 +1,35 @@
 package tests.benchmarks;
 
-import internal.test.DataTest;
-import internal.tests.api.TcpServerApi;
+import internal.api.TcpServerApi;
+import internal.utils.DataGen;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.net.tcp.TcpClient;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class TcpServerTest implements DataTest {
+public class TcpServerTest implements DataGen {
 
     @Test
-    public void testTcpServer() throws Exception {
-        testTcpServer("fs");
-        testTcpServer("netty");
+    public void testTcpServerWithDifferentImplementations() throws Exception {
+        testTcpServerImplementation("fs");
+        testTcpServerImplementation("netty");
     }
 
-    public void testTcpServer(String serverType) throws Exception {
-        TcpServerApi server = TcpServerApi.createServer(serverType);
+    private void testTcpServerImplementation(String serverType) throws Exception {
+        TcpServerApi server = TcpServerApi.createApi(serverType);
         TcpClient client = TcpClient.newBuilder().connect(server.address());
-        byte[] message = randomBytes(10);
-        client.writeBytes(message);
-        client.writeBytes(message);
-        client.readWait();
-        byte[] received = IOKit.readBytes(client.channel(), message.length);
-        assertArrayEquals(message, received);
-        server.shutdown();
-        client.close();
+
+        try {
+            byte[] message = randomBytes(10);
+            client.writeBytes(message);
+            client.writeBytes(message);
+            client.readWait();
+            byte[] received = IOKit.readBytes(client.channel(), message.length);
+            assertArrayEquals(message, received);
+        } finally {
+            server.shutdown();
+            client.close();
+        }
     }
 }

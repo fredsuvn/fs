@@ -2,18 +2,18 @@ plugins {
   `java-library`
   jacoco
   `test-report-aggregation`
-  `maven-publish`
-  signing
   id("fs")
+  id("fs-publish")
 }
 
 description = "Aggregation of fs, including fs-jsr305, fs-annotation and fs-core, without dependencies."
+val publishType by extra { "jar" }
 
-val jsr305Project = project(":fs-jsr305")
-val annotationProject = project(":fs-annotation")
-val asmProject = project(":fs-asm")
-val coreProject = project(":fs-core")
-val internalProject = project(":fs-internal")
+val jsr305Project: Project = project(":fs-jsr305")
+val annotationProject: Project = project(":fs-annotation")
+val asmProject: Project = project(":fs-asm")
+val coreProject: Project = project(":fs-core")
+val internalProject: Project = project(":fs-internal")
 
 evaluationDependsOn(jsr305Project.path)
 evaluationDependsOn(annotationProject.path)
@@ -35,6 +35,10 @@ tasks.named<Jar>("jar") {
   )
   duplicatesStrategy = DuplicatesStrategy.INCLUDE
   //archiveFileName.set("fs.jar")
+
+  manifest {
+    attributes("Implementation-Version" to rootProject.version)
+  }
 }
 
 tasks.named<Jar>("sourcesJar") {
@@ -79,15 +83,17 @@ tasks.named<Javadoc>("javadoc") {
   //destinationDir = rootDir.resolve("docs/javadoc")
 }
 
-val testJavaHighest = coreProject.tasks.named("testJavaHighest")
+val testByJava8: TaskProvider<Task> = coreProject.tasks.named("testByJava8")
+val testByJava17: TaskProvider<Task> = coreProject.tasks.named("testByJava17")
 
 tasks.test {
   dependsOn(
     jsr305Project.tasks.test,
     annotationProject.tasks.test,
     asmProject.tasks.test,
-    coreProject.tasks.test,
-    testJavaHighest,
+    //coreProject.tasks.test,
+    testByJava8,
+    testByJava17,
     internalProject.tasks.test,
   )
   reports {
@@ -106,8 +112,9 @@ tasks.jacocoTestReport {
     jsr305Project.file("build/jacoco/test.exec"),
     annotationProject.file("build/jacoco/test.exec"),
     //asmProject.file("build/jacoco/test.exec"),
-    coreProject.file("build/jacoco/test.exec"),
-    coreProject.file("build/jacoco/${testJavaHighest.name}.exec"),
+    //coreProject.file("build/jacoco/test.exec"),
+    coreProject.file("build/jacoco/${testByJava8.name}.exec"),
+    coreProject.file("build/jacoco/${testByJava17.name}.exec"),
     internalProject.file("build/jacoco/test.exec"),
   )
   sourceSets(
@@ -134,57 +141,14 @@ tasks.testAggregateTestReport {
     annotationProject.layout.buildDirectory.dir("test-results/test/binary"),
     //asmProject.layout.buildDirectory.dir("test-results/test"),
     //asmProject.layout.buildDirectory.dir("test-results/test/binary"),
-    coreProject.layout.buildDirectory.dir("test-results/test"),
-    coreProject.layout.buildDirectory.dir("test-results/test/binary"),
-    coreProject.layout.buildDirectory.dir("test-results/${testJavaHighest.name}"),
-    coreProject.layout.buildDirectory.dir("test-results/${testJavaHighest.name}/binary"),
+    //coreProject.layout.buildDirectory.dir("test-results/test"),
+    //coreProject.layout.buildDirectory.dir("test-results/test/binary"),
+    coreProject.layout.buildDirectory.dir("test-results/${testByJava8.name}"),
+    coreProject.layout.buildDirectory.dir("test-results/${testByJava8.name}/binary"),
+    coreProject.layout.buildDirectory.dir("test-results/${testByJava17.name}"),
+    coreProject.layout.buildDirectory.dir("test-results/${testByJava17.name}/binary"),
     internalProject.layout.buildDirectory.dir("test-results/test"),
     internalProject.layout.buildDirectory.dir("test-results/test/binary"),
   )
   //destinationDirectory = rootDir.resolve("docs/reports/test-aggregate")
-}
-
-publishing {
-  publications {
-    create<MavenPublication>("main") {
-      from(components["java"])
-      val projectInfo: ProjectInfo by rootProject.extra
-      pom {
-        version = projectInfo.version
-        group = rootProject.group
-        name = project.name
-        description = project.description
-        url = projectInfo.url
-        licenses {
-          projectInfo.licenses.forEach {
-            license {
-              name.set(it.name)
-              url.set(it.url)
-            }
-          }
-        }
-        developers {
-          projectInfo.developers.forEach {
-            developer {
-              id.set(it.id)
-              name.set(it.name)
-              email.set(it.email)
-              url.set(it.url)
-            }
-          }
-        }
-        scm {
-          connection = projectInfo.scm.connection
-          developerConnection = projectInfo.scm.developerConnection
-          url = projectInfo.scm.url
-        }
-      }
-    }
-  }
-  repositories {
-    mavenLocal()
-  }
-}
-
-signing {
 }

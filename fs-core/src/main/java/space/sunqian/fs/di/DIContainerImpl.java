@@ -6,8 +6,8 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.OutParam;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.collect.ListKit;
-import space.sunqian.fs.dynamic.aop.AspectMaker;
-import space.sunqian.fs.dynamic.aop.AspectSpec;
+import space.sunqian.fs.dynamic.aspect.AspectMaker;
+import space.sunqian.fs.dynamic.aspect.AspectSpec;
 import space.sunqian.fs.invoke.Invocable;
 import space.sunqian.fs.invoke.InvocationException;
 import space.sunqian.fs.reflect.TypeKit;
@@ -130,6 +130,7 @@ final class DIContainerImpl implements DIContainer {
         }
     }
 
+    @SuppressWarnings("SimplifyStreamApiCallChains")
     private void configureComponentDependencies(
         @Nonnull Map<@Nonnull Type, @Nonnull Res> resMap
     ) {
@@ -307,7 +308,7 @@ final class DIContainerImpl implements DIContainer {
             return res;
         }
         for (Res resource : componentMap.values()) {
-            if (TypeKit.isAssignable(type, resource.type)) {
+            if (TypeKit.isCompatible(type, resource.type)) {
                 return resource;
             }
         }
@@ -431,7 +432,7 @@ final class DIContainerImpl implements DIContainer {
             return component;
         }
         for (DIComponent sr : components.values()) {
-            if (TypeKit.isAssignable(type, sr.type())) {
+            if (TypeKit.isCompatible(type, sr.type())) {
                 return sr;
             }
         }

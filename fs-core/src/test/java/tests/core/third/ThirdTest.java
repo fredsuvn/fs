@@ -1,0 +1,16 @@
+package tests.core.third;
+
+import internal.utils.TestPrint;
+import org.junit.jupiter.api.Test;
+import space.sunqian.fs.third.ThirdKit;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class ThirdTest implements TestPrint {
+
+    @Test
+    public void testThirdClassNameGeneration() throws Exception {
+        String className = ThirdKit.thirdClassName("protobuf", "ProtobufSchemaHandler");
+        assertEquals(ThirdKit.class.getPackage().getName() + ".protobuf.ProtobufSchemaHandler", className);
+    }
+}

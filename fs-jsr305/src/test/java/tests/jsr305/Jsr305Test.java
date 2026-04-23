@@ -1,14 +1,13 @@
 package tests.jsr305;
 
+import org.junit.jupiter.api.Test;
+
 import javax.annotation.Nonnull;
 import javax.annotation.meta.When;
-
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-
 
 public class Jsr305Test {
 

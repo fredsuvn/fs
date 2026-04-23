@@ -9,9 +9,9 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnsupportedEnvException;
 import space.sunqian.fs.base.string.StringKit;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.data.ObjectProperty;
-import space.sunqian.fs.object.data.ObjectPropertyBase;
-import space.sunqian.fs.object.data.ObjectSchemaParser;
+import space.sunqian.fs.object.schema.ObjectProperty;
+import space.sunqian.fs.object.schema.ObjectPropertyBase;
+import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -29,11 +29,12 @@ import java.util.Objects;
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
- * ObjectSchemaParser parser = ObjectSchemaParser
- *     .defaultParser()
- *     .withFirstHandler(new ProtobufSchemaHandler());
+ * ObjectSchemaParser parser = ...;
+ * ObjectSchemaParser protoParser = parser
+ *     .withFirstHandler(ProtobufSchemaHandler.getInstance());
  * }</pre>
- * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment.
+ * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
+ * environment, the {@link ObjectSchemaParser#defaultParser()} will automatically load this handler.
  * <p>
  * Note:
  * <ul>
@@ -52,6 +53,15 @@ import java.util.Objects;
  */
 public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
 
+    private static final @Nonnull ProtobufSchemaHandler INST = new ProtobufSchemaHandler();
+
+    /**
+     * Returns a same one instance of this handler.
+     */
+    public static @Nonnull ProtobufSchemaHandler getInstance() {
+        return INST;
+    }
+
     static final class StringListTypeRef extends TypeRef<List<String>> {
         static final @Nonnull StringListTypeRef SINGLETON = new StringListTypeRef();
     }
@@ -68,7 +78,7 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
 
     @Override
     public boolean parse(@Nonnull ObjectSchemaParser.Context context) throws Exception {
-        Class<?> rawType = TypeKit.getRawClass(context.dataType());
+        Class<?> rawType = TypeKit.getRawClass(context.parsedType());
         if (rawType == null) {
             return true;
         }
@@ -183,7 +193,7 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
         }
 
         @Override
-        public @Nullable Object invokeChecked(
+        public @Nullable Object invokeDirectly(
             @Nullable Object inst, @Nullable Object @Nonnull ... args
         ) throws Throwable {
             clearHandle.invoke(inst);
@@ -207,7 +217,7 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
         }
 
         @Override
-        public @Nullable Object invokeChecked(
+        public @Nullable Object invokeDirectly(
             @Nullable Object inst, @Nullable Object @Nonnull ... args
         ) throws Throwable {
             clearHandle.invoke(inst);

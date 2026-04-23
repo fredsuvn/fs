@@ -2,7 +2,21 @@ name: Test
 on:
   workflow_dispatch:
 jobs:
-  test:
+
+  job1:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Hello"
+      - run: echo "Hello, world!" > test.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test.txt
+          path: test.txt
+
+  job2:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Read from test.txt:"
+      - uses: actions/download-artifact@v4
+        with:
+          name: test.txt
+      - run: cat test.txt

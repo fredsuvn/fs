@@ -1,0 +1,17 @@
+package tests.core.dynamic.aspect;
+
+import org.junit.jupiter.api.Test;
+import space.sunqian.fs.dynamic.aspect.AspectException;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class AspectTest {
+
+    @Test
+    public void testAspectException() {
+        assertThrows(AspectException.class, () -> {throw new AspectException();});
+        assertThrows(AspectException.class, () -> {throw new AspectException("");});
+        assertThrows(AspectException.class, () -> {throw new AspectException("", new RuntimeException());});
+        assertThrows(AspectException.class, () -> {throw new AspectException(new RuntimeException());});
+    }
+}

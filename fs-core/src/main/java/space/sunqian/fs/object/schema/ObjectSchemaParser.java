@@ -1,0 +1,211 @@
+package space.sunqian.fs.object.schema;
+
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.RetainedParam;
+import space.sunqian.annotation.ThreadSafe;
+import space.sunqian.fs.cache.SimpleCache;
+import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.object.schema.handlers.AbstractObjectSchemaHandler;
+import space.sunqian.fs.object.schema.handlers.CommonSchemaHandler;
+import space.sunqian.fs.object.schema.handlers.RecordSchemaHandler;
+
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * This interface is used to parse {@link Type} to {@link ObjectSchema}. It uses a list of {@link Handler}s to execute
+ * the specific parsing operations, where each {@link Handler} possesses its own specific parsing logic.
+ * <p>
+ * There is a skeletal handler implementation: {@link AbstractObjectSchemaHandler}. And the default parser is based on
+ * {@link CommonSchemaHandler#getInstance()}.
+ *
+ * @author sunqian
+ */
+@ThreadSafe
+public interface ObjectSchemaParser {
+
+    /**
+     * Returns the default {@link ObjectSchemaParser}. Here are handlers in the default parser:
+     * <ul>
+     *     <li>
+     *         {@link RecordSchemaHandler#getInstance()}, if the current JVM version supports {@code record} classes
+     *         ({@code >= 16});
+     *     </li>
+     *     <li>{@link CommonSchemaHandler#getInstance()};</li>
+     * </ul>
+     * <p>
+     * Note the default {@link ObjectSchemaParser} is singleton, and never caches the parsed results.
+     *
+     * @return the default {@link ObjectSchemaParser}
+     * @see CommonSchemaHandler
+     * @see RecordSchemaHandler
+     */
+    static @Nonnull ObjectSchemaParser defaultParser() {
+        return ObjectSchemaParserBack.defaultParser();
+    }
+
+    /**
+     * Returns the default cached {@link ObjectSchemaParser}, which is based on {@link #defaultParser()} and caches the
+     * parsed results with {@link SimpleCache#ofSoft()}.
+     * <p>
+     * Note the default cached {@link ObjectSchemaParser} is singleton.
+     *
+     * @return the default cached {@link ObjectSchemaParser}
+     * @see #defaultParser()
+     */
+    static @Nonnull ObjectSchemaParser defaultCachedParser() {
+        return ObjectSchemaParserBack.defaultCachedParser();
+    }
+
+    /**
+     * Creates and returns a new {@link ObjectSchemaParser} with the given handlers.
+     * <p>
+     * Note the created {@link ObjectSchemaParser} never caches the parsed results.
+     *
+     * @param handlers the given handlers
+     * @return a new {@link ObjectSchemaParser} with the given handlers
+     */
+    static @Nonnull ObjectSchemaParser newParser(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
+        return newParser(ListKit.list(handlers));
+    }
+
+    /**
+     * Creates and returns a new {@link ObjectSchemaParser} with given handlers.
+     * <p>
+     * Note the created {@link ObjectSchemaParser} never caches the parsed results.
+     *
+     * @param handlers given handlers
+     * @return a new {@link ObjectSchemaParser} with given handlers
+     */
+    static @Nonnull ObjectSchemaParser newParser(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
+        return ObjectSchemaParserBack.newParser(handlers);
+    }
+
+    /**
+     * Returns a new {@link ObjectSchemaParser} that caches the parsed results with the specified cache.
+     * <p>
+     * Note the behavior of the non-parsing methods of the returned {@link ObjectSchemaParser}, such as
+     * {@link #handlers()}, {@link #asHandler()} and {@link #withFirstHandler(Handler)}, will directly invoke the
+     * underlying {@link ObjectSchemaParser}.
+     *
+     * @param cache  the specified cache to store the parsed results
+     * @param parser the underlying {@link ObjectSchemaParser} to parse the type
+     * @return a new {@link ObjectSchemaParser} that caches the parsed results with the specified cache
+     */
+    static @Nonnull ObjectSchemaParser newCachedParser(
+        @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectSchema> cache,
+        @Nonnull ObjectSchemaParser parser
+    ) {
+        return ObjectSchemaParserBack.newCachedParser(cache, parser);
+    }
+
+    /**
+     * Parses the given type to an instance of {@link ObjectSchema}, and returns the parsed {@link ObjectSchema}.
+     *
+     * @param type the given type
+     * @return the parsed {@link ObjectSchema}
+     * @throws DataSchemaException if any problem occurs
+     * @implNote The default implementation of this method invokes the {@link Handler#parse(ObjectSchemaParser.Context)}
+     * in the order of {@link #handlers()} until one of the handlers returns {@code false}. The codes are similar to:
+     * <pre>{@code
+     * for (Handler handler : handlers()) {
+     *     if (!handler.parse(context)) {
+     *         break;
+     *     }
+     * }
+     * }</pre>
+     */
+    default @Nonnull ObjectSchema parse(@Nonnull Type type) throws DataSchemaException {
+        try {
+            ObjectSchemaBuilder builder = new ObjectSchemaBuilder(type);
+            for (Handler handler : handlers()) {
+                if (!handler.parse(builder)) {
+                    break;
+                }
+            }
+            return builder.build(this);
+        } catch (Exception e) {
+            throw new DataSchemaException(type, e);
+        }
+    }
+
+    /**
+     * Returns all handlers of this {@link ObjectSchemaParser}.
+     *
+     * @return all handlers of this {@link ObjectSchemaParser}
+     */
+    @Nonnull
+    List<@Nonnull Handler> handlers();
+
+    /**
+     * Returns a new {@link ObjectSchemaParser} of which first handler is the given handler and the next handler is this
+     * {@link ObjectSchemaParser} as a {@link Handler}. This method is equivalent:
+     * <pre>{@code
+     * newParser(firstHandler, this.asHandler())
+     * }</pre>
+     *
+     * @param firstHandler the first handler
+     * @return a new {@link ObjectSchemaParser} of which first handler is the given handler and the next handler is this
+     * {@link ObjectSchemaParser} as a {@link Handler}
+     */
+    default @Nonnull ObjectSchemaParser withFirstHandler(@Nonnull Handler firstHandler) {
+        return newParser(firstHandler, this.asHandler());
+    }
+
+    /**
+     * Returns this {@link ObjectSchemaParser} as a {@link Handler}.
+     *
+     * @return this {@link ObjectSchemaParser} as a {@link Handler}
+     */
+    @Nonnull
+    Handler asHandler();
+
+    /**
+     * Handler for {@link ObjectSchemaParser}, provides the specific parsing logic.
+     *
+     * @author sunqian
+     */
+    @ThreadSafe
+    interface Handler {
+
+        /**
+         * Parses {@link Type} to {@link ObjectSchema} with its owner parsing logic. The {@link Type} is specified by
+         * {@link Context#parsedType()} of the given context, and the parsed properties should be stored in
+         * {@link Context#propertyBaseMap()}. Returns {@code false} to prevent subsequent handlers to continue to parse,
+         * otherwise returns {@code true} to continue to parse.
+         *
+         * @param context the given context
+         * @return whether to continue to parse
+         * @throws Exception for errors during parsing
+         */
+        boolean parse(@Nonnull Context context) throws Exception;
+    }
+
+    /**
+     * Context for parsing the specified {@link Type} to {@link ObjectSchema}.
+     *
+     * @author sunqian
+     */
+    interface Context {
+
+        /**
+         * Returns the type to be parsed.
+         *
+         * @return the type to be parsed
+         */
+        @Nonnull
+        Type parsedType();
+
+        /**
+         * Returns a mutable map for storing property base infos.
+         * <p>
+         * The map through whole parsing process, stores and shares the property base infos for all handlers, and each
+         * handler can add or remove or modify the property base info.
+         *
+         * @return a mutable map for storing property base infos
+         */
+        @Nonnull
+        Map<@Nonnull String, @Nonnull ObjectPropertyBase> propertyBaseMap();
+    }
+}

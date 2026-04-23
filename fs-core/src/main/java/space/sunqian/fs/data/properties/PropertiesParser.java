@@ -1,0 +1,63 @@
+package space.sunqian.fs.data.properties;
+
+import space.sunqian.annotation.Nonnull;
+import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.data.ByteDataParser;
+import space.sunqian.fs.data.CharDataParser;
+import space.sunqian.fs.data.DataParsingException;
+
+import java.io.InputStream;
+import java.io.Reader;
+import java.nio.channels.ReadableByteChannel;
+
+/**
+ * Represents the properties data parser that parses properties data a {@code PropertiesData} object.
+ *
+ * @author sunqian
+ */
+public interface PropertiesParser extends ByteDataParser<PropertiesData>, CharDataParser<PropertiesData> {
+
+    /**
+     * Returns the default {@link PropertiesParser}.
+     *
+     * @return the default {@link PropertiesParser}
+     */
+    static @Nonnull PropertiesParser defaultParser() {
+        return PropertiesParserImpl.INST;
+    }
+
+    /**
+     * Parses and returns the properties data from the given input stream to a {@link PropertiesData} object, using
+     * {@link CharsKit#defaultCharset()}.
+     *
+     * @param input the given input stream
+     * @return the parsed {@link PropertiesData} object
+     * @throws DataParsingException if any error occurs during parsing
+     */
+    @Override
+    @Nonnull
+    PropertiesData parse(@Nonnull InputStream input) throws DataParsingException;
+
+    /**
+     * Parses and returns the properties data from the given readable byte channel to a {@link PropertiesData} object,
+     * using {@link CharsKit#defaultCharset()}.
+     *
+     * @param channel the given readable byte channel
+     * @return the parsed {@link PropertiesData} object
+     * @throws DataParsingException if any error occurs during parsing
+     */
+    @Override
+    @Nonnull
+    PropertiesData parse(@Nonnull ReadableByteChannel channel) throws DataParsingException;
+
+    /**
+     * Parses and returns the properties data from the given reader to a {@link PropertiesData} object.
+     *
+     * @param reader the given reader
+     * @return the parsed {@link PropertiesData} object
+     * @throws DataParsingException if any error occurs during parsing
+     */
+    @Override
+    @Nonnull
+    PropertiesData parse(@Nonnull Reader reader) throws DataParsingException;
+}
