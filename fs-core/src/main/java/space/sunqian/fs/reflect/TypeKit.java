@@ -1,10 +1,12 @@
 package space.sunqian.fs.reflect;
 
+import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.OutParam;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.MapKit;
 
@@ -390,8 +392,8 @@ public class TypeKit {
     }
 
     /**
-     * Returns a map contains the mapping of type parameters for the given type, the key is type parameter, and the
-     * value is the actual type argument or inherited type parameter. For example, these types:
+     * Returns an immutable map contains the mapping of type parameters for the given type, the key is type parameter,
+     * and the value is the actual type argument or inherited type parameter. For example, these types:
      * <pre>{@code
      * class X extends Y<Integer, Long>
      * class Y<K, V> implements Z<Float, Double, V>
@@ -408,19 +410,25 @@ public class TypeKit {
      * }</pre>
      *
      * @param type the given type
-     * @return a map contains the mapping of type parameters for the given type
+     * @return an immutable map contains the mapping of type parameters for the given type
      */
-    public static @Nonnull Map<@Nonnull TypeVariable<?>, @Nullable Type> typeParametersMapping(
+    public static @Nonnull @Immutable Map<@Nonnull TypeVariable<?>, @Nonnull Type> typeParametersMapping(
+        @Nonnull Type type
+    ) {
+        return TypeParametersMappingCache.get(type, TypeKit::typeParametersMapping0);
+    }
+
+    private static @Nonnull @Immutable Map<@Nonnull TypeVariable<?>, @Nonnull Type> typeParametersMapping0(
         @Nonnull Type type
     ) {
         Map<TypeVariable<?>, Type> result = new HashMap<>();
         typeParametersMapping(type, result);
-        return result;
+        return Collections.unmodifiableMap(result);
     }
 
     private static void typeParametersMapping(
         @Nonnull Type type,
-        @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping
+        @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nonnull Type> mapping
     ) {
         if (TypeKit.isClass(type)) {
             Class<?> cur = (Class<?>) type;
@@ -442,7 +450,7 @@ public class TypeKit {
 
     private static void mapTypeVariables(
         @Nonnull Type @Nonnull [] interfaces,
-        @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping
+        @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nonnull Type> mapping
     ) {
         if (ArrayKit.isEmpty(interfaces)) {
             return;
@@ -461,7 +469,7 @@ public class TypeKit {
 
     private static void mapTypeVariables(
         @Nonnull Type type,
-        @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping
+        @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nonnull Type> mapping
     ) {
         if (!TypeKit.isParameterized(type)) {
             return;
@@ -950,6 +958,21 @@ public class TypeKit {
         @Override
         public String toString() {
             return getTypeName();
+        }
+    }
+
+    private static final class TypeParametersMappingCache {
+
+        private static final @Nonnull
+        SimpleCache<@Nonnull Type, @Nonnull Map<@Nonnull TypeVariable<?>, @Nonnull Type>> cache = SimpleCache.ofSoft();
+
+        private static @Nonnull @Immutable Map<@Nonnull TypeVariable<?>, @Nonnull Type> get(
+            @Nonnull Type type, Function<@Nonnull Type, @Nonnull Map<@Nonnull TypeVariable<?>, @Nonnull Type>> function
+        ) {
+            return cache.get(type, function);
+        }
+
+        private TypeParametersMappingCache() {
         }
     }
 
