@@ -5,6 +5,7 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.data.DataFormattingException;
+import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
@@ -13,7 +14,6 @@ import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.schema.ObjectProperty;
 import space.sunqian.fs.object.schema.ObjectSchema;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
-import space.sunqian.fs.utils.codec.Base64Kit;
 
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -22,6 +22,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.time.temporal.TemporalAccessor;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -263,14 +264,15 @@ final class JsonFormatterBack {
         private @Nullable Object preProcess(@Nullable Object any) {
             if (any instanceof byte[]) {
                 if (((byte[]) any).length != 0) {
-                    return Base64Kit.encoder().encodeToString((byte[]) any);
+                    return Base64.getEncoder().encodeToString((byte[]) any);
                 }
                 return "";
             }
             if (any instanceof ByteBuffer) {
                 // as base64
-                if (((ByteBuffer) any).hasRemaining()) {
-                    return Base64Kit.encoder().encodeToString((ByteBuffer) any);
+                byte[] bytes = BufferKit.read((ByteBuffer) any);
+                if (bytes != null) {
+                    return Base64.getEncoder().encodeToString(bytes);
                 }
                 return "";
             }
@@ -278,7 +280,7 @@ final class JsonFormatterBack {
                 // as base64
                 byte[] bytes = IOKit.read((InputStream) any);
                 if (bytes != null) {
-                    return Base64Kit.encoder().encodeToString(bytes);
+                    return Base64.getEncoder().encodeToString(bytes);
                 }
                 return "";
             }
@@ -286,7 +288,7 @@ final class JsonFormatterBack {
                 // as base64
                 byte[] bytes = IOKit.readBytes((ReadableByteChannel) any);
                 if (bytes != null) {
-                    return Base64Kit.encoder().encodeToString(bytes);
+                    return Base64.getEncoder().encodeToString(bytes);
                 }
                 return "";
             }
