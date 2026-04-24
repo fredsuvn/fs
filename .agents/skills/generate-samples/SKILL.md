@@ -1,8 +1,11 @@
-# CreateSamples Skill
+---
+name: "generate-samples"
+description: "This skill is designed to generate and maintain examples for using the fs library."
+---
 
-## Overview
+# Generate Samples Skill
 
-The CreateSamples skill is designed to create and maintain examples for using the fs library. This skill helps users understand how to effectively use the fs library by providing clear, concise, and well-structured sample code.
+This skill is designed to generate and maintain examples for using the fs library. This skill helps users understand how to effectively use the fs library by providing clear, concise, and well-structured sample code.
 
 ## Key Modules
 
@@ -103,7 +106,7 @@ At the beginning of each sample file, include a comment block that clearly state
 
 ### Step 2: Provide Multiple Implementation Variations
 
-Show different ways to create/use the feature, from simple to complex:
+Show different ways to generate/use/depende the feature, from simple to complex:
 
 ### Step 3: Update README.md
 
@@ -120,4 +123,4 @@ Please refer to [examples.md](./examples.md).
 
 ## Conclusion
 
-The CreateSamples skill aims to provide high-quality, well-documented examples that demonstrate the power and versatility of the fs library. By following this guide, you can create samples that help users quickly get started with fs and make the most of its features.
+The GenerateSamples skill aims to provide high-quality, well-documented examples that demonstrate the power and versatility of the fs library. By following this guide, you can generate samples that help users quickly get started with fs and make the most of its features.

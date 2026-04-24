@@ -1,4 +1,4 @@
-# CreateSamples Skill - Examples
+# Generate Samples Skill - Examples
 
 This document provides complete examples demonstrating the sample creation flow for the fs library.
 
