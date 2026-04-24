@@ -60,11 +60,12 @@ public class CommonSchemaHandler extends AbstractObjectSchemaHandler {
     private @Nullable String propertyNameFromGetter(@Nonnull Method method) {
         // getter's name should be getXxx or isXxx
         String methodName = method.getName();
-        if (methodName.length() > 3 && methodName.startsWith("get")) {
+        int methodNameLength = methodName.length();
+        if (methodNameLength > 3 && methodName.startsWith("get")) {
             if (!Character.isUpperCase(methodName.charAt(3))) {
                 return null;
             }
-            if (methodName.length() == 4) {
+            if (methodNameLength == 4) {
                 return String.valueOf(Character.toLowerCase(methodName.charAt(3)));
             }
             if (Character.isUpperCase(methodName.charAt(4))) {
@@ -73,11 +74,11 @@ public class CommonSchemaHandler extends AbstractObjectSchemaHandler {
                 return Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
             }
         }
-        if (methodName.length() > 2 && methodName.startsWith("is")) {
+        if (methodNameLength > 2 && methodName.startsWith("is")) {
             if (!Character.isUpperCase(methodName.charAt(2))) {
                 return null;
             }
-            if (methodName.length() == 3) {
+            if (methodNameLength == 3) {
                 return String.valueOf(Character.toLowerCase(methodName.charAt(2)));
             }
             if (Character.isUpperCase(methodName.charAt(3))) {
@@ -100,11 +101,12 @@ public class CommonSchemaHandler extends AbstractObjectSchemaHandler {
     private @Nullable String propertyNameFromSetter(@Nonnull Method method) {
         // setter's name should be setXxx
         String methodName = method.getName();
-        if (methodName.length() > 3 && methodName.startsWith("set")) {
+        int methodNameLength = methodName.length();
+        if (methodNameLength > 3 && methodName.startsWith("set")) {
             if (!Character.isUpperCase(methodName.charAt(3))) {
                 return null;
             }
-            if (methodName.length() == 4) {
+            if (methodNameLength == 4) {
                 return String.valueOf(Character.toLowerCase(methodName.charAt(3)));
             }
             if (Character.isUpperCase(methodName.charAt(4))) {

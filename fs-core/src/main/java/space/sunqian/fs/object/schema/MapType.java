@@ -65,6 +65,7 @@ public interface MapType extends Type {
                 if (!(obj instanceof MapType)) {
                     return false;
                 }
+                @SuppressWarnings("PatternVariableCanBeUsed")
                 MapType o = (MapType) obj;
                 return mapType().equals(o.mapType()) &&
                     keyType().equals(o.keyType()) &&

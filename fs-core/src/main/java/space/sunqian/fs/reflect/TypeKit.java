@@ -967,7 +967,8 @@ public class TypeKit {
         SimpleCache<@Nonnull Type, @Nonnull Map<@Nonnull TypeVariable<?>, @Nonnull Type>> cache = SimpleCache.ofSoft();
 
         private static @Nonnull @Immutable Map<@Nonnull TypeVariable<?>, @Nonnull Type> get(
-            @Nonnull Type type, Function<@Nonnull Type, @Nonnull Map<@Nonnull TypeVariable<?>, @Nonnull Type>> function
+            @Nonnull Type type,
+            Function<@Nonnull Type, @Nonnull Map<@Nonnull TypeVariable<?>, @Nonnull Type>> function
         ) {
             return cache.get(type, function);
         }

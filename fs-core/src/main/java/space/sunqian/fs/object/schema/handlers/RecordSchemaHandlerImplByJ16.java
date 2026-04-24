@@ -31,7 +31,8 @@ enum RecordSchemaHandlerImplByJ16 implements ObjectSchemaParser.Handler {
             var componentName = component.getName();
             var componentType = component.getGenericType();
             var getterMethod = component.getAccessor();
-            Invocable getter = (inst, args) -> getterMethod.invoke(inst);
+            var getterInvocable = Invocable.of(getterMethod);
+            Invocable getter = (inst, args) -> getterInvocable.invoke(inst);
             context.propertyBaseMap().put(
                 componentName,
                 new RecordBase(componentName, componentType, getterMethod, getter)

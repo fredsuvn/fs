@@ -28,6 +28,7 @@ public class SchemaKit {
         if (!(other instanceof ObjectSchema)) {
             return false;
         }
+        @SuppressWarnings("PatternVariableCanBeUsed")
         ObjectSchema otherSchema = (ObjectSchema) other;
         return Objects.equals(objectSchema.type(), otherSchema.type())
             && Objects.equals(objectSchema.parser(), otherSchema.parser());
@@ -48,6 +49,7 @@ public class SchemaKit {
         if (!(other instanceof ObjectProperty)) {
             return false;
         }
+        @SuppressWarnings("PatternVariableCanBeUsed")
         ObjectProperty otherProperty = (ObjectProperty) other;
         return Objects.equals(objectProperty.name(), otherProperty.name())
             && Objects.equals(objectProperty.owner(), otherProperty.owner());
@@ -68,6 +70,7 @@ public class SchemaKit {
         if (!(other instanceof MapSchema)) {
             return false;
         }
+        @SuppressWarnings("PatternVariableCanBeUsed")
         MapSchema otherSchema = (MapSchema) other;
         return Objects.equals(mapSchema.type(), otherSchema.type())
             && Objects.equals(mapSchema.parser(), otherSchema.parser());

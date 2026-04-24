@@ -2,6 +2,7 @@ package space.sunqian.fs.object.builder.handlers;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.invoke.Invocable;
 import space.sunqian.fs.object.builder.BuilderOperator;
 import space.sunqian.fs.object.builder.BuilderOperatorProvider;
@@ -10,6 +11,7 @@ import space.sunqian.fs.reflect.TypeKit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
+import java.util.function.Function;
 
 /**
  * This is the common implementation of {@link BuilderOperatorProvider.Handler}. The {@link BuilderOperator} returned by
@@ -24,6 +26,8 @@ public class CommonBuilderHandler implements BuilderOperatorProvider.Handler {
 
     private static final @Nonnull CommonBuilderHandler INST = new CommonBuilderHandler();
 
+    private static final @Nonnull Invocable NULL = (inst, args) -> null;
+
     /**
      * Returns a same one instance of this handler.
      */
@@ -37,11 +41,19 @@ public class CommonBuilderHandler implements BuilderOperatorProvider.Handler {
         if (rawTarget == null) {
             return null;
         }
+        Invocable constructor = ConstructorCache.get(rawTarget, this::getInvocable);
+        if (constructor == NULL) {
+            return null;
+        }
+        return new CommonBuilderOperator(target, constructor);
+    }
+
+    private @Nonnull Invocable getInvocable(Class<?> rawTarget) {
         try {
             Constructor<?> cst = rawTarget.getConstructor();
-            return new CommonBuilderOperator(target, cst);
+            return Invocable.of(cst);
         } catch (NoSuchMethodException e) {
-            return null;
+            return NULL;
         }
     }
 
@@ -52,10 +64,10 @@ public class CommonBuilderHandler implements BuilderOperatorProvider.Handler {
 
         private CommonBuilderOperator(
             @Nonnull Type targetType,
-            @Nonnull Constructor<?> constructor
+            @Nonnull Invocable constructor
         ) {
             this.targetType = targetType;
-            this.constructor = Invocable.of(constructor);
+            this.constructor = constructor;
         }
 
         @Override
@@ -80,6 +92,21 @@ public class CommonBuilderHandler implements BuilderOperatorProvider.Handler {
         @Override
         public @Nonnull Object buildTarget(@Nonnull Object builder) throws ObjectBuilderException {
             return builder;
+        }
+    }
+
+    private static final class ConstructorCache {
+
+        private static final @Nonnull SimpleCache<@Nonnull Class<?>, @Nonnull Invocable> cache = SimpleCache.ofSoft();
+
+        private static @Nonnull Invocable get(
+            @Nonnull Class<?> cls,
+            Function<@Nonnull Class<?>, @Nonnull Invocable> function
+        ) {
+            return cache.get(cls, function);
+        }
+
+        private ConstructorCache() {
         }
     }
 }
