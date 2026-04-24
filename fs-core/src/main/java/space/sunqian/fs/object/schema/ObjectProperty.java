@@ -3,12 +3,12 @@ package space.sunqian.fs.object.schema;
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.Fs;
 import space.sunqian.fs.invoke.Invocable;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This interface represents the property info of {@link ObjectSchema}. It is very similar to the simple property of
@@ -115,40 +115,40 @@ public interface ObjectProperty extends ObjectPropertyBase {
      * @return the annotation of the specified type on this property, or {@code null} if not found
      */
     default <T extends Annotation> @Nullable T getAnnotation(@Nonnull Class<T> annotationType) {
-        Method getterMethod = getterMethod();
-        if (getterMethod != null) {
-            T annotation = getterMethod.getAnnotation(annotationType);
-            if (annotation != null) {
-                return annotation;
-            }
-        }
-        Method setterMethod = setterMethod();
-        if (setterMethod != null) {
-            T annotation = setterMethod.getAnnotation(annotationType);
-            if (annotation != null) {
-                return annotation;
-            }
-        }
-        Field field = field();
-        if (field != null) {
-            return field.getAnnotation(annotationType);
-        }
+        // Method getterMethod = getterMethod();
+        // if (getterMethod != null) {
+        //     T annotation = getterMethod.getAnnotation(annotationType);
+        //     if (annotation != null) {
+        //         return annotation;
+        //     }
+        // }
+        // Method setterMethod = setterMethod();
+        // if (setterMethod != null) {
+        //     T annotation = setterMethod.getAnnotation(annotationType);
+        //     if (annotation != null) {
+        //         return annotation;
+        //     }
+        // }
+        // Field field = field();
+        // if (field != null) {
+        //     return field.getAnnotation(annotationType);
+        // }
 
-        // for (Annotation annotation : getterAnnotations()) {
-        //     if (Objects.equals(annotation.annotationType(), annotationType)) {
-        //         return Fs.as(annotation);
-        //     }
-        // }
-        // for (Annotation annotation : setterAnnotations()) {
-        //     if (Objects.equals(annotation.annotationType(), annotationType)) {
-        //         return Fs.as(annotation);
-        //     }
-        // }
-        // for (Annotation annotation : fieldAnnotations()) {
-        //     if (Objects.equals(annotation.annotationType(), annotationType)) {
-        //         return Fs.as(annotation);
-        //     }
-        // }
+        for (Annotation annotation : getterAnnotations()) {
+            if (Objects.equals(annotation.annotationType(), annotationType)) {
+                return Fs.as(annotation);
+            }
+        }
+        for (Annotation annotation : setterAnnotations()) {
+            if (Objects.equals(annotation.annotationType(), annotationType)) {
+                return Fs.as(annotation);
+            }
+        }
+        for (Annotation annotation : fieldAnnotations()) {
+            if (Objects.equals(annotation.annotationType(), annotationType)) {
+                return Fs.as(annotation);
+            }
+        }
 
         return null;
     }

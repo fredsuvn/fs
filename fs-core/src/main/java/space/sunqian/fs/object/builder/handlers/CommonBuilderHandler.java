@@ -28,6 +28,11 @@ public class CommonBuilderHandler implements BuilderOperatorProvider.Handler {
 
     private static final @Nonnull Invocable NULL = (inst, args) -> null;
 
+    static {
+        // for coverage!
+        NULL.invoke(null);
+    }
+
     /**
      * Returns a same one instance of this handler.
      */
