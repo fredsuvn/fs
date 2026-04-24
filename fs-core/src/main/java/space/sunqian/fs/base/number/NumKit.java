@@ -150,37 +150,30 @@ public class NumKit {
     }
 
     /**
-     * Returns a {@link Number} object parsed from the given string. The actual type of the object may be
+     * Returns a {@link Number} object parsed from the given char sequence. The actual type of the object may be
      * {@link Integer}, {@link Long}, {@link BigInteger} or {@link BigDecimal}.
      *
-     * @param cs the given string
-     * @return a {@link Number} object parsed from the given string
+     * @param cs the given char sequence
+     * @return a {@link Number} object parsed from the given char sequence
      * @throws NumException if any error occurs during the parsing
      */
     public static @Nonnull Number toNumber(@Nonnull CharSequence cs) throws NumException {
-        try {
-            return toNumber0(cs);
-        } catch (Exception e) {
-            throw new NumException(e);
-        }
+        return NumService.INST.toNumber(cs);
     }
 
-    private static @Nonnull Number toNumber0(@Nonnull CharSequence cs) throws NumberFormatException {
-        String str = cs.toString();
-        if (str.contains(".") || str.contains("e") || str.contains("E")) {
-            return new BigDecimal(str);
-        }
-        int len = str.length();
-        if (str.startsWith("-") || str.startsWith("+")) {
-            len--;
-        }
-        if (len <= 9) {
-            return Integer.parseInt(str);
-        }
-        if (len <= 18) {
-            return Long.parseLong(str);
-        }
-        return new BigInteger(str);
+    /**
+     * Returns a {@link Number} object parsed from the given char sequence from the specified start index inclusive to
+     * the specified end index exclusive. The actual type of the object may be {@link Integer}, {@link Long},
+     * {@link BigInteger} or {@link BigDecimal}.
+     *
+     * @param cs    the given char sequence
+     * @param start the specified start index, inclusive
+     * @param end   the specified end index, exclusive
+     * @return a {@link Number} object parsed from the given char sequence
+     * @throws NumException if any error occurs during the parsing
+     */
+    public static @Nonnull Number toNumber(@Nonnull CharSequence cs, int start, int end) throws NumException {
+        return NumService.INST.toNumber(cs, start, end);
     }
 
     private NumKit() {

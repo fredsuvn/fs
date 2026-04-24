@@ -1,5 +1,6 @@
 package tests.core.base.number;
 
+import internal.annotations.J17Also;
 import internal.utils.DataGen;
 import internal.utils.ErrorNumber;
 import internal.utils.TestPrint;
@@ -168,6 +169,7 @@ public class NumberTest implements DataGen, TestPrint {
         );
     }
 
+    @J17Also
     @Test
     public void testCharSequenceToNumber() {
         // Test positive numbers
@@ -185,11 +187,14 @@ public class NumberTest implements DataGen, TestPrint {
 
     private void testPositiveNumbers() {
         assertEquals(123, NumKit.toNumber("123"));
+        assertEquals(2, NumKit.toNumber("123", 1, 2));
         assertEquals(123456789, NumKit.toNumber("123456789"));
         assertEquals(12345678910L, NumKit.toNumber("12345678910"));
+        assertEquals(23456789101L, NumKit.toNumber("123456789101", 1, 12));
         assertEquals(123456789123456789L, NumKit.toNumber("123456789123456789"));
         assertEquals(new BigInteger("1234567891234567891"), NumKit.toNumber("1234567891234567891"));
         assertEquals(new BigDecimal("1.1"), NumKit.toNumber("1.1"));
+        assertEquals(new BigDecimal("2.1"), NumKit.toNumber("12.1", 1, 4));
         assertEquals(new BigDecimal("1.1e12"), NumKit.toNumber("1.1e12"));
         assertEquals(new BigDecimal("2e12"), NumKit.toNumber("2e12"));
         assertEquals(new BigDecimal("2E12"), NumKit.toNumber("2E12"));
@@ -224,6 +229,7 @@ public class NumberTest implements DataGen, TestPrint {
         assertThrows(NumException.class, () -> NumKit.toNumber("-"));
         assertThrows(NumException.class, () -> NumKit.toNumber(""));
         assertThrows(NumException.class, () -> NumKit.toNumber("0x123"));
+        assertThrows(NumException.class, () -> NumKit.toNumber("0x123", 1, 2));
     }
 
     @Test
