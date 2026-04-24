@@ -10,7 +10,7 @@ This skill helps optimize code performance by analyzing structure, identifying b
 ## How It Works
 
 1. **Structure Analysis**: Carefully analyze code structure and its purpose
-2. **Structure Evaluation**: Assess the合理性 of the current structure
+2. **Structure Evaluation**: Assess the rationality of the current structure
 3. **Structure Optimization**: If structure is unreasonable, return issues and corresponding optimization suggestions
 4. **Detail Evaluation**: If structure is reasonable or has reasonable parts, evaluate code details
 5. **Detail Optimization**: Return optimization opportunities in code details
@@ -27,7 +27,7 @@ This skill helps optimize code performance by analyzing structure, identifying b
 
 1. User requests code performance optimization
 2. Skill analyzes code structure and purpose
-3. Skill evaluates current structure's合理性
+3. Skill evaluates current structure's rationality
 4. Skill provides optimization recommendations
 5. Skill asks for user permission to implement changes
 6. Only if user approves, skill modifies code according to the plan
