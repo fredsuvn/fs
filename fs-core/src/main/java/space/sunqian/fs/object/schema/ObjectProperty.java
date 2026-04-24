@@ -3,12 +3,10 @@ package space.sunqian.fs.object.schema;
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.Fs;
 import space.sunqian.fs.invoke.Invocable;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * This interface represents the property info of {@link ObjectSchema}. It is very similar to the simple property of
@@ -48,16 +46,6 @@ public interface ObjectProperty extends ObjectPropertyBase {
     }
 
     /**
-     * Returns the annotations on the backing field of this property. If this property doesn't have a backing field, an
-     * empty list will be returned.
-     *
-     * @return the annotations on the backing field of this property
-     */
-    @Nonnull
-    @Immutable
-    List<@Nonnull Annotation> fieldAnnotations();
-
-    /**
      * Returns the annotations on the getter method of this property. If this property doesn't have a getter method, an
      * empty list will be returned.
      *
@@ -76,6 +64,16 @@ public interface ObjectProperty extends ObjectPropertyBase {
     @Nonnull
     @Immutable
     List<@Nonnull Annotation> setterAnnotations();
+
+    /**
+     * Returns the annotations on the backing field of this property. If this property doesn't have a backing field, an
+     * empty list will be returned.
+     *
+     * @return the annotations on the backing field of this property
+     */
+    @Nonnull
+    @Immutable
+    List<@Nonnull Annotation> fieldAnnotations();
 
     /**
      * Returns the property value of the specified instance.
@@ -114,44 +112,44 @@ public interface ObjectProperty extends ObjectPropertyBase {
      * @param annotationType the specified annotation type
      * @return the annotation of the specified type on this property, or {@code null} if not found
      */
-    default <T extends Annotation> @Nullable T getAnnotation(@Nonnull Class<T> annotationType) {
-        // Method getterMethod = getterMethod();
-        // if (getterMethod != null) {
-        //     T annotation = getterMethod.getAnnotation(annotationType);
-        //     if (annotation != null) {
-        //         return annotation;
-        //     }
-        // }
-        // Method setterMethod = setterMethod();
-        // if (setterMethod != null) {
-        //     T annotation = setterMethod.getAnnotation(annotationType);
-        //     if (annotation != null) {
-        //         return annotation;
-        //     }
-        // }
-        // Field field = field();
-        // if (field != null) {
-        //     return field.getAnnotation(annotationType);
-        // }
+    <T extends Annotation> @Nullable T getAnnotation(@Nonnull Class<T> annotationType); //{
+    // Method getterMethod = getterMethod();
+    // if (getterMethod != null) {
+    //     T annotation = getterMethod.getAnnotation(annotationType);
+    //     if (annotation != null) {
+    //         return annotation;
+    //     }
+    // }
+    // Method setterMethod = setterMethod();
+    // if (setterMethod != null) {
+    //     T annotation = setterMethod.getAnnotation(annotationType);
+    //     if (annotation != null) {
+    //         return annotation;
+    //     }
+    // }
+    // Field field = field();
+    // if (field != null) {
+    //     return field.getAnnotation(annotationType);
+    // }
 
-        for (Annotation annotation : getterAnnotations()) {
-            if (Objects.equals(annotation.annotationType(), annotationType)) {
-                return Fs.as(annotation);
-            }
-        }
-        for (Annotation annotation : setterAnnotations()) {
-            if (Objects.equals(annotation.annotationType(), annotationType)) {
-                return Fs.as(annotation);
-            }
-        }
-        for (Annotation annotation : fieldAnnotations()) {
-            if (Objects.equals(annotation.annotationType(), annotationType)) {
-                return Fs.as(annotation);
-            }
-        }
-
-        return null;
-    }
+    // for (Annotation annotation : getterAnnotations()) {
+    //     if (Objects.equals(annotation.annotationType(), annotationType)) {
+    //         return Fs.as(annotation);
+    //     }
+    // }
+    // for (Annotation annotation : setterAnnotations()) {
+    //     if (Objects.equals(annotation.annotationType(), annotationType)) {
+    //         return Fs.as(annotation);
+    //     }
+    // }
+    // for (Annotation annotation : fieldAnnotations()) {
+    //     if (Objects.equals(annotation.annotationType(), annotationType)) {
+    //         return Fs.as(annotation);
+    //     }
+    // }
+    //
+    // return null;
+    // }
 
     /**
      * Returns whether this {@link ObjectProperty} is equal to the other {@link ObjectProperty}. They are considered
