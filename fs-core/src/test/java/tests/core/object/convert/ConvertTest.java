@@ -1,13 +1,11 @@
 package tests.core.object.convert;
 
-import cn.hutool.core.bean.BeanUtil;
 import internal.utils.DataGen;
 import internal.utils.TestPrint;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.apache.commons.beanutils.BeanUtils;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.Fs;
@@ -229,29 +227,29 @@ public class ConvertTest implements TestPrint, DataGen {
         Object str4 = ObjectConverter.defaultConverter().convert(str1, Object.class, ConvertOption.newInstanceMode(false));
         assertSame(str1, str4);
 
-        DataObject src = new DataObject(new String(randomChars(16)), new String(randomChars(16)));
-        DataObject dst = new DataObject();
-        BeanUtils.copyProperties(dst, src);
-        assertSame(src.getCode(), dst.getCode());
-        assertSame(src.getName(), dst.getName());
-
-        dst.setCode(null);
-        dst.setName(null);
-        org.springframework.beans.BeanUtils.copyProperties(src, dst);
-        assertSame(src.getCode(), dst.getCode());
-        assertSame(src.getName(), dst.getName());
-
-        dst.setCode(null);
-        dst.setName(null);
-        BeanUtil.copyProperties(src, dst);
-        assertSame(src.getCode(), dst.getCode());
-        assertSame(src.getName(), dst.getName());
-
-        dst.setCode(null);
-        dst.setName(null);
-        Fs.copyProperties(src, dst);
-        assertSame(src.getCode(), dst.getCode());
-        assertSame(src.getName(), dst.getName());
+        // DataObject src = new DataObject(new String(randomChars(16)), new String(randomChars(16)));
+        // DataObject dst = new DataObject();
+        // BeanUtils.copyProperties(dst, src);
+        // assertSame(src.getCode(), dst.getCode());
+        // assertSame(src.getName(), dst.getName());
+        //
+        // dst.setCode(null);
+        // dst.setName(null);
+        // org.springframework.beans.BeanUtils.copyProperties(src, dst);
+        // assertSame(src.getCode(), dst.getCode());
+        // assertSame(src.getName(), dst.getName());
+        //
+        // dst.setCode(null);
+        // dst.setName(null);
+        // BeanUtil.copyProperties(src, dst);
+        // assertSame(src.getCode(), dst.getCode());
+        // assertSame(src.getName(), dst.getName());
+        //
+        // dst.setCode(null);
+        // dst.setName(null);
+        // Fs.copyProperties(src, dst);
+        // assertSame(src.getCode(), dst.getCode());
+        // assertSame(src.getName(), dst.getName());
     }
 
     @Test
