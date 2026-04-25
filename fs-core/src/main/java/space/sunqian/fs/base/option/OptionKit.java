@@ -74,8 +74,9 @@ public class OptionKit {
      * <p>
      * If the additional options array is empty, the default options array will be returned. Otherwise, a new array will
      * be copied from the default options array with the new length and returned. Any additional option whose key equals
-     * the key of the default option will override the default option in the returned array. Any new additional option
-     * whose key does not exist in the default options array will be added to the returned array.
+     * the key of the default option will be put into the returned array at the same index of the default option. And
+     * any new additional option whose key does not exist in the default options array will be added to the returned
+     * array start from the index following the last default option index, in order of the additional options array.
      *
      * @param defaultOptions    the default options
      * @param additionalOptions the additional options
@@ -87,21 +88,21 @@ public class OptionKit {
         @Nonnull Option<?, ?> @Nonnull @RetainedParam [] defaultOptions,
         @Nonnull Option<?, ?> @Nonnull ... additionalOptions
     ) {
-        if (ArrayKit.isEmpty(additionalOptions)) {
+        if (additionalOptions.length == 0) {
             return Fs.as(defaultOptions);
         }
         int newCount = 0;
-        ADDITIONAL:
+        SKIP_COUNT:
         for (Option<?, ?> additionalOption : additionalOptions) {
             for (Option<?, ?> defaultOption : defaultOptions) {
-                if (Objects.equals(defaultOption.key(), additionalOption.key())) {
-                    continue ADDITIONAL;
+                if (Objects.equals(additionalOption.key(), defaultOption.key())) {
+                    continue SKIP_COUNT;
                 }
             }
             newCount++;
         }
         Option<?, ?>[] result = Arrays.copyOf(defaultOptions, defaultOptions.length + newCount);
-        int lastIndex = result.length - 1;
+        int additionalIndex = defaultOptions.length;
         ADDITIONAL:
         for (Option<?, ?> additionalOption : additionalOptions) {
             for (int i = 0; i < defaultOptions.length; i++) {
@@ -112,7 +113,7 @@ public class OptionKit {
                 }
             }
             // new option
-            result[lastIndex--] = additionalOption;
+            result[additionalIndex++] = additionalOption;
         }
         return Fs.as(result);
     }
@@ -121,8 +122,9 @@ public class OptionKit {
      * Merges the additional option to the default options.
      * <p>
      * This method always returns a new array copied from the default options array. If the key of the additional option
-     * equals the key of any option in the default options array, the additional option will override the default option
-     * in the returned array. Otherwise, the additional option will be added to the returned array.
+     * equals the key of any option in the default options array, the additional option will be put into the returned
+     * array at the same index of the default option. Otherwise, the additional option will be added to the returned
+     * array at the last index.
      *
      * @param defaultOptions   the default options
      * @param additionalOption the additional option
@@ -134,16 +136,16 @@ public class OptionKit {
         @Nonnull Option<?, ?> @Nonnull [] defaultOptions,
         @Nonnull Option<?, ?> additionalOption
     ) {
-        int index = ArrayKit.indexOf(
-            defaultOptions, (i, o) -> Objects.equals(o.key(), additionalOption.key())
-        );
-        if (index == -1) {
-            Option<?, ?>[] result = Arrays.copyOf(defaultOptions, defaultOptions.length + 1);
-            result[result.length - 1] = additionalOption;
-            return Fs.as(result);
+        for (int i = 0; i < defaultOptions.length; i++) {
+            Option<?, ?> defaultOption = defaultOptions[i];
+            if (Objects.equals(defaultOption.key(), additionalOption.key())) {
+                Option<?, ?>[] result = Arrays.copyOf(defaultOptions, defaultOptions.length);
+                result[i] = additionalOption;
+                return Fs.as(result);
+            }
         }
-        Option<?, ?>[] result = Arrays.copyOf(defaultOptions, defaultOptions.length);
-        result[index] = additionalOption;
+        Option<?, ?>[] result = Arrays.copyOf(defaultOptions, defaultOptions.length + 1);
+        result[defaultOptions.length] = additionalOption;
         return Fs.as(result);
     }
 

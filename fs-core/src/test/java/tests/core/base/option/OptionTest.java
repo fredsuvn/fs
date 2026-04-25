@@ -89,7 +89,7 @@ public class OptionTest {
         // Test merge with new options
         Option<String, String>[] additionalOptions3 = array(Option.of("d", "4"), Option.of("e", "5"));
         assertNotSame(defaultOptions, OptionKit.mergeOptions(defaultOptions, additionalOptions3));
-        assertArrayEquals(array(Option.of("a", "1"), Option.of("b", "2"), Option.of("c", "3"), Option.of("e", "5"), Option.of("d", "4")), OptionKit.mergeOptions(defaultOptions, additionalOptions3));
+        assertArrayEquals(array(Option.of("a", "1"), Option.of("b", "2"), Option.of("c", "3"), Option.of("d", "4"), Option.of("e", "5")), OptionKit.mergeOptions(defaultOptions, additionalOptions3));
 
         // Test merge with mixed overriding and new options
         Option<String, String>[] additionalOptions4 = array(Option.of("c", "3"), Option.of("d", "4"));
