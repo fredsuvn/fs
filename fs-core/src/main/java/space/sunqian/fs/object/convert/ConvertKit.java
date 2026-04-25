@@ -32,7 +32,8 @@ public class ConvertKit {
      * @return the {@link Option} of {@link DateFormatter} for the given {@link DatePattern}
      */
     public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter> getDateFormatterOption(
-        @Nonnull DatePattern datePattern) {
+        @Nonnull DatePattern datePattern
+    ) {
         ZoneId zoneId;
         if ("".equals(datePattern.zoneId())) {
             zoneId = ZoneId.systemDefault();
@@ -52,7 +53,9 @@ public class ConvertKit {
      * @return the {@link Option} of {@link DateFormatter} for the given pattern and zone id
      */
     public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter> getDateFormatterOption(
-        @Nonnull String pattern, @Nonnull ZoneId zoneId) {
+        @Nonnull String pattern,
+        @Nonnull ZoneId zoneId
+    ) {
         return DateFormatterCache.INST.get(pattern, zoneId);
     }
 
@@ -65,7 +68,8 @@ public class ConvertKit {
      * @return the {@link Option} of {@link NumFormatter} for the given {@link NumPattern}
      */
     public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumFormatter> getNumFormatterOption(
-        @Nonnull NumPattern numPattern) {
+        @Nonnull NumPattern numPattern
+    ) {
         return getNumFormatterOption(numPattern.value());
     }
 
@@ -78,7 +82,8 @@ public class ConvertKit {
      * @return the {@link Option} of {@link NumFormatter} for the given pattern
      */
     public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumFormatter> getNumFormatterOption(
-        @Nonnull String pattern) {
+        @Nonnull String pattern
+    ) {
         return NumFormatterCache.INST.get(pattern);
     }
 

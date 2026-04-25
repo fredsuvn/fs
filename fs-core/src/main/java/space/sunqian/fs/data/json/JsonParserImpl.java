@@ -311,11 +311,11 @@ enum JsonParserImpl implements JsonParser {
                 break;
             }
         }
-        String numberString = strBuilder.toString();
+        // String numberString = strBuilder.toString();
         try {
-            return NumKit.toNumber(numberString);
+            return NumKit.toNumber(strBuilder);
         } catch (Exception e) {
-            throw new JsonDataParsingException(startIndex, numberString, null);
+            throw new JsonDataParsingException(startIndex, strBuilder.toString(), null);
         }
     }
 
