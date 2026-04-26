@@ -136,7 +136,7 @@ final class ByMethodHandle {
 
         @Override
         public @Nullable Object invokeDirectly(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
-            return methodHandle.invokeWithArguments(InvokeKit.toInstanceArgs(inst, args));
+            return methodHandle.invokeWithArguments(InvocableBack.toInstanceArgs(inst, args));
         }
     }
 

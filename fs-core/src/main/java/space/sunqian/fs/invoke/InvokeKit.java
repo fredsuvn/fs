@@ -41,15 +41,6 @@ public class InvokeKit {
         return ByOthers.invokeStatic(handle, args);
     }
 
-    static @Nullable Object @Nonnull [] toInstanceArgs(
-        @Nullable Object inst, @Nullable Object @Nonnull ... args
-    ) {
-        Object[] instanceArgs = new Object[args.length + 1];
-        instanceArgs[0] = inst;
-        System.arraycopy(args, 0, instanceArgs, 1, args.length);
-        return instanceArgs;
-    }
-
     private InvokeKit() {
     }
 }
