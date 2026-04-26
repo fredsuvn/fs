@@ -12,6 +12,8 @@ import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.exception.AwaitingException;
 import space.sunqian.fs.base.exception.UnreachablePointException;
 import space.sunqian.fs.base.system.OSKit;
+import space.sunqian.fs.cache.SimpleCache;
+import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
@@ -191,6 +193,28 @@ public class FsTest implements Asserter, TestPrint {
         } catch (AwaitingException e) {
             assertSame(e.getCause(), cause);
         }
+    }
+
+    @Test
+    public void testGlobalCache() {
+        SimpleCache<String, String> cache1 = SimpleCache.ofStrong();
+        SimpleCache<Integer, Integer> cache2 = SimpleCache.ofStrong();
+        Fs.registerGlobalCache(cache1);
+        assertEquals(
+            SetKit.set(cache1),
+            Fs.globalCaches()
+        );
+        Fs.registerGlobalCache(cache2);
+        assertEquals(
+            SetKit.set(cache1, cache2),
+            Fs.globalCaches()
+        );
+        Fs.unregisterGlobalCache(cache1);
+        assertEquals(
+            SetKit.set(cache2),
+            Fs.globalCaches()
+        );
+        Fs.cleanGlobalCaches();
     }
 
     @Test

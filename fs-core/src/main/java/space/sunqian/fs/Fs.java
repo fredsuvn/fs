@@ -13,6 +13,7 @@ import space.sunqian.fs.base.string.StringKit;
 import space.sunqian.fs.base.thread.ThreadKit;
 import space.sunqian.fs.base.value.Ret;
 import space.sunqian.fs.build.processing.AutoVersion;
+import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
@@ -33,6 +34,7 @@ import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -44,6 +46,7 @@ import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -393,6 +396,49 @@ public class Fs {
             throw new AwaitingException(e);
         }
     }
+
+    //---------------- Caches Begin ----------------//
+
+    /**
+     * Registers the given cache as global cache for {@code fs} library. The cache can be unregistered by
+     * {@link #unregisterGlobalCache(SimpleCache)} or cleaned by {@link #cleanGlobalCaches()} with all registered global
+     * caches.
+     *
+     * @param cache the given cache to be registered as global cache
+     */
+    public static void registerGlobalCache(SimpleCache<?, ?> cache) {
+        Caches.register(cache);
+    }
+
+    /**
+     * Unregisters the given cache from the global caches of {@code fs} library. The cache should be registered by
+     * {@link #registerGlobalCache(SimpleCache)} first.
+     *
+     * @param cache the given cache to be unregistered from the global caches
+     */
+    public static void unregisterGlobalCache(SimpleCache<?, ?> cache) {
+        Caches.unregister(cache);
+    }
+
+    /**
+     * Cleans all global caches of {@code fs} library. The global caches are registered by
+     * {@link #registerGlobalCache(SimpleCache)} first, and this method will call the {@link SimpleCache#clean()} method
+     * for each registered global cache.
+     */
+    public static void cleanGlobalCaches() {
+        Caches.clean();
+    }
+
+    /**
+     * Returns an unmodifiable view of all global caches of {@code fs} library.
+     *
+     * @return an unmodifiable view of all global caches of {@code fs} library
+     */
+    public static @Nonnull @Immutable Set<SimpleCache<?, ?>> globalCaches() {
+        return Caches.cacheSet();
+    }
+
+    //---------------- Caches End ----------------//
 
     //---------------- Equals Begin ----------------//
 
@@ -1196,5 +1242,31 @@ public class Fs {
     //---------------- Process End ----------------//
 
     private Fs() {
+    }
+
+    private static final class Caches {
+
+        private static final @Nonnull Set<SimpleCache<?, ?>> CACHE_SET = ConcurrentHashMap.newKeySet();
+        private static final @Nonnull Set<SimpleCache<?, ?>> UNMODIFIED_CACHE_SET =
+            Collections.unmodifiableSet(CACHE_SET);
+
+        private static void register(SimpleCache<?, ?> cache) {
+            CACHE_SET.add(cache);
+        }
+
+        private static void unregister(SimpleCache<?, ?> cache) {
+            CACHE_SET.remove(cache);
+        }
+
+        private static void clean() {
+            CACHE_SET.forEach(SimpleCache::clean);
+        }
+
+        public static @Nonnull @Immutable Set<SimpleCache<?, ?>> cacheSet() {
+            return UNMODIFIED_CACHE_SET;
+        }
+
+        private Caches() {
+        }
     }
 }
