@@ -7,6 +7,8 @@ import java.time.ZonedDateTime;
 /**
  * Represents the content of a simple log message, to provide the necessary information for logging. It is typically
  * used to help implement the {@link SimpleLogger} interface.
+ *
+ * @author sunqian
  */
 public interface SimpleLog {
 
