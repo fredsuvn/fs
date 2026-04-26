@@ -1,5 +1,6 @@
 package space.sunqian.fs.reflect;
 
+import space.sunqian.annotation.CachedResult;
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -325,7 +326,7 @@ public class TypeKit {
      * @return the actual type arguments of the given type, based on the type parameters of the specified base type, in
      * order of those type parameters, may return {@code null} if the given type cannot be resolved
      */
-    public static @Nullable @Immutable List<@Nonnull Type> getActualTypeArguments(
+    public static @Nullable @CachedResult @Immutable List<@Nonnull Type> getActualTypeArguments(
         @Nonnull Type type, @Nonnull Class<?> baseType
     ) {
         SimpleKey key = SimpleKey.of(type, baseType);
@@ -394,7 +395,7 @@ public class TypeKit {
      * order of those type parameters
      * @throws ReflectionException if the given type cannot be resolved
      */
-    public static @Nonnull @Immutable List<@Nonnull Type> resolveActualTypeArguments(
+    public static @Nonnull @CachedResult @Immutable List<@Nonnull Type> resolveActualTypeArguments(
         @Nonnull Type type, @Nonnull Class<?> baseType
     ) throws ReflectionException {
         List<Type> ret = getActualTypeArguments(type, baseType);
@@ -427,7 +428,7 @@ public class TypeKit {
      * @param type the given type
      * @return an immutable map contains the mapping of type parameters for the given type
      */
-    public static @Nonnull @Immutable Map<@Nonnull TypeVariable<?>, @Nonnull Type> typeParametersMapping(
+    public static @Nonnull @CachedResult @Immutable Map<@Nonnull TypeVariable<?>, @Nonnull Type> typeParametersMapping(
         @Nonnull Type type
     ) {
         return TypeParametersMappingCache.get(type, TypeKit::typeParametersMapping0);
