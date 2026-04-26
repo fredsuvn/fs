@@ -38,7 +38,8 @@ public interface Invocable {
      * @param method the specified method
      * @return an instance of {@link Invocable} represents the specified method
      */
-    static @Nonnull @CachedResult Invocable of(@Nonnull Method method) {
+    @CachedResult
+    static @Nonnull Invocable of(@Nonnull Method method) {
         return of(method, InvocationMode.recommended(method));
     }
 
@@ -49,7 +50,8 @@ public interface Invocable {
      * @param mode   the specified implementation
      * @return an instance of {@link Invocable} represents the specified method
      */
-    static @Nonnull @CachedResult Invocable of(@Nonnull Method method, @Nonnull InvocationMode mode) {
+    @CachedResult
+    static @Nonnull Invocable of(@Nonnull Method method, @Nonnull InvocationMode mode) {
         SimpleKey key = SimpleKey.of(method, mode);
         return InvocableBack.Cache.get(key, k -> {
             SimpleKey sk = (SimpleKey) k;
@@ -66,7 +68,8 @@ public interface Invocable {
      * @param constructor the specified constructor
      * @return an instance of {@link Invocable} represents the specified constructor
      */
-    static @Nonnull @CachedResult Invocable of(@Nonnull Constructor<?> constructor) {
+    @CachedResult
+    static @Nonnull Invocable of(@Nonnull Constructor<?> constructor) {
         return of(constructor, InvocationMode.recommended(constructor));
     }
 
@@ -78,7 +81,8 @@ public interface Invocable {
      * @param mode        the specified implementation
      * @return an instance of {@link Invocable} represents the specified constructor
      */
-    static @Nonnull @CachedResult Invocable of(@Nonnull Constructor<?> constructor, @Nonnull InvocationMode mode) {
+    @CachedResult
+    static @Nonnull Invocable of(@Nonnull Constructor<?> constructor, @Nonnull InvocationMode mode) {
         SimpleKey key = SimpleKey.of(constructor, mode);
         return InvocableBack.Cache.get(key, k -> {
             SimpleKey sk = (SimpleKey) k;
@@ -95,7 +99,8 @@ public interface Invocable {
      * @param isStatic to specify whether the method handle is for a static method/constructor
      * @return an instance of {@link Invocable} represents the specified method handle
      */
-    static @Nonnull @CachedResult Invocable of(@Nonnull MethodHandle handle, boolean isStatic) {
+    @CachedResult
+    static @Nonnull Invocable of(@Nonnull MethodHandle handle, boolean isStatic) {
         SimpleKey key = SimpleKey.of(handle, isStatic);
         return InvocableBack.Cache.get(key, k -> {
             SimpleKey sk = (SimpleKey) k;
