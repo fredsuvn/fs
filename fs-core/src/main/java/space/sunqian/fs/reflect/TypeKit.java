@@ -6,6 +6,7 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.OutParam;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.base.value.SimpleKey;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.MapKit;
@@ -25,6 +26,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Utilities for {@link Type}.
@@ -323,7 +325,18 @@ public class TypeKit {
      * @return the actual type arguments of the given type, based on the type parameters of the specified base type, in
      * order of those type parameters, may return {@code null} if the given type cannot be resolved
      */
-    public static @Nullable List<@Nonnull Type> getActualTypeArguments(
+    public static @Nullable @Immutable List<@Nonnull Type> getActualTypeArguments(
+        @Nonnull Type type, @Nonnull Class<?> baseType
+    ) {
+        SimpleKey key = SimpleKey.of(type, baseType);
+        return ActualTypeArgumentsCache.get(key, k -> {
+            Type t = k.getAs(0);
+            Class<?> bt = k.getAs(1);
+            return getActualTypeArguments0(t, bt);
+        });
+    }
+
+    private static @Nullable @Immutable List<@Nonnull Type> getActualTypeArguments0(
         @Nonnull Type type, @Nonnull Class<?> baseType
     ) {
         if (baseType.isArray()) {
@@ -347,13 +360,15 @@ public class TypeKit {
         }
         Map<TypeVariable<?>, Type> typeArguments = typeParametersMapping(type);
         Set<Type> stack = new HashSet<>();
-        return Fs.stream(typeParameters)
+        Stream<Type> stream = Fs.stream(typeParameters)
             .map(typeVariable -> {
                 Type actualType = MapKit.resolveChain(typeArguments, typeVariable, stack);
                 stack.clear();
                 return Fs.nonnull(actualType, typeVariable);
-            })
-            .collect(Collectors.toList());
+            });
+        @SuppressWarnings({"SimplifyStreamApiCallChains", "FuseStreamOperations"})
+        List<Type> list = stream.collect(Collectors.toList());
+        return Collections.unmodifiableList(list);
     }
 
     /**
@@ -379,7 +394,7 @@ public class TypeKit {
      * order of those type parameters
      * @throws ReflectionException if the given type cannot be resolved
      */
-    public static @Nonnull List<@Nonnull Type> resolveActualTypeArguments(
+    public static @Nonnull @Immutable List<@Nonnull Type> resolveActualTypeArguments(
         @Nonnull Type type, @Nonnull Class<?> baseType
     ) throws ReflectionException {
         List<Type> ret = getActualTypeArguments(type, baseType);
@@ -961,16 +976,41 @@ public class TypeKit {
         }
     }
 
+    private static final class ActualTypeArgumentsCache {
+
+        private static final @Nonnull SimpleCache<@Nonnull SimpleKey, @Nonnull List<@Nonnull Type>> CACHE =
+            SimpleCache.ofSoft();
+
+        static {
+            Fs.registerGlobalCache(CACHE);
+        }
+
+        @SuppressWarnings("DataFlowIssue")
+        private static @Nullable @Immutable List<@Nonnull Type> get(
+            @Nonnull SimpleKey key,
+            @Nonnull Function<@Nonnull SimpleKey, @Nullable @Immutable List<@Nonnull Type>> function
+        ) {
+            return CACHE.get(key, function);
+        }
+
+        private ActualTypeArgumentsCache() {
+        }
+    }
+
     private static final class TypeParametersMappingCache {
 
         private static final @Nonnull
-        SimpleCache<@Nonnull Type, @Nonnull Map<@Nonnull TypeVariable<?>, @Nonnull Type>> cache = SimpleCache.ofSoft();
+        SimpleCache<@Nonnull Type, @Nonnull Map<@Nonnull TypeVariable<?>, @Nonnull Type>> CACHE = SimpleCache.ofSoft();
+
+        static {
+            Fs.registerGlobalCache(CACHE);
+        }
 
         private static @Nonnull @Immutable Map<@Nonnull TypeVariable<?>, @Nonnull Type> get(
             @Nonnull Type type,
-            Function<@Nonnull Type, @Nonnull Map<@Nonnull TypeVariable<?>, @Nonnull Type>> function
+            @Nonnull Function<@Nonnull Type, @Nonnull @Immutable Map<@Nonnull TypeVariable<?>, @Nonnull Type>> function
         ) {
-            return cache.get(type, function);
+            return CACHE.get(type, function);
         }
 
         private TypeParametersMappingCache() {
