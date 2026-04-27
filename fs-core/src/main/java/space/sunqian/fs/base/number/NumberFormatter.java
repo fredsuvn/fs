@@ -1,5 +1,6 @@
 package space.sunqian.fs.base.number;
 
+import space.sunqian.annotation.CachedResult;
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -30,13 +31,26 @@ public interface NumberFormatter {
     }
 
     /**
+     * Returns an instance of {@link NumberFormatter} with the given number format pattern.
+     * <p>
+     * By default, this method uses {@link DecimalFormat} and {@link ThreadLocal} to support multi-threading.
+     *
+     * @param pattern the number format pattern
+     * @return an instance of {@link NumberFormatter} with the given number format pattern
+     */
+    @CachedResult
+    static @Nonnull NumberFormatter ofPattern(@Nonnull String pattern) {
+        return NumberBack.Cache.get(pattern, NumberFormatter::newFormatter);
+    }
+
+    /**
      * Returns a new {@link NumberFormatter} with the given number format supplier.
      *
      * @param supplier the number format supplier
      * @return a new {@link NumberFormatter} with the given number format supplier
      */
-    static @Nonnull NumberFormatter ofSupplier(@Nonnull Supplier<? extends @Nonnull NumberFormat> supplier) {
-        return new NumberBack.NumberFormatterImpl(supplier);
+    static @Nonnull NumberFormatter newFormatter(@Nonnull Supplier<? extends @Nonnull NumberFormat> supplier) {
+        return NumberBack.newFormatter(supplier);
     }
 
     /**
@@ -47,9 +61,9 @@ public interface NumberFormatter {
      * @param pattern the number format pattern
      * @return a new {@link NumberFormatter} with the given number format pattern
      */
-    static @Nonnull NumberFormatter ofPattern(@Nonnull String pattern) {
+    static @Nonnull NumberFormatter newFormatter(@Nonnull String pattern) {
         ThreadLocal<DecimalFormat> format = ThreadLocal.withInitial(() -> new DecimalFormat(pattern));
-        return ofSupplier(format::get);
+        return newFormatter(format::get);
     }
 
     /**

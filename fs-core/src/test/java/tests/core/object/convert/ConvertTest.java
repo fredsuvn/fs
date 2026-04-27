@@ -609,9 +609,9 @@ public class ConvertTest implements TestPrint, DataGen {
         Option<?, NumberFormatter> nf1 = ConvertKit.getNumFormatterOption("#.0000");
         Option<?, NumberFormatter> nf2 = ConvertKit.getNumFormatterOption("#.0000");
         Option<?, NumberFormatter> nf3 = ConvertKit.getNumFormatterOption("#.000000");
-        assertSame(nf1, nf2);
-        assertNotSame(nf1, nf3);
-        assertNotSame(nf2, nf3);
+        assertEquals(nf1, nf2);
+        assertNotEquals(nf1, nf3);
+        assertNotEquals(nf2, nf3);
     }
 
     private void testAnnotationObjectToObject() {

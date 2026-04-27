@@ -1,8 +1,11 @@
 package space.sunqian.fs.base.number;
 
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.fs.Fs;
+import space.sunqian.fs.cache.SimpleCache;
 
 import java.text.NumberFormat;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 final class NumberBack {
@@ -50,6 +53,28 @@ final class NumberBack {
         @Override
         public <T> @Nonnull T parse(@Nonnull CharSequence numStr, @Nonnull Class<T> numType) throws NumberException {
             return NumberKit.toNumber(numStr, numType);
+        }
+    }
+
+    static final class Cache {
+
+        private static final @Nonnull SimpleCache<
+            @Nonnull String,
+            @Nonnull NumberFormatter
+            > CACHE = SimpleCache.ofSoft();
+
+        static {
+            Fs.registerGlobalCache(CACHE);
+        }
+
+        static @Nonnull NumberFormatter get(
+            @Nonnull String pattern,
+            @Nonnull Function<@Nonnull String, @Nonnull NumberFormatter> function
+        ) {
+            return CACHE.get(pattern, function);
+        }
+
+        private Cache() {
         }
     }
 

@@ -83,7 +83,7 @@ public class ConvertKit {
     public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> getNumFormatterOption(
         @Nonnull String pattern
     ) {
-        return NumFormatterCache.INST.get(pattern);
+        return Option.of(ConvertOption.NUM_FORMATTER, NumberFormatter.ofPattern(pattern));
     }
 
     /**
@@ -145,22 +145,6 @@ public class ConvertKit {
             return srcAnnotation;
         } else {
             return dstAnnotation;
-        }
-    }
-
-    private enum NumFormatterCache {
-        INST;
-
-        private final @Nonnull SimpleCache<
-            @Nonnull String,
-            @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter>
-            > cache = SimpleCache.ofSoft();
-
-        public @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> get(@Nonnull String pattern) {
-            return cache.get(
-                pattern,
-                p -> ConvertOption.numFormatter(NumberFormatter.ofPattern(p))
-            );
         }
     }
 
