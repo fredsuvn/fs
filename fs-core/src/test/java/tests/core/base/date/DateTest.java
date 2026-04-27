@@ -82,17 +82,17 @@ public class DateTest implements TestPrint {
         assertEquals(DateKit.formatSafe(nowOffsetDateTime), formatter.format(nowOffsetDateTime));
 
         // Test formatSafe with different formatters
-        DateFormatter instantSpec = DateFormatter.ofFormatter(DateTimeFormatter.ISO_INSTANT);
+        DateFormatter instantSpec = DateFormatter.from(DateTimeFormatter.ISO_INSTANT);
         assertEquals(instantSpec.formatSafe(nowDate), DateTimeFormatter.ISO_INSTANT.format(nowInstant));
         assertEquals(instantSpec.formatSafe(nowInstant), DateTimeFormatter.ISO_INSTANT.format(nowInstant));
 
         assertEquals(
-            DateFormatter.ofFormatter(DateTimeFormatter.ISO_DATE).formatSafe(nowLocalDate),
+            DateFormatter.from(DateTimeFormatter.ISO_DATE).formatSafe(nowLocalDate),
             DateTimeFormatter.ISO_DATE.format(nowLocalDate)
         );
 
         assertEquals(
-            DateFormatter.ofFormatter(DateTimeFormatter.ISO_TIME).formatSafe(nowLocalTime),
+            DateFormatter.from(DateTimeFormatter.ISO_TIME).formatSafe(nowLocalTime),
             DateTimeFormatter.ISO_TIME.format(nowLocalTime)
         );
 
@@ -118,19 +118,19 @@ public class DateTest implements TestPrint {
 
         // Test parseSafe with ISO_ZONED_DATE_TIME
         String fullStr = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(nowZonedDateTime);
-        DateFormatter instantSpec = DateFormatter.ofFormatter(DateTimeFormatter.ISO_ZONED_DATE_TIME);
+        DateFormatter instantSpec = DateFormatter.from(DateTimeFormatter.ISO_ZONED_DATE_TIME);
         assertEquals(instantSpec.parseSafe(fullStr, ZonedDateTime.class), nowZonedDateTime);
         assertEquals(instantSpec.parseSafe(fullStr, OffsetDateTime.class), nowOffsetDateTime);
 
         // Test parseSafe with ISO_INSTANT
         assertEquals(
-            DateFormatter.ofFormatter(DateTimeFormatter.ISO_INSTANT)
+            DateFormatter.from(DateTimeFormatter.ISO_INSTANT)
                 .parseSafe(DateTimeFormatter.ISO_INSTANT.format(nowInstant), Instant.class),
             nowInstant
         );
 
         assertEquals(
-            DateFormatter.ofFormatter(DateTimeFormatter.ISO_INSTANT)
+            DateFormatter.from(DateTimeFormatter.ISO_INSTANT)
                 .parseSafe(DateTimeFormatter.ISO_INSTANT.format(nowInstant), Date.class),
             nowDate
         );
@@ -178,7 +178,7 @@ public class DateTest implements TestPrint {
         assertEquals("yyyy-MM-dd HH:mm:ss", p.pattern());
         assertTrue(p.hasPattern());
 
-        DateFormatter f = DateFormatter.ofFormatter(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        DateFormatter f = DateFormatter.from(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         assertThrows(DateTimeException.class, f::pattern);
         assertFalse(f.hasPattern());
 

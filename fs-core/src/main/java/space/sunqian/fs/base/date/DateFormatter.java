@@ -4,6 +4,7 @@ import space.sunqian.annotation.CachedResult;
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.base.value.SimpleKey;
 
 import java.time.DateTimeException;
@@ -26,6 +27,7 @@ import java.util.Date;
  * @author sunqian
  */
 @Immutable
+@ThreadSafe
 public interface DateFormatter {
 
     /**
@@ -36,21 +38,6 @@ public interface DateFormatter {
      */
     static @Nonnull DateFormatter defaultFormatter() {
         return DateKit.DEFAULT_FORMATTER;
-    }
-
-    /**
-     * Returns an instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}. The default zone info
-     * of the returned instance is {@link ZoneId#systemDefault()}.
-     * <p>
-     * The returned instance supports {@link Date}, {@link Instant}, {@link LocalDateTime}, {@link ZonedDateTime},
-     * {@link OffsetDateTime}, {@link LocalDate} and {@link LocalTime}. But doesn't support pattern methods.
-     *
-     * @param formatter the given {@link DateTimeFormatter}
-     * @return an instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}
-     */
-    @CachedResult
-    static @Nonnull DateFormatter ofFormatter(@Nonnull DateTimeFormatter formatter) {
-        return ofFormatter(formatter, ZoneId.systemDefault());
     }
 
     /**
@@ -68,28 +55,6 @@ public interface DateFormatter {
     @CachedResult
     static @Nonnull DateFormatter ofPattern(@Nonnull String pattern) throws DateTimeException {
         return ofPattern(pattern, ZoneId.systemDefault());
-    }
-
-    /**
-     * Returns an instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}.
-     * <p>
-     * The returned instance supports {@link Date}, {@link Instant}, {@link LocalDateTime}, {@link ZonedDateTime},
-     * {@link OffsetDateTime}, {@link LocalDate} and {@link LocalTime}. But doesn't support pattern methods.
-     *
-     * @param formatter the given {@link DateTimeFormatter}
-     * @param zoneId    the default zone info of the returned instance
-     * @return an instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}
-     */
-    @CachedResult
-    static @Nonnull DateFormatter ofFormatter(
-        @Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId
-    ) {
-        SimpleKey key = SimpleKey.of(formatter, zoneId);
-        return DateBack.Cache.get(key, k -> {
-            DateTimeFormatter f = k.getAs(0);
-            ZoneId z = k.getAs(1);
-            return newFormatter(f, z);
-        });
     }
 
     /**
@@ -113,6 +78,43 @@ public interface DateFormatter {
             String p = k.getAs(0);
             ZoneId z = k.getAs(1);
             return newFormatter(p, z);
+        });
+    }
+
+    /**
+     * Returns an instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}. The default zone info
+     * of the returned instance is {@link ZoneId#systemDefault()}.
+     * <p>
+     * The returned instance supports {@link Date}, {@link Instant}, {@link LocalDateTime}, {@link ZonedDateTime},
+     * {@link OffsetDateTime}, {@link LocalDate} and {@link LocalTime}. But doesn't support pattern methods.
+     *
+     * @param formatter the given {@link DateTimeFormatter}
+     * @return an instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}
+     */
+    @CachedResult
+    static @Nonnull DateFormatter from(@Nonnull DateTimeFormatter formatter) {
+        return from(formatter, ZoneId.systemDefault());
+    }
+
+    /**
+     * Returns an instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}.
+     * <p>
+     * The returned instance supports {@link Date}, {@link Instant}, {@link LocalDateTime}, {@link ZonedDateTime},
+     * {@link OffsetDateTime}, {@link LocalDate} and {@link LocalTime}. But doesn't support pattern methods.
+     *
+     * @param formatter the given {@link DateTimeFormatter}
+     * @param zoneId    the default zone info of the returned instance
+     * @return an instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}
+     */
+    @CachedResult
+    static @Nonnull DateFormatter from(
+        @Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId
+    ) {
+        SimpleKey key = SimpleKey.of(formatter, zoneId);
+        return DateBack.Cache.get(key, k -> {
+            DateTimeFormatter f = k.getAs(0);
+            ZoneId z = k.getAs(1);
+            return newFormatter(f, z);
         });
     }
 
