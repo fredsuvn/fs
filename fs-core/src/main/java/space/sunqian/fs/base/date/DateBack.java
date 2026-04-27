@@ -2,6 +2,8 @@ package space.sunqian.fs.base.date;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.base.value.SimpleKey;
+import space.sunqian.fs.cache.SimpleCache;
 
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -16,16 +18,17 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.Objects;
+import java.util.function.Function;
 
-final class DateFormatterBack {
+final class DateBack {
 
-    static @Nonnull DateFormatter ofFormatter(
+    static @Nonnull DateFormatter newFormatter(
         @Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId
     ) {
         return new OfFormatter(formatter, zoneId);
     }
 
-    static @Nonnull DateFormatter ofPattern(
+    static @Nonnull DateFormatter newFormatter(
         @Nonnull String pattern, @Nonnull ZoneId zoneId
     ) throws DateTimeException {
         try {
@@ -214,6 +217,28 @@ final class DateFormatterBack {
         }
     }
 
-    private DateFormatterBack() {
+    static final class Cache {
+
+        private static final @Nonnull SimpleCache<
+            @Nonnull SimpleKey,
+            @Nonnull DateFormatter
+            > CACHE = SimpleCache.ofSoft();
+
+        static {
+            Fs.registerGlobalCache(CACHE);
+        }
+
+        static @Nonnull DateFormatter get(
+            @Nonnull SimpleKey key,
+            @Nonnull Function<@Nonnull SimpleKey, @Nonnull DateFormatter> function
+        ) {
+            return CACHE.get(key, function);
+        }
+
+        private Cache() {
+        }
+    }
+
+    private DateBack() {
     }
 }

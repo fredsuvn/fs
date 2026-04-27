@@ -254,7 +254,7 @@ public class ConvertTest implements TestPrint, DataGen {
 
     @Test
     public void testAnnotation() {
-        testPatternCache();
+        testPatternAnnotation();
         testAnnotationObjectToObject();
         testAnnotationMapToObject();
         testAnnotationNullSupport();
@@ -598,13 +598,13 @@ public class ConvertTest implements TestPrint, DataGen {
         assertEquals(1L, ((MapObject) ObjectConverter.defaultConverter().convert(map, (Type) MapObject.class)).getLongNum());
     }
 
-    private void testPatternCache() {
+    private void testPatternAnnotation() {
         Option<?, DateFormatter> df1 = ConvertKit.getDateFormatterOption("yyyy-MM-dd", ZoneId.systemDefault());
         Option<?, DateFormatter> df2 = ConvertKit.getDateFormatterOption("yyyy-MM-dd", ZoneId.systemDefault());
         Option<?, DateFormatter> df3 = ConvertKit.getDateFormatterOption("yyyy-MM-dd HH:mm:ss", ZoneId.systemDefault());
-        assertSame(df1, df2);
-        assertNotSame(df1, df3);
-        assertNotSame(df2, df3);
+        assertEquals(df1, df2);
+        assertNotEquals(df1, df3);
+        assertNotEquals(df2, df3);
 
         Option<?, NumFormatter> nf1 = ConvertKit.getNumFormatterOption("#.0000");
         Option<?, NumFormatter> nf2 = ConvertKit.getNumFormatterOption("#.0000");
@@ -624,12 +624,12 @@ public class ConvertTest implements TestPrint, DataGen {
             ann2.getDate1()
         );
         assertEquals(
-            DateFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", ZoneId.of("UTC+2")).parse(ann1.getDate2(), LocalDateTime.class),
+            DateFormatter.newFormatter("yyyy-MM-dd HH:mm:ss", ZoneId.of("UTC+2")).parse(ann1.getDate2(), LocalDateTime.class),
             ann2.getDate2()
         );
         assertEquals(DateFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(ann1.getDate3()), ann2.getDate3());
         assertEquals(
-            DateFormatter.ofPattern("YYYY-MM-dd HH:mm:ss", ZoneId.of("Asia/Shanghai")).format(ann1.getDate4()),
+            DateFormatter.newFormatter("YYYY-MM-dd HH:mm:ss", ZoneId.of("Asia/Shanghai")).format(ann1.getDate4()),
             ann2.getDate4()
         );
         assertEquals(NumFormatter.ofPattern(NumKit.DEFAULT_PATTERN).format(ann1.getNum1()), ann2.getNum1());
@@ -651,12 +651,12 @@ public class ConvertTest implements TestPrint, DataGen {
             ann2.getDate1()
         );
         assertEquals(
-            DateFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", ZoneId.of("UTC+2")).parse((CharSequence) ann1.get("date2"), LocalDateTime.class),
+            DateFormatter.newFormatter("yyyy-MM-dd HH:mm:ss", ZoneId.of("UTC+2")).parse((CharSequence) ann1.get("date2"), LocalDateTime.class),
             ann2.getDate2()
         );
         assertEquals(DateFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format((LocalDateTime) ann1.get("date3")), ann2.getDate3());
         assertEquals(
-            DateFormatter.ofPattern("YYYY-MM-dd HH:mm:ss", ZoneId.of("Asia/Shanghai")).format((Date) ann1.get("date4")),
+            DateFormatter.newFormatter("YYYY-MM-dd HH:mm:ss", ZoneId.of("Asia/Shanghai")).format((Date) ann1.get("date4")),
             ann2.getDate4()
         );
         assertEquals(((BigDecimal) ann1.get("num1")).toString(), ann2.getNum1());

@@ -7,7 +7,6 @@ import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.number.NumFormatter;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.option.OptionKit;
-import space.sunqian.fs.base.value.SimpleKey;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumPattern;
@@ -56,7 +55,7 @@ public class ConvertKit {
         @Nonnull String pattern,
         @Nonnull ZoneId zoneId
     ) {
-        return DateFormatterCache.INST.get(pattern, zoneId);
+        return Option.of(ConvertOption.DATE_FORMATTER, DateFormatter.ofPattern(pattern, zoneId));
     }
 
     /**
@@ -146,25 +145,6 @@ public class ConvertKit {
             return srcAnnotation;
         } else {
             return dstAnnotation;
-        }
-    }
-
-    private enum DateFormatterCache {
-        INST;
-
-        private final @Nonnull SimpleCache<
-            @Nonnull SimpleKey,
-            @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter>
-            > cache = SimpleCache.ofSoft();
-
-        public @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter> get(
-            @Nonnull String pattern, @Nonnull ZoneId zoneId
-        ) {
-            return cache.get(
-                SimpleKey.of(pattern, zoneId),
-                k -> ConvertOption.dateFormatter(DateFormatter.ofPattern(k.getAs(0), k.getAs(1))
-                )
-            );
         }
     }
 
