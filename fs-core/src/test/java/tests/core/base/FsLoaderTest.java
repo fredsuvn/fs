@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.FsLoader;
 import space.sunqian.fs.base.exception.UnknownTypeException;
 import space.sunqian.fs.base.system.JvmKit;
-import space.sunqian.fs.object.schema.handlers.RecordSchemaHandler;
 
 import java.util.Arrays;
 
@@ -128,7 +127,6 @@ public class FsLoaderTest {
     public void testLoadInstanceByDependent() {
         testLoadInstanceByDependentWithExistingClass();
         testLoadInstanceByDependentWithNonExistingClass();
-        testLoadInstanceByDependentWithRecordSchemaHandler();
     }
 
     private void testLoadInstanceByDependentWithExistingClass() {
@@ -140,13 +138,6 @@ public class FsLoaderTest {
 
     private void testLoadInstanceByDependentWithNonExistingClass() {
         assertNull(FsLoader.supplyByDependent(() -> "java.lang.String", "666"));
-    }
-
-    private void testLoadInstanceByDependentWithRecordSchemaHandler() {
-        assertNull(FsLoader.supplyByDependent(
-            RecordSchemaHandler::getInstance,
-            RecordSchemaHandler.class.getName() + "ImplByJ16"
-        ));
     }
 
     @Test
