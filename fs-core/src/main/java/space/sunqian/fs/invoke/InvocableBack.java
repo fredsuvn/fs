@@ -3,6 +3,7 @@ package space.sunqian.fs.invoke;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.base.value.SimpleKey;
 import space.sunqian.fs.cache.SimpleCache;
 
 import java.util.function.Function;
@@ -30,13 +31,13 @@ final class InvocableBack {
 
     static final class Cache {
 
-        private static final @Nonnull SimpleCache<Object, Invocable> CACHE = SimpleCache.ofSoft();
+        private static final @Nonnull SimpleCache<SimpleKey, Invocable> CACHE = SimpleCache.ofSoft();
 
         static {
             Fs.registerGlobalCache(CACHE);
         }
 
-        static @Nonnull Invocable get(@Nonnull Object key, @Nonnull Function<Object, Invocable> function) {
+        static @Nonnull Invocable get(@Nonnull SimpleKey key, @Nonnull Function<SimpleKey, Invocable> function) {
             return CACHE.get(key, function);
         }
 
