@@ -12,6 +12,7 @@ import space.sunqian.fs.object.annotation.DatePatternDetail;
 import space.sunqian.fs.object.annotation.NumberPattern;
 import space.sunqian.fs.object.annotation.NumberPatternDetail;
 import space.sunqian.fs.object.annotation.SimpleAnnotationDetail;
+import space.sunqian.fs.object.convert.ConvertOption;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Repeatable;
@@ -73,6 +74,8 @@ public class AnnotationTest implements Asserter, TestPrint {
         NumberPatternDetail numberPattern = annotationSet.getDetail(NumberPatternDetail.class);
         assertSame(annotationSet.get(NumberPattern.class), numberPattern.annotation());
         assertEquals("11.1122", numberPattern.formatter().format(11.11223344).toString());
+        assertSame(ConvertOption.NUMBER_FORMATTER, numberPattern.option().key());
+        assertSame(numberPattern.formatter(), numberPattern.option().value());
         DatePatternDetail datePattern = annotationSet.getDetail(DatePatternDetail.class);
         assertSame(annotationSet.get(DatePattern.class), datePattern.annotation());
         assertEquals(ZoneId.systemDefault(), datePattern.zoneId());
@@ -81,6 +84,8 @@ public class AnnotationTest implements Asserter, TestPrint {
             new SimpleDateFormat("yyyy-MM-dd").format(date),
             datePattern.formatter().format(date)
         );
+        assertSame(ConvertOption.DATE_FORMATTER, datePattern.option().key());
+        assertSame(datePattern.formatter(), datePattern.option().value());
         SimpleAnnotationDetail<?> nullable = annotationSet.getDetail(SimpleAnnotationDetail.class);
         assertSame(annotationSet.get(Nullable.class), nullable.annotation());
         SimpleAnnotationDetail<AS> as = annotationSet.getDetailByAnnotationType(AS.class);

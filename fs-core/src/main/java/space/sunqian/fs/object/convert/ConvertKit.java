@@ -83,7 +83,7 @@ public class ConvertKit {
     public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> getNumFormatterOption(
         @Nonnull String pattern
     ) {
-        return Option.of(ConvertOption.NUM_FORMATTER, NumberFormatter.ofPattern(pattern));
+        return Option.of(ConvertOption.NUMBER_FORMATTER, NumberFormatter.ofPattern(pattern));
     }
 
     /**

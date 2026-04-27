@@ -116,7 +116,7 @@ public enum ConvertOption {
     /**
      * Key of {@link #numFormatter(NumberFormatter)}.
      */
-    NUM_FORMATTER,
+    NUMBER_FORMATTER,
     ;
 
     /**
@@ -528,20 +528,20 @@ public enum ConvertOption {
     public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> numFormatter(
         @Nonnull NumberFormatter numberFormatter
     ) {
-        return Option.of(NUM_FORMATTER, numberFormatter);
+        return Option.of(NUMBER_FORMATTER, numberFormatter);
     }
 
     /**
      * Returns the specified {@link NumberFormatter} from the given options, or {@link NumberFormatter#common()} if the
-     * given options does not contain a {@link ConvertOption#NUM_FORMATTER}.
+     * given options does not contain a {@link ConvertOption#NUMBER_FORMATTER}.
      *
      * @param options the given options
      * @return the specified {@link NumberFormatter} from the given options, or {@link NumberFormatter#common()} if the
-     * given options does not contain a {@link ConvertOption#NUM_FORMATTER}
+     * given options does not contain a {@link ConvertOption#NUMBER_FORMATTER}
      */
     public static @Nonnull NumberFormatter getNumFormatter(@Nonnull Option<?, ?> @Nonnull [] options) {
         return Fs.nonnull(
-            OptionKit.findValue(ConvertOption.NUM_FORMATTER, options),
+            OptionKit.findValue(ConvertOption.NUMBER_FORMATTER, options),
             NumberFormatter.common()
         );
     }
