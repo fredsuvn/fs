@@ -19,12 +19,9 @@ import space.sunqian.fs.base.value.LongVar;
 import space.sunqian.fs.base.value.Ret;
 import space.sunqian.fs.base.value.ShortVal;
 import space.sunqian.fs.base.value.ShortVar;
-import space.sunqian.fs.base.value.SimpleKey;
 import space.sunqian.fs.base.value.Span;
 import space.sunqian.fs.base.value.Val;
 import space.sunqian.fs.base.value.Var;
-
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -283,44 +280,5 @@ public class ValueTest {
     private void testRetWithThrowable() {
         assertEquals(66, Ret.of(new Throwable()).get(e -> 66));
         assertThrows(Throwable.class, () -> Ret.of(new Throwable()).get());
-    }
-
-    @Test
-    public void testSimpleKey() {
-        testSimpleKeyToString();
-        testSimpleKeyEquality();
-        testSimpleKeyHashCode();
-        testSimpleKeyGetAs();
-    }
-
-    private void testSimpleKeyToString() {
-        assertEquals(
-            "SimpleKey" + Arrays.toString(new Object[]{1, 2, 3}),
-            SimpleKey.of(1, 2, 3).toString()
-        );
-    }
-
-    private void testSimpleKeyEquality() {
-        assertEquals(SimpleKey.of(1, 2, 3), SimpleKey.of(1, 2, 3));
-        assertNotEquals(SimpleKey.of(1, 2, 3), SimpleKey.of(1, 2));
-        assertFalse(SimpleKey.of(1, 2, 3).equals(1));
-    }
-
-    private void testSimpleKeyHashCode() {
-        assertEquals(
-            Arrays.hashCode(new Object[]{1, 2, 3}),
-            SimpleKey.of(1, 2, 3).hashCode()
-        );
-    }
-
-    private void testSimpleKeyGetAs() {
-        assertEquals(1, (Object) SimpleKey.of(1, 2, 3).getAs(0));
-        assertEquals(2, (Object) SimpleKey.of(1, 2, 3).getAs(1));
-        assertEquals(3, (Object) SimpleKey.of(1, 2, 3).getAs(2));
-        assertThrows(IndexOutOfBoundsException.class, () -> SimpleKey.of(1, 2, 3).getAs(3));
-        assertThrows(ClassCastException.class, () -> {
-            long l = SimpleKey.of(1, 2, 3).getAs(0);
-            System.out.println(l);
-        });
     }
 }

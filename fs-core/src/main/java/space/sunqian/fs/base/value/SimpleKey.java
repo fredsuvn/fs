@@ -1,24 +1,31 @@
 package space.sunqian.fs.base.value;
 
+import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.ValueClass;
 import space.sunqian.fs.Fs;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * A {@link SimpleKey} represents a key consists of a group of elements. For example, for a cache of method results, its
- * key is the parameter of the method, and this class can be used to be that key.
+ * A {@link SimpleKey} represents a key that consists of a group of elements. This class is particularly useful for
+ * scenarios where composite keys are needed, such as caching method results where the key comprises the method
+ * parameters.
+ * <p>
+ * This class is immutable and could be optimized as a value class.
  *
  * @author sunqian
  */
+@ValueClass
+@Immutable
 public final class SimpleKey {
 
     /**
-     * Returns a new {@link SimpleKey} with the given elements.
+     * Creates a new {@link SimpleKey} instance containing the specified elements.
      *
-     * @param elements the given elements
-     * @return a new {@link SimpleKey} with the given elements
+     * @param elements the elements to include in the key
+     * @return a new {@link SimpleKey} containing the specified elements
      */
     public static @Nonnull SimpleKey of(Object @Nonnull ... elements) {
         return new SimpleKey(elements);
@@ -31,13 +38,13 @@ public final class SimpleKey {
     }
 
     /**
-     * Returns the element at the specified position in this key, and casts it to the type {@code T}.
+     * Returns the element at the specified position in this key, cast to the specified type.
      *
      * @param index the index of the element to return
-     * @param <T>   the type of the element
-     * @return the element at the specified position in this key, and casts it to the type {@code T}
+     * @param <T>   the target type for casting
+     * @return the element at the specified position, cast to type {@code T}
      * @throws IndexOutOfBoundsException if the index is out of range
-     * @throws ClassCastException        if the element at the specified position cannot be cast to the specified type
+     * @throws ClassCastException        if the element cannot be cast to the specified type
      */
     public <T> T getAs(int index) throws IndexOutOfBoundsException, ClassCastException {
         return Fs.as(get(index));
@@ -47,7 +54,7 @@ public final class SimpleKey {
      * Returns the element at the specified position in this key.
      *
      * @param index the index of the element to return
-     * @return the element at the specified position in this key
+     * @return the element at the specified position
      * @throws IndexOutOfBoundsException if the index is out of range
      */
     public Object get(int index) throws IndexOutOfBoundsException {
@@ -56,11 +63,13 @@ public final class SimpleKey {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
         if (!(o instanceof SimpleKey)) {
             return false;
         }
-        SimpleKey osk = (SimpleKey) o;
-        return Objects.deepEquals(elements, osk.elements);
+        return Objects.deepEquals(elements, ((SimpleKey) o).elements);
     }
 
     @Override
