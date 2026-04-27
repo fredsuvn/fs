@@ -96,13 +96,12 @@ public class CommonBuilderHandler implements BuilderOperatorProvider.Handler {
 
     private static final class ConstructorCache {
 
-        private static final @Nonnull SimpleCache<@Nonnull Class<?>, @Nonnull Invocable> CACHE = SimpleCache.ofSoft();
+        private static final @Nonnull SimpleCache<@Nonnull Class<?>, @Nullable Invocable> CACHE = SimpleCache.ofSoft();
 
         static {
             Fs.registerGlobalCache(CACHE);
         }
 
-        @SuppressWarnings("DataFlowIssue")
         private static @Nullable Invocable get(
             @Nonnull Class<?> cls,
             @Nonnull Function<@Nonnull Class<?>, @Nullable Invocable> function
