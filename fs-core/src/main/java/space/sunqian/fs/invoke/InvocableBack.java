@@ -31,13 +31,16 @@ final class InvocableBack {
 
     static final class Cache {
 
-        private static final @Nonnull SimpleCache<SimpleKey, Invocable> CACHE = SimpleCache.ofSoft();
+        private static final @Nonnull SimpleCache<@Nonnull SimpleKey, @Nonnull Invocable> CACHE = SimpleCache.ofSoft();
 
         static {
             Fs.registerGlobalCache(CACHE);
         }
 
-        static @Nonnull Invocable get(@Nonnull SimpleKey key, @Nonnull Function<SimpleKey, Invocable> function) {
+        static @Nonnull Invocable get(
+            @Nonnull SimpleKey key,
+            @Nonnull Function<@Nonnull SimpleKey, @Nonnull Invocable> function
+        ) {
             return CACHE.get(key, function);
         }
 

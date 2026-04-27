@@ -982,14 +982,15 @@ public class TypeKit {
 
     private static final class ActualTypeArgumentsCache {
 
-        private static final @Nonnull SimpleCache<@Nonnull SimpleKey, @Nonnull List<@Nonnull Type>> CACHE =
-            SimpleCache.ofSoft();
+        private static final @Nonnull SimpleCache<
+            @Nonnull SimpleKey,
+            @Nullable @Immutable List<@Nonnull Type>
+            > CACHE = SimpleCache.ofSoft();
 
         static {
             Fs.registerGlobalCache(CACHE);
         }
 
-        @SuppressWarnings("DataFlowIssue")
         private static @Nullable @Immutable List<@Nonnull Type> get(
             @Nonnull SimpleKey key,
             @Nonnull Function<@Nonnull SimpleKey, @Nullable @Immutable List<@Nonnull Type>> function
