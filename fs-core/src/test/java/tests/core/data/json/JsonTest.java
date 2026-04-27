@@ -28,7 +28,7 @@ import space.sunqian.fs.data.json.JsonType;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;
 import space.sunqian.fs.object.annotation.DatePattern;
-import space.sunqian.fs.object.annotation.NumPattern;
+import space.sunqian.fs.object.annotation.NumberPattern;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
 import space.sunqian.fs.reflect.TypeRef;
@@ -876,10 +876,10 @@ public class JsonTest implements TestPrint {
         @DatePattern("yyyy-MM-dd HH:mm:ss")
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime fmt2;
-        @NumPattern("#.000")
+        @NumberPattern("#.000")
         @JsonFormat(pattern = "#.000")
         private long fmt3;
-        @NumPattern("#.0000")
+        @NumberPattern("#.0000")
         @JsonFormat(pattern = "#.0000")
         private BigDecimal fmt4;
     }
@@ -903,9 +903,9 @@ public class JsonTest implements TestPrint {
         private String fmt1;
         @DatePattern("yyyy-MM-dd HH:mm:ss")
         private String fmt2;
-        @NumPattern("#.000")
+        @NumberPattern("#.000")
         private BigDecimal fmt3;
-        @NumPattern("#.0000")
+        @NumberPattern("#.0000")
         private BigDecimal fmt4;
     }
 

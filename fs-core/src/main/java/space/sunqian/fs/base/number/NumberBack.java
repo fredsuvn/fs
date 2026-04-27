@@ -14,7 +14,7 @@ final class NumberBack {
         return new NumberFormatterImpl(supplier);
     }
 
-    static final class NumberFormatterImpl implements NumberFormatter {
+    private static final class NumberFormatterImpl implements NumberFormatter {
 
         private final @Nonnull Supplier<? extends @Nonnull NumberFormat> format;
 

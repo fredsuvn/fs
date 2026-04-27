@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
     ElementType.LOCAL_VARIABLE,
     ElementType.TYPE_USE,
 })
-public @interface NumPattern {
+public @interface NumberPattern {
 
     /**
      * The number pattern to be used, default is {@link NumberKit#DEFAULT_PATTERN}.

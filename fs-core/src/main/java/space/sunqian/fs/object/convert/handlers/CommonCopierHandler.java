@@ -5,7 +5,7 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.object.annotation.DatePattern;
-import space.sunqian.fs.object.annotation.NumPattern;
+import space.sunqian.fs.object.annotation.NumberPattern;
 import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
@@ -89,8 +89,8 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
             return false;
         }
         DatePattern datePattern = dstProperty.getAnnotation(DatePattern.class);
-        NumPattern numPattern = dstProperty.getAnnotation(NumPattern.class);
-        Option<?, ?>[] actualOps = ConvertKit.mergeOptions(options, datePattern, numPattern);
+        NumberPattern numberPattern = dstProperty.getAnnotation(NumberPattern.class);
+        Option<?, ?>[] actualOps = ConvertKit.mergeOptions(options, datePattern, numberPattern);
         Object dstPropertyValue = converter.convert(srcValue, srcSchema.valueType(), dstProperty.type(), actualOps);
         dstProperty.setValue(dst, dstPropertyValue);
         return false;
@@ -160,10 +160,10 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         DatePattern datePattern = ConvertKit.getAnnotation(
             DatePattern.class, srcProperty, dstProperty
         );
-        NumPattern numPattern = ConvertKit.getAnnotation(
-            NumPattern.class, srcProperty, dstProperty
+        NumberPattern numberPattern = ConvertKit.getAnnotation(
+            NumberPattern.class, srcProperty, dstProperty
         );
-        Option<?, ?>[] actualOps = ConvertKit.mergeOptions(options, datePattern, numPattern);
+        Option<?, ?>[] actualOps = ConvertKit.mergeOptions(options, datePattern, numberPattern);
         Object dstPropertyValue = converter.convert(
             srcPropertyValue, srcProperty.type(), dstProperty.type(), actualOps
         );

@@ -22,7 +22,7 @@ import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.annotation.DatePattern;
-import space.sunqian.fs.object.annotation.NumPattern;
+import space.sunqian.fs.object.annotation.NumberPattern;
 import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ConvertOption;
@@ -862,13 +862,13 @@ public class ConvertTest implements TestPrint, DataGen {
         @DatePattern("yyyy-MM-dd HH:mm:ss")
         private LocalDateTime date3;
         private Date date4;
-        @NumPattern
+        @NumberPattern
         private BigDecimal num1;
-        @NumPattern("#.0")
+        @NumberPattern("#.0")
         private double num2;
         private BigDecimal num3;
         @DatePattern
-        @NumPattern
+        @NumberPattern
         private String complex1;
     }
 
@@ -883,11 +883,11 @@ public class ConvertTest implements TestPrint, DataGen {
         @DatePattern(value = "yyyy-MM-dd HH:mm:ss", zoneId = "Asia/Shanghai")
         private String date4;
         private String num1;
-        @NumPattern("#.000")
+        @NumberPattern("#.000")
         private String num2;
         private String num3;
         @DatePattern
-        @NumPattern
+        @NumberPattern
         private Date complex1;
     }
 }

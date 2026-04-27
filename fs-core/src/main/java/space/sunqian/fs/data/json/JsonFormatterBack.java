@@ -8,7 +8,7 @@ import space.sunqian.fs.data.DataFormattingException;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.object.annotation.DatePattern;
-import space.sunqian.fs.object.annotation.NumPattern;
+import space.sunqian.fs.object.annotation.NumberPattern;
 import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.schema.ObjectProperty;
@@ -314,12 +314,12 @@ final class JsonFormatterBack {
                     }
                 }
                 if (value instanceof Number) {
-                    NumPattern numPattern = property.getAnnotation(NumPattern.class);
-                    if (numPattern != null) {
+                    NumberPattern numberPattern = property.getAnnotation(NumberPattern.class);
+                    if (numberPattern != null) {
                         String numString = objectConverter.convert(
                             value,
                             String.class,
-                            ConvertKit.getNumFormatterOption(numPattern)
+                            ConvertKit.getNumFormatterOption(numberPattern)
                         );
                         appender.append(numString);
                         return;

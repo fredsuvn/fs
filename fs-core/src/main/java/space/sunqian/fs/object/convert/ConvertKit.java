@@ -9,7 +9,7 @@ import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.annotation.DatePattern;
-import space.sunqian.fs.object.annotation.NumPattern;
+import space.sunqian.fs.object.annotation.NumberPattern;
 import space.sunqian.fs.object.schema.ObjectProperty;
 
 import java.lang.annotation.Annotation;
@@ -59,17 +59,17 @@ public class ConvertKit {
     }
 
     /**
-     * Returns a {@link Option} of {@link NumberFormatter} for the given {@link NumPattern}. This method is based on a
+     * Returns a {@link Option} of {@link NumberFormatter} for the given {@link NumberPattern}. This method is based on a
      * soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
      * for the same pattern.
      *
-     * @param numPattern the pattern of the number formatter
-     * @return the {@link Option} of {@link NumberFormatter} for the given {@link NumPattern}
+     * @param numberPattern the pattern of the number formatter
+     * @return the {@link Option} of {@link NumberFormatter} for the given {@link NumberPattern}
      */
     public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> getNumFormatterOption(
-        @Nonnull NumPattern numPattern
+        @Nonnull NumberPattern numberPattern
     ) {
-        return getNumFormatterOption(numPattern.value());
+        return getNumFormatterOption(numberPattern.value());
     }
 
     /**
@@ -97,27 +97,27 @@ public class ConvertKit {
      *
      * @param defaultOptions the default options
      * @param datePattern    the date pattern
-     * @param numPattern     the number pattern
+     * @param numberPattern     the number pattern
      * @return the merged options
      */
     public static @Nonnull Option<?, ?> @Nonnull [] mergeOptions(
         @Nonnull Option<?, ?> @Nonnull @RetainedParam [] defaultOptions,
         @Nullable DatePattern datePattern,
-        @Nullable NumPattern numPattern
+        @Nullable NumberPattern numberPattern
     ) {
         if (datePattern == null) {
-            if (numPattern == null) {
+            if (numberPattern == null) {
                 return defaultOptions;
             } else {
-                Option<ConvertOption, NumberFormatter> numFormatter = ConvertKit.getNumFormatterOption(numPattern);
+                Option<ConvertOption, NumberFormatter> numFormatter = ConvertKit.getNumFormatterOption(numberPattern);
                 return OptionKit.mergeOption(defaultOptions, numFormatter);
             }
         } else {
             Option<ConvertOption, DateFormatter> dateFormatter = ConvertKit.getDateFormatterOption(datePattern);
-            if (numPattern == null) {
+            if (numberPattern == null) {
                 return OptionKit.mergeOption(defaultOptions, dateFormatter);
             } else {
-                Option<ConvertOption, NumberFormatter> numFormatter = ConvertKit.getNumFormatterOption(numPattern);
+                Option<ConvertOption, NumberFormatter> numFormatter = ConvertKit.getNumFormatterOption(numberPattern);
                 return OptionKit.mergeOptions(defaultOptions, dateFormatter, numFormatter);
             }
         }
