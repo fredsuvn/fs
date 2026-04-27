@@ -13,8 +13,8 @@ import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.date.DateKit;
 import space.sunqian.fs.base.exception.UnreachablePointException;
-import space.sunqian.fs.base.number.NumFormatter;
-import space.sunqian.fs.base.number.NumKit;
+import space.sunqian.fs.base.number.NumberFormatter;
+import space.sunqian.fs.base.number.NumberKit;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ListKit;
@@ -430,7 +430,7 @@ public class ConvertTest implements TestPrint, DataGen {
         assertEquals(123L, converter.convert("123", long.class));
         assertEquals(123L, converter.convert("123", Long.class));
         assertEquals(123.123, converter.convert("123.123", double.class));
-        assertEquals("123.12", converter.convert(123.12345, String.class, ConvertOption.numFormatter(NumFormatter.ofPattern("#.00"))));
+        assertEquals("123.12", converter.convert(123.12345, String.class, ConvertOption.numFormatter(NumberFormatter.ofPattern("#.00"))));
 
         Date now = new Date();
         assertEquals(converter.convert(now, long.class), now.getTime());
@@ -606,9 +606,9 @@ public class ConvertTest implements TestPrint, DataGen {
         assertNotEquals(df1, df3);
         assertNotEquals(df2, df3);
 
-        Option<?, NumFormatter> nf1 = ConvertKit.getNumFormatterOption("#.0000");
-        Option<?, NumFormatter> nf2 = ConvertKit.getNumFormatterOption("#.0000");
-        Option<?, NumFormatter> nf3 = ConvertKit.getNumFormatterOption("#.000000");
+        Option<?, NumberFormatter> nf1 = ConvertKit.getNumFormatterOption("#.0000");
+        Option<?, NumberFormatter> nf2 = ConvertKit.getNumFormatterOption("#.0000");
+        Option<?, NumberFormatter> nf3 = ConvertKit.getNumFormatterOption("#.000000");
         assertSame(nf1, nf2);
         assertNotSame(nf1, nf3);
         assertNotSame(nf2, nf3);
@@ -632,8 +632,8 @@ public class ConvertTest implements TestPrint, DataGen {
             DateFormatter.newFormatter("YYYY-MM-dd HH:mm:ss", ZoneId.of("Asia/Shanghai")).format(ann1.getDate4()),
             ann2.getDate4()
         );
-        assertEquals(NumFormatter.ofPattern(NumKit.DEFAULT_PATTERN).format(ann1.getNum1()), ann2.getNum1());
-        assertEquals(NumFormatter.ofPattern("#.000").format(ann1.getNum2()), ann2.getNum2());
+        assertEquals(NumberFormatter.ofPattern(NumberKit.DEFAULT_PATTERN).format(ann1.getNum1()), ann2.getNum1());
+        assertEquals(NumberFormatter.ofPattern("#.000").format(ann1.getNum2()), ann2.getNum2());
         assertEquals(ann1.getNum3().toString(), ann2.getNum3());
         assertEquals(
             DateFormatter.ofPattern(DateKit.DEFAULT_PATTERN).parse(ann1.getComplex1(), Date.class),
@@ -660,7 +660,7 @@ public class ConvertTest implements TestPrint, DataGen {
             ann2.getDate4()
         );
         assertEquals(((BigDecimal) ann1.get("num1")).toString(), ann2.getNum1());
-        assertEquals(NumFormatter.ofPattern("#.000").format((Double) ann1.get("num2")), ann2.getNum2());
+        assertEquals(NumberFormatter.ofPattern("#.000").format((Double) ann1.get("num2")), ann2.getNum2());
         assertEquals(((BigDecimal) ann1.get("num3")).toString(), ann2.getNum3());
         assertEquals(
             DateFormatter.ofPattern(DateKit.DEFAULT_PATTERN).parse((CharSequence) ann1.get("complex1"), Date.class),

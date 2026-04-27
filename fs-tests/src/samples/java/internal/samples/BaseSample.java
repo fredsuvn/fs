@@ -6,7 +6,7 @@ import space.sunqian.fs.base.date.DateKit;
 import space.sunqian.fs.base.function.IndexedConsumer;
 import space.sunqian.fs.base.logging.LogKit;
 import space.sunqian.fs.base.math.MathKit;
-import space.sunqian.fs.base.number.NumKit;
+import space.sunqian.fs.base.number.NumberKit;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.random.Rng;
 import space.sunqian.fs.base.random.Rog;
@@ -91,7 +91,7 @@ import java.time.LocalDateTime;
  *     {@link Rog}: Random object generation
  *   </li>
  *   <li>
- *     {@link NumKit}: Number processing utilities
+ *     {@link NumberKit}: Number processing utilities
  *   </li>
  *   <li>
  *     {@link Option}: Optional value utilities
@@ -231,7 +231,7 @@ public class BaseSample {
         String numberStr = "123.45";
         System.out.println("Original string: " + numberStr);
         try {
-            double doubleValue = NumKit.toNumber(numberStr, Double.class);
+            double doubleValue = NumberKit.toNumber(numberStr, Double.class);
             System.out.println("Parse to double: " + doubleValue);
         } catch (Exception e) {
             e.printStackTrace();
@@ -241,7 +241,7 @@ public class BaseSample {
         String intStr = "123";
         System.out.println("\nOriginal integer string: " + intStr);
         try {
-            int intValue = NumKit.toNumber(intStr, Integer.class);
+            int intValue = NumberKit.toNumber(intStr, Integer.class);
             System.out.println("Parse to int: " + intValue);
         } catch (Exception e) {
             e.printStackTrace();

@@ -8,12 +8,12 @@ import space.sunqian.fs.base.exception.FsRuntimeException;
  *
  * @author sunqian
  */
-public class NumException extends FsRuntimeException {
+public class NumberException extends FsRuntimeException {
 
     /**
      * Empty constructor.
      */
-    public NumException() {
+    public NumberException() {
         super();
     }
 
@@ -22,7 +22,7 @@ public class NumException extends FsRuntimeException {
      *
      * @param message the message
      */
-    public NumException(@Nullable String message) {
+    public NumberException(@Nullable String message) {
         super(message);
     }
 
@@ -32,7 +32,7 @@ public class NumException extends FsRuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public NumException(@Nullable String message, @Nullable Throwable cause) {
+    public NumberException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -41,7 +41,7 @@ public class NumException extends FsRuntimeException {
      *
      * @param cause the cause
      */
-    public NumException(@Nullable Throwable cause) {
+    public NumberException(@Nullable Throwable cause) {
         super(null, cause);
     }
 }

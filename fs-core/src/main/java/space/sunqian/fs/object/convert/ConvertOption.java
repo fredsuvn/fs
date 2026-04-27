@@ -4,7 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateFormatter;
-import space.sunqian.fs.base.number.NumFormatter;
+import space.sunqian.fs.base.number.NumberFormatter;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.base.string.NameMapper;
@@ -114,7 +114,7 @@ public enum ConvertOption {
     DATE_FORMATTER,
 
     /**
-     * Key of {@link #numFormatter(NumFormatter)}.
+     * Key of {@link #numFormatter(NumberFormatter)}.
      */
     NUM_FORMATTER,
     ;
@@ -518,31 +518,31 @@ public enum ConvertOption {
     }
 
     /**
-     * Returns an option to specify the {@link NumFormatter} if needed.
+     * Returns an option to specify the {@link NumberFormatter} if needed.
      * <p>
-     * By default, no {@link NumFormatter} is used.
+     * By default, no {@link NumberFormatter} is used.
      *
-     * @param numFormatter the {@link NumFormatter} to be specified
-     * @return an option to specify the {@link NumFormatter} if needed
+     * @param numberFormatter the {@link NumberFormatter} to be specified
+     * @return an option to specify the {@link NumberFormatter} if needed
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumFormatter> numFormatter(
-        @Nonnull NumFormatter numFormatter
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> numFormatter(
+        @Nonnull NumberFormatter numberFormatter
     ) {
-        return Option.of(NUM_FORMATTER, numFormatter);
+        return Option.of(NUM_FORMATTER, numberFormatter);
     }
 
     /**
-     * Returns the specified {@link NumFormatter} from the given options, or {@link NumFormatter#common()} if the given
-     * options does not contain a {@link ConvertOption#NUM_FORMATTER}.
+     * Returns the specified {@link NumberFormatter} from the given options, or {@link NumberFormatter#common()} if the
+     * given options does not contain a {@link ConvertOption#NUM_FORMATTER}.
      *
      * @param options the given options
-     * @return the specified {@link NumFormatter} from the given options, or {@link NumFormatter#common()} if the given
-     * options does not contain a {@link ConvertOption#NUM_FORMATTER}
+     * @return the specified {@link NumberFormatter} from the given options, or {@link NumberFormatter#common()} if the
+     * given options does not contain a {@link ConvertOption#NUM_FORMATTER}
      */
-    public static @Nonnull NumFormatter getNumFormatter(@Nonnull Option<?, ?> @Nonnull [] options) {
+    public static @Nonnull NumberFormatter getNumFormatter(@Nonnull Option<?, ?> @Nonnull [] options) {
         return Fs.nonnull(
             OptionKit.findValue(ConvertOption.NUM_FORMATTER, options),
-            NumFormatter.common()
+            NumberFormatter.common()
         );
     }
 }

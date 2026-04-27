@@ -11,7 +11,7 @@ import java.math.BigInteger;
  *
  * @author sunqian
  */
-public class NumKit {
+public class NumberKit {
 
     /**
      * Default format pattern: "#.00".
@@ -36,11 +36,11 @@ public class NumKit {
      * @param numType the specified number type
      * @param <T>     the number type
      * @return the converted number object
-     * @throws NumException if any error occurs during the conversion
+     * @throws NumberException if any error occurs during the conversion
      */
     public static <T> @Nonnull T toNumber(
         @Nonnull CharSequence str, Class<T> numType
-    ) throws NumException {
+    ) throws NumberException {
         try {
             if (byte.class.equals(numType) || Byte.class.equals(numType)) {
                 return Fs.as(Byte.parseByte(str.toString()));
@@ -72,9 +72,9 @@ public class NumKit {
                 return Fs.as(new BigDecimal(str.toString()));
             }
         } catch (Exception e) {
-            throw new NumException(e);
+            throw new NumberException(e);
         }
-        throw new NumException("Failed to convert " + str + " to " + numType + ".");
+        throw new NumberException("Failed to convert " + str + " to " + numType + ".");
     }
 
     /**
@@ -95,11 +95,11 @@ public class NumKit {
      * @param numType the specified other number type
      * @param <T>     the number type
      * @return the converted number object
-     * @throws NumException if any error occurs during the conversion
+     * @throws NumberException if any error occurs during the conversion
      */
     public static <T> @Nonnull T toNumber(
         @Nonnull Number num, Class<T> numType
-    ) throws NumException {
+    ) throws NumberException {
         try {
             if (numType.isAssignableFrom(num.getClass())) {
                 return numType.cast(num);
@@ -144,9 +144,9 @@ public class NumKit {
                 return Fs.as(new BigDecimal(num.toString()));
             }
         } catch (Exception e) {
-            throw new NumException(e);
+            throw new NumberException(e);
         }
-        throw new NumException("Failed to convert " + num + " to type: " + numType + ".");
+        throw new NumberException("Failed to convert " + num + " to type: " + numType + ".");
     }
 
     /**
@@ -155,10 +155,10 @@ public class NumKit {
      *
      * @param cs the given char sequence
      * @return a {@link Number} object parsed from the given char sequence
-     * @throws NumException if any error occurs during the parsing
+     * @throws NumberException if any error occurs during the parsing
      */
-    public static @Nonnull Number toNumber(@Nonnull CharSequence cs) throws NumException {
-        return NumService.INST.toNumber(cs);
+    public static @Nonnull Number toNumber(@Nonnull CharSequence cs) throws NumberException {
+        return NumberService.INST.toNumber(cs);
     }
 
     /**
@@ -170,12 +170,12 @@ public class NumKit {
      * @param start the specified start index, inclusive
      * @param end   the specified end index, exclusive
      * @return a {@link Number} object parsed from the given char sequence
-     * @throws NumException if any error occurs during the parsing
+     * @throws NumberException if any error occurs during the parsing
      */
-    public static @Nonnull Number toNumber(@Nonnull CharSequence cs, int start, int end) throws NumException {
-        return NumService.INST.toNumber(cs, start, end);
+    public static @Nonnull Number toNumber(@Nonnull CharSequence cs, int start, int end) throws NumberException {
+        return NumberService.INST.toNumber(cs, start, end);
     }
 
-    private NumKit() {
+    private NumberKit() {
     }
 }

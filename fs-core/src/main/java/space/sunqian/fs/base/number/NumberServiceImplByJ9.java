@@ -5,24 +5,24 @@ import space.sunqian.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public enum NumServiceImplByJ9 implements NumService {
+public enum NumberServiceImplByJ9 implements NumberService {
     INST;
 
     @Override
-    public @Nonnull Number toNumber(@Nonnull CharSequence cs) throws NumException {
+    public @Nonnull Number toNumber(@Nonnull CharSequence cs) throws NumberException {
         try {
             return toNumber0(cs, 0, cs.length());
         } catch (Exception e) {
-            throw new NumException(e);
+            throw new NumberException(e);
         }
     }
 
     @Override
-    public @Nonnull Number toNumber(@Nonnull CharSequence cs, int start, int end) throws NumException {
+    public @Nonnull Number toNumber(@Nonnull CharSequence cs, int start, int end) throws NumberException {
         try {
             return toNumber0(cs, start, end);
         } catch (Exception e) {
-            throw new NumException(e);
+            throw new NumberException(e);
         }
     }
 

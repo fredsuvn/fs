@@ -1,6 +1,6 @@
 package space.sunqian.fs.object.annotation;
 
-import space.sunqian.fs.base.number.NumKit;
+import space.sunqian.fs.base.number.NumberKit;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
 
@@ -33,9 +33,9 @@ import java.lang.annotation.Target;
 public @interface NumPattern {
 
     /**
-     * The number pattern to be used, default is {@link NumKit#DEFAULT_PATTERN}.
+     * The number pattern to be used, default is {@link NumberKit#DEFAULT_PATTERN}.
      *
-     * @return the number pattern to be used, default is {@link NumKit#DEFAULT_PATTERN}
+     * @return the number pattern to be used, default is {@link NumberKit#DEFAULT_PATTERN}
      */
-    String value() default NumKit.DEFAULT_PATTERN;
+    String value() default NumberKit.DEFAULT_PATTERN;
 }

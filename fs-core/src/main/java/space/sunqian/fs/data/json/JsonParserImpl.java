@@ -4,7 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
-import space.sunqian.fs.base.number.NumKit;
+import space.sunqian.fs.base.number.NumberKit;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -313,7 +313,7 @@ enum JsonParserImpl implements JsonParser {
         }
         // String numberString = strBuilder.toString();
         try {
-            return NumKit.toNumber(strBuilder);
+            return NumberKit.toNumber(strBuilder);
         } catch (Exception e) {
             throw new JsonDataParsingException(startIndex, strBuilder.toString(), null);
         }

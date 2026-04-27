@@ -1,7 +1,9 @@
 package space.sunqian.fs.base.number;
 
+import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.annotation.ThreadSafe;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -12,38 +14,40 @@ import java.util.function.Supplier;
  *
  * @author sunqian
  */
-public interface NumFormatter {
+@Immutable
+@ThreadSafe
+public interface NumberFormatter {
 
     /**
-     * Returns a common {@link NumFormatter} which uses {@link Number#toString()} to format the number and
-     * {@link NumKit#toNumber(CharSequence, Class)} to parse the string. Note the returned instance is singleton.
+     * Returns a common {@link NumberFormatter} which uses {@link Number#toString()} to format the number and
+     * {@link NumberKit#toNumber(CharSequence, Class)} to parse the string. Note the returned instance is singleton.
      *
-     * @return a common {@link NumFormatter} which uses {@link Number#toString()} to format the number and
-     * {@link NumKit#toNumber(CharSequence, Class)} to parse the string
+     * @return a common {@link NumberFormatter} which uses {@link Number#toString()} to format the number and
+     * {@link NumberKit#toNumber(CharSequence, Class)} to parse the string
      */
-    static @Nonnull NumFormatter common() {
-        return NumFormatterImpl.Common.INST;
+    static @Nonnull NumberFormatter common() {
+        return NumberBack.Common.INST;
     }
 
     /**
-     * Returns a new {@link NumFormatter} with the given number format supplier.
+     * Returns a new {@link NumberFormatter} with the given number format supplier.
      *
      * @param supplier the number format supplier
-     * @return a new {@link NumFormatter} with the given number format supplier
+     * @return a new {@link NumberFormatter} with the given number format supplier
      */
-    static @Nonnull NumFormatter ofSupplier(@Nonnull Supplier<? extends @Nonnull NumberFormat> supplier) {
-        return new NumFormatterImpl(supplier);
+    static @Nonnull NumberFormatter ofSupplier(@Nonnull Supplier<? extends @Nonnull NumberFormat> supplier) {
+        return new NumberBack.NumberFormatterImpl(supplier);
     }
 
     /**
-     * Returns a new {@link NumFormatter} with the given number format pattern.
+     * Returns a new {@link NumberFormatter} with the given number format pattern.
      * <p>
      * By default, this method uses {@link DecimalFormat} and {@link ThreadLocal} to support multi-threading.
      *
      * @param pattern the number format pattern
-     * @return a new {@link NumFormatter} with the given number format pattern
+     * @return a new {@link NumberFormatter} with the given number format pattern
      */
-    static @Nonnull NumFormatter ofPattern(@Nonnull String pattern) {
+    static @Nonnull NumberFormatter ofPattern(@Nonnull String pattern) {
         ThreadLocal<DecimalFormat> format = ThreadLocal.withInitial(() -> new DecimalFormat(pattern));
         return ofSupplier(format::get);
     }
@@ -53,10 +57,10 @@ public interface NumFormatter {
      *
      * @param num the given number to format
      * @return the formatted string
-     * @throws NumException if any error occurs
+     * @throws NumberException if any error occurs
      */
     @Nonnull
-    String format(@Nonnull Number num) throws NumException;
+    String format(@Nonnull Number num) throws NumberException;
 
     /**
      * Formats the given number. If the given number is {@code null}, or an exception thrown during formating, returns
@@ -64,9 +68,9 @@ public interface NumFormatter {
      *
      * @param num the given number to format, can be {@code null}
      * @return the formatted string, or {@code null} if the given number is {@code null} or an exception thrown
-     * @throws NumException if any error occurs
+     * @throws NumberException if any error occurs
      */
-    default @Nullable String formatSafe(@Nullable Number num) throws NumException {
+    default @Nullable String formatSafe(@Nullable Number num) throws NumberException {
         if (num == null) {
             return null;
         }
@@ -84,9 +88,9 @@ public interface NumFormatter {
      * @param numType the specified number type
      * @param <T>     the number type
      * @return the parsed number instance
-     * @throws NumException if any error occurs
+     * @throws NumberException if any error occurs
      */
-    <T> @Nonnull T parse(@Nonnull CharSequence numStr, @Nonnull Class<T> numType) throws NumException;
+    <T> @Nonnull T parse(@Nonnull CharSequence numStr, @Nonnull Class<T> numType) throws NumberException;
 
     /**
      * Parses the given number string to an instance of the specified number type. If the given number string is
@@ -97,11 +101,11 @@ public interface NumFormatter {
      * @param <T>     the number type
      * @return the parsed number instance, or {@code null} if the given number string is {@code null} or an exception
      * thrown
-     * @throws NumException if any error occurs
+     * @throws NumberException if any error occurs
      */
     default <T> @Nullable T parseSafe(
         @Nullable CharSequence numStr, @Nonnull Class<T> numType
-    ) throws NumException {
+    ) throws NumberException {
         if (numStr == null) {
             return null;
         }

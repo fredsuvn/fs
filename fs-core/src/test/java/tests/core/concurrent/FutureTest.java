@@ -17,7 +17,7 @@ public class FutureTest {
     @Test
     public void testFuture() {
         ExecutorService service = Executors.newCachedThreadPool();
-        
+
         testFutureWithSuccess(service);
         testFutureWithException(service);
         testFutureWithExceptionAndDefaultValue(service);

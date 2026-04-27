@@ -5,8 +5,8 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.date.DateFormatter;
 import space.sunqian.fs.base.lang.EnumKit;
-import space.sunqian.fs.base.number.NumFormatter;
-import space.sunqian.fs.base.number.NumKit;
+import space.sunqian.fs.base.number.NumberFormatter;
+import space.sunqian.fs.base.number.NumberKit;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ArrayOperator;
@@ -83,7 +83,7 @@ import java.util.function.IntFunction;
  * </tr>
  * <tr>
  *     <td>Numbers</td>
- *     <td>Using {@link NumFormatter#format(Number)}.</td>
+ *     <td>Using {@link NumberFormatter#format(Number)}.</td>
  * </tr>
  * <tr>
  *     <td>Others</td>
@@ -97,11 +97,11 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td rowspan="2">Numbers</td>
  *     <td>{@link String}</td>
- *     <td>Using {@link NumKit#toNumber(CharSequence, Class)}.</td>
+ *     <td>Using {@link NumberKit#toNumber(CharSequence, Class)}.</td>
  * </tr>
  * <tr>
  *     <td>Other Numbers</td>
- *     <td>Using {@link NumKit#toNumber(Number, Class)}.</td>
+ *     <td>Using {@link NumberKit#toNumber(Number, Class)}.</td>
  * </tr>
  * <tr>
  *     <td>{@code long} and {@link Long}</td>
@@ -487,8 +487,8 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 return new String((char[]) src);
             }
             if (src instanceof Number) {
-                NumFormatter numFormatter = ConvertOption.getNumFormatter(options);
-                return numFormatter.format((Number) src);
+                NumberFormatter numberFormatter = ConvertOption.getNumFormatter(options);
+                return numberFormatter.format((Number) src);
             }
             if (src instanceof Date) {
                 DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
@@ -532,7 +532,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @Nonnull Option<?, ?> @Nonnull ... options
         ) {
             if (src instanceof String) {
-                return NumKit.toNumber((String) src, target);
+                return NumberKit.toNumber((String) src, target);
             }
             // date to long
             if (target.equals(Long.class) || target.equals(long.class)) {
@@ -550,7 +550,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             if (src instanceof Number) {
                 @SuppressWarnings("PatternVariableCanBeUsed")
                 Number srcNum = (Number) src;
-                return NumKit.toNumber(srcNum, target);
+                return NumberKit.toNumber(srcNum, target);
             }
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }

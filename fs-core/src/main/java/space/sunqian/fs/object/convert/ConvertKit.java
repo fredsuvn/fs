@@ -4,7 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.base.date.DateFormatter;
-import space.sunqian.fs.base.number.NumFormatter;
+import space.sunqian.fs.base.number.NumberFormatter;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.cache.SimpleCache;
@@ -59,28 +59,28 @@ public class ConvertKit {
     }
 
     /**
-     * Returns a {@link Option} of {@link NumFormatter} for the given {@link NumPattern}. This method is based on a
+     * Returns a {@link Option} of {@link NumberFormatter} for the given {@link NumPattern}. This method is based on a
      * soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
      * for the same pattern.
      *
      * @param numPattern the pattern of the number formatter
-     * @return the {@link Option} of {@link NumFormatter} for the given {@link NumPattern}
+     * @return the {@link Option} of {@link NumberFormatter} for the given {@link NumPattern}
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumFormatter> getNumFormatterOption(
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> getNumFormatterOption(
         @Nonnull NumPattern numPattern
     ) {
         return getNumFormatterOption(numPattern.value());
     }
 
     /**
-     * Returns a {@link Option} of {@link NumFormatter} for the given pattern. This method is based on a soft-reference
-     * cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned for the same
-     * pattern.
+     * Returns a {@link Option} of {@link NumberFormatter} for the given pattern. This method is based on a
+     * soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
+     * for the same pattern.
      *
      * @param pattern the pattern of the number formatter
-     * @return the {@link Option} of {@link NumFormatter} for the given pattern
+     * @return the {@link Option} of {@link NumberFormatter} for the given pattern
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumFormatter> getNumFormatterOption(
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> getNumFormatterOption(
         @Nonnull String pattern
     ) {
         return NumFormatterCache.INST.get(pattern);
@@ -109,7 +109,7 @@ public class ConvertKit {
             if (numPattern == null) {
                 return defaultOptions;
             } else {
-                Option<ConvertOption, NumFormatter> numFormatter = ConvertKit.getNumFormatterOption(numPattern);
+                Option<ConvertOption, NumberFormatter> numFormatter = ConvertKit.getNumFormatterOption(numPattern);
                 return OptionKit.mergeOption(defaultOptions, numFormatter);
             }
         } else {
@@ -117,7 +117,7 @@ public class ConvertKit {
             if (numPattern == null) {
                 return OptionKit.mergeOption(defaultOptions, dateFormatter);
             } else {
-                Option<ConvertOption, NumFormatter> numFormatter = ConvertKit.getNumFormatterOption(numPattern);
+                Option<ConvertOption, NumberFormatter> numFormatter = ConvertKit.getNumFormatterOption(numPattern);
                 return OptionKit.mergeOptions(defaultOptions, dateFormatter, numFormatter);
             }
         }
@@ -153,13 +153,13 @@ public class ConvertKit {
 
         private final @Nonnull SimpleCache<
             @Nonnull String,
-            @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumFormatter>
+            @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter>
             > cache = SimpleCache.ofSoft();
 
-        public @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumFormatter> get(@Nonnull String pattern) {
+        public @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> get(@Nonnull String pattern) {
             return cache.get(
                 pattern,
-                p -> ConvertOption.numFormatter(NumFormatter.ofPattern(p))
+                p -> ConvertOption.numFormatter(NumberFormatter.ofPattern(p))
             );
         }
     }
