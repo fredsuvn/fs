@@ -10,9 +10,9 @@ import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
-import space.sunqian.fs.object.schema.MapSchema;
-import space.sunqian.fs.object.schema.ObjectProperty;
-import space.sunqian.fs.object.schema.ObjectSchema;
+import space.sunqian.fs.object.meta.MapMeta;
+import space.sunqian.fs.object.meta.PropertyMetaMeta;
+import space.sunqian.fs.object.meta.ObjectMeta;
 
 import java.util.Map;
 
@@ -42,9 +42,9 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         @Nonnull Object srcKey,
         @Nullable Object srcValue,
         @Nonnull Map<Object, Object> src,
-        @Nonnull MapSchema srcSchema,
+        @Nonnull MapMeta srcSchema,
         @Nonnull Map<Object, Object> dst,
-        @Nonnull MapSchema dstSchema,
+        @Nonnull MapMeta dstSchema,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
@@ -68,9 +68,9 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         @Nonnull Object srcKey,
         @Nullable Object srcValue,
         @Nonnull Map<Object, Object> src,
-        @Nonnull MapSchema srcSchema,
+        @Nonnull MapMeta srcSchema,
         @Nonnull Object dst,
-        @Nonnull ObjectSchema dstSchema,
+        @Nonnull ObjectMeta dstSchema,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
@@ -84,7 +84,7 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
             srcKey = ConvertOption.getNameMapper(options).map((String) srcKey);
         }
         String dstPropertyName = Fs.as(converter.convert(srcKey, srcSchema.keyType(), String.class, options));
-        ObjectProperty dstProperty = dstSchema.getProperty(dstPropertyName);
+        PropertyMetaMeta dstProperty = dstSchema.getProperty(dstPropertyName);
         if (dstProperty == null || !dstProperty.isWritable()) {
             return false;
         }
@@ -99,11 +99,11 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
     @Override
     public boolean copyProperty(
         @Nonnull String srcPropertyName,
-        @Nonnull ObjectProperty srcProperty,
+        @Nonnull PropertyMetaMeta srcProperty,
         @Nonnull Object src,
-        @Nonnull ObjectSchema srcSchema,
+        @Nonnull ObjectMeta srcSchema,
         @Nonnull Map<Object, Object> dst,
-        @Nonnull MapSchema dstSchema,
+        @Nonnull MapMeta dstSchema,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
@@ -130,11 +130,11 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
     @Override
     public boolean copyProperty(
         @Nonnull String srcPropertyName,
-        @Nonnull ObjectProperty srcProperty,
+        @Nonnull PropertyMetaMeta srcProperty,
         @Nonnull Object src,
-        @Nonnull ObjectSchema srcSchema,
+        @Nonnull ObjectMeta srcSchema,
         @Nonnull Object dst,
-        @Nonnull ObjectSchema dstSchema,
+        @Nonnull ObjectMeta dstSchema,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
@@ -153,7 +153,7 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
             return false;
         }
         String dstPropertyName = Fs.as(converter.convert(actualSrcPropertyName, String.class, String.class, options));
-        ObjectProperty dstProperty = dstSchema.getProperty(dstPropertyName);
+        PropertyMetaMeta dstProperty = dstSchema.getProperty(dstPropertyName);
         if (dstProperty == null || !dstProperty.isWritable()) {
             return false;
         }

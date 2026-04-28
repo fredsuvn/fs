@@ -11,9 +11,9 @@ import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumberPattern;
 import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.schema.ObjectProperty;
-import space.sunqian.fs.object.schema.ObjectSchema;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.meta.PropertyMetaMeta;
+import space.sunqian.fs.object.meta.ObjectMeta;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
 
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -35,14 +35,14 @@ final class JsonFormatterBack {
 
     static @Nonnull JsonFormatterImpl newFormatter(boolean ignoreNullValue) {
         return newFormatter(
-            ObjectSchemaParser.defaultCachedParser(),
+            ObjectMetaManager.defaultCachedParser(),
             ObjectConverter.defaultConverter(),
             ignoreNullValue
         );
     }
 
     static @Nonnull JsonFormatterImpl newFormatter(
-        @Nonnull ObjectSchemaParser objectParser,
+        @Nonnull ObjectMetaManager objectParser,
         @Nonnull ObjectConverter objectConverter,
         boolean ignoreNullValue
     ) {
@@ -111,12 +111,12 @@ final class JsonFormatterBack {
             });
         }
 
-        private final @Nonnull ObjectSchemaParser objectParser;
+        private final @Nonnull ObjectMetaManager objectParser;
         private final @Nonnull ObjectConverter objectConverter;
         private final boolean ignoreNullValue;
 
         JsonFormatterImpl(
-            @Nonnull ObjectSchemaParser objectParser,
+            @Nonnull ObjectMetaManager objectParser,
             @Nonnull ObjectConverter objectConverter,
             boolean ignoreNullValue
         ) {
@@ -234,7 +234,7 @@ final class JsonFormatterBack {
         }
 
         private void writeObject(@Nonnull Object object, @Nonnull Appendable appender) throws Exception {
-            ObjectSchema schema = objectParser.parse(object.getClass());
+            ObjectMeta schema = objectParser.parse(object.getClass());
             appender.append('{');
             boolean[] isFirst = {true};
             schema.properties().forEach((key, property) -> {
@@ -296,7 +296,7 @@ final class JsonFormatterBack {
         }
 
         private void writeProperty(
-            @Nonnull ObjectProperty property, @Nullable Object value, @Nonnull Appendable appender
+            @Nonnull PropertyMetaMeta property, @Nullable Object value, @Nonnull Appendable appender
         ) throws Exception {
             writeString(property.name(), appender);
             appender.append(':');

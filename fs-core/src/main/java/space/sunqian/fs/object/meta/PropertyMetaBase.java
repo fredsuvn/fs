@@ -1,4 +1,4 @@
-package space.sunqian.fs.object.schema;
+package space.sunqian.fs.object.meta;
 
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
@@ -12,13 +12,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 /**
- * This interface provides the base info for {@link ObjectProperty}, typically used in the parsing process of
- * {@link ObjectSchema}.
+ * This interface provides the base info for {@link PropertyMetaMeta}, typically used in the parsing process of
+ * {@link ObjectMeta}.
  *
  * @author sunqian
  */
 @Immutable
-public interface ObjectPropertyBase {
+public interface PropertyMetaBase {
 
     /**
      * Returns the name of this property.

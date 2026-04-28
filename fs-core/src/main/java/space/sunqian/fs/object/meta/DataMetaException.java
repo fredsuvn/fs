@@ -1,4 +1,4 @@
-package space.sunqian.fs.object.schema;
+package space.sunqian.fs.object.meta;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -7,20 +7,20 @@ import space.sunqian.fs.object.ObjectException;
 import java.lang.reflect.Type;
 
 /**
- * Exception for object schema, including map schema and non-map object schema.
+ * Exception for object meta, including map meta and non-map object meta.
  *
  * @author sunqian
  */
-public class DataSchemaException extends ObjectException {
+public class DataMetaException extends ObjectException {
 
     private static String toMessage(@Nonnull Type type) {
-        return "Parsing data schema failed: " + type.getTypeName() + "[" + type.getClass().getName() + "].";
+        return "Introspection data meta failed: " + type.getTypeName() + "[" + type.getClass().getName() + "].";
     }
 
     /**
      * Empty constructor.
      */
-    public DataSchemaException() {
+    public DataMetaException() {
         super();
     }
 
@@ -29,7 +29,7 @@ public class DataSchemaException extends ObjectException {
      *
      * @param message the message
      */
-    public DataSchemaException(@Nullable String message) {
+    public DataMetaException(@Nullable String message) {
         super(message);
     }
 
@@ -39,7 +39,7 @@ public class DataSchemaException extends ObjectException {
      * @param message the message
      * @param cause   the cause
      */
-    public DataSchemaException(@Nullable String message, @Nullable Throwable cause) {
+    public DataMetaException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -48,26 +48,26 @@ public class DataSchemaException extends ObjectException {
      *
      * @param cause the cause
      */
-    public DataSchemaException(@Nullable Throwable cause) {
+    public DataMetaException(@Nullable Throwable cause) {
         super(cause);
     }
 
     /**
-     * Constructs with the type of specified data object.
+     * Constructs with the type to be introspected.
      *
-     * @param type the type of specified data object
+     * @param type the type to be introspected
      */
-    public DataSchemaException(@Nonnull Type type) {
+    public DataMetaException(@Nonnull Type type) {
         this(toMessage(type));
     }
 
     /**
-     * Constructs with the type of specified data object and cause.
+     * Constructs with the type to be introspected and cause.
      *
-     * @param type  the type of specified data object
+     * @param type  the type to be introspected
      * @param cause the cause
      */
-    public DataSchemaException(@Nonnull Type type, @Nullable Throwable cause) {
+    public DataMetaException(@Nonnull Type type, @Nullable Throwable cause) {
         this(toMessage(type), cause);
     }
 }

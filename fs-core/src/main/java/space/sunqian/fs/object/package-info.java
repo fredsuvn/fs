@@ -6,7 +6,7 @@
  * </ul>
  * And its subpackages provide specific object related supports;
  * <ul>
- *     <li>{@link space.sunqian.fs.object.schema}: Defines schemas for data objects;</li>
+ *     <li>{@link space.sunqian.fs.object.meta}: Defines schemas for data objects;</li>
  *     <li>{@link space.sunqian.fs.object.builder}: Defines steps for creating and building objects;</li>
  *     <li>{@link space.sunqian.fs.object.convert}: Converts and copies objects and properties;</li>
  *     <li>{@link space.sunqian.fs.object.pool}: Provides pool interfaces for objects;</li>

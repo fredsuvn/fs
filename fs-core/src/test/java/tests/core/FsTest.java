@@ -16,7 +16,7 @@ import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.io.InputStream;
@@ -323,7 +323,7 @@ public class FsTest implements Asserter, TestPrint {
     public void testShortcutWithGetProperty() {
         MapProps mapProps = new MapProps(111L);
         assertEquals(111L, Fs.getValue(mapProps, "longNum"));
-        assertEquals(111L, Fs.getValue(mapProps, "longNum", ObjectSchemaParser.defaultParser()));
+        assertEquals(111L, Fs.getValue(mapProps, "longNum", ObjectMetaManager.defaultParser()));
     }
 
     private void printProcess(String title, Process process) {

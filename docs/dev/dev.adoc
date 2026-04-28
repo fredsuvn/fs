@@ -263,7 +263,7 @@ _fs-core_ is organized into functional packages with clear responsibilities:
   * **Core Utilities**: ObjectKit
   * **Core Exception**: ObjectException
   * **Subpackages**:
-    * **schema**: Object schema definition and parsing
+    * **meta**: Object schema definition and parsing
     * **builder**: Object building with builder patterns
     * **convert**: Object conversion and property copying
     * **pool**: Object pooling interfaces

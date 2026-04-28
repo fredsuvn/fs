@@ -1,10 +1,10 @@
-package space.sunqian.fs.object.schema.handlers;
+package space.sunqian.fs.object.meta.handlers;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.schema.ObjectPropertyBase;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.meta.PropertyMetaBase;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
 import space.sunqian.fs.reflect.TypeKit;
 
 import java.lang.reflect.Field;
@@ -12,12 +12,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 
-enum RecordSchemaHandlerImplByJ16 implements ObjectSchemaParser.Handler {
+enum RecordMetaHandlerImplByJ16 implements ObjectMetaManager.Handler {
 
     INST;
 
     @Override
-    public boolean parse(ObjectSchemaParser.@Nonnull Context context) throws Exception {
+    public boolean parse(ObjectMetaManager.@Nonnull Context context) throws Exception {
         var type = context.parsedType();
         var rawClass = TypeKit.getRawClass(type);
         if (rawClass == null) {
@@ -35,20 +35,20 @@ enum RecordSchemaHandlerImplByJ16 implements ObjectSchemaParser.Handler {
             Invocable getter = (inst, args) -> getterInvocable.invoke(inst);
             context.propertyBaseMap().put(
                 componentName,
-                new RecordBase(componentName, componentType, getterMethod, getter)
+                new RecordMetaBase(componentName, componentType, getterMethod, getter)
             );
         }
         return false;
     }
 
-    private static final class RecordBase implements ObjectPropertyBase {
+    private static final class RecordMetaBase implements PropertyMetaBase {
 
         private final @Nonnull String name;
         private final @Nonnull Type type;
         private final @Nonnull Method getterMethod;
         private final @Nonnull Invocable getter;
 
-        private RecordBase(
+        private RecordMetaBase(
             @Nonnull String name,
             @Nonnull Type type,
             @Nonnull Method getterMethod,

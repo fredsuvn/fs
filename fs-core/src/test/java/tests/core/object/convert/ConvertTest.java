@@ -31,8 +31,8 @@ import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
-import space.sunqian.fs.object.schema.MapSchemaParser;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.meta.MapMetaManager;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
 import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -695,21 +695,21 @@ public class ConvertTest implements TestPrint, DataGen {
     }
 
     private void testMapParserOptions() {
-        assertSame(MapSchemaParser.defaultCachedParser(),
+        assertSame(MapMetaManager.defaultCachedParser(),
             ConvertOption.getMapSchemaParser(ConvertOption.ignoreNull(true)));
-        assertNotEquals(MapSchemaParser.defaultCachedParser(),
-            ConvertOption.getMapSchemaParser(ConvertOption.mapSchemaParser(MapSchemaParser.defaultParser())));
-        assertSame(MapSchemaParser.defaultParser(),
-            ConvertOption.getMapSchemaParser(ConvertOption.mapSchemaParser(MapSchemaParser.defaultParser())));
+        assertNotEquals(MapMetaManager.defaultCachedParser(),
+            ConvertOption.getMapSchemaParser(ConvertOption.mapSchemaParser(MapMetaManager.defaultManager())));
+        assertSame(MapMetaManager.defaultManager(),
+            ConvertOption.getMapSchemaParser(ConvertOption.mapSchemaParser(MapMetaManager.defaultManager())));
     }
 
     private void testObjectParserOptions() {
-        assertSame(ObjectSchemaParser.defaultCachedParser(),
+        assertSame(ObjectMetaManager.defaultCachedParser(),
             ConvertOption.getObjectSchemaParser(ConvertOption.ignoreNull(true)));
-        assertNotEquals(ObjectSchemaParser.defaultCachedParser(),
-            ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectSchemaParser.defaultParser())));
-        assertSame(ObjectSchemaParser.defaultParser(),
-            ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectSchemaParser.defaultParser())));
+        assertNotEquals(ObjectMetaManager.defaultCachedParser(),
+            ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectMetaManager.defaultParser())));
+        assertSame(ObjectMetaManager.defaultParser(),
+            ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectMetaManager.defaultParser())));
     }
 
     private void testBuilderManagerOptions() {

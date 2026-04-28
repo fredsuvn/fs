@@ -1,4 +1,4 @@
-package space.sunqian.fs.object.schema;
+package space.sunqian.fs.object.meta;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.reflect.TypeKit;

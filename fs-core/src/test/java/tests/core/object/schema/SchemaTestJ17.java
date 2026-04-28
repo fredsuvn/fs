@@ -11,9 +11,9 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.collect.ListKit;
-import space.sunqian.fs.object.schema.DataSchemaException;
-import space.sunqian.fs.object.schema.ObjectProperty;
-import space.sunqian.fs.object.schema.ObjectSchema;
+import space.sunqian.fs.object.meta.DataMetaException;
+import space.sunqian.fs.object.meta.PropertyMetaMeta;
+import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Method;
@@ -31,43 +31,43 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class SchemaTestJ17 {
 
     private InfoRecord<Integer> infoRecord;
-    private ObjectSchema recordSchema;
+    private ObjectMeta recordSchema;
 
     @BeforeEach
     public void setUp() throws Exception {
         infoRecord = new InfoRecord<>("hello", 18, List.of("friend1", "friend2"), 6);
-        recordSchema = ObjectSchema.parse(new TypeRef<InfoRecord<Integer>>() {}.type());
+        recordSchema = ObjectMeta.parse(new TypeRef<InfoRecord<Integer>>() {}.type());
     }
 
     @Test
     public void testRecordSchemaBasicProperties() {
-        assertTrue(recordSchema.isObjectSchema());
-        assertFalse(recordSchema.isMapSchema());
+        assertTrue(recordSchema.isObjectMeta());
+        assertFalse(recordSchema.isMapMeta());
         assertEquals(4, recordSchema.properties().size());
     }
 
     @Test
     public void testRecordSchemaPropertyName() throws Exception {
-        ObjectProperty recordName = recordSchema.properties().get("name");
+        PropertyMetaMeta recordName = recordSchema.properties().get("name");
         verifyRecordProperty(recordName, "name", String.class, "hello", InfoRecord.class.getMethod("name"));
     }
 
     @Test
     public void testRecordSchemaPropertyAge() throws Exception {
-        ObjectProperty recordAge = recordSchema.properties().get("age");
+        PropertyMetaMeta recordAge = recordSchema.properties().get("age");
         verifyRecordProperty(recordAge, "age", int.class, 18, InfoRecord.class.getMethod("age"));
     }
 
     @Test
     public void testRecordSchemaPropertyFriends() throws Exception {
-        ObjectProperty recordFriends = recordSchema.properties().get("friends");
+        PropertyMetaMeta recordFriends = recordSchema.properties().get("friends");
         List<String> expectedFriends = List.of("friend1", "friend2");
         verifyRecordProperty(recordFriends, "friends", new TypeRef<List<String>>() {}.type(), expectedFriends, InfoRecord.class.getMethod("friends"));
     }
 
     @Test
     public void testRecordSchemaPropertyT() throws Exception {
-        ObjectProperty recordT = recordSchema.properties().get("t");
+        PropertyMetaMeta recordT = recordSchema.properties().get("t");
         verifyRecordProperty(recordT, "t", InfoRecord.class.getTypeParameters()[0], 6, InfoRecord.class.getMethod("t"));
     }
 
@@ -88,20 +88,20 @@ public class SchemaTestJ17 {
 
     @Test
     public void testRecordSchemaErrorType() {
-        assertThrows(DataSchemaException.class, () -> ObjectSchema.parse(InfoRecord.class.getTypeParameters()[0]));
+        assertThrows(DataMetaException.class, () -> ObjectMeta.parse(InfoRecord.class.getTypeParameters()[0]));
     }
 
     @Test
     public void testAnnotation() {
-        ObjectSchema schema = ObjectSchema.parse(ForAnnotation.class);
+        ObjectMeta schema = ObjectMeta.parse(ForAnnotation.class);
         testAnnotationProp1(schema);
         testAnnotationProp2(schema);
         testAnnotationProp3(schema);
         testAnnotationProp4(schema);
     }
 
-    private void testAnnotationProp1(ObjectSchema schema) {
-        ObjectProperty prop1 = schema.getProperty("prop1");
+    private void testAnnotationProp1(ObjectMeta schema) {
+        PropertyMetaMeta prop1 = schema.getProperty("prop1");
         assertNotNull(prop1);
         Nonnull a1 = prop1.getAnnotation(Nonnull.class);
         assertNotNull(a1);
@@ -112,8 +112,8 @@ public class SchemaTestJ17 {
         assertEquals(Collections.emptyList(), prop1.setterAnnotations());
     }
 
-    private void testAnnotationProp2(ObjectSchema schema) {
-        ObjectProperty prop2 = schema.getProperty("prop2");
+    private void testAnnotationProp2(ObjectMeta schema) {
+        PropertyMetaMeta prop2 = schema.getProperty("prop2");
         assertNotNull(prop2);
         Nullable a2 = prop2.getAnnotation(Nullable.class);
         assertNotNull(a2);
@@ -124,8 +124,8 @@ public class SchemaTestJ17 {
         assertEquals(Collections.emptyList(), prop2.setterAnnotations());
     }
 
-    private void testAnnotationProp3(ObjectSchema schema) {
-        ObjectProperty prop3 = schema.getProperty("prop3");
+    private void testAnnotationProp3(ObjectMeta schema) {
+        PropertyMetaMeta prop3 = schema.getProperty("prop3");
         assertNotNull(prop3);
         Nonnull a3 = prop3.getAnnotation(Nonnull.class);
         assertNotNull(a3);
@@ -136,8 +136,8 @@ public class SchemaTestJ17 {
         assertEquals(Collections.emptyList(), prop3.setterAnnotations());
     }
 
-    private void testAnnotationProp4(ObjectSchema schema) {
-        ObjectProperty prop4 = schema.getProperty("prop4");
+    private void testAnnotationProp4(ObjectMeta schema) {
+        PropertyMetaMeta prop4 = schema.getProperty("prop4");
         assertNotNull(prop4);
         assertNull(prop4.getAnnotation(Nonnull.class));
         assertNull(prop4.getAnnotation(Nullable.class));
@@ -146,7 +146,7 @@ public class SchemaTestJ17 {
         assertEquals(Collections.emptyList(), prop4.setterAnnotations());
     }
 
-    private void verifyRecordProperty(ObjectProperty property, String expectedName, Object expectedType, Object expectedValue, Method expectedGetter) throws Exception {
+    private void verifyRecordProperty(PropertyMetaMeta property, String expectedName, Object expectedType, Object expectedValue, Method expectedGetter) throws Exception {
         assertEquals(expectedName, property.name());
         assertEquals(expectedType, property.type());
         assertTrue(property.isReadable());

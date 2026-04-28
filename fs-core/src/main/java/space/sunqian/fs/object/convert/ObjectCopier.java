@@ -9,9 +9,9 @@ import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.builder.BuilderManager;
 import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
-import space.sunqian.fs.object.schema.MapSchema;
-import space.sunqian.fs.object.schema.ObjectProperty;
-import space.sunqian.fs.object.schema.ObjectSchema;
+import space.sunqian.fs.object.meta.MapMeta;
+import space.sunqian.fs.object.meta.PropertyMetaMeta;
+import space.sunqian.fs.object.meta.ObjectMeta;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -20,7 +20,7 @@ import java.util.Map;
 
 /**
  * This interface is used to copy data properties from an object to another object. The object should be a {@link Map}
- * or a non-map object which can be parsed to {@link MapSchema} and {@link ObjectSchema}.
+ * or a non-map object which can be parsed to {@link MapMeta} and {@link ObjectMeta}.
  * <p>
  * A copier can have default options. The options parameter of a copy method (such as
  * {@link #copyProperties(Object, Type, Object, Type, ObjectConverter, Option[])}) will be merged with the default
@@ -88,7 +88,7 @@ public interface ObjectCopier {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * a non-map object which can be parsed to {@link ObjectMeta}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link ConvertOption} or other custom options for custom implementations.
@@ -106,7 +106,7 @@ public interface ObjectCopier {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * a non-map object which can be parsed to {@link ObjectMeta}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link ConvertOption} or other custom options for custom implementations.
@@ -128,7 +128,7 @@ public interface ObjectCopier {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * a non-map object which can be parsed to {@link ObjectMeta}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link ConvertOption} or other custom options for custom implementations.
@@ -159,7 +159,7 @@ public interface ObjectCopier {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * a non-map object which can be parsed to {@link ObjectMeta}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link ConvertOption} or other custom options for custom implementations.
@@ -237,19 +237,19 @@ public interface ObjectCopier {
      * destination object. It has 4 methods:
      * <ul>
      *     <li>
-     *         {@link #copyProperty(Object, Object, Map, MapSchema, Map, MapSchema, ObjectConverter, Option[])}:
+     *         {@link #copyProperty(Object, Object, Map, MapMeta, Map, MapMeta, ObjectConverter, Option[])}:
      *         from source map entry to destination map entry;
      *     </li>
      *     <li>
-     *         {@link #copyProperty(Object, Object, Map, MapSchema, Object, ObjectSchema, ObjectConverter, Option[])}:
+     *         {@link #copyProperty(Object, Object, Map, MapMeta, Object, ObjectMeta, ObjectConverter, Option[])}:
      *         from source map entry to destination object property;
      *     </li>
      *     <li>
-     *         {@link #copyProperty(String, ObjectProperty, Object, ObjectSchema, Map, MapSchema, ObjectConverter, Option[])}:
+     *         {@link #copyProperty(String, PropertyMetaMeta, Object, ObjectMeta, Map, MapMeta, ObjectConverter, Option[])}:
      *         from source object property to destination map entry;
      *     </li>
      *     <li>
-     *         {@link #copyProperty(String, ObjectProperty, Object, ObjectSchema, Map, MapSchema, ObjectConverter, Option[])}:
+     *         {@link #copyProperty(String, PropertyMetaMeta, Object, ObjectMeta, Map, MapMeta, ObjectConverter, Option[])}:
      *         from source object property to destination object property;
      *     </li>
      * </ul>
@@ -284,9 +284,9 @@ public interface ObjectCopier {
             @Nonnull Object srcKey,
             @Nullable Object srcValue,
             @Nonnull Map<Object, Object> src,
-            @Nonnull MapSchema srcSchema,
+            @Nonnull MapMeta srcSchema,
             @Nonnull Map<Object, Object> dst,
-            @Nonnull MapSchema dstSchema,
+            @Nonnull MapMeta dstSchema,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception;
@@ -310,9 +310,9 @@ public interface ObjectCopier {
             @Nonnull Object srcKey,
             @Nullable Object srcValue,
             @Nonnull Map<Object, Object> src,
-            @Nonnull MapSchema srcSchema,
+            @Nonnull MapMeta srcSchema,
             @Nonnull Object dst,
-            @Nonnull ObjectSchema dstSchema,
+            @Nonnull ObjectMeta dstSchema,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception;
@@ -335,11 +335,11 @@ public interface ObjectCopier {
          */
         boolean copyProperty(
             @Nonnull String srcPropertyName,
-            @Nonnull ObjectProperty srcProperty,
+            @Nonnull PropertyMetaMeta srcProperty,
             @Nonnull Object src,
-            @Nonnull ObjectSchema srcSchema,
+            @Nonnull ObjectMeta srcSchema,
             @Nonnull Map<Object, Object> dst,
-            @Nonnull MapSchema dstSchema,
+            @Nonnull MapMeta dstSchema,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception;
@@ -362,11 +362,11 @@ public interface ObjectCopier {
          */
         boolean copyProperty(
             @Nonnull String srcPropertyName,
-            @Nonnull ObjectProperty srcProperty,
+            @Nonnull PropertyMetaMeta srcProperty,
             @Nonnull Object src,
-            @Nonnull ObjectSchema srcSchema,
+            @Nonnull ObjectMeta srcSchema,
             @Nonnull Object dst,
-            @Nonnull ObjectSchema dstSchema,
+            @Nonnull ObjectMeta dstSchema,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception;

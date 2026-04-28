@@ -9,7 +9,7 @@ import space.sunqian.fs.data.CharDataFormatter;
 import space.sunqian.fs.data.DataFormattingException;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,7 +30,7 @@ import java.nio.channels.WritableByteChannel;
 public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormatter<Object> {
 
     /**
-     * Returns the default {@link JsonFormatter}, which uses {@link ObjectSchemaParser#defaultCachedParser()} and
+     * Returns the default {@link JsonFormatter}, which uses {@link ObjectMetaManager#defaultCachedParser()} and
      * {@link ObjectConverter#defaultConverter()} to pars and convert objects, and doesn't ignore the properties of
      * which values are {@code null}, or {@code null} values of map, when formatting.
      * <p>
@@ -44,7 +44,7 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
     }
 
     /**
-     * Returns the default {@link JsonFormatter}, which uses {@link ObjectSchemaParser#defaultCachedParser()} and
+     * Returns the default {@link JsonFormatter}, which uses {@link ObjectMetaManager#defaultCachedParser()} and
      * {@link ObjectConverter#defaultConverter()} to pars and convert objects, and does ignore the properties of which
      * values are {@code null}, or {@code null} values of map, when formatting.
      * <p>
@@ -58,21 +58,21 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
     }
 
     /**
-     * Returns a new {@link JsonFormatter} with the specified {@link ObjectSchemaParser} and {@link ObjectConverter} to
+     * Returns a new {@link JsonFormatter} with the specified {@link ObjectMetaManager} and {@link ObjectConverter} to
      * parse and convert objects.
      * <p>
      * The returned formatter will format {@code byte[]}/{@link ByteBuffer} as Base64 string, and it is the only way to
      * format binary data.
      *
-     * @param objectParser    the specified {@link ObjectSchemaParser}
+     * @param objectParser    the specified {@link ObjectMetaManager}
      * @param objectConverter the specified {@link ObjectConverter}
      * @param ignoreNullValue whether to ignore the properties of which values are {@code null}, or {@code null} values
      *                        of map, when formatting
-     * @return a new {@link JsonFormatter} with the specified {@link ObjectSchemaParser} and {@link ObjectConverter} to
+     * @return a new {@link JsonFormatter} with the specified {@link ObjectMetaManager} and {@link ObjectConverter} to
      * parse and convert objects
      */
     static @Nonnull JsonFormatter newFormatter(
-        @Nonnull ObjectSchemaParser objectParser,
+        @Nonnull ObjectMetaManager objectParser,
         @Nonnull ObjectConverter objectConverter,
         boolean ignoreNullValue
     ) {

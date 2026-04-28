@@ -30,7 +30,7 @@ import space.sunqian.fs.io.IORuntimeException;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumberPattern;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.io.ByteArrayInputStream;
@@ -87,7 +87,7 @@ public class JsonTest implements TestPrint {
         );
         testFormattingAndParsing(
             JsonFormatter.newFormatter(
-                ObjectSchemaParser.defaultCachedParser(),
+                ObjectMetaManager.defaultCachedParser(),
                 ObjectConverter.defaultConverter(),
                 false
             ),

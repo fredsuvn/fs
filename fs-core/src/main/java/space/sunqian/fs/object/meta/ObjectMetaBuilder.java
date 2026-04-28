@@ -1,4 +1,4 @@
-package space.sunqian.fs.object.schema;
+package space.sunqian.fs.object.meta;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
@@ -16,12 +16,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-final class ObjectSchemaBuilder implements ObjectSchemaParser.Context {
+final class ObjectMetaBuilder implements ObjectMetaManager.Context {
 
     private final @Nonnull Type type;
-    private final @Nonnull Map<@Nonnull String, @Nonnull ObjectPropertyBase> properties = new LinkedHashMap<>();
+    private final @Nonnull Map<@Nonnull String, @Nonnull PropertyMetaBase> properties = new LinkedHashMap<>();
 
-    ObjectSchemaBuilder(@Nonnull Type type) {
+    ObjectMetaBuilder(@Nonnull Type type) {
         this.type = type;
     }
 
@@ -31,35 +31,35 @@ final class ObjectSchemaBuilder implements ObjectSchemaParser.Context {
     }
 
     @Override
-    public @Nonnull Map<@Nonnull String, @Nonnull ObjectPropertyBase> propertyBaseMap() {
+    public @Nonnull Map<@Nonnull String, @Nonnull PropertyMetaBase> propertyBaseMap() {
         return properties;
     }
 
     @Nonnull
-    ObjectSchema build(@Nonnull ObjectSchemaParser parser) {
-        return new ObjectSchemaImpl(parser, type, properties);
+    ObjectMeta build(@Nonnull ObjectMetaManager parser) {
+        return new ObjectMetaImpl(parser, type, properties);
     }
 
-    private static final class ObjectSchemaImpl implements ObjectSchema {
+    private static final class ObjectMetaImpl implements ObjectMeta {
 
-        private final @Nonnull ObjectSchemaParser parser;
+        private final @Nonnull ObjectMetaManager parser;
         private final @Nonnull Type type;
-        private final @Nonnull Map<@Nonnull String, @Nonnull ObjectProperty> properties;
+        private final @Nonnull Map<@Nonnull String, @Nonnull PropertyMetaMeta> properties;
 
-        private ObjectSchemaImpl(
-            @Nonnull ObjectSchemaParser parser,
+        private ObjectMetaImpl(
+            @Nonnull ObjectMetaManager parser,
             @Nonnull Type type,
-            @Nonnull Map<@Nonnull String, @Nonnull ObjectPropertyBase> propBases
+            @Nonnull Map<@Nonnull String, @Nonnull PropertyMetaBase> propBases
         ) {
             this.parser = parser;
             this.type = type;
-            Map<@Nonnull String, @Nonnull ObjectProperty> props = new LinkedHashMap<>();
-            propBases.forEach((name, propBase) -> props.put(name, new PropertyImpl(propBase)));
+            Map<@Nonnull String, @Nonnull PropertyMetaMeta> props = new LinkedHashMap<>();
+            propBases.forEach((name, propBase) -> props.put(name, new PropertyMetaMetaImpl(propBase)));
             this.properties = Collections.unmodifiableMap(props);
         }
 
         @Override
-        public @Nonnull ObjectSchemaParser parser() {
+        public @Nonnull ObjectMetaManager parser() {
             return parser;
         }
 
@@ -69,27 +69,27 @@ final class ObjectSchemaBuilder implements ObjectSchemaParser.Context {
         }
 
         @Override
-        public @Nonnull Map<@Nonnull String, @Nonnull ObjectProperty> properties() {
+        public @Nonnull Map<@Nonnull String, @Nonnull PropertyMetaMeta> properties() {
             return properties;
         }
 
         @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
         @Override
         public boolean equals(Object o) {
-            return SchemaKit.equals(this, o);
+            return MetaKit.equals(this, o);
         }
 
         @Override
         public int hashCode() {
-            return SchemaKit.hashCode(this);
+            return MetaKit.hashCode(this);
         }
 
         @Override
         public @Nonnull String toString() {
-            return SchemaKit.toString(this);
+            return MetaKit.toString(this);
         }
 
-        private final class PropertyImpl implements ObjectProperty {
+        private final class PropertyMetaMetaImpl implements PropertyMetaMeta {
 
             private final @Nonnull String name;
             private final @Nonnull Type type;
@@ -105,7 +105,7 @@ final class ObjectSchemaBuilder implements ObjectSchemaParser.Context {
             private final @Nonnull List<@Nonnull Annotation> fieldAnnotations;
             private final @Nonnull Map<@Nonnull Class<?>, @Nonnull Annotation> annotations;
 
-            private PropertyImpl(@Nonnull ObjectPropertyBase propertyBase) {
+            private PropertyMetaMetaImpl(@Nonnull PropertyMetaBase propertyBase) {
                 this.name = propertyBase.name();
                 this.type = propertyBase.type();
                 this.getterMethod = propertyBase.getterMethod();
@@ -127,8 +127,8 @@ final class ObjectSchemaBuilder implements ObjectSchemaParser.Context {
             }
 
             @Override
-            public @Nonnull ObjectSchema owner() {
-                return ObjectSchemaImpl.this;
+            public @Nonnull ObjectMeta owner() {
+                return ObjectMetaImpl.this;
             }
 
             @Override
@@ -189,17 +189,17 @@ final class ObjectSchemaBuilder implements ObjectSchemaParser.Context {
             @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
             @Override
             public boolean equals(Object o) {
-                return SchemaKit.equals(this, o);
+                return MetaKit.equals(this, o);
             }
 
             @Override
             public int hashCode() {
-                return SchemaKit.hashCode(this);
+                return MetaKit.hashCode(this);
             }
 
             @Override
             public @Nonnull String toString() {
-                return SchemaKit.toString(this);
+                return MetaKit.toString(this);
             }
         }
     }

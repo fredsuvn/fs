@@ -26,8 +26,8 @@ import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
-import space.sunqian.fs.object.schema.ObjectSchema;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.meta.ObjectMeta;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
@@ -647,7 +647,7 @@ public class Fs {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * a non-map object which can be parsed to {@link ObjectMeta}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link ConvertOption} or other custom options for custom implementations.
@@ -668,7 +668,7 @@ public class Fs {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * a non-map object which can be parsed to {@link ObjectMeta}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link ConvertOption} or other custom options for custom implementations.
@@ -693,7 +693,7 @@ public class Fs {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * a non-map object which can be parsed to {@link ObjectMeta}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link ConvertOption} or other custom options for custom implementations.
@@ -726,7 +726,7 @@ public class Fs {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * a non-map object which can be parsed to {@link ObjectMeta}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link ConvertOption} or other custom options for custom implementations.
@@ -952,7 +952,7 @@ public class Fs {
      * This method supports nested property access using dot notation (e.g., "parent.child.property"). If any part of
      * the property path is not found or is {@code null}, this method returns {@code null}.
      * <p>
-     * This method is a shortcut to the {@link ObjectKit#getPropertyValue(Object, String, ObjectSchemaParser)}.
+     * This method is a shortcut to the {@link ObjectKit#getPropertyValue(Object, String, ObjectMetaManager)}.
      *
      * @param obj          the given object
      * @param propertyName the specified property name
@@ -963,7 +963,7 @@ public class Fs {
     public static @Nullable Object getValue(
         @Nullable Object obj,
         @Nonnull String propertyName,
-        @Nonnull ObjectSchemaParser objectParser
+        @Nonnull ObjectMetaManager objectParser
     ) {
         return ObjectKit.getPropertyValue(obj, propertyName, objectParser);
     }

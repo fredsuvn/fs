@@ -11,8 +11,8 @@ import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.builder.BuilderManager;
-import space.sunqian.fs.object.schema.MapSchemaParser;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.meta.MapMetaManager;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
 
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -59,12 +59,12 @@ public enum ConvertOption {
     NEW_INSTANCE_MODE,
 
     /**
-     * Key of {@link #objectSchemaParser(ObjectSchemaParser)}.
+     * Key of {@link #objectSchemaParser(ObjectMetaManager)}.
      */
     OBJECT_SCHEMA_PARSER,
 
     /**
-     * Key of {@link #mapSchemaParser(MapSchemaParser)}.
+     * Key of {@link #mapSchemaParser(MapMetaManager)}.
      */
     MAP_SCHEMA_PARSER,
 
@@ -197,62 +197,62 @@ public enum ConvertOption {
     /**
      * Returns an option to specify the object schema parser.
      * <p>
-     * By default, {@link ObjectSchemaParser#defaultCachedParser()} is used.
+     * By default, {@link ObjectMetaManager#defaultCachedParser()} is used.
      *
      * @param schemaParser the specified object schema parser
      * @return an option to specify the object schema parser
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectSchemaParser> objectSchemaParser(
-        @Nonnull ObjectSchemaParser schemaParser
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectMetaManager> objectSchemaParser(
+        @Nonnull ObjectMetaManager schemaParser
     ) {
         return Option.of(OBJECT_SCHEMA_PARSER, schemaParser);
     }
 
     /**
-     * Returns the specified {@link ObjectSchemaParser} from the given options, or
-     * {@link ObjectSchemaParser#defaultCachedParser()} if the given options does not contain a
+     * Returns the specified {@link ObjectMetaManager} from the given options, or
+     * {@link ObjectMetaManager#defaultCachedParser()} if the given options does not contain a
      * {@link ConvertOption#OBJECT_SCHEMA_PARSER}.
      *
      * @param options the given options
-     * @return the specified {@link ObjectSchemaParser} from the given options, or
-     * {@link ObjectSchemaParser#defaultCachedParser()} if the given options does not contain a
+     * @return the specified {@link ObjectMetaManager} from the given options, or
+     * {@link ObjectMetaManager#defaultCachedParser()} if the given options does not contain a
      * {@link ConvertOption#OBJECT_SCHEMA_PARSER}
      */
-    public static @Nonnull ObjectSchemaParser getObjectSchemaParser(@Nonnull Option<?, ?> @Nonnull ... options) {
+    public static @Nonnull ObjectMetaManager getObjectSchemaParser(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Fs.nonnull(
             OptionKit.findValue(ConvertOption.OBJECT_SCHEMA_PARSER, options),
-            ObjectSchemaParser.defaultCachedParser()
+            ObjectMetaManager.defaultCachedParser()
         );
     }
 
     /**
      * Returns an option to specify the map schema parser.
      * <p>
-     * By default, {@link MapSchemaParser#defaultCachedParser()} is used.
+     * By default, {@link MapMetaManager#defaultCachedParser()} is used.
      *
      * @param schemaParser the specified map schema parser
      * @return an option to specify the map schema parser
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull MapSchemaParser> mapSchemaParser(
-        @Nonnull MapSchemaParser schemaParser
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull MapMetaManager> mapSchemaParser(
+        @Nonnull MapMetaManager schemaParser
     ) {
         return Option.of(MAP_SCHEMA_PARSER, schemaParser);
     }
 
     /**
-     * Returns the specified {@link MapSchemaParser} from the given options, or
-     * {@link MapSchemaParser#defaultCachedParser()} if the given options does not contain a
+     * Returns the specified {@link MapMetaManager} from the given options, or
+     * {@link MapMetaManager#defaultCachedParser()} if the given options does not contain a
      * {@link ConvertOption#MAP_SCHEMA_PARSER}.
      *
      * @param options the given options
-     * @return the specified {@link MapSchemaParser} from the given options, or
-     * {@link MapSchemaParser#defaultCachedParser()} if the given options does not contain a
+     * @return the specified {@link MapMetaManager} from the given options, or
+     * {@link MapMetaManager#defaultCachedParser()} if the given options does not contain a
      * {@link ConvertOption#MAP_SCHEMA_PARSER}
      */
-    public static @Nonnull MapSchemaParser getMapSchemaParser(@Nonnull Option<?, ?> @Nonnull ... options) {
+    public static @Nonnull MapMetaManager getMapSchemaParser(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Fs.nonnull(
             OptionKit.findValue(ConvertOption.MAP_SCHEMA_PARSER, options),
-            MapSchemaParser.defaultCachedParser()
+            MapMetaManager.defaultCachedParser()
         );
     }
 

@@ -1,7 +1,7 @@
 package internal.samples;
 
-import space.sunqian.fs.object.schema.ObjectSchema;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.meta.ObjectMeta;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
 
 /**
  * Sample: Object Schema Usage
@@ -24,10 +24,10 @@ import space.sunqian.fs.object.schema.ObjectSchemaParser;
  * Key Classes:
  * <ul>
  *   <li>
- *     {@link ObjectSchema}: Represents the schema of an object
+ *     {@link ObjectMeta}: Represents the schema of an object
  *   </li>
  *   <li>
- *     {@link ObjectSchemaParser}: Parses object schema from classes
+ *     {@link ObjectMetaManager}: Parses object schema from classes
  *   </li>
  * </ul>
  */
@@ -45,7 +45,7 @@ public class SchemaSample {
 
         try {
             // Parse schema from a class
-            ObjectSchema schema = ObjectSchemaParser.defaultParser().parse(Person.class);
+            ObjectMeta schema = ObjectMetaManager.defaultParser().parse(Person.class);
             System.out.println("Parsed schema for Person class: " + schema);
 
             // Access schema properties

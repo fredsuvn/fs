@@ -1,4 +1,4 @@
-package space.sunqian.fs.object.schema;
+package space.sunqian.fs.object.meta;
 
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
@@ -9,23 +9,23 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
- * This interface represents the property info of {@link ObjectSchema}. It is very similar to the simple property of
+ * This interface represents the property info of {@link ObjectMeta}. It is very similar to the simple property of
  * <a href="https://www.oracle.com/java/technologies/javase/javabeans-spec.html">JavaBeans</a>.
  * <p>
- * Two {@link ObjectProperty}s are considered equal if, and only if both their names and both their owners are equal.
+ * Two {@link PropertyMetaMeta}s are considered equal if, and only if both their names and both their owners are equal.
  *
  * @author sunqian
  */
 @Immutable
-public interface ObjectProperty extends ObjectPropertyBase {
+public interface PropertyMetaMeta extends PropertyMetaBase {
 
     /**
-     * Returns the owner {@link ObjectSchema} of this property.
+     * Returns the owner {@link ObjectMeta} of this property.
      *
-     * @return the owner {@link ObjectSchema} of this property
+     * @return the owner {@link ObjectMeta} of this property
      */
     @Nonnull
-    ObjectSchema owner();
+    ObjectMeta owner();
 
     /**
      * Returns whether this property is readable.
@@ -80,12 +80,12 @@ public interface ObjectProperty extends ObjectPropertyBase {
      *
      * @param inst the specified instance
      * @return the property value of the specified instance
-     * @throws DataSchemaException if this property is not readable
+     * @throws DataMetaException if this property is not readable
      */
-    default @Nullable Object getValue(@Nonnull Object inst) throws DataSchemaException {
+    default @Nullable Object getValue(@Nonnull Object inst) throws DataMetaException {
         Invocable getter = getter();
         if (getter == null) {
-            throw new DataSchemaException("The property is not readable: " + name() + ".");
+            throw new DataMetaException("The property is not readable: " + name() + ".");
         }
         return getter.invoke(inst);
     }
@@ -95,12 +95,12 @@ public interface ObjectProperty extends ObjectPropertyBase {
      *
      * @param inst  the specified instance
      * @param value the property value
-     * @throws DataSchemaException if this property is not writable
+     * @throws DataMetaException if this property is not writable
      */
-    default void setValue(@Nonnull Object inst, @Nullable Object value) throws DataSchemaException {
+    default void setValue(@Nonnull Object inst, @Nullable Object value) throws DataMetaException {
         Invocable setter = setter();
         if (setter == null) {
-            throw new DataSchemaException("The property is not writable: " + name() + ".");
+            throw new DataMetaException("The property is not writable: " + name() + ".");
         }
         setter.invoke(inst, value);
     }
@@ -152,16 +152,16 @@ public interface ObjectProperty extends ObjectPropertyBase {
     // }
 
     /**
-     * Returns whether this {@link ObjectProperty} is equal to the other {@link ObjectProperty}. They are considered
+     * Returns whether this {@link PropertyMetaMeta} is equal to the other {@link PropertyMetaMeta}. They are considered
      * equal if, and only if both their names and both their owners are equal.
      *
-     * @param other the other {@link ObjectProperty}
-     * @return whether this {@link ObjectProperty} is equal to the other {@link ObjectProperty}
+     * @param other the other {@link PropertyMetaMeta}
+     * @return whether this {@link PropertyMetaMeta} is equal to the other {@link PropertyMetaMeta}
      */
     boolean equals(Object other);
 
     /**
-     * Returns the hash code of this {@link ObjectProperty}. The hash code is generated via {@link #name()} and
+     * Returns the hash code of this {@link PropertyMetaMeta}. The hash code is generated via {@link #name()} and
      * {@link #owner()} like following codes:
      * <pre>{@code
      * int result = 1;
@@ -170,17 +170,17 @@ public interface ObjectProperty extends ObjectPropertyBase {
      * return result;
      * }</pre>
      *
-     * @return the hash code of this {@link ObjectProperty}
+     * @return the hash code of this {@link PropertyMetaMeta}
      */
     int hashCode();
 
     /**
-     * Returns a string representation of this {@link ObjectProperty}. The string is generated like following codes:
+     * Returns a string representation of this {@link PropertyMetaMeta}. The string is generated like following codes:
      * <pre>{@code
      * return name() + ": " + type().getTypeName();
      * }</pre>
      *
-     * @return a string representation of this {@link ObjectProperty}
+     * @return a string representation of this {@link PropertyMetaMeta}
      */
     @Nonnull
     String toString();

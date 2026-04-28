@@ -3,7 +3,7 @@ package internal.samples;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
-import space.sunqian.fs.object.schema.ObjectSchema;
+import space.sunqian.fs.object.meta.ObjectMeta;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +42,7 @@ import java.util.Map;
  *     {@link ObjectCopier}: Main class for object property copying
  *   </li>
  *   <li>
- *     {@link ObjectSchema}: Object schema for type information
+ *     {@link ObjectMeta}: Object schema for type information
  *   </li>
  *   <li>
  *     {@link Fs}: Core utility class with object-related methods

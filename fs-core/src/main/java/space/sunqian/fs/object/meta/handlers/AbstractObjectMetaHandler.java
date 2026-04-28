@@ -1,12 +1,11 @@
-package space.sunqian.fs.object.schema.handlers;
+package space.sunqian.fs.object.meta.handlers;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.schema.ObjectPropertyBase;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
 import space.sunqian.fs.reflect.TypeKit;
 
 import java.lang.reflect.Field;
@@ -19,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This is a skeletal implementation of {@link ObjectSchemaParser.Handler} to minimize the effort required to implement
+ * This is a skeletal implementation of {@link ObjectMetaManager.Handler} to minimize the effort required to implement
  * the interface.
  * <p>
  * This class uses {@link Class#getMethods()} to find out all methods (the synthetic method will be filtered out), then
@@ -29,7 +28,7 @@ import java.util.Set;
  *
  * @author sunqian
  */
-public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.Handler {
+public abstract class AbstractObjectMetaHandler implements ObjectMetaManager.Handler {
 
     private static @Nonnull Type findActualType(
         @Nonnull Type type,
@@ -64,14 +63,14 @@ public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.
     }
 
     @Override
-    public boolean parse(ObjectSchemaParser.@Nonnull Context context) throws Exception {
+    public boolean parse(ObjectMetaManager.@Nonnull Context context) throws Exception {
         Type type = context.parsedType();
         Class<?> rawType = TypeKit.getRawClass(type);
         if (rawType == null) {
             throw new UnsupportedOperationException("Not a Class or ParameterizedType: " + type + ".");
         }
         Method[] methods = rawType.getMethods();
-        Map<String, PropertyBase> propertyInfoMap = new LinkedHashMap<>();
+        Map<String, PropertyMetaBase> propertyInfoMap = new LinkedHashMap<>();
 
         // Builds property info for each method.
         for (Method method : methods) {
@@ -83,7 +82,7 @@ public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.
                 continue;
             }
             String propertyName = accessorInfo.propertyName();
-            PropertyBase propertyBase = propertyInfoMap.computeIfAbsent(propertyName, PropertyBase::new);
+            PropertyMetaBase propertyBase = propertyInfoMap.computeIfAbsent(propertyName, PropertyMetaBase::new);
             if (accessorInfo.isGetter()) {
                 propertyBase.getterMethod = method;
                 propertyBase.getter = accessorInfo.accessor();
@@ -159,7 +158,7 @@ public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.
         boolean isGetter();
     }
 
-    private static final class PropertyBase implements ObjectPropertyBase {
+    private static final class PropertyMetaBase implements space.sunqian.fs.object.meta.PropertyMetaBase {
 
         private final @Nonnull String name;
         private @Nonnull Type type = Object.class;
@@ -170,7 +169,7 @@ public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.
         private @Nullable Method setterMethod;
         private @Nullable Invocable setter;
 
-        private PropertyBase(@Nonnull String name) {
+        private PropertyMetaBase(@Nonnull String name) {
             this.name = name;
         }
 

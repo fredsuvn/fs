@@ -10,7 +10,7 @@ import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumberPattern;
-import space.sunqian.fs.object.schema.ObjectProperty;
+import space.sunqian.fs.object.meta.PropertyMetaMeta;
 
 import java.lang.annotation.Annotation;
 import java.time.ZoneId;
@@ -136,8 +136,8 @@ public class ConvertKit {
      */
     public static <A extends Annotation> @Nullable A getAnnotation(
         @Nonnull Class<A> annotationType,
-        @Nonnull ObjectProperty srcProperty,
-        @Nonnull ObjectProperty dstProperty
+        @Nonnull PropertyMetaMeta srcProperty,
+        @Nonnull PropertyMetaMeta dstProperty
     ) {
         A srcAnnotation = srcProperty.getAnnotation(annotationType);
         A dstAnnotation = dstProperty.getAnnotation(annotationType);

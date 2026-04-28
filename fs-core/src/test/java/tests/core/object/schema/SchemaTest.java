@@ -14,15 +14,15 @@ import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.schema.DataSchemaException;
-import space.sunqian.fs.object.schema.MapSchema;
-import space.sunqian.fs.object.schema.MapSchemaParser;
-import space.sunqian.fs.object.schema.MapType;
-import space.sunqian.fs.object.schema.ObjectProperty;
-import space.sunqian.fs.object.schema.ObjectPropertyBase;
-import space.sunqian.fs.object.schema.ObjectSchema;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
-import space.sunqian.fs.object.schema.handlers.CommonSchemaHandler;
+import space.sunqian.fs.object.meta.DataMetaException;
+import space.sunqian.fs.object.meta.MapMeta;
+import space.sunqian.fs.object.meta.MapMetaManager;
+import space.sunqian.fs.object.meta.MapType;
+import space.sunqian.fs.object.meta.PropertyMetaMeta;
+import space.sunqian.fs.object.meta.PropertyMetaBase;
+import space.sunqian.fs.object.meta.ObjectMeta;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.handlers.CommonMetaHandler;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Field;
@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class SchemaTest implements TestPrint {
 
     private TestData<CharSequence, String> testDataInstance;
-    private ObjectSchema testDataSchema;
+    private ObjectMeta testDataSchema;
     private Field strField;
     private Field iField;
     private Field strArrayField;
@@ -73,7 +73,7 @@ public class SchemaTest implements TestPrint {
     @BeforeEach
     public void setUp() throws Exception {
         Type type = new TypeRef<TestData<CharSequence, String>>() {}.type();
-        testDataSchema = ObjectSchema.parse(type);
+        testDataSchema = ObjectMeta.parse(type);
         testDataInstance = new TestData<>();
 
         // fields
@@ -102,13 +102,13 @@ public class SchemaTest implements TestPrint {
 
     @Test
     public void testObjectSchemaBasicProperties() throws Exception {
-        assertSame(testDataSchema.parser(), ObjectSchemaParser.defaultParser());
+        assertSame(testDataSchema.parser(), ObjectMetaManager.defaultParser());
         assertEquals(testDataSchema.type(), new TypeRef<TestData<CharSequence, String>>() {}.type());
         assertEquals(TestData.class, testDataSchema.rawType());
-        assertTrue(testDataSchema.isObjectSchema());
-        assertFalse(testDataSchema.isMapSchema());
-        assertSame(testDataSchema.asObjectSchema(), testDataSchema);
-        assertThrows(ClassCastException.class, testDataSchema::asMapSchema);
+        assertTrue(testDataSchema.isObjectMeta());
+        assertFalse(testDataSchema.isMapMeta());
+        assertSame(testDataSchema.asObjectMeta(), testDataSchema);
+        assertThrows(ClassCastException.class, testDataSchema::asMapMeta);
         assertEquals(
             testDataSchema.properties().keySet(),
             SetKit.set("str", "i", "strArray", "t", "UU", "class", "b", "bb", "BB")
@@ -118,7 +118,7 @@ public class SchemaTest implements TestPrint {
             testDataSchema.toString(),
             testDataSchema.type().getTypeName() + "{" +
                 testDataSchema.properties().values().stream()
-                    .map(ObjectProperty::toString)
+                    .map(PropertyMetaMeta::toString)
                     .collect(Collectors.joining(", "))
                 + "}"
         );
@@ -135,7 +135,7 @@ public class SchemaTest implements TestPrint {
 
     @Test
     public void testObjectSchemaPropertyStr() throws Exception {
-        ObjectProperty str = testDataSchema.getProperty("str");
+        PropertyMetaMeta str = testDataSchema.getProperty("str");
         verifyPropertyBasic(str, testDataSchema, "str", String.class, String.class);
         assertEquals(str.field(), strField);
         assertEquals(str.getterMethod(), strGetter);
@@ -149,7 +149,7 @@ public class SchemaTest implements TestPrint {
 
     @Test
     public void testObjectSchemaPropertyI() throws Exception {
-        ObjectProperty i = testDataSchema.getProperty("i");
+        PropertyMetaMeta i = testDataSchema.getProperty("i");
         verifyPropertyBasic(i, testDataSchema, "i", int.class, int.class);
         assertEquals(i.field(), iField);
         assertEquals(i.getterMethod(), iGetter);
@@ -157,18 +157,18 @@ public class SchemaTest implements TestPrint {
         assertTrue(i.isReadable());
         assertEquals(0, i.getValue(testDataInstance));
         assertFalse(i.isWritable());
-        assertThrows(DataSchemaException.class, () -> i.setValue(testDataInstance, 1));
+        assertThrows(DataMetaException.class, () -> i.setValue(testDataInstance, 1));
     }
 
     @Test
     public void testObjectSchemaPropertyStrArray() throws Exception {
-        ObjectProperty strArray = testDataSchema.getProperty("strArray");
+        PropertyMetaMeta strArray = testDataSchema.getProperty("strArray");
         verifyPropertyBasic(strArray, testDataSchema, "strArray", String[].class, String[].class);
         assertEquals(strArray.field(), strArrayField);
         assertNull(strArray.getterMethod());
         assertEquals(strArray.setterMethod(), strArraySetter);
         assertFalse(strArray.isReadable());
-        assertThrows(DataSchemaException.class, () -> strArray.getValue(testDataInstance));
+        assertThrows(DataMetaException.class, () -> strArray.getValue(testDataInstance));
         assertTrue(strArray.isWritable());
         strArray.setValue(testDataInstance, new String[]{"hello"});
         assertArrayEquals(new String[]{"hello"}, testDataInstance.strArray);
@@ -176,7 +176,7 @@ public class SchemaTest implements TestPrint {
 
     @Test
     public void testObjectSchemaPropertyT() throws Exception {
-        ObjectProperty t = testDataSchema.getProperty("t");
+        PropertyMetaMeta t = testDataSchema.getProperty("t");
         verifyPropertyBasic(t, testDataSchema, "t", CharSequence.class, CharSequence.class);
         assertEquals(t.field(), tField);
         assertEquals(t.getterMethod(), tGetter);
@@ -190,7 +190,7 @@ public class SchemaTest implements TestPrint {
 
     @Test
     public void testObjectSchemaPropertyUU() throws Exception {
-        ObjectProperty UU = testDataSchema.getProperty("UU");
+        PropertyMetaMeta UU = testDataSchema.getProperty("UU");
         verifyPropertyBasic(UU, testDataSchema, "UU", String.class, String.class);
         assertNull(UU.field());
         assertEquals(UU.getterMethod(), uGetter);
@@ -204,7 +204,7 @@ public class SchemaTest implements TestPrint {
 
     @Test
     public void testObjectSchemaPropertyClass() throws Exception {
-        ObjectProperty classProp = testDataSchema.getProperty("class");
+        PropertyMetaMeta classProp = testDataSchema.getProperty("class");
         assertSame(classProp.owner(), testDataSchema);
         assertEquals("class", classProp.name());
         assertEquals(classProp.type(), new TypeRef<Class<?>>() {}.type());
@@ -219,51 +219,51 @@ public class SchemaTest implements TestPrint {
 
     @Test
     public void testObjectSchemaPropertyB() throws Exception {
-        ObjectProperty b = testDataSchema.getProperty("b");
+        PropertyMetaMeta b = testDataSchema.getProperty("b");
         verifyBooleanProperty(b, testDataSchema, "b", bField, bGetter, testDataInstance);
     }
 
     @Test
     public void testObjectSchemaPropertyBb() throws Exception {
-        ObjectProperty bb = testDataSchema.getProperty("bb");
+        PropertyMetaMeta bb = testDataSchema.getProperty("bb");
         verifyBooleanProperty(bb, testDataSchema, "bb", bbField, bbGetter, testDataInstance);
     }
 
     @Test
     public void testObjectSchemaPropertyBB() throws Exception {
-        ObjectProperty BB = testDataSchema.getProperty("BB");
+        PropertyMetaMeta BB = testDataSchema.getProperty("BB");
         verifyBooleanProperty(BB, testDataSchema, "BB", BBField, BBGetter, testDataInstance);
     }
 
     @Test
     public void testObjectSchemaErrorType() {
-        assertThrows(DataSchemaException.class, () -> ObjectSchema.parse(TestData.class.getTypeParameters()[0]));
+        assertThrows(DataMetaException.class, () -> ObjectMeta.parse(TestData.class.getTypeParameters()[0]));
     }
 
     @Test
     public void testObjectSchemaRawType() {
-        ObjectSchema raw = ObjectSchema.parse(TestData.class);
+        ObjectMeta raw = ObjectMeta.parse(TestData.class);
         assertEquals(raw.getProperty("t").type(), TestData.class.getTypeParameters()[0]);
         assertEquals(raw.getProperty("UU").type(), TestData.class.getTypeParameters()[1]);
     }
 
     @Test
     public void testObjectSchemaPublicField() throws Exception {
-        ObjectSchema publicFieldSchema = ObjectSchema.parse(ForPublicFiled.class);
+        ObjectMeta publicFieldSchema = ObjectMeta.parse(ForPublicFiled.class);
         assertEquals(
             ForPublicFiled.class.getField("publicField"),
             publicFieldSchema.getProperty("publicField").field()
         );
     }
 
-    private void verifyPropertyBasic(ObjectProperty property, ObjectSchema owner, String name, Type expectedType, Class<?> expectedRawType) {
+    private void verifyPropertyBasic(PropertyMetaMeta property, ObjectMeta owner, String name, Type expectedType, Class<?> expectedRawType) {
         assertSame(property.owner(), owner);
         assertEquals(name, property.name());
         assertEquals(expectedType, property.type());
         assertEquals(expectedRawType, property.rawType());
     }
 
-    private void verifyBooleanProperty(ObjectProperty property, ObjectSchema owner, String name, Field field, Method getter, TestData<CharSequence, String> instance) throws Exception {
+    private void verifyBooleanProperty(PropertyMetaMeta property, ObjectMeta owner, String name, Field field, Method getter, TestData<CharSequence, String> instance) throws Exception {
         verifyPropertyBasic(property, owner, name, boolean.class, boolean.class);
         assertEquals(property.field(), field);
         assertEquals(property.getterMethod(), getter);
@@ -275,42 +275,42 @@ public class SchemaTest implements TestPrint {
 
     @Test
     public void testObjectParser() throws Exception {
-        assertSame(ObjectSchemaParser.defaultParser(), ObjectSchemaParser.defaultParser());
-        assertSame(ObjectSchemaParser.defaultCachedParser(), ObjectSchemaParser.defaultCachedParser());
-        testObjectParserWithHandler(ObjectSchemaParser.defaultParser());
-        testObjectParserWithHandler(ObjectSchemaParser.defaultCachedParser());
+        assertSame(ObjectMetaManager.defaultParser(), ObjectMetaManager.defaultParser());
+        assertSame(ObjectMetaManager.defaultCachedParser(), ObjectMetaManager.defaultCachedParser());
+        testObjectParserWithHandler(ObjectMetaManager.defaultParser());
+        testObjectParserWithHandler(ObjectMetaManager.defaultCachedParser());
     }
 
-    private void testObjectParserWithHandler(ObjectSchemaParser parser) throws Exception {
+    private void testObjectParserWithHandler(ObjectMetaManager parser) throws Exception {
         // Test with pre handler
-        ObjectSchemaParser preParser = parser.withFirstHandler(new PreHandler());
-        ObjectSchema preSchema = preParser.parse(Object.class);
+        ObjectMetaManager preParser = parser.withFirstHandler(new PreHandler());
+        ObjectMeta preSchema = preParser.parse(Object.class);
         assertEquals(Object.class, preSchema.type());
         assertEquals(0, preSchema.properties().size());
 
         // Test with last handler
-        ObjectSchemaParser lastParser = ObjectSchemaParser.newParser(
+        ObjectMetaManager lastParser = ObjectMetaManager.newParser(
             parser.asHandler(), new LastHandler());
-        ObjectSchema lastSchema = lastParser.parse(Object.class);
+        ObjectMeta lastSchema = lastParser.parse(Object.class);
         assertEquals(Object.class, lastSchema.type());
         assertEquals(lastSchema.properties().keySet(), SetKit.set("class", "test"));
 
         // Test with pre handler as handler
-        ObjectSchemaParser asPreParser = ObjectSchemaParser.newParser(preParser.asHandler());
-        ObjectSchema asPreSchema = asPreParser.parse(Object.class);
+        ObjectMetaManager asPreParser = ObjectMetaManager.newParser(preParser.asHandler());
+        ObjectMeta asPreSchema = asPreParser.parse(Object.class);
         assertEquals(Object.class, asPreSchema.type());
         assertEquals(0, asPreSchema.properties().size());
 
         // Test with last handler as handler
-        ObjectSchemaParser asLastParser = ObjectSchemaParser.newParser(lastParser.asHandler());
-        ObjectSchema asLastSchema = asLastParser.parse(Object.class);
+        ObjectMetaManager asLastParser = ObjectMetaManager.newParser(lastParser.asHandler());
+        ObjectMeta asLastSchema = asLastParser.parse(Object.class);
         assertEquals(Object.class, asLastSchema.type());
         assertEquals(asLastSchema.properties().keySet(), SetKit.set("class", "test"));
     }
 
-    private static class PreHandler implements ObjectSchemaParser.Handler {
+    private static class PreHandler implements ObjectMetaManager.Handler {
         @Override
-        public boolean parse(@Nonnull ObjectSchemaParser.Context context) throws Exception {
+        public boolean parse(@Nonnull ObjectMetaManager.Context context) throws Exception {
             if (context.parsedType().equals(Object.class)) {
                 return false;
             }
@@ -318,11 +318,11 @@ public class SchemaTest implements TestPrint {
         }
     }
 
-    private static class LastHandler implements ObjectSchemaParser.Handler {
+    private static class LastHandler implements ObjectMetaManager.Handler {
         @Override
-        public boolean parse(@Nonnull ObjectSchemaParser.Context context) throws Exception {
+        public boolean parse(@Nonnull ObjectMetaManager.Context context) throws Exception {
             if (context.parsedType().equals(Object.class)) {
-                context.propertyBaseMap().put("test", new ObjectPropertyBase() {
+                context.propertyBaseMap().put("test", new PropertyMetaBase() {
                     @Override
                     public @Nonnull String name() {
                         return "test";
@@ -366,11 +366,11 @@ public class SchemaTest implements TestPrint {
     @Test
     public void testEqualHashCode() throws Exception {
         // schema equal
-        ObjectSchema a1 = ObjectSchema.parse(A.class);
-        ObjectSchema a2 = ObjectSchema.parse(A.class);
-        ObjectSchema b1 = ObjectSchema.parse(B.class);
-        ObjectSchemaParser parser2 = ObjectSchemaParser.newParser(new CommonSchemaHandler());
-        ObjectSchema a3 = parser2.parse(A.class);
+        ObjectMeta a1 = ObjectMeta.parse(A.class);
+        ObjectMeta a2 = ObjectMeta.parse(A.class);
+        ObjectMeta b1 = ObjectMeta.parse(B.class);
+        ObjectMetaManager parser2 = ObjectMetaManager.newParser(new CommonMetaHandler());
+        ObjectMeta a3 = parser2.parse(A.class);
         assertEquals(a1, a1);
         assertFalse(a1.equals(""));
         assertNotSame(a1, a2);
@@ -378,11 +378,11 @@ public class SchemaTest implements TestPrint {
         assertFalse(a1.equals(b1));
         assertFalse(a1.equals(a3));
         // properties equal
-        ObjectProperty ap1 = a1.getProperty("class");
-        ObjectProperty appp = a1.getProperty("pp");
-        ObjectProperty ap2 = a2.getProperty("class");
-        ObjectProperty bp1 = b1.getProperty("class");
-        ObjectProperty ap3 = a3.getProperty("class");
+        PropertyMetaMeta ap1 = a1.getProperty("class");
+        PropertyMetaMeta appp = a1.getProperty("pp");
+        PropertyMetaMeta ap2 = a2.getProperty("class");
+        PropertyMetaMeta bp1 = b1.getProperty("class");
+        PropertyMetaMeta ap3 = a3.getProperty("class");
         assertTrue(ap1.equals(ap1));
         assertEquals(ap1, ap2);
         assertFalse(ap1.equals(appp));
@@ -406,17 +406,17 @@ public class SchemaTest implements TestPrint {
 
     @Test
     public void testMapSchema() throws Exception {
-        MapSchema schema = MapSchema.parse(HelloMap.class);
+        MapMeta schema = MapMeta.of(HelloMap.class);
         verifyMapSchemaBasic(schema, HelloMap.class, String.class, Long.class);
         printFor("MapSchema toString", schema);
         assertEquals(
             schema.toString(),
             schema.type().getTypeName()
         );
-        assertThrows(DataSchemaException.class, () -> MapSchema.parse(String.class));
+        assertThrows(DataMetaException.class, () -> MapMeta.of(String.class));
 
         // Test with MapType
-        MapSchema schemaWithTypes = MapSchema.parse(MapType.of(Map.class, Object.class, Long.class));
+        MapMeta schemaWithTypes = MapMeta.of(MapType.of(Map.class, Object.class, Long.class));
         verifyMapSchemaBasic(schemaWithTypes, Map.class, Object.class, Long.class);
 
         // Test schema equality
@@ -425,108 +425,108 @@ public class SchemaTest implements TestPrint {
 
     @Test
     public void testMapParser() throws Exception {
-        assertSame(MapSchemaParser.defaultParser(), MapSchemaParser.defaultParser());
-        assertSame(MapSchemaParser.defaultCachedParser(), MapSchemaParser.defaultCachedParser());
-        testMapParserWithParser(MapSchemaParser.defaultParser());
-        testMapParserWithParser(MapSchemaParser.defaultCachedParser());
+        assertSame(MapMetaManager.defaultManager(), MapMetaManager.defaultManager());
+        assertSame(MapMetaManager.defaultCachedParser(), MapMetaManager.defaultCachedParser());
+        testMapParserWithParser(MapMetaManager.defaultManager());
+        testMapParserWithParser(MapMetaManager.defaultCachedParser());
     }
 
-    private void testMapParserWithParser(MapSchemaParser parser) throws Exception {
-        MapSchema schema = parser.parse(HelloMap.class);
+    private void testMapParserWithParser(MapMetaManager parser) throws Exception {
+        MapMeta schema = parser.introspect(HelloMap.class);
         verifyMapSchemaWithParser(schema, HelloMap.class, String.class, Long.class, parser);
         printFor("MapSchema toString", schema);
         assertEquals(
             schema.toString(),
             schema.type().getTypeName()
         );
-        assertThrows(DataSchemaException.class, () -> parser.parse(String.class));
+        assertThrows(DataMetaException.class, () -> parser.introspect(String.class));
 
         // Test with MapType
-        MapSchema schemaWithTypes = parser.parse(MapType.of(Map.class, Object.class, Long.class));
+        MapMeta schemaWithTypes = parser.introspect(MapType.of(Map.class, Object.class, Long.class));
         verifyMapSchemaWithParser(schemaWithTypes, Map.class, Object.class, Long.class, parser);
 
         // Test schema equality
         testMapSchemaEqualityWithParser(parser);
     }
 
-    private void verifyMapSchemaBasic(MapSchema schema, Class<?> expectedType, Class<?> expectedKeyType, Class<?> expectedValueType) {
-        assertSame(schema.parser(), MapSchemaParser.defaultParser());
+    private void verifyMapSchemaBasic(MapMeta schema, Class<?> expectedType, Class<?> expectedKeyType, Class<?> expectedValueType) {
+        assertSame(schema.manager(), MapMetaManager.defaultManager());
         assertEquals(expectedType, schema.type());
         assertEquals(expectedType, schema.rawType());
-        assertTrue(schema.isMapSchema());
-        assertFalse(schema.isObjectSchema());
-        assertSame(schema.asMapSchema(), schema);
-        assertThrows(ClassCastException.class, schema::asObjectSchema);
+        assertTrue(schema.isMapMeta());
+        assertFalse(schema.isObjectMeta());
+        assertSame(schema.asMapMeta(), schema);
+        assertThrows(ClassCastException.class, schema::asObjectMeta);
         assertEquals(expectedKeyType, schema.keyType());
         assertEquals(expectedValueType, schema.valueType());
     }
 
-    private void verifyMapSchemaWithParser(MapSchema schema, Class<?> expectedType, Class<?> expectedKeyType, Class<?> expectedValueType, MapSchemaParser expectedParser) {
+    private void verifyMapSchemaWithParser(MapMeta schema, Class<?> expectedType, Class<?> expectedKeyType, Class<?> expectedValueType, MapMetaManager expectedParser) {
         // For cached parsers, the schema's parser returns the underlying parser, not the cached one
         // So we don't assert same here, just verify other properties
         assertEquals(expectedType, schema.type());
         assertEquals(expectedType, schema.rawType());
-        assertTrue(schema.isMapSchema());
-        assertFalse(schema.isObjectSchema());
-        assertSame(schema.asMapSchema(), schema);
-        assertThrows(ClassCastException.class, schema::asObjectSchema);
+        assertTrue(schema.isMapMeta());
+        assertFalse(schema.isObjectMeta());
+        assertSame(schema.asMapMeta(), schema);
+        assertThrows(ClassCastException.class, schema::asObjectMeta);
         assertEquals(expectedKeyType, schema.keyType());
         assertEquals(expectedValueType, schema.valueType());
     }
 
     private void testMapSchemaEquality() throws Exception {
-        MapSchema m1 = MapSchema.parse(Map.class);
-        MapSchema m2 = MapSchema.parse(Map.class);
+        MapMeta m1 = MapMeta.of(Map.class);
+        MapMeta m2 = MapMeta.of(Map.class);
         assertEquals(m1, m2);
         assertTrue(m1.equals(m1));
         assertFalse(m1.equals(""));
-        MapSchema m3 = MapSchema.parse(new TypeRef<Map<String, Integer>>() {}.type());
+        MapMeta m3 = MapMeta.of(new TypeRef<Map<String, Integer>>() {}.type());
         assertNotEquals(m1, m3);
         assertNotEquals(m3, m1);
 
         // Test with custom parser
-        MapSchemaParser parser2 = new CustomMapSchemaParser();
-        MapSchema m4 = parser2.parse(Map.class);
+        MapMetaManager parser2 = new CustomMapMetaManager();
+        MapMeta m4 = parser2.introspect(Map.class);
         assertNotEquals(m1, m4);
         assertNotEquals(m4, m1);
 
         // Test hash code
         int result = 1;
         result = 31 * result + m1.type().hashCode();
-        result = 31 * result + m1.parser().hashCode();
+        result = 31 * result + m1.manager().hashCode();
         assertEquals(m1.hashCode(), result);
     }
 
-    private void testMapSchemaEqualityWithParser(MapSchemaParser parser) throws Exception {
-        MapSchema m1 = parser.parse(Map.class);
-        MapSchema m2 = parser.parse(Map.class);
+    private void testMapSchemaEqualityWithParser(MapMetaManager parser) throws Exception {
+        MapMeta m1 = parser.introspect(Map.class);
+        MapMeta m2 = parser.introspect(Map.class);
         assertEquals(m1, m2);
         assertTrue(m1.equals(m1));
         assertFalse(m1.equals(""));
-        MapSchema m3 = parser.parse(new TypeRef<Map<String, Integer>>() {}.type());
+        MapMeta m3 = parser.introspect(new TypeRef<Map<String, Integer>>() {}.type());
         assertNotEquals(m1, m3);
         assertNotEquals(m3, m1);
 
         // Test with custom parser
-        MapSchemaParser parser2 = new CustomMapSchemaParser();
-        MapSchema m4 = parser2.parse(Map.class);
+        MapMetaManager parser2 = new CustomMapMetaManager();
+        MapMeta m4 = parser2.introspect(Map.class);
         assertNotEquals(m1, m4);
         assertNotEquals(m4, m1);
 
         // Test hash code
         int result = 1;
         result = 31 * result + m1.type().hashCode();
-        result = 31 * result + m1.parser().hashCode();
+        result = 31 * result + m1.manager().hashCode();
         assertEquals(m1.hashCode(), result);
     }
 
-    private static class CustomMapSchemaParser implements MapSchemaParser {
+    private static class CustomMapMetaManager implements MapMetaManager {
         @Override
-        public @Nonnull MapSchema parse(@Nonnull Type type) throws DataSchemaException {
-            return new MapSchema() {
+        public @Nonnull MapMeta introspect(@Nonnull Type type) throws DataMetaException {
+            return new MapMeta() {
                 @Override
-                public @Nonnull MapSchemaParser parser() {
-                    return CustomMapSchemaParser.this;
+                public @Nonnull MapMetaManager manager() {
+                    return CustomMapMetaManager.this;
                 }
 
                 @Override
@@ -554,24 +554,24 @@ public class SchemaTest implements TestPrint {
     }
 
     private void testMapSchemaCachedParser() {
-        MapSchemaParser mapParser = MapSchemaParser.newCachedParser(SimpleCache.ofStrong(), MapSchemaParser.defaultParser());
+        MapMetaManager mapParser = MapMetaManager.newCachedParser(SimpleCache.ofStrong(), MapMetaManager.defaultManager());
         // Test caching for Map.class
-        assertSame(mapParser.parse(Map.class), mapParser.parse(Map.class));
-        assertNotSame(MapSchema.parse(Map.class), MapSchema.parse(Map.class));
+        assertSame(mapParser.introspect(Map.class), mapParser.introspect(Map.class));
+        assertNotSame(MapMeta.of(Map.class), MapMeta.of(Map.class));
         // Test caching for MapType
         MapType mapType = MapType.of(Map.class, String.class, Long.class);
-        assertSame(mapParser.parse(mapType), mapParser.parse(mapType));
-        assertNotSame(MapSchema.parse(mapType), MapSchema.parse(mapType));
+        assertSame(mapParser.introspect(mapType), mapParser.introspect(mapType));
+        assertNotSame(MapMeta.of(mapType), MapMeta.of(mapType));
     }
 
     private void testObjectSchemaCachedParser() {
-        ObjectSchemaParser objectParser = ObjectSchemaParser.newCachedParser(SimpleCache.ofStrong(), ObjectSchemaParser.defaultParser());
+        ObjectMetaManager objectParser = ObjectMetaManager.newCachedParser(SimpleCache.ofStrong(), ObjectMetaManager.defaultParser());
         // Test caching for A.class
         assertSame(objectParser.parse(A.class), objectParser.parse(A.class));
-        assertNotSame(ObjectSchema.parse(A.class), ObjectSchema.parse(A.class));
+        assertNotSame(ObjectMeta.parse(A.class), ObjectMeta.parse(A.class));
         // Test handler consistency
-        assertSame(ObjectSchemaParser.defaultParser().handlers(), objectParser.handlers());
-        assertSame(ObjectSchemaParser.defaultParser().asHandler(), objectParser.asHandler());
+        assertSame(ObjectMetaManager.defaultParser().handlers(), objectParser.handlers());
+        assertSame(ObjectMetaManager.defaultParser().asHandler(), objectParser.asHandler());
     }
 
     @Test
@@ -613,7 +613,7 @@ public class SchemaTest implements TestPrint {
 
     @Test
     public void testAnnotation() {
-        ObjectSchema schema = ObjectSchema.parse(ForAnnotation.class);
+        ObjectMeta schema = ObjectMeta.parse(ForAnnotation.class);
         testAnnotationProp1(schema);
         testAnnotationProp2(schema);
         testAnnotationProp3(schema);
@@ -622,8 +622,8 @@ public class SchemaTest implements TestPrint {
         testAnnotationProp6(schema);
     }
 
-    private void testAnnotationProp1(ObjectSchema schema) {
-        ObjectProperty prop1 = schema.getProperty("prop1");
+    private void testAnnotationProp1(ObjectMeta schema) {
+        PropertyMetaMeta prop1 = schema.getProperty("prop1");
         assertNotNull(prop1);
         Nonnull a1 = prop1.getAnnotation(Nonnull.class);
         assertNotNull(a1);
@@ -634,8 +634,8 @@ public class SchemaTest implements TestPrint {
         assertEquals(Collections.emptyList(), prop1.setterAnnotations());
     }
 
-    private void testAnnotationProp2(ObjectSchema schema) {
-        ObjectProperty prop2 = schema.getProperty("prop2");
+    private void testAnnotationProp2(ObjectMeta schema) {
+        PropertyMetaMeta prop2 = schema.getProperty("prop2");
         assertNotNull(prop2);
         Nonnull a2 = prop2.getAnnotation(Nonnull.class);
         assertNotNull(a2);
@@ -646,8 +646,8 @@ public class SchemaTest implements TestPrint {
         assertEquals(Collections.emptyList(), prop2.setterAnnotations());
     }
 
-    private void testAnnotationProp3(ObjectSchema schema) {
-        ObjectProperty prop3 = schema.getProperty("prop3");
+    private void testAnnotationProp3(ObjectMeta schema) {
+        PropertyMetaMeta prop3 = schema.getProperty("prop3");
         assertNotNull(prop3);
         Nonnull a3 = prop3.getAnnotation(Nonnull.class);
         assertNotNull(a3);
@@ -658,8 +658,8 @@ public class SchemaTest implements TestPrint {
         assertEquals(ListKit.list(a3), prop3.setterAnnotations());
     }
 
-    private void testAnnotationProp4(ObjectSchema schema) {
-        ObjectProperty prop4 = schema.getProperty("prop4");
+    private void testAnnotationProp4(ObjectMeta schema) {
+        PropertyMetaMeta prop4 = schema.getProperty("prop4");
         assertNotNull(prop4);
         assertNull(prop4.getAnnotation(Nonnull.class));
         assertNull(prop4.getAnnotation(Nullable.class));
@@ -668,8 +668,8 @@ public class SchemaTest implements TestPrint {
         assertEquals(Collections.emptyList(), prop4.setterAnnotations());
     }
 
-    private void testAnnotationProp5(ObjectSchema schema) {
-        ObjectProperty prop5 = schema.getProperty("prop5");
+    private void testAnnotationProp5(ObjectMeta schema) {
+        PropertyMetaMeta prop5 = schema.getProperty("prop5");
         assertNotNull(prop5);
         assertNull(prop5.getAnnotation(Nonnull.class));
         assertNull(prop5.getAnnotation(Nullable.class));
@@ -678,8 +678,8 @@ public class SchemaTest implements TestPrint {
         assertEquals(Collections.emptyList(), prop5.setterAnnotations());
     }
 
-    private void testAnnotationProp6(ObjectSchema schema) {
-        ObjectProperty prop6 = schema.getProperty("prop6");
+    private void testAnnotationProp6(ObjectMeta schema) {
+        PropertyMetaMeta prop6 = schema.getProperty("prop6");
         assertNotNull(prop6);
         assertNull(prop6.getAnnotation(Nonnull.class));
         assertNull(prop6.getAnnotation(Nullable.class));
@@ -694,13 +694,13 @@ public class SchemaTest implements TestPrint {
     }
 
     private void testDataSchemaExceptionConstructors() {
-        assertThrows(DataSchemaException.class, () -> {throw new DataSchemaException();});
-        assertThrows(DataSchemaException.class, () -> {throw new DataSchemaException("");});
-        assertThrows(DataSchemaException.class, () -> {throw new DataSchemaException("", new RuntimeException());});
-        assertThrows(DataSchemaException.class, () -> {throw new DataSchemaException(new RuntimeException());});
-        assertThrows(DataSchemaException.class, () -> {throw new DataSchemaException(Object.class);});
-        assertThrows(DataSchemaException.class, () -> {
-            throw new DataSchemaException(Object.class, new RuntimeException());
+        assertThrows(DataMetaException.class, () -> {throw new DataMetaException();});
+        assertThrows(DataMetaException.class, () -> {throw new DataMetaException("");});
+        assertThrows(DataMetaException.class, () -> {throw new DataMetaException("", new RuntimeException());});
+        assertThrows(DataMetaException.class, () -> {throw new DataMetaException(new RuntimeException());});
+        assertThrows(DataMetaException.class, () -> {throw new DataMetaException(Object.class);});
+        assertThrows(DataMetaException.class, () -> {
+            throw new DataMetaException(Object.class, new RuntimeException());
         });
     }
 

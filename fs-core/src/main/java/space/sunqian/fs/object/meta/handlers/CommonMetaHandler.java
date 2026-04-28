@@ -1,17 +1,17 @@
-package space.sunqian.fs.object.schema.handlers;
+package space.sunqian.fs.object.meta.handlers;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * This is a common implementation of {@link ObjectSchemaParser.Handler} which basically follows the <a
+ * This is a common implementation of {@link ObjectMetaManager.Handler} which basically follows the <a
  * href="https://www.oracle.com/java/technologies/javase/javabeans-spec.html">JavaBeans</a> style, inheriting from
- * {@link AbstractObjectSchemaHandler} and overriding the {@link AbstractObjectSchemaHandler#resolveAccessor(Method)}
+ * {@link AbstractObjectMetaHandler} and overriding the {@link AbstractObjectMetaHandler#resolveAccessor(Method)}
  * method.
  * <p>
  * This implementation resolves {@code getXxx} or {@code isXxx} methods as getters and {@code setXxx} methods as setters
@@ -21,14 +21,14 @@ import java.util.Objects;
  *
  * @author sunqian
  */
-public class CommonSchemaHandler extends AbstractObjectSchemaHandler {
+public class CommonMetaHandler extends AbstractObjectMetaHandler {
 
-    private static final @Nonnull CommonSchemaHandler INST = new CommonSchemaHandler();
+    private static final @Nonnull CommonMetaHandler INST = new CommonMetaHandler();
 
     /**
      * Returns a same one instance of this handler.
      */
-    public static @Nonnull CommonSchemaHandler getInstance() {
+    public static @Nonnull CommonMetaHandler getInstance() {
         return INST;
     }
 

@@ -9,9 +9,9 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnsupportedEnvException;
 import space.sunqian.fs.base.string.StringKit;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.schema.ObjectProperty;
-import space.sunqian.fs.object.schema.ObjectPropertyBase;
-import space.sunqian.fs.object.schema.ObjectSchemaParser;
+import space.sunqian.fs.object.meta.PropertyMetaMeta;
+import space.sunqian.fs.object.meta.PropertyMetaBase;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
 import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * {@link ObjectSchemaParser.Handler} implementation for
+ * {@link ObjectMetaManager.Handler} implementation for
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
@@ -34,13 +34,13 @@ import java.util.Objects;
  *     .withFirstHandler(ProtobufSchemaHandler.getInstance());
  * }</pre>
  * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
- * environment, the {@link ObjectSchemaParser#defaultParser()} will automatically load this handler.
+ * environment, the {@link ObjectMetaManager#defaultParser()} will automatically load this handler.
  * <p>
  * Note:
  * <ul>
  *     <li>
  *         When {@link ProtocolStringList} is used as a property type, it will be mapped to {@code List<String>}, but
- *         the type of the instance returned by {@link ObjectProperty#getValue(Object)} is still
+ *         the type of the instance returned by {@link PropertyMetaMeta#getValue(Object)} is still
  *         {@link ProtocolStringList};
  *     </li>
  *     <li>
@@ -51,7 +51,7 @@ import java.util.Objects;
  *
  * @author sunqian
  */
-public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
+public class ProtobufSchemaHandler implements ObjectMetaManager.Handler {
 
     private static final @Nonnull ProtobufSchemaHandler INST = new ProtobufSchemaHandler();
 
@@ -77,7 +77,7 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
     }
 
     @Override
-    public boolean parse(@Nonnull ObjectSchemaParser.Context context) throws Exception {
+    public boolean parse(@Nonnull ObjectMetaManager.Context context) throws Exception {
         Class<?> rawType = TypeKit.getRawClass(context.parsedType());
         if (rawType == null) {
             return true;
@@ -98,13 +98,13 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
         Method getDescriptorMethod = rawType.getMethod("getDescriptor");
         Descriptors.Descriptor descriptor = (Descriptors.Descriptor) getDescriptorMethod.invoke(null);
         for (Descriptors.FieldDescriptor field : descriptor.getFields()) {
-            ObjectPropertyBase objectPropertyBase = buildProperty(field, rawType, isBuilder);
-            context.propertyBaseMap().put(objectPropertyBase.name(), objectPropertyBase);
+            PropertyMetaBase propertyMetaBase = buildProperty(field, rawType, isBuilder);
+            context.propertyBaseMap().put(propertyMetaBase.name(), propertyMetaBase);
         }
         return false;
     }
 
-    private @Nonnull ObjectPropertyBase buildProperty(
+    private @Nonnull PropertyMetaBase buildProperty(
         @Nonnull Descriptors.FieldDescriptor field,
         @Nonnull Class<?> rawClass,
         boolean isBuilder
@@ -123,7 +123,7 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
                 Method putAllMethod = rawClass.getMethod("putAll" + StringKit.capitalize(rawName), Map.class);
                 setter = new MapSetter(clearMethod, putAllMethod);
             }
-            return new PropertyBaseImpl(
+            return new PropertyMetaBaseImpl(
                 rawName,
                 getterMethod.getGenericReturnType(),
                 getterMethod,
@@ -148,7 +148,7 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
                 Method addAllMethod = rawClass.getMethod("addAll" + StringKit.capitalize(rawName), Iterable.class);
                 setter = new ListSetter(clearMethod, addAllMethod);
             }
-            return new PropertyBaseImpl(
+            return new PropertyMetaBaseImpl(
                 rawName,
                 type,
                 getterMethod,
@@ -168,7 +168,7 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
             setterMethod = rawClass.getMethod("set" + StringKit.capitalize(rawName), TypeKit.getRawClass(type));
             setter = Invocable.of(setterMethod);
         }
-        return new PropertyBaseImpl(
+        return new PropertyMetaBaseImpl(
             rawName,
             type,
             getterMethod,
@@ -226,7 +226,7 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
         }
     }
 
-    private static final class PropertyBaseImpl implements ObjectPropertyBase {
+    private static final class PropertyMetaBaseImpl implements PropertyMetaBase {
 
         private final @Nonnull String name;
         private final @Nonnull Type type;
@@ -235,7 +235,7 @@ public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
         private final @Nonnull Invocable getter;
         private final @Nullable Invocable setter;
 
-        private PropertyBaseImpl(
+        private PropertyMetaBaseImpl(
             @Nonnull String name,
             @Nonnull Type type,
             @Nullable Method getterMethod,
