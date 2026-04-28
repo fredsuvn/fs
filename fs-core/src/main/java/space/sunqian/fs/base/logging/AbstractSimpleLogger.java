@@ -10,7 +10,7 @@ import java.time.ZonedDateTime;
 
 /**
  * This is a skeletal implementation of {@link SimpleLogger} to minimize the effort required to implement the interface.
- * The subclasses of this class only need to implement the {@link #log(SimpleLog, Method)} method.
+ * The subclasses of this class only need to implement the {@link #log(Log, Method)} method.
  *
  * @author sunqian
  */
@@ -82,7 +82,7 @@ public abstract class AbstractSimpleLogger implements SimpleLogger {
     }
 
     private void log(@Nonnull Level level, @Nonnull Method method, Object @Nonnull ... message) {
-        SimpleLog log = newLog(level, message);
+        Log log = newLog(level, message);
         if (log == null) {
             return;
         }
@@ -98,15 +98,15 @@ public abstract class AbstractSimpleLogger implements SimpleLogger {
      *               {@link SimpleLogger#warn(Object...)}, {@link SimpleLogger#info(Object...)},
      *               {@link SimpleLogger#debug(Object...)}, and {@link SimpleLogger#trace(Object...)}.
      */
-    protected abstract void log(@Nonnull SimpleLog log, @Nonnull Method method);
+    protected abstract void log(@Nonnull SimpleLogger.Log log, @Nonnull Method method);
 
-    private @Nullable SimpleLog newLog(@Nonnull Level level, Object @Nonnull ... message) {
+    private @Nullable SimpleLogger.Log newLog(@Nonnull Level level, Object @Nonnull ... message) {
         if (level.value() < this.level.value()) {
             return null;
         }
         ZonedDateTime now = ZonedDateTime.now();
         Thread currentThread = Thread.currentThread();
         StackTraceElement[] stackElements = currentThread.getStackTrace();
-        return SimpleLog.newLog(now, level, message, stackElements, currentThread);
+        return SimpleLogger.newLog(now, level, message, stackElements, currentThread);
     }
 }

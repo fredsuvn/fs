@@ -5,6 +5,7 @@
  * <ul>
  *     <li>{@link space.sunqian.fs.base.logging.SimpleLogger}</li>
  *     <li>{@link space.sunqian.fs.base.logging.AbstractSimpleLogger}</li>
+ *     <li>{@link space.sunqian.fs.base.logging.ToLog}</li>
  * </ul>
  * Utilities:
  * <ul>

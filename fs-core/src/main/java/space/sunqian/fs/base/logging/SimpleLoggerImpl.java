@@ -18,7 +18,7 @@ final class SimpleLoggerImpl extends AbstractSimpleLogger {
     }
 
     @Override
-    protected void log(@Nonnull SimpleLog log, @Nonnull Method method) {
+    protected void log(@Nonnull SimpleLogger.Log log, @Nonnull Method method) {
         try {
             StackTraceElement caller = getCallerTrace(method, log.stackTrace());
             appendable.append(DateKit.format(log.timestamp()))

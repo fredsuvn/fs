@@ -2,14 +2,15 @@ package tests.core.base.logging;
 
 import internal.utils.ErrorAppender;
 import org.junit.jupiter.api.Test;
-import space.sunqian.fs.base.logging.LogKit;
-import space.sunqian.fs.base.logging.SimpleLog;
 import space.sunqian.fs.base.logging.SimpleLogger;
+import space.sunqian.fs.base.logging.ToLog;
 import space.sunqian.fs.base.thread.TraceKit;
 
 import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LogTest {
@@ -53,7 +54,7 @@ public class LogTest {
         // Test with stack trace containing SimpleLoggerImpl
         caller = (StackTraceElement) getCallerTrace.invoke(
             sysLogger, infoMethod, new StackTraceElement[]{
-                new StackTraceElement(SimpleLog.class.getPackage().getName() + ".SimpleLoggerImpl",
+                new StackTraceElement(SimpleLogger.Log.class.getPackage().getName() + ".SimpleLoggerImpl",
                     "info",
                     "ErrorAppender.java", 1)});
         assertEquals(TraceKit.EMPTY_FRAME, caller);
@@ -71,7 +72,22 @@ public class LogTest {
 
     @Test
     public void testLazyToString() {
-        Object lazyString = LogKit.lazyToString(() -> "hello world");
-        assertEquals("hello world", lazyString.toString());
+        Object obj = new Object();
+        ToLog<Object> objWrapper = ToLog.wrap(obj);
+        assertSame(obj, objWrapper.origin());
+        assertEquals(obj.toString(), objWrapper.toString());
+        assertEquals(obj.toString(), objWrapper.toString());
+        int[] count = {0};
+        Supplier<String> supplier = () -> {
+            count[0]++;
+            return "hello world";
+        };
+        ToLog<Supplier<String>> supplierWrapper = ToLog.wrap(supplier);
+        assertSame(supplier, supplierWrapper.origin());
+        assertEquals(0, count[0]);
+        assertEquals("hello world", supplierWrapper.toString());
+        assertEquals(1, count[0]);
+        assertEquals("hello world", supplierWrapper.toString());
+        assertEquals(1, count[0]);
     }
 }
