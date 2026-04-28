@@ -2,28 +2,25 @@ package space.sunqian.fs.object.builder.handlers;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.Fs;
-import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.invoke.Invocable;
+import space.sunqian.fs.object.builder.BuilderManager;
 import space.sunqian.fs.object.builder.BuilderOperator;
-import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 import space.sunqian.fs.object.builder.ObjectBuilderException;
 import space.sunqian.fs.reflect.TypeKit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
-import java.util.function.Function;
 
 /**
- * This is the common implementation of {@link BuilderOperatorProvider.Handler}. The {@link BuilderOperator} returned by
- * this handler using the empty constructor of the target class to create the builder instance, and returns builder
- * instance itself as the final target object.
+ * This is the common implementation of {@link BuilderManager.Handler}. The {@link BuilderOperator} returned by this
+ * handler using the empty constructor of the target class to create the builder instance, and returns builder instance
+ * itself as the final target object.
  * <p>
  * Using {@link #getInstance()} can get a same one instance of this handler.
  *
  * @author sunqian
  */
-public class CommonBuilderHandler implements BuilderOperatorProvider.Handler {
+public class CommonBuilderHandler implements BuilderManager.Handler {
 
     private static final @Nonnull CommonBuilderHandler INST = new CommonBuilderHandler();
 
@@ -40,11 +37,11 @@ public class CommonBuilderHandler implements BuilderOperatorProvider.Handler {
         if (rawTarget == null) {
             return null;
         }
-        Invocable constructor = ConstructorCache.get(rawTarget, this::getInvocable);
-        if (constructor == null) {
+        Invocable invocable = getInvocable(rawTarget);
+        if (invocable == null) {
             return null;
         }
-        return new CommonBuilderOperator(target, constructor);
+        return new CommonBuilderOperator(target, invocable);
     }
 
     private @Nullable Invocable getInvocable(Class<?> rawTarget) {
@@ -59,14 +56,14 @@ public class CommonBuilderHandler implements BuilderOperatorProvider.Handler {
     private static final class CommonBuilderOperator implements BuilderOperator {
 
         private final @Nonnull Type targetType;
-        private final @Nonnull Invocable constructor;
+        private final @Nonnull Invocable invocable;
 
         private CommonBuilderOperator(
             @Nonnull Type targetType,
-            @Nonnull Invocable constructor
+            @Nonnull Invocable invocable
         ) {
             this.targetType = targetType;
-            this.constructor = constructor;
+            this.invocable = invocable;
         }
 
         @Override
@@ -82,7 +79,7 @@ public class CommonBuilderHandler implements BuilderOperatorProvider.Handler {
         @Override
         public @Nonnull Object createBuilder() throws ObjectBuilderException {
             try {
-                return constructor.invoke(null);
+                return invocable.invoke(null);
             } catch (Exception e) {
                 throw new ObjectBuilderException(e);
             }
@@ -91,25 +88,6 @@ public class CommonBuilderHandler implements BuilderOperatorProvider.Handler {
         @Override
         public @Nonnull Object buildTarget(@Nonnull Object builder) throws ObjectBuilderException {
             return builder;
-        }
-    }
-
-    private static final class ConstructorCache {
-
-        private static final @Nonnull SimpleCache<@Nonnull Class<?>, @Nullable Invocable> CACHE = SimpleCache.ofSoft();
-
-        static {
-            Fs.registerGlobalCache(CACHE);
-        }
-
-        private static @Nullable Invocable get(
-            @Nonnull Class<?> cls,
-            @Nonnull Function<@Nonnull Class<?>, @Nullable Invocable> function
-        ) {
-            return CACHE.get(cls, function);
-        }
-
-        private ConstructorCache() {
         }
     }
 }

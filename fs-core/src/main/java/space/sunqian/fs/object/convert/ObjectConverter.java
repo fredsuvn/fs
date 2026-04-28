@@ -7,7 +7,7 @@ import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
-import space.sunqian.fs.object.builder.BuilderOperatorProvider;
+import space.sunqian.fs.object.builder.BuilderManager;
 import space.sunqian.fs.object.convert.handlers.AssignableConvertHandler;
 import space.sunqian.fs.object.convert.handlers.CommonConvertHandler;
 import space.sunqian.fs.reflect.TypeRef;
@@ -46,7 +46,7 @@ import java.util.List;
  * options will be overridden by those additional options.
  * <p>
  * The thread safety of the methods in this interface is determined by its dependent option objects, such as
- * {@link BuilderOperatorProvider}, {@link ObjectCopier}, and other objects. By default, they are all thread-safe.
+ * {@link BuilderManager}, {@link ObjectCopier}, and other objects. By default, they are all thread-safe.
  *
  * @author sunqian
  * @implNote The default implementations of {@link ObjectConverter} support annotations defined in
@@ -301,7 +301,7 @@ public interface ObjectConverter {
      * Handler for {@link ObjectConverter}, provides the specific conversion logic.
      * <p>
      * The thread safety of the methods in this interface is determined by its dependent {@link ObjectCopier},
-     * {@link BuilderOperatorProvider}, and other objects. By default, they are all thread-safe.
+     * {@link BuilderManager}, and other objects. By default, they are all thread-safe.
      *
      * @author sunqian
      */

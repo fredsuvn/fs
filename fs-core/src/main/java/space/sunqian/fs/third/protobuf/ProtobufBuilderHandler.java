@@ -7,27 +7,29 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnsupportedEnvException;
 import space.sunqian.fs.invoke.Invocable;
 import space.sunqian.fs.object.ObjectException;
+import space.sunqian.fs.object.builder.BuilderManager;
 import space.sunqian.fs.object.builder.BuilderOperator;
-import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 /**
- * {@link BuilderOperatorProvider.Handler} implementation for
+ * {@link BuilderManager.Handler} implementation for
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
- * BuilderOperatorProvider provider = ...;
- * BuilderOperatorProvider protoProvider = provider
- *     .withFirstHandler(ProtobufBuilderHandler.getInstance());
+ * BuilderManager manager = ...;
+ * BuilderManager protoManager = BuilderManager.newManager(
+ *     ListKit.list(ProtobufBuilderHandler.getInstance(), manager.asHandler()),
+ *     SimpleCache.ofSoft()
+ * );
  * }</pre>
  * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
- * environment, the {@link BuilderOperatorProvider#defaultProvider()} will automatically load this handler.
+ * environment, the {@link BuilderManager#defaultManager()} will automatically load this handler.
  *
  * @author sunqian
  */
-public class ProtobufBuilderHandler implements BuilderOperatorProvider.Handler {
+public class ProtobufBuilderHandler implements BuilderManager.Handler {
 
     private static final @Nonnull ProtobufBuilderHandler INST = new ProtobufBuilderHandler();
 

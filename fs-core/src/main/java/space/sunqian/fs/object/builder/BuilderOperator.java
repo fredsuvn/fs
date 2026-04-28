@@ -29,16 +29,15 @@ public interface BuilderOperator {
 
     /**
      * Returns an instance of {@link BuilderOperator} for the target type, or {@code null} if the target type is
-     * unsupported, using {@link BuilderOperatorProvider#defaultProvider()}.
-     * <p>
-     * Note this method never caches the returned {@link BuilderOperator} instances.
+     * unsupported, using {@link BuilderManager#defaultManager()}.
      *
      * @param target the target type
-     * @return a new {@link BuilderOperator}, or {@code null} if the target type is unsupported via the default provider
+     * @return a new {@link BuilderOperator}, or {@code null} if the target type is unsupported via the
+     * {@link BuilderManager#defaultManager()}
      * @throws ObjectBuilderException if an error occurs while creating the {@link BuilderOperator}
      */
     static @Nullable BuilderOperator of(@Nonnull Type target) throws ObjectBuilderException {
-        return BuilderOperatorProvider.defaultProvider().forType(target);
+        return BuilderManager.defaultManager().getOperator(target);
     }
 
     /**

@@ -16,6 +16,7 @@ import space.sunqian.fs.base.exception.UnreachablePointException;
 import space.sunqian.fs.base.number.NumberFormatter;
 import space.sunqian.fs.base.number.NumberKit;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
@@ -23,7 +24,7 @@ import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumberPattern;
-import space.sunqian.fs.object.builder.BuilderOperatorProvider;
+import space.sunqian.fs.object.builder.BuilderManager;
 import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
@@ -264,7 +265,7 @@ public class ConvertTest implements TestPrint, DataGen {
     public void testConvertKit() throws Exception {
         testMapParserOptions();
         testObjectParserOptions();
-        testBuilderProviderOptions();
+        testBuilderManagerOptions();
     }
 
     @Test
@@ -376,9 +377,10 @@ public class ConvertTest implements TestPrint, DataGen {
         assertEquals(map2, MapKit.map("first", "1", "second", "2", "third", "3"));
 
         Map<String, String> map3 = converter.convert(a, new TypeRef<Map<String, String>>() {},
-            ConvertOption.builderOperatorProvider(BuilderOperatorProvider.newProvider(
-                BuilderOperatorProvider.defaultProvider().asHandler())
-            )
+            ConvertOption.builderManager(BuilderManager.newManager(
+                ListKit.list(BuilderManager.defaultManager().asHandler()),
+                SimpleCache.ofSoft()
+            ))
         );
         assertEquals(map3, MapKit.map("first", "1", "second", "2", "third", "3"));
     }
@@ -710,13 +712,11 @@ public class ConvertTest implements TestPrint, DataGen {
             ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectSchemaParser.defaultParser())));
     }
 
-    private void testBuilderProviderOptions() {
-        assertSame(BuilderOperatorProvider.defaultCachedProvider(),
-            ConvertOption.getBuilderOperatorProvider(ConvertOption.ignoreNull(true)));
-        assertNotEquals(BuilderOperatorProvider.defaultCachedProvider(),
-            ConvertOption.getBuilderOperatorProvider(ConvertOption.builderOperatorProvider(BuilderOperatorProvider.defaultProvider())));
-        assertSame(BuilderOperatorProvider.defaultProvider(),
-            ConvertOption.getBuilderOperatorProvider(ConvertOption.builderOperatorProvider(BuilderOperatorProvider.defaultProvider())));
+    private void testBuilderManagerOptions() {
+        assertSame(BuilderManager.defaultManager(),
+            ConvertOption.getBuilderManager(ConvertOption.ignoreNull(true)));
+        assertSame(BuilderManager.defaultManager(),
+            ConvertOption.getBuilderManager(ConvertOption.builderManager(BuilderManager.defaultManager())));
     }
 
     private A createA(String first, String second, String third) {

@@ -16,8 +16,8 @@ import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOOperator;
+import space.sunqian.fs.object.builder.BuilderManager;
 import space.sunqian.fs.object.builder.BuilderOperator;
-import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
@@ -143,7 +143,7 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td>Map and Data Objects</td>
  *     <td>Any Objects</td>
- *     <td>Generating data object is based on {@link ConvertOption#builderOperatorProvider(BuilderOperatorProvider)} and
+ *     <td>Generating data object is based on {@link ConvertOption#builderManager(BuilderManager)} and
  *     {@link ConvertOption#objectCopier(ObjectCopier)}. Generating map using its constructor, and copying properties
  *     also using {@link ConvertOption#objectCopier(ObjectCopier)}. The supported map types follow the
  *     {@link MapKit#newFunction(Type)}.
@@ -409,8 +409,8 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             objectCopier.copyProperties(src, srcType, targetObject, target, converter, options);
             return targetObject;
         } else {
-            BuilderOperatorProvider builderProvider = ConvertOption.getBuilderOperatorProvider(options);
-            BuilderOperator operator = builderProvider.forType(target);
+            BuilderManager builderManager = ConvertOption.getBuilderManager(options);
+            BuilderOperator operator = builderManager.getOperator(target);
             if (operator == null) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
             }

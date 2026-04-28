@@ -3,13 +3,13 @@
  * Using codes similar to the following to create and build objects in steps:
  * <pre>{@code
  * // Create object without builder and configured by setter methods:
- * BuilderOperator operator = BuilderOperator.forType(type);
+ * BuilderOperator operator = BuilderOperator.of(type);
  * Foo object = (Foo) operator.createBuilder();
  * foo.setBar("bar");
  * Bar bar = (Bar) operator.buildTarget(foo);
  *
  * // Create object with builder:
- * BuilderOperator operator = BuilderOperatorProvider.newProvider(your-builder-handlers).forType(type);
+ * BuilderOperator operator = BuilderManager.newManager(your-builder-handlers, your-cache-function).getOperator(type);
  * FooBuilder fooBuilder = (FooBuilder) operator.createBuilder();
  * fooBuilder.setBar("bar");
  * Bar bar = (Bar) operator.buildTarget(fooBuilder);
@@ -17,7 +17,7 @@
  * The core interfaces of this package:
  * <ul>
  *     <li>{@link space.sunqian.fs.object.builder.BuilderOperator}</li>
- *     <li>{@link space.sunqian.fs.object.builder.BuilderOperatorProvider}</li>
+ *     <li>{@link space.sunqian.fs.object.builder.BuilderManager}</li>
  * </ul>
  */
 package space.sunqian.fs.object.builder;

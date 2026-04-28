@@ -10,7 +10,7 @@ import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.io.IOOperator;
-import space.sunqian.fs.object.builder.BuilderOperatorProvider;
+import space.sunqian.fs.object.builder.BuilderManager;
 import space.sunqian.fs.object.schema.MapSchemaParser;
 import space.sunqian.fs.object.schema.ObjectSchemaParser;
 
@@ -69,9 +69,9 @@ public enum ConvertOption {
     MAP_SCHEMA_PARSER,
 
     /**
-     * Key of {@link #builderOperatorProvider(BuilderOperatorProvider)}.
+     * Key of {@link #builderManager(BuilderManager)}.
      */
-    BUILDER_OPERATOR_PROVIDER,
+    BUILDER_MANAGER,
 
     /**
      * Key of {@link #objectCopier(ObjectCopier)}.
@@ -257,35 +257,33 @@ public enum ConvertOption {
     }
 
     /**
-     * Returns an option to specify the {@link BuilderOperatorProvider} to generate data object during the conversion.
+     * Returns an option to specify the {@link BuilderManager} to generate data object during the conversion.
      * <p>
-     * By default, the {@link BuilderOperatorProvider#defaultCachedProvider()} is used.
+     * By default, the {@link BuilderManager#defaultManager()} is used.
      *
-     * @param operatorProvider the {@link BuilderOperatorProvider} to be specified
-     * @return an option to specify the {@link BuilderOperatorProvider} to generate data object during the conversion
+     * @param builderManager the {@link BuilderManager} to be specified
+     * @return an option to specify the {@link BuilderManager} to generate data object during the conversion
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull BuilderOperatorProvider> builderOperatorProvider(
-        @Nonnull BuilderOperatorProvider operatorProvider
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull BuilderManager> builderManager(
+        @Nonnull BuilderManager builderManager
     ) {
-        return Option.of(BUILDER_OPERATOR_PROVIDER, operatorProvider);
+        return Option.of(BUILDER_MANAGER, builderManager);
     }
 
     /**
-     * Returns the specified {@link BuilderOperatorProvider} from the given options, or
-     * {@link BuilderOperatorProvider#defaultCachedProvider()} if the given options does not contain a
-     * {@link ConvertOption#BUILDER_OPERATOR_PROVIDER}.
+     * Returns the specified {@link BuilderManager} from the given options, or {@link BuilderManager#defaultManager()}
+     * if the given options does not contain a {@link ConvertOption#BUILDER_MANAGER}.
      *
      * @param options the given options
-     * @return the specified {@link BuilderOperatorProvider} from the given options, or
-     * {@link BuilderOperatorProvider#defaultCachedProvider()} if the given options does not contain a
-     * {@link ConvertOption#BUILDER_OPERATOR_PROVIDER}
+     * @return the specified {@link BuilderManager} from the given options, or {@link BuilderManager#defaultManager()}
+     * if the given options does not contain a {@link ConvertOption#BUILDER_MANAGER}
      */
-    public static @Nonnull BuilderOperatorProvider getBuilderOperatorProvider(
+    public static @Nonnull BuilderManager getBuilderManager(
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         return Fs.nonnull(
-            OptionKit.findValue(ConvertOption.BUILDER_OPERATOR_PROVIDER, options),
-            BuilderOperatorProvider.defaultCachedProvider()
+            OptionKit.findValue(ConvertOption.BUILDER_MANAGER, options),
+            BuilderManager.defaultManager()
         );
     }
 

@@ -7,11 +7,12 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.collect.SetKit;
+import space.sunqian.fs.object.builder.BuilderManager;
 import space.sunqian.fs.object.builder.BuilderOperator;
-import space.sunqian.fs.object.builder.BuilderOperatorProvider;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
@@ -459,27 +460,31 @@ public class ProtobufTest implements TestPrint {
     }
 
     @Test
-    public void testCreatorHandlerForType() {
-        BuilderOperatorProvider defaultProvider = BuilderOperatorProvider.defaultProvider();
-        BuilderOperatorProvider provider = BuilderOperatorProvider
-            .newProvider(ProtobufBuilderHandler.getInstance(), defaultProvider.asHandler());
+    public void testBuilderHandlerForType() {
+        BuilderManager manager = BuilderManager.defaultManager();
+        BuilderManager protoManager = BuilderManager.newManager(
+            ListKit.list(ProtobufBuilderHandler.getInstance(), manager.asHandler()),
+            SimpleCache.ofSoft()
+        );
 
         // test message creator
-        BuilderOperator messageCreator = provider.forType(PbSimple.class);
+        BuilderOperator messageCreator = protoManager.getOperator(PbSimple.class);
         assertEquals(PbSimple.class, messageCreator.targetType());
         assertEquals(PbSimple.Builder.class, messageCreator.builderType());
 
         // test builder creator
-        BuilderOperator builderCreator = provider.forType(PbSimple.Builder.class);
+        BuilderOperator builderCreator = protoManager.getOperator(PbSimple.Builder.class);
         assertEquals(PbSimple.Builder.class, builderCreator.targetType());
         assertEquals(PbSimple.Builder.class, builderCreator.builderType());
     }
 
     @Test
-    public void testCreatorHandlerWithJavaToPb() {
-        BuilderOperatorProvider defaultProvider = BuilderOperatorProvider.defaultProvider();
-        BuilderOperatorProvider provider = BuilderOperatorProvider
-            .newProvider(ProtobufBuilderHandler.getInstance(), defaultProvider.asHandler());
+    public void testBuilderHandlerWithJavaToPb() {
+        BuilderManager manager = BuilderManager.defaultManager();
+        BuilderManager protoManager = BuilderManager.newManager(
+            ListKit.list(ProtobufBuilderHandler.getInstance(), manager.asHandler()),
+            SimpleCache.ofSoft()
+        );
         ObjectSchemaParser parser = ObjectSchemaParser
             .defaultParser()
             .withFirstHandler(new ProtobufSchemaHandler());
@@ -487,7 +492,7 @@ public class ProtobufTest implements TestPrint {
         // java to pb
         JvSimple jvSimple = new JvSimple("123", 456);
         PbSimple pbSimple = ObjectConverter.defaultConverter().convert(jvSimple, PbSimple.class,
-            ConvertOption.builderOperatorProvider(provider),
+            ConvertOption.builderManager(protoManager),
             ConvertOption.objectSchemaParser(parser)
         );
         assertEquals(pbSimple.getP1(), jvSimple.getP1());
@@ -495,10 +500,12 @@ public class ProtobufTest implements TestPrint {
     }
 
     @Test
-    public void testCreatorHandlerWithPbToJava() {
-        BuilderOperatorProvider defaultProvider = BuilderOperatorProvider.defaultProvider();
-        BuilderOperatorProvider provider = BuilderOperatorProvider
-            .newProvider(ProtobufBuilderHandler.getInstance(), defaultProvider.asHandler());
+    public void testBuilderHandlerWithPbToJava() {
+        BuilderManager manager = BuilderManager.defaultManager();
+        BuilderManager protoManager = BuilderManager.newManager(
+            ListKit.list(ProtobufBuilderHandler.getInstance(), manager.asHandler()),
+            SimpleCache.ofSoft()
+        );
         ObjectSchemaParser parser = ObjectSchemaParser
             .defaultParser()
             .withFirstHandler(new ProtobufSchemaHandler());
@@ -509,7 +516,7 @@ public class ProtobufTest implements TestPrint {
             .setP2(456)
             .build();
         JvSimple jvSimple = ObjectConverter.defaultConverter().convert(pbSimple, JvSimple.class,
-            ConvertOption.builderOperatorProvider(provider),
+            ConvertOption.builderManager(protoManager),
             ConvertOption.objectSchemaParser(parser)
         );
         assertEquals(pbSimple.getP1(), jvSimple.getP1());
@@ -517,10 +524,12 @@ public class ProtobufTest implements TestPrint {
     }
 
     @Test
-    public void testCreatorHandlerWithJavaToPbBuilder() {
-        BuilderOperatorProvider defaultProvider = BuilderOperatorProvider.defaultProvider();
-        BuilderOperatorProvider provider = BuilderOperatorProvider
-            .newProvider(ProtobufBuilderHandler.getInstance(), defaultProvider.asHandler());
+    public void testBuilderHandlerWithJavaToPbBuilder() {
+        BuilderManager manager = BuilderManager.defaultManager();
+        BuilderManager protoManager = BuilderManager.newManager(
+            ListKit.list(ProtobufBuilderHandler.getInstance(), manager.asHandler()),
+            SimpleCache.ofSoft()
+        );
         ObjectSchemaParser parser = ObjectSchemaParser
             .defaultParser()
             .withFirstHandler(new ProtobufSchemaHandler());
@@ -528,7 +537,7 @@ public class ProtobufTest implements TestPrint {
         // java to pb.Builder
         JvSimple jvSimple = new JvSimple("123", 456);
         PbSimple.Builder pbSimpleBuilder = ObjectConverter.defaultConverter().convert(jvSimple, PbSimple.Builder.class,
-            ConvertOption.builderOperatorProvider(provider),
+            ConvertOption.builderManager(protoManager),
             ConvertOption.objectSchemaParser(parser)
         );
         assertEquals(pbSimpleBuilder.getP1(), jvSimple.getP1());
@@ -536,10 +545,12 @@ public class ProtobufTest implements TestPrint {
     }
 
     @Test
-    public void testCreatorHandlerWithPbBuilderToJava() {
-        BuilderOperatorProvider defaultProvider = BuilderOperatorProvider.defaultProvider();
-        BuilderOperatorProvider provider = BuilderOperatorProvider
-            .newProvider(ProtobufBuilderHandler.getInstance(), defaultProvider.asHandler());
+    public void testBuilderHandlerWithPbBuilderToJava() {
+        BuilderManager manager = BuilderManager.defaultManager();
+        BuilderManager protoManager = BuilderManager.newManager(
+            ListKit.list(ProtobufBuilderHandler.getInstance(), manager.asHandler()),
+            SimpleCache.ofSoft()
+        );
         ObjectSchemaParser parser = ObjectSchemaParser
             .defaultParser()
             .withFirstHandler(new ProtobufSchemaHandler());
@@ -549,7 +560,7 @@ public class ProtobufTest implements TestPrint {
             .setP1("123")
             .setP2(456);
         JvSimple jvSimple = ObjectConverter.defaultConverter().convert(pbSimpleBuilder, JvSimple.class,
-            ConvertOption.builderOperatorProvider(provider),
+            ConvertOption.builderManager(protoManager),
             ConvertOption.objectSchemaParser(parser)
         );
         assertEquals(pbSimpleBuilder.getP1(), jvSimple.getP1());
@@ -557,10 +568,12 @@ public class ProtobufTest implements TestPrint {
     }
 
     @Test
-    public void testCreatorHandlerWithJavaToJava() {
-        BuilderOperatorProvider defaultProvider = BuilderOperatorProvider.defaultProvider();
-        BuilderOperatorProvider provider = BuilderOperatorProvider
-            .newProvider(ProtobufBuilderHandler.getInstance(), defaultProvider.asHandler());
+    public void testBuilderHandlerWithJavaToJava() {
+        BuilderManager manager = BuilderManager.defaultManager();
+        BuilderManager protoManager = BuilderManager.newManager(
+            ListKit.list(ProtobufBuilderHandler.getInstance(), manager.asHandler()),
+            SimpleCache.ofSoft()
+        );
         ObjectSchemaParser parser = ObjectSchemaParser
             .defaultParser()
             .withFirstHandler(new ProtobufSchemaHandler());
@@ -568,7 +581,7 @@ public class ProtobufTest implements TestPrint {
         // java to java
         JvSimple jvSimple = new JvSimple("123", 456);
         JvT<String> jvT = ObjectConverter.defaultConverter().convert(jvSimple, new TypeRef<JvT<String>>() {},
-            ConvertOption.builderOperatorProvider(provider),
+            ConvertOption.builderManager(protoManager),
             ConvertOption.objectSchemaParser(parser)
         );
         assertEquals(jvT.getP1(), jvSimple.getP1());
