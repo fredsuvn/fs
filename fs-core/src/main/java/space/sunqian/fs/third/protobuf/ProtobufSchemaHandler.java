@@ -9,7 +9,7 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnsupportedEnvException;
 import space.sunqian.fs.base.string.StringKit;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.meta.PropertyMetaMeta;
+import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.PropertyMetaBase;
 import space.sunqian.fs.object.meta.ObjectMetaManager;
 import space.sunqian.fs.reflect.TypeKit;
@@ -34,13 +34,13 @@ import java.util.Objects;
  *     .withFirstHandler(ProtobufSchemaHandler.getInstance());
  * }</pre>
  * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
- * environment, the {@link ObjectMetaManager#defaultParser()} will automatically load this handler.
+ * environment, the {@link ObjectMetaManager#defaultManager()} will automatically load this handler.
  * <p>
  * Note:
  * <ul>
  *     <li>
  *         When {@link ProtocolStringList} is used as a property type, it will be mapped to {@code List<String>}, but
- *         the type of the instance returned by {@link PropertyMetaMeta#getValue(Object)} is still
+ *         the type of the instance returned by {@link PropertyMeta#getValue(Object)} is still
  *         {@link ProtocolStringList};
  *     </li>
  *     <li>

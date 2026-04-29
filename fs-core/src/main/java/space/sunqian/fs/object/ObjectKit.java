@@ -5,7 +5,7 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.exception.UnknownArrayTypeException;
 import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaManager;
-import space.sunqian.fs.object.meta.PropertyMetaMeta;
+import space.sunqian.fs.object.meta.PropertyMeta;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -222,7 +222,7 @@ public class ObjectKit {
      * This method supports nested property access using dot notation (e.g., "parent.child.property"). If any part of
      * the property path is not found or is {@code null}, this method returns {@code null}.
      * <p>
-     * Note this method use {@link ObjectMetaManager#defaultCachedParser()} to parse object schemas, it is equivalent
+     * Note this method use {@link ObjectMetaManager#defaultCachedManager()} to parse object schemas, it is equivalent
      * to:
      * <pre>{@code
      * ObjectKit.getPropertyValue(object, propertyName, ObjectSchemaParser.defaultCachedParser());
@@ -236,7 +236,7 @@ public class ObjectKit {
         @Nullable Object object,
         @Nonnull String propertyName
     ) {
-        return getPropertyValue(object, propertyName, ObjectMetaManager.defaultCachedParser());
+        return getPropertyValue(object, propertyName, ObjectMetaManager.defaultCachedManager());
     }
 
     /**
@@ -283,7 +283,7 @@ public class ObjectKit {
             return ((Map<?, ?>) object).get(propertyName);
         }
         ObjectMeta schema = objectParser.parse(object.getClass());
-        PropertyMetaMeta property = schema.getProperty(propertyName);
+        PropertyMeta property = schema.getProperty(propertyName);
         if (property == null) {
             return null;
         }

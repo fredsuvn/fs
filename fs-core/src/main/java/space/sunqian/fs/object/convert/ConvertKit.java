@@ -10,7 +10,7 @@ import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumberPattern;
-import space.sunqian.fs.object.meta.PropertyMetaMeta;
+import space.sunqian.fs.object.meta.PropertyMeta;
 
 import java.lang.annotation.Annotation;
 import java.time.ZoneId;
@@ -59,8 +59,8 @@ public class ConvertKit {
     }
 
     /**
-     * Returns a {@link Option} of {@link NumberFormatter} for the given {@link NumberPattern}. This method is based on a
-     * soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
+     * Returns a {@link Option} of {@link NumberFormatter} for the given {@link NumberPattern}. This method is based on
+     * a soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
      * for the same pattern.
      *
      * @param numberPattern the pattern of the number formatter
@@ -97,7 +97,7 @@ public class ConvertKit {
      *
      * @param defaultOptions the default options
      * @param datePattern    the date pattern
-     * @param numberPattern     the number pattern
+     * @param numberPattern  the number pattern
      * @return the merged options
      */
     public static @Nonnull Option<?, ?> @Nonnull [] mergeOptions(
@@ -136,8 +136,8 @@ public class ConvertKit {
      */
     public static <A extends Annotation> @Nullable A getAnnotation(
         @Nonnull Class<A> annotationType,
-        @Nonnull PropertyMetaMeta srcProperty,
-        @Nonnull PropertyMetaMeta dstProperty
+        @Nonnull PropertyMeta srcProperty,
+        @Nonnull PropertyMeta dstProperty
     ) {
         A srcAnnotation = srcProperty.getAnnotation(annotationType);
         A dstAnnotation = dstProperty.getAnnotation(annotationType);

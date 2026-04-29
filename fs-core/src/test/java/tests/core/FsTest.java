@@ -323,7 +323,7 @@ public class FsTest implements Asserter, TestPrint {
     public void testShortcutWithGetProperty() {
         MapProps mapProps = new MapProps(111L);
         assertEquals(111L, Fs.getValue(mapProps, "longNum"));
-        assertEquals(111L, Fs.getValue(mapProps, "longNum", ObjectMetaManager.defaultParser()));
+        assertEquals(111L, Fs.getValue(mapProps, "longNum", ObjectMetaManager.defaultManager()));
     }
 
     private void printProcess(String title, Process process) {

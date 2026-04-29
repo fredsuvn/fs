@@ -64,9 +64,9 @@ public enum ConvertOption {
     OBJECT_SCHEMA_PARSER,
 
     /**
-     * Key of {@link #mapSchemaParser(MapMetaManager)}.
+     * Key of {@link #mapMetaManager(MapMetaManager)}.
      */
-    MAP_SCHEMA_PARSER,
+    MAP_META_MANAGER,
 
     /**
      * Key of {@link #builderManager(BuilderManager)}.
@@ -197,7 +197,7 @@ public enum ConvertOption {
     /**
      * Returns an option to specify the object schema parser.
      * <p>
-     * By default, {@link ObjectMetaManager#defaultCachedParser()} is used.
+     * By default, {@link ObjectMetaManager#defaultCachedManager()} is used.
      *
      * @param schemaParser the specified object schema parser
      * @return an option to specify the object schema parser
@@ -210,49 +210,47 @@ public enum ConvertOption {
 
     /**
      * Returns the specified {@link ObjectMetaManager} from the given options, or
-     * {@link ObjectMetaManager#defaultCachedParser()} if the given options does not contain a
+     * {@link ObjectMetaManager#defaultCachedManager()} if the given options does not contain a
      * {@link ConvertOption#OBJECT_SCHEMA_PARSER}.
      *
      * @param options the given options
      * @return the specified {@link ObjectMetaManager} from the given options, or
-     * {@link ObjectMetaManager#defaultCachedParser()} if the given options does not contain a
+     * {@link ObjectMetaManager#defaultCachedManager()} if the given options does not contain a
      * {@link ConvertOption#OBJECT_SCHEMA_PARSER}
      */
     public static @Nonnull ObjectMetaManager getObjectSchemaParser(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Fs.nonnull(
             OptionKit.findValue(ConvertOption.OBJECT_SCHEMA_PARSER, options),
-            ObjectMetaManager.defaultCachedParser()
+            ObjectMetaManager.defaultCachedManager()
         );
     }
 
     /**
      * Returns an option to specify the map schema parser.
      * <p>
-     * By default, {@link MapMetaManager#defaultCachedParser()} is used.
+     * By default, {@link MapMetaManager#defaultManager()} is used.
      *
      * @param schemaParser the specified map schema parser
      * @return an option to specify the map schema parser
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull MapMetaManager> mapSchemaParser(
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull MapMetaManager> mapMetaManager(
         @Nonnull MapMetaManager schemaParser
     ) {
-        return Option.of(MAP_SCHEMA_PARSER, schemaParser);
+        return Option.of(MAP_META_MANAGER, schemaParser);
     }
 
     /**
-     * Returns the specified {@link MapMetaManager} from the given options, or
-     * {@link MapMetaManager#defaultCachedParser()} if the given options does not contain a
-     * {@link ConvertOption#MAP_SCHEMA_PARSER}.
+     * Returns the specified {@link MapMetaManager} from the given options, or {@link MapMetaManager#defaultManager()}
+     * if the given options does not contain a {@link ConvertOption#MAP_META_MANAGER}.
      *
      * @param options the given options
-     * @return the specified {@link MapMetaManager} from the given options, or
-     * {@link MapMetaManager#defaultCachedParser()} if the given options does not contain a
-     * {@link ConvertOption#MAP_SCHEMA_PARSER}
+     * @return the specified {@link MapMetaManager} from the given options, or {@link MapMetaManager#defaultManager()}
+     * if the given options does not contain a {@link ConvertOption#MAP_META_MANAGER}
      */
-    public static @Nonnull MapMetaManager getMapSchemaParser(@Nonnull Option<?, ?> @Nonnull ... options) {
+    public static @Nonnull MapMetaManager getMapMetaManager(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Fs.nonnull(
-            OptionKit.findValue(ConvertOption.MAP_SCHEMA_PARSER, options),
-            MapMetaManager.defaultCachedParser()
+            OptionKit.findValue(ConvertOption.MAP_META_MANAGER, options),
+            MapMetaManager.defaultManager()
         );
     }
 

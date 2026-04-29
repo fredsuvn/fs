@@ -2,17 +2,19 @@ package space.sunqian.fs.object.meta;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.annotation.RetainedParam;
 import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.cache.CacheFunction;
 import space.sunqian.fs.cache.SimpleCache;
-import space.sunqian.fs.object.builder.BuilderManager;
+import space.sunqian.fs.object.meta.handlers.CommonMapMetaHandler;
 
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
 /**
- * This interface is used to introspect {@link Type} and {@link MapType} to {@link MapMeta}.
+ * This interface is used to introspect {@link Type} of {@link Map} to {@link MapMeta}.
  *
  * @author sunqian
  */
@@ -20,7 +22,10 @@ import java.util.Map;
 public interface MapMetaManager {
 
     /**
-     * Returns the default {@link MapMetaManager}.
+     * Returns the default {@link MapMetaManager}. Here are handlers in the default {@link MapMetaManager}:
+     * <ul>
+     *     <li>{@link CommonMapMetaHandler#getInstance()}</li>
+     * </ul>
      * <p>
      * Note the default {@link MapMetaManager} is singleton, and will cache the returned {@link MapMeta} instances by a
      * {@link SimpleCache#ofSoft()} registered in {@link Fs#registerGlobalCache(SimpleCache)}.
@@ -32,39 +37,25 @@ public interface MapMetaManager {
     }
 
     /**
-     * Returns the default cached {@link MapMetaManager}, which is based on {@link #defaultManager()} and caches the
-     * parsed results with a {@link SimpleCache#ofSoft()}.
-     * <p>
-     * Note the default cached {@link MapMetaManager} is singleton.
+     * Creates and returns a new {@link MapMetaManager} with given handlers and cache function.
      *
-     * @return the default cached {@link MapMetaManager}
-     * @see #defaultManager()
+     * @param handlers      the given handlers
+     * @param cacheFunction the cache function to cache the generated {@link MapMeta} instances
+     * @return a new {@link MapMetaManager} with the given handlers and cache function
      */
-    static @Nonnull MapMetaManager defaultCachedParser() {
-        return MapMetaBack.defaultCachedParser();
-    }
-
-    /**
-     * Returns a new {@link MapMetaManager} that caches the parsed results with the specified cache.
-     *
-     * @param cache  the specified cache to store the parsed results
-     * @param parser the underlying {@link MapMetaManager} to parse the type
-     * @return a new {@link MapMetaManager} that caches the parsed results with the specified cache
-     */
-    static @Nonnull MapMetaManager newCachedParser(
-        @Nonnull SimpleCache<@Nonnull Type, @Nonnull MapMeta> cache,
-        @Nonnull MapMetaManager parser
+    static @Nonnull MapMetaManager newManager(
+        @Nonnull @RetainedParam List<@Nonnull Handler> handlers,
+        @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cacheFunction
     ) {
-        return MapMetaBack.newCachedParser(cache, parser);
+        return MapMetaBack.newManager(handlers, cacheFunction);
     }
 
     /**
-     * Introspects and returns the given {@link Map} type or {@link MapType} to an instance of {@link MapMeta}.
+     * Introspects and returns the given {@link Map} type to an instance of {@link MapMeta}.
      *
      * @param type the given type
      * @return the introspected {@link MapMeta}
-     * @throws DataMetaException if the given type is not a {@link Map} type or {@link MapType}, or any other error
-     *                           occurs
+     * @throws DataMetaException if the given type is not a {@link Map} type, or any other error occurs
      */
     @Nonnull
     MapMeta introspect(@Nonnull Type type) throws DataMetaException;
@@ -97,11 +88,12 @@ public interface MapMetaManager {
          * Introspects and returns a new {@link MapMeta} for the given type, or {@code null} if the given type is
          * unsupported.
          *
-         * @param type the given type
+         * @param type    the given type
+         * @param manager the {@link MapMetaManager} where this handler is used
          * @return a new {@link MapMeta}, or {@code null} if the given type is unsupported
          * @throws Exception if an error occurs
          */
         @Nullable
-        MapMeta newMapMeta(@Nonnull Type type) throws Exception;
+        MapMeta newMapMeta(@Nonnull Type type, @Nonnull MapMetaManager manager) throws Exception;
     }
 }

@@ -41,20 +41,20 @@ public interface ObjectMetaManager {
      * @see CommonMetaHandler
      * @see RecordMetaHandler
      */
-    static @Nonnull ObjectMetaManager defaultParser() {
+    static @Nonnull ObjectMetaManager defaultManager() {
         return ObjectMetaBack.defaultParser();
     }
 
     /**
-     * Returns the default cached {@link ObjectMetaManager}, which is based on {@link #defaultParser()} and caches the
+     * Returns the default cached {@link ObjectMetaManager}, which is based on {@link #defaultManager()} and caches the
      * parsed results with {@link SimpleCache#ofSoft()}.
      * <p>
      * Note the default cached {@link ObjectMetaManager} is singleton.
      *
      * @return the default cached {@link ObjectMetaManager}
-     * @see #defaultParser()
+     * @see #defaultManager()
      */
-    static @Nonnull ObjectMetaManager defaultCachedParser() {
+    static @Nonnull ObjectMetaManager defaultCachedManager() {
         return ObjectMetaBack.defaultCachedParser();
     }
 
@@ -66,8 +66,8 @@ public interface ObjectMetaManager {
      * @param handlers the given handlers
      * @return a new {@link ObjectMetaManager} with the given handlers
      */
-    static @Nonnull ObjectMetaManager newParser(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
-        return newParser(ListKit.list(handlers));
+    static @Nonnull ObjectMetaManager newManager(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
+        return newManager(ListKit.list(handlers));
     }
 
     /**
@@ -78,7 +78,7 @@ public interface ObjectMetaManager {
      * @param handlers given handlers
      * @return a new {@link ObjectMetaManager} with given handlers
      */
-    static @Nonnull ObjectMetaManager newParser(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
+    static @Nonnull ObjectMetaManager newManager(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
         return ObjectMetaBack.newParser(handlers);
     }
 
@@ -93,7 +93,7 @@ public interface ObjectMetaManager {
      * @param parser the underlying {@link ObjectMetaManager} to parse the type
      * @return a new {@link ObjectMetaManager} that caches the parsed results with the specified cache
      */
-    static @Nonnull ObjectMetaManager newCachedParser(
+    static @Nonnull ObjectMetaManager newManager(
         @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectMeta> cache,
         @Nonnull ObjectMetaManager parser
     ) {
@@ -150,7 +150,7 @@ public interface ObjectMetaManager {
      * {@link ObjectMetaManager} as a {@link Handler}
      */
     default @Nonnull ObjectMetaManager withFirstHandler(@Nonnull Handler firstHandler) {
-        return newParser(firstHandler, this.asHandler());
+        return newManager(firstHandler, this.asHandler());
     }
 
     /**

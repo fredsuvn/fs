@@ -1,15 +1,16 @@
 package space.sunqian.fs.object.meta;
 
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.cache.CacheFunction;
 import space.sunqian.fs.cache.SimpleCache;
-import space.sunqian.fs.reflect.ReflectionException;
-import space.sunqian.fs.reflect.TypeKit;
+import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.object.meta.handlers.CommonMapMetaHandler;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Map;
 
 final class MapMetaBack {
 
@@ -17,14 +18,14 @@ final class MapMetaBack {
         return MapMetaManagerImpl.DEFAULT;
     }
 
-    // static @Nonnull MapMetaManager newCachedParser(
-    //     @Nonnull SimpleCache<@Nonnull Type, @Nonnull MapMeta> cache,
-    //     @Nonnull MapMetaManager parser
-    // ) {
-    //     return new CachedMapMetaManager(cache, parser);
-    // }
+    static @Nonnull MapMetaManager newManager(
+        @Nonnull @RetainedParam List<MapMetaManager.@Nonnull Handler> handlers,
+        @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cacheFunction
+    ) {
+        return new MapMetaManagerImpl(handlers, cacheFunction);
+    }
 
-    private static final class MapMetaManagerImpl implements MapMetaManager {
+    private static final class MapMetaManagerImpl implements MapMetaManager, MapMetaManager.Handler {
 
         private static final @Nonnull SimpleCache<@Nonnull Type, @Nonnull MapMeta> DEFAULT_CACHE =
             SimpleCache.ofSoft();
@@ -33,11 +34,18 @@ final class MapMetaBack {
             Fs.registerGlobalCache(DEFAULT_CACHE);
         }
 
-        private static final @Nonnull MapMetaManager DEFAULT = new MapMetaManagerImpl(DEFAULT_CACHE);
+        private static final @Nonnull MapMetaManager DEFAULT = new MapMetaManagerImpl(
+            ListKit.list(CommonMapMetaHandler.getInstance()),
+            DEFAULT_CACHE
+        );
 
+        private final @Nonnull List<@Nonnull Handler> handlers;
         private final @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cache;
 
-        private MapMetaManagerImpl(@Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cache) {
+        private MapMetaManagerImpl(
+            @Nonnull @RetainedParam List<@Nonnull Handler> handlers,
+            @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cache) {
+            this.handlers = handlers;
             this.cache = cache;
         }
 
@@ -47,69 +55,37 @@ final class MapMetaBack {
         }
 
         private @Nonnull MapMeta introspect0(@Nonnull Type type) throws DataMetaException {
+            MapMeta mapMeta;
             try {
-                return new MapMetaImpl(type);
+                mapMeta = newMapMeta(type, this);
             } catch (Exception e) {
                 throw new DataMetaException(e);
             }
+            if (mapMeta == null) {
+                throw new DataMetaException(type);
+            }
+            return mapMeta;
         }
 
-        private final class MapMetaImpl implements MapMeta {
+        @Override
+        public @Nonnull List<@Nonnull Handler> handlers() {
+            return handlers;
+        }
 
-            private final @Nonnull Type type;
-            private final @Nonnull Type keyType;
-            private final @Nonnull Type valueType;
+        @Override
+        public @Nonnull Handler asHandler() {
+            return this;
+        }
 
-            private MapMetaImpl(@Nonnull Type type) throws ReflectionException {
-                if (type instanceof MapType) {
-                    @SuppressWarnings("PatternVariableCanBeUsed")
-                    MapType mapType = (MapType) type;
-                    this.type = mapType.mapType();
-                    this.keyType = mapType.keyType();
-                    this.valueType = mapType.valueType();
-                } else {
-                    this.type = type;
-                    List<Type> actualTypes = TypeKit.resolveActualTypeArguments(type, Map.class);
-                    this.keyType = actualTypes.get(0);
-                    this.valueType = actualTypes.get(1);
+        @Override
+        public @Nullable MapMeta newMapMeta(@Nonnull Type type, @Nonnull MapMetaManager manager) throws Exception {
+            for (Handler handler : handlers) {
+                MapMeta mapMeta = handler.newMapMeta(type, manager);
+                if (mapMeta != null) {
+                    return mapMeta;
                 }
             }
-
-            @Override
-            public @Nonnull Type type() {
-                return type;
-            }
-
-            @Override
-            public @Nonnull MapMetaManager manager() {
-                return MapMetaManagerImpl.this;
-            }
-
-            @Override
-            public @Nonnull Type keyType() {
-                return keyType;
-            }
-
-            @Override
-            public @Nonnull Type valueType() {
-                return valueType;
-            }
-
-            @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-            @Override
-            public boolean equals(Object o) {
-                return MetaKit.equals(this, o);
-            }
-
-            @Override
-            public int hashCode() {
-                return MetaKit.hashCode(this);
-            }
-
-            @Override
-            public @Nonnull String toString() {
-                return MetaKit.toString(this);
-            }
+            return null;
         }
     }
 

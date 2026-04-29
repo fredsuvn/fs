@@ -695,21 +695,21 @@ public class ConvertTest implements TestPrint, DataGen {
     }
 
     private void testMapParserOptions() {
-        assertSame(MapMetaManager.defaultCachedParser(),
-            ConvertOption.getMapSchemaParser(ConvertOption.ignoreNull(true)));
-        assertNotEquals(MapMetaManager.defaultCachedParser(),
-            ConvertOption.getMapSchemaParser(ConvertOption.mapSchemaParser(MapMetaManager.defaultManager())));
         assertSame(MapMetaManager.defaultManager(),
-            ConvertOption.getMapSchemaParser(ConvertOption.mapSchemaParser(MapMetaManager.defaultManager())));
+            ConvertOption.getMapMetaManager(ConvertOption.ignoreNull(true)));
+        assertSame(MapMetaManager.defaultManager(),
+            ConvertOption.getMapMetaManager(ConvertOption.mapMetaManager(MapMetaManager.defaultManager())));
+        assertNotEquals(MapMetaManager.defaultManager(),
+            ConvertOption.getMapMetaManager(ConvertOption.mapMetaManager(MapMetaManager.newManager(Collections.emptyList(), SimpleCache.ofSoft()))));
     }
 
     private void testObjectParserOptions() {
-        assertSame(ObjectMetaManager.defaultCachedParser(),
+        assertSame(ObjectMetaManager.defaultCachedManager(),
             ConvertOption.getObjectSchemaParser(ConvertOption.ignoreNull(true)));
-        assertNotEquals(ObjectMetaManager.defaultCachedParser(),
-            ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectMetaManager.defaultParser())));
-        assertSame(ObjectMetaManager.defaultParser(),
-            ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectMetaManager.defaultParser())));
+        assertNotEquals(ObjectMetaManager.defaultCachedManager(),
+            ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectMetaManager.defaultManager())));
+        assertSame(ObjectMetaManager.defaultManager(),
+            ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectMetaManager.defaultManager())));
     }
 
     private void testBuilderManagerOptions() {

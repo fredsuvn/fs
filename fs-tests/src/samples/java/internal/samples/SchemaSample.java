@@ -45,7 +45,7 @@ public class SchemaSample {
 
         try {
             // Parse schema from a class
-            ObjectMeta schema = ObjectMetaManager.defaultParser().parse(Person.class);
+            ObjectMeta schema = ObjectMetaManager.defaultManager().parse(Person.class);
             System.out.println("Parsed schema for Person class: " + schema);
 
             // Access schema properties

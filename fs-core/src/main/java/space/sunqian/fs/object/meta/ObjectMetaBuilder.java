@@ -44,7 +44,7 @@ final class ObjectMetaBuilder implements ObjectMetaManager.Context {
 
         private final @Nonnull ObjectMetaManager parser;
         private final @Nonnull Type type;
-        private final @Nonnull Map<@Nonnull String, @Nonnull PropertyMetaMeta> properties;
+        private final @Nonnull Map<@Nonnull String, @Nonnull PropertyMeta> properties;
 
         private ObjectMetaImpl(
             @Nonnull ObjectMetaManager parser,
@@ -53,13 +53,13 @@ final class ObjectMetaBuilder implements ObjectMetaManager.Context {
         ) {
             this.parser = parser;
             this.type = type;
-            Map<@Nonnull String, @Nonnull PropertyMetaMeta> props = new LinkedHashMap<>();
-            propBases.forEach((name, propBase) -> props.put(name, new PropertyMetaMetaImpl(propBase)));
+            Map<@Nonnull String, @Nonnull PropertyMeta> props = new LinkedHashMap<>();
+            propBases.forEach((name, propBase) -> props.put(name, new PropertyMetaImpl(propBase)));
             this.properties = Collections.unmodifiableMap(props);
         }
 
         @Override
-        public @Nonnull ObjectMetaManager parser() {
+        public @Nonnull ObjectMetaManager manager() {
             return parser;
         }
 
@@ -69,7 +69,7 @@ final class ObjectMetaBuilder implements ObjectMetaManager.Context {
         }
 
         @Override
-        public @Nonnull Map<@Nonnull String, @Nonnull PropertyMetaMeta> properties() {
+        public @Nonnull Map<@Nonnull String, @Nonnull PropertyMeta> properties() {
             return properties;
         }
 
@@ -89,7 +89,7 @@ final class ObjectMetaBuilder implements ObjectMetaManager.Context {
             return MetaKit.toString(this);
         }
 
-        private final class PropertyMetaMetaImpl implements PropertyMetaMeta {
+        private final class PropertyMetaImpl implements PropertyMeta {
 
             private final @Nonnull String name;
             private final @Nonnull Type type;
@@ -105,7 +105,7 @@ final class ObjectMetaBuilder implements ObjectMetaManager.Context {
             private final @Nonnull List<@Nonnull Annotation> fieldAnnotations;
             private final @Nonnull Map<@Nonnull Class<?>, @Nonnull Annotation> annotations;
 
-            private PropertyMetaMetaImpl(@Nonnull PropertyMetaBase propertyBase) {
+            private PropertyMetaImpl(@Nonnull PropertyMetaBase propertyBase) {
                 this.name = propertyBase.name();
                 this.type = propertyBase.type();
                 this.getterMethod = propertyBase.getterMethod();

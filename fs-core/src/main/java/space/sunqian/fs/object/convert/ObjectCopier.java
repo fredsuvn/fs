@@ -10,7 +10,7 @@ import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.builder.BuilderManager;
 import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.meta.MapMeta;
-import space.sunqian.fs.object.meta.PropertyMetaMeta;
+import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.ObjectMeta;
 
 import java.lang.reflect.Type;
@@ -245,11 +245,11 @@ public interface ObjectCopier {
      *         from source map entry to destination object property;
      *     </li>
      *     <li>
-     *         {@link #copyProperty(String, PropertyMetaMeta, Object, ObjectMeta, Map, MapMeta, ObjectConverter, Option[])}:
+     *         {@link #copyProperty(String, PropertyMeta, Object, ObjectMeta, Map, MapMeta, ObjectConverter, Option[])}:
      *         from source object property to destination map entry;
      *     </li>
      *     <li>
-     *         {@link #copyProperty(String, PropertyMetaMeta, Object, ObjectMeta, Map, MapMeta, ObjectConverter, Option[])}:
+     *         {@link #copyProperty(String, PropertyMeta, Object, ObjectMeta, Map, MapMeta, ObjectConverter, Option[])}:
      *         from source object property to destination object property;
      *     </li>
      * </ul>
@@ -335,7 +335,7 @@ public interface ObjectCopier {
          */
         boolean copyProperty(
             @Nonnull String srcPropertyName,
-            @Nonnull PropertyMetaMeta srcProperty,
+            @Nonnull PropertyMeta srcProperty,
             @Nonnull Object src,
             @Nonnull ObjectMeta srcSchema,
             @Nonnull Map<Object, Object> dst,
@@ -362,7 +362,7 @@ public interface ObjectCopier {
          */
         boolean copyProperty(
             @Nonnull String srcPropertyName,
-            @Nonnull PropertyMetaMeta srcProperty,
+            @Nonnull PropertyMeta srcProperty,
             @Nonnull Object src,
             @Nonnull ObjectMeta srcSchema,
             @Nonnull Object dst,

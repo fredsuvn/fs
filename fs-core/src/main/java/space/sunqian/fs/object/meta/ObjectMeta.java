@@ -18,7 +18,7 @@ import java.util.Map;
  * parsing properties are defined by the implementation of {@link ObjectMetaManager}, rather than a public rules.
  * <p>
  * Two {@link ObjectMeta}s are considered equal if, and only if both types of objects and both parsers from
- * {@link #parser()} are equal.
+ * {@link #manager()} are equal.
  *
  * @author sunqian
  */
@@ -26,16 +26,16 @@ import java.util.Map;
 public interface ObjectMeta extends DataMeta {
 
     /**
-     * Parse the given type to {@link ObjectMeta} using {@link ObjectMetaManager#defaultParser()}.
+     * Parse the given type to {@link ObjectMeta} using {@link ObjectMetaManager#defaultManager()}.
      * <p>
      * Note this method never caches the parsed results.
      *
      * @param type the given type
-     * @return the {@link ObjectMeta} parsed from the given type using {@link ObjectMetaManager#defaultParser()}
+     * @return the {@link ObjectMeta} parsed from the given type using {@link ObjectMetaManager#defaultManager()}
      * @throws DataMetaException if any problem occurs
      */
-    static @Nonnull ObjectMeta parse(@Nonnull Type type) throws DataMetaException {
-        return ObjectMetaManager.defaultParser().parse(type);
+    static @Nonnull ObjectMeta of(@Nonnull Type type) throws DataMetaException {
+        return ObjectMetaManager.defaultManager().parse(type);
     }
 
     /**
@@ -44,7 +44,7 @@ public interface ObjectMeta extends DataMeta {
      * @return the {@link ObjectMetaManager} of this {@link ObjectMeta}
      */
     @Nonnull
-    ObjectMetaManager parser();
+    ObjectMetaManager manager();
 
     /**
      * Returns a map contains all properties of this {@link ObjectMeta}.
@@ -53,7 +53,7 @@ public interface ObjectMeta extends DataMeta {
      */
     @Immutable
     @Nonnull
-    Map<@Nonnull String, @Nonnull PropertyMetaMeta> properties();
+    Map<@Nonnull String, @Nonnull PropertyMeta> properties();
 
     /**
      * Returns the specified property with the specified name in this {@link ObjectMeta}.
@@ -61,7 +61,7 @@ public interface ObjectMeta extends DataMeta {
      * @param name the specified name
      * @return the specified property with the specified name in this {@link ObjectMeta}
      */
-    default @Nullable PropertyMetaMeta getProperty(String name) {
+    default @Nullable PropertyMeta getProperty(String name) {
         return properties().get(name);
     }
 
@@ -77,7 +77,7 @@ public interface ObjectMeta extends DataMeta {
 
     /**
      * Returns whether this {@link ObjectMeta} is equal to the other {@link ObjectMeta}. They are considered equal
-     * if, and only if both types of objects and both parsers from {@link #parser()} are equal.
+     * if, and only if both types of objects and both parsers from {@link #manager()} are equal.
      *
      * @param other the other {@link ObjectMeta}
      * @return whether this {@link ObjectMeta} is equal to the other {@link ObjectMeta}
@@ -86,7 +86,7 @@ public interface ObjectMeta extends DataMeta {
 
     /**
      * Returns the hash code of this {@link ObjectMeta}. The hash code is generated via {@link #type()} and
-     * {@link #parser()} like following codes:
+     * {@link #manager()} like following codes:
      * <pre>{@code
      * int result = 1;
      * result = 31 * result + type().hashCode();

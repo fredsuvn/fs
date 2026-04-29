@@ -30,7 +30,7 @@ import java.nio.channels.WritableByteChannel;
 public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormatter<Object> {
 
     /**
-     * Returns the default {@link JsonFormatter}, which uses {@link ObjectMetaManager#defaultCachedParser()} and
+     * Returns the default {@link JsonFormatter}, which uses {@link ObjectMetaManager#defaultCachedManager()} and
      * {@link ObjectConverter#defaultConverter()} to pars and convert objects, and doesn't ignore the properties of
      * which values are {@code null}, or {@code null} values of map, when formatting.
      * <p>
@@ -44,7 +44,7 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
     }
 
     /**
-     * Returns the default {@link JsonFormatter}, which uses {@link ObjectMetaManager#defaultCachedParser()} and
+     * Returns the default {@link JsonFormatter}, which uses {@link ObjectMetaManager#defaultCachedManager()} and
      * {@link ObjectConverter#defaultConverter()} to pars and convert objects, and does ignore the properties of which
      * values are {@code null}, or {@code null} values of map, when formatting.
      * <p>

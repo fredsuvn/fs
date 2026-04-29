@@ -12,12 +12,12 @@ import java.util.List;
  * This interface represents the property info of {@link ObjectMeta}. It is very similar to the simple property of
  * <a href="https://www.oracle.com/java/technologies/javase/javabeans-spec.html">JavaBeans</a>.
  * <p>
- * Two {@link PropertyMetaMeta}s are considered equal if, and only if both their names and both their owners are equal.
+ * Two {@link PropertyMeta}s are considered equal if, and only if both their names and both their owners are equal.
  *
  * @author sunqian
  */
 @Immutable
-public interface PropertyMetaMeta extends PropertyMetaBase {
+public interface PropertyMeta extends PropertyMetaBase {
 
     /**
      * Returns the owner {@link ObjectMeta} of this property.
@@ -152,16 +152,16 @@ public interface PropertyMetaMeta extends PropertyMetaBase {
     // }
 
     /**
-     * Returns whether this {@link PropertyMetaMeta} is equal to the other {@link PropertyMetaMeta}. They are considered
+     * Returns whether this {@link PropertyMeta} is equal to the other {@link PropertyMeta}. They are considered
      * equal if, and only if both their names and both their owners are equal.
      *
-     * @param other the other {@link PropertyMetaMeta}
-     * @return whether this {@link PropertyMetaMeta} is equal to the other {@link PropertyMetaMeta}
+     * @param other the other {@link PropertyMeta}
+     * @return whether this {@link PropertyMeta} is equal to the other {@link PropertyMeta}
      */
     boolean equals(Object other);
 
     /**
-     * Returns the hash code of this {@link PropertyMetaMeta}. The hash code is generated via {@link #name()} and
+     * Returns the hash code of this {@link PropertyMeta}. The hash code is generated via {@link #name()} and
      * {@link #owner()} like following codes:
      * <pre>{@code
      * int result = 1;
@@ -170,17 +170,17 @@ public interface PropertyMetaMeta extends PropertyMetaBase {
      * return result;
      * }</pre>
      *
-     * @return the hash code of this {@link PropertyMetaMeta}
+     * @return the hash code of this {@link PropertyMeta}
      */
     int hashCode();
 
     /**
-     * Returns a string representation of this {@link PropertyMetaMeta}. The string is generated like following codes:
+     * Returns a string representation of this {@link PropertyMeta}. The string is generated like following codes:
      * <pre>{@code
      * return name() + ": " + type().getTypeName();
      * }</pre>
      *
-     * @return a string representation of this {@link PropertyMetaMeta}
+     * @return a string representation of this {@link PropertyMeta}
      */
     @Nonnull
     String toString();

@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 /**
- * This interface provides the base info for {@link PropertyMetaMeta}, typically used in the parsing process of
+ * This interface provides the base info for {@link PropertyMeta}, typically used in the parsing process of
  * {@link ObjectMeta}.
  *
  * @author sunqian

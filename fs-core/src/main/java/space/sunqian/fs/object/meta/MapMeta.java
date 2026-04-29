@@ -18,13 +18,11 @@ import java.util.Map;
 public interface MapMeta extends DataMeta {
 
     /**
-     * Introspects the given {@link Map} type or {@link MapType} to {@link MapMeta} using
-     * {@link MapMetaManager#defaultManager()}.
+     * Introspects the given {@link Map} type to {@link MapMeta} using {@link MapMetaManager#defaultManager()}.
      *
      * @param type the given type to be introspected
      * @return the {@link MapMeta} introspected from the given type using {@link MapMetaManager#defaultManager()}
-     * @throws DataMetaException if the given type is not a {@link Map} type or {@link MapType}, or any other error
-     *                           occurs
+     * @throws DataMetaException if the given type is not a {@link Map} type, or any other error occurs
      */
     static @Nonnull MapMeta of(@Nonnull Type type) throws DataMetaException {
         return MapMetaManager.defaultManager().introspect(type);

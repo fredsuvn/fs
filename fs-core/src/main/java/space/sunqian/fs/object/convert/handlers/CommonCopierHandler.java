@@ -11,7 +11,7 @@ import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.meta.MapMeta;
-import space.sunqian.fs.object.meta.PropertyMetaMeta;
+import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.ObjectMeta;
 
 import java.util.Map;
@@ -84,7 +84,7 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
             srcKey = ConvertOption.getNameMapper(options).map((String) srcKey);
         }
         String dstPropertyName = Fs.as(converter.convert(srcKey, srcSchema.keyType(), String.class, options));
-        PropertyMetaMeta dstProperty = dstSchema.getProperty(dstPropertyName);
+        PropertyMeta dstProperty = dstSchema.getProperty(dstPropertyName);
         if (dstProperty == null || !dstProperty.isWritable()) {
             return false;
         }
@@ -99,7 +99,7 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
     @Override
     public boolean copyProperty(
         @Nonnull String srcPropertyName,
-        @Nonnull PropertyMetaMeta srcProperty,
+        @Nonnull PropertyMeta srcProperty,
         @Nonnull Object src,
         @Nonnull ObjectMeta srcSchema,
         @Nonnull Map<Object, Object> dst,
@@ -130,7 +130,7 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
     @Override
     public boolean copyProperty(
         @Nonnull String srcPropertyName,
-        @Nonnull PropertyMetaMeta srcProperty,
+        @Nonnull PropertyMeta srcProperty,
         @Nonnull Object src,
         @Nonnull ObjectMeta srcSchema,
         @Nonnull Object dst,
@@ -153,7 +153,7 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
             return false;
         }
         String dstPropertyName = Fs.as(converter.convert(actualSrcPropertyName, String.class, String.class, options));
-        PropertyMetaMeta dstProperty = dstSchema.getProperty(dstPropertyName);
+        PropertyMeta dstProperty = dstSchema.getProperty(dstPropertyName);
         if (dstProperty == null || !dstProperty.isWritable()) {
             return false;
         }

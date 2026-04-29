@@ -79,7 +79,7 @@ final class ObjectMetaBack {
 
         private static final @Nonnull ObjectMetaBack.CachedObjectMetaManager DEFAULT = newCachedParser(
             SimpleCache.ofSoft(),
-            ObjectMetaManager.defaultParser()
+            ObjectMetaManager.defaultManager()
         );
 
         private final @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectMeta> cache;

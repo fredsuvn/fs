@@ -16,9 +16,9 @@ import space.sunqian.fs.object.builder.BuilderOperator;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
-import space.sunqian.fs.object.meta.PropertyMetaMeta;
 import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.reflect.TypeRef;
 import space.sunqian.fs.third.protobuf.ProtobufBuilderHandler;
 import space.sunqian.fs.third.protobuf.ProtobufConvertHandler;
@@ -48,7 +48,7 @@ public class ProtobufTest implements TestPrint {
 
     @BeforeEach
     public void setUp() {
-        protoParser = ObjectMetaManager.newParser(ProtobufSchemaHandler.getInstance());
+        protoParser = ObjectMetaManager.newManager(ProtobufSchemaHandler.getInstance());
         builder = Data.newBuilder()
             .setStr("str")
             .setI32(1)
@@ -153,7 +153,7 @@ public class ProtobufTest implements TestPrint {
         );
         {
             // str
-            PropertyMetaMeta str = schema.getProperty("str");
+            PropertyMeta str = schema.getProperty("str");
             assertNotNull(str);
             assertEquals(String.class, str.type());
             assertEquals("str", str.getValue(inst));
@@ -171,7 +171,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // i32
-            PropertyMetaMeta i32 = schema.getProperty("i32");
+            PropertyMeta i32 = schema.getProperty("i32");
             assertNotNull(i32);
             assertEquals(int.class, i32.type());
             assertEquals(1, i32.getValue(inst));
@@ -189,7 +189,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // u64
-            PropertyMetaMeta u64 = schema.getProperty("u64");
+            PropertyMeta u64 = schema.getProperty("u64");
             assertNotNull(u64);
             assertEquals(long.class, u64.type());
             assertEquals(2L, u64.getValue(inst));
@@ -207,7 +207,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // f32
-            PropertyMetaMeta f32 = schema.getProperty("f32");
+            PropertyMeta f32 = schema.getProperty("f32");
             assertNotNull(f32);
             assertEquals(int.class, f32.type());
             assertEquals(3, f32.getValue(inst));
@@ -225,7 +225,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // f64
-            PropertyMetaMeta f64 = schema.getProperty("f64");
+            PropertyMeta f64 = schema.getProperty("f64");
             assertNotNull(f64);
             assertEquals(long.class, f64.type());
             assertEquals(4L, f64.getValue(inst));
@@ -243,7 +243,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // sf32
-            PropertyMetaMeta sf32 = schema.getProperty("sf32");
+            PropertyMeta sf32 = schema.getProperty("sf32");
             assertNotNull(sf32);
             assertEquals(int.class, sf32.type());
             assertEquals(5, sf32.getValue(inst));
@@ -261,7 +261,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // sf64
-            PropertyMetaMeta sf64 = schema.getProperty("sf64");
+            PropertyMeta sf64 = schema.getProperty("sf64");
             assertNotNull(sf64);
             assertEquals(long.class, sf64.type());
             assertEquals(6L, sf64.getValue(inst));
@@ -279,7 +279,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // sint32
-            PropertyMetaMeta sint32 = schema.getProperty("sint32");
+            PropertyMeta sint32 = schema.getProperty("sint32");
             assertNotNull(sint32);
             assertEquals(int.class, sint32.type());
             assertEquals(7, sint32.getValue(inst));
@@ -297,7 +297,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // sint64
-            PropertyMetaMeta sint64 = schema.getProperty("sint64");
+            PropertyMeta sint64 = schema.getProperty("sint64");
             assertNotNull(sint64);
             assertEquals(long.class, sint64.type());
             assertEquals(8L, sint64.getValue(inst));
@@ -315,7 +315,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // bytes
-            PropertyMetaMeta bytes = schema.getProperty("bytes");
+            PropertyMeta bytes = schema.getProperty("bytes");
             assertNotNull(bytes);
             assertEquals(ByteString.class, bytes.type());
             assertEquals(bytes.getValue(inst), ByteString.copyFromUtf8("bytes"));
@@ -333,7 +333,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // bool
-            PropertyMetaMeta bool = schema.getProperty("bool");
+            PropertyMeta bool = schema.getProperty("bool");
             assertNotNull(bool);
             assertEquals(boolean.class, bool.type());
             assertEquals(true, bool.getValue(inst));
@@ -351,7 +351,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // float
-            PropertyMetaMeta floatProp = schema.getProperty("float");
+            PropertyMeta floatProp = schema.getProperty("float");
             assertNotNull(floatProp);
             assertEquals(float.class, floatProp.type());
             assertEquals(1.1f, floatProp.getValue(inst));
@@ -369,7 +369,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // double
-            PropertyMetaMeta doubleProp = schema.getProperty("double");
+            PropertyMeta doubleProp = schema.getProperty("double");
             assertNotNull(doubleProp);
             assertEquals(double.class, doubleProp.type());
             assertEquals(1.2, doubleProp.getValue(inst));
@@ -387,7 +387,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // siMap
-            PropertyMetaMeta siMap = schema.getProperty("siMap");
+            PropertyMeta siMap = schema.getProperty("siMap");
             assertNotNull(siMap);
             assertEquals(siMap.type(), new TypeRef<Map<String, Integer>>() {}.type());
             assertEquals(siMap.getValue(inst), MapKit.map("siMap", 1));
@@ -405,7 +405,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // iList
-            PropertyMetaMeta iList = schema.getProperty("iList");
+            PropertyMeta iList = schema.getProperty("iList");
             assertNotNull(iList);
             assertEquals(iList.type(), new TypeRef<List<Integer>>() {}.type());
             assertEquals(iList.getValue(inst), ListKit.list(1));
@@ -423,7 +423,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // strList
-            PropertyMetaMeta strList = schema.getProperty("strList");
+            PropertyMeta strList = schema.getProperty("strList");
             assertNotNull(strList);
             assertEquals(strList.type(), new TypeRef<List<String>>() {}.type());
             assertEquals(strList.getValue(inst), ListKit.list("strList"));
@@ -441,7 +441,7 @@ public class ProtobufTest implements TestPrint {
         }
         {
             // xEnum
-            PropertyMetaMeta xEnum = schema.getProperty("xEnum");
+            PropertyMeta xEnum = schema.getProperty("xEnum");
             assertNotNull(xEnum);
             assertEquals(xEnum.class, xEnum.type());
             assertEquals(xEnum.getValue(inst), tests.core.protobuf.xEnum.E1);
@@ -486,7 +486,7 @@ public class ProtobufTest implements TestPrint {
             SimpleCache.ofSoft()
         );
         ObjectMetaManager parser = ObjectMetaManager
-            .defaultParser()
+            .defaultManager()
             .withFirstHandler(new ProtobufSchemaHandler());
 
         // java to pb
@@ -507,7 +507,7 @@ public class ProtobufTest implements TestPrint {
             SimpleCache.ofSoft()
         );
         ObjectMetaManager parser = ObjectMetaManager
-            .defaultParser()
+            .defaultManager()
             .withFirstHandler(new ProtobufSchemaHandler());
 
         // pb to java
@@ -531,7 +531,7 @@ public class ProtobufTest implements TestPrint {
             SimpleCache.ofSoft()
         );
         ObjectMetaManager parser = ObjectMetaManager
-            .defaultParser()
+            .defaultManager()
             .withFirstHandler(new ProtobufSchemaHandler());
 
         // java to pb.Builder
@@ -552,7 +552,7 @@ public class ProtobufTest implements TestPrint {
             SimpleCache.ofSoft()
         );
         ObjectMetaManager parser = ObjectMetaManager
-            .defaultParser()
+            .defaultManager()
             .withFirstHandler(new ProtobufSchemaHandler());
 
         // pb.Builder to java
@@ -575,7 +575,7 @@ public class ProtobufTest implements TestPrint {
             SimpleCache.ofSoft()
         );
         ObjectMetaManager parser = ObjectMetaManager
-            .defaultParser()
+            .defaultManager()
             .withFirstHandler(new ProtobufSchemaHandler());
 
         // java to java

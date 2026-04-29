@@ -31,26 +31,26 @@ public class MetaKit {
         @SuppressWarnings("PatternVariableCanBeUsed")
         ObjectMeta otherSchema = (ObjectMeta) other;
         return Objects.equals(objectSchema.type(), otherSchema.type())
-            && Objects.equals(objectSchema.parser(), otherSchema.parser());
+            && Objects.equals(objectSchema.manager(), otherSchema.manager());
     }
 
     /**
-     * The implementation of {@link PropertyMetaMeta#equals(Object)}, and it works in conjunction with
-     * {@link #hashCode(PropertyMetaMeta)}.
+     * The implementation of {@link PropertyMeta#equals(Object)}, and it works in conjunction with
+     * {@link #hashCode(PropertyMeta)}.
      *
-     * @param propertyMeta the compared {@link PropertyMetaMeta}
-     * @param other          the other {@link PropertyMetaMeta}
-     * @return whether the compared {@link PropertyMetaMeta} is equal to other {@link PropertyMetaMeta}
+     * @param propertyMeta the compared {@link PropertyMeta}
+     * @param other          the other {@link PropertyMeta}
+     * @return whether the compared {@link PropertyMeta} is equal to other {@link PropertyMeta}
      */
-    public static boolean equals(@Nonnull PropertyMetaMeta propertyMeta, @Nullable Object other) {
+    public static boolean equals(@Nonnull PropertyMeta propertyMeta, @Nullable Object other) {
         if (propertyMeta == other) {
             return true;
         }
-        if (!(other instanceof PropertyMetaMeta)) {
+        if (!(other instanceof PropertyMeta)) {
             return false;
         }
         @SuppressWarnings("PatternVariableCanBeUsed")
-        PropertyMetaMeta otherProperty = (PropertyMetaMeta) other;
+        PropertyMeta otherProperty = (PropertyMeta) other;
         return Objects.equals(propertyMeta.name(), otherProperty.name())
             && Objects.equals(propertyMeta.owner(), otherProperty.owner());
     }
@@ -86,18 +86,18 @@ public class MetaKit {
     public static int hashCode(@Nonnull ObjectMeta objectSchema) {
         int result = 1;
         result = 31 * result + objectSchema.type().hashCode();
-        result = 31 * result + objectSchema.parser().hashCode();
+        result = 31 * result + objectSchema.manager().hashCode();
         return result;
     }
 
     /**
-     * The implementation of {@link PropertyMetaMeta#hashCode()}, and it works in conjunction with
-     * {@link #equals(PropertyMetaMeta, Object)}.
+     * The implementation of {@link PropertyMeta#hashCode()}, and it works in conjunction with
+     * {@link #equals(PropertyMeta, Object)}.
      *
-     * @param propertyMeta the {@link PropertyMetaMeta} to be hashed
-     * @return the hash code of the {@link PropertyMetaMeta}
+     * @param propertyMeta the {@link PropertyMeta} to be hashed
+     * @return the hash code of the {@link PropertyMeta}
      */
-    public static int hashCode(@Nonnull PropertyMetaMeta propertyMeta) {
+    public static int hashCode(@Nonnull PropertyMeta propertyMeta) {
         int result = 1;
         result = 31 * result + propertyMeta.name().hashCode();
         result = 31 * result + propertyMeta.owner().hashCode();
@@ -127,18 +127,18 @@ public class MetaKit {
     public static @Nonnull String toString(@Nonnull ObjectMeta objectSchema) {
         return objectSchema.type().getTypeName() + "{" +
             objectSchema.properties().values().stream()
-                .map(PropertyMetaMeta::toString)
+                .map(PropertyMeta::toString)
                 .collect(Collectors.joining(", "))
             + "}";
     }
 
     /**
-     * The implementation of {@link PropertyMetaMeta#toString()}.
+     * The implementation of {@link PropertyMeta#toString()}.
      *
-     * @param property the {@link PropertyMetaMeta} to be string
-     * @return a string representation of given {@link PropertyMetaMeta}
+     * @param property the {@link PropertyMeta} to be string
+     * @return a string representation of given {@link PropertyMeta}
      */
-    public static @Nonnull String toString(@Nonnull PropertyMetaMeta property) {
+    public static @Nonnull String toString(@Nonnull PropertyMeta property) {
         return property.name() + ": " + property.type().getTypeName();
     }
 

@@ -11,7 +11,7 @@ import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.meta.DataMetaException;
 import space.sunqian.fs.object.meta.MapMeta;
 import space.sunqian.fs.object.meta.MapMetaManager;
-import space.sunqian.fs.object.meta.PropertyMetaMeta;
+import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaManager;
 
@@ -53,7 +53,7 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
         try {
             @Nonnull Option<?, ?> @Nonnull [] actualOptions = OptionKit.mergeOptions(defaultOptionsArray, options);
             if (src instanceof Map) {
-                MapMetaManager srcParser = ConvertOption.getMapSchemaParser(actualOptions);
+                MapMetaManager srcParser = ConvertOption.getMapMetaManager(actualOptions);
                 MapMeta srcSchema = parseMapSchema((Map<?, ?>) src, srcParser, srcType, actualOptions);
                 if (dst instanceof Map) {
                     MapMeta dstParser = parseMapSchema((Map<?, ?>) dst, srcParser, dstType, actualOptions);
@@ -67,7 +67,7 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
                 ObjectMetaManager srcParser = ConvertOption.getObjectSchemaParser(actualOptions);
                 ObjectMeta srcSchema = parseObjectSchema(src, srcParser, srcType, actualOptions);
                 if (dst instanceof Map) {
-                    MapMetaManager dstParser = ConvertOption.getMapSchemaParser(actualOptions);
+                    MapMetaManager dstParser = ConvertOption.getMapMetaManager(actualOptions);
                     MapMeta dstSchema = parseMapSchema((Map<?, ?>) dst, dstParser, dstType, actualOptions);
                     objectToMap(src, srcSchema, Fs.as(dst), dstSchema, converter, actualOptions);
                 } else {
@@ -265,7 +265,7 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
     }
 
     @Override
-    public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMetaMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+    public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
         boolean goon = true;
         for (Handler handler : handlers) {
             goon = handler.copyProperty(
@@ -279,7 +279,7 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
     }
 
     @Override
-    public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMetaMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+    public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
         boolean goon = true;
         for (Handler handler : handlers) {
             goon = handler.copyProperty(
