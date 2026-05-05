@@ -29,7 +29,7 @@ public interface BuilderManager {
      * </ul>
      * <p>
      * Note the default {@link BuilderManager} is singleton, and will cache the returned {@link BuilderOperator}
-     * instances by a {@link SimpleCache#ofSoft()} registered in {@link Fs#registerGlobalCache(SimpleCache)}.
+     * instances by a {@link SimpleCache} registered in {@link Fs#registerGlobalCache(SimpleCache)}.
      *
      * @return the default {@link BuilderManager}
      * @see CommonBuilderHandler

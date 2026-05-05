@@ -9,31 +9,33 @@ import java.lang.ref.PhantomReference;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
  * This interface is a simplified key-value pair cache interface (implementations must be thread-safe). It only provides
- * get, put, remove and clean operations, and supports null value but does not allow null key. It is suitable for
- * scenarios that require simple cache operations and do not care about the cache lifecycle.
+ * get, put, remove and clean operations, and supports {@code null values} but does not allow {@code null keys}.
  * <p>
- * It is recommended to use the skeletal implementation: {@link AbstractSimpleCache}.
+ * Entries in a {@link SimpleCache} will be automatically invalidated unless explicitly cleaned. It is suitable for
+ * scenarios that require simple cache operations and do not need to manage the cache lifecycle.
+ * <p>
+ * There is a skeletal implementation: {@link AbstractSimpleCache}.
  *
  * @param <K> the key type
  * @param <V> the value type
  * @author sunqian
- * @implNote Although the default implementations will call {@link #clean()} every time they execute other methods, it
- * is recommended to take some measures to enable the {@link #clean()} to call regularly to clean invalid entries
+ * @implNote Although the default implementations (based on {@link AbstractSimpleCache}) will call {@link #clean()}
+ * every time they execute other methods, it is recommended to take measures to ensure that {@link #clean()} is called
+ * regularly to clean up invalid entries.
  * @see AbstractSimpleCache
  */
 @ThreadSafe
 public interface SimpleCache<K, V> extends CacheFunction<K, V> {
 
     /**
-     * Returns a new {@link SimpleCache} based on {@link WeakReference} and {@link ConcurrentHashMap}. The values of the
-     * returned cache will be automatically collected by the garbage collection based on the characteristics of
-     * {@link WeakReference}. Its {@link #clean()} method releases all entries of which values are collected, and this
-     * method is automatically invoked once every time another method is executed.
+     * Returns a new {@link SimpleCache} based on {@link WeakReference}. The values in the returned cache will be
+     * automatically collected by garbage collection according to the semantics of {@link WeakReference}. Its
+     * {@link #clean()} method releases all entries whose values have been collected, and this method is automatically
+     * invoked each time any other method is executed.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -44,10 +46,10 @@ public interface SimpleCache<K, V> extends CacheFunction<K, V> {
     }
 
     /**
-     * Returns a new {@link SimpleCache} based on {@link SoftReference} and {@link ConcurrentHashMap}. The values of the
-     * returned cache will be automatically collected by the garbage collection based on the characteristics of
-     * {@link SoftReference}. Its {@link #clean()} method releases all entries of which values are collected, and this
-     * method is automatically invoked once every time another method is executed.
+     * Returns a new {@link SimpleCache} based on {@link SoftReference}. The values in the returned cache will be
+     * automatically collected by garbage collection based on the semantics of {@link SoftReference}. Its
+     * {@link #clean()} method releases all entries whose values have been collected, and this method is automatically
+     * invoked each time any other method is executed.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -58,10 +60,10 @@ public interface SimpleCache<K, V> extends CacheFunction<K, V> {
     }
 
     /**
-     * Returns a new {@link SimpleCache} based on {@link PhantomReference} and {@link ConcurrentHashMap}. The values of
-     * the returned cache will be automatically collected by the garbage collection based on the characteristics of
-     * {@link PhantomReference}. Its {@link #clean()} method releases all entries of which values are collected, and
-     * this method is automatically invoked once every time another method is executed.
+     * Returns a new {@link SimpleCache} based on {@link PhantomReference}. The values in the returned cache will be
+     * automatically collected by garbage collection based on the semantics of {@link PhantomReference}. Its
+     * {@link #clean()} method releases all entries whose values have been collected, and this method is automatically
+     * invoked each time any other method is executed.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -72,9 +74,11 @@ public interface SimpleCache<K, V> extends CacheFunction<K, V> {
     }
 
     /**
-     * Returns a new {@link SimpleCache} based on strong reference and {@link ConcurrentHashMap}. The values of the
-     * returned cache will never automatically be invalid, and its {@link #clean()} method does nothing. The behavior of
-     * the returned cache is just like a regular {@link Map}.
+     * Returns a new {@link SimpleCache} based on strong reference.
+     * <p>
+     * This is a special case of {@link SimpleCache}. The entries in the returned cache will never automatically be
+     * invalid, and its {@link #clean()} method does nothing. The behavior of the returned cache is just like a regular
+     * {@link Map}.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -86,6 +90,9 @@ public interface SimpleCache<K, V> extends CacheFunction<K, V> {
 
     /**
      * Returns a new {@link SimpleCache} based on the given map.
+     * <p>
+     * This is a special case of {@link SimpleCache}. Whether the entries in the returned cache will automatically be
+     * invalid depends on the behavior of the given map.
      * <p>
      * Note the returned cache treats {@code null} values as absent, which will lead to certain results in processing
      * {@code null} values. Therefore, putting {@code null} values are not encouraged for returned map cache.
