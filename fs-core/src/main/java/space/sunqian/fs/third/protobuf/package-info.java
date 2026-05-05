@@ -8,7 +8,7 @@
  * </ul>
  * Interfaces:
  * <ul>
- *     <li>{@link space.sunqian.fs.third.protobuf.ProtobufSchemaHandler}</li>
+ *     <li>{@link space.sunqian.fs.third.protobuf.ProtobufMetaHandler}</li>
  *     <li>{@link space.sunqian.fs.third.protobuf.ProtobufConvertHandler}</li>
  *     <li>{@link space.sunqian.fs.third.protobuf.ProtobufBuilderHandler}</li>
  * </ul>

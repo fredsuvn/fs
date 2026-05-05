@@ -21,7 +21,7 @@ import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaManager;
 import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.PropertyMetaBase;
-import space.sunqian.fs.object.meta.handlers.CommonMetaHandler;
+import space.sunqian.fs.object.meta.handlers.CommonObjectMetaHandler;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Field;
@@ -39,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -275,42 +274,43 @@ public class MetaTest implements TestPrint {
     @Test
     public void testObjectManager() throws Exception {
         assertSame(ObjectMetaManager.defaultManager(), ObjectMetaManager.defaultManager());
-        assertSame(ObjectMetaManager.defaultCachedManager(), ObjectMetaManager.defaultCachedManager());
         testObjectManagerWithHandler(ObjectMetaManager.defaultManager());
-        testObjectManagerWithHandler(ObjectMetaManager.defaultCachedManager());
     }
 
     private void testObjectManagerWithHandler(ObjectMetaManager manager) throws Exception {
         // Test with pre handler
-        ObjectMetaManager preManager = manager.withFirstHandler(new PreHandler());
-        ObjectMeta preMeta = preManager.parse(Object.class);
+        ObjectMetaManager preManager = ObjectMetaManager.newManager(
+            SimpleCache.ofSoft(), new PreHandler(), manager.asHandler()
+        );
+        ObjectMeta preMeta = preManager.introspect(Object.class);
         assertEquals(Object.class, preMeta.type());
         assertEquals(0, preMeta.properties().size());
 
         // Test with last handler
         ObjectMetaManager lastManager = ObjectMetaManager.newManager(
-            manager.asHandler(), new LastHandler());
-        ObjectMeta lastMeta = lastManager.parse(Object.class);
+            SimpleCache.ofSoft(), manager.asHandler(), new LastHandler()
+        );
+        ObjectMeta lastMeta = lastManager.introspect(Object.class);
         assertEquals(Object.class, lastMeta.type());
         assertEquals(lastMeta.properties().keySet(), SetKit.set("class", "test"));
 
         // Test with pre handler as handler
-        ObjectMetaManager asPreManager = ObjectMetaManager.newManager(preManager.asHandler());
-        ObjectMeta asPreMeta = asPreManager.parse(Object.class);
+        ObjectMetaManager asPreManager = ObjectMetaManager.newManager(SimpleCache.ofSoft(), preManager.asHandler());
+        ObjectMeta asPreMeta = asPreManager.introspect(Object.class);
         assertEquals(Object.class, asPreMeta.type());
         assertEquals(0, asPreMeta.properties().size());
 
         // Test with last handler as handler
-        ObjectMetaManager asLastManager = ObjectMetaManager.newManager(lastManager.asHandler());
-        ObjectMeta asLastMeta = asLastManager.parse(Object.class);
+        ObjectMetaManager asLastManager = ObjectMetaManager.newManager(SimpleCache.ofSoft(), lastManager.asHandler());
+        ObjectMeta asLastMeta = asLastManager.introspect(Object.class);
         assertEquals(Object.class, asLastMeta.type());
         assertEquals(asLastMeta.properties().keySet(), SetKit.set("class", "test"));
     }
 
     private static class PreHandler implements ObjectMetaManager.Handler {
         @Override
-        public boolean parse(@Nonnull ObjectMetaManager.Context context) throws Exception {
-            if (context.parsedType().equals(Object.class)) {
+        public boolean introspect(@Nonnull ObjectMetaManager.Context context) throws Exception {
+            if (context.objectType().equals(Object.class)) {
                 return false;
             }
             return true;
@@ -319,8 +319,8 @@ public class MetaTest implements TestPrint {
 
     private static class LastHandler implements ObjectMetaManager.Handler {
         @Override
-        public boolean parse(@Nonnull ObjectMetaManager.Context context) throws Exception {
-            if (context.parsedType().equals(Object.class)) {
+        public boolean introspect(@Nonnull ObjectMetaManager.Context context) throws Exception {
+            if (context.objectType().equals(Object.class)) {
                 context.propertyBaseMap().put("test", new PropertyMetaBase() {
                     @Override
                     public @Nonnull String name() {
@@ -368,11 +368,12 @@ public class MetaTest implements TestPrint {
         ObjectMeta a1 = ObjectMeta.of(A.class);
         ObjectMeta a2 = ObjectMeta.of(A.class);
         ObjectMeta b1 = ObjectMeta.of(B.class);
-        ObjectMetaManager manager2 = ObjectMetaManager.newManager(new CommonMetaHandler());
-        ObjectMeta a3 = manager2.parse(A.class);
+        ObjectMetaManager manager2 = ObjectMetaManager.newManager(
+            SimpleCache.ofStrong(), new CommonObjectMetaHandler()
+        );
+        ObjectMeta a3 = manager2.introspect(A.class);
         assertEquals(a1, a1);
         assertFalse(a1.equals(""));
-        assertNotSame(a1, a2);
         assertEquals(a1, a2);
         assertFalse(a1.equals(b1));
         assertFalse(a1.equals(a3));
@@ -556,17 +557,12 @@ public class MetaTest implements TestPrint {
         MapMetaManager mapManager = MapMetaManager.newManager(ListKit.list(MapMetaManager.defaultManager().asHandler()), SimpleCache.ofStrong());
         // Test caching for Map.class
         assertSame(mapManager.introspect(Map.class), mapManager.introspect(Map.class));
-        // assertNotSame(MapMeta.of(Map.class), MapMeta.of(Map.class));
     }
 
     private void testObjectMetaCachedManager() {
-        ObjectMetaManager objectManager = ObjectMetaManager.newManager(SimpleCache.ofStrong(), ObjectMetaManager.defaultManager());
+        ObjectMetaManager objectManager = ObjectMetaManager.newManager(SimpleCache.ofStrong(), ObjectMetaManager.defaultManager().asHandler());
         // Test caching for A.class
-        assertSame(objectManager.parse(A.class), objectManager.parse(A.class));
-        assertNotSame(ObjectMeta.of(A.class), ObjectMeta.of(A.class));
-        // Test handler consistency
-        assertSame(ObjectMetaManager.defaultManager().handlers(), objectManager.handlers());
-        assertSame(ObjectMetaManager.defaultManager().asHandler(), objectManager.asHandler());
+        assertSame(objectManager.introspect(A.class), objectManager.introspect(A.class));
     }
 
     @Test

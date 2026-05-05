@@ -63,8 +63,8 @@ public abstract class AbstractObjectMetaHandler implements ObjectMetaManager.Han
     }
 
     @Override
-    public boolean parse(ObjectMetaManager.@Nonnull Context context) throws Exception {
-        Type type = context.parsedType();
+    public boolean introspect(ObjectMetaManager.@Nonnull Context context) throws Exception {
+        Type type = context.objectType();
         Class<?> rawType = TypeKit.getRawClass(type);
         if (rawType == null) {
             throw new UnsupportedOperationException("Not a Class or ParameterizedType: " + type + ".");
@@ -93,7 +93,7 @@ public abstract class AbstractObjectMetaHandler implements ObjectMetaManager.Han
         }
 
         // Builds property base for each property info.
-        Map<TypeVariable<?>, Type> typeParameterMapping = TypeKit.typeParametersMapping(context.parsedType());
+        Map<TypeVariable<?>, Type> typeParameterMapping = TypeKit.typeParametersMapping(context.objectType());
         Set<Type> stack = new HashSet<>();
         propertyInfoMap.forEach((propertyName, propertyBase) -> {
             Method getterMethod = propertyBase.getterMethod;

@@ -7,7 +7,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Utilities for object schema, including map schema and non-map object schema.
+ * Utilities for object meta info, including map meta info ({@link MapMeta}) and non-map object meta info
+ * ({@link ObjectMeta}).
  *
  * @author sunqian
  */
@@ -17,21 +18,21 @@ public class MetaKit {
      * The implementation of {@link ObjectMeta#equals(Object)}, and it works in conjunction with
      * {@link #hashCode(ObjectMeta)}.
      *
-     * @param objectSchema the compared {@link ObjectMeta}
-     * @param other        the other {@link ObjectMeta}
+     * @param objectMeta the compared {@link ObjectMeta}
+     * @param other      the other {@link ObjectMeta}
      * @return whether the compared {@link ObjectMeta} is equal to other {@link ObjectMeta}
      */
-    public static boolean equals(@Nonnull ObjectMeta objectSchema, @Nullable Object other) {
-        if (objectSchema == other) {
+    public static boolean equals(@Nonnull ObjectMeta objectMeta, @Nullable Object other) {
+        if (objectMeta == other) {
             return true;
         }
         if (!(other instanceof ObjectMeta)) {
             return false;
         }
         @SuppressWarnings("PatternVariableCanBeUsed")
-        ObjectMeta otherSchema = (ObjectMeta) other;
-        return Objects.equals(objectSchema.type(), otherSchema.type())
-            && Objects.equals(objectSchema.manager(), otherSchema.manager());
+        ObjectMeta otherMeta = (ObjectMeta) other;
+        return Objects.equals(objectMeta.type(), otherMeta.type())
+            && Objects.equals(objectMeta.manager(), otherMeta.manager());
     }
 
     /**
@@ -39,7 +40,7 @@ public class MetaKit {
      * {@link #hashCode(PropertyMeta)}.
      *
      * @param propertyMeta the compared {@link PropertyMeta}
-     * @param other          the other {@link PropertyMeta}
+     * @param other        the other {@link PropertyMeta}
      * @return whether the compared {@link PropertyMeta} is equal to other {@link PropertyMeta}
      */
     public static boolean equals(@Nonnull PropertyMeta propertyMeta, @Nullable Object other) {
@@ -59,34 +60,34 @@ public class MetaKit {
      * The implementation of {@link MapMeta#equals(Object)}, and it works in conjunction with
      * {@link #hashCode(MapMeta)}.
      *
-     * @param mapSchema the compared {@link MapMeta}
-     * @param other     the other {@link MapMeta}
+     * @param mapMeta the compared {@link MapMeta}
+     * @param other   the other {@link MapMeta}
      * @return whether the compared {@link MapMeta} is equal to other {@link MapMeta}
      */
-    public static boolean equals(@Nonnull MapMeta mapSchema, @Nullable Object other) {
-        if (mapSchema == other) {
+    public static boolean equals(@Nonnull MapMeta mapMeta, @Nullable Object other) {
+        if (mapMeta == other) {
             return true;
         }
         if (!(other instanceof MapMeta)) {
             return false;
         }
         @SuppressWarnings("PatternVariableCanBeUsed")
-        MapMeta otherSchema = (MapMeta) other;
-        return Objects.equals(mapSchema.type(), otherSchema.type())
-            && Objects.equals(mapSchema.manager(), otherSchema.manager());
+        MapMeta otherMeta = (MapMeta) other;
+        return Objects.equals(mapMeta.type(), otherMeta.type())
+            && Objects.equals(mapMeta.manager(), otherMeta.manager());
     }
 
     /**
      * The implementation of {@link ObjectMeta#hashCode()}, and it works in conjunction with
      * {@link #equals(ObjectMeta, Object)}.
      *
-     * @param objectSchema the {@link ObjectMeta} to be hashed
+     * @param objectMeta the {@link ObjectMeta} to be hashed
      * @return the hash code of the {@link ObjectMeta}
      */
-    public static int hashCode(@Nonnull ObjectMeta objectSchema) {
+    public static int hashCode(@Nonnull ObjectMeta objectMeta) {
         int result = 1;
-        result = 31 * result + objectSchema.type().hashCode();
-        result = 31 * result + objectSchema.manager().hashCode();
+        result = 31 * result + objectMeta.type().hashCode();
+        result = 31 * result + objectMeta.manager().hashCode();
         return result;
     }
 
@@ -108,25 +109,25 @@ public class MetaKit {
      * The implementation of {@link MapMeta#hashCode()}, and it works in conjunction with
      * {@link #equals(MapMeta, Object)}.
      *
-     * @param mapSchema the {@link MapMeta} to be hashed
+     * @param mapMeta the {@link MapMeta} to be hashed
      * @return the hash code of the {@link MapMeta}
      */
-    public static int hashCode(@Nonnull MapMeta mapSchema) {
+    public static int hashCode(@Nonnull MapMeta mapMeta) {
         int result = 1;
-        result = 31 * result + mapSchema.type().hashCode();
-        result = 31 * result + mapSchema.manager().hashCode();
+        result = 31 * result + mapMeta.type().hashCode();
+        result = 31 * result + mapMeta.manager().hashCode();
         return result;
     }
 
     /**
      * The implementation of {@link ObjectMeta#toString()}.
      *
-     * @param objectSchema the {@link ObjectMeta} to be string
+     * @param objectMeta the {@link ObjectMeta} to be string
      * @return a string representation of given {@link ObjectMeta}
      */
-    public static @Nonnull String toString(@Nonnull ObjectMeta objectSchema) {
-        return objectSchema.type().getTypeName() + "{" +
-            objectSchema.properties().values().stream()
+    public static @Nonnull String toString(@Nonnull ObjectMeta objectMeta) {
+        return objectMeta.type().getTypeName() + "{" +
+            objectMeta.properties().values().stream()
                 .map(PropertyMeta::toString)
                 .collect(Collectors.joining(", "))
             + "}";
@@ -145,11 +146,11 @@ public class MetaKit {
     /**
      * The implementation of {@link MapMeta#toString()}.
      *
-     * @param mapSchema the {@link MapMeta} to be string
+     * @param mapMeta the {@link MapMeta} to be string
      * @return a string representation of given {@link MapMeta}
      */
-    public static @Nonnull String toString(@Nonnull MapMeta mapSchema) {
-        return mapSchema.type().getTypeName();
+    public static @Nonnull String toString(@Nonnull MapMeta mapMeta) {
+        return mapMeta.type().getTypeName();
     }
 
     private MetaKit() {

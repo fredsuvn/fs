@@ -31,7 +31,7 @@ public class RecordMetaHandler implements ObjectMetaManager.Handler {
     }
 
     @Override
-    public boolean parse(ObjectMetaManager.@Nonnull Context context) throws Exception {
-        return HANDLER.parse(context);
+    public boolean introspect(ObjectMetaManager.@Nonnull Context context) throws Exception {
+        return HANDLER.introspect(context);
     }
 }

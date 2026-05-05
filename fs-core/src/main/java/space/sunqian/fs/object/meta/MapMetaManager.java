@@ -15,6 +15,10 @@ import java.util.Map;
 
 /**
  * This interface is used to introspect {@link Type} of {@link Map} to {@link MapMeta}.
+ * <p>
+ * It uses a list of {@link Handler}s to execute the introspection operations, where each {@link Handler} possesses its
+ * own specific introspection logic. And the default {@link MapMetaManager} is based on
+ * {@link CommonMapMetaHandler#getInstance()}.
  *
  * @author sunqian
  */
@@ -28,7 +32,7 @@ public interface MapMetaManager {
      * </ul>
      * <p>
      * Note the default {@link MapMetaManager} is singleton, and will cache the returned {@link MapMeta} instances by a
-     * {@link SimpleCache#ofSoft()} registered in {@link Fs#registerGlobalCache(SimpleCache)}.
+     * {@link SimpleCache} registered in {@link Fs#registerGlobalCache(SimpleCache)}.
      *
      * @return the default {@link MapMetaManager}
      */
@@ -51,7 +55,7 @@ public interface MapMetaManager {
     }
 
     /**
-     * Introspects and returns the given {@link Map} type to an instance of {@link MapMeta}.
+     * Introspects the given {@link Map} type and returns the introspected {@link MapMeta}.
      *
      * @param type the given type
      * @return the introspected {@link MapMeta}
@@ -85,7 +89,7 @@ public interface MapMetaManager {
     interface Handler {
 
         /**
-         * Introspects and returns a new {@link MapMeta} for the given type, or {@code null} if the given type is
+         * Introspects the given type and returns the introspected {@link MapMeta}, or {@code null} if the given type is
          * unsupported.
          *
          * @param type    the given type
@@ -94,6 +98,6 @@ public interface MapMetaManager {
          * @throws Exception if an error occurs
          */
         @Nullable
-        MapMeta newMapMeta(@Nonnull Type type, @Nonnull MapMetaManager manager) throws Exception;
+        MapMeta introspect(@Nonnull Type type, @Nonnull MapMetaManager manager) throws Exception;
     }
 }

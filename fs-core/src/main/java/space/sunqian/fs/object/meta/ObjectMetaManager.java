@@ -3,10 +3,12 @@ package space.sunqian.fs.object.meta;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.annotation.ThreadSafe;
+import space.sunqian.fs.Fs;
+import space.sunqian.fs.cache.CacheFunction;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.meta.handlers.AbstractObjectMetaHandler;
-import space.sunqian.fs.object.meta.handlers.CommonMetaHandler;
+import space.sunqian.fs.object.meta.handlers.CommonObjectMetaHandler;
 import space.sunqian.fs.object.meta.handlers.RecordMetaHandler;
 
 import java.lang.reflect.Type;
@@ -14,11 +16,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This interface is used to parse {@link Type} to {@link ObjectMeta}. It uses a list of {@link Handler}s to execute
- * the specific parsing operations, where each {@link Handler} possesses its own specific parsing logic.
+ * This interface is used to introspect {@link Type} to {@link ObjectMeta}.
  * <p>
- * There is a skeletal handler implementation: {@link AbstractObjectMetaHandler}. And the default parser is based on
- * {@link CommonMetaHandler#getInstance()}.
+ * It uses a list of {@link Handler}s to execute the introspection operations, where each {@link Handler} possesses its
+ * own specific introspection logic. And the default {@link ObjectMetaManager} is based on
+ * {@link CommonObjectMetaHandler#getInstance()}.
+ * <p>
+ * There is a skeletal {@link Handler} implementation: {@link AbstractObjectMetaHandler}.
  *
  * @author sunqian
  */
@@ -26,101 +30,76 @@ import java.util.Map;
 public interface ObjectMetaManager {
 
     /**
-     * Returns the default {@link ObjectMetaManager}. Here are handlers in the default parser:
+     * Returns the default {@link ObjectMetaManager}. Here are handlers in the default {@link ObjectMetaManager}:
      * <ul>
      *     <li>
      *         {@link RecordMetaHandler#getInstance()}, if the current JVM version supports {@code record} classes
      *         ({@code >= 16});
      *     </li>
-     *     <li>{@link CommonMetaHandler#getInstance()};</li>
+     *     <li>{@link CommonObjectMetaHandler#getInstance()};</li>
      * </ul>
      * <p>
-     * Note the default {@link ObjectMetaManager} is singleton, and never caches the parsed results.
+     * Note the default {@link ObjectMetaManager} is singleton, and will cache the returned {@link ObjectMeta} instances by a
+     * {@link SimpleCache} registered in {@link Fs#registerGlobalCache(SimpleCache)}.
      *
      * @return the default {@link ObjectMetaManager}
-     * @see CommonMetaHandler
+     * @see CommonObjectMetaHandler
      * @see RecordMetaHandler
      */
     static @Nonnull ObjectMetaManager defaultManager() {
-        return ObjectMetaBack.defaultParser();
+        return ObjectMetaBack.defaultManager();
     }
 
     /**
-     * Returns the default cached {@link ObjectMetaManager}, which is based on {@link #defaultManager()} and caches the
-     * parsed results with {@link SimpleCache#ofSoft()}.
-     * <p>
-     * Note the default cached {@link ObjectMetaManager} is singleton.
+     * Creates and returns a new {@link ObjectMetaManager} with given cache function and handlers.
      *
-     * @return the default cached {@link ObjectMetaManager}
-     * @see #defaultManager()
-     */
-    static @Nonnull ObjectMetaManager defaultCachedManager() {
-        return ObjectMetaBack.defaultCachedParser();
-    }
-
-    /**
-     * Creates and returns a new {@link ObjectMetaManager} with the given handlers.
-     * <p>
-     * Note the created {@link ObjectMetaManager} never caches the parsed results.
-     *
-     * @param handlers the given handlers
-     * @return a new {@link ObjectMetaManager} with the given handlers
-     */
-    static @Nonnull ObjectMetaManager newManager(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
-        return newManager(ListKit.list(handlers));
-    }
-
-    /**
-     * Creates and returns a new {@link ObjectMetaManager} with given handlers.
-     * <p>
-     * Note the created {@link ObjectMetaManager} never caches the parsed results.
-     *
-     * @param handlers given handlers
-     * @return a new {@link ObjectMetaManager} with given handlers
-     */
-    static @Nonnull ObjectMetaManager newManager(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
-        return ObjectMetaBack.newParser(handlers);
-    }
-
-    /**
-     * Returns a new {@link ObjectMetaManager} that caches the parsed results with the specified cache.
-     * <p>
-     * Note the behavior of the non-parsing methods of the returned {@link ObjectMetaManager}, such as
-     * {@link #handlers()}, {@link #asHandler()} and {@link #withFirstHandler(Handler)}, will directly invoke the
-     * underlying {@link ObjectMetaManager}.
-     *
-     * @param cache  the specified cache to store the parsed results
-     * @param parser the underlying {@link ObjectMetaManager} to parse the type
-     * @return a new {@link ObjectMetaManager} that caches the parsed results with the specified cache
+     * @param cacheFunction the cache function to cache the generated {@link ObjectMeta} instances
+     * @param handlers      the given handlers
+     * @return a new {@link ObjectMetaManager} with the given cache function and handlers
      */
     static @Nonnull ObjectMetaManager newManager(
-        @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectMeta> cache,
-        @Nonnull ObjectMetaManager parser
+        @Nonnull CacheFunction<@Nonnull Type, @Nonnull ObjectMeta> cacheFunction,
+        @Nonnull Handler @Nonnull @RetainedParam ... handlers
     ) {
-        return ObjectMetaBack.newCachedParser(cache, parser);
+        return newManager(cacheFunction, ListKit.list(handlers));
     }
 
     /**
-     * Parses the given type to an instance of {@link ObjectMeta}, and returns the parsed {@link ObjectMeta}.
+     * Creates and returns a new {@link ObjectMetaManager} with given cache function and handlers.
+     *
+     * @param cacheFunction the cache function to cache the generated {@link ObjectMeta} instances
+     * @param handlers      the given handlers
+     * @return a new {@link ObjectMetaManager} with the given cache function and handlers
+     */
+    static @Nonnull ObjectMetaManager newManager(
+        @Nonnull CacheFunction<@Nonnull Type, @Nonnull ObjectMeta> cacheFunction,
+        @Nonnull @RetainedParam List<@Nonnull Handler> handlers
+    ) {
+        return ObjectMetaBack.newManager(cacheFunction, handlers);
+    }
+
+    /**
+     * Introspects the given type and returns the introspected {@link ObjectMeta}.
      *
      * @param type the given type
-     * @return the parsed {@link ObjectMeta}
+     * @return the introspected {@link ObjectMeta}
      * @throws DataMetaException if any problem occurs
-     * @implNote The default implementation of this method invokes the {@link Handler#parse(ObjectMetaManager.Context)}
-     * in the order of {@link #handlers()} until one of the handlers returns {@code false}. The codes are similar to:
+     * @implNote The default implementation of this method invokes the
+     * {@link Handler#introspect(ObjectMetaManager.Context)} in the order of {@link #handlers()} until one of the
+     * handlers returns {@code false}. The codes are similar to:
      * <pre>{@code
      * for (Handler handler : handlers()) {
-     *     if (!handler.parse(context)) {
+     *     if (!handler.introspect(context)) {
      *         break;
      *     }
      * }
      * }</pre>
      */
-    default @Nonnull ObjectMeta parse(@Nonnull Type type) throws DataMetaException {
+    default @Nonnull ObjectMeta introspect(@Nonnull Type type) throws DataMetaException {
         try {
             ObjectMetaBuilder builder = new ObjectMetaBuilder(type);
             for (Handler handler : handlers()) {
-                if (!handler.parse(builder)) {
+                if (!handler.introspect(builder)) {
                     break;
                 }
             }
@@ -139,21 +118,6 @@ public interface ObjectMetaManager {
     List<@Nonnull Handler> handlers();
 
     /**
-     * Returns a new {@link ObjectMetaManager} of which first handler is the given handler and the next handler is this
-     * {@link ObjectMetaManager} as a {@link Handler}. This method is equivalent:
-     * <pre>{@code
-     * newParser(firstHandler, this.asHandler())
-     * }</pre>
-     *
-     * @param firstHandler the first handler
-     * @return a new {@link ObjectMetaManager} of which first handler is the given handler and the next handler is this
-     * {@link ObjectMetaManager} as a {@link Handler}
-     */
-    default @Nonnull ObjectMetaManager withFirstHandler(@Nonnull Handler firstHandler) {
-        return newManager(firstHandler, this.asHandler());
-    }
-
-    /**
      * Returns this {@link ObjectMetaManager} as a {@link Handler}.
      *
      * @return this {@link ObjectMetaManager} as a {@link Handler}
@@ -162,7 +126,7 @@ public interface ObjectMetaManager {
     Handler asHandler();
 
     /**
-     * Handler for {@link ObjectMetaManager}, provides the specific parsing logic.
+     * Handler for {@link ObjectMetaManager}, provides the actual introspecting logic.
      *
      * @author sunqian
      */
@@ -170,40 +134,45 @@ public interface ObjectMetaManager {
     interface Handler {
 
         /**
-         * Parses {@link Type} to {@link ObjectMeta} with its owner parsing logic. The {@link Type} is specified by
-         * {@link Context#parsedType()} of the given context, and the parsed properties should be stored in
-         * {@link Context#propertyBaseMap()}. Returns {@code false} to prevent subsequent handlers to continue to parse,
-         * otherwise returns {@code true} to continue to parse.
+         * Introspects the given type and returns the introspected {@link ObjectMeta} using its specified introspecting
+         * logic.
+         * <p>
+         * The given {@link Context} instance provides the introspected type via {@link Context#objectType()}. The
+         * introspected properties should be stored in {@link Context#propertyBaseMap()}. Subsequent handlers can read
+         * the property base info placed by the previous handler and then replace or reprocess it.
+         * <p>
+         * Returns {@code false} to prevent subsequent handlers from introspecting further, or {@code true} to continue
+         * introspecting.
          *
          * @param context the given context
-         * @return whether to continue to parse
-         * @throws Exception for errors during parsing
+         * @return whether to continue introspecting
+         * @throws Exception for any error during introspection
          */
-        boolean parse(@Nonnull Context context) throws Exception;
+        boolean introspect(@Nonnull Context context) throws Exception;
     }
 
     /**
-     * Context for parsing the specified {@link Type} to {@link ObjectMeta}.
+     * Context for introspecting the specified type.
      *
      * @author sunqian
      */
     interface Context {
 
         /**
-         * Returns the type to be parsed.
+         * Returns the type of the object to be introspected.
          *
-         * @return the type to be parsed
+         * @return the type of the object to be introspected
          */
         @Nonnull
-        Type parsedType();
+        Type objectType();
 
         /**
-         * Returns a mutable map for storing property base infos.
+         * Returns a mutable map for storing and reading property base info.
          * <p>
-         * The map through whole parsing process, stores and shares the property base infos for all handlers, and each
-         * handler can add or remove or modify the property base info.
+         * Throughout the whole introspection process, the map stores and shares property base info for all handlers.
+         * Each handler can add, remove, or reprocess that info.
          *
-         * @return a mutable map for storing property base infos
+         * @return a mutable map for storing and reading property base info
          */
         @Nonnull
         Map<@Nonnull String, @Nonnull PropertyMetaBase> propertyBaseMap();

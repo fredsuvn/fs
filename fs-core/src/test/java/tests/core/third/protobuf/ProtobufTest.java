@@ -23,7 +23,7 @@ import space.sunqian.fs.reflect.TypeRef;
 import space.sunqian.fs.third.protobuf.ProtobufBuilderHandler;
 import space.sunqian.fs.third.protobuf.ProtobufConvertHandler;
 import space.sunqian.fs.third.protobuf.ProtobufKit;
-import space.sunqian.fs.third.protobuf.ProtobufSchemaHandler;
+import space.sunqian.fs.third.protobuf.ProtobufMetaHandler;
 import tests.core.protobuf.Data;
 import tests.core.protobuf.PbSimple;
 import tests.core.protobuf.xEnum;
@@ -48,7 +48,7 @@ public class ProtobufTest implements TestPrint {
 
     @BeforeEach
     public void setUp() {
-        protoParser = ObjectMetaManager.newManager(ProtobufSchemaHandler.getInstance());
+        protoParser = ObjectMetaManager.newManager(SimpleCache.ofSoft(), ProtobufMetaHandler.getInstance());
         builder = Data.newBuilder()
             .setStr("str")
             .setI32(1)
@@ -67,9 +67,9 @@ public class ProtobufTest implements TestPrint {
             .addIList(1)
             .addStrList("strList")
             .setXEnum(xEnum.E1);
-        builderSchema = protoParser.parse(Data.Builder.class);
+        builderSchema = protoParser.introspect(Data.Builder.class);
         message = builder.build();
-        messageSchema = protoParser.parse(Data.class);
+        messageSchema = protoParser.introspect(Data.class);
     }
 
     @Test
@@ -139,9 +139,9 @@ public class ProtobufTest implements TestPrint {
     public void testSchemaHandlerForNonProtobufTypes() throws Exception {
         // error
         class T<T> {}
-        ObjectMeta NonClassSchema = protoParser.parse(T.class.getTypeParameters()[0]);
+        ObjectMeta NonClassSchema = protoParser.introspect(T.class.getTypeParameters()[0]);
         assertEquals(0, NonClassSchema.properties().size());
-        ObjectMeta NonProtoSchema = protoParser.parse(String.class);
+        ObjectMeta NonProtoSchema = protoParser.introspect(String.class);
         assertEquals(0, NonProtoSchema.properties().size());
     }
 
@@ -485,15 +485,17 @@ public class ProtobufTest implements TestPrint {
             ListKit.list(ProtobufBuilderHandler.getInstance(), manager.asHandler()),
             SimpleCache.ofSoft()
         );
-        ObjectMetaManager parser = ObjectMetaManager
-            .defaultManager()
-            .withFirstHandler(new ProtobufSchemaHandler());
+        ObjectMetaManager parser = ObjectMetaManager.newManager(
+            SimpleCache.ofSoft(),
+            new ProtobufMetaHandler(),
+            ObjectMetaManager.defaultManager().asHandler()
+        );
 
         // java to pb
         JvSimple jvSimple = new JvSimple("123", 456);
         PbSimple pbSimple = ObjectConverter.defaultConverter().convert(jvSimple, PbSimple.class,
             ConvertOption.builderManager(protoManager),
-            ConvertOption.objectSchemaParser(parser)
+            ConvertOption.objectMetaManager(parser)
         );
         assertEquals(pbSimple.getP1(), jvSimple.getP1());
         assertEquals(pbSimple.getP2(), jvSimple.getP2());
@@ -506,9 +508,11 @@ public class ProtobufTest implements TestPrint {
             ListKit.list(ProtobufBuilderHandler.getInstance(), manager.asHandler()),
             SimpleCache.ofSoft()
         );
-        ObjectMetaManager parser = ObjectMetaManager
-            .defaultManager()
-            .withFirstHandler(new ProtobufSchemaHandler());
+        ObjectMetaManager parser = ObjectMetaManager.newManager(
+            SimpleCache.ofSoft(),
+            new ProtobufMetaHandler(),
+            ObjectMetaManager.defaultManager().asHandler()
+        );
 
         // pb to java
         PbSimple pbSimple = PbSimple.newBuilder()
@@ -517,7 +521,7 @@ public class ProtobufTest implements TestPrint {
             .build();
         JvSimple jvSimple = ObjectConverter.defaultConverter().convert(pbSimple, JvSimple.class,
             ConvertOption.builderManager(protoManager),
-            ConvertOption.objectSchemaParser(parser)
+            ConvertOption.objectMetaManager(parser)
         );
         assertEquals(pbSimple.getP1(), jvSimple.getP1());
         assertEquals(pbSimple.getP2(), jvSimple.getP2());
@@ -530,15 +534,17 @@ public class ProtobufTest implements TestPrint {
             ListKit.list(ProtobufBuilderHandler.getInstance(), manager.asHandler()),
             SimpleCache.ofSoft()
         );
-        ObjectMetaManager parser = ObjectMetaManager
-            .defaultManager()
-            .withFirstHandler(new ProtobufSchemaHandler());
+        ObjectMetaManager parser = ObjectMetaManager.newManager(
+            SimpleCache.ofSoft(),
+            new ProtobufMetaHandler(),
+            ObjectMetaManager.defaultManager().asHandler()
+        );
 
         // java to pb.Builder
         JvSimple jvSimple = new JvSimple("123", 456);
         PbSimple.Builder pbSimpleBuilder = ObjectConverter.defaultConverter().convert(jvSimple, PbSimple.Builder.class,
             ConvertOption.builderManager(protoManager),
-            ConvertOption.objectSchemaParser(parser)
+            ConvertOption.objectMetaManager(parser)
         );
         assertEquals(pbSimpleBuilder.getP1(), jvSimple.getP1());
         assertEquals(pbSimpleBuilder.getP2(), jvSimple.getP2());
@@ -551,9 +557,11 @@ public class ProtobufTest implements TestPrint {
             ListKit.list(ProtobufBuilderHandler.getInstance(), manager.asHandler()),
             SimpleCache.ofSoft()
         );
-        ObjectMetaManager parser = ObjectMetaManager
-            .defaultManager()
-            .withFirstHandler(new ProtobufSchemaHandler());
+        ObjectMetaManager parser = ObjectMetaManager.newManager(
+            SimpleCache.ofSoft(),
+            new ProtobufMetaHandler(),
+            ObjectMetaManager.defaultManager().asHandler()
+        );
 
         // pb.Builder to java
         PbSimple.Builder pbSimpleBuilder = PbSimple.newBuilder()
@@ -561,7 +569,7 @@ public class ProtobufTest implements TestPrint {
             .setP2(456);
         JvSimple jvSimple = ObjectConverter.defaultConverter().convert(pbSimpleBuilder, JvSimple.class,
             ConvertOption.builderManager(protoManager),
-            ConvertOption.objectSchemaParser(parser)
+            ConvertOption.objectMetaManager(parser)
         );
         assertEquals(pbSimpleBuilder.getP1(), jvSimple.getP1());
         assertEquals(pbSimpleBuilder.getP2(), jvSimple.getP2());
@@ -574,15 +582,17 @@ public class ProtobufTest implements TestPrint {
             ListKit.list(ProtobufBuilderHandler.getInstance(), manager.asHandler()),
             SimpleCache.ofSoft()
         );
-        ObjectMetaManager parser = ObjectMetaManager
-            .defaultManager()
-            .withFirstHandler(new ProtobufSchemaHandler());
+        ObjectMetaManager parser = ObjectMetaManager.newManager(
+            SimpleCache.ofSoft(),
+            new ProtobufMetaHandler(),
+            ObjectMetaManager.defaultManager().asHandler()
+        );
 
         // java to java
         JvSimple jvSimple = new JvSimple("123", 456);
         JvT<String> jvT = ObjectConverter.defaultConverter().convert(jvSimple, new TypeRef<JvT<String>>() {},
             ConvertOption.builderManager(protoManager),
-            ConvertOption.objectSchemaParser(parser)
+            ConvertOption.objectMetaManager(parser)
         );
         assertEquals(jvT.getP1(), jvSimple.getP1());
         assertEquals(jvT.getP2(), jvSimple.getP2());

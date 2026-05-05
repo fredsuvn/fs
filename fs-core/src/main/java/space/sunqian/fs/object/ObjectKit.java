@@ -222,8 +222,7 @@ public class ObjectKit {
      * This method supports nested property access using dot notation (e.g., "parent.child.property"). If any part of
      * the property path is not found or is {@code null}, this method returns {@code null}.
      * <p>
-     * Note this method use {@link ObjectMetaManager#defaultCachedManager()} to parse object schemas, it is equivalent
-     * to:
+     * Note this method use {@link ObjectMetaManager#defaultManager()} to parse object schemas, it is equivalent to:
      * <pre>{@code
      * ObjectKit.getPropertyValue(object, propertyName, ObjectSchemaParser.defaultCachedParser());
      * }</pre>
@@ -236,7 +235,7 @@ public class ObjectKit {
         @Nullable Object object,
         @Nonnull String propertyName
     ) {
-        return getPropertyValue(object, propertyName, ObjectMetaManager.defaultCachedManager());
+        return getPropertyValue(object, propertyName, ObjectMetaManager.defaultManager());
     }
 
     /**
@@ -282,7 +281,7 @@ public class ObjectKit {
         if (object instanceof Map<?, ?>) {
             return ((Map<?, ?>) object).get(propertyName);
         }
-        ObjectMeta schema = objectParser.parse(object.getClass());
+        ObjectMeta schema = objectParser.introspect(object.getClass());
         PropertyMeta property = schema.getProperty(propertyName);
         if (property == null) {
             return null;

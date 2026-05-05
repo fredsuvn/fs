@@ -9,9 +9,9 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnsupportedEnvException;
 import space.sunqian.fs.base.string.StringKit;
 import space.sunqian.fs.invoke.Invocable;
+import space.sunqian.fs.object.meta.ObjectMetaManager;
 import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.PropertyMetaBase;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
 import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -29,9 +29,12 @@ import java.util.Objects;
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
- * ObjectSchemaParser parser = ...;
- * ObjectSchemaParser protoParser = parser
- *     .withFirstHandler(ProtobufSchemaHandler.getInstance());
+ * ObjectMetaManager manager = ...;
+ * ObjectMetaManager protoManager = ObjectMetaManager.newManager(
+ *     cache,
+ *     ProtobufSchemaHandler.getInstance(),
+ *     manager.asHandler()
+ * );
  * }</pre>
  * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
  * environment, the {@link ObjectMetaManager#defaultManager()} will automatically load this handler.
@@ -51,14 +54,14 @@ import java.util.Objects;
  *
  * @author sunqian
  */
-public class ProtobufSchemaHandler implements ObjectMetaManager.Handler {
+public class ProtobufMetaHandler implements ObjectMetaManager.Handler {
 
-    private static final @Nonnull ProtobufSchemaHandler INST = new ProtobufSchemaHandler();
+    private static final @Nonnull ProtobufMetaHandler INST = new ProtobufMetaHandler();
 
     /**
      * Returns a same one instance of this handler.
      */
-    public static @Nonnull ProtobufSchemaHandler getInstance() {
+    public static @Nonnull ProtobufMetaHandler getInstance() {
         return INST;
     }
 
@@ -72,13 +75,13 @@ public class ProtobufSchemaHandler implements ObjectMetaManager.Handler {
      *
      * @throws UnsupportedEnvException if the protobuf package is not available in the current environment.
      */
-    public ProtobufSchemaHandler() throws UnsupportedEnvException {
+    public ProtobufMetaHandler() throws UnsupportedEnvException {
         Fs.uncheck(() -> Class.forName("com.google.protobuf.Message"), UnsupportedEnvException::new);
     }
 
     @Override
-    public boolean parse(@Nonnull ObjectMetaManager.Context context) throws Exception {
-        Class<?> rawType = TypeKit.getRawClass(context.parsedType());
+    public boolean introspect(@Nonnull ObjectMetaManager.Context context) throws Exception {
+        Class<?> rawType = TypeKit.getRawClass(context.objectType());
         if (rawType == null) {
             return true;
         }

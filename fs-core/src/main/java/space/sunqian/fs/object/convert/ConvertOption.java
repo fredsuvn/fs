@@ -59,9 +59,9 @@ public enum ConvertOption {
     NEW_INSTANCE_MODE,
 
     /**
-     * Key of {@link #objectSchemaParser(ObjectMetaManager)}.
+     * Key of {@link #objectMetaManager(ObjectMetaManager)}.
      */
-    OBJECT_SCHEMA_PARSER,
+    OBJECT_META_MANAGER,
 
     /**
      * Key of {@link #mapMetaManager(MapMetaManager)}.
@@ -197,31 +197,31 @@ public enum ConvertOption {
     /**
      * Returns an option to specify the object schema parser.
      * <p>
-     * By default, {@link ObjectMetaManager#defaultCachedManager()} is used.
+     * By default, {@link ObjectMetaManager#defaultManager()} is used.
      *
-     * @param schemaParser the specified object schema parser
+     * @param metaManager the specified object schema parser
      * @return an option to specify the object schema parser
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectMetaManager> objectSchemaParser(
-        @Nonnull ObjectMetaManager schemaParser
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectMetaManager> objectMetaManager(
+        @Nonnull ObjectMetaManager metaManager
     ) {
-        return Option.of(OBJECT_SCHEMA_PARSER, schemaParser);
+        return Option.of(OBJECT_META_MANAGER, metaManager);
     }
 
     /**
      * Returns the specified {@link ObjectMetaManager} from the given options, or
-     * {@link ObjectMetaManager#defaultCachedManager()} if the given options does not contain a
-     * {@link ConvertOption#OBJECT_SCHEMA_PARSER}.
+     * {@link ObjectMetaManager#defaultManager()} if the given options does not contain a
+     * {@link ConvertOption#OBJECT_META_MANAGER}.
      *
      * @param options the given options
      * @return the specified {@link ObjectMetaManager} from the given options, or
-     * {@link ObjectMetaManager#defaultCachedManager()} if the given options does not contain a
-     * {@link ConvertOption#OBJECT_SCHEMA_PARSER}
+     * {@link ObjectMetaManager#defaultManager()} if the given options does not contain a
+     * {@link ConvertOption#OBJECT_META_MANAGER}
      */
-    public static @Nonnull ObjectMetaManager getObjectSchemaParser(@Nonnull Option<?, ?> @Nonnull ... options) {
+    public static @Nonnull ObjectMetaManager getObjectMetaManager(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Fs.nonnull(
-            OptionKit.findValue(ConvertOption.OBJECT_SCHEMA_PARSER, options),
-            ObjectMetaManager.defaultCachedManager()
+            OptionKit.findValue(ConvertOption.OBJECT_META_MANAGER, options),
+            ObjectMetaManager.defaultManager()
         );
     }
 
@@ -230,13 +230,13 @@ public enum ConvertOption {
      * <p>
      * By default, {@link MapMetaManager#defaultManager()} is used.
      *
-     * @param schemaParser the specified map schema parser
+     * @param metaManager the specified map schema parser
      * @return an option to specify the map schema parser
      */
     public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull MapMetaManager> mapMetaManager(
-        @Nonnull MapMetaManager schemaParser
+        @Nonnull MapMetaManager metaManager
     ) {
-        return Option.of(MAP_META_MANAGER, schemaParser);
+        return Option.of(MAP_META_MANAGER, metaManager);
     }
 
     /**

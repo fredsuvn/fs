@@ -1,14 +1,16 @@
 /**
- * This package provides definitions and utilities for schemas, including map schema and non-map object schema. The top
- * interface for a data schema is {@link space.sunqian.fs.object.meta.DataMeta}, and the two main sub-interfaces are
- * {@link space.sunqian.fs.object.meta.MapMeta} which represents the schema for map, and
- * {@link space.sunqian.fs.object.meta.ObjectMeta} which represents the schema for non-map object. Using codes similar
- * to the following to parse:
+ * This package provides definitions and utilities for data object meta info, including map meta and non-map object
+ * meta.
+ * <p>
+ * The top interface for data meta info is {@link space.sunqian.fs.object.meta.DataMeta}, and the two main
+ * sub-interfaces are {@link space.sunqian.fs.object.meta.MapMeta} which represents the meta info for map, and
+ * {@link space.sunqian.fs.object.meta.ObjectMeta} which represents the meta info for non-map object. Using codes
+ * similar to the following to parse:
  * <pre>{@code
  * // Parse a non-map object:
- * ObjectSchema objectSchema = ObjectSchema.parse(type);
+ * ObjectMeta objectMeta = ObjectMeta.of(type);
  * // Get a property value:
- * Object value = objectSchema.getProperty("someProperty").getValue(instant);
+ * Object value = objectMeta.getProperty("someProperty").getValue(inst);
  *
  * // Parse a map:
  * MapMeta mapMeta = MapMeta.of(type);
@@ -24,7 +26,7 @@
  *     <li>{@link space.sunqian.fs.object.meta.MapMeta}</li>
  *     <li>{@link space.sunqian.fs.object.meta.MapMetaManager}</li>
  *     <li>{@link space.sunqian.fs.object.meta.handlers.AbstractObjectMetaHandler}</li>
- *     <li>{@link space.sunqian.fs.object.meta.handlers.CommonMetaHandler}</li>
+ *     <li>{@link space.sunqian.fs.object.meta.handlers.CommonObjectMetaHandler}</li>
  *     <li>{@link space.sunqian.fs.object.meta.handlers.RecordMetaHandler}(only loaded on JDK 16+)</li>
  * </ul>
  * And utilities:

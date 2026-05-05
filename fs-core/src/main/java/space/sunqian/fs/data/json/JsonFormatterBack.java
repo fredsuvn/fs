@@ -11,9 +11,9 @@ import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumberPattern;
 import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ObjectConverter;
-import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.PropertyMeta;
 
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -35,7 +35,7 @@ final class JsonFormatterBack {
 
     static @Nonnull JsonFormatterImpl newFormatter(boolean ignoreNullValue) {
         return newFormatter(
-            ObjectMetaManager.defaultCachedManager(),
+            ObjectMetaManager.defaultManager(),
             ObjectConverter.defaultConverter(),
             ignoreNullValue
         );
@@ -234,7 +234,7 @@ final class JsonFormatterBack {
         }
 
         private void writeObject(@Nonnull Object object, @Nonnull Appendable appender) throws Exception {
-            ObjectMeta schema = objectParser.parse(object.getClass());
+            ObjectMeta schema = objectParser.introspect(object.getClass());
             appender.append('{');
             boolean[] isFirst = {true};
             schema.properties().forEach((key, property) -> {
@@ -296,7 +296,7 @@ final class JsonFormatterBack {
         }
 
         private void writeProperty(
-                @Nonnull PropertyMeta property, @Nullable Object value, @Nonnull Appendable appender
+            @Nonnull PropertyMeta property, @Nullable Object value, @Nonnull Appendable appender
         ) throws Exception {
             writeString(property.name(), appender);
             appender.append(':');

@@ -26,7 +26,7 @@ final class ObjectMetaBuilder implements ObjectMetaManager.Context {
     }
 
     @Override
-    public @Nonnull Type parsedType() {
+    public @Nonnull Type objectType() {
         return type;
     }
 

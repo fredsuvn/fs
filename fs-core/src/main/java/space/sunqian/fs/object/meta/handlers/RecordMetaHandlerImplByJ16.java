@@ -17,8 +17,8 @@ enum RecordMetaHandlerImplByJ16 implements ObjectMetaManager.Handler {
     INST;
 
     @Override
-    public boolean parse(ObjectMetaManager.@Nonnull Context context) throws Exception {
-        var type = context.parsedType();
+    public boolean introspect(ObjectMetaManager.@Nonnull Context context) throws Exception {
+        var type = context.objectType();
         var rawClass = TypeKit.getRawClass(type);
         if (rawClass == null) {
             return true;

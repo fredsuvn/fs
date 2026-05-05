@@ -34,7 +34,7 @@ public class CommonMapMetaHandler implements MapMetaManager.Handler {
     }
 
     @Override
-    public @Nullable MapMeta newMapMeta(@Nonnull Type type, @Nonnull MapMetaManager manager) throws Exception {
+    public @Nullable MapMeta introspect(@Nonnull Type type, @Nonnull MapMetaManager manager) throws Exception {
         return new MapMetaImpl(type, manager);
     }
 

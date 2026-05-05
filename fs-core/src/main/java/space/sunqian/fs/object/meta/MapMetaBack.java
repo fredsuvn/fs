@@ -27,16 +27,16 @@ final class MapMetaBack {
 
     private static final class MapMetaManagerImpl implements MapMetaManager, MapMetaManager.Handler {
 
-        private static final @Nonnull SimpleCache<@Nonnull Type, @Nonnull MapMeta> DEFAULT_CACHE =
+        private static final @Nonnull SimpleCache<@Nonnull Type, @Nonnull MapMeta> GLOBAL_CACHE =
             SimpleCache.ofSoft();
 
         static {
-            Fs.registerGlobalCache(DEFAULT_CACHE);
+            Fs.registerGlobalCache(GLOBAL_CACHE);
         }
 
         private static final @Nonnull MapMetaManager DEFAULT = new MapMetaManagerImpl(
             ListKit.list(CommonMapMetaHandler.getInstance()),
-            DEFAULT_CACHE
+            GLOBAL_CACHE
         );
 
         private final @Nonnull List<@Nonnull Handler> handlers;
@@ -44,7 +44,8 @@ final class MapMetaBack {
 
         private MapMetaManagerImpl(
             @Nonnull @RetainedParam List<@Nonnull Handler> handlers,
-            @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cache) {
+            @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cache
+        ) {
             this.handlers = handlers;
             this.cache = cache;
         }
@@ -57,7 +58,7 @@ final class MapMetaBack {
         private @Nonnull MapMeta introspect0(@Nonnull Type type) throws DataMetaException {
             MapMeta mapMeta;
             try {
-                mapMeta = newMapMeta(type, this);
+                mapMeta = introspect(type, this);
             } catch (Exception e) {
                 throw new DataMetaException(e);
             }
@@ -78,9 +79,9 @@ final class MapMetaBack {
         }
 
         @Override
-        public @Nullable MapMeta newMapMeta(@Nonnull Type type, @Nonnull MapMetaManager manager) throws Exception {
+        public @Nullable MapMeta introspect(@Nonnull Type type, @Nonnull MapMetaManager manager) throws Exception {
             for (Handler handler : handlers) {
-                MapMeta mapMeta = handler.newMapMeta(type, manager);
+                MapMeta mapMeta = handler.introspect(type, manager);
                 if (mapMeta != null) {
                     return mapMeta;
                 }

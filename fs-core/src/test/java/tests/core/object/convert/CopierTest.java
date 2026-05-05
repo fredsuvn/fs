@@ -326,7 +326,7 @@ public class CopierTest implements TestPrint {
                                  ObjectCopier.Handler valueChangeHandler, ObjectCopier.Handler errorHandler) {
         Map<String, String> mapA = MapKit.map("first", "1", "second", "2", "third", "3");
         ClsB clsB = new ClsB();
-        objectCopier.copyProperties(mapA, typeA, clsB, ClsB.class, ConvertOption.objectSchemaParser(ObjectMetaManager.defaultManager()));
+        objectCopier.copyProperties(mapA, typeA, clsB, ClsB.class, ConvertOption.objectMetaManager(ObjectMetaManager.defaultManager()));
         assertEquals(new ClsB(1, 2, 3), clsB);
 
         ClsA2 clsA2 = new ClsA2();

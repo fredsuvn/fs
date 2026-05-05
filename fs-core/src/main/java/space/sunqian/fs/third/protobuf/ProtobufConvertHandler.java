@@ -73,7 +73,7 @@ public class ProtobufConvertHandler implements ObjectConverter.Handler {
             }
         } else if (targetType.equals(ProtocolStringList.class)) {
             Object ret = converter.asHandler().convert(
-                src, srcType, ProtobufSchemaHandler.StringListTypeRef.SINGLETON.type(), converter, options
+                src, srcType, ProtobufMetaHandler.StringListTypeRef.SINGLETON.type(), converter, options
             );
             if (ret instanceof List) {
                 List<String> list = Fs.as(ret);

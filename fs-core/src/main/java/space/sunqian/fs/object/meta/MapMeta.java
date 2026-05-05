@@ -7,7 +7,8 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
- * This interface represents the meta info of a map, provides meta info about the map's entries.
+ * This interface represents the meta info of a map, provides meta info about the map's entries, and introspected by a
+ * {@link MapMetaManager}.
  * <p>
  * Two {@link MapMeta}s are considered equal if, and only if both map types and managers from {@link #manager()} are
  * equal.
@@ -18,7 +19,8 @@ import java.util.Map;
 public interface MapMeta extends DataMeta {
 
     /**
-     * Introspects the given {@link Map} type to {@link MapMeta} using {@link MapMetaManager#defaultManager()}.
+     * Introspects the given {@link Map} type and returns a {@link MapMeta} using
+     * {@link MapMetaManager#defaultManager()}.
      *
      * @param type the given type to be introspected
      * @return the {@link MapMeta} introspected from the given type using {@link MapMetaManager#defaultManager()}
@@ -77,7 +79,7 @@ public interface MapMeta extends DataMeta {
      * <pre>{@code
      * int result = 1;
      * result = 31 * result + type().hashCode();
-     * result = 31 * result + parser().hashCode();
+     * result = 31 * result + manager().hashCode();
      * return result;
      * }</pre>
      *

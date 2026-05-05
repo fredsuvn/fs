@@ -704,12 +704,12 @@ public class ConvertTest implements TestPrint, DataGen {
     }
 
     private void testObjectParserOptions() {
-        assertSame(ObjectMetaManager.defaultCachedManager(),
-            ConvertOption.getObjectSchemaParser(ConvertOption.ignoreNull(true)));
-        assertNotEquals(ObjectMetaManager.defaultCachedManager(),
-            ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectMetaManager.defaultManager())));
         assertSame(ObjectMetaManager.defaultManager(),
-            ConvertOption.getObjectSchemaParser(ConvertOption.objectSchemaParser(ObjectMetaManager.defaultManager())));
+            ConvertOption.getObjectMetaManager(ConvertOption.ignoreNull(true)));
+        assertNotEquals(ObjectMetaManager.defaultManager(),
+            ConvertOption.getObjectMetaManager(ConvertOption.objectMetaManager(ObjectMetaManager.defaultManager())));
+        assertSame(ObjectMetaManager.defaultManager(),
+            ConvertOption.getObjectMetaManager(ConvertOption.objectMetaManager(ObjectMetaManager.defaultManager())));
     }
 
     private void testBuilderManagerOptions() {

@@ -9,16 +9,16 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
- * This interface represents the schema of non-map object, parsed by a {@link ObjectMetaManager}, and provides
- * information about the object's properties.
+ * This interface represents the meta info of non-map object, provides meta info about the object's properties, and
+ * introspected by a {@link ObjectMetaManager}.
  * <p>
  * It is very similar to the {@link BeanInfo} used to describe
  * <a href="https://www.oracle.com/java/technologies/javase/javabeans-spec.html">JavaBeans</a>, but it only includes
  * simple properties, without indexed properties, events, methods, or other more complex components. And the rules for
- * parsing properties are defined by the implementation of {@link ObjectMetaManager}, rather than a public rules.
+ * introspecting properties are defined by the implementation of {@link ObjectMetaManager}, rather than a public rules.
  * <p>
- * Two {@link ObjectMeta}s are considered equal if, and only if both types of objects and both parsers from
- * {@link #manager()} are equal.
+ * Two {@link ObjectMeta}s are considered equal if, and only if both object types and managers from {@link #manager()}
+ * are equal.
  *
  * @author sunqian
  */
@@ -35,31 +35,31 @@ public interface ObjectMeta extends DataMeta {
      * @throws DataMetaException if any problem occurs
      */
     static @Nonnull ObjectMeta of(@Nonnull Type type) throws DataMetaException {
-        return ObjectMetaManager.defaultManager().parse(type);
+        return ObjectMetaManager.defaultManager().introspect(type);
     }
 
     /**
-     * Returns the {@link ObjectMetaManager} of this {@link ObjectMeta}.
+     * Returns the {@link ObjectMetaManager} where this {@link ObjectMeta} is introspected.
      *
-     * @return the {@link ObjectMetaManager} of this {@link ObjectMeta}
+     * @return the {@link ObjectMetaManager} where this {@link ObjectMeta} is introspected
      */
     @Nonnull
     ObjectMetaManager manager();
 
     /**
-     * Returns a map contains all properties of this {@link ObjectMeta}.
+     * Returns an immutable map contains all properties meta infos of this {@link ObjectMeta}.
      *
-     * @return a map contains all properties of this {@link ObjectMeta}
+     * @return an immutable map contains all properties meta infos of this {@link ObjectMeta}
      */
     @Immutable
     @Nonnull
     Map<@Nonnull String, @Nonnull PropertyMeta> properties();
 
     /**
-     * Returns the specified property with the specified name in this {@link ObjectMeta}.
+     * Returns the specified property meta info with the specified name in this {@link ObjectMeta}.
      *
      * @param name the specified name
-     * @return the specified property with the specified name in this {@link ObjectMeta}
+     * @return the specified property meta info with the specified name in this {@link ObjectMeta}, or {@code null} if not found
      */
     default @Nullable PropertyMeta getProperty(String name) {
         return properties().get(name);
@@ -76,8 +76,8 @@ public interface ObjectMeta extends DataMeta {
     }
 
     /**
-     * Returns whether this {@link ObjectMeta} is equal to the other {@link ObjectMeta}. They are considered equal
-     * if, and only if both types of objects and both parsers from {@link #manager()} are equal.
+     * Returns whether this {@link ObjectMeta} is equal to the other {@link ObjectMeta}. They are considered equal if,
+     * and only if both object types and managers from {@link #manager()} are equal.
      *
      * @param other the other {@link ObjectMeta}
      * @return whether this {@link ObjectMeta} is equal to the other {@link ObjectMeta}
@@ -90,7 +90,7 @@ public interface ObjectMeta extends DataMeta {
      * <pre>{@code
      * int result = 1;
      * result = 31 * result + type().hashCode();
-     * result = 31 * result + parser().hashCode();
+     * result = 31 * result + manager().hashCode();
      * return result;
      * }</pre>
      *

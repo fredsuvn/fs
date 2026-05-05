@@ -21,14 +21,14 @@ import java.util.Objects;
  *
  * @author sunqian
  */
-public class CommonMetaHandler extends AbstractObjectMetaHandler {
+public class CommonObjectMetaHandler extends AbstractObjectMetaHandler {
 
-    private static final @Nonnull CommonMetaHandler INST = new CommonMetaHandler();
+    private static final @Nonnull CommonObjectMetaHandler INST = new CommonObjectMetaHandler();
 
     /**
      * Returns a same one instance of this handler.
      */
-    public static @Nonnull CommonMetaHandler getInstance() {
+    public static @Nonnull CommonObjectMetaHandler getInstance() {
         return INST;
     }
 

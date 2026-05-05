@@ -87,7 +87,7 @@ public class JsonTest implements TestPrint {
         );
         testFormattingAndParsing(
             JsonFormatter.newFormatter(
-                ObjectMetaManager.defaultCachedManager(),
+                ObjectMetaManager.defaultManager(),
                 ObjectConverter.defaultConverter(),
                 false
             ),

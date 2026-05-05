@@ -59,19 +59,19 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
                     MapMeta dstParser = parseMapSchema((Map<?, ?>) dst, srcParser, dstType, actualOptions);
                     mapToMap(Fs.as(src), srcSchema, Fs.as(dst), dstParser, converter, actualOptions);
                 } else {
-                    ObjectMetaManager objectParser = ConvertOption.getObjectSchemaParser(actualOptions);
+                    ObjectMetaManager objectParser = ConvertOption.getObjectMetaManager(actualOptions);
                     ObjectMeta dstSchema = parseObjectSchema(dst, objectParser, dstType, actualOptions);
                     mapToObject(Fs.as(src), srcSchema, dst, dstSchema, converter, actualOptions);
                 }
             } else {
-                ObjectMetaManager srcParser = ConvertOption.getObjectSchemaParser(actualOptions);
+                ObjectMetaManager srcParser = ConvertOption.getObjectMetaManager(actualOptions);
                 ObjectMeta srcSchema = parseObjectSchema(src, srcParser, srcType, actualOptions);
                 if (dst instanceof Map) {
                     MapMetaManager dstParser = ConvertOption.getMapMetaManager(actualOptions);
                     MapMeta dstSchema = parseMapSchema((Map<?, ?>) dst, dstParser, dstType, actualOptions);
                     objectToMap(src, srcSchema, Fs.as(dst), dstSchema, converter, actualOptions);
                 } else {
-                    ObjectMeta dstSchema = srcParser.parse(dstType);
+                    ObjectMeta dstSchema = srcParser.introspect(dstType);
                     objectToObject(src, srcSchema, dst, dstSchema, converter, actualOptions);
                 }
             }
@@ -89,7 +89,7 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         try {
-            return parser.parse(type);
+            return parser.introspect(type);
         } catch (DataMetaException e) {
             if (ConvertOption.isStrictSourceTypeMode(options)) {
                 throw e;
@@ -98,7 +98,7 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
             if (Objects.equals(objType, type)) {
                 throw e;
             }
-            return parser.parse(objType);
+            return parser.introspect(objType);
         }
     }
 
