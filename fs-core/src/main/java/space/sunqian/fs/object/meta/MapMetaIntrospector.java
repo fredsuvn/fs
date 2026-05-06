@@ -18,55 +18,55 @@ import java.util.Map;
  * This interface is used to introspect {@link Type} of {@link Map} to {@link MapMeta}.
  * <p>
  * It uses a list of {@link Handler}s to execute the introspection operations, where each {@link Handler} possesses its
- * own specific introspection logic. And the default {@link MapMetaManager} is based on
+ * own specific introspection logic. And the default {@link MapMetaIntrospector} is based on
  * {@link CommonMapMetaHandler#getInstance()}.
  *
  * @author sunqian
  */
 @ThreadSafe
-public interface MapMetaManager {
+public interface MapMetaIntrospector {
 
     /**
-     * Returns the default {@link MapMetaManager}. Here are handlers in the default {@link MapMetaManager}:
+     * Returns the default {@link MapMetaIntrospector}. Here are handlers in the default {@link MapMetaIntrospector}:
      * <ul>
      *     <li>{@link CommonMapMetaHandler#getInstance()}</li>
      * </ul>
      * <p>
-     * Note the default {@link MapMetaManager} is singleton, and will cache the returned {@link MapMeta} instances by a
+     * Note the default {@link MapMetaIntrospector} is singleton, and will cache the returned {@link MapMeta} instances by a
      * {@link SimpleCache} registered in {@link Fs#registerGlobalCache(SimpleCache)}.
      *
-     * @return the default {@link MapMetaManager}
+     * @return the default {@link MapMetaIntrospector}
      */
-    static @Nonnull MapMetaManager defaultManager() {
-        return MapMetaBack.defaultManager();
+    static @Nonnull MapMetaIntrospector defaultIntrospector() {
+        return MapMetaBack.defaultIntrospector();
     }
 
     /**
-     * Creates and returns a new {@link MapMetaManager} with given cache function and handlers.
+     * Creates and returns a new {@link MapMetaIntrospector} with given cache function and handlers.
      *
      * @param cacheFunction the cache function to cache the generated {@link MapMeta} instances
      * @param handlers      the given handlers
-     * @return a new {@link MapMetaManager} with the given cache function and handlers
+     * @return a new {@link MapMetaIntrospector} with the given cache function and handlers
      */
-    static @Nonnull MapMetaManager newManager(
+    static @Nonnull MapMetaIntrospector newIntrospector(
         @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cacheFunction,
         @Nonnull Handler @Nonnull @RetainedParam ... handlers
     ) {
-        return newManager(cacheFunction, ListKit.list(handlers));
+        return newIntrospector(cacheFunction, ListKit.list(handlers));
     }
 
     /**
-     * Creates and returns a new {@link MapMetaManager} with given cache function and handlers.
+     * Creates and returns a new {@link MapMetaIntrospector} with given cache function and handlers.
      *
      * @param cacheFunction the cache function to cache the generated {@link MapMeta} instances
      * @param handlers      the given handlers
-     * @return a new {@link MapMetaManager} with the given cache function and handlers
+     * @return a new {@link MapMetaIntrospector} with the given cache function and handlers
      */
-    static @Nonnull MapMetaManager newManager(
+    static @Nonnull MapMetaIntrospector newIntrospector(
         @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cacheFunction,
         @Nonnull @RetainedParam List<@Nonnull Handler> handlers
     ) {
-        return MapMetaBack.newManager(cacheFunction, handlers);
+        return MapMetaBack.newIntrospector(cacheFunction, handlers);
     }
 
     /**
@@ -80,23 +80,23 @@ public interface MapMetaManager {
     MapMeta introspect(@Nonnull Type type) throws DataMetaException;
 
     /**
-     * Returns all handlers of this {@link MapMetaManager}.
+     * Returns all handlers of this {@link MapMetaIntrospector}.
      *
-     * @return all handlers of this {@link MapMetaManager}
+     * @return all handlers of this {@link MapMetaIntrospector}
      */
     @Nonnull
     List<@Nonnull Handler> handlers();
 
     /**
-     * Returns this {@link MapMetaManager} as a {@link Handler}.
+     * Returns this {@link MapMetaIntrospector} as a {@link Handler}.
      *
-     * @return this {@link MapMetaManager} as a {@link Handler}
+     * @return this {@link MapMetaIntrospector} as a {@link Handler}
      */
     @Nonnull
     Handler asHandler();
 
     /**
-     * Handler for {@link MapMetaManager}, provides the actual introspecting logic.
+     * Handler for {@link MapMetaIntrospector}, provides the actual introspecting logic.
      *
      * @author sunqian
      */
@@ -108,11 +108,11 @@ public interface MapMetaManager {
          * unsupported.
          *
          * @param type    the given type
-         * @param manager the {@link MapMetaManager} where this handler is used
+         * @param introspector the {@link MapMetaIntrospector} where this handler is used
          * @return a new {@link MapMeta}, or {@code null} if the given type is unsupported
          * @throws Exception if an error occurs
          */
         @Nullable
-        MapMeta introspect(@Nonnull Type type, @Nonnull MapMetaManager manager) throws Exception;
+        MapMeta introspect(@Nonnull Type type, @Nonnull MapMetaIntrospector introspector) throws Exception;
     }
 }

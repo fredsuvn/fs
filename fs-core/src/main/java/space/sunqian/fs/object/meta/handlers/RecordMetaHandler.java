@@ -2,10 +2,10 @@ package space.sunqian.fs.object.meta.handlers;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.FsLoader;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 
 /**
- * This implementation of {@link ObjectMetaManager.Handler} is used to introspect {@code record} classes, and it is
+ * This implementation of {@link ObjectMetaIntrospector.Handler} is used to introspect {@code record} classes, and it is
  * automatically loaded if the current JVM version supports {@code record} classes (typically JVM version 16 or
  * higher).
  * <p>
@@ -13,11 +13,11 @@ import space.sunqian.fs.object.meta.ObjectMetaManager;
  *
  * @author sunqian
  */
-public class RecordMetaHandler implements ObjectMetaManager.Handler {
+public class RecordMetaHandler implements ObjectMetaIntrospector.Handler {
 
     private static final @Nonnull RecordMetaHandler INST = new RecordMetaHandler();
 
-    private static final ObjectMetaManager.@Nonnull Handler HANDLER = FsLoader.loadImplByJvm(
+    private static final ObjectMetaIntrospector.@Nonnull Handler HANDLER = FsLoader.loadImplByJvm(
         RecordMetaHandler.class, 16
     );
 
@@ -31,7 +31,7 @@ public class RecordMetaHandler implements ObjectMetaManager.Handler {
     }
 
     @Override
-    public boolean introspect(ObjectMetaManager.@Nonnull Context context) throws Exception {
+    public boolean introspect(ObjectMetaIntrospector.@Nonnull Context context) throws Exception {
         return HANDLER.introspect(context);
     }
 }

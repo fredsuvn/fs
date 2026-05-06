@@ -10,15 +10,16 @@ import java.util.Map;
 
 /**
  * This interface represents the meta info of non-map object, provides meta info about the object's properties, and
- * introspected by a {@link ObjectMetaManager}.
+ * introspected by a {@link ObjectMetaIntrospector}.
  * <p>
  * It is very similar to the {@link BeanInfo} used to describe
  * <a href="https://www.oracle.com/java/technologies/javase/javabeans-spec.html">JavaBeans</a>, but it only includes
  * simple properties, without indexed properties, events, methods, or other more complex components. And the rules for
- * introspecting properties are defined by the implementation of {@link ObjectMetaManager}, rather than a public rules.
+ * introspecting properties are defined by the implementation of {@link ObjectMetaIntrospector}, rather than a public
+ * rules.
  * <p>
- * Two {@link ObjectMeta}s are considered equal if, and only if both object types and managers from {@link #manager()}
- * are equal.
+ * Two {@link ObjectMeta}s are considered equal if, and only if both object types and result from
+ * {@link #introspector()} are equal.
  *
  * @author sunqian
  */
@@ -26,25 +27,27 @@ import java.util.Map;
 public interface ObjectMeta extends DataMeta {
 
     /**
-     * Introspects the given type and returns the {@link ObjectMeta} using {@link ObjectMetaManager#defaultManager()}.
+     * Introspects the given type and returns the {@link ObjectMeta} using
+     * {@link ObjectMetaIntrospector#defaultIntrospector()}.
      * <p>
      * Note this method never caches the introspected results.
      *
      * @param type the given type
-     * @return the {@link ObjectMeta} introspected from the given type using {@link ObjectMetaManager#defaultManager()}
+     * @return the {@link ObjectMeta} introspected from the given type using
+     * {@link ObjectMetaIntrospector#defaultIntrospector()}
      * @throws DataMetaException if any problem occurs
      */
     static @Nonnull ObjectMeta of(@Nonnull Type type) throws DataMetaException {
-        return ObjectMetaManager.defaultManager().introspect(type);
+        return ObjectMetaIntrospector.defaultIntrospector().introspect(type);
     }
 
     /**
-     * Returns the {@link ObjectMetaManager} where this {@link ObjectMeta} is introspected.
+     * Returns the {@link ObjectMetaIntrospector} where this {@link ObjectMeta} is introspected.
      *
-     * @return the {@link ObjectMetaManager} where this {@link ObjectMeta} is introspected
+     * @return the {@link ObjectMetaIntrospector} where this {@link ObjectMeta} is introspected
      */
     @Nonnull
-    ObjectMetaManager manager();
+    ObjectMetaIntrospector introspector();
 
     /**
      * Returns an immutable map contains all properties meta infos of this {@link ObjectMeta}.
@@ -78,7 +81,7 @@ public interface ObjectMeta extends DataMeta {
 
     /**
      * Returns whether this {@link ObjectMeta} is equal to the other {@link ObjectMeta}. They are considered equal if,
-     * and only if both object types and managers from {@link #manager()} are equal.
+     * and only if both object types and result from {@link #introspector()} are equal.
      *
      * @param other the other {@link ObjectMeta}
      * @return whether this {@link ObjectMeta} is equal to the other {@link ObjectMeta}
@@ -87,11 +90,11 @@ public interface ObjectMeta extends DataMeta {
 
     /**
      * Returns the hash code of this {@link ObjectMeta}. The hash code is generated via {@link #type()} and
-     * {@link #manager()} like following codes:
+     * {@link #introspector()} like following codes:
      * <pre>{@code
      * int result = 1;
      * result = 31 * result + type().hashCode();
-     * result = 31 * result + manager().hashCode();
+     * result = 31 * result + introspector().hashCode();
      * return result;
      * }</pre>
      *

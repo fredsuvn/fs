@@ -4,7 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.base.exception.UnknownArrayTypeException;
 import space.sunqian.fs.object.meta.ObjectMeta;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.object.meta.PropertyMeta;
 
 import java.util.Arrays;
@@ -222,7 +222,7 @@ public class ObjectKit {
      * This method supports nested property access using dot notation (e.g., "parent.child.property"). If any part of
      * the property path is not found or is {@code null}, this method returns {@code null}.
      * <p>
-     * Note this method use {@link ObjectMetaManager#defaultManager()} to introspect object metas, it is equivalent to:
+     * Note this method use {@link ObjectMetaIntrospector#defaultIntrospector()} to introspect object metas, it is equivalent to:
      * <pre>{@code
      * ObjectKit.getPropertyValue(object, propertyName, ObjectMetaManager.defaultManager());
      * }</pre>
@@ -235,7 +235,7 @@ public class ObjectKit {
         @Nullable Object object,
         @Nonnull String propertyName
     ) {
-        return getPropertyValue(object, propertyName, ObjectMetaManager.defaultManager());
+        return getPropertyValue(object, propertyName, ObjectMetaIntrospector.defaultIntrospector());
     }
 
     /**
@@ -252,7 +252,7 @@ public class ObjectKit {
     public static @Nullable Object getPropertyValue(
         @Nullable Object object,
         @Nonnull String propertyName,
-        @Nonnull ObjectMetaManager metaManager
+        @Nonnull ObjectMetaIntrospector metaManager
     ) {
         if (object == null) {
             return null;
@@ -273,7 +273,7 @@ public class ObjectKit {
     private static @Nullable Object getPropertyValue0(
         @Nullable Object object,
         @Nonnull String propertyName,
-        @Nonnull ObjectMetaManager objectParser
+        @Nonnull ObjectMetaIntrospector objectParser
     ) {
         if (object == null) {
             return null;

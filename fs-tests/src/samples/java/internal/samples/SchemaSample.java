@@ -1,7 +1,7 @@
 package internal.samples;
 
 import space.sunqian.fs.object.meta.ObjectMeta;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 
 /**
  * Sample: Object Schema Usage
@@ -27,7 +27,7 @@ import space.sunqian.fs.object.meta.ObjectMetaManager;
  *     {@link ObjectMeta}: Represents the schema of an object
  *   </li>
  *   <li>
- *     {@link ObjectMetaManager}: Parses object schema from classes
+ *     {@link ObjectMetaIntrospector}: Parses object schema from classes
  *   </li>
  * </ul>
  */
@@ -45,7 +45,7 @@ public class SchemaSample {
 
         try {
             // Parse schema from a class
-            ObjectMeta schema = ObjectMetaManager.defaultManager().introspect(Person.class);
+            ObjectMeta schema = ObjectMetaIntrospector.defaultIntrospector().introspect(Person.class);
             System.out.println("Parsed schema for Person class: " + schema);
 
             // Access schema properties

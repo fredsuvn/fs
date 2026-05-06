@@ -31,8 +31,8 @@ import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
-import space.sunqian.fs.object.meta.MapMetaManager;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.MapMetaIntrospector;
+import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.reflect.TypeKit;
 import space.sunqian.fs.reflect.TypeRef;
 
@@ -695,21 +695,21 @@ public class ConvertTest implements TestPrint, DataGen {
     }
 
     private void testMapParserOptions() {
-        assertSame(MapMetaManager.defaultManager(),
-            ConvertOption.getMapMetaManager(ConvertOption.ignoreNull(true)));
-        assertSame(MapMetaManager.defaultManager(),
-            ConvertOption.getMapMetaManager(ConvertOption.mapMetaManager(MapMetaManager.defaultManager())));
-        assertNotEquals(MapMetaManager.defaultManager(),
-            ConvertOption.getMapMetaManager(ConvertOption.mapMetaManager(MapMetaManager.newManager(SimpleCache.ofSoft(), Collections.emptyList()))));
+        assertSame(MapMetaIntrospector.defaultIntrospector(),
+            ConvertOption.getMapMetaIntrospector(ConvertOption.ignoreNull(true)));
+        assertSame(MapMetaIntrospector.defaultIntrospector(),
+            ConvertOption.getMapMetaIntrospector(ConvertOption.mapMetaIntrospector(MapMetaIntrospector.defaultIntrospector())));
+        assertNotEquals(MapMetaIntrospector.defaultIntrospector(),
+            ConvertOption.getMapMetaIntrospector(ConvertOption.mapMetaIntrospector(MapMetaIntrospector.newIntrospector(SimpleCache.ofSoft(), Collections.emptyList()))));
     }
 
     private void testObjectParserOptions() {
-        assertSame(ObjectMetaManager.defaultManager(),
-            ConvertOption.getObjectMetaManager(ConvertOption.ignoreNull(true)));
-        assertNotEquals(ObjectMetaManager.defaultManager(),
-            ConvertOption.getObjectMetaManager(ConvertOption.objectMetaManager(ObjectMetaManager.defaultManager())));
-        assertSame(ObjectMetaManager.defaultManager(),
-            ConvertOption.getObjectMetaManager(ConvertOption.objectMetaManager(ObjectMetaManager.defaultManager())));
+        assertSame(ObjectMetaIntrospector.defaultIntrospector(),
+            ConvertOption.getObjectMetaIntrospector(ConvertOption.ignoreNull(true)));
+        assertNotEquals(ObjectMetaIntrospector.defaultIntrospector(),
+            ConvertOption.getObjectMetaIntrospector(ConvertOption.objectMetaIntrospector(ObjectMetaIntrospector.defaultIntrospector())));
+        assertSame(ObjectMetaIntrospector.defaultIntrospector(),
+            ConvertOption.getObjectMetaIntrospector(ConvertOption.objectMetaIntrospector(ObjectMetaIntrospector.defaultIntrospector())));
     }
 
     private void testBuilderManagerOptions() {

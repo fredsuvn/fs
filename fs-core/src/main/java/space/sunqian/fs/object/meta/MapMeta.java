@@ -8,9 +8,9 @@ import java.util.Map;
 
 /**
  * This interface represents the meta info of a map, provides meta info about the map's entries, and introspected by a
- * {@link MapMetaManager}.
+ * {@link MapMetaIntrospector}.
  * <p>
- * Two {@link MapMeta}s are considered equal if, and only if both map types and managers from {@link #manager()} are
+ * Two {@link MapMeta}s are considered equal if, and only if both map types and result from {@link #introspector()} are
  * equal.
  *
  * @author sunqian
@@ -20,23 +20,24 @@ public interface MapMeta extends DataMeta {
 
     /**
      * Introspects the given {@link Map} type and returns a {@link MapMeta} using
-     * {@link MapMetaManager#defaultManager()}.
+     * {@link MapMetaIntrospector#defaultIntrospector()}.
      *
      * @param type the given type to be introspected
-     * @return the {@link MapMeta} introspected from the given type using {@link MapMetaManager#defaultManager()}
+     * @return the {@link MapMeta} introspected from the given type using
+     * {@link MapMetaIntrospector#defaultIntrospector()}
      * @throws DataMetaException if the given type is not a {@link Map} type, or any other error occurs
      */
     static @Nonnull MapMeta of(@Nonnull Type type) throws DataMetaException {
-        return MapMetaManager.defaultManager().introspect(type);
+        return MapMetaIntrospector.defaultIntrospector().introspect(type);
     }
 
     /**
-     * Returns the {@link MapMetaManager} where this {@link MapMeta} is introspected.
+     * Returns the {@link MapMetaIntrospector} where this {@link MapMeta} is introspected.
      *
-     * @return the {@link MapMetaManager} where this {@link MapMeta} is introspected
+     * @return the {@link MapMetaIntrospector} where this {@link MapMeta} is introspected
      */
     @Nonnull
-    MapMetaManager manager();
+    MapMetaIntrospector introspector();
 
     /**
      * Returns the key type of this map type.
@@ -66,7 +67,7 @@ public interface MapMeta extends DataMeta {
 
     /**
      * Returns whether this {@link MapMeta} is equal to the other {@link MapMeta}. They are considered equal if, and
-     * only if both map types and managers from {@link #manager()} are equal.
+     * only if both map types and result from {@link #introspector()} are equal.
      *
      * @param other the other {@link MapMeta}
      * @return whether this {@link MapMeta} is equal to the other {@link MapMeta}
@@ -75,11 +76,11 @@ public interface MapMeta extends DataMeta {
 
     /**
      * Returns the hash code of this {@link MapMeta}. The hash code is generated via {@link #type()} and
-     * {@link #manager()} like following codes:
+     * {@link #introspector()} like following codes:
      * <pre>{@code
      * int result = 1;
      * result = 31 * result + type().hashCode();
-     * result = 31 * result + manager().hashCode();
+     * result = 31 * result + introspector().hashCode();
      * return result;
      * }</pre>
      *

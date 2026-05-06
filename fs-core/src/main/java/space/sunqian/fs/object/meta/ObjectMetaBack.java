@@ -25,18 +25,18 @@ import java.util.Map;
 
 final class ObjectMetaBack {
 
-    static @Nonnull ObjectMetaManager defaultManager() {
-        return ObjectMetaManagerImpl.DEFAULT;
+    static @Nonnull ObjectMetaIntrospector defaultIntrospector() {
+        return ObjectMetaIntrospectorImpl.DEFAULT;
     }
 
-    static @Nonnull ObjectMetaManager newManager(
+    static @Nonnull ObjectMetaIntrospector newIntrospector(
         @Nonnull CacheFunction<@Nonnull Type, @Nonnull ObjectMeta> cache,
-        @Nonnull @RetainedParam List<ObjectMetaManager.@Nonnull Handler> handlers
+        @Nonnull @RetainedParam List<ObjectMetaIntrospector.@Nonnull Handler> handlers
     ) {
-        return new ObjectMetaManagerImpl(cache, handlers);
+        return new ObjectMetaIntrospectorImpl(cache, handlers);
     }
 
-    private static final class ObjectMetaManagerImpl implements ObjectMetaManager, ObjectMetaManager.Handler {
+    private static final class ObjectMetaIntrospectorImpl implements ObjectMetaIntrospector, ObjectMetaIntrospector.Handler {
 
         private static final @Nonnull SimpleCache<@Nonnull Type, @Nonnull ObjectMeta> GLOBAL_CACHE =
             SimpleCache.ofSoft();
@@ -45,7 +45,7 @@ final class ObjectMetaBack {
             Fs.registerGlobalCache(GLOBAL_CACHE);
         }
 
-        private static final @Nonnull ObjectMetaBack.ObjectMetaManagerImpl DEFAULT = new ObjectMetaManagerImpl(
+        private static final @Nonnull ObjectMetaBack.ObjectMetaIntrospectorImpl DEFAULT = new ObjectMetaIntrospectorImpl(
             GLOBAL_CACHE,
             FsLoader.loadInstances(
                 FsLoader.loadClassByDependent(
@@ -62,7 +62,7 @@ final class ObjectMetaBack {
         private final @Nonnull CacheFunction<@Nonnull Type, @Nonnull ObjectMeta> cache;
         private final @Nonnull List<@Nonnull Handler> handlers;
 
-        private ObjectMetaManagerImpl(
+        private ObjectMetaIntrospectorImpl(
             @Nonnull CacheFunction<@Nonnull Type, @Nonnull ObjectMeta> cache,
             @Nonnull @RetainedParam List<@Nonnull Handler> handlers
         ) {
@@ -76,7 +76,7 @@ final class ObjectMetaBack {
         }
 
         private @Nonnull ObjectMeta introspect0(@Nonnull Type type) throws DataMetaException {
-            return ObjectMetaManager.super.introspect(type);
+            return ObjectMetaIntrospector.super.introspect(type);
         }
 
         @Override
@@ -103,7 +103,7 @@ final class ObjectMetaBack {
     private ObjectMetaBack() {
     }
 
-    static final class MetaBuilder implements ObjectMetaManager.Context {
+    static final class MetaBuilder implements ObjectMetaIntrospector.Context {
 
         private final @Nonnull Type type;
         private final @Nonnull Map<@Nonnull String, @Nonnull PropertyMetaBase> properties = new LinkedHashMap<>();
@@ -123,22 +123,22 @@ final class ObjectMetaBack {
         }
 
         @Nonnull
-        ObjectMeta build(@Nonnull ObjectMetaManager manager) {
-            return new ObjectMetaImpl(manager, type, properties);
+        ObjectMeta build(@Nonnull ObjectMetaIntrospector introspector) {
+            return new ObjectMetaImpl(introspector, type, properties);
         }
 
         private static final class ObjectMetaImpl implements ObjectMeta {
 
-            private final @Nonnull ObjectMetaManager manager;
+            private final @Nonnull ObjectMetaIntrospector introspector;
             private final @Nonnull Type type;
             private final @Nonnull Map<@Nonnull String, @Nonnull PropertyMeta> properties;
 
             private ObjectMetaImpl(
-                @Nonnull ObjectMetaManager manager,
+                @Nonnull ObjectMetaIntrospector introspector,
                 @Nonnull Type type,
                 @Nonnull Map<@Nonnull String, @Nonnull PropertyMetaBase> propBases
             ) {
-                this.manager = manager;
+                this.introspector = introspector;
                 this.type = type;
                 Map<@Nonnull String, @Nonnull PropertyMeta> props = new LinkedHashMap<>();
                 propBases.forEach((name, propBase) -> props.put(name, new PropertyMetaImpl(propBase)));
@@ -146,8 +146,8 @@ final class ObjectMetaBack {
             }
 
             @Override
-            public @Nonnull ObjectMetaManager manager() {
-                return manager;
+            public @Nonnull ObjectMetaIntrospector introspector() {
+                return introspector;
             }
 
             @Override

@@ -27,7 +27,7 @@ import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.convert.UnsupportedObjectConvertException;
 import space.sunqian.fs.object.meta.ObjectMeta;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Type;
@@ -952,7 +952,7 @@ public class Fs {
      * This method supports nested property access using dot notation (e.g., "parent.child.property"). If any part of
      * the property path is not found or is {@code null}, this method returns {@code null}.
      * <p>
-     * This method is a shortcut to the {@link ObjectKit#getPropertyValue(Object, String, ObjectMetaManager)}.
+     * This method is a shortcut to the {@link ObjectKit#getPropertyValue(Object, String, ObjectMetaIntrospector)}.
      *
      * @param obj          the given object
      * @param propertyName the specified property name
@@ -963,7 +963,7 @@ public class Fs {
     public static @Nullable Object getValue(
         @Nullable Object obj,
         @Nonnull String propertyName,
-        @Nonnull ObjectMetaManager objectParser
+        @Nonnull ObjectMetaIntrospector objectParser
     ) {
         return ObjectKit.getPropertyValue(obj, propertyName, objectParser);
     }

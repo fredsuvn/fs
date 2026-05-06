@@ -12,8 +12,8 @@ import java.util.Map;
 /**
  * Top interface of {@link MapMeta} and {@link ObjectMeta}, presents the meta info of a data object.
  * <p>
- * A data object may be an instance of {@link Map} which can be introspected by {@link MapMetaManager}, or a non-map
- * object which can be introspected by {@link ObjectMetaManager}.
+ * A data object may be an instance of {@link Map} which can be introspected by {@link MapMetaIntrospector}, or a non-map
+ * object which can be introspected by {@link ObjectMetaIntrospector}.
  *
  * @author sunqian
  */

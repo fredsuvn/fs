@@ -3,7 +3,7 @@ package space.sunqian.fs.object.meta.handlers;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.object.meta.MapMeta;
-import space.sunqian.fs.object.meta.MapMetaManager;
+import space.sunqian.fs.object.meta.MapMetaIntrospector;
 import space.sunqian.fs.object.meta.MetaKit;
 import space.sunqian.fs.reflect.ReflectionException;
 import space.sunqian.fs.reflect.TypeKit;
@@ -13,15 +13,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This is a common implementation of {@link MapMetaManager.Handler}. It always creates new instance of {@link MapMeta}
- * on {@link #introspect(Type, MapMetaManager)}, and it is the default handler of
- * {@link MapMetaManager#defaultManager()}.
+ * This is a common implementation of {@link MapMetaIntrospector.Handler}. It always creates new instance of
+ * {@link MapMeta} on {@link #introspect(Type, MapMetaIntrospector)}, and it is the default handler of
+ * {@link MapMetaIntrospector#defaultIntrospector()}.
  * <p>
  * Using {@link #getInstance()} can get a same one instance of this handler.
  *
  * @author sunqian
  */
-public class CommonMapMetaHandler implements MapMetaManager.Handler {
+public class CommonMapMetaHandler implements MapMetaIntrospector.Handler {
 
     private static final @Nonnull CommonMapMetaHandler INST = new CommonMapMetaHandler();
 
@@ -33,8 +33,8 @@ public class CommonMapMetaHandler implements MapMetaManager.Handler {
     }
 
     @Override
-    public @Nullable MapMeta introspect(@Nonnull Type type, @Nonnull MapMetaManager manager) throws Exception {
-        return new MapMetaImpl(type, manager);
+    public @Nullable MapMeta introspect(@Nonnull Type type, @Nonnull MapMetaIntrospector introspector) throws Exception {
+        return new MapMetaImpl(type, introspector);
     }
 
     private static final class MapMetaImpl implements MapMeta {
@@ -42,10 +42,10 @@ public class CommonMapMetaHandler implements MapMetaManager.Handler {
         private final @Nonnull Type type;
         private final @Nonnull Type keyType;
         private final @Nonnull Type valueType;
-        private final @Nonnull MapMetaManager manager;
+        private final @Nonnull MapMetaIntrospector introspector;
 
-        private MapMetaImpl(@Nonnull Type type, @Nonnull MapMetaManager manager) throws ReflectionException {
-            this.manager = manager;
+        private MapMetaImpl(@Nonnull Type type, @Nonnull MapMetaIntrospector introspector) throws ReflectionException {
+            this.introspector = introspector;
             // if (type instanceof MapType) {
             //     @SuppressWarnings("PatternVariableCanBeUsed")
             //     MapType mapType = (MapType) type;
@@ -66,8 +66,8 @@ public class CommonMapMetaHandler implements MapMetaManager.Handler {
         }
 
         @Override
-        public @Nonnull MapMetaManager manager() {
-            return manager;
+        public @Nonnull MapMetaIntrospector introspector() {
+            return introspector;
         }
 
         @Override

@@ -22,9 +22,9 @@
  *     <li>{@link space.sunqian.fs.object.meta.DataMeta}</li>
  *     <li>{@link space.sunqian.fs.object.meta.ObjectMeta}</li>
  *     <li>{@link space.sunqian.fs.object.meta.PropertyMeta}</li>
- *     <li>{@link space.sunqian.fs.object.meta.ObjectMetaManager}</li>
+ *     <li>{@link space.sunqian.fs.object.meta.ObjectMetaIntrospector}</li>
  *     <li>{@link space.sunqian.fs.object.meta.MapMeta}</li>
- *     <li>{@link space.sunqian.fs.object.meta.MapMetaManager}</li>
+ *     <li>{@link space.sunqian.fs.object.meta.MapMetaIntrospector}</li>
  *     <li>{@link space.sunqian.fs.object.meta.handlers.AbstractObjectMetaHandler}</li>
  *     <li>{@link space.sunqian.fs.object.meta.handlers.CommonObjectMetaHandler}</li>
  *     <li>{@link space.sunqian.fs.object.meta.handlers.RecordMetaHandler}(only loaded on JDK 16+)</li>

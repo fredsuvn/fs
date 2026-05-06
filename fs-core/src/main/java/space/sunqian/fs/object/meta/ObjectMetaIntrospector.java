@@ -19,7 +19,7 @@ import java.util.Map;
  * This interface is used to introspect {@link Type} to {@link ObjectMeta}.
  * <p>
  * It uses a list of {@link Handler}s to execute the introspection operations, where each {@link Handler} possesses its
- * own specific introspection logic. And the default {@link ObjectMetaManager} is based on
+ * own specific introspection logic. And the default {@link ObjectMetaIntrospector} is based on
  * {@link CommonObjectMetaHandler#getInstance()}.
  * <p>
  * There is a skeletal {@link Handler} implementation: {@link AbstractObjectMetaHandler}.
@@ -27,10 +27,11 @@ import java.util.Map;
  * @author sunqian
  */
 @ThreadSafe
-public interface ObjectMetaManager {
+public interface ObjectMetaIntrospector {
 
     /**
-     * Returns the default {@link ObjectMetaManager}. Here are handlers in the default {@link ObjectMetaManager}:
+     * Returns the default {@link ObjectMetaIntrospector}. Here are handlers in the default
+     * {@link ObjectMetaIntrospector}:
      * <ul>
      *     <li>
      *         {@link RecordMetaHandler#getInstance()}, if the current JVM version supports {@code record} classes
@@ -39,43 +40,43 @@ public interface ObjectMetaManager {
      *     <li>{@link CommonObjectMetaHandler#getInstance()};</li>
      * </ul>
      * <p>
-     * Note the default {@link ObjectMetaManager} is singleton, and will cache the returned {@link ObjectMeta} instances by a
+     * Note the default {@link ObjectMetaIntrospector} is singleton, and will cache the returned {@link ObjectMeta} instances by a
      * {@link SimpleCache} registered in {@link Fs#registerGlobalCache(SimpleCache)}.
      *
-     * @return the default {@link ObjectMetaManager}
+     * @return the default {@link ObjectMetaIntrospector}
      * @see CommonObjectMetaHandler
      * @see RecordMetaHandler
      */
-    static @Nonnull ObjectMetaManager defaultManager() {
-        return ObjectMetaBack.defaultManager();
+    static @Nonnull ObjectMetaIntrospector defaultIntrospector() {
+        return ObjectMetaBack.defaultIntrospector();
     }
 
     /**
-     * Creates and returns a new {@link ObjectMetaManager} with given cache function and handlers.
+     * Creates and returns a new {@link ObjectMetaIntrospector} with given cache function and handlers.
      *
      * @param cacheFunction the cache function to cache the generated {@link ObjectMeta} instances
      * @param handlers      the given handlers
-     * @return a new {@link ObjectMetaManager} with the given cache function and handlers
+     * @return a new {@link ObjectMetaIntrospector} with the given cache function and handlers
      */
-    static @Nonnull ObjectMetaManager newManager(
+    static @Nonnull ObjectMetaIntrospector newIntrospector(
         @Nonnull CacheFunction<@Nonnull Type, @Nonnull ObjectMeta> cacheFunction,
         @Nonnull Handler @Nonnull @RetainedParam ... handlers
     ) {
-        return newManager(cacheFunction, ListKit.list(handlers));
+        return newIntrospector(cacheFunction, ListKit.list(handlers));
     }
 
     /**
-     * Creates and returns a new {@link ObjectMetaManager} with given cache function and handlers.
+     * Creates and returns a new {@link ObjectMetaIntrospector} with given cache function and handlers.
      *
      * @param cacheFunction the cache function to cache the generated {@link ObjectMeta} instances
      * @param handlers      the given handlers
-     * @return a new {@link ObjectMetaManager} with the given cache function and handlers
+     * @return a new {@link ObjectMetaIntrospector} with the given cache function and handlers
      */
-    static @Nonnull ObjectMetaManager newManager(
+    static @Nonnull ObjectMetaIntrospector newIntrospector(
         @Nonnull CacheFunction<@Nonnull Type, @Nonnull ObjectMeta> cacheFunction,
         @Nonnull @RetainedParam List<@Nonnull Handler> handlers
     ) {
-        return ObjectMetaBack.newManager(cacheFunction, handlers);
+        return ObjectMetaBack.newIntrospector(cacheFunction, handlers);
     }
 
     /**
@@ -85,7 +86,7 @@ public interface ObjectMetaManager {
      * @return the introspected {@link ObjectMeta}
      * @throws DataMetaException if any problem occurs
      * @implNote The default implementation of this method invokes the
-     * {@link Handler#introspect(ObjectMetaManager.Context)} in the order of {@link #handlers()} until one of the
+     * {@link Handler#introspect(ObjectMetaIntrospector.Context)} in the order of {@link #handlers()} until one of the
      * handlers returns {@code false}. The codes are similar to:
      * <pre>{@code
      * for (Handler handler : handlers()) {
@@ -110,23 +111,23 @@ public interface ObjectMetaManager {
     }
 
     /**
-     * Returns all handlers of this {@link ObjectMetaManager}.
+     * Returns all handlers of this {@link ObjectMetaIntrospector}.
      *
-     * @return all handlers of this {@link ObjectMetaManager}
+     * @return all handlers of this {@link ObjectMetaIntrospector}
      */
     @Nonnull
     List<@Nonnull Handler> handlers();
 
     /**
-     * Returns this {@link ObjectMetaManager} as a {@link Handler}.
+     * Returns this {@link ObjectMetaIntrospector} as a {@link Handler}.
      *
-     * @return this {@link ObjectMetaManager} as a {@link Handler}
+     * @return this {@link ObjectMetaIntrospector} as a {@link Handler}
      */
     @Nonnull
     Handler asHandler();
 
     /**
-     * Handler for {@link ObjectMetaManager}, provides the actual introspecting logic.
+     * Handler for {@link ObjectMetaIntrospector}, provides the actual introspecting logic.
      *
      * @author sunqian
      */

@@ -5,7 +5,7 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.collect.MapKit;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.reflect.TypeKit;
 
 import java.lang.reflect.Field;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This is a skeletal implementation of {@link ObjectMetaManager.Handler} to minimize the effort required to implement
+ * This is a skeletal implementation of {@link ObjectMetaIntrospector.Handler} to minimize the effort required to implement
  * the interface.
  * <p>
  * This class uses {@link Class#getMethods()} to find out all accessible methods without synthetic methods, passes each
@@ -28,7 +28,7 @@ import java.util.Set;
  *
  * @author sunqian
  */
-public abstract class AbstractObjectMetaHandler implements ObjectMetaManager.Handler {
+public abstract class AbstractObjectMetaHandler implements ObjectMetaIntrospector.Handler {
 
     private static @Nonnull Type findActualType(
         @Nonnull Type type,
@@ -63,7 +63,7 @@ public abstract class AbstractObjectMetaHandler implements ObjectMetaManager.Han
     }
 
     @Override
-    public boolean introspect(ObjectMetaManager.@Nonnull Context context) throws Exception {
+    public boolean introspect(ObjectMetaIntrospector.@Nonnull Context context) throws Exception {
         Type type = context.objectType();
         Class<?> rawType = TypeKit.getRawClass(type);
         if (rawType == null) {

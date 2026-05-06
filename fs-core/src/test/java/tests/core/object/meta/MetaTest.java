@@ -16,9 +16,9 @@ import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.invoke.Invocable;
 import space.sunqian.fs.object.meta.DataMetaException;
 import space.sunqian.fs.object.meta.MapMeta;
-import space.sunqian.fs.object.meta.MapMetaManager;
+import space.sunqian.fs.object.meta.MapMetaIntrospector;
 import space.sunqian.fs.object.meta.ObjectMeta;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.PropertyMetaBase;
 import space.sunqian.fs.object.meta.handlers.CommonObjectMetaHandler;
@@ -100,7 +100,7 @@ public class MetaTest implements TestPrint {
 
     @Test
     public void testObjectMetaBasicProperties() throws Exception {
-        assertSame(testDataMeta.manager(), ObjectMetaManager.defaultManager());
+        assertSame(testDataMeta.introspector(), ObjectMetaIntrospector.defaultIntrospector());
         assertEquals(testDataMeta.type(), new TypeRef<TestData<CharSequence, String>>() {}.type());
         assertEquals(TestData.class, testDataMeta.rawType());
         assertTrue(testDataMeta.isObjectMeta());
@@ -273,13 +273,13 @@ public class MetaTest implements TestPrint {
 
     @Test
     public void testObjectManager() throws Exception {
-        assertSame(ObjectMetaManager.defaultManager(), ObjectMetaManager.defaultManager());
-        testObjectManagerWithHandler(ObjectMetaManager.defaultManager());
+        assertSame(ObjectMetaIntrospector.defaultIntrospector(), ObjectMetaIntrospector.defaultIntrospector());
+        testObjectManagerWithHandler(ObjectMetaIntrospector.defaultIntrospector());
     }
 
-    private void testObjectManagerWithHandler(ObjectMetaManager manager) throws Exception {
+    private void testObjectManagerWithHandler(ObjectMetaIntrospector manager) throws Exception {
         // Test with pre handler
-        ObjectMetaManager preManager = ObjectMetaManager.newManager(
+        ObjectMetaIntrospector preManager = ObjectMetaIntrospector.newIntrospector(
             SimpleCache.ofSoft(), new PreHandler(), manager.asHandler()
         );
         ObjectMeta preMeta = preManager.introspect(Object.class);
@@ -287,7 +287,7 @@ public class MetaTest implements TestPrint {
         assertEquals(0, preMeta.properties().size());
 
         // Test with last handler
-        ObjectMetaManager lastManager = ObjectMetaManager.newManager(
+        ObjectMetaIntrospector lastManager = ObjectMetaIntrospector.newIntrospector(
             SimpleCache.ofSoft(), manager.asHandler(), new LastHandler()
         );
         ObjectMeta lastMeta = lastManager.introspect(Object.class);
@@ -295,21 +295,21 @@ public class MetaTest implements TestPrint {
         assertEquals(lastMeta.properties().keySet(), SetKit.set("class", "test"));
 
         // Test with pre handler as handler
-        ObjectMetaManager asPreManager = ObjectMetaManager.newManager(SimpleCache.ofSoft(), preManager.asHandler());
+        ObjectMetaIntrospector asPreManager = ObjectMetaIntrospector.newIntrospector(SimpleCache.ofSoft(), preManager.asHandler());
         ObjectMeta asPreMeta = asPreManager.introspect(Object.class);
         assertEquals(Object.class, asPreMeta.type());
         assertEquals(0, asPreMeta.properties().size());
 
         // Test with last handler as handler
-        ObjectMetaManager asLastManager = ObjectMetaManager.newManager(SimpleCache.ofSoft(), lastManager.asHandler());
+        ObjectMetaIntrospector asLastManager = ObjectMetaIntrospector.newIntrospector(SimpleCache.ofSoft(), lastManager.asHandler());
         ObjectMeta asLastMeta = asLastManager.introspect(Object.class);
         assertEquals(Object.class, asLastMeta.type());
         assertEquals(asLastMeta.properties().keySet(), SetKit.set("class", "test"));
     }
 
-    private static class PreHandler implements ObjectMetaManager.Handler {
+    private static class PreHandler implements ObjectMetaIntrospector.Handler {
         @Override
-        public boolean introspect(@Nonnull ObjectMetaManager.Context context) throws Exception {
+        public boolean introspect(@Nonnull ObjectMetaIntrospector.Context context) throws Exception {
             if (context.objectType().equals(Object.class)) {
                 return false;
             }
@@ -317,9 +317,9 @@ public class MetaTest implements TestPrint {
         }
     }
 
-    private static class LastHandler implements ObjectMetaManager.Handler {
+    private static class LastHandler implements ObjectMetaIntrospector.Handler {
         @Override
-        public boolean introspect(@Nonnull ObjectMetaManager.Context context) throws Exception {
+        public boolean introspect(@Nonnull ObjectMetaIntrospector.Context context) throws Exception {
             if (context.objectType().equals(Object.class)) {
                 context.propertyBaseMap().put("test", new PropertyMetaBase() {
                     @Override
@@ -368,7 +368,7 @@ public class MetaTest implements TestPrint {
         ObjectMeta a1 = ObjectMeta.of(A.class);
         ObjectMeta a2 = ObjectMeta.of(A.class);
         ObjectMeta b1 = ObjectMeta.of(B.class);
-        ObjectMetaManager manager2 = ObjectMetaManager.newManager(
+        ObjectMetaIntrospector manager2 = ObjectMetaIntrospector.newIntrospector(
             SimpleCache.ofStrong(), new CommonObjectMetaHandler()
         );
         ObjectMeta a3 = manager2.introspect(A.class);
@@ -393,7 +393,7 @@ public class MetaTest implements TestPrint {
         {
             int result = 1;
             result = 31 * result + a1.type().hashCode();
-            result = 31 * result + a1.manager().hashCode();
+            result = 31 * result + a1.introspector().hashCode();
             assertEquals(a1.hashCode(), result);
         }
         {
@@ -421,11 +421,11 @@ public class MetaTest implements TestPrint {
 
     @Test
     public void testMapManager() throws Exception {
-        assertSame(MapMetaManager.defaultManager(), MapMetaManager.defaultManager());
-        testMapManagerWithManager(MapMetaManager.defaultManager());
+        assertSame(MapMetaIntrospector.defaultIntrospector(), MapMetaIntrospector.defaultIntrospector());
+        testMapManagerWithManager(MapMetaIntrospector.defaultIntrospector());
     }
 
-    private void testMapManagerWithManager(MapMetaManager manager) throws Exception {
+    private void testMapManagerWithManager(MapMetaIntrospector manager) throws Exception {
         MapMeta meta = manager.introspect(HelloMap.class);
         verifyMapMetaWithManager(meta, HelloMap.class, String.class, Long.class, manager);
         printFor("MapMeta toString", meta);
@@ -440,7 +440,7 @@ public class MetaTest implements TestPrint {
     }
 
     private void verifyMapMetaBasic(MapMeta meta, Class<?> expectedType, Class<?> expectedKeyType, Class<?> expectedValueType) {
-        assertSame(meta.manager(), MapMetaManager.defaultManager());
+        assertSame(meta.introspector(), MapMetaIntrospector.defaultIntrospector());
         assertEquals(expectedType, meta.type());
         assertEquals(expectedType, meta.rawType());
         assertTrue(meta.isMapMeta());
@@ -451,7 +451,7 @@ public class MetaTest implements TestPrint {
         assertEquals(expectedValueType, meta.valueType());
     }
 
-    private void verifyMapMetaWithManager(MapMeta meta, Class<?> expectedType, Class<?> expectedKeyType, Class<?> expectedValueType, MapMetaManager expectedManager) {
+    private void verifyMapMetaWithManager(MapMeta meta, Class<?> expectedType, Class<?> expectedKeyType, Class<?> expectedValueType, MapMetaIntrospector expectedManager) {
         // For cached managers, the meta's manager returns the underlying manager, not the cached one
         // So we don't assert same here, just verify other properties
         assertEquals(expectedType, meta.type());
@@ -475,7 +475,7 @@ public class MetaTest implements TestPrint {
         assertNotEquals(m3, m1);
 
         // Test with custom manager
-        MapMetaManager manager2 = new CustomMapMetaManager();
+        MapMetaIntrospector manager2 = new CustomMapMetaIntrospector();
         MapMeta m4 = manager2.introspect(Map.class);
         assertNotEquals(m1, m4);
         assertNotEquals(m4, m1);
@@ -483,11 +483,11 @@ public class MetaTest implements TestPrint {
         // Test hash code
         int result = 1;
         result = 31 * result + m1.type().hashCode();
-        result = 31 * result + m1.manager().hashCode();
+        result = 31 * result + m1.introspector().hashCode();
         assertEquals(m1.hashCode(), result);
     }
 
-    private void testMapMetaEqualityWithManager(MapMetaManager manager) throws Exception {
+    private void testMapMetaEqualityWithManager(MapMetaIntrospector manager) throws Exception {
         MapMeta m1 = manager.introspect(Map.class);
         MapMeta m2 = manager.introspect(Map.class);
         assertEquals(m1, m2);
@@ -498,7 +498,7 @@ public class MetaTest implements TestPrint {
         assertNotEquals(m3, m1);
 
         // Test with custom manager
-        MapMetaManager manager2 = new CustomMapMetaManager();
+        MapMetaIntrospector manager2 = new CustomMapMetaIntrospector();
         MapMeta m4 = manager2.introspect(Map.class);
         assertNotEquals(m1, m4);
         assertNotEquals(m4, m1);
@@ -506,17 +506,17 @@ public class MetaTest implements TestPrint {
         // Test hash code
         int result = 1;
         result = 31 * result + m1.type().hashCode();
-        result = 31 * result + m1.manager().hashCode();
+        result = 31 * result + m1.introspector().hashCode();
         assertEquals(m1.hashCode(), result);
     }
 
-    private static class CustomMapMetaManager implements MapMetaManager {
+    private static class CustomMapMetaIntrospector implements MapMetaIntrospector {
         @Override
         public @Nonnull MapMeta introspect(@Nonnull Type type) throws DataMetaException {
             return new MapMeta() {
                 @Override
-                public @Nonnull MapMetaManager manager() {
-                    return CustomMapMetaManager.this;
+                public @Nonnull MapMetaIntrospector introspector() {
+                    return CustomMapMetaIntrospector.this;
                 }
 
                 @Override
@@ -554,13 +554,13 @@ public class MetaTest implements TestPrint {
     }
 
     private void testMapMetaCachedManager() {
-        MapMetaManager mapManager = MapMetaManager.newManager(SimpleCache.ofStrong(), MapMetaManager.defaultManager().asHandler());
+        MapMetaIntrospector mapManager = MapMetaIntrospector.newIntrospector(SimpleCache.ofStrong(), MapMetaIntrospector.defaultIntrospector().asHandler());
         // Test caching for Map.class
         assertSame(mapManager.introspect(Map.class), mapManager.introspect(Map.class));
     }
 
     private void testObjectMetaCachedManager() {
-        ObjectMetaManager objectManager = ObjectMetaManager.newManager(SimpleCache.ofStrong(), ObjectMetaManager.defaultManager().asHandler());
+        ObjectMetaIntrospector objectManager = ObjectMetaIntrospector.newIntrospector(SimpleCache.ofStrong(), ObjectMetaIntrospector.defaultIntrospector().asHandler());
         // Test caching for A.class
         assertSame(objectManager.introspect(A.class), objectManager.introspect(A.class));
     }

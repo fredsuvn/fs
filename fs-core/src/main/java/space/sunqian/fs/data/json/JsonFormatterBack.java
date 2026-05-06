@@ -12,7 +12,7 @@ import space.sunqian.fs.object.annotation.NumberPattern;
 import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.meta.ObjectMeta;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.object.meta.PropertyMeta;
 
 import java.io.InputStream;
@@ -35,14 +35,14 @@ final class JsonFormatterBack {
 
     static @Nonnull JsonFormatterImpl newFormatter(boolean ignoreNullValue) {
         return newFormatter(
-            ObjectMetaManager.defaultManager(),
+            ObjectMetaIntrospector.defaultIntrospector(),
             ObjectConverter.defaultConverter(),
             ignoreNullValue
         );
     }
 
     static @Nonnull JsonFormatterImpl newFormatter(
-        @Nonnull ObjectMetaManager objectParser,
+        @Nonnull ObjectMetaIntrospector objectParser,
         @Nonnull ObjectConverter objectConverter,
         boolean ignoreNullValue
     ) {
@@ -111,16 +111,16 @@ final class JsonFormatterBack {
             });
         }
 
-        private final @Nonnull ObjectMetaManager objectParser;
+        private final @Nonnull ObjectMetaIntrospector objectIntrospector;
         private final @Nonnull ObjectConverter objectConverter;
         private final boolean ignoreNullValue;
 
         JsonFormatterImpl(
-            @Nonnull ObjectMetaManager objectParser,
+            @Nonnull ObjectMetaIntrospector objectIntrospector,
             @Nonnull ObjectConverter objectConverter,
             boolean ignoreNullValue
         ) {
-            this.objectParser = objectParser;
+            this.objectIntrospector = objectIntrospector;
             this.objectConverter = objectConverter;
             this.ignoreNullValue = ignoreNullValue;
         }
@@ -234,7 +234,7 @@ final class JsonFormatterBack {
         }
 
         private void writeObject(@Nonnull Object object, @Nonnull Appendable appender) throws Exception {
-            ObjectMeta schema = objectParser.introspect(object.getClass());
+            ObjectMeta schema = objectIntrospector.introspect(object.getClass());
             appender.append('{');
             boolean[] isFirst = {true};
             schema.properties().forEach((key, property) -> {

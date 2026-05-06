@@ -4,7 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.invoke.Invocable;
 import space.sunqian.fs.object.meta.PropertyMetaBase;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.reflect.TypeKit;
 
 import java.lang.reflect.Field;
@@ -12,12 +12,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 
-enum RecordMetaHandlerImplByJ16 implements ObjectMetaManager.Handler {
+enum RecordMetaHandlerImplByJ16 implements ObjectMetaIntrospector.Handler {
 
     INST;
 
     @Override
-    public boolean introspect(ObjectMetaManager.@Nonnull Context context) throws Exception {
+    public boolean introspect(ObjectMetaIntrospector.@Nonnull Context context) throws Exception {
         var type = context.objectType();
         var rawClass = TypeKit.getRawClass(type);
         if (rawClass == null) {

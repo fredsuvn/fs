@@ -9,7 +9,7 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.exception.UnsupportedEnvException;
 import space.sunqian.fs.base.string.StringKit;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.PropertyMetaBase;
 import space.sunqian.fs.reflect.TypeKit;
@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * {@link ObjectMetaManager.Handler} implementation for
+ * {@link ObjectMetaIntrospector.Handler} implementation for
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
@@ -37,7 +37,7 @@ import java.util.Objects;
  * );
  * }</pre>
  * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this
- * environment, the {@link ObjectMetaManager#defaultManager()} will automatically load this handler.
+ * environment, the {@link ObjectMetaIntrospector#defaultIntrospector()} will automatically load this handler.
  * <p>
  * Note:
  * <ul>
@@ -54,7 +54,7 @@ import java.util.Objects;
  *
  * @author sunqian
  */
-public class ProtobufMetaHandler implements ObjectMetaManager.Handler {
+public class ProtobufMetaHandler implements ObjectMetaIntrospector.Handler {
 
     private static final @Nonnull ProtobufMetaHandler INST = new ProtobufMetaHandler();
 
@@ -80,7 +80,7 @@ public class ProtobufMetaHandler implements ObjectMetaManager.Handler {
     }
 
     @Override
-    public boolean introspect(@Nonnull ObjectMetaManager.Context context) throws Exception {
+    public boolean introspect(@Nonnull ObjectMetaIntrospector.Context context) throws Exception {
         Class<?> rawType = TypeKit.getRawClass(context.objectType());
         if (rawType == null) {
             return true;

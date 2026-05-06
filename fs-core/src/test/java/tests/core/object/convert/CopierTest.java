@@ -21,10 +21,10 @@ import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.convert.ObjectCopyException;
 import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.meta.MapMeta;
-import space.sunqian.fs.object.meta.MapMetaManager;
+import space.sunqian.fs.object.meta.MapMetaIntrospector;
 import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.ObjectMeta;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.annotation.ElementType;
@@ -279,7 +279,7 @@ public class CopierTest implements TestPrint {
                               ObjectCopier.Handler valueChangeHandler, ObjectCopier.Handler errorHandler) {
         Map<String, String> mapA = MapKit.map("first", "1", "second", "2", "third", "3");
         Map<String, Integer> mapB = new HashMap<>();
-        objectCopier.copyProperties(mapA, typeA, mapB, typeB, ConvertOption.mapMetaManager(MapMetaManager.defaultManager()));
+        objectCopier.copyProperties(mapA, typeA, mapB, typeB, ConvertOption.mapMetaIntrospector(MapMetaIntrospector.defaultIntrospector()));
         assertEquals(MapKit.map("first", 1, "second", 2, "third", 3), mapB);
 
         Map<String, String> mapA2 = new HashMap<>();
@@ -326,7 +326,7 @@ public class CopierTest implements TestPrint {
                                  ObjectCopier.Handler valueChangeHandler, ObjectCopier.Handler errorHandler) {
         Map<String, String> mapA = MapKit.map("first", "1", "second", "2", "third", "3");
         ClsB clsB = new ClsB();
-        objectCopier.copyProperties(mapA, typeA, clsB, ClsB.class, ConvertOption.objectMetaManager(ObjectMetaManager.defaultManager()));
+        objectCopier.copyProperties(mapA, typeA, clsB, ClsB.class, ConvertOption.objectMetaIntrospector(ObjectMetaIntrospector.defaultIntrospector()));
         assertEquals(new ClsB(1, 2, 3), clsB);
 
         ClsA2 clsA2 = new ClsA2();

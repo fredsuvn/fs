@@ -32,7 +32,7 @@ public class MetaKit {
         @SuppressWarnings("PatternVariableCanBeUsed")
         ObjectMeta otherMeta = (ObjectMeta) other;
         return Objects.equals(objectMeta.type(), otherMeta.type())
-            && Objects.equals(objectMeta.manager(), otherMeta.manager());
+            && Objects.equals(objectMeta.introspector(), otherMeta.introspector());
     }
 
     /**
@@ -74,7 +74,7 @@ public class MetaKit {
         @SuppressWarnings("PatternVariableCanBeUsed")
         MapMeta otherMeta = (MapMeta) other;
         return Objects.equals(mapMeta.type(), otherMeta.type())
-            && Objects.equals(mapMeta.manager(), otherMeta.manager());
+            && Objects.equals(mapMeta.introspector(), otherMeta.introspector());
     }
 
     /**
@@ -87,7 +87,7 @@ public class MetaKit {
     public static int hashCode(@Nonnull ObjectMeta objectMeta) {
         int result = 1;
         result = 31 * result + objectMeta.type().hashCode();
-        result = 31 * result + objectMeta.manager().hashCode();
+        result = 31 * result + objectMeta.introspector().hashCode();
         return result;
     }
 
@@ -115,7 +115,7 @@ public class MetaKit {
     public static int hashCode(@Nonnull MapMeta mapMeta) {
         int result = 1;
         result = 31 * result + mapMeta.type().hashCode();
-        result = 31 * result + mapMeta.manager().hashCode();
+        result = 31 * result + mapMeta.introspector().hashCode();
         return result;
     }
 

@@ -10,10 +10,10 @@ import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.meta.DataMetaException;
 import space.sunqian.fs.object.meta.MapMeta;
-import space.sunqian.fs.object.meta.MapMetaManager;
+import space.sunqian.fs.object.meta.MapMetaIntrospector;
 import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.ObjectMeta;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -53,21 +53,21 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
         try {
             @Nonnull Option<?, ?> @Nonnull [] actualOptions = OptionKit.mergeOptions(defaultOptionsArray, options);
             if (src instanceof Map) {
-                MapMetaManager srcParser = ConvertOption.getMapMetaManager(actualOptions);
+                MapMetaIntrospector srcParser = ConvertOption.getMapMetaIntrospector(actualOptions);
                 MapMeta srcSchema = parseMapSchema((Map<?, ?>) src, srcParser, srcType, actualOptions);
                 if (dst instanceof Map) {
                     MapMeta dstParser = parseMapSchema((Map<?, ?>) dst, srcParser, dstType, actualOptions);
                     mapToMap(Fs.as(src), srcSchema, Fs.as(dst), dstParser, converter, actualOptions);
                 } else {
-                    ObjectMetaManager objectParser = ConvertOption.getObjectMetaManager(actualOptions);
+                    ObjectMetaIntrospector objectParser = ConvertOption.getObjectMetaIntrospector(actualOptions);
                     ObjectMeta dstSchema = parseObjectSchema(dst, objectParser, dstType, actualOptions);
                     mapToObject(Fs.as(src), srcSchema, dst, dstSchema, converter, actualOptions);
                 }
             } else {
-                ObjectMetaManager srcParser = ConvertOption.getObjectMetaManager(actualOptions);
+                ObjectMetaIntrospector srcParser = ConvertOption.getObjectMetaIntrospector(actualOptions);
                 ObjectMeta srcSchema = parseObjectSchema(src, srcParser, srcType, actualOptions);
                 if (dst instanceof Map) {
-                    MapMetaManager dstParser = ConvertOption.getMapMetaManager(actualOptions);
+                    MapMetaIntrospector dstParser = ConvertOption.getMapMetaIntrospector(actualOptions);
                     MapMeta dstSchema = parseMapSchema((Map<?, ?>) dst, dstParser, dstType, actualOptions);
                     objectToMap(src, srcSchema, Fs.as(dst), dstSchema, converter, actualOptions);
                 } else {
@@ -84,7 +84,7 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
 
     private @Nonnull ObjectMeta parseObjectSchema(
         @Nonnull Object object,
-        @Nonnull ObjectMetaManager parser,
+        @Nonnull ObjectMetaIntrospector parser,
         @Nonnull Type type,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
@@ -104,7 +104,7 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
 
     private @Nonnull MapMeta parseMapSchema(
         @Nonnull Map<?, ?> object,
-        @Nonnull MapMetaManager parser,
+        @Nonnull MapMetaIntrospector parser,
         @Nonnull Type type,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {

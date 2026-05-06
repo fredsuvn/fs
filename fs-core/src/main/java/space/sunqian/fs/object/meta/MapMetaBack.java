@@ -14,18 +14,18 @@ import java.util.List;
 
 final class MapMetaBack {
 
-    static @Nonnull MapMetaManager defaultManager() {
-        return MapMetaManagerImpl.DEFAULT;
+    static @Nonnull MapMetaIntrospector defaultIntrospector() {
+        return MapMetaIntrospectorImpl.DEFAULT;
     }
 
-    static @Nonnull MapMetaManager newManager(
+    static @Nonnull MapMetaIntrospector newIntrospector(
         @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cacheFunction,
-        @Nonnull @RetainedParam List<MapMetaManager.@Nonnull Handler> handlers
+        @Nonnull @RetainedParam List<MapMetaIntrospector.@Nonnull Handler> handlers
     ) {
-        return new MapMetaManagerImpl(cacheFunction, handlers);
+        return new MapMetaIntrospectorImpl(cacheFunction, handlers);
     }
 
-    private static final class MapMetaManagerImpl implements MapMetaManager, MapMetaManager.Handler {
+    private static final class MapMetaIntrospectorImpl implements MapMetaIntrospector, MapMetaIntrospector.Handler {
 
         private static final @Nonnull SimpleCache<@Nonnull Type, @Nonnull MapMeta> GLOBAL_CACHE =
             SimpleCache.ofSoft();
@@ -34,7 +34,7 @@ final class MapMetaBack {
             Fs.registerGlobalCache(GLOBAL_CACHE);
         }
 
-        private static final @Nonnull MapMetaManager DEFAULT = new MapMetaManagerImpl(
+        private static final @Nonnull MapMetaIntrospector DEFAULT = new MapMetaIntrospectorImpl(
             GLOBAL_CACHE,
             ListKit.list(CommonMapMetaHandler.getInstance())
         );
@@ -42,7 +42,7 @@ final class MapMetaBack {
         private final @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cache;
         private final @Nonnull List<@Nonnull Handler> handlers;
 
-        private MapMetaManagerImpl(
+        private MapMetaIntrospectorImpl(
             @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cache,
             @Nonnull @RetainedParam List<@Nonnull Handler> handlers
         ) {
@@ -79,9 +79,9 @@ final class MapMetaBack {
         }
 
         @Override
-        public @Nullable MapMeta introspect(@Nonnull Type type, @Nonnull MapMetaManager manager) throws Exception {
+        public @Nullable MapMeta introspect(@Nonnull Type type, @Nonnull MapMetaIntrospector introspector) throws Exception {
             for (Handler handler : handlers) {
-                MapMeta mapMeta = handler.introspect(type, manager);
+                MapMeta mapMeta = handler.introspect(type, introspector);
                 if (mapMeta != null) {
                     return mapMeta;
                 }

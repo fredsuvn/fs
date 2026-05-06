@@ -11,8 +11,8 @@ import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.builder.BuilderManager;
-import space.sunqian.fs.object.meta.MapMetaManager;
-import space.sunqian.fs.object.meta.ObjectMetaManager;
+import space.sunqian.fs.object.meta.MapMetaIntrospector;
+import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -59,14 +59,14 @@ public enum ConvertOption {
     NEW_INSTANCE_MODE,
 
     /**
-     * Key of {@link #objectMetaManager(ObjectMetaManager)}.
+     * Key of {@link #objectMetaIntrospector(ObjectMetaIntrospector)}.
      */
-    OBJECT_META_MANAGER,
+    OBJECT_META_INTROSPECTOR,
 
     /**
-     * Key of {@link #mapMetaManager(MapMetaManager)}.
+     * Key of {@link #mapMetaIntrospector(MapMetaIntrospector)}.
      */
-    MAP_META_MANAGER,
+    MAP_META_INTROSPECTOR,
 
     /**
      * Key of {@link #builderManager(BuilderManager)}.
@@ -197,60 +197,62 @@ public enum ConvertOption {
     /**
      * Returns an option to specify the object schema parser.
      * <p>
-     * By default, {@link ObjectMetaManager#defaultManager()} is used.
+     * By default, {@link ObjectMetaIntrospector#defaultIntrospector()} is used.
      *
-     * @param metaManager the specified object schema parser
+     * @param objectMetaIntrospector the specified object schema parser
      * @return an option to specify the object schema parser
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectMetaManager> objectMetaManager(
-        @Nonnull ObjectMetaManager metaManager
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectMetaIntrospector> objectMetaIntrospector(
+        @Nonnull ObjectMetaIntrospector objectMetaIntrospector
     ) {
-        return Option.of(OBJECT_META_MANAGER, metaManager);
+        return Option.of(OBJECT_META_INTROSPECTOR, objectMetaIntrospector);
     }
 
     /**
-     * Returns the specified {@link ObjectMetaManager} from the given options, or
-     * {@link ObjectMetaManager#defaultManager()} if the given options does not contain a
-     * {@link ConvertOption#OBJECT_META_MANAGER}.
+     * Returns the specified {@link ObjectMetaIntrospector} from the given options, or
+     * {@link ObjectMetaIntrospector#defaultIntrospector()} if the given options does not contain a
+     * {@link ConvertOption#OBJECT_META_INTROSPECTOR}.
      *
      * @param options the given options
-     * @return the specified {@link ObjectMetaManager} from the given options, or
-     * {@link ObjectMetaManager#defaultManager()} if the given options does not contain a
-     * {@link ConvertOption#OBJECT_META_MANAGER}
+     * @return the specified {@link ObjectMetaIntrospector} from the given options, or
+     * {@link ObjectMetaIntrospector#defaultIntrospector()} if the given options does not contain a
+     * {@link ConvertOption#OBJECT_META_INTROSPECTOR}
      */
-    public static @Nonnull ObjectMetaManager getObjectMetaManager(@Nonnull Option<?, ?> @Nonnull ... options) {
+    public static @Nonnull ObjectMetaIntrospector getObjectMetaIntrospector(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Fs.nonnull(
-            OptionKit.findValue(ConvertOption.OBJECT_META_MANAGER, options),
-            ObjectMetaManager.defaultManager()
+            OptionKit.findValue(ConvertOption.OBJECT_META_INTROSPECTOR, options),
+            ObjectMetaIntrospector.defaultIntrospector()
         );
     }
 
     /**
      * Returns an option to specify the map schema parser.
      * <p>
-     * By default, {@link MapMetaManager#defaultManager()} is used.
+     * By default, {@link MapMetaIntrospector#defaultIntrospector()} is used.
      *
-     * @param metaManager the specified map schema parser
+     * @param mapMetaIntrospector the specified map schema parser
      * @return an option to specify the map schema parser
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull MapMetaManager> mapMetaManager(
-        @Nonnull MapMetaManager metaManager
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull MapMetaIntrospector> mapMetaIntrospector(
+        @Nonnull MapMetaIntrospector mapMetaIntrospector
     ) {
-        return Option.of(MAP_META_MANAGER, metaManager);
+        return Option.of(MAP_META_INTROSPECTOR, mapMetaIntrospector);
     }
 
     /**
-     * Returns the specified {@link MapMetaManager} from the given options, or {@link MapMetaManager#defaultManager()}
-     * if the given options does not contain a {@link ConvertOption#MAP_META_MANAGER}.
+     * Returns the specified {@link MapMetaIntrospector} from the given options, or
+     * {@link MapMetaIntrospector#defaultIntrospector()} if the given options does not contain a
+     * {@link ConvertOption#MAP_META_INTROSPECTOR}.
      *
      * @param options the given options
-     * @return the specified {@link MapMetaManager} from the given options, or {@link MapMetaManager#defaultManager()}
-     * if the given options does not contain a {@link ConvertOption#MAP_META_MANAGER}
+     * @return the specified {@link MapMetaIntrospector} from the given options, or
+     * {@link MapMetaIntrospector#defaultIntrospector()} if the given options does not contain a
+     * {@link ConvertOption#MAP_META_INTROSPECTOR}
      */
-    public static @Nonnull MapMetaManager getMapMetaManager(@Nonnull Option<?, ?> @Nonnull ... options) {
+    public static @Nonnull MapMetaIntrospector getMapMetaIntrospector(@Nonnull Option<?, ?> @Nonnull ... options) {
         return Fs.nonnull(
-            OptionKit.findValue(ConvertOption.MAP_META_MANAGER, options),
-            MapMetaManager.defaultManager()
+            OptionKit.findValue(ConvertOption.MAP_META_INTROSPECTOR, options),
+            MapMetaIntrospector.defaultIntrospector()
         );
     }
 
