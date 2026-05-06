@@ -3,6 +3,7 @@ package space.sunqian.fs.object.meta.handlers;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.invoke.Invocable;
+import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaManager;
 
 import java.lang.reflect.Method;
@@ -11,11 +12,12 @@ import java.util.Objects;
 /**
  * This is a common implementation of {@link ObjectMetaManager.Handler} which basically follows the <a
  * href="https://www.oracle.com/java/technologies/javase/javabeans-spec.html">JavaBeans</a> style, inheriting from
- * {@link AbstractObjectMetaHandler} and overriding the {@link AbstractObjectMetaHandler#resolveAccessor(Method)}
+ * {@link AbstractObjectMetaHandler} and overriding the {@link AbstractObjectMetaHandler#introspectAccessor(Method)}
  * method.
  * <p>
- * This implementation resolves {@code getXxx} or {@code isXxx} methods as getters and {@code setXxx} methods as setters
- * according to lower camel case naming conventions.
+ * This implementation resolves {@code getXxx} or {@code isXxx} methods as getters, and {@code setXxx} methods as
+ * setters, according to lower camel case naming conventions. It always creates new instance of {@link ObjectMeta} on
+ * {@link #introspect(ObjectMetaManager.Context)}, and it is the default handler of {@link ObjectMetaManager}.
  * <p>
  * Using {@link #getInstance()} can get a same one instance of this handler.
  *
@@ -34,7 +36,7 @@ public class CommonObjectMetaHandler extends AbstractObjectMetaHandler {
 
     @SuppressWarnings("EnhancedSwitchMigration")
     @Override
-    protected @Nullable AccessorInfo resolveAccessor(@Nonnull Method method) {
+    protected @Nullable AccessorInfo introspectAccessor(@Nonnull Method method) {
         int parameterCount = method.getParameterCount();
         switch (parameterCount) {
             case 0:// maybe getter

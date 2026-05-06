@@ -21,10 +21,10 @@ import java.util.Set;
  * This is a skeletal implementation of {@link ObjectMetaManager.Handler} to minimize the effort required to implement
  * the interface.
  * <p>
- * This class uses {@link Class#getMethods()} to find out all methods (the synthetic method will be filtered out), then
- * passes each of them to {@link #resolveAccessor(Method)} to resolve property accessor infos. This class will perform
- * subsequent parsing based on those property accessor infos, the subclasses only needs to implement the
- * {@link #resolveAccessor(Method)}.
+ * This class uses {@link Class#getMethods()} to find out all accessible methods without synthetic methods, passes each
+ * of them to {@link #introspectAccessor(Method)} to introspect property accessor infos. Then, this class processes the
+ * property accessor infos to the property meta infos. The subclasses only needs to implement the
+ * {@link #introspectAccessor(Method)}.
  *
  * @author sunqian
  */
@@ -77,7 +77,7 @@ public abstract class AbstractObjectMetaHandler implements ObjectMetaManager.Han
             if (method.isSynthetic()) {
                 continue;
             }
-            AccessorInfo accessorInfo = resolveAccessor(method);
+            AccessorInfo accessorInfo = introspectAccessor(method);
             if (accessorInfo == null) {
                 continue;
             }
@@ -118,17 +118,17 @@ public abstract class AbstractObjectMetaHandler implements ObjectMetaManager.Han
     }
 
     /**
-     * Resolves and returns the given method to an accessor info, or {@code null} if the given method is not a data
+     * Introspects and returns the given method to an accessor info, or {@code null} if the given method is not a data
      * property.
      *
      * @param method the given method
-     * @return the accessor info resolved from the given method, or {@code null} if the given method is not a data
+     * @return the accessor info introspected from the given method, or {@code null} if the given method is not a data
      * property
      */
-    protected abstract @Nullable AccessorInfo resolveAccessor(@Nonnull Method method);
+    protected abstract @Nullable AccessorInfo introspectAccessor(@Nonnull Method method);
 
     /**
-     * Property accessor info, resolved from the specified {@link Method}.
+     * Property accessor info, introspected from the specified {@link Method}.
      *
      * @author sunqian
      */

@@ -7,6 +7,7 @@ import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.cache.CacheFunction;
 import space.sunqian.fs.cache.SimpleCache;
+import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.meta.handlers.CommonMapMetaHandler;
 
 import java.lang.reflect.Type;
@@ -41,17 +42,31 @@ public interface MapMetaManager {
     }
 
     /**
-     * Creates and returns a new {@link MapMetaManager} with given handlers and cache function.
+     * Creates and returns a new {@link MapMetaManager} with given cache function and handlers.
      *
-     * @param handlers      the given handlers
      * @param cacheFunction the cache function to cache the generated {@link MapMeta} instances
-     * @return a new {@link MapMetaManager} with the given handlers and cache function
+     * @param handlers      the given handlers
+     * @return a new {@link MapMetaManager} with the given cache function and handlers
      */
     static @Nonnull MapMetaManager newManager(
-        @Nonnull @RetainedParam List<@Nonnull Handler> handlers,
-        @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cacheFunction
+        @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cacheFunction,
+        @Nonnull Handler @Nonnull @RetainedParam ... handlers
     ) {
-        return MapMetaBack.newManager(handlers, cacheFunction);
+        return newManager(cacheFunction, ListKit.list(handlers));
+    }
+
+    /**
+     * Creates and returns a new {@link MapMetaManager} with given cache function and handlers.
+     *
+     * @param cacheFunction the cache function to cache the generated {@link MapMeta} instances
+     * @param handlers      the given handlers
+     * @return a new {@link MapMetaManager} with the given cache function and handlers
+     */
+    static @Nonnull MapMetaManager newManager(
+        @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cacheFunction,
+        @Nonnull @RetainedParam List<@Nonnull Handler> handlers
+    ) {
+        return MapMetaBack.newManager(cacheFunction, handlers);
     }
 
     /**

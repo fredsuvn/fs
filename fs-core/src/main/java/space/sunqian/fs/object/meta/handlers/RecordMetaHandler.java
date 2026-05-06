@@ -5,7 +5,7 @@ import space.sunqian.fs.base.FsLoader;
 import space.sunqian.fs.object.meta.ObjectMetaManager;
 
 /**
- * This implementation of {@link ObjectMetaManager.Handler} is used to parse {@code record} classes, and it is
+ * This implementation of {@link ObjectMetaManager.Handler} is used to introspect {@code record} classes, and it is
  * automatically loaded if the current JVM version supports {@code record} classes (typically JVM version 16 or
  * higher).
  * <p>

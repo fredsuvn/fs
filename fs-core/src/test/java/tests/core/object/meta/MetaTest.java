@@ -554,7 +554,7 @@ public class MetaTest implements TestPrint {
     }
 
     private void testMapMetaCachedManager() {
-        MapMetaManager mapManager = MapMetaManager.newManager(ListKit.list(MapMetaManager.defaultManager().asHandler()), SimpleCache.ofStrong());
+        MapMetaManager mapManager = MapMetaManager.newManager(SimpleCache.ofStrong(), MapMetaManager.defaultManager().asHandler());
         // Test caching for Map.class
         assertSame(mapManager.introspect(Map.class), mapManager.introspect(Map.class));
     }

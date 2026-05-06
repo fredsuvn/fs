@@ -13,10 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This is a common implementation of {@link MapMetaManager.Handler}, and it is the default handler of
+ * This is a common implementation of {@link MapMetaManager.Handler}. It always creates new instance of {@link MapMeta}
+ * on {@link #introspect(Type, MapMetaManager)}, and it is the default handler of
  * {@link MapMetaManager#defaultManager()}.
- * <p>
- * This implementation introspects the {@link Type} object to {@link MapMeta}.
  * <p>
  * Using {@link #getInstance()} can get a same one instance of this handler.
  *

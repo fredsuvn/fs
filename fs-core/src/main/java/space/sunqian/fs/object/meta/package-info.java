@@ -5,14 +5,14 @@
  * The top interface for data meta info is {@link space.sunqian.fs.object.meta.DataMeta}, and the two main
  * sub-interfaces are {@link space.sunqian.fs.object.meta.MapMeta} which represents the meta info for map, and
  * {@link space.sunqian.fs.object.meta.ObjectMeta} which represents the meta info for non-map object. Using codes
- * similar to the following to parse:
+ * similar to the following to introspect:
  * <pre>{@code
- * // Parse a non-map object:
+ * // Introspect a non-map object:
  * ObjectMeta objectMeta = ObjectMeta.of(type);
  * // Get a property value:
  * Object value = objectMeta.getProperty("someProperty").getValue(inst);
  *
- * // Parse a map:
+ * // Introspect a map:
  * MapMeta mapMeta = MapMeta.of(type);
  * // Get the key type of the map:
  * Type keyType = mapMeta.keyType();

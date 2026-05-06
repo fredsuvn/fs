@@ -97,7 +97,7 @@ public interface ObjectMetaManager {
      */
     default @Nonnull ObjectMeta introspect(@Nonnull Type type) throws DataMetaException {
         try {
-            ObjectMetaBuilder builder = new ObjectMetaBuilder(type);
+            ObjectMetaBack.MetaBuilder builder = new ObjectMetaBack.MetaBuilder(type);
             for (Handler handler : handlers()) {
                 if (!handler.introspect(builder)) {
                     break;

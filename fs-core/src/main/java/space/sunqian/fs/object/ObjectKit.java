@@ -222,9 +222,9 @@ public class ObjectKit {
      * This method supports nested property access using dot notation (e.g., "parent.child.property"). If any part of
      * the property path is not found or is {@code null}, this method returns {@code null}.
      * <p>
-     * Note this method use {@link ObjectMetaManager#defaultManager()} to parse object schemas, it is equivalent to:
+     * Note this method use {@link ObjectMetaManager#defaultManager()} to introspect object metas, it is equivalent to:
      * <pre>{@code
-     * ObjectKit.getPropertyValue(object, propertyName, ObjectSchemaParser.defaultCachedParser());
+     * ObjectKit.getPropertyValue(object, propertyName, ObjectMetaManager.defaultManager());
      * }</pre>
      *
      * @param object       the given object from which to retrieve the property value
@@ -246,13 +246,13 @@ public class ObjectKit {
      *
      * @param object       the given object from which to retrieve the property value
      * @param propertyName the name of the property to retrieve, supporting dot notation for nested properties
-     * @param objectParser the parser used to resolve object schemas
+     * @param metaManager  the meta manager used to introspect object metas
      * @return the value of the specified property, or {@code null} if the property path is not found or is {@code null}
      */
     public static @Nullable Object getPropertyValue(
         @Nullable Object object,
         @Nonnull String propertyName,
-        @Nonnull ObjectMetaManager objectParser
+        @Nonnull ObjectMetaManager metaManager
     ) {
         if (object == null) {
             return null;
@@ -262,9 +262,9 @@ public class ObjectKit {
         while (true) {
             int nextDotIndex = propertyName.indexOf('.', start);
             if (nextDotIndex == -1) {
-                return getPropertyValue0(cur, propertyName.substring(start), objectParser);
+                return getPropertyValue0(cur, propertyName.substring(start), metaManager);
             } else {
-                cur = getPropertyValue0(cur, propertyName.substring(start, nextDotIndex), objectParser);
+                cur = getPropertyValue0(cur, propertyName.substring(start, nextDotIndex), metaManager);
                 start = nextDotIndex + 1;
             }
         }
@@ -281,8 +281,8 @@ public class ObjectKit {
         if (object instanceof Map<?, ?>) {
             return ((Map<?, ?>) object).get(propertyName);
         }
-        ObjectMeta schema = objectParser.introspect(object.getClass());
-        PropertyMeta property = schema.getProperty(propertyName);
+        ObjectMeta meta = objectParser.introspect(object.getClass());
+        PropertyMeta property = meta.getProperty(propertyName);
         if (property == null) {
             return null;
         }

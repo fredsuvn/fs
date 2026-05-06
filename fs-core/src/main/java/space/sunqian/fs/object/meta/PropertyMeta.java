@@ -9,10 +9,10 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
- * This interface represents the property info of {@link ObjectMeta}. It is very similar to the simple property of
+ * This interface represents the property meta info of {@link ObjectMeta}. It is very similar to the simple property of
  * <a href="https://www.oracle.com/java/technologies/javase/javabeans-spec.html">JavaBeans</a>.
  * <p>
- * Two {@link PropertyMeta}s are considered equal if, and only if both their names and both their owners are equal.
+ * Two {@link PropertyMeta}s are considered equal if, and only if both their names and owners are equal.
  *
  * @author sunqian
  */
@@ -152,8 +152,8 @@ public interface PropertyMeta extends PropertyMetaBase {
     // }
 
     /**
-     * Returns whether this {@link PropertyMeta} is equal to the other {@link PropertyMeta}. They are considered
-     * equal if, and only if both their names and both their owners are equal.
+     * Returns whether this {@link PropertyMeta} is equal to the other {@link PropertyMeta}. They are considered equal
+     * if, and only if both their names and owners are equal.
      *
      * @param other the other {@link PropertyMeta}
      * @return whether this {@link PropertyMeta} is equal to the other {@link PropertyMeta}

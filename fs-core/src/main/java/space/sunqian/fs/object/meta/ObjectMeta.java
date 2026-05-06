@@ -26,12 +26,12 @@ import java.util.Map;
 public interface ObjectMeta extends DataMeta {
 
     /**
-     * Parse the given type to {@link ObjectMeta} using {@link ObjectMetaManager#defaultManager()}.
+     * Introspects the given type and returns the {@link ObjectMeta} using {@link ObjectMetaManager#defaultManager()}.
      * <p>
-     * Note this method never caches the parsed results.
+     * Note this method never caches the introspected results.
      *
      * @param type the given type
-     * @return the {@link ObjectMeta} parsed from the given type using {@link ObjectMetaManager#defaultManager()}
+     * @return the {@link ObjectMeta} introspected from the given type using {@link ObjectMetaManager#defaultManager()}
      * @throws DataMetaException if any problem occurs
      */
     static @Nonnull ObjectMeta of(@Nonnull Type type) throws DataMetaException {
@@ -59,7 +59,8 @@ public interface ObjectMeta extends DataMeta {
      * Returns the specified property meta info with the specified name in this {@link ObjectMeta}.
      *
      * @param name the specified name
-     * @return the specified property meta info with the specified name in this {@link ObjectMeta}, or {@code null} if not found
+     * @return the specified property meta info with the specified name in this {@link ObjectMeta}, or {@code null} if
+     * not found
      */
     default @Nullable PropertyMeta getProperty(String name) {
         return properties().get(name);

@@ -700,7 +700,7 @@ public class ConvertTest implements TestPrint, DataGen {
         assertSame(MapMetaManager.defaultManager(),
             ConvertOption.getMapMetaManager(ConvertOption.mapMetaManager(MapMetaManager.defaultManager())));
         assertNotEquals(MapMetaManager.defaultManager(),
-            ConvertOption.getMapMetaManager(ConvertOption.mapMetaManager(MapMetaManager.newManager(Collections.emptyList(), SimpleCache.ofSoft()))));
+            ConvertOption.getMapMetaManager(ConvertOption.mapMetaManager(MapMetaManager.newManager(SimpleCache.ofSoft(), Collections.emptyList()))));
     }
 
     private void testObjectParserOptions() {

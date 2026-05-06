@@ -19,10 +19,10 @@ final class MapMetaBack {
     }
 
     static @Nonnull MapMetaManager newManager(
-        @Nonnull @RetainedParam List<MapMetaManager.@Nonnull Handler> handlers,
-        @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cacheFunction
+        @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cacheFunction,
+        @Nonnull @RetainedParam List<MapMetaManager.@Nonnull Handler> handlers
     ) {
-        return new MapMetaManagerImpl(handlers, cacheFunction);
+        return new MapMetaManagerImpl(cacheFunction, handlers);
     }
 
     private static final class MapMetaManagerImpl implements MapMetaManager, MapMetaManager.Handler {
@@ -35,19 +35,19 @@ final class MapMetaBack {
         }
 
         private static final @Nonnull MapMetaManager DEFAULT = new MapMetaManagerImpl(
-            ListKit.list(CommonMapMetaHandler.getInstance()),
-            GLOBAL_CACHE
+            GLOBAL_CACHE,
+            ListKit.list(CommonMapMetaHandler.getInstance())
         );
 
-        private final @Nonnull List<@Nonnull Handler> handlers;
         private final @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cache;
+        private final @Nonnull List<@Nonnull Handler> handlers;
 
         private MapMetaManagerImpl(
-            @Nonnull @RetainedParam List<@Nonnull Handler> handlers,
-            @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cache
+            @Nonnull CacheFunction<@Nonnull Type, @Nonnull MapMeta> cache,
+            @Nonnull @RetainedParam List<@Nonnull Handler> handlers
         ) {
-            this.handlers = handlers;
             this.cache = cache;
+            this.handlers = handlers;
         }
 
         @Override
