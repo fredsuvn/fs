@@ -5,6 +5,7 @@ import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.date.DateKit;
 import space.sunqian.fs.base.function.IndexedConsumer;
 import space.sunqian.fs.base.logging.LogKit;
+import space.sunqian.fs.base.logging.ToLog;
 import space.sunqian.fs.base.math.MathKit;
 import space.sunqian.fs.base.number.NumberKit;
 import space.sunqian.fs.base.option.Option;
@@ -180,7 +181,7 @@ public class BaseSample {
 
         // Using LazyToString for efficient logging
         String message = "This is a log message";
-        Object lazyMessage = LogKit.lazyToString(() -> "Lazy: " + message);
+        Object lazyMessage = ToLog.wrap(() -> "Lazy: " + message);
         System.out.println("Lazy log message: " + lazyMessage);
     }
 

@@ -15,7 +15,7 @@ public class TraceTest implements TestPrint {
     @Test
     public void testTrace() throws Exception {
         testStackTrace();
-        testParseStackTrace();
+        testResolveStackTrace();
     }
 
     private void testStackTrace() {
@@ -28,8 +28,8 @@ public class TraceTest implements TestPrint {
         }
     }
 
-    private void testParseStackTrace() throws Exception {
-        Method method = TraceKit.class.getDeclaredMethod("parseStackTrace", StackTraceElement[].class);
+    private void testResolveStackTrace() throws Exception {
+        Method method = TraceKit.class.getDeclaredMethod("resolveStackTrace", StackTraceElement[].class);
         method.setAccessible(true);
 
         testParseEmptyStackTrace(method);

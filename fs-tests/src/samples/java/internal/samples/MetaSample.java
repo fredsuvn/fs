@@ -4,53 +4,53 @@ import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 
 /**
- * Sample: Object Schema Usage
+ * Sample: Object Meta Usage
  * <p>
- * Purpose: Demonstrate how to use the object schema utilities provided by fs-core module.
+ * Purpose: Demonstrate how to use the object meta utilities provided by fs-core module.
  * <p>
  * Use Cases:
  * <ul>
  *   <li>
- *     Parse object schema from a class
+ *     Introspect the object meta from a class
  *   </li>
  *   <li>
- *     Access object properties through schema
+ *     Access object properties through meta
  *   </li>
  *   <li>
- *     Work with nested object schemas
+ *     Work with nested object meta
  *   </li>
  * </ul>
  * <p>
  * Key Classes:
  * <ul>
  *   <li>
- *     {@link ObjectMeta}: Represents the schema of an object
+ *     {@link ObjectMeta}: Represents the meta of an object
  *   </li>
  *   <li>
- *     {@link ObjectMetaIntrospector}: Parses object schema from classes
+ *     {@link ObjectMetaIntrospector}: Introspects the object meta from classes
  *   </li>
  * </ul>
  */
-public class SchemaSample {
+public class MetaSample {
 
     public static void main(String[] args) {
-        demonstrateObjectSchema();
+        demonstrateObjectMeta();
     }
 
     /**
-     * Demonstrates object schema parsing and usage.
+     * Demonstrates object meta introspection and usage.
      */
-    public static void demonstrateObjectSchema() {
-        System.out.println("=== Object Schema Processing ===");
+    public static void demonstrateObjectMeta() {
+        System.out.println("=== Object Meta Processing ===");
 
         try {
-            // Parse schema from a class
-            ObjectMeta schema = ObjectMetaIntrospector.defaultIntrospector().introspect(Person.class);
-            System.out.println("Parsed schema for Person class: " + schema);
+            // Introspect the object's meta from a class
+            ObjectMeta meta = ObjectMetaIntrospector.defaultIntrospector().introspect(Person.class);
+            System.out.println("Introspected meta for Person class: " + meta);
 
-            // Access schema properties
-            System.out.println("Number of properties: " + schema.properties().size());
-            schema.properties().forEach((name, property) -> {
+            // Access meta properties
+            System.out.println("Number of properties: " + meta.properties().size());
+            meta.properties().forEach((name, property) -> {
                 System.out.println("Property: " + name + ", Type: " + property.type());
             });
 
@@ -60,13 +60,13 @@ public class SchemaSample {
             person.setAge(30);
             person.setAddress(new Address("123 Main St", "New York"));
 
-            // Access properties through schema
+            // Access properties through meta
             System.out.println("\nPerson instance:");
-            System.out.println("Name: " + schema.getProperty("name").getValue(person));
-            System.out.println("Age: " + schema.getProperty("age").getValue(person));
+            System.out.println("Name: " + meta.getProperty("name").getValue(person));
+            System.out.println("Age: " + meta.getProperty("age").getValue(person));
 
             // Access nested properties
-            Object address = schema.getProperty("address").getValue(person);
+            Object address = meta.getProperty("address").getValue(person);
             System.out.println("Address:");
             if (address instanceof Address) {
                 Address addr = (Address) address;
@@ -80,7 +80,7 @@ public class SchemaSample {
     }
 
     /**
-     * Sample class for schema demonstration.
+     * Sample class for meta demonstration.
      */
     public static class Person {
         private String name;
@@ -113,7 +113,7 @@ public class SchemaSample {
     }
 
     /**
-     * Nested class for schema demonstration.
+     * Nested class for meta demonstration.
      */
     public static class Address {
         private String street;

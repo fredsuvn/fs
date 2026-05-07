@@ -42,7 +42,7 @@ import java.util.Map;
  *     {@link ObjectCopier}: Main class for object property copying
  *   </li>
  *   <li>
- *     {@link ObjectMeta}: Object schema for type information
+ *     {@link ObjectMeta}: Object meta for type information
  *   </li>
  *   <li>
  *     {@link Fs}: Core utility class with object-related methods
