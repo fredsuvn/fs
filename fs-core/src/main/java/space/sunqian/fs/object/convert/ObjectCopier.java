@@ -7,11 +7,13 @@ import space.sunqian.annotation.RetainedParam;
 import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.collect.ListKit;
+import space.sunqian.fs.object.annotation.DatePattern;
+import space.sunqian.fs.object.annotation.NumberPattern;
 import space.sunqian.fs.object.builder.BuilderManager;
 import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.meta.MapMeta;
-import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.ObjectMeta;
+import space.sunqian.fs.object.meta.PropertyMeta;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -19,16 +21,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This interface is used to copy data properties from an object to another object. The object should be a {@link Map}
- * or a non-map object which can be parsed to {@link MapMeta} and {@link ObjectMeta}.
+ * This interface is used to copy properties from one object to another. The properties can come from a {@link Map} or a
+ * non-map object that can be introspected to {@link MapMeta} and {@link ObjectMeta}.
  * <p>
- * A copier can have default options. The options parameter of a copy method (such as
- * {@link #copyProperties(Object, Type, Object, Type, ObjectConverter, Option[])}) will be merged with the default
+ * A copier contains a list of {@link Handler}s to sequentially attempt
+ * <p>
+ * A copier can have a list of default options. The options parameter of a copy method (such as
+ * {@link #copyProperties(Object, Type, Object, Type, ObjectConverter, Option...)}) will be merged with the default
  * options when the method is called.
  *
  * @author sunqian
- * @implNote The default implementations of {@link ObjectCopier} support annotations defined in
- * {@link space.sunqian.fs.object.annotation}.
+ * @implNote The default implementations of {@link ObjectCopier} support adding annotations defined in
+ * {@link space.sunqian.fs.object.annotation} on the source and destination properties (annotations on the destination
+ * override those on the source):
+ * <ul>
+ *     <li>{@link DatePattern}</li>
+ *     <li>{@link NumberPattern}</li>
+ * </ul>
  */
 @ThreadSafe
 public interface ObjectCopier {
