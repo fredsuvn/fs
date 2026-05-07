@@ -107,7 +107,7 @@ public interface MapMetaIntrospector {
          * Introspects the given type and returns the introspected {@link MapMeta}, or {@code null} if the given type is
          * unsupported.
          *
-         * @param type    the given type
+         * @param type         the given type
          * @param introspector the {@link MapMetaIntrospector} where this handler is used
          * @return a new {@link MapMeta}, or {@code null} if the given type is unsupported
          * @throws Exception if an error occurs

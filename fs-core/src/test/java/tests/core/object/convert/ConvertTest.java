@@ -263,8 +263,8 @@ public class ConvertTest implements TestPrint, DataGen {
 
     @Test
     public void testConvertKit() throws Exception {
-        testMapParserOptions();
-        testObjectParserOptions();
+        testMapIntrospectorOptions();
+        testObjectIntrospectorOptions();
         testBuilderManagerOptions();
     }
 
@@ -694,7 +694,7 @@ public class ConvertTest implements TestPrint, DataGen {
         assertNull(ann22.getComplex1());
     }
 
-    private void testMapParserOptions() {
+    private void testMapIntrospectorOptions() {
         assertSame(MapMetaIntrospector.defaultIntrospector(),
             ConvertOption.getMapMetaIntrospector(ConvertOption.ignoreNull(true)));
         assertSame(MapMetaIntrospector.defaultIntrospector(),
@@ -703,13 +703,19 @@ public class ConvertTest implements TestPrint, DataGen {
             ConvertOption.getMapMetaIntrospector(ConvertOption.mapMetaIntrospector(MapMetaIntrospector.newIntrospector(SimpleCache.ofSoft(), Collections.emptyList()))));
     }
 
-    private void testObjectParserOptions() {
-        assertSame(ObjectMetaIntrospector.defaultIntrospector(),
-            ConvertOption.getObjectMetaIntrospector(ConvertOption.ignoreNull(true)));
-        assertNotEquals(ObjectMetaIntrospector.defaultIntrospector(),
-            ConvertOption.getObjectMetaIntrospector(ConvertOption.objectMetaIntrospector(ObjectMetaIntrospector.defaultIntrospector())));
-        assertSame(ObjectMetaIntrospector.defaultIntrospector(),
-            ConvertOption.getObjectMetaIntrospector(ConvertOption.objectMetaIntrospector(ObjectMetaIntrospector.defaultIntrospector())));
+    private void testObjectIntrospectorOptions() {
+        assertSame(
+            ObjectMetaIntrospector.defaultIntrospector(),
+            ConvertOption.getObjectMetaIntrospector(ConvertOption.ignoreNull(true))
+        );
+        assertNotEquals(
+            ObjectMetaIntrospector.defaultIntrospector(),
+            ConvertOption.getObjectMetaIntrospector(ConvertOption.objectMetaIntrospector(ObjectMetaIntrospector.newIntrospector(SimpleCache.ofSoft(), Collections.emptyList())))
+        );
+        assertSame(
+            ObjectMetaIntrospector.defaultIntrospector(),
+            ConvertOption.getObjectMetaIntrospector(ConvertOption.objectMetaIntrospector(ObjectMetaIntrospector.defaultIntrospector()))
+        );
     }
 
     private void testBuilderManagerOptions() {

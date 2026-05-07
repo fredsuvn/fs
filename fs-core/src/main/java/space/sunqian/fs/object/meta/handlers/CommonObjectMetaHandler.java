@@ -17,7 +17,8 @@ import java.util.Objects;
  * <p>
  * This implementation resolves {@code getXxx} or {@code isXxx} methods as getters, and {@code setXxx} methods as
  * setters, according to lower camel case naming conventions. It always creates new instance of {@link ObjectMeta} on
- * {@link #introspect(ObjectMetaIntrospector.Context)}, and it is the default handler of {@link ObjectMetaIntrospector}.
+ * {@link #introspect(ObjectMetaIntrospector.Context)}, and it is the default handler of
+ * {@link ObjectMetaIntrospector}.
  * <p>
  * Using {@link #getInstance()} can get a same one instance of this handler.
  *

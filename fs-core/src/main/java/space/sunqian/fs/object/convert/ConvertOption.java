@@ -30,7 +30,7 @@ public enum ConvertOption {
      * Option to enable strict source type mode. In strict type mode, the conversion will strictly treat the source
      * object as the specified source type.
      * <p>
-     * By default, this option is disabled. In this case, if some error occurs when parsing the source type, the
+     * By default, this option is disabled. In this case, if some error occurs when introspecting the source type, the
      * conversion will try again with the {@link Object#getClass()} as the source type.
      */
     STRICT_SOURCE_TYPE_MODE,
@@ -123,7 +123,7 @@ public enum ConvertOption {
      * Sets option to enable strict source type mode. In strict type mode, the conversion will strictly treat the source
      * object as the specified source type.
      * <p>
-     * By default, this option is disabled. In this case, if some error occurs when parsing the source type, the
+     * By default, this option is disabled. In this case, if some error occurs when introspecting the source type, the
      * conversion will try again with the {@link Object#getClass()} as the source type.
      *
      * @param strictSourceType whether to enable strict source type mode
@@ -195,12 +195,12 @@ public enum ConvertOption {
     }
 
     /**
-     * Returns an option to specify the object schema parser.
+     * Returns an option to specify the {@link ObjectMetaIntrospector}.
      * <p>
      * By default, {@link ObjectMetaIntrospector#defaultIntrospector()} is used.
      *
-     * @param objectMetaIntrospector the specified object schema parser
-     * @return an option to specify the object schema parser
+     * @param objectMetaIntrospector the specified {@link ObjectMetaIntrospector}
+     * @return an option to specify the {@link ObjectMetaIntrospector}
      */
     public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectMetaIntrospector> objectMetaIntrospector(
         @Nonnull ObjectMetaIntrospector objectMetaIntrospector
@@ -226,12 +226,12 @@ public enum ConvertOption {
     }
 
     /**
-     * Returns an option to specify the map schema parser.
+     * Returns an option to specify the {@link MapMetaIntrospector}.
      * <p>
      * By default, {@link MapMetaIntrospector#defaultIntrospector()} is used.
      *
-     * @param mapMetaIntrospector the specified map schema parser
-     * @return an option to specify the map schema parser
+     * @param mapMetaIntrospector the specified {@link MapMetaIntrospector}
+     * @return an option to specify the {@link MapMetaIntrospector}
      */
     public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull MapMetaIntrospector> mapMetaIntrospector(
         @Nonnull MapMetaIntrospector mapMetaIntrospector

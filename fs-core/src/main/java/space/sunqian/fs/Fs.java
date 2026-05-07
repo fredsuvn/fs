@@ -21,7 +21,6 @@ import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.collect.StreamKit;
 import space.sunqian.fs.io.IORuntimeException;
 import space.sunqian.fs.object.ObjectKit;
-import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
@@ -647,16 +646,17 @@ public class Fs {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectMeta}.
+     * a non-map object which can be introspected to {@link ObjectMeta}.
      * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
+     * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
+     * operation uses the options merged from the default and copy options, where copy options override defaults for the
+     * same key.
      * <p>
      * This method is a shortcut to the {@link ObjectCopier#copyProperties(Object, Object, Option[])}.
      *
      * @param src     the given source object
      * @param dst     the given destination object
-     * @param options the options for copying properties
+     * @param options the copy options
      * @throws ObjectConvertException if an error occurs during copying properties
      * @see ObjectCopier
      */
@@ -668,17 +668,18 @@ public class Fs {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectMeta}.
+     * a non-map object which can be introspected to {@link ObjectMeta}.
      * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
+     * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
+     * operation uses the options merged from the default and copy options, where copy options override defaults for the
+     * same key.
      * <p>
      * This method is a shortcut to the {@link ObjectCopier#copyProperties(Object, Object, ObjectConverter, Option[])}.
      *
      * @param src       the given source object
      * @param dst       the given destination object
      * @param converter the converter for converting values of the properties if needed
-     * @param options   the options for copying properties
+     * @param options   the copy options
      * @throws ObjectConvertException if an error occurs during copying properties
      * @see ObjectCopier
      */
@@ -693,10 +694,11 @@ public class Fs {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectMeta}.
+     * a non-map object which can be introspected to {@link ObjectMeta}.
      * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
+     * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
+     * operation uses the options merged from the default and copy options, where copy options override defaults for the
+     * same key.
      * <p>
      * This method is a shortcut to the {@link ObjectCopier#copyProperties(Object, Type, Object, Type, Option[])}.
      *
@@ -704,7 +706,7 @@ public class Fs {
      * @param srcType specifies the type of the given source object
      * @param dst     the given destination object
      * @param dstType specifies the type of the given destination object
-     * @param options the options for copying properties
+     * @param options the copy options
      * @throws ObjectConvertException if an error occurs during copying properties
      * @see ObjectCopier
      */
@@ -726,10 +728,11 @@ public class Fs {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectMeta}.
+     * a non-map object which can be introspected to {@link ObjectMeta}.
      * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
+     * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
+     * operation uses the options merged from the default and copy options, where copy options override defaults for the
+     * same key.
      * <p>
      * This method is a shortcut to the
      * {@link ObjectCopier#copyProperties(Object, Type, Object, Type, ObjectConverter, Option[])}.
@@ -739,7 +742,7 @@ public class Fs {
      * @param dst       the given destination object
      * @param dstType   specifies the type of the given destination object
      * @param converter the converter for converting values of the properties if needed
-     * @param options   the options for copying properties
+     * @param options   the copy options
      * @throws ObjectConvertException if an error occurs during copying properties
      * @see ObjectCopier
      */
@@ -768,15 +771,15 @@ public class Fs {
     /**
      * Converts the given source object to the target type.
      * <p>
-     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
-     * conversion will use the options merged from the default options and additional options. Note the default options
-     * of which keys are same as the additional options will be overridden by those additional options.
+     * The conversion options parameter can be empty, in which case the default options will be used. Otherwise, the
+     * conversion operation uses the options merged from the default and conversion options, where conversion options
+     * override defaults for the same key.
      * <p>
      * This method is a shortcut to the {@link ObjectConverter#convert(Object, Class, Option[])}.
      *
      * @param src        the given source object
      * @param targetType the target type
-     * @param options    the additional conversion options
+     * @param options    the conversion options
      * @param <T>        the target type
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion to the target type is unsupported
@@ -793,16 +796,16 @@ public class Fs {
     /**
      * Converts the given source object from the specified source type to the target type.
      * <p>
-     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
-     * conversion will use the options merged from the default options and additional options. Note the default options
-     * of which keys are same as the additional options will be overridden by those additional options.
+     * The conversion options parameter can be empty, in which case the default options will be used. Otherwise, the
+     * conversion operation uses the options merged from the default and conversion options, where conversion options
+     * override defaults for the same key.
      * <p>
      * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, Class, Option[])}.
      *
      * @param src        the given source object
      * @param srcType    the specified source type
      * @param targetType the target type
-     * @param options    the additional conversion options
+     * @param options    the conversion options
      * @param <T>        the target type
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion from the specified source type to the target type is
@@ -821,15 +824,15 @@ public class Fs {
     /**
      * Converts the given source object to the target type.
      * <p>
-     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
-     * conversion will use the options merged from the default options and additional options. Note the default options
-     * of which keys are same as the additional options will be overridden by those additional options.
+     * The conversion options parameter can be empty, in which case the default options will be used. Otherwise, the
+     * conversion operation uses the options merged from the default and conversion options, where conversion options
+     * override defaults for the same key.
      * <p>
      * This method is a shortcut to the {@link ObjectConverter#convert(Object, TypeRef, Option[])}.
      *
      * @param src        the given source object
      * @param targetType the type ref of the target type
-     * @param options    the additional conversion options
+     * @param options    the conversion options
      * @param <T>        the target type
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion to the target type is unsupported
@@ -846,16 +849,16 @@ public class Fs {
     /**
      * Converts the given source object from the specified source type to the target type.
      * <p>
-     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
-     * conversion will use the options merged from the default options and additional options. Note the default options
-     * of which keys are same as the additional options will be overridden by those additional options.
+     * The conversion options parameter can be empty, in which case the default options will be used. Otherwise, the
+     * conversion operation uses the options merged from the default and conversion options, where conversion options
+     * override defaults for the same key.
      * <p>
      * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, TypeRef, Option[])}.
      *
      * @param src        the given source object
      * @param srcType    the specified source type
      * @param targetType the type ref of the target type
-     * @param options    the additional conversion options
+     * @param options    the conversion options
      * @param <T>        the target type
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion from the specified source type to the target type is
@@ -874,15 +877,15 @@ public class Fs {
     /**
      * Converts the given source object to the target type.
      * <p>
-     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
-     * conversion will use the options merged from the default options and additional options. Note the default options
-     * of which keys are same as the additional options will be overridden by those additional options.
+     * The conversion options parameter can be empty, in which case the default options will be used. Otherwise, the
+     * conversion operation uses the options merged from the default and conversion options, where conversion options
+     * override defaults for the same key.
      * <p>
      * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, Option[])}.
      *
      * @param src        the given source object
      * @param targetType the target type
-     * @param options    the additional conversion options
+     * @param options    the conversion options
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion to the target type is unsupported
      * @throws ObjectConvertException            if the conversion failed
@@ -898,16 +901,16 @@ public class Fs {
     /**
      * Converts the given source object from the specified source type to the target type.
      * <p>
-     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
-     * conversion will use the options merged from the default options and additional options. Note the default options
-     * of which keys are same as the additional options will be overridden by those additional options.
+     * The conversion options parameter can be empty, in which case the default options will be used. Otherwise, the
+     * conversion operation uses the options merged from the default and conversion options, where conversion options
+     * override defaults for the same key.
      * <p>
      * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, Type, Option[])}.
      *
      * @param src        the given source object
      * @param srcType    the specified source type
      * @param targetType the target type
-     * @param options    the additional conversion options
+     * @param options    the conversion options
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion from the specified source type to the target type is
      *                                           unsupported

@@ -29,11 +29,11 @@ import java.util.Objects;
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>, can be quickly used through similar
  * codes:
  * <pre>{@code
- * ObjectMetaManager manager = ...;
- * ObjectMetaManager protoManager = ObjectMetaManager.newManager(
+ * ObjectMetaIntrospector introspector = ...;
+ * ObjectMetaIntrospector protoIntrospector = ObjectMetaIntrospector.rewIntrospector(
  *     cache,
- *     ProtobufSchemaHandler.getInstance(),
- *     manager.asHandler()
+ *     ProtobufMetaHandler.getInstance(),
+ *     introspector.asHandler()
  * );
  * }</pre>
  * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment. And in this

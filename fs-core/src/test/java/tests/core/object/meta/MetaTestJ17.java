@@ -12,8 +12,8 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.meta.DataMetaException;
-import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.ObjectMeta;
+import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.reflect.Method;
@@ -31,48 +31,48 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class MetaTestJ17 {
 
     private InfoRecord<Integer> infoRecord;
-    private ObjectMeta recordSchema;
+    private ObjectMeta recordMeta;
 
     @BeforeEach
     public void setUp() throws Exception {
         infoRecord = new InfoRecord<>("hello", 18, List.of("friend1", "friend2"), 6);
-        recordSchema = ObjectMeta.of(new TypeRef<InfoRecord<Integer>>() {}.type());
+        recordMeta = ObjectMeta.of(new TypeRef<InfoRecord<Integer>>() {}.type());
     }
 
     @Test
-    public void testRecordSchemaBasicProperties() {
-        assertTrue(recordSchema.isObjectMeta());
-        assertFalse(recordSchema.isMapMeta());
-        assertEquals(4, recordSchema.properties().size());
+    public void testRecordMetaBasicProperties() {
+        assertTrue(recordMeta.isObjectMeta());
+        assertFalse(recordMeta.isMapMeta());
+        assertEquals(4, recordMeta.properties().size());
     }
 
     @Test
-    public void testRecordSchemaPropertyName() throws Exception {
-        PropertyMeta recordName = recordSchema.properties().get("name");
+    public void testRecordMetaPropertyName() throws Exception {
+        PropertyMeta recordName = recordMeta.properties().get("name");
         verifyRecordProperty(recordName, "name", String.class, "hello", InfoRecord.class.getMethod("name"));
     }
 
     @Test
-    public void testRecordSchemaPropertyAge() throws Exception {
-        PropertyMeta recordAge = recordSchema.properties().get("age");
+    public void testRecordMetaPropertyAge() throws Exception {
+        PropertyMeta recordAge = recordMeta.properties().get("age");
         verifyRecordProperty(recordAge, "age", int.class, 18, InfoRecord.class.getMethod("age"));
     }
 
     @Test
-    public void testRecordSchemaPropertyFriends() throws Exception {
-        PropertyMeta recordFriends = recordSchema.properties().get("friends");
+    public void testRecordMetaPropertyFriends() throws Exception {
+        PropertyMeta recordFriends = recordMeta.properties().get("friends");
         List<String> expectedFriends = List.of("friend1", "friend2");
         verifyRecordProperty(recordFriends, "friends", new TypeRef<List<String>>() {}.type(), expectedFriends, InfoRecord.class.getMethod("friends"));
     }
 
     @Test
-    public void testRecordSchemaPropertyT() throws Exception {
-        PropertyMeta recordT = recordSchema.properties().get("t");
+    public void testRecordMetaPropertyT() throws Exception {
+        PropertyMeta recordT = recordMeta.properties().get("t");
         verifyRecordProperty(recordT, "t", InfoRecord.class.getTypeParameters()[0], 6, InfoRecord.class.getMethod("t"));
     }
 
     @Test
-    public void testRecordSchemaCopyProperties() {
+    public void testRecordMetaCopyProperties() {
         InfoObject<Long> infoObject = new InfoObject<>();
         Fs.copyProperties(
             infoRecord,
@@ -87,21 +87,21 @@ public class MetaTestJ17 {
     }
 
     @Test
-    public void testRecordSchemaErrorType() {
+    public void testRecordMetaErrorType() {
         assertThrows(DataMetaException.class, () -> ObjectMeta.of(InfoRecord.class.getTypeParameters()[0]));
     }
 
     @Test
     public void testAnnotation() {
-        ObjectMeta schema = ObjectMeta.of(ForAnnotation.class);
-        testAnnotationProp1(schema);
-        testAnnotationProp2(schema);
-        testAnnotationProp3(schema);
-        testAnnotationProp4(schema);
+        ObjectMeta meta = ObjectMeta.of(ForAnnotation.class);
+        testAnnotationProp1(meta);
+        testAnnotationProp2(meta);
+        testAnnotationProp3(meta);
+        testAnnotationProp4(meta);
     }
 
-    private void testAnnotationProp1(ObjectMeta schema) {
-        PropertyMeta prop1 = schema.getProperty("prop1");
+    private void testAnnotationProp1(ObjectMeta meta) {
+        PropertyMeta prop1 = meta.getProperty("prop1");
         assertNotNull(prop1);
         Nonnull a1 = prop1.getAnnotation(Nonnull.class);
         assertNotNull(a1);
@@ -112,8 +112,8 @@ public class MetaTestJ17 {
         assertEquals(Collections.emptyList(), prop1.setterAnnotations());
     }
 
-    private void testAnnotationProp2(ObjectMeta schema) {
-        PropertyMeta prop2 = schema.getProperty("prop2");
+    private void testAnnotationProp2(ObjectMeta meta) {
+        PropertyMeta prop2 = meta.getProperty("prop2");
         assertNotNull(prop2);
         Nullable a2 = prop2.getAnnotation(Nullable.class);
         assertNotNull(a2);
@@ -124,8 +124,8 @@ public class MetaTestJ17 {
         assertEquals(Collections.emptyList(), prop2.setterAnnotations());
     }
 
-    private void testAnnotationProp3(ObjectMeta schema) {
-        PropertyMeta prop3 = schema.getProperty("prop3");
+    private void testAnnotationProp3(ObjectMeta meta) {
+        PropertyMeta prop3 = meta.getProperty("prop3");
         assertNotNull(prop3);
         Nonnull a3 = prop3.getAnnotation(Nonnull.class);
         assertNotNull(a3);
@@ -136,8 +136,8 @@ public class MetaTestJ17 {
         assertEquals(Collections.emptyList(), prop3.setterAnnotations());
     }
 
-    private void testAnnotationProp4(ObjectMeta schema) {
-        PropertyMeta prop4 = schema.getProperty("prop4");
+    private void testAnnotationProp4(ObjectMeta meta) {
+        PropertyMeta prop4 = meta.getProperty("prop4");
         assertNotNull(prop4);
         assertNull(prop4.getAnnotation(Nonnull.class));
         assertNull(prop4.getAnnotation(Nullable.class));

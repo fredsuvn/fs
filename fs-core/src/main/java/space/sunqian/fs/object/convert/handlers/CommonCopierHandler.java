@@ -11,8 +11,8 @@ import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
 import space.sunqian.fs.object.meta.MapMeta;
-import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.ObjectMeta;
+import space.sunqian.fs.object.meta.PropertyMeta;
 
 import java.util.Map;
 
@@ -42,9 +42,9 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         @Nonnull Object srcKey,
         @Nullable Object srcValue,
         @Nonnull Map<Object, Object> src,
-        @Nonnull MapMeta srcSchema,
+        @Nonnull MapMeta srcMeta,
         @Nonnull Map<Object, Object> dst,
-        @Nonnull MapMeta dstSchema,
+        @Nonnull MapMeta dstMeta,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
@@ -57,8 +57,8 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         if (srcKey instanceof String) {
             srcKey = Fs.as(ConvertOption.getNameMapper(options).map((String) srcKey));
         }
-        Object dstKey = converter.convert(srcKey, srcSchema.keyType(), dstSchema.keyType(), options);
-        Object dstValue = converter.convert(srcValue, srcSchema.valueType(), dstSchema.valueType(), options);
+        Object dstKey = converter.convert(srcKey, srcMeta.keyType(), dstMeta.keyType(), options);
+        Object dstValue = converter.convert(srcValue, srcMeta.valueType(), dstMeta.valueType(), options);
         dst.put(dstKey, dstValue);
         return false;
     }
@@ -68,9 +68,9 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         @Nonnull Object srcKey,
         @Nullable Object srcValue,
         @Nonnull Map<Object, Object> src,
-        @Nonnull MapMeta srcSchema,
+        @Nonnull MapMeta srcMeta,
         @Nonnull Object dst,
-        @Nonnull ObjectMeta dstSchema,
+        @Nonnull ObjectMeta dstMeta,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
@@ -83,15 +83,15 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         if (srcKey instanceof String) {
             srcKey = ConvertOption.getNameMapper(options).map((String) srcKey);
         }
-        String dstPropertyName = Fs.as(converter.convert(srcKey, srcSchema.keyType(), String.class, options));
-        PropertyMeta dstProperty = dstSchema.getProperty(dstPropertyName);
+        String dstPropertyName = Fs.as(converter.convert(srcKey, srcMeta.keyType(), String.class, options));
+        PropertyMeta dstProperty = dstMeta.getProperty(dstPropertyName);
         if (dstProperty == null || !dstProperty.isWritable()) {
             return false;
         }
         DatePattern datePattern = dstProperty.getAnnotation(DatePattern.class);
         NumberPattern numberPattern = dstProperty.getAnnotation(NumberPattern.class);
         Option<?, ?>[] actualOps = ConvertKit.mergeOptions(options, datePattern, numberPattern);
-        Object dstPropertyValue = converter.convert(srcValue, srcSchema.valueType(), dstProperty.type(), actualOps);
+        Object dstPropertyValue = converter.convert(srcValue, srcMeta.valueType(), dstProperty.type(), actualOps);
         dstProperty.setValue(dst, dstPropertyValue);
         return false;
     }
@@ -101,9 +101,9 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         @Nonnull String srcPropertyName,
         @Nonnull PropertyMeta srcProperty,
         @Nonnull Object src,
-        @Nonnull ObjectMeta srcSchema,
+        @Nonnull ObjectMeta srcMeta,
         @Nonnull Map<Object, Object> dst,
-        @Nonnull MapMeta dstSchema,
+        @Nonnull MapMeta dstMeta,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
@@ -121,8 +121,8 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         if (srcPropertyValue == null && ConvertOption.isIgnoreNull(options)) {
             return false;
         }
-        Object dstKey = converter.convert(actualSrcPropertyName, String.class, dstSchema.keyType(), options);
-        Object dstValue = converter.convert(srcPropertyValue, srcProperty.type(), dstSchema.valueType(), options);
+        Object dstKey = converter.convert(actualSrcPropertyName, String.class, dstMeta.keyType(), options);
+        Object dstValue = converter.convert(srcPropertyValue, srcProperty.type(), dstMeta.valueType(), options);
         dst.put(dstKey, dstValue);
         return false;
     }
@@ -132,9 +132,9 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         @Nonnull String srcPropertyName,
         @Nonnull PropertyMeta srcProperty,
         @Nonnull Object src,
-        @Nonnull ObjectMeta srcSchema,
+        @Nonnull ObjectMeta srcMeta,
         @Nonnull Object dst,
-        @Nonnull ObjectMeta dstSchema,
+        @Nonnull ObjectMeta dstMeta,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
@@ -153,7 +153,7 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
             return false;
         }
         String dstPropertyName = Fs.as(converter.convert(actualSrcPropertyName, String.class, String.class, options));
-        PropertyMeta dstProperty = dstSchema.getProperty(dstPropertyName);
+        PropertyMeta dstProperty = dstMeta.getProperty(dstPropertyName);
         if (dstProperty == null || !dstProperty.isWritable()) {
             return false;
         }

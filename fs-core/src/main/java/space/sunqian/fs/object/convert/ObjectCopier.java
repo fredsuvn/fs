@@ -24,11 +24,13 @@ import java.util.Map;
  * This interface is used to copy properties from one object to another. The properties can come from a {@link Map} or a
  * non-map object that can be introspected to {@link MapMeta} and {@link ObjectMeta}.
  * <p>
- * A copier contains a list of {@link Handler}s to sequentially attempt
+ * A {@link ObjectCopier} contains a list of {@link Handler}s to sequentially attempt copy. The copy logic iterates over
+ * each handler in the {@link #handlers()} and, based on its return value, decides whether to complete the copy.
  * <p>
- * A copier can have a list of default options. The options parameter of a copy method (such as
+ * A {@link ObjectCopier} can have a list of default options. The parameter options of a conversion method (such as
  * {@link #copyProperties(Object, Type, Object, Type, ObjectConverter, Option...)}) will be merged with the default
- * options when the method is called.
+ * options when the method is called, and any parameter option with the same key as a default option will override it.
+ * The supported built-in options are defined in {@link ConvertOption}.
  *
  * @author sunqian
  * @implNote The default implementations of {@link ObjectCopier} support adding annotations defined in
@@ -97,14 +99,15 @@ public interface ObjectCopier {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectMeta}.
+     * a non-map object which can be introspected to {@link ObjectMeta}.
      * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
+     * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
+     * operation uses the options merged from the default and copy options, where copy options override defaults for the
+     * same key.
      *
      * @param src     the given source object
      * @param dst     the given destination object
-     * @param options the options for copying properties
+     * @param options the copy options
      * @throws ObjectCopyException if an error occurs during copying properties
      */
     default void copyProperties(
@@ -115,15 +118,16 @@ public interface ObjectCopier {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectMeta}.
+     * a non-map object which can be introspected to {@link ObjectMeta}.
      * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
+     * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
+     * operation uses the options merged from the default and copy options, where copy options override defaults for the
+     * same key.
      *
      * @param src       the given source object
      * @param dst       the given destination object
      * @param converter the converter for converting values of the properties if needed
-     * @param options   the options for copying properties
+     * @param options   the copy options
      * @throws ObjectCopyException if an error occurs during copying properties
      */
     default void copyProperties(
@@ -137,16 +141,17 @@ public interface ObjectCopier {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectMeta}.
+     * a non-map object which can be introspected to {@link ObjectMeta}.
      * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
+     * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
+     * operation uses the options merged from the default and copy options, where copy options override defaults for the
+     * same key.
      *
      * @param src     the given source object
      * @param srcType specifies the type of the given source object
      * @param dst     the given destination object
      * @param dstType specifies the type of the given destination object
-     * @param options the options for copying properties
+     * @param options the copy options
      * @throws ObjectCopyException if an error occurs during copying properties
      */
     default void copyProperties(
@@ -168,17 +173,18 @@ public interface ObjectCopier {
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectMeta}.
+     * a non-map object which can be introspected to {@link ObjectMeta}.
      * <p>
-     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConvertOption} or other custom options for custom implementations.
+     * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
+     * operation uses the options merged from the default and copy options, where copy options override defaults for the
+     * same key.
      *
      * @param src       the given source object
      * @param srcType   specifies the type of the given source object
      * @param dst       the given destination object
      * @param dstType   specifies the type of the given destination object
      * @param converter the converter for converting values of the properties if needed
-     * @param options   the options for copying properties
+     * @param options   the copy options
      * @throws ObjectCopyException if an error occurs during copying properties
      */
     void copyProperties(
@@ -281,9 +287,9 @@ public interface ObjectCopier {
          *
          * @param srcKey    the key of the entry to be copied
          * @param srcValue  the value of the entry to be copied
-         * @param srcSchema the schema of the source map
+         * @param srcMeta   the meta info of the source map
          * @param dst       the destination map
-         * @param dstSchema the schema of the destination map
+         * @param dstMeta   the meta info of the destination map
          * @param converter the converter used in the mapping process
          * @param options   the options used in the mapping process
          * @return whether to continue to copy
@@ -293,9 +299,9 @@ public interface ObjectCopier {
             @Nonnull Object srcKey,
             @Nullable Object srcValue,
             @Nonnull Map<Object, Object> src,
-            @Nonnull MapMeta srcSchema,
+            @Nonnull MapMeta srcMeta,
             @Nonnull Map<Object, Object> dst,
-            @Nonnull MapMeta dstSchema,
+            @Nonnull MapMeta dstMeta,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception;
@@ -307,9 +313,9 @@ public interface ObjectCopier {
          *
          * @param srcKey    the key of the entry to be copied
          * @param srcValue  the value of the entry to be copied
-         * @param srcSchema the schema of the source map
+         * @param srcMeta   the meta info of the source map
          * @param dst       the destination object
-         * @param dstSchema the schema of the destination object
+         * @param dstMeta   the meta info of the destination object
          * @param converter the converter used in the mapping process
          * @param options   the options used in the mapping process
          * @return whether to continue to copy
@@ -319,9 +325,9 @@ public interface ObjectCopier {
             @Nonnull Object srcKey,
             @Nullable Object srcValue,
             @Nonnull Map<Object, Object> src,
-            @Nonnull MapMeta srcSchema,
+            @Nonnull MapMeta srcMeta,
             @Nonnull Object dst,
-            @Nonnull ObjectMeta dstSchema,
+            @Nonnull ObjectMeta dstMeta,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception;
@@ -334,9 +340,9 @@ public interface ObjectCopier {
          * @param srcPropertyName the name of the property to be copied
          * @param srcProperty     the property to be copied
          * @param src             the source object
-         * @param srcSchema       the schema of the source object
+         * @param srcMeta         the meta info of the source object
          * @param dst             the destination map
-         * @param dstSchema       the schema of the destination map
+         * @param dstMeta         the meta info of the destination map
          * @param converter       the converter used in the mapping process
          * @param options         the options used in the mapping process
          * @return whether to continue to copy
@@ -346,9 +352,9 @@ public interface ObjectCopier {
             @Nonnull String srcPropertyName,
             @Nonnull PropertyMeta srcProperty,
             @Nonnull Object src,
-            @Nonnull ObjectMeta srcSchema,
+            @Nonnull ObjectMeta srcMeta,
             @Nonnull Map<Object, Object> dst,
-            @Nonnull MapMeta dstSchema,
+            @Nonnull MapMeta dstMeta,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception;
@@ -361,9 +367,9 @@ public interface ObjectCopier {
          * @param srcPropertyName the name of the property to be copied
          * @param srcProperty     the property to be copied
          * @param src             the source object
-         * @param srcSchema       the schema of the source object
+         * @param srcMeta         the meta info of the source object
          * @param dst             the destination object
-         * @param dstSchema       the schema of the destination object
+         * @param dstMeta         the meta info of the destination object
          * @param converter       the converter used in the mapping process
          * @param options         the options used in the mapping process
          * @return whether to continue to copy
@@ -373,9 +379,9 @@ public interface ObjectCopier {
             @Nonnull String srcPropertyName,
             @Nonnull PropertyMeta srcProperty,
             @Nonnull Object src,
-            @Nonnull ObjectMeta srcSchema,
+            @Nonnull ObjectMeta srcMeta,
             @Nonnull Object dst,
-            @Nonnull ObjectMeta dstSchema,
+            @Nonnull ObjectMeta dstMeta,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception;

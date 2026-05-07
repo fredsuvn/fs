@@ -11,9 +11,9 @@ import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.meta.DataMetaException;
 import space.sunqian.fs.object.meta.MapMeta;
 import space.sunqian.fs.object.meta.MapMetaIntrospector;
-import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
+import space.sunqian.fs.object.meta.PropertyMeta;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -53,26 +53,26 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
         try {
             @Nonnull Option<?, ?> @Nonnull [] actualOptions = OptionKit.mergeOptions(defaultOptionsArray, options);
             if (src instanceof Map) {
-                MapMetaIntrospector srcParser = ConvertOption.getMapMetaIntrospector(actualOptions);
-                MapMeta srcSchema = parseMapSchema((Map<?, ?>) src, srcParser, srcType, actualOptions);
+                MapMetaIntrospector srcIntrospector = ConvertOption.getMapMetaIntrospector(actualOptions);
+                MapMeta srcMeta = introspectMap((Map<?, ?>) src, srcIntrospector, srcType, actualOptions);
                 if (dst instanceof Map) {
-                    MapMeta dstParser = parseMapSchema((Map<?, ?>) dst, srcParser, dstType, actualOptions);
-                    mapToMap(Fs.as(src), srcSchema, Fs.as(dst), dstParser, converter, actualOptions);
+                    MapMeta dstMeta = introspectMap((Map<?, ?>) dst, srcIntrospector, dstType, actualOptions);
+                    mapToMap(Fs.as(src), srcMeta, Fs.as(dst), dstMeta, converter, actualOptions);
                 } else {
-                    ObjectMetaIntrospector objectParser = ConvertOption.getObjectMetaIntrospector(actualOptions);
-                    ObjectMeta dstSchema = parseObjectSchema(dst, objectParser, dstType, actualOptions);
-                    mapToObject(Fs.as(src), srcSchema, dst, dstSchema, converter, actualOptions);
+                    ObjectMetaIntrospector dstIntrospector = ConvertOption.getObjectMetaIntrospector(actualOptions);
+                    ObjectMeta dstMeta = introspectObject(dst, dstIntrospector, dstType, actualOptions);
+                    mapToObject(Fs.as(src), srcMeta, dst, dstMeta, converter, actualOptions);
                 }
             } else {
-                ObjectMetaIntrospector srcParser = ConvertOption.getObjectMetaIntrospector(actualOptions);
-                ObjectMeta srcSchema = parseObjectSchema(src, srcParser, srcType, actualOptions);
+                ObjectMetaIntrospector srcIntrospector = ConvertOption.getObjectMetaIntrospector(actualOptions);
+                ObjectMeta srcMeta = introspectObject(src, srcIntrospector, srcType, actualOptions);
                 if (dst instanceof Map) {
-                    MapMetaIntrospector dstParser = ConvertOption.getMapMetaIntrospector(actualOptions);
-                    MapMeta dstSchema = parseMapSchema((Map<?, ?>) dst, dstParser, dstType, actualOptions);
-                    objectToMap(src, srcSchema, Fs.as(dst), dstSchema, converter, actualOptions);
+                    MapMetaIntrospector dstIntrospector = ConvertOption.getMapMetaIntrospector(actualOptions);
+                    MapMeta dstMeta = introspectMap((Map<?, ?>) dst, dstIntrospector, dstType, actualOptions);
+                    objectToMap(src, srcMeta, Fs.as(dst), dstMeta, converter, actualOptions);
                 } else {
-                    ObjectMeta dstSchema = srcParser.introspect(dstType);
-                    objectToObject(src, srcSchema, dst, dstSchema, converter, actualOptions);
+                    ObjectMeta dstMeta = introspectObject(dst, srcIntrospector, dstType, actualOptions);
+                    objectToObject(src, srcMeta, dst, dstMeta, converter, actualOptions);
                 }
             }
         } catch (ObjectCopyException e) {
@@ -82,14 +82,14 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
         }
     }
 
-    private @Nonnull ObjectMeta parseObjectSchema(
+    private @Nonnull ObjectMeta introspectObject(
         @Nonnull Object object,
-        @Nonnull ObjectMetaIntrospector parser,
+        @Nonnull ObjectMetaIntrospector introspector,
         @Nonnull Type type,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         try {
-            return parser.introspect(type);
+            return introspector.introspect(type);
         } catch (DataMetaException e) {
             if (ConvertOption.isStrictSourceTypeMode(options)) {
                 throw e;
@@ -98,18 +98,18 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
             if (Objects.equals(objType, type)) {
                 throw e;
             }
-            return parser.introspect(objType);
+            return introspector.introspect(objType);
         }
     }
 
-    private @Nonnull MapMeta parseMapSchema(
+    private @Nonnull MapMeta introspectMap(
         @Nonnull Map<?, ?> object,
-        @Nonnull MapMetaIntrospector parser,
+        @Nonnull MapMetaIntrospector introspector,
         @Nonnull Type type,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         try {
-            return parser.introspect(type);
+            return introspector.introspect(type);
         } catch (DataMetaException e) {
             if (ConvertOption.isStrictSourceTypeMode(options)) {
                 throw e;
@@ -121,7 +121,7 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
                   throw e;
               }
              */
-            return parser.introspect(object.getClass());
+            return introspector.introspect(object.getClass());
         }
     }
 
@@ -142,9 +142,9 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
 
     void mapToMap(
         @Nonnull Map<Object, Object> src,
-        @Nonnull MapMeta srcSchema,
+        @Nonnull MapMeta srcMeta,
         @Nonnull Map<Object, Object> dst,
-        @Nonnull MapMeta dstSchema,
+        @Nonnull MapMeta dstMeta,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
@@ -152,7 +152,7 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
             try {
                 for (Handler handler : handlers) {
                     boolean goon = handler.copyProperty(
-                        srcKey, srcValue, src, srcSchema, dst, dstSchema, converter, options
+                        srcKey, srcValue, src, srcMeta, dst, dstMeta, converter, options
                     );
                     if (!goon) {
                         break;
@@ -166,9 +166,9 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
 
     void mapToObject(
         @Nonnull Map<Object, Object> src,
-        @Nonnull MapMeta srcSchema,
+        @Nonnull MapMeta srcMeta,
         @Nonnull Object dst,
-        @Nonnull ObjectMeta dstSchema,
+        @Nonnull ObjectMeta dstMeta,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
@@ -176,7 +176,7 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
             try {
                 for (Handler handler : handlers) {
                     boolean goon = handler.copyProperty(
-                        srcKey, srcValue, src, srcSchema, dst, dstSchema, converter, options
+                        srcKey, srcValue, src, srcMeta, dst, dstMeta, converter, options
                     );
                     if (!goon) {
                         break;
@@ -190,17 +190,17 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
 
     void objectToMap(
         @Nonnull Object src,
-        @Nonnull ObjectMeta srcSchema,
+        @Nonnull ObjectMeta srcMeta,
         @Nonnull Map<Object, Object> dst,
-        @Nonnull MapMeta dstSchema,
+        @Nonnull MapMeta dstMeta,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
-        srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {
+        srcMeta.properties().forEach((srcPropertyName, srcProperty) -> {
             try {
                 for (Handler handler : handlers) {
                     boolean goon = handler.copyProperty(
-                        srcProperty.name(), srcProperty, src, srcSchema, dst, dstSchema, converter, options
+                        srcProperty.name(), srcProperty, src, srcMeta, dst, dstMeta, converter, options
                     );
                     if (!goon) {
                         break;
@@ -214,17 +214,17 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
 
     void objectToObject(
         @Nonnull Object src,
-        @Nonnull ObjectMeta srcSchema,
+        @Nonnull ObjectMeta srcMeta,
         @Nonnull Object dst,
-        @Nonnull ObjectMeta dstSchema,
+        @Nonnull ObjectMeta dstMeta,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
-        srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {
+        srcMeta.properties().forEach((srcPropertyName, srcProperty) -> {
             try {
                 for (Handler handler : handlers) {
                     boolean goon = handler.copyProperty(
-                        srcProperty.name(), srcProperty, src, srcSchema, dst, dstSchema, converter, options
+                        srcProperty.name(), srcProperty, src, srcMeta, dst, dstMeta, converter, options
                     );
                     if (!goon) {
                         break;
@@ -237,11 +237,11 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
     }
 
     @Override
-    public boolean copyProperty(@Nonnull Object srcKey, @Nullable Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+    public boolean copyProperty(@Nonnull Object srcKey, @Nullable Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcMeta, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
         boolean goon = true;
         for (Handler handler : handlers) {
             goon = handler.copyProperty(
-                srcKey, srcValue, src, srcSchema, dst, dstSchema, converter, options
+                srcKey, srcValue, src, srcMeta, dst, dstMeta, converter, options
             );
             if (!goon) {
                 break;
@@ -251,11 +251,11 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
     }
 
     @Override
-    public boolean copyProperty(@Nonnull Object srcKey, @Nullable Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+    public boolean copyProperty(@Nonnull Object srcKey, @Nullable Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcMeta, @Nonnull Object dst, @Nonnull ObjectMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
         boolean goon = true;
         for (Handler handler : handlers) {
             goon = handler.copyProperty(
-                srcKey, srcValue, src, srcSchema, dst, dstSchema, converter, options
+                srcKey, srcValue, src, srcMeta, dst, dstMeta, converter, options
             );
             if (!goon) {
                 break;
@@ -265,11 +265,11 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
     }
 
     @Override
-    public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+    public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcMeta, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
         boolean goon = true;
         for (Handler handler : handlers) {
             goon = handler.copyProperty(
-                srcPropertyName, srcProperty, src, srcSchema, dst, dstSchema, converter, options
+                srcPropertyName, srcProperty, src, srcMeta, dst, dstMeta, converter, options
             );
             if (!goon) {
                 break;
@@ -279,11 +279,11 @@ final class ObjectCopierImpl implements ObjectCopier, ObjectCopier.Handler {
     }
 
     @Override
-    public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+    public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcMeta, @Nonnull Object dst, @Nonnull ObjectMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
         boolean goon = true;
         for (Handler handler : handlers) {
             goon = handler.copyProperty(
-                srcPropertyName, srcProperty, src, srcSchema, dst, dstSchema, converter, options
+                srcPropertyName, srcProperty, src, srcMeta, dst, dstMeta, converter, options
             );
             if (!goon) {
                 break;

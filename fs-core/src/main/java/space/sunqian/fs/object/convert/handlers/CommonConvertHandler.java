@@ -212,16 +212,16 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             if (targetClass.isArray()) {
                 return toArray(src, srcType, targetClass, converter, options);
             }
-            ClassHandler classHandler = TargetClasses.get(targetClass);
+            ClassHandler targetClassHandler = TargetClasses.get(targetClass);
             // to target class:
-            if (classHandler != null) {
-                return classHandler.convert(src, srcType, targetClass, converter, options);
+            if (targetClassHandler != null) {
+                return targetClassHandler.convert(src, srcType, targetClass, converter, options);
             }
-            IntFunction<Collection<Object>> collectionFunc = collectionFunction(targetClass);
+            IntFunction<Collection<Object>> collectionFactory = collectionFunction(targetClass);
             // to collection:
-            if (collectionFunc != null) {
+            if (collectionFactory != null) {
                 return toCollection(
-                    src, srcType, collectionFunc, targetClass.getTypeParameters()[0], converter, options
+                    src, srcType, collectionFactory, targetClass.getTypeParameters()[0], converter, options
                 );
             }
             // to map or data object:
@@ -233,11 +233,11 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @SuppressWarnings("PatternVariableCanBeUsed")
             ParameterizedType paramType = (ParameterizedType) targetType;
             Class<?> rawTarget = (Class<?>) paramType.getRawType();
-            IntFunction<Collection<Object>> collectionFunc = collectionFunction(rawTarget);
+            IntFunction<Collection<Object>> collectionFactory = collectionFunction(rawTarget);
             // to collection:
-            if (collectionFunc != null) {
+            if (collectionFactory != null) {
                 return toCollection(
-                    src, srcType, collectionFunc, paramType.getActualTypeArguments()[0], converter, options
+                    src, srcType, collectionFactory, paramType.getActualTypeArguments()[0], converter, options
                 );
             }
             // to map or data object:
@@ -378,7 +378,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         }
         int size = srcCollection.size();
         Collection<Object> newCollection = collectionFunc.apply(size);
-        int i = 0;
+        // int i = 0;
         for (Object srcElement : srcCollection) {
             Object targetElement = converter.convert(srcElement, srcComponentType, targetComponentType, options);
             newCollection.add(targetElement);

@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This is a skeletal implementation of {@link ObjectMetaIntrospector.Handler} to minimize the effort required to implement
- * the interface.
+ * This is a skeletal implementation of {@link ObjectMetaIntrospector.Handler} to minimize the effort required to
+ * implement the interface.
  * <p>
  * This class uses {@link Class#getMethods()} to find out all accessible methods without synthetic methods, passes each
  * of them to {@link #introspectAccessor(Method)} to introspect property accessor infos. Then, this class processes the

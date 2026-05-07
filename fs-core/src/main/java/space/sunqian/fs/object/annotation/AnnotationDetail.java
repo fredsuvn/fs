@@ -6,7 +6,7 @@ import space.sunqian.fs.Fs;
 import java.lang.annotation.Annotation;
 
 /**
- * Represents the detail info for an annotation, including the original annotation instance and parsed objects from the
+ * Represents the detail info for an annotation, including the original annotation instance and detail objects from the
  * annotation attributes. Here are the detail classes and its original annotation instance:
  * <table>
  *     <tr>

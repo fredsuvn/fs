@@ -53,10 +53,10 @@ public class TraceKit {
      */
     public static @Nonnull List<@Nonnull StackTraceElement> stackTrace(@Nonnull Thread thread) {
         StackTraceElement[] elements = thread.getStackTrace();
-        return parseStackTrace(elements);
+        return resolveStackTrace(elements);
     }
 
-    private static @Nonnull List<@Nonnull StackTraceElement> parseStackTrace(
+    private static @Nonnull List<@Nonnull StackTraceElement> resolveStackTrace(
         @Nonnull StackTraceElement @Nonnull [] elements
     ) {
         int preIndex = -1;

@@ -3,8 +3,8 @@ package space.sunqian.fs.object.meta.handlers;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.invoke.Invocable;
-import space.sunqian.fs.object.meta.PropertyMetaBase;
 import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
+import space.sunqian.fs.object.meta.PropertyMetaBase;
 import space.sunqian.fs.reflect.TypeKit;
 
 import java.lang.reflect.Field;

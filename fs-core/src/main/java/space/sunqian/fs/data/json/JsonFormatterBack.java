@@ -234,10 +234,10 @@ final class JsonFormatterBack {
         }
 
         private void writeObject(@Nonnull Object object, @Nonnull Appendable appender) throws Exception {
-            ObjectMeta schema = objectIntrospector.introspect(object.getClass());
+            ObjectMeta meta = objectIntrospector.introspect(object.getClass());
             appender.append('{');
             boolean[] isFirst = {true};
-            schema.properties().forEach((key, property) -> {
+            meta.properties().forEach((key, property) -> {
                 try {
                     // ignore class
                     if ("class".equals(property.name())) {

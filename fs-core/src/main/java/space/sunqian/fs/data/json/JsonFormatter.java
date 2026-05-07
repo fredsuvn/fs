@@ -31,8 +31,8 @@ public interface JsonFormatter extends ByteDataFormatter<Object>, CharDataFormat
 
     /**
      * Returns the default {@link JsonFormatter}, which uses {@link ObjectMetaIntrospector#defaultIntrospector()} and
-     * {@link ObjectConverter#defaultConverter()} to pars and convert objects, and doesn't ignore the properties of
-     * which values are {@code null}, or {@code null} values of map, when formatting.
+     * {@link ObjectConverter#defaultConverter()} to introspect and convert objects, and doesn't ignore the properties
+     * of which values are {@code null}, or {@code null} values of map, when formatting.
      * <p>
      * The returned formatter will format {@code byte[]}/{@link ByteBuffer} as Base64 string, and it is the only way to
      * format binary data.

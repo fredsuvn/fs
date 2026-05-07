@@ -22,9 +22,9 @@ import space.sunqian.fs.object.convert.ObjectCopyException;
 import space.sunqian.fs.object.convert.handlers.CommonCopierHandler;
 import space.sunqian.fs.object.meta.MapMeta;
 import space.sunqian.fs.object.meta.MapMetaIntrospector;
-import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
+import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.reflect.TypeRef;
 
 import java.lang.annotation.ElementType;
@@ -470,22 +470,22 @@ public class CopierTest implements TestPrint {
     private ObjectCopier.Handler createNoCopyHandler() {
         return new ObjectCopier.Handler() {
             @Override
-            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcMeta, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 return false;
             }
 
             @Override
-            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcMeta, @Nonnull Object dst, @Nonnull ObjectMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 return false;
             }
 
             @Override
-            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcMeta, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 return false;
             }
 
             @Override
-            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcMeta, @Nonnull Object dst, @Nonnull ObjectMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 return false;
             }
         };
@@ -494,29 +494,29 @@ public class CopierTest implements TestPrint {
     private ObjectCopier.Handler createKeyPlusHandler() {
         class Key2Handler extends CommonCopierHandler {
             @Override
-            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
-                return super.copyProperty((srcKey + "2"), srcValue, src, srcSchema, dst, dstSchema, converter, options);
+            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcMeta, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                return super.copyProperty((srcKey + "2"), srcValue, src, srcMeta, dst, dstMeta, converter, options);
             }
 
             @Override
-            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
-                return super.copyProperty((srcKey + "2"), srcValue, src, srcSchema, dst, dstSchema, converter, options);
+            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcMeta, @Nonnull Object dst, @Nonnull ObjectMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+                return super.copyProperty((srcKey + "2"), srcValue, src, srcMeta, dst, dstMeta, converter, options);
             }
 
             @Override
-            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcMeta, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 if ("class".equals(srcPropertyName) || !srcProperty.isReadable()) {
                     return false;
                 }
-                return super.copyProperty(srcPropertyName + "2", srcProperty, src, srcSchema, dst, dstSchema, converter, options);
+                return super.copyProperty(srcPropertyName + "2", srcProperty, src, srcMeta, dst, dstMeta, converter, options);
             }
 
             @Override
-            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcMeta, @Nonnull Object dst, @Nonnull ObjectMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 if ("class".equals(srcPropertyName) || !srcProperty.isReadable()) {
                     return false;
                 }
-                return super.copyProperty(srcPropertyName + "2", srcProperty, src, srcSchema, dst, dstSchema, converter, options);
+                return super.copyProperty(srcPropertyName + "2", srcProperty, src, srcMeta, dst, dstMeta, converter, options);
             }
         }
         return new Key2Handler();
@@ -525,19 +525,19 @@ public class CopierTest implements TestPrint {
     private ObjectCopier.Handler createValueChangeHandler() {
         class Value2Handler extends CommonCopierHandler {
             @Override
-            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcMeta, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 Object value = "second".equals(srcKey) ? "2" : "1";
-                return super.copyProperty(srcKey, value, src, srcSchema, dst, dstSchema, converter, options);
+                return super.copyProperty(srcKey, value, src, srcMeta, dst, dstMeta, converter, options);
             }
 
             @Override
-            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcMeta, @Nonnull Object dst, @Nonnull ObjectMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 Object value = "second".equals(srcKey) ? "2" : "1";
-                return super.copyProperty(srcKey, value, src, srcSchema, dst, dstSchema, converter, options);
+                return super.copyProperty(srcKey, value, src, srcMeta, dst, dstMeta, converter, options);
             }
 
             @Override
-            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcMeta, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 if ("class".equals(srcPropertyName) || !srcProperty.isReadable()) {
                     return false;
                 }
@@ -547,12 +547,12 @@ public class CopierTest implements TestPrint {
             }
 
             @Override
-            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcMeta, @Nonnull Object dst, @Nonnull ObjectMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 if ("class".equals(srcPropertyName) || !srcProperty.isReadable()) {
                     return false;
                 }
                 Object value = "second".equals(srcPropertyName) ? "2" : "1";
-                dstSchema.getProperty(srcPropertyName).setValue(dst, value);
+                dstMeta.getProperty(srcPropertyName).setValue(dst, value);
                 return false;
             }
         }
@@ -562,22 +562,22 @@ public class CopierTest implements TestPrint {
     private ObjectCopier.Handler createErrorHandler() {
         return new ObjectCopier.Handler() {
             @Override
-            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcMeta, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 throw new UnreachablePointException();
             }
 
             @Override
-            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcMeta, @Nonnull Object dst, @Nonnull ObjectMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 throw new UnreachablePointException();
             }
 
             @Override
-            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcMeta, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 throw new UnreachablePointException();
             }
 
             @Override
-            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcMeta, @Nonnull Object dst, @Nonnull ObjectMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 throw new UnreachablePointException();
             }
         };
@@ -586,22 +586,22 @@ public class CopierTest implements TestPrint {
     private ObjectCopier.Handler createContinueHandler() {
         return new ObjectCopier.Handler() {
             @Override
-            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcMeta, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 return true;
             }
 
             @Override
-            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull Object srcKey, Object srcValue, @Nonnull Map<Object, Object> src, @Nonnull MapMeta srcMeta, @Nonnull Object dst, @Nonnull ObjectMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 return true;
             }
 
             @Override
-            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcMeta, @Nonnull Map<Object, Object> dst, @Nonnull MapMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 return true;
             }
 
             @Override
-            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcSchema, @Nonnull Object dst, @Nonnull ObjectMeta dstSchema, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+            public boolean copyProperty(@Nonnull String srcPropertyName, @Nonnull PropertyMeta srcProperty, @Nonnull Object src, @Nonnull ObjectMeta srcMeta, @Nonnull Object dst, @Nonnull ObjectMeta dstMeta, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
                 return true;
             }
         };

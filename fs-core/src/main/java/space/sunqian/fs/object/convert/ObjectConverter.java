@@ -19,9 +19,10 @@ import java.util.List;
 /**
  * This interface is used to convert an object from the specified type to the target type.
  * <p>
- * It contains and uses a list of {@link Handler}s to sequentially attempt conversion. A handler can return
- * {@link Status#HANDLER_CONTINUE}, {@link Status#HANDLER_BREAK} or a normal value as the final result. The conversion
- * logic is as follows:
+ * A {@link ObjectConverter} contains a list of {@link Handler}s to sequentially attempt conversion. The conversion
+ * logic iterates over each handler in the {@link #handlers()} and, based on its return value, decides whether to
+ * complete the conversion. A {@link Handler} can return {@link Status#HANDLER_CONTINUE}, {@link Status#HANDLER_BREAK}
+ * or a normal value as the final result. The conversion logic is as follows:
  * <pre>{@code
  * for (Handler handler : handlers()) {
  *     Object ret;
@@ -41,9 +42,10 @@ import java.util.List;
  * throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
  * }</pre>
  * <p>
- * A converter can have default options. The actual options used in a conversion are merged with the default options and
- * the additional options of the conversion method. Note the default options of which keys are same as the additional
- * options will be overridden by those additional options.
+ * A {@link ObjectConverter} can have a list of default options. The parameter options of a conversion method (such as
+ * {@link #convert(Object, Type, Type, Option...)}) will be merged with the default options when the method is called,
+ * and any parameter option with the same key as a default option will override it. The supported built-in options are
+ * defined in {@link ConvertOption}.
  * <p>
  * The thread safety of the methods in this interface is determined by its dependent option objects, such as
  * {@link BuilderManager}, {@link ObjectCopier}, and other objects. By default, they are all thread-safe.
@@ -106,13 +108,13 @@ public interface ObjectConverter {
     /**
      * Converts the given source object to the target type.
      * <p>
-     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
-     * conversion will use the options merged from the default options and additional options. Note the default options
-     * of which keys are same as the additional options will be overridden by those additional options.
+     * The conversion options parameter can be empty, in which case the default options will be used. Otherwise, the
+     * conversion operation uses the options merged from the default and conversion options, where conversion options
+     * override defaults for the same key.
      *
      * @param src        the given source object
      * @param targetType the target type
-     * @param options    the additional conversion options
+     * @param options    the conversion options
      * @param <T>        the target type
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion to the target type is unsupported
@@ -129,14 +131,14 @@ public interface ObjectConverter {
     /**
      * Converts the given source object from the specified source type to the target type.
      * <p>
-     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
-     * conversion will use the options merged from the default options and additional options. Note the default options
-     * of which keys are same as the additional options will be overridden by those additional options.
+     * The conversion options parameter can be empty, in which case the default options will be used. Otherwise, the
+     * conversion operation uses the options merged from the default and conversion options, where conversion options
+     * override defaults for the same key.
      *
      * @param src        the given source object
      * @param srcType    the specified source type
      * @param targetType the target type
-     * @param options    the additional conversion options
+     * @param options    the conversion options
      * @param <T>        the target type
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion from the specified source type to the target type is
@@ -155,13 +157,13 @@ public interface ObjectConverter {
     /**
      * Converts the given source object to the target type.
      * <p>
-     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
-     * conversion will use the options merged from the default options and additional options. Note the default options
-     * of which keys are same as the additional options will be overridden by those additional options.
+     * The conversion options parameter can be empty, in which case the default options will be used. Otherwise, the
+     * conversion operation uses the options merged from the default and conversion options, where conversion options
+     * override defaults for the same key.
      *
      * @param src        the given source object
      * @param targetType the type ref of the target type
-     * @param options    the additional conversion options
+     * @param options    the conversion options
      * @param <T>        the target type
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion to the target type is unsupported
@@ -178,14 +180,14 @@ public interface ObjectConverter {
     /**
      * Converts the given source object from the specified source type to the target type.
      * <p>
-     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
-     * conversion will use the options merged from the default options and additional options. Note the default options
-     * of which keys are same as the additional options will be overridden by those additional options.
+     * The conversion options parameter can be empty, in which case the default options will be used. Otherwise, the
+     * conversion operation uses the options merged from the default and conversion options, where conversion options
+     * override defaults for the same key.
      *
      * @param src        the given source object
      * @param srcType    the specified source type
      * @param targetType the type ref of the target type
-     * @param options    the additional conversion options
+     * @param options    the conversion options
      * @param <T>        the target type
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion from the specified source type to the target type is
@@ -204,13 +206,13 @@ public interface ObjectConverter {
     /**
      * Converts the given source object to the target type.
      * <p>
-     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
-     * conversion will use the options merged from the default options and additional options. Note the default options
-     * of which keys are same as the additional options will be overridden by those additional options.
+     * The conversion options parameter can be empty, in which case the default options will be used. Otherwise, the
+     * conversion operation uses the options merged from the default and conversion options, where conversion options
+     * override defaults for the same key.
      *
      * @param src        the given source object
      * @param targetType the target type
-     * @param options    the additional conversion options
+     * @param options    the conversion options
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion to the target type is unsupported
      * @throws ObjectConvertException            if the conversion failed
@@ -226,14 +228,14 @@ public interface ObjectConverter {
     /**
      * Converts the given source object from the specified source type to the target type.
      * <p>
-     * The additional options parameter can be empty, in which case the default options will be used. Otherwise,
-     * conversion will use the options merged from the default options and additional options. Note the default options
-     * of which keys are same as the additional options will be overridden by those additional options.
+     * The conversion options parameter can be empty, in which case the default options will be used. Otherwise, the
+     * conversion operation uses the options merged from the default and conversion options, where conversion options
+     * override defaults for the same key.
      *
      * @param src        the given source object
      * @param srcType    the specified source type
      * @param targetType the target type
-     * @param options    the additional conversion options
+     * @param options    the conversion options
      * @return the converted object, {@code null} is permitted
      * @throws UnsupportedObjectConvertException if the conversion from the specified source type to the target type is
      *                                           unsupported
