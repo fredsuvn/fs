@@ -5,7 +5,7 @@ import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.ThreadSafe;
-import space.sunqian.fs.base.value.SimpleKey;
+import space.sunqian.fs.base.value.SimpleKey2;
 
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -73,7 +73,7 @@ public interface DateFormatter {
     static @Nonnull DateFormatter ofPattern(
         @Nonnull String pattern, @Nonnull ZoneId zoneId
     ) throws DateTimeException {
-        SimpleKey key = SimpleKey.of(pattern, zoneId);
+        SimpleKey2 key = SimpleKey2.of(pattern, zoneId);
         return DateBack.getFormatter(key, k -> {
             String p = k.getAs(0);
             ZoneId z = k.getAs(1);
@@ -110,7 +110,7 @@ public interface DateFormatter {
     static @Nonnull DateFormatter from(
         @Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId
     ) {
-        SimpleKey key = SimpleKey.of(formatter, zoneId);
+        SimpleKey2 key = SimpleKey2.of(formatter, zoneId);
         return DateBack.getFormatter(key, k -> {
             DateTimeFormatter f = k.getAs(0);
             ZoneId z = k.getAs(1);

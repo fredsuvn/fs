@@ -34,9 +34,12 @@
  *     <li>{@link space.sunqian.fs.base.value.LongSpan}</li>
  * </ul>
  * <p>
- * Other classes
+ * Key interface and classes
  * <ul>
  *     <li>{@link space.sunqian.fs.base.value.SimpleKey}</li>
+ *     <li>{@link space.sunqian.fs.base.value.SimpleKey2}</li>
+ *     <li>{@link space.sunqian.fs.base.value.SimpleKey3}</li>
+ *     <li>{@link space.sunqian.fs.base.value.SimpleKeyN}</li>
  * </ul>
  */
 package space.sunqian.fs.base.value;

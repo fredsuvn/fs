@@ -2,40 +2,33 @@ package space.sunqian.fs.base.value;
 
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.ValueClass;
-import space.sunqian.fs.Fs;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.List;
 
 /**
- * A {@link SimpleKey} represents a key that consists of a group of elements. This class is particularly useful for
- * scenarios where composite keys are needed, such as caching method results where the key comprises the method
- * parameters.
+ * A {@link SimpleKey} represents a key that consists of a group of elements.
  * <p>
- * This class is immutable and could be optimized as a value class.
+ * Two {@link SimpleKey} instances are equal if and only if their elements are equal at the same positions. Instances of
+ * different implementation classes (with the same number of elements in corresponding positions) * behave identically
+ * in terms of {@code equals}, {@code hashCode}, and {@code toString}. For better performance, it is recommended to
+ * compare instances of the same implementation class whenever possible.
+ * <p>
+ * Implementations of this interface are particularly useful for scenarios where composite keys are needed, such as
+ * caching method results where the key comprises the method parameters. There are built-in implementations available:
+ * <ul>
+ *   <li>{@link SimpleKey2} for keys with two elements.</li>
+ *   <li>{@link SimpleKey3} for keys with three elements.</li>
+ *   <li>{@link SimpleKeyN} for keys with {@code n} number of elements.</li>
+ * </ul>
  *
  * @author sunqian
+ * @implNote The implementations should be immutable and could be optimized as a value class.
  */
 @ValueClass
 @Immutable
-public final class SimpleKey {
-
-    /**
-     * Creates a new {@link SimpleKey} instance containing the specified elements.
-     *
-     * @param elements the elements to include in the key
-     * @return a new {@link SimpleKey} containing the specified elements
-     */
-    public static @Nonnull SimpleKey of(Object @Nonnull ... elements) {
-        return new SimpleKey(elements);
-    }
-
-    private final Object @Nonnull [] elements;
-
-    private SimpleKey(Object @Nonnull [] elements) {
-        this.elements = elements;
-    }
+public interface SimpleKey {
 
     /**
      * Returns the element at the specified position in this key, cast to the specified type.
@@ -46,9 +39,7 @@ public final class SimpleKey {
      * @throws IndexOutOfBoundsException if the index is out of range
      * @throws ClassCastException        if the element cannot be cast to the specified type
      */
-    public <T> T getAs(int index) throws IndexOutOfBoundsException, ClassCastException {
-        return Fs.as(get(index));
-    }
+    <T> T getAs(int index) throws IndexOutOfBoundsException, ClassCastException;
 
     /**
      * Returns the element at the specified position in this key.
@@ -57,28 +48,59 @@ public final class SimpleKey {
      * @return the element at the specified position
      * @throws IndexOutOfBoundsException if the index is out of range
      */
-    public Object get(int index) throws IndexOutOfBoundsException {
-        return elements[index];
-    }
+    Object get(int index) throws IndexOutOfBoundsException;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof SimpleKey)) {
-            return false;
-        }
-        return Objects.deepEquals(elements, ((SimpleKey) o).elements);
-    }
+    /**
+     * Returns an immutable list contains all elements of this key.
+     *
+     * @return an immutable list contains all elements of this key
+     */
+    @Nonnull
+    @Immutable
+    List<Object> elements();
 
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(elements);
-    }
+    /**
+     * Returns the number of elements in this key.
+     *
+     * @return the number of elements in this key
+     */
+    int size();
 
+    /**
+     * Compares whether this key equals to the given object. Two {@code SimpleKey} instances are equal if and only if:
+     * <ol>
+     *   <li>Both are instances of {@code SimpleKey} (can be different implementation classes);</li>
+     *   <li>Their corresponding elements (at the same index) are equal.</li>
+     * </ol>
+     *
+     * @param o the given object to compare.
+     * @return {@code true} if this key equals to the given object, {@code false} otherwise
+     */
     @Override
-    public String toString() {
-        return "SimpleKey" + Arrays.toString(elements);
-    }
+    boolean equals(@Nullable Object o);
+
+    /**
+     * Returns hash code of this key. The hash code is computed using the following algorithm:
+     * <pre>{@code
+     * int result = 0;
+     * for (Object e : elements()) {
+     *     result = 31 * result + Objects.hashCode(e);
+     * }
+     * return result;
+     * }</pre>
+     *
+     * @return the hash code of this key
+     */
+    @Override
+    int hashCode();
+
+    /**
+     * Returns a string representation of this key. The format is as follows:
+     * <pre>{@code k:[e1, e2, e3,...]}</pre>
+     *
+     * @return the string representation of this key
+     */
+    @Override
+    @Nonnull
+    String toString();
 }

@@ -2,7 +2,7 @@ package space.sunqian.fs.base.date;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.base.value.SimpleKey;
+import space.sunqian.fs.base.value.SimpleKey2;
 import space.sunqian.fs.cache.SimpleCache;
 
 import java.time.DateTimeException;
@@ -23,8 +23,8 @@ import java.util.function.Function;
 final class DateBack {
 
     static @Nonnull DateFormatter getFormatter(
-        @Nonnull SimpleKey key,
-        @Nonnull Function<@Nonnull SimpleKey, @Nonnull DateFormatter> function
+        @Nonnull SimpleKey2 key,
+        @Nonnull Function<@Nonnull SimpleKey2, @Nonnull DateFormatter> function
     ) {
         return Cache.get(key, function);
     }
@@ -227,7 +227,7 @@ final class DateBack {
     private static final class Cache {
 
         private static final @Nonnull SimpleCache<
-            @Nonnull SimpleKey,
+            @Nonnull SimpleKey2,
             @Nonnull DateFormatter
             > CACHE = SimpleCache.ofSoft();
 
@@ -236,8 +236,8 @@ final class DateBack {
         }
 
         private static @Nonnull DateFormatter get(
-            @Nonnull SimpleKey key,
-            @Nonnull Function<@Nonnull SimpleKey, @Nonnull DateFormatter> function
+            @Nonnull SimpleKey2 key,
+            @Nonnull Function<@Nonnull SimpleKey2, @Nonnull DateFormatter> function
         ) {
             return CACHE.get(key, function);
         }

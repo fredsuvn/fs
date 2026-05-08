@@ -7,7 +7,7 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.OutParam;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
-import space.sunqian.fs.base.value.SimpleKey;
+import space.sunqian.fs.base.value.SimpleKey2;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.collect.MapKit;
@@ -330,7 +330,7 @@ public class TypeKit {
     public static @Nullable @Immutable List<@Nonnull Type> getActualTypeArguments(
         @Nonnull Type type, @Nonnull Class<?> baseType
     ) {
-        SimpleKey key = SimpleKey.of(type, baseType);
+        SimpleKey2 key = SimpleKey2.of(type, baseType);
         return ActualTypeArgumentsCache.get(key, k -> {
             Type t = k.getAs(0);
             Class<?> bt = k.getAs(1);
@@ -983,7 +983,7 @@ public class TypeKit {
     private static final class ActualTypeArgumentsCache {
 
         private static final @Nonnull SimpleCache<
-            @Nonnull SimpleKey,
+            @Nonnull SimpleKey2,
             @Nullable @Immutable List<@Nonnull Type>
             > CACHE = SimpleCache.ofSoft();
 
@@ -992,8 +992,8 @@ public class TypeKit {
         }
 
         private static @Nullable @Immutable List<@Nonnull Type> get(
-            @Nonnull SimpleKey key,
-            @Nonnull Function<@Nonnull SimpleKey, @Nullable @Immutable List<@Nonnull Type>> function
+            @Nonnull SimpleKey2 key,
+            @Nonnull Function<@Nonnull SimpleKey2, @Nullable @Immutable List<@Nonnull Type>> function
         ) {
             return CACHE.get(key, function);
         }
