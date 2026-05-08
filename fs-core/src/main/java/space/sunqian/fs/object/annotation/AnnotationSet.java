@@ -4,6 +4,7 @@ import space.sunqian.annotation.CachedResult;
 import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.annotation.RetainedParam;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -14,6 +15,7 @@ import java.util.List;
  *
  * @author sunqian
  */
+@Immutable
 public interface AnnotationSet {
 
     /**
@@ -35,6 +37,26 @@ public interface AnnotationSet {
      */
     static @Nonnull AnnotationSet newSet(@Nonnull AnnotatedElement annotatedElement) {
         return AnnotationBack.newSet(annotatedElement);
+    }
+
+    /**
+     * Returns a new {@link AnnotationSet} whose contents are come from the given {@link AnnotationSet}s. The search
+     * order of the search method is the order of the given {@link AnnotationSet}s.
+     *
+     * @param annotationSets the given {@link AnnotationSet}s
+     * @return a new {@link AnnotationSet} whose contents are come from the given {@link AnnotationSet}s
+     */
+    static @Nonnull AnnotationSet multiSet(@Nonnull AnnotationSet @Nonnull @RetainedParam ... annotationSets) {
+        return AnnotationBack.multiSet(annotationSets);
+    }
+
+    /**
+     * Returns an empty {@link AnnotationSet}.
+     *
+     * @return an empty {@link AnnotationSet}
+     */
+    static @Nonnull AnnotationSet emptySet() {
+        return AnnotationBack.emptySet();
     }
 
     /**

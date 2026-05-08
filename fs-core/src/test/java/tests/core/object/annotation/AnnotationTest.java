@@ -22,6 +22,8 @@ import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 public class AnnotationTest implements Asserter, TestPrint {
 
     @Test
-    public void testAnnotation() throws Exception {
+    public void testAnnotationSet() throws Exception {
         Field fieldA = X.class.getDeclaredField("a");
         AnnotationSet annotationSetA = AnnotationSet.from(fieldA);
         testAnnotations(annotationSetA);
@@ -103,6 +105,54 @@ public class AnnotationTest implements Asserter, TestPrint {
         assertEquals(ZoneId.of("Asia/Shanghai"), datePattern.zoneId());
     }
 
+    @Test
+    public void testMultiAnnotationSet() throws Exception {
+        Field fieldA = M.class.getDeclaredField("a");
+        AnnotationSet annotationSetA = AnnotationSet.from(fieldA);
+        DatePattern pa = annotationSetA.get(DatePattern.class);
+        DatePatternDetail da = annotationSetA.getDetail(DatePatternDetail.class);
+        Field fieldB = M.class.getDeclaredField("b");
+        AnnotationSet annotationSetB = AnnotationSet.from(fieldB);
+        DatePattern pb = annotationSetB.get(DatePattern.class);
+        DatePatternDetail db = annotationSetB.getDetail(DatePatternDetail.class);
+        NumberPattern nb = annotationSetB.get(NumberPattern.class);
+        NumberPatternDetail ndb = annotationSetB.getDetail(NumberPatternDetail.class);
+        AnnotationSet multiSet = AnnotationSet.multiSet(annotationSetA, annotationSetB);
+        assertEquals(
+            Arrays.asList(pa, pb, nb),
+            multiSet.annotations()
+        );
+        assertEquals(
+            Arrays.asList(da, db, ndb),
+            multiSet.details()
+        );
+        assertSame(pa, multiSet.get(DatePattern.class));
+        assertSame(da, multiSet.getDetail(DatePatternDetail.class));
+        assertSame(nb, multiSet.get(NumberPattern.class));
+        assertSame(ndb, multiSet.getDetail(NumberPatternDetail.class));
+        assertSame(ndb, multiSet.getDetailByAnnotationType(NumberPattern.class));
+        assertNull(multiSet.get(Nullable.class));
+        assertNull(multiSet.getDetailByAnnotationType(Nullable.class));
+        class D implements AnnotationDetail<Nullable> {
+
+            @Override
+            public Nullable annotation() {
+                return null;
+            }
+        }
+        assertNull(multiSet.getDetail(D.class));
+    }
+
+    @Test
+    public void testEmptySet() {
+        AnnotationSet empty = AnnotationSet.emptySet();
+        assertEquals(Collections.emptyList(), empty.annotations());
+        assertEquals(Collections.emptyList(), empty.details());
+        assertNull(empty.get(NumberPattern.class));
+        assertNull(empty.getDetail(DatePatternDetail.class));
+        assertNull(empty.getDetailByAnnotationType(Nullable.class));
+    }
+
     public static class X {
 
         @NumberPattern("#.0000")
@@ -127,5 +177,15 @@ public class AnnotationTest implements Asserter, TestPrint {
     @Repeatable(AS.class)
     public @interface A {
         String value();
+    }
+
+    public static class M {
+
+        @DatePattern("yyyy-MM-dd")
+        private String a;
+
+        @DatePattern(zoneId = "Asia/Shanghai")
+        @NumberPattern("#.0000")
+        private String b;
     }
 }
