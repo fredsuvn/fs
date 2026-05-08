@@ -7,18 +7,16 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.FsLoader;
 import space.sunqian.fs.cache.CacheFunction;
 import space.sunqian.fs.cache.SimpleCache;
-import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.invoke.Invocable;
+import space.sunqian.fs.object.annotation.AnnotationSet;
 import space.sunqian.fs.object.meta.handlers.CommonObjectMetaHandler;
 import space.sunqian.fs.object.meta.handlers.RecordMetaHandler;
 import space.sunqian.fs.third.ThirdKit;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -187,10 +185,10 @@ final class ObjectMetaBack {
                 private final @Nullable Invocable setter;
 
                 // annotations:
-                private final @Nonnull List<@Nonnull Annotation> getterAnnotations;
-                private final @Nonnull List<@Nonnull Annotation> setterAnnotations;
-                private final @Nonnull List<@Nonnull Annotation> fieldAnnotations;
-                private final @Nonnull Map<@Nonnull Class<?>, @Nonnull Annotation> annotations;
+                private final @Nonnull AnnotationSet getterAnnotations;
+                private final @Nonnull AnnotationSet setterAnnotations;
+                private final @Nonnull AnnotationSet fieldAnnotations;
+                private final @Nonnull AnnotationSet annotations;
 
                 private PropertyMetaImpl(@Nonnull PropertyMetaBase propertyBase) {
                     this.name = propertyBase.name();
@@ -201,16 +199,12 @@ final class ObjectMetaBack {
                     this.getter = propertyBase.getter();
                     this.setter = propertyBase.setter();
                     this.getterAnnotations = getterMethod == null ?
-                        Collections.emptyList() : ListKit.list(getterMethod.getAnnotations());
+                        AnnotationSet.emptySet() : AnnotationSet.newSet(getterMethod);
                     this.setterAnnotations = setterMethod == null ?
-                        Collections.emptyList() : ListKit.list(setterMethod.getAnnotations());
+                        AnnotationSet.emptySet() : AnnotationSet.newSet(setterMethod);
                     this.fieldAnnotations = field == null ?
-                        Collections.emptyList() : ListKit.list(field.getAnnotations());
-                    Map<Class<?>, Annotation> annMap = new HashMap<>();
-                    fieldAnnotations.forEach(ann -> annMap.put(ann.annotationType(), ann));
-                    setterAnnotations.forEach(ann -> annMap.put(ann.annotationType(), ann));
-                    getterAnnotations.forEach(ann -> annMap.put(ann.annotationType(), ann));
-                    annotations = Collections.unmodifiableMap(annMap);
+                        AnnotationSet.emptySet() : AnnotationSet.newSet(field);
+                    annotations = AnnotationSet.multiSet(getterAnnotations, setterAnnotations, fieldAnnotations);
                 }
 
                 @Override
@@ -254,22 +248,27 @@ final class ObjectMetaBack {
                 }
 
                 @Override
-                public @Nonnull List<@Nonnull Annotation> fieldAnnotations() {
+                public @Nonnull AnnotationSet fieldAnnotations() {
                     return fieldAnnotations;
                 }
 
                 @Override
-                public <T extends Annotation> @Nullable T getAnnotation(@Nonnull Class<T> annotationType) {
-                    return Fs.as(annotations.get(annotationType));
+                public @Nonnull AnnotationSet annotations() {
+                    return annotations;
                 }
 
+                // @Override
+                // public <T extends Annotation> @Nullable T getAnnotation(@Nonnull Class<T> annotationType) {
+                //     return Fs.as(annotations.get(annotationType));
+                // }
+
                 @Override
-                public @Nonnull List<@Nonnull Annotation> getterAnnotations() {
+                public @Nonnull AnnotationSet getterAnnotations() {
                     return getterAnnotations;
                 }
 
                 @Override
-                public @Nonnull List<@Nonnull Annotation> setterAnnotations() {
+                public @Nonnull AnnotationSet setterAnnotations() {
                     return setterAnnotations;
                 }
 

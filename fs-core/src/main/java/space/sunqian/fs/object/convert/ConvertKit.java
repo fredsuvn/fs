@@ -139,8 +139,8 @@ public class ConvertKit {
         @Nonnull PropertyMeta srcProperty,
         @Nonnull PropertyMeta dstProperty
     ) {
-        A srcAnnotation = srcProperty.getAnnotation(annotationType);
-        A dstAnnotation = dstProperty.getAnnotation(annotationType);
+        A srcAnnotation = srcProperty.annotations().get(annotationType);
+        A dstAnnotation = dstProperty.annotations().get(annotationType);
         if (dstAnnotation == null) {
             return srcAnnotation;
         } else {

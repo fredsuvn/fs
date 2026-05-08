@@ -88,8 +88,8 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         if (dstProperty == null || !dstProperty.isWritable()) {
             return false;
         }
-        DatePattern datePattern = dstProperty.getAnnotation(DatePattern.class);
-        NumberPattern numberPattern = dstProperty.getAnnotation(NumberPattern.class);
+        DatePattern datePattern = dstProperty.annotations().get(DatePattern.class);
+        NumberPattern numberPattern = dstProperty.annotations().get(NumberPattern.class);
         Option<?, ?>[] actualOps = ConvertKit.mergeOptions(options, datePattern, numberPattern);
         Object dstPropertyValue = converter.convert(srcValue, srcMeta.valueType(), dstProperty.type(), actualOps);
         dstProperty.setValue(dst, dstPropertyValue);

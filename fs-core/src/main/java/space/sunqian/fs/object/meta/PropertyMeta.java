@@ -4,9 +4,7 @@ import space.sunqian.annotation.Immutable;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.invoke.Invocable;
-
-import java.lang.annotation.Annotation;
-import java.util.List;
+import space.sunqian.fs.object.annotation.AnnotationSet;
 
 /**
  * This interface represents the property meta info of {@link ObjectMeta}. It is very similar to the simple property of
@@ -46,73 +44,54 @@ public interface PropertyMeta extends PropertyMetaBase {
     }
 
     /**
-     * Returns the annotations on the getter method of this property. If this property doesn't have a getter method, an
-     * empty list will be returned.
+     * Returns the {@link AnnotationSet} on the getter method of this property. If this property doesn't have a getter
+     * method, an empty {@link AnnotationSet} will be returned.
      *
-     * @return the annotations on the getter method of this property
+     * @return the {@link AnnotationSet} on the getter method of this property
      */
     @Nonnull
     @Immutable
-    List<@Nonnull Annotation> getterAnnotations();
+    AnnotationSet getterAnnotations();
 
     /**
-     * Returns the annotations on the setter method of this property. If this property doesn't have a setter method, an
-     * empty list will be returned.
+     * Returns the {@link AnnotationSet} on the setter method of this property. If this property doesn't have a setter
+     * method, an empty {@link AnnotationSet} will be returned.
      *
-     * @return the annotations on the setter method of this property
+     * @return the {@link AnnotationSet} on the setter method of this property
      */
     @Nonnull
     @Immutable
-    List<@Nonnull Annotation> setterAnnotations();
+    AnnotationSet setterAnnotations();
 
     /**
-     * Returns the annotations on the backing field of this property. If this property doesn't have a backing field, an
-     * empty list will be returned.
+     * Returns the {@link AnnotationSet} on the backing field of this property. If this property doesn't have a backing
+     * field, an empty {@link AnnotationSet} will be returned.
      *
-     * @return the annotations on the backing field of this property
+     * @return the {@link AnnotationSet} on the backing field of this property
      */
     @Nonnull
     @Immutable
-    List<@Nonnull Annotation> fieldAnnotations();
+    AnnotationSet fieldAnnotations();
 
     /**
-     * Returns the property value of the specified instance.
+     * Returns the {@link AnnotationSet} on getter method, setter method and backing field of this property, and the
+     * searching order is that order.
      *
-     * @param inst the specified instance
-     * @return the property value of the specified instance
-     * @throws DataMetaException if this property is not readable
+     * @return the {@link AnnotationSet} on getter method, setter method and backing field of this property
      */
-    default @Nullable Object getValue(@Nonnull Object inst) throws DataMetaException {
-        Invocable getter = getter();
-        if (getter == null) {
-            throw new DataMetaException("The property is not readable: " + name() + ".");
-        }
-        return getter.invoke(inst);
-    }
+    @Nonnull
+    @Immutable
+    AnnotationSet annotations();
 
-    /**
-     * Sets the property value of the specified instance.
-     *
-     * @param inst  the specified instance
-     * @param value the property value
-     * @throws DataMetaException if this property is not writable
-     */
-    default void setValue(@Nonnull Object inst, @Nullable Object value) throws DataMetaException {
-        Invocable setter = setter();
-        if (setter == null) {
-            throw new DataMetaException("The property is not writable: " + name() + ".");
-        }
-        setter.invoke(inst, value);
-    }
-
-    /**
-     * Finds and returns the annotation of the specified type on getter method, setter method or backing field of this
-     * property, the searching order is that order. If the annotation is not found, {@code null} will be returned.
-     *
-     * @param annotationType the specified annotation type
-     * @return the annotation of the specified type on this property, or {@code null} if not found
-     */
-    <T extends Annotation> @Nullable T getAnnotation(@Nonnull Class<T> annotationType); //{
+    // /**
+    //  * Finds and returns the annotation of the specified type on getter method, setter method or backing field of this
+    //  * property, the searching order is that order. If the annotation is not found, {@code null} will be returned.
+    //  *
+    //  * @param annotationType the specified annotation type
+    //  * @return the annotation of the specified type on this property, or {@code null} if not found
+    //  */
+    // <T extends Annotation> @Nullable T getAnnotation(@Nonnull Class<T> annotationType);
+    //{
     // Method getterMethod = getterMethod();
     // if (getterMethod != null) {
     //     T annotation = getterMethod.getAnnotation(annotationType);
@@ -150,6 +129,36 @@ public interface PropertyMeta extends PropertyMetaBase {
     //
     // return null;
     // }
+
+    /**
+     * Returns the property value of the specified instance.
+     *
+     * @param inst the specified instance
+     * @return the property value of the specified instance
+     * @throws DataMetaException if this property is not readable
+     */
+    default @Nullable Object getValue(@Nonnull Object inst) throws DataMetaException {
+        Invocable getter = getter();
+        if (getter == null) {
+            throw new DataMetaException("The property is not readable: " + name() + ".");
+        }
+        return getter.invoke(inst);
+    }
+
+    /**
+     * Sets the property value of the specified instance.
+     *
+     * @param inst  the specified instance
+     * @param value the property value
+     * @throws DataMetaException if this property is not writable
+     */
+    default void setValue(@Nonnull Object inst, @Nullable Object value) throws DataMetaException {
+        Invocable setter = setter();
+        if (setter == null) {
+            throw new DataMetaException("The property is not writable: " + name() + ".");
+        }
+        setter.invoke(inst, value);
+    }
 
     /**
      * Returns whether this {@link PropertyMeta} is equal to the other {@link PropertyMeta}. They are considered equal

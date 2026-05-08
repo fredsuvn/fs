@@ -14,6 +14,7 @@ import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.invoke.Invocable;
+import space.sunqian.fs.object.annotation.AnnotationSet;
 import space.sunqian.fs.object.meta.DataMetaException;
 import space.sunqian.fs.object.meta.MetaKit;
 import space.sunqian.fs.object.meta.ObjectMeta;
@@ -23,12 +24,10 @@ import space.sunqian.fs.object.meta.PropertyMetaBase;
 import space.sunqian.fs.object.meta.handlers.CommonObjectMetaHandler;
 import space.sunqian.fs.reflect.TypeRef;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -363,67 +362,67 @@ public class ObjectMetaTest implements TestPrint {
     private void testAnnotationProp1(ObjectMeta meta) {
         PropertyMeta prop1 = meta.getProperty("prop1");
         assertNotNull(prop1);
-        Nonnull a1 = prop1.getAnnotation(Nonnull.class);
+        Nonnull a1 = prop1.annotations().get(Nonnull.class);
         assertNotNull(a1);
         assertEquals(Nonnull.class, a1.annotationType());
-        assertNull(prop1.getAnnotation(Nullable.class));
-        assertEquals(ListKit.list(a1), prop1.fieldAnnotations());
-        assertEquals(Collections.emptyList(), prop1.getterAnnotations());
-        assertEquals(Collections.emptyList(), prop1.setterAnnotations());
+        assertNull(prop1.annotations().get(Nullable.class));
+        assertEquals(ListKit.list(a1), prop1.fieldAnnotations().annotations());
+        assertEquals(Collections.emptyList(), prop1.getterAnnotations().annotations());
+        assertEquals(Collections.emptyList(), prop1.setterAnnotations().annotations());
     }
 
     private void testAnnotationProp2(ObjectMeta meta) {
         PropertyMeta prop2 = meta.getProperty("prop2");
         assertNotNull(prop2);
-        Nonnull a2 = prop2.getAnnotation(Nonnull.class);
+        Nonnull a2 = prop2.annotations().get(Nonnull.class);
         assertNotNull(a2);
         assertEquals(Nonnull.class, a2.annotationType());
-        assertNull(prop2.getAnnotation(Nullable.class));
-        assertEquals(Collections.emptyList(), prop2.fieldAnnotations());
-        assertEquals(ListKit.list(a2), prop2.getterAnnotations());
-        assertEquals(Collections.emptyList(), prop2.setterAnnotations());
+        assertNull(prop2.annotations().get(Nullable.class));
+        assertEquals(Collections.emptyList(), prop2.fieldAnnotations().annotations());
+        assertEquals(ListKit.list(a2), prop2.getterAnnotations().annotations());
+        assertEquals(Collections.emptyList(), prop2.setterAnnotations().annotations());
     }
 
     private void testAnnotationProp3(ObjectMeta meta) {
         PropertyMeta prop3 = meta.getProperty("prop3");
         assertNotNull(prop3);
-        Nonnull a3 = prop3.getAnnotation(Nonnull.class);
+        Nonnull a3 = prop3.annotations().get(Nonnull.class);
         assertNotNull(a3);
         assertEquals(Nonnull.class, a3.annotationType());
-        assertNull(prop3.getAnnotation(Nullable.class));
-        assertEquals(Collections.emptyList(), prop3.fieldAnnotations());
-        assertEquals(Collections.emptyList(), prop3.getterAnnotations());
-        assertEquals(ListKit.list(a3), prop3.setterAnnotations());
+        assertNull(prop3.annotations().get(Nullable.class));
+        assertEquals(Collections.emptyList(), prop3.fieldAnnotations().annotations());
+        assertEquals(Collections.emptyList(), prop3.getterAnnotations().annotations());
+        assertEquals(ListKit.list(a3), prop3.setterAnnotations().annotations());
     }
 
     private void testAnnotationProp4(ObjectMeta meta) {
         PropertyMeta prop4 = meta.getProperty("prop4");
         assertNotNull(prop4);
-        assertNull(prop4.getAnnotation(Nonnull.class));
-        assertNull(prop4.getAnnotation(Nullable.class));
-        assertEquals(Collections.emptyList(), prop4.fieldAnnotations());
-        assertEquals(Collections.emptyList(), prop4.getterAnnotations());
-        assertEquals(Collections.emptyList(), prop4.setterAnnotations());
+        assertNull(prop4.annotations().get(Nonnull.class));
+        assertNull(prop4.annotations().get(Nullable.class));
+        assertEquals(Collections.emptyList(), prop4.fieldAnnotations().annotations());
+        assertEquals(Collections.emptyList(), prop4.getterAnnotations().annotations());
+        assertEquals(Collections.emptyList(), prop4.setterAnnotations().annotations());
     }
 
     private void testAnnotationProp5(ObjectMeta meta) {
         PropertyMeta prop5 = meta.getProperty("prop5");
         assertNotNull(prop5);
-        assertNull(prop5.getAnnotation(Nonnull.class));
-        assertNull(prop5.getAnnotation(Nullable.class));
-        assertEquals(Collections.emptyList(), prop5.fieldAnnotations());
-        assertEquals(Collections.emptyList(), prop5.getterAnnotations());
-        assertEquals(Collections.emptyList(), prop5.setterAnnotations());
+        assertNull(prop5.annotations().get(Nonnull.class));
+        assertNull(prop5.annotations().get(Nullable.class));
+        assertEquals(Collections.emptyList(), prop5.fieldAnnotations().annotations());
+        assertEquals(Collections.emptyList(), prop5.getterAnnotations().annotations());
+        assertEquals(Collections.emptyList(), prop5.setterAnnotations().annotations());
     }
 
     private void testAnnotationProp6(ObjectMeta meta) {
         PropertyMeta prop6 = meta.getProperty("prop6");
         assertNotNull(prop6);
-        assertNull(prop6.getAnnotation(Nonnull.class));
-        assertNull(prop6.getAnnotation(Nullable.class));
-        assertEquals(Collections.emptyList(), prop6.fieldAnnotations());
-        assertEquals(Collections.emptyList(), prop6.getterAnnotations());
-        assertEquals(Collections.emptyList(), prop6.setterAnnotations());
+        assertNull(prop6.annotations().get(Nonnull.class));
+        assertNull(prop6.annotations().get(Nullable.class));
+        assertEquals(Collections.emptyList(), prop6.fieldAnnotations().annotations());
+        assertEquals(Collections.emptyList(), prop6.getterAnnotations().annotations());
+        assertEquals(Collections.emptyList(), prop6.setterAnnotations().annotations());
     }
 
     private void verifyPropertyBasic(PropertyMeta property, ObjectMeta owner, String name, Type expectedType, Class<?> expectedRawType) {
@@ -642,24 +641,29 @@ public class ObjectMetaTest implements TestPrint {
         }
 
         @Override
-        public @Nonnull List<@Nonnull Annotation> getterAnnotations() {
+        public @Nonnull AnnotationSet getterAnnotations() {
             return null;
         }
 
         @Override
-        public @Nonnull List<@Nonnull Annotation> setterAnnotations() {
+        public @Nonnull AnnotationSet setterAnnotations() {
             return null;
         }
 
         @Override
-        public @Nonnull List<@Nonnull Annotation> fieldAnnotations() {
+        public @Nonnull AnnotationSet fieldAnnotations() {
             return null;
         }
 
         @Override
-        public <T extends Annotation> T getAnnotation(@Nonnull Class<T> annotationType) {
+        public @Nonnull AnnotationSet annotations() {
             return null;
         }
+
+        // @Override
+        // public <T extends Annotation> T getAnnotation(@Nonnull Class<T> annotationType) {
+        //     return null;
+        // }
 
         @Override
         public @Nonnull String name() {
