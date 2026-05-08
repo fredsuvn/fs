@@ -10,6 +10,13 @@ import java.util.function.Supplier;
 
 final class NumberBack {
 
+    static @Nonnull NumberFormatter getFormatter(
+        @Nonnull String pattern,
+        @Nonnull Function<@Nonnull String, @Nonnull NumberFormatter> function
+    ) {
+        return Cache.get(pattern, function);
+    }
+
     static @Nonnull NumberFormatter newFormatter(@Nonnull Supplier<? extends @Nonnull NumberFormat> supplier) {
         return new NumberFormatterImpl(supplier);
     }
@@ -56,7 +63,7 @@ final class NumberBack {
         }
     }
 
-    static final class Cache {
+    private static final class Cache {
 
         private static final @Nonnull SimpleCache<
             @Nonnull String,
@@ -67,7 +74,7 @@ final class NumberBack {
             Fs.registerGlobalCache(CACHE);
         }
 
-        static @Nonnull NumberFormatter get(
+        private static @Nonnull NumberFormatter get(
             @Nonnull String pattern,
             @Nonnull Function<@Nonnull String, @Nonnull NumberFormatter> function
         ) {

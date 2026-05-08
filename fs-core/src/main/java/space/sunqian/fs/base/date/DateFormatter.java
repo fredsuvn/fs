@@ -74,7 +74,7 @@ public interface DateFormatter {
         @Nonnull String pattern, @Nonnull ZoneId zoneId
     ) throws DateTimeException {
         SimpleKey key = SimpleKey.of(pattern, zoneId);
-        return DateBack.Cache.get(key, k -> {
+        return DateBack.getFormatter(key, k -> {
             String p = k.getAs(0);
             ZoneId z = k.getAs(1);
             return newFormatter(p, z);
@@ -111,7 +111,7 @@ public interface DateFormatter {
         @Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId
     ) {
         SimpleKey key = SimpleKey.of(formatter, zoneId);
-        return DateBack.Cache.get(key, k -> {
+        return DateBack.getFormatter(key, k -> {
             DateTimeFormatter f = k.getAs(0);
             ZoneId z = k.getAs(1);
             return newFormatter(f, z);

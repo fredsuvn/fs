@@ -22,6 +22,13 @@ import java.util.function.Function;
 
 final class DateBack {
 
+    static @Nonnull DateFormatter getFormatter(
+        @Nonnull SimpleKey key,
+        @Nonnull Function<@Nonnull SimpleKey, @Nonnull DateFormatter> function
+    ) {
+        return Cache.get(key, function);
+    }
+
     static @Nonnull DateFormatter newFormatter(
         @Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId
     ) {
@@ -217,7 +224,7 @@ final class DateBack {
         }
     }
 
-    static final class Cache {
+    private static final class Cache {
 
         private static final @Nonnull SimpleCache<
             @Nonnull SimpleKey,
@@ -228,7 +235,7 @@ final class DateBack {
             Fs.registerGlobalCache(CACHE);
         }
 
-        static @Nonnull DateFormatter get(
+        private static @Nonnull DateFormatter get(
             @Nonnull SimpleKey key,
             @Nonnull Function<@Nonnull SimpleKey, @Nonnull DateFormatter> function
         ) {

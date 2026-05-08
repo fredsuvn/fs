@@ -12,6 +12,13 @@ import java.util.function.Function;
 
 final class AnnotationBack {
 
+    static @Nonnull AnnotationSet getSet(
+        @Nonnull AnnotatedElement annotatedElement,
+        @Nonnull Function<@Nonnull AnnotatedElement, @Nonnull AnnotationSet> function
+    ) {
+        return Cache.get(annotatedElement, function);
+    }
+
     static @Nonnull AnnotationSet newSet(@Nonnull AnnotatedElement annotatedElement) {
         return new AnnotationSetImpl(annotatedElement);
     }
@@ -76,7 +83,7 @@ final class AnnotationBack {
         }
     }
 
-    static final class Cache {
+    private static final class Cache {
 
         private static final @Nonnull SimpleCache<
             @Nonnull AnnotatedElement,
@@ -87,7 +94,7 @@ final class AnnotationBack {
             Fs.registerGlobalCache(CACHE);
         }
 
-        static @Nonnull AnnotationSet get(
+        private static @Nonnull AnnotationSet get(
             @Nonnull AnnotatedElement annotatedElement,
             @Nonnull Function<@Nonnull AnnotatedElement, @Nonnull AnnotationSet> function
         ) {

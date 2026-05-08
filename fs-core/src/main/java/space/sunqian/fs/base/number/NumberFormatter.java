@@ -40,7 +40,7 @@ public interface NumberFormatter {
      */
     @CachedResult
     static @Nonnull NumberFormatter ofPattern(@Nonnull String pattern) {
-        return NumberBack.Cache.get(pattern, NumberFormatter::newFormatter);
+        return NumberBack.getFormatter(pattern, NumberFormatter::newFormatter);
     }
 
     /**

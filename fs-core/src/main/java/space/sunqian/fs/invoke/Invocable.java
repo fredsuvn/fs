@@ -53,7 +53,7 @@ public interface Invocable {
     @CachedResult
     static @Nonnull Invocable of(@Nonnull Method method, @Nonnull InvocationMode mode) {
         SimpleKey key = SimpleKey.of(method, mode);
-        return InvocableBack.Cache.get(key, k -> {
+        return InvocableBack.getInvocable(key, k -> {
             Method m = k.getAs(0);
             InvocationMode im = k.getAs(1);
             return newInvocable(m, im);
@@ -83,7 +83,7 @@ public interface Invocable {
     @CachedResult
     static @Nonnull Invocable of(@Nonnull Constructor<?> constructor, @Nonnull InvocationMode mode) {
         SimpleKey key = SimpleKey.of(constructor, mode);
-        return InvocableBack.Cache.get(key, k -> {
+        return InvocableBack.getInvocable(key, k -> {
             Constructor<?> c = k.getAs(0);
             InvocationMode im = k.getAs(1);
             return newInvocable(c, im);
@@ -100,7 +100,7 @@ public interface Invocable {
     @CachedResult
     static @Nonnull Invocable of(@Nonnull MethodHandle handle, boolean isStatic) {
         SimpleKey key = SimpleKey.of(handle, isStatic);
-        return InvocableBack.Cache.get(key, k -> {
+        return InvocableBack.getInvocable(key, k -> {
             MethodHandle mh = k.getAs(0);
             boolean is = k.getAs(1);
             return newInvocable(mh, is);

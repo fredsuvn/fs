@@ -10,6 +10,13 @@ import java.util.function.Function;
 
 final class InvocableBack {
 
+    static @Nonnull Invocable getInvocable(
+        @Nonnull SimpleKey key,
+        @Nonnull Function<@Nonnull SimpleKey, @Nonnull Invocable> function
+    ) {
+        return Cache.get(key, function);
+    }
+
     static @Nullable Object @Nonnull [] toInstanceArgs(
         @Nullable Object inst, @Nullable Object @Nonnull ... args
     ) {
@@ -29,7 +36,7 @@ final class InvocableBack {
         }
     }
 
-    static final class Cache {
+    private static final class Cache {
 
         private static final @Nonnull SimpleCache<@Nonnull SimpleKey, @Nonnull Invocable> CACHE = SimpleCache.ofSoft();
 
@@ -37,7 +44,7 @@ final class InvocableBack {
             Fs.registerGlobalCache(CACHE);
         }
 
-        static @Nonnull Invocable get(
+        private static @Nonnull Invocable get(
             @Nonnull SimpleKey key,
             @Nonnull Function<@Nonnull SimpleKey, @Nonnull Invocable> function
         ) {

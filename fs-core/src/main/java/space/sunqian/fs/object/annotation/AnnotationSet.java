@@ -24,7 +24,7 @@ public interface AnnotationSet {
      */
     @CachedResult
     static @Nonnull AnnotationSet from(@Nonnull AnnotatedElement annotatedElement) {
-        return AnnotationBack.Cache.get(annotatedElement, AnnotationSet::newSet);
+        return AnnotationBack.getSet(annotatedElement, AnnotationSet::newSet);
     }
 
     /**
