@@ -4,8 +4,11 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.option.Option;
+import space.sunqian.fs.object.annotation.AnnotationSet;
 import space.sunqian.fs.object.annotation.DatePattern;
+import space.sunqian.fs.object.annotation.DatePatternDetail;
 import space.sunqian.fs.object.annotation.NumberPattern;
+import space.sunqian.fs.object.annotation.NumberPatternDetail;
 import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConverter;
@@ -88,8 +91,9 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         if (dstProperty == null || !dstProperty.isWritable()) {
             return false;
         }
-        DatePattern datePattern = dstProperty.annotations().get(DatePattern.class);
-        NumberPattern numberPattern = dstProperty.annotations().get(NumberPattern.class);
+        AnnotationSet dstAnnotations = dstProperty.annotations();
+        DatePatternDetail datePattern = dstAnnotations.getDetailByAnnotationType(DatePattern.class);
+        NumberPatternDetail numberPattern = dstAnnotations.getDetailByAnnotationType(NumberPattern.class);
         Option<?, ?>[] actualOps = ConvertKit.mergeOptions(options, datePattern, numberPattern);
         Object dstPropertyValue = converter.convert(srcValue, srcMeta.valueType(), dstProperty.type(), actualOps);
         dstProperty.setValue(dst, dstPropertyValue);
@@ -122,7 +126,11 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
             return false;
         }
         Object dstKey = converter.convert(actualSrcPropertyName, String.class, dstMeta.keyType(), options);
-        Object dstValue = converter.convert(srcPropertyValue, srcProperty.type(), dstMeta.valueType(), options);
+        AnnotationSet srcAnnotations = srcProperty.annotations();
+        DatePatternDetail datePattern = srcAnnotations.getDetailByAnnotationType(DatePattern.class);
+        NumberPatternDetail numberPattern = srcAnnotations.getDetailByAnnotationType(NumberPattern.class);
+        Option<?, ?>[] actualOps = ConvertKit.mergeOptions(options, datePattern, numberPattern);
+        Object dstValue = converter.convert(srcPropertyValue, srcProperty.type(), dstMeta.valueType(), actualOps);
         dst.put(dstKey, dstValue);
         return false;
     }
@@ -157,10 +165,10 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         if (dstProperty == null || !dstProperty.isWritable()) {
             return false;
         }
-        DatePattern datePattern = ConvertKit.getAnnotation(
+        DatePatternDetail datePattern = ConvertKit.getAnnotationDetail(
             DatePattern.class, srcProperty, dstProperty
         );
-        NumberPattern numberPattern = ConvertKit.getAnnotation(
+        NumberPatternDetail numberPattern = ConvertKit.getAnnotationDetail(
             NumberPattern.class, srcProperty, dstProperty
         );
         Option<?, ?>[] actualOps = ConvertKit.mergeOptions(options, datePattern, numberPattern);

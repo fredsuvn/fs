@@ -114,7 +114,7 @@ public enum ConvertOption {
     DATE_FORMATTER,
 
     /**
-     * Key of {@link #numFormatter(NumberFormatter)}.
+     * Key of {@link #numberFormatter(NumberFormatter)}.
      */
     NUMBER_FORMATTER,
     ;
@@ -523,7 +523,7 @@ public enum ConvertOption {
      * @param numberFormatter the {@link NumberFormatter} to be specified
      * @return an option to specify the {@link NumberFormatter} if needed
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> numFormatter(
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> numberFormatter(
         @Nonnull NumberFormatter numberFormatter
     ) {
         return Option.of(NUMBER_FORMATTER, numberFormatter);

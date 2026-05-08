@@ -8,8 +8,9 @@ import space.sunqian.fs.data.DataFormattingException;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.object.annotation.DatePattern;
+import space.sunqian.fs.object.annotation.DatePatternDetail;
 import space.sunqian.fs.object.annotation.NumberPattern;
-import space.sunqian.fs.object.convert.ConvertKit;
+import space.sunqian.fs.object.annotation.NumberPatternDetail;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
@@ -302,24 +303,24 @@ final class JsonFormatterBack {
             appender.append(':');
             if (value != null) {
                 if (value instanceof Date || value instanceof TemporalAccessor) {
-                    DatePattern datePattern = property.annotations().get(DatePattern.class);
+                    DatePatternDetail datePattern = property.annotations().getDetailByAnnotationType(DatePattern.class);
                     if (datePattern != null) {
                         String dateString = objectConverter.convert(
                             value,
                             String.class,
-                            ConvertKit.getDateFormatterOption(datePattern)
+                            datePattern.option()
                         );
                         writeString(dateString, appender);
                         return;
                     }
                 }
                 if (value instanceof Number) {
-                    NumberPattern numberPattern = property.annotations().get(NumberPattern.class);
+                    NumberPatternDetail numberPattern = property.annotations().getDetailByAnnotationType(NumberPattern.class);
                     if (numberPattern != null) {
                         String numString = objectConverter.convert(
                             value,
                             String.class,
-                            ConvertKit.getNumFormatterOption(numberPattern)
+                            numberPattern.option()
                         );
                         appender.append(numString);
                         return;

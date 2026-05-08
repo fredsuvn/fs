@@ -25,7 +25,6 @@ import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumberPattern;
 import space.sunqian.fs.object.builder.BuilderManager;
-import space.sunqian.fs.object.convert.ConvertKit;
 import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
@@ -432,7 +431,7 @@ public class ConvertTest implements TestPrint, DataGen {
         assertEquals(123L, converter.convert("123", long.class));
         assertEquals(123L, converter.convert("123", Long.class));
         assertEquals(123.123, converter.convert("123.123", double.class));
-        assertEquals("123.12", converter.convert(123.12345, String.class, ConvertOption.numFormatter(NumberFormatter.ofPattern("#.00"))));
+        assertEquals("123.12", converter.convert(123.12345, String.class, ConvertOption.numberFormatter(NumberFormatter.ofPattern("#.00"))));
 
         Date now = new Date();
         assertEquals(converter.convert(now, long.class), now.getTime());
@@ -601,16 +600,17 @@ public class ConvertTest implements TestPrint, DataGen {
     }
 
     private void testPatternAnnotation() {
-        Option<?, DateFormatter> df1 = ConvertKit.getDateFormatterOption("yyyy-MM-dd", ZoneId.systemDefault());
-        Option<?, DateFormatter> df2 = ConvertKit.getDateFormatterOption("yyyy-MM-dd", ZoneId.systemDefault());
-        Option<?, DateFormatter> df3 = ConvertKit.getDateFormatterOption("yyyy-MM-dd HH:mm:ss", ZoneId.systemDefault());
+
+        Option<?, DateFormatter> df1 = ConvertOption.dateFormatter(DateFormatter.ofPattern("yyyy-MM-dd", ZoneId.systemDefault()));
+        Option<?, DateFormatter> df2 = ConvertOption.dateFormatter(DateFormatter.ofPattern("yyyy-MM-dd", ZoneId.systemDefault()));
+        Option<?, DateFormatter> df3 = ConvertOption.dateFormatter(DateFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", ZoneId.systemDefault()));
         assertEquals(df1, df2);
         assertNotEquals(df1, df3);
         assertNotEquals(df2, df3);
 
-        Option<?, NumberFormatter> nf1 = ConvertKit.getNumFormatterOption("#.0000");
-        Option<?, NumberFormatter> nf2 = ConvertKit.getNumFormatterOption("#.0000");
-        Option<?, NumberFormatter> nf3 = ConvertKit.getNumFormatterOption("#.000000");
+        Option<?, NumberFormatter> nf1 = ConvertOption.numberFormatter(NumberFormatter.ofPattern("#.0000"));
+        Option<?, NumberFormatter> nf2 = ConvertOption.numberFormatter(NumberFormatter.ofPattern("#.0000"));
+        Option<?, NumberFormatter> nf3 = ConvertOption.numberFormatter(NumberFormatter.ofPattern("#.000000"));
         assertEquals(nf1, nf2);
         assertNotEquals(nf1, nf3);
         assertNotEquals(nf2, nf3);

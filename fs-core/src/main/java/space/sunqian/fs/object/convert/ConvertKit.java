@@ -8,8 +8,11 @@ import space.sunqian.fs.base.number.NumberFormatter;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.option.OptionKit;
 import space.sunqian.fs.cache.SimpleCache;
+import space.sunqian.fs.object.annotation.AnnotationDetail;
 import space.sunqian.fs.object.annotation.DatePattern;
+import space.sunqian.fs.object.annotation.DatePatternDetail;
 import space.sunqian.fs.object.annotation.NumberPattern;
+import space.sunqian.fs.object.annotation.NumberPatternDetail;
 import space.sunqian.fs.object.meta.PropertyMeta;
 
 import java.lang.annotation.Annotation;
@@ -22,69 +25,69 @@ import java.time.ZoneId;
  */
 public class ConvertKit {
 
-    /**
-     * Returns a {@link Option} of {@link DateFormatter} for the given {@link DatePattern}. This method is based on a
-     * soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
-     * for the same pattern and zone id.
-     *
-     * @param datePattern the pattern of the date formatter
-     * @return the {@link Option} of {@link DateFormatter} for the given {@link DatePattern}
-     */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter> getDateFormatterOption(
-        @Nonnull DatePattern datePattern
-    ) {
-        ZoneId zoneId;
-        if ("".equals(datePattern.zoneId())) {
-            zoneId = ZoneId.systemDefault();
-        } else {
-            zoneId = ZoneId.of(datePattern.zoneId());
-        }
-        return getDateFormatterOption(datePattern.value(), zoneId);
-    }
+    // /**
+    //  * Returns a {@link Option} of {@link DateFormatter} for the given {@link DatePattern}. This method is based on a
+    //  * soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
+    //  * for the same pattern and zone id.
+    //  *
+    //  * @param datePattern the pattern of the date formatter
+    //  * @return the {@link Option} of {@link DateFormatter} for the given {@link DatePattern}
+    //  */
+    // public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter> getDateFormatterOption(
+    //     @Nonnull DatePattern datePattern
+    // ) {
+    //     ZoneId zoneId;
+    //     if ("".equals(datePattern.zoneId())) {
+    //         zoneId = ZoneId.systemDefault();
+    //     } else {
+    //         zoneId = ZoneId.of(datePattern.zoneId());
+    //     }
+    //     return getDateFormatterOption(datePattern.value(), zoneId);
+    // }
 
-    /**
-     * Returns a {@link Option} of {@link DateFormatter} for the given pattern and zone id. This method is based on a
-     * soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
-     * for the same pattern and zone id.
-     *
-     * @param pattern the pattern of the date formatter
-     * @param zoneId  the zone id of the date formatter
-     * @return the {@link Option} of {@link DateFormatter} for the given pattern and zone id
-     */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter> getDateFormatterOption(
-        @Nonnull String pattern,
-        @Nonnull ZoneId zoneId
-    ) {
-        return Option.of(ConvertOption.DATE_FORMATTER, DateFormatter.ofPattern(pattern, zoneId));
-    }
+    // /**
+    //  * Returns a {@link Option} of {@link DateFormatter} for the given pattern and zone id. This method is based on a
+    //  * soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
+    //  * for the same pattern and zone id.
+    //  *
+    //  * @param pattern the pattern of the date formatter
+    //  * @param zoneId  the zone id of the date formatter
+    //  * @return the {@link Option} of {@link DateFormatter} for the given pattern and zone id
+    //  */
+    // public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DateFormatter> getDateFormatterOption(
+    //     @Nonnull String pattern,
+    //     @Nonnull ZoneId zoneId
+    // ) {
+    //     return Option.of(ConvertOption.DATE_FORMATTER, DateFormatter.ofPattern(pattern, zoneId));
+    // }
 
-    /**
-     * Returns a {@link Option} of {@link NumberFormatter} for the given {@link NumberPattern}. This method is based on
-     * a soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
-     * for the same pattern.
-     *
-     * @param numberPattern the pattern of the number formatter
-     * @return the {@link Option} of {@link NumberFormatter} for the given {@link NumberPattern}
-     */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> getNumFormatterOption(
-        @Nonnull NumberPattern numberPattern
-    ) {
-        return getNumFormatterOption(numberPattern.value());
-    }
+    // /**
+    //  * Returns a {@link Option} of {@link NumberFormatter} for the given {@link NumberPattern}. This method is based on
+    //  * a soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
+    //  * for the same pattern.
+    //  *
+    //  * @param numberPattern the pattern of the number formatter
+    //  * @return the {@link Option} of {@link NumberFormatter} for the given {@link NumberPattern}
+    //  */
+    // public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> getNumFormatterOption(
+    //     @Nonnull NumberPattern numberPattern
+    // ) {
+    //     return getNumFormatterOption(numberPattern.value());
+    // }
 
-    /**
-     * Returns a {@link Option} of {@link NumberFormatter} for the given pattern. This method is based on a
-     * soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
-     * for the same pattern.
-     *
-     * @param pattern the pattern of the number formatter
-     * @return the {@link Option} of {@link NumberFormatter} for the given pattern
-     */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> getNumFormatterOption(
-        @Nonnull String pattern
-    ) {
-        return Option.of(ConvertOption.NUMBER_FORMATTER, NumberFormatter.ofPattern(pattern));
-    }
+    // /**
+    //  * Returns a {@link Option} of {@link NumberFormatter} for the given pattern. This method is based on a
+    //  * soft-reference cache (from {@link SimpleCache#ofSoft()}), so the same {@link Option} instance could be returned
+    //  * for the same pattern.
+    //  *
+    //  * @param pattern the pattern of the number formatter
+    //  * @return the {@link Option} of {@link NumberFormatter} for the given pattern
+    //  */
+    // public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull NumberFormatter> getNumFormatterOption(
+    //     @Nonnull String pattern
+    // ) {
+    //     return Option.of(ConvertOption.NUMBER_FORMATTER, NumberFormatter.ofPattern(pattern));
+    // }
 
     /**
      * Merges the default options with the date formatter and number formatter if they are not null.
@@ -102,45 +105,46 @@ public class ConvertKit {
      */
     public static @Nonnull Option<?, ?> @Nonnull [] mergeOptions(
         @Nonnull Option<?, ?> @Nonnull @RetainedParam [] defaultOptions,
-        @Nullable DatePattern datePattern,
-        @Nullable NumberPattern numberPattern
+        @Nullable DatePatternDetail datePattern,
+        @Nullable NumberPatternDetail numberPattern
     ) {
         if (datePattern == null) {
             if (numberPattern == null) {
                 return defaultOptions;
             } else {
-                Option<ConvertOption, NumberFormatter> numFormatter = ConvertKit.getNumFormatterOption(numberPattern);
-                return OptionKit.mergeOption(defaultOptions, numFormatter);
+                // Option<ConvertOption, NumberFormatter> numFormatter = ConvertKit.getNumFormatterOption(numberPattern);
+                return OptionKit.mergeOption(defaultOptions, numberPattern.option());
             }
         } else {
-            Option<ConvertOption, DateFormatter> dateFormatter = ConvertKit.getDateFormatterOption(datePattern);
+            // Option<ConvertOption, DateFormatter> dateFormatter = ConvertKit.getDateFormatterOption(datePattern);
             if (numberPattern == null) {
-                return OptionKit.mergeOption(defaultOptions, dateFormatter);
+                return OptionKit.mergeOption(defaultOptions, datePattern.option());
             } else {
-                Option<ConvertOption, NumberFormatter> numFormatter = ConvertKit.getNumFormatterOption(numberPattern);
-                return OptionKit.mergeOptions(defaultOptions, dateFormatter, numFormatter);
+                // Option<ConvertOption, NumberFormatter> numFormatter = ConvertKit.getNumFormatterOption(numberPattern);
+                return OptionKit.mergeOptions(defaultOptions, datePattern.option(), numberPattern.option());
             }
         }
     }
 
     /**
-     * Returns the annotation for the given type from the source property if it exists, otherwise from the destination
-     * property.
+     * Returns the annotation detail for the given type from the source property if it exists, otherwise from the
+     * destination property.
      *
      * @param annotationType the type of the annotation
      * @param srcProperty    the source property
      * @param dstProperty    the destination property
      * @param <A>            the type of the annotation
+     * @param <S>            the type of the annotation detail
      * @return the annotation for the given type from the source property if it exists, otherwise from the destination
      * property
      */
-    public static <A extends Annotation> @Nullable A getAnnotation(
+    public static <A extends Annotation, S extends AnnotationDetail<A>> @Nullable S getAnnotationDetail(
         @Nonnull Class<A> annotationType,
         @Nonnull PropertyMeta srcProperty,
         @Nonnull PropertyMeta dstProperty
     ) {
-        A srcAnnotation = srcProperty.annotations().get(annotationType);
-        A dstAnnotation = dstProperty.annotations().get(annotationType);
+        S srcAnnotation = srcProperty.annotations().getDetailByAnnotationType(annotationType);
+        S dstAnnotation = dstProperty.annotations().getDetailByAnnotationType(annotationType);
         if (dstAnnotation == null) {
             return srcAnnotation;
         } else {
