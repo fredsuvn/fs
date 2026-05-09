@@ -65,6 +65,8 @@ jmh {
 
   //includes = listOf(
     //"internal.benchmark.(CopyPropertiesJmh|CopyPropertiesWithAnnotationsJmh)"
+    //"internal.benchmark.CopyPropertiesJmh"
+    //"internal.benchmark.CopyPropertiesWithAnnotationsJmh"
     //"internal.benchmark.AspectJmh"
     //"internal.benchmark.TcpServerJmh"
     //"internal.benchmark.JsonParseJmh"

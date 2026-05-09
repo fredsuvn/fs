@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 @BenchmarkMode({Mode.Throughput})
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
-@Fork(5)
+@Fork(3)
 public class JsonParseJmh {
 
     private final TestJsonData data = new TestJsonData();

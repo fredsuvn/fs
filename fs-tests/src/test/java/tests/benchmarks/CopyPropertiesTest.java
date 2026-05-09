@@ -17,14 +17,6 @@ public class CopyPropertiesTest {
 
     @Test
     public void testPropertiesCopierWithDifferentImplementations() throws Exception {
-        // Test with date formatting
-        testCopierImplementation("fs", true);
-        testCopierImplementation("fs-newInstMode", true);
-        testCopierImplementation("spring", true);
-        testCopierImplementation("apache", true);
-        testCopierImplementation("hutool", true);
-        testCopierImplementation("direct", true);
-
         // Test without date formatting
         testCopierImplementation("fs", false);
         testCopierImplementation("fs-newInstMode", false);
@@ -32,6 +24,14 @@ public class CopyPropertiesTest {
         testCopierImplementation("apache", false);
         testCopierImplementation("hutool", false);
         testCopierImplementation("direct", false);
+
+        // Test with date formatting
+        testCopierImplementation("fs", true);
+        testCopierImplementation("fs-newInstMode", true);
+        testCopierImplementation("spring", true);
+        testCopierImplementation("apache", true);
+        testCopierImplementation("hutool", true);
+        testCopierImplementation("direct", true);
     }
 
     private void testCopierImplementation(String copierType, boolean format) throws Exception {
