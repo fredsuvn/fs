@@ -50,6 +50,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -257,6 +258,7 @@ public class ConvertTest implements TestPrint, DataGen {
         testPatternAnnotation();
         testAnnotationObjectToObject();
         testAnnotationMapToObject();
+        testAnnotationObjectToMap();
         testAnnotationNullSupport();
     }
 
@@ -641,6 +643,20 @@ public class ConvertTest implements TestPrint, DataGen {
             DateFormatter.ofPattern(DateKit.DEFAULT_PATTERN).parse(ann1.getComplex1(), Date.class),
             ann2.getComplex1()
         );
+
+        {
+            // Test nesting
+            Date now = new Date();
+            ZonedDateTime zonedNow = ZonedDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault());
+            AnnOutSrc src = new AnnOutSrc();
+            AnnInSrc in = new AnnInSrc();
+            in.setDate(now);
+            src.setDate(now);
+            src.setInner(in);
+            AnnOutDst dst = ObjectConverter.defaultConverter().convert(src, AnnOutDst.class);
+            assertEquals(zonedNow.format(DateTimeFormatter.ofPattern("yyyy-MM")), dst.getDate());
+            assertEquals(zonedNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH")), dst.getInner().getDate());
+        }
     }
 
     private void testAnnotationMapToObject() {
@@ -668,6 +684,32 @@ public class ConvertTest implements TestPrint, DataGen {
             DateFormatter.ofPattern(DateKit.DEFAULT_PATTERN).parse((CharSequence) ann1.get("complex1"), Date.class),
             ann2.getComplex1()
         );
+
+        {
+            // Test nesting
+            Date now = new Date();
+            ZonedDateTime zonedNow = ZonedDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault());
+            Map<Object, Object> src = new HashMap<>();
+            AnnInSrc in = new AnnInSrc();
+            in.setDate(now);
+            src.put("date", now);
+            src.put("inner", in);
+            AnnOutDst dst = ObjectConverter.defaultConverter().convert(src, AnnOutDst.class);
+            assertEquals(zonedNow.format(DateTimeFormatter.ofPattern("yyyy-MM")), dst.getDate());
+            assertEquals(zonedNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH")), dst.getInner().getDate());
+        }
+    }
+
+    private void testAnnotationObjectToMap() {
+        {
+            // Test nesting
+            Date now = new Date();
+            ZonedDateTime zonedNow = ZonedDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault());
+            AnnOutSrc src = new AnnOutSrc();
+            src.setDate(now);
+            Map<String, String> dst = ObjectConverter.defaultConverter().convert(src, new TypeRef<Map<String, String>>() {});
+            assertEquals(zonedNow.format(DateTimeFormatter.ofPattern("yyyy")), dst.get("date"));
+        }
     }
 
     private void testAnnotationNullSupport() {
@@ -895,5 +937,31 @@ public class ConvertTest implements TestPrint, DataGen {
         @DatePattern
         @NumberPattern
         private Date complex1;
+    }
+
+    @Data
+    public static class AnnOutSrc {
+        @DatePattern("yyyy")
+        private Date date;
+        private AnnInSrc inner;
+    }
+
+    @Data
+    public static class AnnInSrc {
+        @DatePattern("yyyy-MM-dd")
+        private Date date;
+    }
+
+    @Data
+    public static class AnnOutDst {
+        @DatePattern("yyyy-MM")
+        private String date;
+        private AnnInDst inner;
+    }
+
+    @Data
+    public static class AnnInDst {
+        @DatePattern("yyyy-MM-dd HH")
+        private String date;
     }
 }
