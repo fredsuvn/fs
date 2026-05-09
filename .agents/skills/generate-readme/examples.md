@@ -48,11 +48,11 @@ public class QuickStart {
     public static void main(String[] args) {
         // Initialize fs
         Fs.init();
-        
+
         // Simple file operations
         String content = Fs.io().file().readString("data.txt");
         System.out.println(content);
-        
+
         // HTTP request in one line
         String response = Fs.net().http().get("https://api.example.com/data");
         System.out.println(response);
@@ -86,7 +86,7 @@ public class QuickStart {
 
 **Requirements:**
 - JDK 21 or later
-- Gradle 8.5+
+- Gradle 9+
 
 **Build:**
 ```bash

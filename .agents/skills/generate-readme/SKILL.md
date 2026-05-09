@@ -90,7 +90,7 @@ A powerful utility library for Java/Kotlin that simplifies common development ta
 
 ✨ **Core Features:**
 - Feature 1: Brief description
-- Feature 2: Brief description  
+- Feature 2: Brief description
 - Feature 3: Brief description
 - Feature 4: Brief description
 ```
@@ -161,7 +161,7 @@ Include practical information:
 
 **Requirements:**
 - JDK 21+
-- Gradle 8.x
+- Gradle 9+
 
 **Build Command:**
 ```bash

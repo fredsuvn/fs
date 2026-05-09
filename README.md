@@ -1,4 +1,4 @@
-# ![fs](docs/fs.svg) fs: A Lightweight, High-Performance, Zero-Dependency Tool Library for Java
+# ![fs](docs/logo/fs.svg) fs: A Lightweight, High-Performance, Zero-Dependency Tool Library for Java
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/fredsuvn/fs/test.yml)](https://github.com/fredsuvn/fs/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/fredsuvn/fs)](https://codecov.io/gh/fredsuvn/fs)
@@ -61,17 +61,17 @@ public class App {
     public static void main(String[] args) {
         // Null safety
         String value = Fs.nonnull(input, "default");
-        
+
         // Create collections
         var list = Fs.list("a", "b", "c");
         var map = Fs.map("key1", 1, "key2", 2);
-        
+
         // Object conversion
         TargetType target = Fs.convert(source, TargetType.class);
-        
+
         // Property copying
         Fs.copyProperties(source, target);
-        
+
         // Object meta introspection
         ObjectMeta meta = ObjectMeta.of(Person.class);
         System.out.println("Properties: " + meta.properties().keySet());
@@ -195,7 +195,7 @@ container.shutdown();
 ## Documentation
 
 - [JavaDoc](https://fredsuvn.github.io/fs-docs/docs/fs/docs/javadoc/index.html)
-- [Developer Guide](docs/dev/dev.adoc)
+- [Developer Guide](docs/dev/DEVELOPMENT.adoc)
 - [JMH Benchmarks](https://fredsuvn.github.io/fs-docs/tools/jmh-visualizer/jmh-visualizer.html?resultsPath=../../docs/fs/jmh/results.json)
 - [Test Coverage](https://fredsuvn.github.io/fs-docs/docs/fs/reports/jacoco/test/html/index.html)
 
@@ -257,4 +257,4 @@ This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENS
 
 ---
 
-![fs](docs/fs.svg)
+![fs](docs/logo/fs.svg)

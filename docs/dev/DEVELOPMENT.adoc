@@ -1,0 +1,452 @@
+= Develop Manual of _fs_
+:doctype: book
+:toc: macro
+:toclevels: 3
+:encoding: UTF-8
+
+image::../logo/fs.svg[]
+
+== Quick Start
+
+=== Environment Requirements
+
+* JDK 8+ (for compilation)
+* Gradle 8.x
+* Git
+
+=== Clone Repository
+
+[source,bash]
+----
+git clone https://github.com/fredsuvn/fs.git
+cd fs
+----
+
+=== First Build
+
+[source,bash]
+----
+./gradlew clean build
+----
+
+=== Run Tests
+
+[source,bash]
+----
+./gradlew test
+----
+
+=== Common Issues
+
+==== JDK Configuration
+
+Ensure JDK versions are properly configured in `gradle.properties`:
+
+[source,properties]
+----
+org.gradle.java.installations.paths=\
+  ~/.jdks/azul-1.8.0_462,\
+  ~/.jdks/azul-17.0.17,\
+  ~/.jdks/openjdk-25
+----
+
+==== Proxy Configuration
+
+Set proxy environment variables if needed:
+
+[source,bash]
+----
+export HTTP_PROXY=http://proxy.example.com:8080
+export HTTPS_PROXY=http://proxy.example.com:8080
+----
+
+== Project Architecture Overview
+
+=== Module Structure
+
+_fs_ follows a modular architecture with clear separation of concerns:
+
+* **fs-annotation**: Custom annotations for code analysis and validation
+* **fs-asm**: Embedded ASM framework for bytecode manipulation
+* **fs-core**: Main library with comprehensive utilities and interfaces
+* **fs-all**: Aggregated jar containing all modules (zero-dependency)
+
+=== Module Dependency Graph
+
+[graphviz]
+----
+digraph G {
+    rankdir=TB;
+    node [shape=box];
+
+    "fs-annotation";
+    "fs-asm";
+    "fs-core";
+    "fs-all";
+
+    "fs-annotation" -> "fs-core";
+    "fs-asm" -> "fs-core";
+    "fs-core" -> "fs-all";
+}
+----
+
+=== Multi-Version JDK Support
+
+The project uses `FsLoader` to load appropriate implementations based on runtime JDK version:
+
+[source,java]
+----
+interface HttpCallerService {
+    @Nonnull
+    HttpCallerService INST = FsLoader.loadImplByJvm(HttpCallerService.class, 11);
+
+    @Nonnull
+    HttpCaller newCaller(int bufSize, @Nonnull Proxy proxy) throws HttpNetException;
+}
+----
+
+=== Design Principles
+
+_fs_ is built on the following design principles:
+
+* **Zero Dependency**: Minimal external dependencies, self-contained implementations
+* **Multi-Version Support**: Automatic JDK version detection and optimal implementation selection
+* **High Performance**: Optimized implementations with benchmark validation
+* **Modularity**: Clear module boundaries and responsibilities
+* **Extensibility**: Well-defined interfaces for custom implementations
+* **Consistency**: Unified API design and naming conventions
+* **Reliability**: Comprehensive test coverage and error handling
+* **Simplicity**: Intuitive APIs and clear documentation
+
+== Development Workflow
+
+=== Branch Strategy
+
+* `main`: Main branch, the newest release branch
+* `dev/main`: Main development branch, the release preparation branch
+* `dev/*`: Development branches for each author
+* `release/*`: Release preparation branches
+* `feature/*`: Feature development branches
+* `fix/*`: Bug fix branches
+
+=== Commit Standards
+
+Follow the conventional commit format:
+
+[source]
+----
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer]
+----
+
+Types:
+* `feat`: New feature
+* `fix`: Bug fix
+* `docs`: Documentation update
+* `refactor`: Code refactoring
+* `test`: Test updates
+
+=== Code Review Process
+
+1. Create feature branch from `main`
+2. Implement changes with tests
+3. Submit pull request
+4. Request review from at least one maintainer
+5. Address feedback
+6. Maintainer merges when approved
+
+== Coding Standards
+
+=== Naming Conventions
+
+* Classes: PascalCase
+* Methods: camelCase
+* Variables: camelCase
+* Constants: UPPER_SNAKE_CASE
+* Packages: lowercase with dots as separators
+
+=== Code Formatting
+
+* Use 4 spaces for indentation
+* Keep lines under 120 characters
+* Use blank lines to separate logical blocks
+* Use curly braces even for single-line blocks
+
+=== Annotation Usage
+
+* `@Nonnull`: Required for non-null return values and parameters
+* `@Nullable`: Required for nullable return values and parameters
+* `@Immutable`: For immutable value classes
+* `@ThreadSafe`: For thread-safe classes
+
+[source,java]
+----
+public void process(
+    @Nonnull String required,
+    @Nullable String optional
+) {
+    // Implementation
+}
+----
+
+=== Exception Handling
+
+* Use specific exception types when possible
+* Provide meaningful error messages
+* Catch exceptions at the appropriate level
+* Use `Fs.uncheck` for checked exception handling when appropriate
+
+== Module Details
+
+=== fs-annotation
+
+src: link:../../fs-annotation/[fs-annotation]
+
+Provides custom annotations for code analysis, validation, and static analysis support.
+
+==== Key Annotations
+
+* **Null Safety**: `@Nonnull`, `@Nullable` for null pointer prevention
+* **Immutability**: `@Immutable` for immutable types
+* **Parameter Handling**: `@RetainedParam` for parameter retention
+* **Visibility**: `@NonExported` for non-exported packages
+
+==== Usage Guidelines
+
+* Use `@Nonnull` and `@Nullable` consistently for method parameters and return types
+* Apply `@Immutable` to value objects and data classes
+* Use package-level annotations for default nullability settings
+
+=== fs-asm
+
+src: link:../../fs-asm/[fs-asm]
+
+Embedded ASM framework for bytecode manipulation, providing dynamic programming capabilities without external dependencies.
+
+==== Key Features
+
+* **Zero Dependency**: Complete ASM implementation with no external dependencies
+* **Package Isolation**: All classes in `space.sunqian.fs.asm` package
+* **Version Compatibility**: ASM 7.1 feature set
+
+==== Core Components
+
+* **Class Manipulation**: `ClassReader`, `ClassWriter`
+* **Method Handling**: `MethodVisitor`, `FieldVisitor`
+* **Bytecode Analysis**: `AnnotationVisitor`, `Type`
+* **Framework Support**: Complete ASM opcodes and utilities
+
+==== Usage in _fs_
+
+* Used by _fs-core_ for dynamic proxy and AOP functionality
+* Enables bytecode generation for performance optimization
+* Provides reflection alternatives for high-performance scenarios
+
+=== fs-core
+
+src: link:../../fs-core/[fs-core]
+
+Main library with comprehensive utilities and interfaces.
+
+==== Architecture Overview
+
+_fs-core_ is organized into functional packages:
+
+* **Root Package** (`space.sunqian.fs`): Core utilities and global access point
+* **Base Utilities** (`space.sunqian.fs.base`): Fundamental utilities
+* **Cache** (`space.sunqian.fs.cache`): Lightweight caching implementation
+* **Collections & Data** (`space.sunqian.fs.collect`, `space.sunqian.fs.data`)
+* **Concurrency** (`space.sunqian.fs.concurrent`): Concurrent programming utilities
+* **I/O Operations** (`space.sunqian.fs.io`): Byte/char processing and file operations
+* **Networking** (`space.sunqian.fs.net`): HTTP, TCP, UDP with adaptive implementations
+* **Object Manipulation** (`space.sunqian.fs.object`): Meta, building, conversion, and pooling
+* **Dynamic Programming** (`space.sunqian.fs.dynamic`, `space.sunqian.fs.invoke`)
+* **Dependency Injection** (`space.sunqian.fs.di`): Lightweight DI container
+* **Reflection** (`space.sunqian.fs.reflect`): Reflection utilities and type handling
+* **Third-party Integration** (`space.sunqian.fs.third`): Integration with third-party libraries
+* **Utilities** (`space.sunqian.fs.utils`): Codec, event bus, JDBC, versioning
+
+==== Object Manipulation Package
+
+The `space.sunqian.fs.object` package contains key components:
+
+* **meta**: Object metadata definition and introspection
+  * `ObjectMeta`: Object metadata for class introspection
+  * `MapMeta`: Map metadata for type-safe map operations
+  * `PropertyMeta`: Property metadata for individual fields
+  * `MetaKit`: Utility methods for metadata operations
+* **builder**: Object building with builder patterns
+  * `BuilderManager`: Central manager for builder operations
+  * `BuilderOperator`: Builder operator interface
+* **convert**: Object conversion and property copying
+  * `ObjectConverter`: Object conversion interface
+  * `ObjectCopier`: Property copying interface
+  * `ConvertKit`: Conversion utilities
+* **annotation**: Annotations for object-related operations
+* **pool**: Object pooling interfaces
+
+==== Key Design Patterns
+
+* **Factory Pattern**: Used extensively for creating instances with version-specific implementations
+* **Builder Pattern**: Network clients and object builders use fluent builder interfaces
+* **Strategy Pattern**: Different implementations selected based on runtime environment
+* **Adapter Pattern**: JDK version compatibility through adapter implementations
+
+==== Development Guidelines
+
+* Place kits, interfaces, and implementations in appropriate packages
+* Use `FsLoader` for multi-version JDK support
+* Follow the established naming conventions and package structure
+* Write comprehensive tests for all new functionality
+* Maintain interface-back-implementation pattern for extensibility
+
+=== fs-all
+
+src: link:../../fs-all/[fs-all]
+
+Aggregation module containing all essential modules for easy consumption.
+
+==== Purpose
+
+Provides a zero-dependency aggregated jar containing all essential modules for easy consumption by external projects.
+
+==== Aggregation Strategy
+
+* **Complete Integration**: Combines classes and resources from _fs-annotation_, _fs-asm_, and _fs-core_
+* **Zero Dependency**: No module dependencies, self-contained distribution
+* **Documentation Aggregation**: Generates unified Javadoc, JaCoCo reports, and test reports
+
+== Testing Guidelines
+
+=== Unit Testing
+
+* Use JUnit 5 for unit tests
+* Place tests in `src/test/java/tests/`
+* Test all public methods
+* Follow existing test naming conventions
+
+=== Integration Testing
+
+* Test cross-module interactions
+* Use separate test resources when needed
+* Follow integration test naming patterns
+
+=== Benchmark Testing
+
+* Use JUnit 5 for unit tests
+* Place tests in `src/test/java/tests/`
+* Test all public methods
+* Follow existing test naming conventions
+
+=== Integration Testing
+
+* Test cross-module interactions
+* Use separate test resources when needed
+* Follow integration test naming patterns
+
+=== Benchmark Testing
+
+* Use JMH for performance benchmarks
+* Place benchmarks in dedicated test module
+* Include before/after performance metrics
+* Validate performance improvements
+
+=== Coverage Requirements
+
+* Maintain 100% test coverage
+* Use JaCoCo for coverage reporting
+* Fix coverage gaps before merging
+* Exclude `fs-asm` from coverage (copied from ASM framework)
+
+== Build & Release
+
+=== Gradle Tasks
+
+| Task | Description |
+|------|-------------|
+| `build` | Build all modules |
+| `test` | Run unit tests |
+| `jmh` | Run benchmarks |
+| `javadoc` | Generate documentation |
+| `publishToMavenLocal` | Publish to local Maven |
+| `jacocoTestReport` | Generate coverage reports |
+
+=== Multi-JDK Build
+
+Add new JDK versions in `gradle.properties`:
+
+[source,properties]
+----
+org.gradle.java.installations.paths=\
+  ~/.jdks/azul-1.8.0_462,\
+  ~/.jdks/azul-17.0.17,\
+  ~/.jdks/openjdk-25
+----
+
+=== Local Release
+
+[source,bash]
+----
+./gradlew clean build publishToMavenLocal
+----
+
+=== Maven Central Release
+
+1. Update version in build configuration
+2. Run `./gradlew publish`
+3. Close and release in Sonatype Nexus
+
+== FAQ
+
+=== How to add a new utility class?
+
+1. Place in appropriate package under `fs-core/src/main/java`
+2. Follow naming conventions (e.g., `XxxKit`)
+3. Add unit tests
+4. Update documentation
+
+=== How to support a new JDK version?
+
+1. Add JDK path to `gradle.properties`
+2. Create version-specific implementation using `FsLoader`
+3. Add tests for the new version
+4. Update build configuration
+
+=== How to add new object conversion handlers?
+
+1. Implement handler in `space.sunqian.fs.object.convert.handlers`
+2. Register handler in appropriate converter/copier
+3. Add tests for the new handler
+4. Update documentation if needed
+
+=== Why is fs-asm excluded from test coverage?
+
+`fs-asm` is a direct copy of the ASM framework with package relocation. No modifications to original ASM functionality, so testing is handled by the ASM project itself.
+
+== Contributing Guidelines
+
+=== Code Quality
+
+* Maintain 100% test coverage
+* Follow established coding conventions
+* Use built-in annotations consistently
+* Write comprehensive documentation
+
+=== Testing Requirements
+
+* All new functionality must include tests
+* Performance changes require benchmark validation
+* Integration tests for cross-module functionality
+* Maintain backward compatibility
+
+=== Pull Request Process
+
+* Clear description of changes
+* Link to related issues
+* Performance impact analysis
+* Documentation updates included
+
+image::../logo/fs.svg[]
