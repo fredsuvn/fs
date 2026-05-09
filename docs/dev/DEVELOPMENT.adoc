@@ -11,7 +11,7 @@ image::../logo/fs.svg[]
 === Environment Requirements
 
 * JDK 8+ (for compilation)
-* Gradle 8.x
+* Gradle 9+
 * Git
 
 === Clone Repository

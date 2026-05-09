@@ -223,11 +223,11 @@ Explore the [samples directory](fs-tests/src/samples) for detailed usage example
 
 ---
 
-## Build & Contribute
+## Build & Contribute & Contact
 
 **Requirements:**
 - JDK 8+ for compilation
-- Gradle 8.x
+- Gradle 9+
 
 **Build Command:**
 ```bash
@@ -248,6 +248,10 @@ Explore the [samples directory](fs-tests/src/samples) for detailed usage example
 1. Fork the repository
 2. Create a feature branch
 3. Submit a pull request
+
+**Contact**
+* [https://github.com/fredsuvn/fs](https://github.com/fredsuvn/fs/)
+* [QQ group: 566185308](https://qm.qq.com/q/wlkc2tmOaG)
 
 ---
 
