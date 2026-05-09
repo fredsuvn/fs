@@ -36,7 +36,7 @@
 #### Gradle
 ```kotlin
 dependencies {
-    implementation("space.sunqian.fs:fs-all:0.0.4-SNAPSHOT")
+    implementation("space.sunqian.fs:fs-all:0.0.3-SNAPSHOT")
 }
 ```
 
@@ -45,7 +45,7 @@ dependencies {
 <dependency>
   <groupId>space.sunqian.fs</groupId>
   <artifactId>fs-all</artifactId>
-  <version>0.0.4-SNAPSHOT</version>
+  <version>0.0.3-SNAPSHOT</version>
 </dependency>
 ```
 
