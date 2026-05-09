@@ -17,7 +17,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 final class DateBack {
@@ -48,6 +49,9 @@ final class DateBack {
     private static class AbsDateFormatter implements DateFormatter {
 
         private static final @Nonnull String NO_PATTERN = "No pattern in this TimeSpec.";
+
+        private static final @Nonnull Map<@Nonnull Class<?>, @Nonnull DateParser> PARSER_MAP;
+        private static final @Nonnull Map<@Nonnull Class<?>, @Nonnull DateConverter> CONVERTER_MAP;
 
         protected final @Nonnull DateTimeFormatter formatter;
         private final @Nonnull ZoneId zoneId;
@@ -96,41 +100,9 @@ final class DateBack {
         private @Nonnull Object parse0(
             @Nonnull CharSequence date, @Nonnull Class<?> timeType
         ) throws DateTimeException {
-            if (Objects.equals(timeType, Instant.class)) {
-                try {
-                    return Instant.parse(date);
-                } catch (DateTimeParseException e) {
-                    LocalDateTime localDateTime = LocalDateTime.parse(date, formatter);
-                    return ZonedDateTime.of(localDateTime, zoneId).toInstant();
-                }
-            }
-            if (Objects.equals(timeType, Date.class)) {
-                return Date.from(parse(date, Instant.class));
-            }
-            if (Objects.equals(timeType, LocalDateTime.class)) {
-                return LocalDateTime.parse(date, formatter);
-            }
-            if (Objects.equals(timeType, ZonedDateTime.class)) {
-                try {
-                    return ZonedDateTime.parse(date, formatter);
-                } catch (DateTimeParseException e) {
-                    LocalDateTime localDateTime = LocalDateTime.parse(date, formatter);
-                    return ZonedDateTime.of(localDateTime, zoneId);
-                }
-            }
-            if (Objects.equals(timeType, OffsetDateTime.class)) {
-                try {
-                    return OffsetDateTime.parse(date, formatter);
-                } catch (DateTimeParseException e) {
-                    LocalDateTime localDateTime = LocalDateTime.parse(date, formatter);
-                    return OffsetDateTime.of(localDateTime, DateKit.nowOffset());
-                }
-            }
-            if (Objects.equals(timeType, LocalDate.class)) {
-                return LocalDate.parse(date, formatter);
-            }
-            if (Objects.equals(timeType, LocalTime.class)) {
-                return LocalTime.parse(date, formatter);
+            DateParser parser = PARSER_MAP.get(timeType);
+            if (parser != null) {
+                return parser.parse(date, timeType, this);
             }
             throw new DateException("Unsupported time type: " + timeType);
         }
@@ -157,26 +129,9 @@ final class DateBack {
         private @Nonnull Object convert0(
             @Nonnull TemporalAccessor time, @Nonnull Class<?> timeType
         ) throws DateTimeException {
-            if (Objects.equals(timeType, Instant.class)) {
-                return Instant.from(time);
-            }
-            if (Objects.equals(timeType, Date.class)) {
-                return Date.from(Instant.from(time));
-            }
-            if (Objects.equals(timeType, LocalDateTime.class)) {
-                return LocalDateTime.from(time);
-            }
-            if (Objects.equals(timeType, ZonedDateTime.class)) {
-                return ZonedDateTime.from(time);
-            }
-            if (Objects.equals(timeType, OffsetDateTime.class)) {
-                return OffsetDateTime.from(time);
-            }
-            if (Objects.equals(timeType, LocalDate.class)) {
-                return LocalDate.from(time);
-            }
-            if (Objects.equals(timeType, LocalTime.class)) {
-                return LocalTime.from(time);
+            DateConverter converter = CONVERTER_MAP.get(timeType);
+            if (converter != null) {
+                return converter.convert(time, timeType, this);
             }
             throw new DateException("Unsupported conversion from " + time.getClass() + " to " + timeType + ".");
         }
@@ -195,6 +150,85 @@ final class DateBack {
             //     return ZonedDateTime.of(LocalDate.MIN, (LocalTime) time, zoneId);
             // }
             return time;
+        }
+
+        static {
+            PARSER_MAP = new HashMap<>();
+            PARSER_MAP.put(Instant.class, (cs, t, f) -> {
+                try {
+                    return Instant.parse(cs);
+                } catch (DateTimeParseException e) {
+                    LocalDateTime localDateTime = LocalDateTime.parse(cs, f.formatter);
+                    return ZonedDateTime.of(localDateTime, f.zoneId).toInstant();
+                }
+            });
+            PARSER_MAP.put(Date.class, (cs, t, f) -> {
+                return Date.from(f.parse(cs, Instant.class));
+            });
+            PARSER_MAP.put(LocalDateTime.class, (cs, t, f) -> {
+                return LocalDateTime.parse(cs, f.formatter);
+            });
+            PARSER_MAP.put(ZonedDateTime.class, (cs, t, f) -> {
+                try {
+                    return ZonedDateTime.parse(cs, f.formatter);
+                } catch (DateTimeParseException e) {
+                    LocalDateTime localDateTime = LocalDateTime.parse(cs, f.formatter);
+                    return ZonedDateTime.of(localDateTime, f.zoneId);
+                }
+            });
+            PARSER_MAP.put(OffsetDateTime.class, (cs, t, f) -> {
+                try {
+                    return OffsetDateTime.parse(cs, f.formatter);
+                } catch (DateTimeParseException e) {
+                    LocalDateTime localDateTime = LocalDateTime.parse(cs, f.formatter);
+                    return OffsetDateTime.of(localDateTime, DateKit.nowOffset());
+                }
+            });
+            PARSER_MAP.put(LocalDate.class, (cs, t, f) -> {
+                return LocalDate.parse(cs, f.formatter);
+            });
+            PARSER_MAP.put(LocalTime.class, (cs, t, f) -> {
+                return LocalTime.parse(cs, f.formatter);
+            });
+
+            CONVERTER_MAP = new HashMap<>();
+            CONVERTER_MAP.put(Instant.class, (ta, t, f) -> {
+                return Instant.from(ta);
+            });
+            CONVERTER_MAP.put(Date.class, (ta, t, f) -> {
+                return Date.from(Instant.from(ta));
+            });
+            CONVERTER_MAP.put(LocalDateTime.class, (ta, t, f) -> {
+                return LocalDateTime.from(ta);
+            });
+            CONVERTER_MAP.put(ZonedDateTime.class, (ta, t, f) -> {
+                return ZonedDateTime.from(ta);
+            });
+            CONVERTER_MAP.put(OffsetDateTime.class, (ta, t, f) -> {
+                return OffsetDateTime.from(ta);
+            });
+            CONVERTER_MAP.put(LocalDate.class, (ta, t, f) -> {
+                return LocalDate.from(ta);
+            });
+            CONVERTER_MAP.put(LocalTime.class, (ta, t, f) -> {
+                return LocalTime.from(ta);
+            });
+        }
+
+        private interface DateParser {
+
+            @Nonnull
+            Object parse(
+                @Nonnull CharSequence cs, @Nonnull Class<?> t, @Nonnull AbsDateFormatter f
+            ) throws DateTimeException;
+        }
+
+        private interface DateConverter {
+
+            @Nonnull
+            Object convert(
+                @Nonnull TemporalAccessor ta, @Nonnull Class<?> t, @Nonnull AbsDateFormatter f
+            ) throws DateTimeException;
         }
     }
 

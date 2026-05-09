@@ -44,16 +44,6 @@ public interface NumberFormatter {
     }
 
     /**
-     * Returns a new {@link NumberFormatter} with the given number format supplier.
-     *
-     * @param supplier the number format supplier
-     * @return a new {@link NumberFormatter} with the given number format supplier
-     */
-    static @Nonnull NumberFormatter newFormatter(@Nonnull Supplier<? extends @Nonnull NumberFormat> supplier) {
-        return NumberBack.newFormatter(supplier);
-    }
-
-    /**
      * Returns a new {@link NumberFormatter} with the given number format pattern.
      * <p>
      * By default, this method uses {@link DecimalFormat} and {@link ThreadLocal} to support multi-threading.
@@ -64,6 +54,16 @@ public interface NumberFormatter {
     static @Nonnull NumberFormatter newFormatter(@Nonnull String pattern) {
         ThreadLocal<DecimalFormat> format = ThreadLocal.withInitial(() -> new DecimalFormat(pattern));
         return newFormatter(format::get);
+    }
+
+    /**
+     * Returns a new {@link NumberFormatter} with the given number format supplier.
+     *
+     * @param supplier the number format supplier
+     * @return a new {@link NumberFormatter} with the given number format supplier
+     */
+    static @Nonnull NumberFormatter newFormatter(@Nonnull Supplier<? extends @Nonnull NumberFormat> supplier) {
+        return NumberBack.newFormatter(supplier);
     }
 
     /**

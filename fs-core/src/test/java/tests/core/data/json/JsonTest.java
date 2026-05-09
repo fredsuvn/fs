@@ -32,6 +32,7 @@ import space.sunqian.fs.object.annotation.NumberPattern;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.reflect.TypeRef;
+import tests.core.object.convert.ConvertTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -44,6 +45,8 @@ import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -851,6 +854,39 @@ public class JsonTest implements TestPrint {
         assertThrows(JsonDataException.class, () -> {throw new JsonDataException(new RuntimeException());});
     }
 
+    @Test
+    public void testAnnotation() throws Exception {
+        {
+            // Test nesting format
+            Date now = new Date();
+            ZonedDateTime zonedNow = ZonedDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault());
+            ConvertTest.AnnOutSrc src = new ConvertTest.AnnOutSrc();
+            ConvertTest.AnnInSrc in = new ConvertTest.AnnInSrc();
+            in.setDate(now);
+            src.setDate(now);
+            src.setInner(in);
+            String json = JsonFormatter.defaultFormatter().format(src);
+            Map<?, ?> parsed = jsonMapper.readValue(json, Map.class);
+            assertEquals(zonedNow.format(DateTimeFormatter.ofPattern("yyyy")), parsed.get("date"));
+            Map<?, ?> inner = (Map<?, ?>) parsed.get("inner");
+            assertEquals(zonedNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), inner.get("date"));
+        }
+        {
+            // Test nesting parse
+            Date now = new Date();
+            ZonedDateTime zonedNow = ZonedDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault());
+            Map<String, Object> src = new HashMap<>();
+            ConvertTest.AnnInSrc in = new ConvertTest.AnnInSrc();
+            in.setDate(now);
+            src.put("date", DateTimeFormatter.ofPattern("yyyy-MM").format(zonedNow));
+            src.put("inner", MapKit.map("date", DateTimeFormatter.ofPattern("yyyy-MM-dd HH").format(zonedNow)));
+            String json = jsonMapper.writeValueAsString(src);
+            AnnOutDst parsed = JsonParser.defaultParser().parse(json).toObject(AnnOutDst.class);
+            assertEquals(zonedNow.format(DateTimeFormatter.ofPattern("yyyy-MM")), parsed.getDate());
+            assertEquals(zonedNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH")), parsed.getInner().getDate());
+        }
+    }
+
     public enum DataEnum {
         A, B, C
     }
@@ -948,5 +984,31 @@ public class JsonTest implements TestPrint {
         private long[] la3;
         private BigDecimal[] ba3;
         private List<String> sa3;
+    }
+
+    @Data
+    public static class AnnOutSrc {
+        @DatePattern("yyyy")
+        private Date date;
+        private ConvertTest.AnnInSrc inner;
+    }
+
+    @Data
+    public static class AnnInSrc {
+        @DatePattern("yyyy-MM-dd")
+        private Date date;
+    }
+
+    @Data
+    public static class AnnOutDst {
+        @DatePattern("yyyy-MM")
+        private String date;
+        private ConvertTest.AnnInDst inner;
+    }
+
+    @Data
+    public static class AnnInDst {
+        @DatePattern("yyyy-MM-dd HH")
+        private String date;
     }
 }
