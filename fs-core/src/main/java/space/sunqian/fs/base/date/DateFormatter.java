@@ -93,45 +93,11 @@ public interface DateFormatter {
      */
     @CachedResult
     static @Nonnull DateFormatter from(@Nonnull DateTimeFormatter formatter) {
-        return from(formatter, ZoneId.systemDefault());
-    }
-
-    /**
-     * Returns an instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}.
-     * <p>
-     * The returned instance supports {@link Date}, {@link Instant}, {@link LocalDateTime}, {@link ZonedDateTime},
-     * {@link OffsetDateTime}, {@link LocalDate} and {@link LocalTime}. But doesn't support pattern methods.
-     *
-     * @param formatter the given {@link DateTimeFormatter}
-     * @param zoneId    the default zone info of the returned instance
-     * @return an instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}
-     */
-    @CachedResult
-    static @Nonnull DateFormatter from(
-        @Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId
-    ) {
-        SimpleKey2 key = SimpleKey2.of(formatter, zoneId);
+        SimpleKey2 key = SimpleKey2.of(formatter, null);
         return DateBack.getFormatter(key, k -> {
             DateTimeFormatter f = k.getAs(0);
-            ZoneId z = k.getAs(1);
-            return newFormatter(f, z);
+            return newFormatter(f);
         });
-    }
-
-    /**
-     * Returns a new instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}.
-     * <p>
-     * The returned instance supports {@link Date}, {@link Instant}, {@link LocalDateTime}, {@link ZonedDateTime},
-     * {@link OffsetDateTime}, {@link LocalDate} and {@link LocalTime}. But doesn't support pattern methods.
-     *
-     * @param formatter the given {@link DateTimeFormatter}
-     * @param zoneId    the default zone info of the returned instance
-     * @return a new instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}
-     */
-    static @Nonnull DateFormatter newFormatter(
-        @Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId
-    ) {
-        return DateBack.newFormatter(formatter, zoneId);
     }
 
     /**
@@ -150,6 +116,21 @@ public interface DateFormatter {
         @Nonnull String pattern, @Nonnull ZoneId zoneId
     ) throws DateTimeException {
         return DateBack.newFormatter(pattern, zoneId);
+    }
+
+    /**
+     * Returns a new instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}.
+     * <p>
+     * The returned instance supports {@link Date}, {@link Instant}, {@link LocalDateTime}, {@link ZonedDateTime},
+     * {@link OffsetDateTime}, {@link LocalDate} and {@link LocalTime}. But doesn't support pattern methods.
+     *
+     * @param formatter the given {@link DateTimeFormatter}
+     * @return a new instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}
+     */
+    static @Nonnull DateFormatter newFormatter(
+        @Nonnull DateTimeFormatter formatter
+    ) {
+        return DateBack.newFormatter(formatter);
     }
 
     /**
@@ -237,32 +218,32 @@ public interface DateFormatter {
     /**
      * Parses the given date string to an instance of the specified time type.
      *
-     * @param date     the given date string to parse
-     * @param timeType the specified time type
-     * @param <T>      the time type
+     * @param dateString the given date string to parse
+     * @param timeType   the specified time type
+     * @param <T>        the time type
      * @return the parsed time instance
      * @throws DateTimeException if any error occurs
      */
-    <T> @Nonnull T parse(@Nonnull CharSequence date, @Nonnull Class<T> timeType) throws DateTimeException;
+    <T> @Nonnull T parse(@Nonnull CharSequence dateString, @Nonnull Class<T> timeType) throws DateTimeException;
 
     /**
      * Parses the given date string to an instance of the specified time type. If the given date string is {@code null},
      * or an exception thrown during parsing, returns {@code null}.
      *
-     * @param date     the given date string to parse, can be {@code null}
-     * @param timeType the specified time type
-     * @param <T>      the time type
+     * @param dateString the given date string to parse, can be {@code null}
+     * @param timeType   the specified time type
+     * @param <T>        the time type
      * @return the parsed time instance, or {@code null} if the given date string is {@code null} or an exception thrown
      * @throws DateTimeException if any error occurs
      */
     default <T> @Nullable T parseSafe(
-        @Nullable CharSequence date, @Nonnull Class<T> timeType
+        @Nullable CharSequence dateString, @Nonnull Class<T> timeType
     ) throws DateTimeException {
-        if (date == null) {
+        if (dateString == null) {
             return null;
         }
         try {
-            return parse(date, timeType);
+            return parse(dateString, timeType);
         } catch (Exception e) {
             return null;
         }

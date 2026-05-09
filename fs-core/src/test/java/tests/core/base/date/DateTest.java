@@ -208,6 +208,11 @@ public class DateTest implements TestPrint {
         public Instant toInstant() {
             throw new RuntimeException();
         }
+
+        @Override
+        public long getTime() {
+            throw new RuntimeException();
+        }
     }
 
     private static final class ErrTime implements TemporalAccessor {

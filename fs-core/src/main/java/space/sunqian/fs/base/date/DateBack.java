@@ -1,10 +1,14 @@
 package space.sunqian.fs.base.date;
 
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.value.SimpleKey2;
 import space.sunqian.fs.cache.SimpleCache;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -17,8 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.TimeZone;
 import java.util.function.Function;
 
 final class DateBack {
@@ -31,9 +34,9 @@ final class DateBack {
     }
 
     static @Nonnull DateFormatter newFormatter(
-        @Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId
+        @Nonnull DateTimeFormatter formatter
     ) {
-        return new OfFormatter(formatter, zoneId);
+        return new OfFormatter(formatter);
     }
 
     static @Nonnull DateFormatter newFormatter(
@@ -50,15 +53,21 @@ final class DateBack {
 
         private static final @Nonnull String NO_PATTERN = "No pattern in this TimeSpec.";
 
-        private static final @Nonnull Map<@Nonnull Class<?>, @Nonnull DateParser> PARSER_MAP;
-        private static final @Nonnull Map<@Nonnull Class<?>, @Nonnull DateConverter> CONVERTER_MAP;
+        // private static final @Nonnull Map<@Nonnull Class<?>, @Nonnull DateParser> PARSER_MAP;
+        // private static final @Nonnull Map<@Nonnull Class<?>, @Nonnull DateConverter> CONVERTER_MAP;
 
         protected final @Nonnull DateTimeFormatter formatter;
         private final @Nonnull ZoneId zoneId;
+        private final @Nonnull ThreadLocal<DateFormat> format =
+            ThreadLocal.withInitial(() -> {
+                SimpleDateFormat sdf = new SimpleDateFormat(pattern());
+                sdf.setTimeZone(TimeZone.getTimeZone(zoneId()));
+                return sdf;
+            });
 
-        private AbsDateFormatter(@Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId) {
+        private AbsDateFormatter(@Nonnull DateTimeFormatter formatter, @Nullable ZoneId zoneId) {
             this.formatter = formatter;
-            this.zoneId = zoneId;
+            this.zoneId = Fs.nonnull(zoneId, ZoneId.systemDefault());
         }
 
         @Override
@@ -78,8 +87,11 @@ final class DateBack {
 
         @Override
         public @Nonnull String format(@Nonnull Date date) throws DateTimeException {
+            if (hasPattern()) {
+                return format.get().format(date);
+            }
             Instant instant = date.toInstant();
-            return format(instant);
+            return format0(instant);
         }
 
         @Override
@@ -93,16 +105,59 @@ final class DateBack {
         }
 
         @Override
-        public <T> @Nonnull T parse(@Nonnull CharSequence date, @Nonnull Class<T> timeType) throws DateTimeException {
-            return Fs.as(parse0(date, timeType));
+        public <T> @Nonnull T parse(@Nonnull CharSequence dateString, @Nonnull Class<T> timeType) throws DateTimeException {
+            return Fs.as(parse0(dateString, timeType));
         }
 
         private @Nonnull Object parse0(
-            @Nonnull CharSequence date, @Nonnull Class<?> timeType
+            @Nonnull CharSequence cs, @Nonnull Class<?> timeType
         ) throws DateTimeException {
-            DateParser parser = PARSER_MAP.get(timeType);
-            if (parser != null) {
-                return parser.parse(date, timeType, this);
+            // DateParser parser = PARSER_MAP.get(timeType);
+            // if (parser != null) {
+            //     return parser.parse(cs, timeType, this);
+            // }
+            if (Instant.class.equals(timeType)) {
+                try {
+                    return Instant.parse(cs);
+                } catch (DateTimeParseException e) {
+                    LocalDateTime localDateTime = LocalDateTime.parse(cs, formatter);
+                    return ZonedDateTime.of(localDateTime, zoneId).toInstant();
+                }
+            }
+            if (Date.class.equals(timeType)) {
+                if (hasPattern()) {
+                    try {
+                        return format.get().parse(cs.toString());
+                    } catch (ParseException e) {
+                        throw new DateTimeException(e.getMessage(), e);
+                    }
+                }
+                return Date.from(parse(cs, Instant.class));
+            }
+            if (LocalDateTime.class.equals(timeType)) {
+                return LocalDateTime.parse(cs, formatter);
+            }
+            if (ZonedDateTime.class.equals(timeType)) {
+                try {
+                    return ZonedDateTime.parse(cs, formatter);
+                } catch (DateTimeParseException e) {
+                    LocalDateTime localDateTime = LocalDateTime.parse(cs, formatter);
+                    return ZonedDateTime.of(localDateTime, zoneId);
+                }
+            }
+            if (OffsetDateTime.class.equals(timeType)) {
+                try {
+                    return OffsetDateTime.parse(cs, formatter);
+                } catch (DateTimeParseException e) {
+                    LocalDateTime localDateTime = LocalDateTime.parse(cs, formatter);
+                    return OffsetDateTime.of(localDateTime, DateKit.nowOffset());
+                }
+            }
+            if (LocalDate.class.equals(timeType)) {
+                return LocalDate.parse(cs, formatter);
+            }
+            if (LocalTime.class.equals(timeType)) {
+                return LocalTime.parse(cs, formatter);
             }
             throw new DateException("Unsupported time type: " + timeType);
         }
@@ -127,13 +182,34 @@ final class DateBack {
         }
 
         private @Nonnull Object convert0(
-            @Nonnull TemporalAccessor time, @Nonnull Class<?> timeType
+            @Nonnull TemporalAccessor ta, @Nonnull Class<?> timeType
         ) throws DateTimeException {
-            DateConverter converter = CONVERTER_MAP.get(timeType);
-            if (converter != null) {
-                return converter.convert(time, timeType, this);
+            // DateConverter converter = CONVERTER_MAP.get(timeType);
+            // if (converter != null) {
+            //     return converter.convert(time, timeType, this);
+            // }
+            if (Instant.class.equals(timeType)) {
+                return Instant.from(ta);
             }
-            throw new DateException("Unsupported conversion from " + time.getClass() + " to " + timeType + ".");
+            if (Date.class.equals(timeType)) {
+                return Date.from(Instant.from(ta));
+            }
+            if (LocalDateTime.class.equals(timeType)) {
+                return LocalDateTime.from(ta);
+            }
+            if (ZonedDateTime.class.equals(timeType)) {
+                return ZonedDateTime.from(ta);
+            }
+            if (OffsetDateTime.class.equals(timeType)) {
+                return OffsetDateTime.from(ta);
+            }
+            if (LocalDate.class.equals(timeType)) {
+                return LocalDate.from(ta);
+            }
+            if (LocalTime.class.equals(timeType)) {
+                return LocalTime.from(ta);
+            }
+            throw new DateException("Unsupported conversion from " + ta + " to " + timeType + ".");
         }
 
         private @Nonnull TemporalAccessor withZoneId(@Nonnull TemporalAccessor time, @Nonnull ZoneId zoneId) {
@@ -152,89 +228,89 @@ final class DateBack {
             return time;
         }
 
-        static {
-            PARSER_MAP = new HashMap<>();
-            PARSER_MAP.put(Instant.class, (cs, t, f) -> {
-                try {
-                    return Instant.parse(cs);
-                } catch (DateTimeParseException e) {
-                    LocalDateTime localDateTime = LocalDateTime.parse(cs, f.formatter);
-                    return ZonedDateTime.of(localDateTime, f.zoneId).toInstant();
-                }
-            });
-            PARSER_MAP.put(Date.class, (cs, t, f) -> {
-                return Date.from(f.parse(cs, Instant.class));
-            });
-            PARSER_MAP.put(LocalDateTime.class, (cs, t, f) -> {
-                return LocalDateTime.parse(cs, f.formatter);
-            });
-            PARSER_MAP.put(ZonedDateTime.class, (cs, t, f) -> {
-                try {
-                    return ZonedDateTime.parse(cs, f.formatter);
-                } catch (DateTimeParseException e) {
-                    LocalDateTime localDateTime = LocalDateTime.parse(cs, f.formatter);
-                    return ZonedDateTime.of(localDateTime, f.zoneId);
-                }
-            });
-            PARSER_MAP.put(OffsetDateTime.class, (cs, t, f) -> {
-                try {
-                    return OffsetDateTime.parse(cs, f.formatter);
-                } catch (DateTimeParseException e) {
-                    LocalDateTime localDateTime = LocalDateTime.parse(cs, f.formatter);
-                    return OffsetDateTime.of(localDateTime, DateKit.nowOffset());
-                }
-            });
-            PARSER_MAP.put(LocalDate.class, (cs, t, f) -> {
-                return LocalDate.parse(cs, f.formatter);
-            });
-            PARSER_MAP.put(LocalTime.class, (cs, t, f) -> {
-                return LocalTime.parse(cs, f.formatter);
-            });
+        // static {
+        //     PARSER_MAP = new HashMap<>();
+        //     PARSER_MAP.put(Instant.class, (cs, t, f) -> {
+        //         try {
+        //             return Instant.parse(cs);
+        //         } catch (DateTimeParseException e) {
+        //             LocalDateTime localDateTime = LocalDateTime.parse(cs, f.formatter);
+        //             return ZonedDateTime.of(localDateTime, f.zoneId).toInstant();
+        //         }
+        //     });
+        //     PARSER_MAP.put(Date.class, (cs, t, f) -> {
+        //         return Date.from(f.parse(cs, Instant.class));
+        //     });
+        //     PARSER_MAP.put(LocalDateTime.class, (cs, t, f) -> {
+        //         return LocalDateTime.parse(cs, f.formatter);
+        //     });
+        //     PARSER_MAP.put(ZonedDateTime.class, (cs, t, f) -> {
+        //         try {
+        //             return ZonedDateTime.parse(cs, f.formatter);
+        //         } catch (DateTimeParseException e) {
+        //             LocalDateTime localDateTime = LocalDateTime.parse(cs, f.formatter);
+        //             return ZonedDateTime.of(localDateTime, f.zoneId);
+        //         }
+        //     });
+        //     PARSER_MAP.put(OffsetDateTime.class, (cs, t, f) -> {
+        //         try {
+        //             return OffsetDateTime.parse(cs, f.formatter);
+        //         } catch (DateTimeParseException e) {
+        //             LocalDateTime localDateTime = LocalDateTime.parse(cs, f.formatter);
+        //             return OffsetDateTime.of(localDateTime, DateKit.nowOffset());
+        //         }
+        //     });
+        //     PARSER_MAP.put(LocalDate.class, (cs, t, f) -> {
+        //         return LocalDate.parse(cs, f.formatter);
+        //     });
+        //     PARSER_MAP.put(LocalTime.class, (cs, t, f) -> {
+        //         return LocalTime.parse(cs, f.formatter);
+        //     });
+        //
+        //     CONVERTER_MAP = new HashMap<>();
+        //     CONVERTER_MAP.put(Instant.class, (ta, t, f) -> {
+        //         return Instant.from(ta);
+        //     });
+        //     CONVERTER_MAP.put(Date.class, (ta, t, f) -> {
+        //         return Date.from(Instant.from(ta));
+        //     });
+        //     CONVERTER_MAP.put(LocalDateTime.class, (ta, t, f) -> {
+        //         return LocalDateTime.from(ta);
+        //     });
+        //     CONVERTER_MAP.put(ZonedDateTime.class, (ta, t, f) -> {
+        //         return ZonedDateTime.from(ta);
+        //     });
+        //     CONVERTER_MAP.put(OffsetDateTime.class, (ta, t, f) -> {
+        //         return OffsetDateTime.from(ta);
+        //     });
+        //     CONVERTER_MAP.put(LocalDate.class, (ta, t, f) -> {
+        //         return LocalDate.from(ta);
+        //     });
+        //     CONVERTER_MAP.put(LocalTime.class, (ta, t, f) -> {
+        //         return LocalTime.from(ta);
+        //     });
+        // }
 
-            CONVERTER_MAP = new HashMap<>();
-            CONVERTER_MAP.put(Instant.class, (ta, t, f) -> {
-                return Instant.from(ta);
-            });
-            CONVERTER_MAP.put(Date.class, (ta, t, f) -> {
-                return Date.from(Instant.from(ta));
-            });
-            CONVERTER_MAP.put(LocalDateTime.class, (ta, t, f) -> {
-                return LocalDateTime.from(ta);
-            });
-            CONVERTER_MAP.put(ZonedDateTime.class, (ta, t, f) -> {
-                return ZonedDateTime.from(ta);
-            });
-            CONVERTER_MAP.put(OffsetDateTime.class, (ta, t, f) -> {
-                return OffsetDateTime.from(ta);
-            });
-            CONVERTER_MAP.put(LocalDate.class, (ta, t, f) -> {
-                return LocalDate.from(ta);
-            });
-            CONVERTER_MAP.put(LocalTime.class, (ta, t, f) -> {
-                return LocalTime.from(ta);
-            });
-        }
-
-        private interface DateParser {
-
-            @Nonnull
-            Object parse(
-                @Nonnull CharSequence cs, @Nonnull Class<?> t, @Nonnull AbsDateFormatter f
-            ) throws DateTimeException;
-        }
-
-        private interface DateConverter {
-
-            @Nonnull
-            Object convert(
-                @Nonnull TemporalAccessor ta, @Nonnull Class<?> t, @Nonnull AbsDateFormatter f
-            ) throws DateTimeException;
-        }
+        // private interface DateParser {
+        //
+        //     @Nonnull
+        //     Object parse(
+        //         @Nonnull CharSequence cs, @Nonnull Class<?> t, @Nonnull AbsDateFormatter f
+        //     ) throws DateTimeException;
+        // }
+        //
+        // private interface DateConverter {
+        //
+        //     @Nonnull
+        //     Object convert(
+        //         @Nonnull TemporalAccessor ta, @Nonnull Class<?> t, @Nonnull AbsDateFormatter f
+        //     ) throws DateTimeException;
+        // }
     }
 
     private static final class OfFormatter extends AbsDateFormatter {
-        private OfFormatter(@Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId) {
-            super(formatter, zoneId);
+        private OfFormatter(@Nonnull DateTimeFormatter formatter) {
+            super(formatter, formatter.getZone());
         }
     }
 
