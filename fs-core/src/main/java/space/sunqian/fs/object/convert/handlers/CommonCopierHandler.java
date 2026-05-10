@@ -17,7 +17,9 @@ import space.sunqian.fs.object.meta.MapMeta;
 import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.PropertyMeta;
 
+import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * The common implementation of {@link ObjectCopier.Handler}, also be the default last handler of
@@ -60,7 +62,12 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         if (srcKey instanceof String) {
             srcKey = Fs.as(ConvertOption.getNameMapper(options).map((String) srcKey));
         }
-        Object dstKey = converter.convert(srcKey, srcMeta.keyType(), dstMeta.keyType(), options);
+        Type srcKeyType = srcMeta.keyType();
+        Type dstKeyType = dstMeta.keyType();
+        Object dstKey = Objects.equals(srcKeyType, dstKeyType) ?
+            srcKey
+            :
+            converter.convert(srcKey, srcKeyType, dstKeyType, options);
         Object dstValue = converter.convert(srcValue, srcMeta.valueType(), dstMeta.valueType(), options);
         dst.put(dstKey, dstValue);
         return false;
@@ -86,7 +93,12 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         if (srcKey instanceof String) {
             srcKey = ConvertOption.getNameMapper(options).map((String) srcKey);
         }
-        String dstPropertyName = Fs.as(converter.convert(srcKey, srcMeta.keyType(), String.class, options));
+        Type srcKeyType = srcMeta.keyType();
+        // Type dstKeyType = String.class;
+        String dstPropertyName = Objects.equals(srcKeyType, String.class) ?
+            Fs.as(srcKey)
+            :
+            Fs.as(converter.convert(srcKey, srcKeyType, String.class, options));
         PropertyMeta dstProperty = dstMeta.getProperty(dstPropertyName);
         if (dstProperty == null || !dstProperty.isWritable()) {
             return false;
@@ -125,7 +137,12 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         if (srcPropertyValue == null && ConvertOption.isIgnoreNull(options)) {
             return false;
         }
-        Object dstKey = converter.convert(actualSrcPropertyName, String.class, dstMeta.keyType(), options);
+        // Type srcKeyType = String.class;
+        Type dstKeyType = dstMeta.keyType();
+        Object dstKey = Objects.equals(String.class, dstKeyType) ?
+            actualSrcPropertyName
+            :
+            converter.convert(actualSrcPropertyName, String.class, dstKeyType, options);
         AnnotationSet srcAnnotations = srcProperty.annotations();
         DatePatternDetail datePattern = srcAnnotations.getDetailByAnnotationType(DatePattern.class);
         NumberPatternDetail numberPattern = srcAnnotations.getDetailByAnnotationType(NumberPattern.class);
@@ -160,7 +177,8 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         if (srcPropertyValue == null && ConvertOption.isIgnoreNull(options)) {
             return false;
         }
-        String dstPropertyName = Fs.as(converter.convert(actualSrcPropertyName, String.class, String.class, options));
+        @SuppressWarnings("UnnecessaryLocalVariable")
+        String dstPropertyName = actualSrcPropertyName;// Fs.as(converter.convert(actualSrcPropertyName, String.class, String.class, options));
         PropertyMeta dstProperty = dstMeta.getProperty(dstPropertyName);
         if (dstProperty == null || !dstProperty.isWritable()) {
             return false;

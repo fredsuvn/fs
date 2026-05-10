@@ -170,8 +170,8 @@ public enum ConvertOption {
     }
 
     /**
-     * Sets option to enable new instance mode. In new instance mode, the conversion will always create a new instance
-     * of the target type even if the target type is assignable from the source type.
+     * Sets option to enable new instance mode. In new instance mode, the conversion will attempt to create a new
+     * instance of the target type even if the target type is assignable from the source type.
      * <p>
      * By default, this option is disabled. In this case, the conversion could return the source object if the target
      * type is assignable from the source type.
@@ -319,11 +319,11 @@ public enum ConvertOption {
     /**
      * Returns an option to specify the {@link NameMapper}.
      * <p>
-     * Note that this configuration is only valid for the {@link String} type names, mainly for the property names (both
-     * source and target), and executed before the configured {@link ObjectCopier.Handler} (if any, and it means the
-     * property name received by the property mapper will be mapped by the name mapper first). For the property names
-     * whose type is not {@link String}, such as non-{@link String} keys of a {@link Map}, this configuration will not
-     * take effect.
+     * Note that this configuration is only valid for the {@link String} type names (or keys of map), mainly for the
+     * property names (both source and target), and executed before the configured {@link ObjectCopier.Handler} (if any,
+     * and it means the property name received by the property mapper will be mapped by the name mapper first). For the
+     * property names whose type is not {@link String}, such as non-{@link String} keys of a {@link Map}, this
+     * configuration will not take effect.
      * <p>
      * By default, this option is disabled.
      *

@@ -32,15 +32,21 @@ public class OptionKit {
         @Nonnull K key,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
-        if (ArrayKit.isEmpty(options)) {
-            return null;
-        }
         for (Option<?, ?> option : options) {
             if (Objects.equals(option.key(), key)) {
                 return Fs.as(option);
             }
         }
         return null;
+        // if (ArrayKit.isEmpty(options)) {
+        //     return null;
+        // }
+        // for (Option<?, ?> option : options) {
+        //     if (Objects.equals(option.key(), key)) {
+        //         return Fs.as(option);
+        //     }
+        // }
+        // return null;
     }
 
     /**
