@@ -40,7 +40,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -607,6 +609,29 @@ public class CopierTest implements TestPrint {
         };
     }
 
+    @Test
+    public void testKeyConversion() {
+        ObjectCopier copier = ObjectCopier.defaultCopier().withDefaultOptions(ConvertOption.newInstanceMode(true));
+        Map<Object, Object> srcMap = new HashMap<>();
+        K k1 = new K("k1");
+        srcMap.put(k1, "value1");
+        Map<Object, Object> dstMap = new HashMap<>();
+        {
+            // map to map
+            copier.copyProperties(
+                srcMap, new TypeRef<Map<K, Object>>() {}.type(),
+                dstMap, new TypeRef<Map<K, Object>>() {}.type()
+            );
+            assertSame(srcMap.keySet().iterator().next(), dstMap.keySet().iterator().next());
+            dstMap.clear();
+            copier.copyProperties(
+                srcMap, new TypeRef<Map<Object, Object>>() {}.type(),
+                dstMap, new TypeRef<Map<K, Object>>() {}.type()
+            );
+            assertNotSame(srcMap.keySet().iterator().next(), dstMap.keySet().iterator().next());
+        }
+    }
+
     @Data
     @EqualsAndHashCode
     @AllArgsConstructor
@@ -682,5 +707,19 @@ public class CopierTest implements TestPrint {
     @Target({ElementType.FIELD})
     public @interface Format {
         String value();
+    }
+
+    @Data
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class K {
+
+        private String key;
+
+        @Override
+        public String toString() {
+            return key;
+        }
     }
 }

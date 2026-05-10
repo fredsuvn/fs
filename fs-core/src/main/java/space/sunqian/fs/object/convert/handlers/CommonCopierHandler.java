@@ -64,10 +64,7 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         }
         Type srcKeyType = srcMeta.keyType();
         Type dstKeyType = dstMeta.keyType();
-        Object dstKey = Objects.equals(srcKeyType, dstKeyType) ?
-            srcKey
-            :
-            converter.convert(srcKey, srcKeyType, dstKeyType, options);
+        Object dstKey = ensureKey(srcKey, srcKeyType, dstKeyType, converter, options);
         Object dstValue = converter.convert(srcValue, srcMeta.valueType(), dstMeta.valueType(), options);
         dst.put(dstKey, dstValue);
         return false;
@@ -95,10 +92,7 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         }
         Type srcKeyType = srcMeta.keyType();
         // Type dstKeyType = String.class;
-        String dstPropertyName = Objects.equals(srcKeyType, String.class) ?
-            Fs.as(srcKey)
-            :
-            Fs.as(converter.convert(srcKey, srcKeyType, String.class, options));
+        String dstPropertyName = (String) ensureKey(srcKey, srcKeyType, String.class, converter, options);
         PropertyMeta dstProperty = dstMeta.getProperty(dstPropertyName);
         if (dstProperty == null || !dstProperty.isWritable()) {
             return false;
@@ -139,10 +133,7 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         }
         // Type srcKeyType = String.class;
         Type dstKeyType = dstMeta.keyType();
-        Object dstKey = Objects.equals(String.class, dstKeyType) ?
-            actualSrcPropertyName
-            :
-            converter.convert(actualSrcPropertyName, String.class, dstKeyType, options);
+        Object dstKey = ensureKey(actualSrcPropertyName, String.class, dstKeyType, converter, options);
         AnnotationSet srcAnnotations = srcProperty.annotations();
         DatePatternDetail datePattern = srcAnnotations.getDetailByAnnotationType(DatePattern.class);
         NumberPatternDetail numberPattern = srcAnnotations.getDetailByAnnotationType(NumberPattern.class);
@@ -195,5 +186,17 @@ public class CommonCopierHandler implements ObjectCopier.Handler {
         );
         dstProperty.setValue(dst, dstPropertyValue);
         return false;
+    }
+
+    private @Nonnull Object ensureKey(
+        @Nonnull Object srcKey,
+        Type srcKeyType,
+        Type dstKeyType,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option<?, ?> @Nonnull ... options) {
+        return Objects.equals(srcKeyType, dstKeyType) ?
+            srcKey
+            :
+            converter.convert(srcKey, srcKeyType, dstKeyType, options);
     }
 }
