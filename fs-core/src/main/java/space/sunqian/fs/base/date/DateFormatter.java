@@ -92,7 +92,7 @@ public interface DateFormatter {
      * @return an instance of {@link DateFormatter} based on the given {@link DateTimeFormatter}
      */
     @CachedResult
-    static @Nonnull DateFormatter from(@Nonnull DateTimeFormatter formatter) {
+    static @Nonnull DateFormatter ofFormatter(@Nonnull DateTimeFormatter formatter) {
         SimpleKey2 key = SimpleKey2.of(formatter, null);
         return DateBack.getFormatter(key, k -> {
             DateTimeFormatter f = k.getAs(0);
