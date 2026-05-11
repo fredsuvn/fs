@@ -25,9 +25,10 @@ import java.util.Objects;
  * The common implementation of {@link ObjectCopier.Handler}, also be the default last handler of
  * {@link ObjectCopier#defaultCopier()}. Using {@link #getInstance()} can get a same one instance of this handler.
  * <p>
- * This handler uses the default implementations of {@link ObjectCopier.Handler}, which directly copies properties from
+ * This handler is the default implementations of {@link ObjectCopier.Handler}, which directly copies properties from
  * the source object to the target object, following the rules of the specified options defined in
- * {@link ConvertOption}.
+ * {@link ConvertOption}. By default, this handler converts values. For keys/property names, if their types are equal,
+ * no conversion is performed; only when their types differ, they will be converted in the same way as values.
  *
  * @author sunqian
  */

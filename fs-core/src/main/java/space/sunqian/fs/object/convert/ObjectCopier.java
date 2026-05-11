@@ -6,7 +6,6 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.base.option.Option;
-import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.object.annotation.DatePattern;
 import space.sunqian.fs.object.annotation.NumberPattern;
@@ -102,10 +101,6 @@ public interface ObjectCopier {
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
      * a non-map object which can be introspected to {@link ObjectMeta}.
      * <p>
-     * For map keys and property names, if their types are the same, the conversion method will not be called to convert
-     * map keys or property names from the source object to the destination object (unless otherwise specified such as
-     * {@link ConvertOption#nameMapper(NameMapper)}).
-     * <p>
      * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
      * operation uses the options merged from the default and copy options, where copy options override defaults for the
      * same key.
@@ -124,10 +119,6 @@ public interface ObjectCopier {
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
      * a non-map object which can be introspected to {@link ObjectMeta}.
-     * <p>
-     * For map keys and property names, if their types are the same, the conversion method will not be called to convert
-     * map keys or property names from the source object to the destination object (unless otherwise specified such as
-     * {@link ConvertOption#nameMapper(NameMapper)}).
      * <p>
      * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
      * operation uses the options merged from the default and copy options, where copy options override defaults for the
@@ -151,10 +142,6 @@ public interface ObjectCopier {
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
      * a non-map object which can be introspected to {@link ObjectMeta}.
-     * <p>
-     * For map keys and property names, if their types are the same, the conversion method will not be called to convert
-     * map keys or property names from the source object to the destination object (unless otherwise specified such as
-     * {@link ConvertOption#nameMapper(NameMapper)}).
      * <p>
      * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
      * operation uses the options merged from the default and copy options, where copy options override defaults for the
@@ -187,10 +174,6 @@ public interface ObjectCopier {
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
      * a non-map object which can be introspected to {@link ObjectMeta}.
-     * <p>
-     * For map keys and property names, if their types are the same, the conversion method will not be called to convert
-     * map keys or property names from the source object to the destination object (unless otherwise specified such as
-     * {@link ConvertOption#nameMapper(NameMapper)}).
      * <p>
      * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
      * operation uses the options merged from the default and copy options, where copy options override defaults for the

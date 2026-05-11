@@ -9,7 +9,6 @@ import space.sunqian.fs.base.function.BooleanCallable;
 import space.sunqian.fs.base.function.VoidCallable;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.process.ProcessKit;
-import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.base.string.StringKit;
 import space.sunqian.fs.base.thread.ThreadKit;
 import space.sunqian.fs.base.value.Ret;
@@ -22,7 +21,6 @@ import space.sunqian.fs.collect.SetKit;
 import space.sunqian.fs.collect.StreamKit;
 import space.sunqian.fs.io.IORuntimeException;
 import space.sunqian.fs.object.ObjectKit;
-import space.sunqian.fs.object.convert.ConvertOption;
 import space.sunqian.fs.object.convert.ObjectConvertException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.convert.ObjectCopier;
@@ -650,10 +648,6 @@ public class Fs {
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
      * a non-map object which can be introspected to {@link ObjectMeta}.
      * <p>
-     * For map keys and property names, if their types are the same, the conversion method will not be called to convert
-     * map keys or property names from the source object to the destination object (unless otherwise specified such as
-     * {@link ConvertOption#nameMapper(NameMapper)}).
-     * <p>
      * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
      * operation uses the options merged from the default and copy options, where copy options override defaults for the
      * same key.
@@ -675,10 +669,6 @@ public class Fs {
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
      * a non-map object which can be introspected to {@link ObjectMeta}.
-     * <p>
-     * For map keys and property names, if their types are the same, the conversion method will not be called to convert
-     * map keys or property names from the source object to the destination object (unless otherwise specified such as
-     * {@link ConvertOption#nameMapper(NameMapper)}).
      * <p>
      * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
      * operation uses the options merged from the default and copy options, where copy options override defaults for the
@@ -705,10 +695,6 @@ public class Fs {
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
      * a non-map object which can be introspected to {@link ObjectMeta}.
-     * <p>
-     * For map keys and property names, if their types are the same, the conversion method will not be called to convert
-     * map keys or property names from the source object to the destination object (unless otherwise specified such as
-     * {@link ConvertOption#nameMapper(NameMapper)}).
      * <p>
      * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
      * operation uses the options merged from the default and copy options, where copy options override defaults for the
@@ -743,10 +729,6 @@ public class Fs {
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
      * a non-map object which can be introspected to {@link ObjectMeta}.
-     * <p>
-     * For map keys and property names, if their types are the same, the conversion method will not be called to convert
-     * map keys or property names from the source object to the destination object (unless otherwise specified such as
-     * {@link ConvertOption#nameMapper(NameMapper)}).
      * <p>
      * The copy options parameter can be empty, in which case the default options will be used. Otherwise, the copy
      * operation uses the options merged from the default and copy options, where copy options override defaults for the
