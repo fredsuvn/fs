@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.system.ResKit;
 import space.sunqian.fs.data.properties.PropertiesData;
-import space.sunqian.fs.data.properties.PropertiesKit;
 import space.sunqian.fs.io.IOKit;
 
 import java.io.ByteArrayInputStream;
@@ -87,7 +86,7 @@ public class PropertiesTest implements TestPrint {
     private void testWrapperLoading() throws Exception {
         // wrapper
         PropertiesData properties = PropertiesData.from(ResKit.findStream("data/x.properties"));
-        checkProperties(PropertiesKit.wrap(properties.asProperties()));
+        checkProperties(PropertiesData.wrap(properties.asProperties()));
     }
 
     private void verifyMapConversion(PropertiesData properties) {

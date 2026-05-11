@@ -4,16 +4,21 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
+import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.data.ByteData;
 import space.sunqian.fs.data.CharData;
 import space.sunqian.fs.data.DataException;
 import space.sunqian.fs.data.DataList;
 import space.sunqian.fs.data.DataMap;
+import space.sunqian.fs.data.DataParsingException;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.reflect.TypeRef;
 
+import java.io.InputStream;
+import java.io.Reader;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.nio.channels.ReadableByteChannel;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +28,84 @@ import java.util.Map;
  * @author sunqian
  */
 public interface JsonData extends ByteData, CharData {
+
+    /**
+     * Loads JSON data from the given byte array, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * This method uses {@link JsonParser#defaultParser()} to parse the JSON data.
+     *
+     * @param bytes the byte array to read from
+     * @return the parsed {@link JsonData} object
+     * @throws DataParsingException if an I/O error occurs while loading the JSON data
+     */
+    static @Nonnull JsonData from(byte @Nonnull [] bytes) throws DataParsingException {
+        return JsonKit.parse(bytes);
+    }
+
+    /**
+     * Loads JSON data from the given input stream, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * This method uses {@link JsonParser#defaultParser()} to parse the JSON data.
+     *
+     * @param in the input stream to read from
+     * @return the parsed {@link JsonData} object
+     * @throws DataParsingException if an I/O error occurs while loading the JSON data
+     */
+    static @Nonnull JsonData from(@Nonnull InputStream in) throws DataParsingException {
+        return JsonKit.parse(in);
+    }
+
+    /**
+     * Loads JSON data from the given readable byte channel, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * This method uses {@link JsonParser#defaultParser()} to parse the JSON data.
+     *
+     * @param channel the readable byte channel to read from
+     * @return the parsed {@link JsonData} object
+     * @throws DataParsingException if an I/O error occurs while loading the JSON data
+     */
+    static @Nonnull JsonData from(@Nonnull ReadableByteChannel channel) throws DataParsingException {
+        return JsonKit.parse(channel);
+    }
+
+    /**
+     * Loads JSON data from the given char array, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * This method uses {@link JsonParser#defaultParser()} to parse the JSON data.
+     *
+     * @param chars the char array to read from
+     * @return the parsed {@link JsonData} object
+     * @throws DataParsingException if an I/O error occurs while loading the JSON data
+     */
+    static @Nonnull JsonData from(char @Nonnull [] chars) throws DataParsingException {
+        return JsonKit.parse(chars);
+    }
+
+    /**
+     * Loads JSON data from the given char sequence, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * This method uses {@link JsonParser#defaultParser()} to parse the JSON data.
+     *
+     * @param charSequence the char sequence to read from
+     * @return the parsed {@link JsonData} object
+     * @throws DataParsingException if an I/O error occurs while loading the JSON data
+     */
+    static @Nonnull JsonData from(@Nonnull CharSequence charSequence) throws DataParsingException {
+        return JsonKit.parse(charSequence);
+    }
+
+    /**
+     * Loads JSON data from the given reader, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * This method uses {@link JsonParser#defaultParser()} to parse the JSON data.
+     *
+     * @param reader the reader to read from
+     * @return the parsed {@link JsonData} object
+     * @throws DataParsingException if an I/O error occurs while loading the JSON data
+     */
+    static @Nonnull JsonData from(@Nonnull Reader reader) throws DataParsingException {
+        return JsonKit.parse(reader);
+    }
 
     /**
      * Returns a {@link JsonData} represents JSON null.

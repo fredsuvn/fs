@@ -887,6 +887,19 @@ public class JsonTest implements TestPrint {
         }
     }
 
+    @Test
+    public void testJsonDataFrom() throws Exception {
+        DataPack pack = new DataPack("1qaz!QAZ", "2wsx@!WSX");
+        String json = jsonMapper.writeValueAsString(pack);
+        byte[] bytes = jsonMapper.writeValueAsBytes(pack);
+        assertEquals(pack, JsonData.from(bytes).toObject(DataPack.class));
+        assertEquals(pack, JsonData.from(new ByteArrayInputStream(bytes)).toObject(DataPack.class));
+        assertEquals(pack, JsonData.from(Channels.newChannel(new ByteArrayInputStream(bytes))).toObject(DataPack.class));
+        assertEquals(pack, JsonData.from(json.toCharArray()).toObject(DataPack.class));
+        assertEquals(pack, JsonData.from(json).toObject(DataPack.class));
+        assertEquals(pack, JsonData.from(new StringReader(json)).toObject(DataPack.class));
+    }
+
     public enum DataEnum {
         A, B, C
     }

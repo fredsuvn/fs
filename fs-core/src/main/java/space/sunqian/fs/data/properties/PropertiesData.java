@@ -35,11 +35,11 @@ public interface PropertiesData extends ByteData, CharData {
      * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
      *
      * @param bytes the byte array to read from
-     * @return a new {@link PropertiesData} wraps the loaded properties
+     * @return the parsed {@link PropertiesData} object
      * @throws DataParsingException if an I/O error occurs while loading the properties
      */
     static @Nonnull PropertiesData from(byte @Nonnull [] bytes) throws DataParsingException {
-        return PropertiesParser.defaultParser().parse(bytes);
+        return PropertiesKit.load(bytes);
     }
 
     /**
@@ -48,11 +48,11 @@ public interface PropertiesData extends ByteData, CharData {
      * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
      *
      * @param in the input stream to read from
-     * @return a new {@link PropertiesData} wraps the loaded properties
+     * @return the parsed {@link PropertiesData} object
      * @throws DataParsingException if an I/O error occurs while loading the properties
      */
     static @Nonnull PropertiesData from(@Nonnull InputStream in) throws DataParsingException {
-        return PropertiesParser.defaultParser().parse(in);
+        return PropertiesKit.load(in);
     }
 
     /**
@@ -61,11 +61,11 @@ public interface PropertiesData extends ByteData, CharData {
      * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
      *
      * @param channel the readable byte channel to read from
-     * @return a new {@link PropertiesData} wraps the loaded properties
+     * @return the parsed {@link PropertiesData} object
      * @throws DataParsingException if an I/O error occurs while loading the properties
      */
     static @Nonnull PropertiesData from(@Nonnull ReadableByteChannel channel) throws DataParsingException {
-        return PropertiesParser.defaultParser().parse(channel);
+        return PropertiesKit.load(channel);
     }
 
     /**
@@ -74,11 +74,11 @@ public interface PropertiesData extends ByteData, CharData {
      * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
      *
      * @param chars the char array to read from
-     * @return a new {@link PropertiesData} wraps the loaded properties
+     * @return the parsed {@link PropertiesData} object
      * @throws DataParsingException if an I/O error occurs while loading the properties
      */
     static @Nonnull PropertiesData from(char @Nonnull [] chars) throws DataParsingException {
-        return PropertiesParser.defaultParser().parse(chars);
+        return PropertiesKit.load(chars);
     }
 
     /**
@@ -87,11 +87,11 @@ public interface PropertiesData extends ByteData, CharData {
      * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
      *
      * @param charSequence the char sequence to read from
-     * @return a new {@link PropertiesData} wraps the loaded properties
+     * @return the parsed {@link PropertiesData} object
      * @throws DataParsingException if an I/O error occurs while loading the properties
      */
     static @Nonnull PropertiesData from(@Nonnull CharSequence charSequence) throws DataParsingException {
-        return PropertiesParser.defaultParser().parse(charSequence);
+        return PropertiesKit.load(charSequence);
     }
 
     /**
@@ -100,11 +100,32 @@ public interface PropertiesData extends ByteData, CharData {
      * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
      *
      * @param reader the reader to read from
-     * @return a new {@link PropertiesData} wraps the loaded properties
+     * @return the parsed {@link PropertiesData} object
      * @throws DataParsingException if an I/O error occurs while loading the properties
      */
     static @Nonnull PropertiesData from(@Nonnull Reader reader) throws DataParsingException {
-        return PropertiesParser.defaultParser().parse(reader);
+        return PropertiesKit.load(reader);
+    }
+
+    /**
+     * Wraps the given {@link Properties} object into a {@link PropertiesData} object.
+     *
+     * @param properties the given {@link Properties} object
+     * @return the wrapped {@link PropertiesData} object
+     */
+    static @Nonnull PropertiesData wrap(@Nonnull Properties properties) {
+        return new PropertiesData() {
+
+            @Override
+            public @Nonnull Properties asProperties() {
+                return properties;
+            }
+
+            @Override
+            public @Nonnull String toString() {
+                return properties.toString();
+            }
+        };
     }
 
     /**

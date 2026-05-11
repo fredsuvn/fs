@@ -7,6 +7,7 @@ import space.sunqian.fs.data.CharDataParser;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
 /**
@@ -18,6 +19,10 @@ public interface JsonParser extends ByteDataParser<JsonData>, CharDataParser<Jso
 
     /**
      * Returns the default {@link JsonParser}.
+     * <p>
+     * Note for the data of type {@code byte[]}, {@link ByteBuffer}, {@link InputStream} or {@link ReadableByteChannel},
+     * the default parser formats them as Base64 string; for the data of type {@code char[]}, the default parser formats
+     * them as JSON string rather than JSON array.
      *
      * @return the default {@link JsonParser}
      */
