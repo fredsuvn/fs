@@ -20,6 +20,10 @@ import java.util.Objects;
  * Its conversion logic is:
  * <ol>
  *     <li>
+ *         If the conversion disables {@link ConvertOption#NEW_INSTANCE_MODE}, and if the source type equals the target
+ *         type, directly returns the source object;
+ *     </li>
+ *     <li>
  *         If the specified source type is a {@link WildcardType} or {@link TypeVariable}, and it represents {@code ?}
  *         or {@code ? extends Object} or raw {@code T} or {@code T extends Object}, this handler will use
  *         {@link Object#getClass()} as the actual source type (or {@code Object.class} if the source object is
@@ -68,6 +72,12 @@ public class AssignableConvertHandler implements ObjectConverter.Handler {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
+        boolean isNewInstanceMode = ConvertOption.isNewInstanceMode(options);
+        if (!isNewInstanceMode) {
+            if (Objects.equals(targetType, srcType)) {
+                return src;
+            }
+        }
         if (srcType instanceof WildcardType) {
             if (isUndefined((WildcardType) srcType)) {
                 return converter.convert(src, ensureType(src), targetType, options);
@@ -78,11 +88,8 @@ public class AssignableConvertHandler implements ObjectConverter.Handler {
                 return converter.convert(src, ensureType(src), targetType, options);
             }
         }
-        if (ConvertOption.isNewInstanceMode(options)) {
+        if (isNewInstanceMode) {
             return ObjectConverter.Status.HANDLER_CONTINUE;
-        }
-        if (Objects.equals(targetType, srcType)) {
-            return src;
         }
         if (ConvertOption.isStrictTargetTypeMode(options)) {
             // strict mode, wildcard is unsupported

@@ -498,22 +498,22 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
                 return dateFormatter.format((TemporalAccessor) src);
             }
-            Charset charset = ConvertOption.getCharset(options);
+            //Charset charset = ConvertOption.getCharset(options);
             if (src instanceof byte[]) {
-                return new String((byte[]) src, charset);
+                return new String((byte[]) src, ConvertOption.getCharset(options));
             }
             if (src instanceof ByteBuffer) {
-                return BufferKit.string((ByteBuffer) src, charset);
+                return BufferKit.string((ByteBuffer) src, ConvertOption.getCharset(options));
             }
-            IOOperator ioOperator = ConvertOption.getIOOperator(options);
+            //IOOperator ioOperator = ConvertOption.getIOOperator(options);
             if (src instanceof Reader) {
-                return ioOperator.string((Reader) src);
+                return ConvertOption.getIOOperator(options).string((Reader) src);
             }
             if (src instanceof InputStream) {
-                return ioOperator.string((InputStream) src, charset);
+                return ConvertOption.getIOOperator(options).string((InputStream) src, ConvertOption.getCharset(options));
             }
             if (src instanceof ReadableByteChannel) {
-                return ioOperator.string((ReadableByteChannel) src, charset);
+                return ConvertOption.getIOOperator(options).string((ReadableByteChannel) src, ConvertOption.getCharset(options));
             }
             return src.toString();
         }
@@ -593,19 +593,19 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) {
-            DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
+            //DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
             if (src instanceof String) {
-                return dateFormatter.parse((String) src, target);
+                return ConvertOption.getDateFormatter(options).parse((String) src, target);
             }
             if (src instanceof Date) {
-                return dateFormatter.convert((Date) src, target);
+                return ConvertOption.getDateFormatter(options).convert((Date) src, target);
             }
             if (src instanceof Long) {
                 Date date = new Date((Long) src);
-                return dateFormatter.convert(date, target);
+                return ConvertOption.getDateFormatter(options).convert(date, target);
             }
             if (src instanceof TemporalAccessor) {
-                return dateFormatter.convert((TemporalAccessor) src, target);
+                return ConvertOption.getDateFormatter(options).convert((TemporalAccessor) src, target);
             }
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
