@@ -6,7 +6,6 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.number.NumberKit;
 import space.sunqian.fs.data.DataParsingException;
-import space.sunqian.fs.io.IOKit;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,8 +24,9 @@ enum JsonParserImpl implements JsonParser {
     private static final @Nonnull Object NULL = new Object();
 
     @Override
-    public JsonData parse(byte @Nonnull [] bytes) throws DataParsingException {
-        return null;
+    public @Nonnull JsonData parse(byte @Nonnull [] bytes) throws DataParsingException {
+        String str = new String(bytes, CharsKit.defaultCharset());
+        return parse(str);
     }
 
     @Override
@@ -44,23 +44,18 @@ enum JsonParserImpl implements JsonParser {
     }
 
     @Override
-    public JsonData parse(char @Nonnull [] chars) throws DataParsingException {
-        return null;
+    public @Nonnull JsonData parse(char @Nonnull [] chars) throws DataParsingException {
+        return parse(new String(chars));
     }
 
     @Override
-    public JsonData parse(@Nonnull CharSequence charSequence) throws DataParsingException {
-        return null;
+    public @Nonnull JsonData parse(@Nonnull CharSequence charSequence) throws DataParsingException {
+        return parse(JsonReader.from(charSequence));
     }
 
     @Override
     public @Nonnull JsonData parse(@Nonnull Reader reader) throws JsonDataParsingException {
-        return parse(JsonReader.from(IOKit.string(reader)));
-    }
-
-    @Override
-    public @Nonnull JsonData parse(@Nonnull String str) throws JsonDataParsingException {
-        return parse(JsonReader.from(str));
+        return parse(JsonReader.from(reader));
     }
 
     private @Nonnull JsonData parse(@Nonnull JsonReader jsonReader) throws JsonDataParsingException {
