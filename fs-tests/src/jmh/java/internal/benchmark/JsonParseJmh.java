@@ -10,7 +10,9 @@ import org.openjdk.jmh.infra.Blackhole;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.data.json.JsonKit;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,7 +21,10 @@ public class JsonParseJmh extends AbstractJmhBenchmark {
     private final TestJsonData data = new TestJsonData();
     private final Map<String, Object> map = new LinkedHashMap<>();
     private final String dataJson;
+    private final ByteArrayInputStream dataJsonInput;
     private final String mapJson;
+    private final ByteArrayInputStream mapJsonInput;
+
     @Param({
         "fs",
         "jackson",
@@ -63,6 +68,7 @@ public class JsonParseJmh extends AbstractJmhBenchmark {
         data.setBa3(new BigDecimal[]{new BigDecimal("1.0"), new BigDecimal("2.0")});
         data.setSa3(ListKit.list("a", "b"));
         this.dataJson = JsonKit.toJsonString(data);
+        this.dataJsonInput = new ByteArrayInputStream(dataJson.getBytes(StandardCharsets.UTF_8));
         // map
         map.put("i1", 1);
         map.put("l1", 2L);
@@ -92,6 +98,7 @@ public class JsonParseJmh extends AbstractJmhBenchmark {
         map.put("ba3", new BigDecimal[]{new BigDecimal("1.0"), new BigDecimal("2.0")});
         map.put("sa3", ListKit.list("a", "b"));
         this.mapJson = JsonKit.toJsonString(map);
+        this.mapJsonInput = new ByteArrayInputStream(mapJson.getBytes(StandardCharsets.UTF_8));
     }
 
     @Setup(Level.Trial)
@@ -100,12 +107,25 @@ public class JsonParseJmh extends AbstractJmhBenchmark {
     }
 
     @Benchmark
-    public void toJsonString(Blackhole blackhole) throws Exception {
+    public void parseStringJson(Blackhole blackhole) throws Exception {
         if ("object".equals(parseType)) {
             Object data = jsonParseApi.parse(dataJson, TestJsonData.class);
             blackhole.consume(data);
         } else {
             Object map = jsonParseApi.parse(mapJson, Map.class);
+            blackhole.consume(map);
+        }
+    }
+
+    @Benchmark
+    public void parseInputJson(Blackhole blackhole) throws Exception {
+        if ("object".equals(parseType)) {
+            dataJsonInput.reset();
+            Object data = jsonParseApi.parse(dataJsonInput, TestJsonData.class);
+            blackhole.consume(data);
+        } else {
+            mapJsonInput.reset();
+            Object map = jsonParseApi.parse(mapJsonInput, Map.class);
             blackhole.consume(map);
         }
     }
