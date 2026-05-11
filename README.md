@@ -1,9 +1,12 @@
 # ![fs](docs/logo/fs.svg) fs: A Lightweight, High-Performance, Zero-Dependency Tool Library for Java
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/fredsuvn/fs/test.yml)](https://github.com/fredsuvn/fs/actions)
-[![Coverage](https://img.shields.io/codecov/c/github/fredsuvn/fs)](https://codecov.io/gh/fredsuvn/fs)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-orange)](https://fredsuvn.github.io/fs-docs/docs/fs/reports/jacoco/test/html/index.html)
 [![License](https://img.shields.io/github/license/fredsuvn/fs)](LICENSE)
 [![Maven Central](https://img.shields.io/maven-central/v/space.sunqian.fs/fs-all)](https://search.maven.org/artifact/space.sunqian.fs/fs-all)
+[![Javadoc](https://img.shields.io/badge/javadoc-blue)](https://fredsuvn.github.io/fs-docs/docs/fs/docs/javadoc/index.html)
+[![JMH Benchmarks](https://img.shields.io/badge/JMH%20Benchmarks-8A2BE2)](https://fredsuvn.github.io/fs-docs/tools/jmh-visualizer/jmh-visualizer.html?resultsPath=../../docs/fs/jmh/results.json)
+
 
 ---
 
@@ -198,6 +201,7 @@ container.shutdown();
 - [Developer Guide](docs/dev/DEVELOPMENT.adoc)
 - [JMH Benchmarks](https://fredsuvn.github.io/fs-docs/tools/jmh-visualizer/jmh-visualizer.html?resultsPath=../../docs/fs/jmh/results.json)
 - [Test Coverage](https://fredsuvn.github.io/fs-docs/docs/fs/reports/jacoco/test/html/index.html)
+<!-- [![Coverage](https://img.shields.io/codecov/c/github/fredsuvn/fs)](https://codecov.io/gh/fredsuvn/fs) -->
 
 ---
 
