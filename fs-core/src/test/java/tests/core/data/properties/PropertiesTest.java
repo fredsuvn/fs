@@ -22,7 +22,10 @@ public class PropertiesTest implements TestPrint {
     @Test
     public void testPropertiesDataLoading() throws Exception {
         testCommonLoading();
+        testBytesLoading();
         testChannelLoading();
+        testCharsLoading();
+        testCharSequenceLoading();
         testReaderLoading();
         testWrapperLoading();
     }
@@ -41,10 +44,34 @@ public class PropertiesTest implements TestPrint {
         testWriteOperations(properties);
     }
 
+    private void testBytesLoading() throws Exception {
+        // with channel
+        PropertiesData properties = PropertiesData.load(
+            IOKit.read(ResKit.findStream("data/x.properties"))
+        );
+        checkProperties(properties);
+    }
+
     private void testChannelLoading() throws Exception {
         // with channel
         PropertiesData properties = PropertiesData.load(
             Channels.newChannel(ResKit.findStream("data/x.properties"))
+        );
+        checkProperties(properties);
+    }
+
+    private void testCharsLoading() throws Exception {
+        // with reader
+        PropertiesData properties = PropertiesData.load(
+            IOKit.string(ResKit.findStream("data/x.properties"), CharsKit.defaultCharset()).toCharArray()
+        );
+        checkProperties(properties);
+    }
+
+    private void testCharSequenceLoading() throws Exception {
+        // with reader
+        PropertiesData properties = PropertiesData.load(
+            IOKit.string(ResKit.findStream("data/x.properties"), CharsKit.defaultCharset())
         );
         checkProperties(properties);
     }

@@ -5,6 +5,8 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.number.NumberKit;
+import space.sunqian.fs.data.DataParsingException;
+import space.sunqian.fs.io.IOKit;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +25,11 @@ enum JsonParserImpl implements JsonParser {
     private static final @Nonnull Object NULL = new Object();
 
     @Override
+    public JsonData parse(byte @Nonnull [] bytes) throws DataParsingException {
+        return null;
+    }
+
+    @Override
     public @Nonnull JsonData parse(@Nonnull InputStream input) throws JsonDataParsingException {
         Reader reader = new InputStreamReader(input, CharsKit.defaultCharset());
         return parse(reader);
@@ -37,10 +44,28 @@ enum JsonParserImpl implements JsonParser {
     }
 
     @Override
+    public JsonData parse(char @Nonnull [] chars) throws DataParsingException {
+        return null;
+    }
+
+    @Override
+    public JsonData parse(@Nonnull CharSequence charSequence) throws DataParsingException {
+        return null;
+    }
+
+    @Override
     public @Nonnull JsonData parse(@Nonnull Reader reader) throws JsonDataParsingException {
+        return parse(JsonReader.from(IOKit.string(reader)));
+    }
+
+    @Override
+    public @Nonnull JsonData parse(@Nonnull String str) throws JsonDataParsingException {
+        return parse(JsonReader.from(str));
+    }
+
+    private @Nonnull JsonData parse(@Nonnull JsonReader jsonReader) throws JsonDataParsingException {
         try {
-            JReader jReader = new JReader(reader);
-            Object result = parseJson(jReader, new StringBuilder(), true);
+            Object result = parseJson(jsonReader, new StringBuilder(), true);
             if (result == null) {
                 return JsonData.ofNull();
             }
@@ -65,7 +90,7 @@ enum JsonParserImpl implements JsonParser {
     }
 
     private Object parseJson(
-        @Nonnull JReader reader, @Nonnull StringBuilder strBuilder, boolean toEnd
+        @Nonnull JsonParserImpl.JsonReader reader, @Nonnull StringBuilder strBuilder, boolean toEnd
     ) throws Exception {
         Object result = null;
         int i;
@@ -140,7 +165,7 @@ enum JsonParserImpl implements JsonParser {
     }
 
     private void parseObject(
-        @Nonnull JReader reader,
+        @Nonnull JsonParserImpl.JsonReader reader,
         @Nonnull Map<@Nonnull String, @Nullable Object> objBuilder,
         @Nonnull StringBuilder strBuilder
     ) throws Exception {
@@ -177,7 +202,7 @@ enum JsonParserImpl implements JsonParser {
     }
 
     private void parseArray(
-        @Nonnull JReader reader,
+        @Nonnull JsonParserImpl.JsonReader reader,
         @Nonnull List<@Nullable Object> arrBuilder,
         @Nonnull StringBuilder strBuilder
     ) throws Exception {
@@ -206,19 +231,19 @@ enum JsonParserImpl implements JsonParser {
         throw new JsonDataParsingException(reader.nextIndex(), null, "]");
     }
 
-    private void parseNull(@Nonnull JReader reader) throws Exception {
+    private void parseNull(@Nonnull JsonParserImpl.JsonReader reader) throws Exception {
         nextChar(reader, 'u');
         nextChar(reader, 'l');
         nextChar(reader, 'l');
     }
 
-    private void parseTrue(@Nonnull JReader reader) throws Exception {
+    private void parseTrue(@Nonnull JsonParserImpl.JsonReader reader) throws Exception {
         nextChar(reader, 'r');
         nextChar(reader, 'u');
         nextChar(reader, 'e');
     }
 
-    private void parseFalse(@Nonnull JReader reader) throws Exception {
+    private void parseFalse(@Nonnull JsonParserImpl.JsonReader reader) throws Exception {
         nextChar(reader, 'a');
         nextChar(reader, 'l');
         nextChar(reader, 's');
@@ -226,7 +251,7 @@ enum JsonParserImpl implements JsonParser {
     }
 
     private void parseString(
-        @Nonnull JReader reader, @Nonnull StringBuilder builder
+        @Nonnull JsonParserImpl.JsonReader reader, @Nonnull StringBuilder builder
     ) throws Exception {
         int i;
         while ((i = reader.nextChar()) != -1) {
@@ -245,7 +270,7 @@ enum JsonParserImpl implements JsonParser {
     }
 
     private void parseEscape(
-        @Nonnull JReader reader, @Nonnull StringBuilder builder
+        @Nonnull JsonParserImpl.JsonReader reader, @Nonnull StringBuilder builder
     ) throws Exception {
         int i = reader.nextChar();
         if (i != -1) {
@@ -281,7 +306,7 @@ enum JsonParserImpl implements JsonParser {
     }
 
     private void parseUnicode(
-        @Nonnull JReader reader, @Nonnull StringBuilder builder
+        @Nonnull JsonParserImpl.JsonReader reader, @Nonnull StringBuilder builder
     ) throws Exception {
         char c1 = nextChar(reader);
         char c2 = nextChar(reader);
@@ -291,7 +316,7 @@ enum JsonParserImpl implements JsonParser {
     }
 
     private Number parseNumber(
-        @Nonnull JReader reader, @Nonnull StringBuilder strBuilder
+        @Nonnull JsonParserImpl.JsonReader reader, @Nonnull StringBuilder strBuilder
     ) throws Exception {
         int startIndex = reader.nextIndex() - 1;
         int i;
@@ -319,7 +344,7 @@ enum JsonParserImpl implements JsonParser {
         }
     }
 
-    private char nextChar(@Nonnull JReader reader) throws Exception {
+    private char nextChar(@Nonnull JsonParserImpl.JsonReader reader) throws Exception {
         int i = reader.nextChar();
         if (i == -1) {
             throw new JsonDataParsingException(reader.nextIndex(), null, null);
@@ -327,7 +352,7 @@ enum JsonParserImpl implements JsonParser {
         return (char) i;
     }
 
-    private void nextChar(@Nonnull JReader reader, char shouldBe) throws Exception {
+    private void nextChar(@Nonnull JsonParserImpl.JsonReader reader, char shouldBe) throws Exception {
         int i = reader.nextChar();
         if (i == -1) {
             throw new JsonDataParsingException(reader.nextIndex(), null, String.valueOf(shouldBe));
@@ -338,7 +363,7 @@ enum JsonParserImpl implements JsonParser {
         }
     }
 
-    private void skipToEof(@Nonnull JReader reader) throws Exception {
+    private void skipToEof(@Nonnull JsonParserImpl.JsonReader reader) throws Exception {
         int i;
         while ((i = reader.nextChar()) != -1) {
             char c = (char) i;
@@ -349,7 +374,7 @@ enum JsonParserImpl implements JsonParser {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private void skipToChar(@Nonnull JReader reader, char target) throws Exception {
+    private void skipToChar(@Nonnull JsonParserImpl.JsonReader reader, char target) throws Exception {
         int i;
         while ((i = reader.nextChar()) != -1) {
             char c = (char) i;
@@ -363,16 +388,34 @@ enum JsonParserImpl implements JsonParser {
         throw new JsonDataParsingException(reader.nextIndex(), null, String.valueOf(target));
     }
 
-    private static final class JReader {
+    private interface JsonReader {
+
+        static JsonReader from(@Nonnull Reader reader) {
+            return new OfReader(reader);
+        }
+
+        static JsonReader from(@Nonnull CharSequence charSequence) {
+            return new OfString(charSequence);
+        }
+
+        int nextChar() throws IOException;
+
+        int nextIndex();
+
+        void swallow(int buf);
+    }
+
+    private static final class OfReader implements JsonReader {
 
         private final @Nonnull Reader reader;
         private int index = 0;
         private int swallowedChar = -1;
 
-        private JReader(@Nonnull Reader reader) {
+        private OfReader(@Nonnull Reader reader) {
             this.reader = reader;
         }
 
+        @Override
         public int nextChar() throws IOException {
             int result;
             if (swallowedChar != -1) {
@@ -387,12 +430,44 @@ enum JsonParserImpl implements JsonParser {
             return result;
         }
 
+        @Override
         public int nextIndex() {
             return index;
         }
 
+        @Override
         public void swallow(int buf) {
             this.swallowedChar = buf;
+            index--;
+        }
+    }
+
+    private static final class OfString implements JsonReader {
+
+        private final @Nonnull CharSequence charSequence;
+        private int index = 0;
+        // private int swallowedChar = -1;
+
+        private OfString(@Nonnull CharSequence charSequence) {
+            this.charSequence = charSequence;
+        }
+
+        @Override
+        public int nextChar() throws IOException {
+            if (index >= charSequence.length()) {
+                return -1;
+            }
+            return charSequence.charAt(index++);
+        }
+
+        @Override
+        public int nextIndex() {
+            return index;
+        }
+
+        @Override
+        public void swallow(int buf) {
+            // this.swallowedChar = buf;
             index--;
         }
     }

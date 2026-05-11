@@ -30,6 +30,19 @@ import java.util.Properties;
 public interface PropertiesData extends ByteData, CharData {
 
     /**
+     * Loads properties from the given byte array, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
+     *
+     * @param bytes the byte array to read from
+     * @return a new {@link PropertiesData} wraps the loaded properties
+     * @throws DataParsingException if an I/O error occurs while loading the properties
+     */
+    static @Nonnull PropertiesData load(byte @Nonnull [] bytes) throws DataParsingException {
+        return PropertiesParser.defaultParser().parse(bytes);
+    }
+
+    /**
      * Loads properties from the given input stream, using {@link CharsKit#defaultCharset()}.
      * <p>
      * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
@@ -53,6 +66,32 @@ public interface PropertiesData extends ByteData, CharData {
      */
     static @Nonnull PropertiesData load(@Nonnull ReadableByteChannel channel) throws DataParsingException {
         return PropertiesParser.defaultParser().parse(channel);
+    }
+
+    /**
+     * Loads properties from the given char array, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
+     *
+     * @param chars the char array to read from
+     * @return a new {@link PropertiesData} wraps the loaded properties
+     * @throws DataParsingException if an I/O error occurs while loading the properties
+     */
+    static @Nonnull PropertiesData load(char @Nonnull [] chars) throws DataParsingException {
+        return PropertiesParser.defaultParser().parse(chars);
+    }
+
+    /**
+     * Loads properties from the given char sequence, using {@link CharsKit#defaultCharset()}.
+     * <p>
+     * This method uses {@link PropertiesParser#defaultParser()} to parse the properties.
+     *
+     * @param charSequence the char sequence to read from
+     * @return a new {@link PropertiesData} wraps the loaded properties
+     * @throws DataParsingException if an I/O error occurs while loading the properties
+     */
+    static @Nonnull PropertiesData load(@Nonnull CharSequence charSequence) throws DataParsingException {
+        return PropertiesParser.defaultParser().parse(charSequence);
     }
 
     /**

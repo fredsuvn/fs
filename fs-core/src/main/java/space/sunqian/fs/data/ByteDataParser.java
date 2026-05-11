@@ -14,6 +14,16 @@ import java.nio.channels.ReadableByteChannel;
 public interface ByteDataParser<T> {
 
     /**
+     * Parses and returns the data from the given byte array to a data object.
+     *
+     * @param bytes the given byte array
+     * @return the parsed data object
+     * @throws DataParsingException if any error occurs during parsing
+     */
+    @Nonnull
+    T parse(byte @Nonnull [] bytes) throws DataParsingException;
+
+    /**
      * Parses and returns the data from the given input stream to a data object.
      *
      * @param input the given input stream

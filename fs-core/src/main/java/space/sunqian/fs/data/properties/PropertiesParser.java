@@ -27,6 +27,18 @@ public interface PropertiesParser extends ByteDataParser<PropertiesData>, CharDa
     }
 
     /**
+     * Parses and returns the properties data from the given byte array to a {@link PropertiesData} object, using
+     * {@link CharsKit#defaultCharset()}.
+     *
+     * @param bytes the given byte array
+     * @return the parsed {@link PropertiesData} object
+     * @throws DataParsingException if any error occurs during parsing
+     */
+    @Override
+    @Nonnull
+    PropertiesData parse(byte @Nonnull [] bytes) throws DataParsingException;
+
+    /**
      * Parses and returns the properties data from the given input stream to a {@link PropertiesData} object, using
      * {@link CharsKit#defaultCharset()}.
      *
@@ -49,6 +61,28 @@ public interface PropertiesParser extends ByteDataParser<PropertiesData>, CharDa
     @Override
     @Nonnull
     PropertiesData parse(@Nonnull ReadableByteChannel channel) throws DataParsingException;
+
+    /**
+     * Parses and returns the properties data from the given char array to a {@link PropertiesData} object.
+     *
+     * @param chars the given char array
+     * @return the parsed {@link PropertiesData} object
+     * @throws DataParsingException if any error occurs during parsing
+     */
+    @Override
+    @Nonnull
+    PropertiesData parse(char @Nonnull [] chars) throws DataParsingException;
+
+    /**
+     * Parses and returns the properties data from the given char sequence to a {@link PropertiesData} object.
+     *
+     * @param charSequence the char sequence
+     * @return the parsed {@link PropertiesData} object
+     * @throws DataParsingException if any error occurs during parsing
+     */
+    @Override
+    @Nonnull
+    PropertiesData parse(@Nonnull CharSequence charSequence) throws DataParsingException;
 
     /**
      * Parses and returns the properties data from the given reader to a {@link PropertiesData} object.

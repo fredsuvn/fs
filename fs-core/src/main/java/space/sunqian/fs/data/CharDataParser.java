@@ -13,6 +13,26 @@ import java.io.Reader;
 public interface CharDataParser<T> {
 
     /**
+     * Parses and returns the data from the given char array to a data object.
+     *
+     * @param chars the given char array
+     * @return the parsed data object
+     * @throws DataParsingException if any error occurs during parsing
+     **/
+    @Nonnull
+    T parse(char @Nonnull [] chars) throws DataParsingException;
+
+    /**
+     * Parses and returns the data from the given char sequence to a data object.
+     *
+     * @param charSequence the given char sequence
+     * @return the parsed data object
+     * @throws DataParsingException if any error occurs during parsing
+     **/
+    @Nonnull
+    T parse(@Nonnull CharSequence charSequence) throws DataParsingException;
+
+    /**
      * Parses and returns the data from the given reader to a data object.
      *
      * @param reader the given reader
