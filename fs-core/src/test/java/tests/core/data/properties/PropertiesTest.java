@@ -32,7 +32,7 @@ public class PropertiesTest implements TestPrint {
 
     private void testCommonLoading() throws Exception {
         // common loading
-        PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
+        PropertiesData properties = PropertiesData.from(ResKit.findStream("data/x.properties"));
         printFor("x.properties", properties);
         checkProperties(properties);
         verifyMapConversion(properties);
@@ -46,7 +46,7 @@ public class PropertiesTest implements TestPrint {
 
     private void testBytesLoading() throws Exception {
         // with channel
-        PropertiesData properties = PropertiesData.load(
+        PropertiesData properties = PropertiesData.from(
             IOKit.read(ResKit.findStream("data/x.properties"))
         );
         checkProperties(properties);
@@ -54,7 +54,7 @@ public class PropertiesTest implements TestPrint {
 
     private void testChannelLoading() throws Exception {
         // with channel
-        PropertiesData properties = PropertiesData.load(
+        PropertiesData properties = PropertiesData.from(
             Channels.newChannel(ResKit.findStream("data/x.properties"))
         );
         checkProperties(properties);
@@ -62,7 +62,7 @@ public class PropertiesTest implements TestPrint {
 
     private void testCharsLoading() throws Exception {
         // with reader
-        PropertiesData properties = PropertiesData.load(
+        PropertiesData properties = PropertiesData.from(
             IOKit.string(ResKit.findStream("data/x.properties"), CharsKit.defaultCharset()).toCharArray()
         );
         checkProperties(properties);
@@ -70,7 +70,7 @@ public class PropertiesTest implements TestPrint {
 
     private void testCharSequenceLoading() throws Exception {
         // with reader
-        PropertiesData properties = PropertiesData.load(
+        PropertiesData properties = PropertiesData.from(
             IOKit.string(ResKit.findStream("data/x.properties"), CharsKit.defaultCharset())
         );
         checkProperties(properties);
@@ -78,7 +78,7 @@ public class PropertiesTest implements TestPrint {
 
     private void testReaderLoading() throws Exception {
         // with reader
-        PropertiesData properties = PropertiesData.load(
+        PropertiesData properties = PropertiesData.from(
             IOKit.newReader(ResKit.findStream("data/x.properties"), CharsKit.defaultCharset())
         );
         checkProperties(properties);
@@ -86,7 +86,7 @@ public class PropertiesTest implements TestPrint {
 
     private void testWrapperLoading() throws Exception {
         // wrapper
-        PropertiesData properties = PropertiesData.load(ResKit.findStream("data/x.properties"));
+        PropertiesData properties = PropertiesData.from(ResKit.findStream("data/x.properties"));
         checkProperties(PropertiesKit.wrap(properties.asProperties()));
     }
 

@@ -38,7 +38,7 @@ public interface PropertiesData extends ByteData, CharData {
      * @return a new {@link PropertiesData} wraps the loaded properties
      * @throws DataParsingException if an I/O error occurs while loading the properties
      */
-    static @Nonnull PropertiesData load(byte @Nonnull [] bytes) throws DataParsingException {
+    static @Nonnull PropertiesData from(byte @Nonnull [] bytes) throws DataParsingException {
         return PropertiesParser.defaultParser().parse(bytes);
     }
 
@@ -51,7 +51,7 @@ public interface PropertiesData extends ByteData, CharData {
      * @return a new {@link PropertiesData} wraps the loaded properties
      * @throws DataParsingException if an I/O error occurs while loading the properties
      */
-    static @Nonnull PropertiesData load(@Nonnull InputStream in) throws DataParsingException {
+    static @Nonnull PropertiesData from(@Nonnull InputStream in) throws DataParsingException {
         return PropertiesParser.defaultParser().parse(in);
     }
 
@@ -64,7 +64,7 @@ public interface PropertiesData extends ByteData, CharData {
      * @return a new {@link PropertiesData} wraps the loaded properties
      * @throws DataParsingException if an I/O error occurs while loading the properties
      */
-    static @Nonnull PropertiesData load(@Nonnull ReadableByteChannel channel) throws DataParsingException {
+    static @Nonnull PropertiesData from(@Nonnull ReadableByteChannel channel) throws DataParsingException {
         return PropertiesParser.defaultParser().parse(channel);
     }
 
@@ -77,7 +77,7 @@ public interface PropertiesData extends ByteData, CharData {
      * @return a new {@link PropertiesData} wraps the loaded properties
      * @throws DataParsingException if an I/O error occurs while loading the properties
      */
-    static @Nonnull PropertiesData load(char @Nonnull [] chars) throws DataParsingException {
+    static @Nonnull PropertiesData from(char @Nonnull [] chars) throws DataParsingException {
         return PropertiesParser.defaultParser().parse(chars);
     }
 
@@ -90,7 +90,7 @@ public interface PropertiesData extends ByteData, CharData {
      * @return a new {@link PropertiesData} wraps the loaded properties
      * @throws DataParsingException if an I/O error occurs while loading the properties
      */
-    static @Nonnull PropertiesData load(@Nonnull CharSequence charSequence) throws DataParsingException {
+    static @Nonnull PropertiesData from(@Nonnull CharSequence charSequence) throws DataParsingException {
         return PropertiesParser.defaultParser().parse(charSequence);
     }
 
@@ -103,7 +103,7 @@ public interface PropertiesData extends ByteData, CharData {
      * @return a new {@link PropertiesData} wraps the loaded properties
      * @throws DataParsingException if an I/O error occurs while loading the properties
      */
-    static @Nonnull PropertiesData load(@Nonnull Reader reader) throws DataParsingException {
+    static @Nonnull PropertiesData from(@Nonnull Reader reader) throws DataParsingException {
         return PropertiesParser.defaultParser().parse(reader);
     }
 
