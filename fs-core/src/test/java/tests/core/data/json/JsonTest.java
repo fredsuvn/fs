@@ -527,6 +527,12 @@ public class JsonTest implements TestPrint {
             assertThrows(JsonDataParsingException.class, () -> JsonKit.parse(IOKit.newInputStream(tr)));
             assertThrows(JsonDataParsingException.class, () -> JsonKit.parse(Channels.newChannel(IOKit.newInputStream(tr))));
         }
+        {
+            // whitespace
+            String json = " {\t \"key\"\n\r\t :  \r\r \"value\"\t\t}\t\t";
+            Map<?, ?> map = JsonKit.parse(json).asMap();
+            assertEquals("value", map.get("key"));
+        }
     }
 
     private void checkTarget(DataSrc dataSrc, DataTarget target, String dateString) {

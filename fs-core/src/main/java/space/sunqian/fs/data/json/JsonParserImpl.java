@@ -6,6 +6,7 @@ import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.number.NumberKit;
 import space.sunqian.fs.data.DataParsingException;
+import space.sunqian.fs.io.IOKit;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -92,7 +93,7 @@ enum JsonParserImpl implements JsonParser {
         PARSING:
         while ((i = reader.nextChar()) != -1) {
             char c = (char) i;
-            if (Character.isWhitespace(c)) {
+            if (isWhitespace(c)) {
                 continue;
             }
             switch (c) {
@@ -108,24 +109,21 @@ enum JsonParserImpl implements JsonParser {
                     parseFalse(reader);
                     result = false;
                     break PARSING;
-                case '\"': {
+                case '\"':
                     parseString(reader, strBuilder);
                     result = strBuilder.toString();
                     strBuilder.setLength(0);
                     break PARSING;
-                }
-                case '{': {
+                case '{':
                     Map<String, Object> objBuilder = new LinkedHashMap<>();
                     parseObject(reader, objBuilder, strBuilder);
                     result = objBuilder;
                     break PARSING;
-                }
-                case '[': {
+                case '[':
                     List<Object> arrBuilder = new ArrayList<>();
                     parseArray(reader, arrBuilder, strBuilder);
                     result = arrBuilder;
                     break PARSING;
-                }
                 case '0':
                 case '1':
                 case '2':
@@ -168,7 +166,7 @@ enum JsonParserImpl implements JsonParser {
         int i;
         while ((i = reader.nextChar()) != -1) {
             char c = (char) i;
-            if (Character.isWhitespace(c)) {
+            if (isWhitespace(c)) {
                 continue;
             }
             switch (c) {
@@ -205,7 +203,7 @@ enum JsonParserImpl implements JsonParser {
         int i;
         while ((i = reader.nextChar()) != -1) {
             char c = (char) i;
-            if (Character.isWhitespace(c)) {
+            if (isWhitespace(c)) {
                 continue;
             }
             if (c == ',') {
@@ -362,7 +360,7 @@ enum JsonParserImpl implements JsonParser {
         int i;
         while ((i = reader.nextChar()) != -1) {
             char c = (char) i;
-            if (!Character.isWhitespace(c)) {
+            if (!isWhitespace(c)) {
                 throw new JsonDataParsingException(reader.nextIndex() - 1, String.valueOf(c), null);
             }
         }
@@ -376,11 +374,15 @@ enum JsonParserImpl implements JsonParser {
             if (c == target) {
                 return;
             }
-            if (!Character.isWhitespace(c)) {
+            if (!isWhitespace(c)) {
                 throw new JsonDataParsingException(reader.nextIndex() - 1, String.valueOf(c), String.valueOf(target));
             }
         }
         throw new JsonDataParsingException(reader.nextIndex(), null, String.valueOf(target));
+    }
+
+    private boolean isWhitespace(char c) {
+        return c == ' ' || c == '\t' || c == '\r' || c == '\n';
     }
 
     private interface JsonReader {
@@ -400,42 +402,42 @@ enum JsonParserImpl implements JsonParser {
         void swallow(int aChar);
     }
 
-    private static final class OfReader implements JsonReader {
-
-        private final @Nonnull Reader reader;
-        private int index = 0;
-        private int swallowedChar = -1;
-
-        private OfReader(@Nonnull Reader reader) {
-            this.reader = reader;
-        }
-
-        @Override
-        public int nextChar() throws IOException {
-            int result;
-            if (swallowedChar != -1) {
-                result = swallowedChar;
-                swallowedChar = -1;
-            } else {
-                result = reader.read();
-            }
-            if (result != -1) {
-                index++;
-            }
-            return result;
-        }
-
-        @Override
-        public int nextIndex() {
-            return index;
-        }
-
-        @Override
-        public void swallow(int aChar) {
-            this.swallowedChar = aChar;
-            index--;
-        }
-    }
+    // private static final class OfReader implements JsonReader {
+    //
+    //     private final @Nonnull Reader reader;
+    //     private int index = 0;
+    //     private int swallowedChar = -1;
+    //
+    //     private OfReader(@Nonnull Reader reader) {
+    //         this.reader = reader;
+    //     }
+    //
+    //     @Override
+    //     public int nextChar() throws IOException {
+    //         int result;
+    //         if (swallowedChar != -1) {
+    //             result = swallowedChar;
+    //             swallowedChar = -1;
+    //         } else {
+    //             result = reader.read();
+    //         }
+    //         if (result != -1) {
+    //             index++;
+    //         }
+    //         return result;
+    //     }
+    //
+    //     @Override
+    //     public int nextIndex() {
+    //         return index;
+    //     }
+    //
+    //     @Override
+    //     public void swallow(int aChar) {
+    //         this.swallowedChar = aChar;
+    //         index--;
+    //     }
+    // }
 
     private static final class OfString implements JsonReader {
 
@@ -464,6 +466,58 @@ enum JsonParserImpl implements JsonParser {
         public void swallow(int aChar) {
             // this.swallowedChar = buf;
             index--;
+        }
+    }
+
+    private static final class OfReader implements JsonReader {
+
+        private static final @Nonnull ThreadLocal<char @Nonnull []> BUFFER =
+            ThreadLocal.withInitial(() -> new char[IOKit.bufferSize()]);
+
+        private final @Nonnull Reader reader;
+        private int position = 0;
+        private int swallowedChar = -1;
+
+        // private final char @Nonnull [] buffer = new char[1024];
+        private int index = 0;
+        private int length = 0;
+
+        private OfReader(@Nonnull Reader reader) {
+            this.reader = reader;
+        }
+
+        @Override
+        public int nextChar() throws IOException {
+            if (swallowedChar != -1) {
+                int result = swallowedChar;
+                swallowedChar = -1;
+                return result;
+            }
+            refreshBuffer();
+            if (length == -1) {
+                return -1;
+            }
+            position++;
+            return BUFFER.get()[index++];
+        }
+
+        @Override
+        public int nextIndex() {
+            return position;
+        }
+
+        @Override
+        public void swallow(int aChar) {
+            this.swallowedChar = aChar;
+            position--;
+        }
+
+        private void refreshBuffer() throws IOException {
+            if (index < length) {
+                return;
+            }
+            this.index = 0;
+            this.length = reader.read(BUFFER.get());
         }
     }
 }
