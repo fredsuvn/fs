@@ -125,6 +125,22 @@ public interface PropertiesData extends ByteData, CharData {
             public @Nonnull String toString() {
                 return properties.toString();
             }
+
+            @Override
+            public int hashCode() {
+                return properties.hashCode();
+            }
+
+            @Override
+            public boolean equals(@Nullable Object obj) {
+                if (this == obj) {
+                    return true;
+                }
+                if (obj instanceof PropertiesData) {
+                    return properties.equals(((PropertiesData) obj).asProperties());
+                }
+                return false;
+            }
         };
     }
 
@@ -330,6 +346,29 @@ public interface PropertiesData extends ByteData, CharData {
     default void writeTo(@Nonnull Appendable appender) throws IORuntimeException {
         Fs.uncheck(() -> asProperties().store(IOKit.wrapWriter(appender), null), IORuntimeException::new);
     }
+
+    /**
+     * Returns {@code true} if the given object is an instance of {@link PropertiesData} and their contents are equal,
+     * otherwise {@code false}. It is typically equivalent to:
+     * <pre>{@code
+     * return asProperties().equals(that.asProperties());
+     * }</pre>
+     *
+     * @param that the given object to compare.
+     * @return {@code true} if the given object is an instance of {@link PropertiesData} and their contents are equal,
+     * otherwise {@code false}
+     */
+    boolean equals(@Nullable Object that);
+
+    /**
+     * Returns the hash code value for the current properties. It is typically equivalent to:
+     * <pre>{@code
+     * return asProperties().hashCode();
+     * }</pre>
+     *
+     * @return the hash code value for the current properties.
+     */
+    int hashCode();
 
     /**
      * Returns a string representation of the current properties.

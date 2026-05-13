@@ -14,7 +14,9 @@ import java.nio.channels.Channels;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PropertiesTest implements TestPrint {
 
@@ -27,6 +29,19 @@ public class PropertiesTest implements TestPrint {
         testCharSequenceLoading();
         testReaderLoading();
         testWrapperLoading();
+    }
+
+    @Test
+    public void testEqualsHashCode() throws Exception {
+        // Test equals
+        PropertiesData properties1 = PropertiesData.from(ResKit.findStream("data/x.properties"));
+        PropertiesData properties2 = PropertiesData.from(ResKit.findStream("data/x.properties"));
+        assertEquals(properties1, properties2);
+        assertTrue(properties1.equals(properties1));
+        assertFalse(properties1.equals(null));
+        assertFalse(properties1.equals(""));
+        // Test hash code
+        assertEquals(properties1.hashCode(), properties2.hashCode());
     }
 
     private void testCommonLoading() throws Exception {
