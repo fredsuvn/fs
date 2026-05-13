@@ -8,16 +8,24 @@ import space.sunqian.fs.base.exception.UnreachablePointException;
 
 final class StringViewBack {
 
-    static @Nonnull StringView view(@Nonnull CharSequence @Nonnull @RetainedParam ... strings) {
-        return new StringViewImpl(strings);
+    static @Nonnull StringView newView(@Nonnull CharSequence @Nonnull @RetainedParam ... strings) {
+        return new OfCharSequence(strings);
     }
 
-    private static final class StringViewImpl implements StringView {
+    static @Nonnull StringView newView(
+        char @Nonnull @RetainedParam [] chars,
+        int start,
+        int end
+    ) throws IndexOutOfBoundsException {
+        return new OfCharArray(chars, start, end);
+    }
+
+    private static final class OfCharSequence implements StringView {
 
         private final @Nonnull CharSequence[] chars;
         private final int length;
 
-        private StringViewImpl(@Nonnull CharSequence[] chars) {
+        private OfCharSequence(@Nonnull CharSequence[] chars) {
             this.chars = chars;
             int c = 0;
             for (CharSequence aChar : chars) {
@@ -58,7 +66,7 @@ final class StringViewBack {
             for (int i = 1, j = startNode.charsIndex + 1; i < subChars.length - 1; i++, j++) {
                 subChars[i] = chars[j];
             }
-            return new StringViewImpl(subChars);
+            return new OfCharSequence(subChars);
         }
 
         @Override
@@ -92,6 +100,46 @@ final class StringViewBack {
                 this.charsIndex = charsIndex;
                 this.charIndex = charIndex;
             }
+        }
+    }
+
+    private static final class OfCharArray implements StringView {
+
+        private final char[] chars;
+        private final int start;
+        private final int end;
+
+        private OfCharArray(
+            char @Nonnull @RetainedParam [] chars,
+            int start,
+            int end
+        ) throws IndexOutOfBoundsException {
+            Checker.checkInBounds(start, end, 0, chars.length);
+            this.chars = chars;
+            this.start = start;
+            this.end = end;
+        }
+
+        @Override
+        public int length() {
+            return end - start;
+        }
+
+        @Override
+        public char charAt(int index) {
+            Checker.checkInBounds(index, 0, length());
+            return chars[start + index];
+        }
+
+        @Override
+        public @Nonnull CharSequence subSequence(int start, int end) {
+            Checker.checkInBounds(start, end, 0, length());
+            return new OfCharArray(chars, this.start + start, this.start + end);
+        }
+
+        @Override
+        public @Nonnull String toString() {
+            return new String(chars, start, end - start);
         }
     }
 

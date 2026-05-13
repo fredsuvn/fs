@@ -22,7 +22,7 @@ public interface StringView extends CharSequence {
      * @return a {@code StringView} that is composed of the specified {@link CharSequence} instances
      */
     static @Nonnull StringView of(@Nonnull CharSequence @Nonnull @RetainedParam ... strings) {
-        return StringViewBack.view(strings);
+        return StringViewBack.newView(strings);
     }
 
     /**
@@ -33,5 +33,32 @@ public interface StringView extends CharSequence {
      */
     static @Nonnull StringView of(@Nonnull List<? extends @Nonnull CharSequence> strings) {
         return of(strings.toArray(new CharSequence[0]));
+    }
+
+    /**
+     * Returns a {@code StringView} that is composed of the specified {@link char} array.
+     *
+     * @param chars the specified {@link char} array to compose
+     * @return a {@code StringView} that is composed of the specified {@link char} array
+     */
+    static @Nonnull StringView of(char @Nonnull @RetainedParam [] chars) {
+        return of(chars, 0, chars.length);
+    }
+
+    /**
+     * Returns a {@code StringView} that is composed of the specified {@link char} array.
+     *
+     * @param chars the specified {@link char} array to compose
+     * @param start the start index of the {@link char} array to compose, inclusive
+     * @param end   the end index of the {@link char} array to compose, exclusive
+     * @return a {@code StringView} that is composed of the specified {@link char} array
+     * @throws IndexOutOfBoundsException if the start or end index is out of bounds
+     */
+    static @Nonnull StringView of(
+        char @Nonnull @RetainedParam [] chars,
+        int start,
+        int end
+    ) throws IndexOutOfBoundsException {
+        return StringViewBack.newView(chars, start, end);
     }
 }

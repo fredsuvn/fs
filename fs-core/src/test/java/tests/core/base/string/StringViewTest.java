@@ -37,7 +37,14 @@ public class StringViewTest implements TestPrint {
     }
 
     private void testStringView(String fullString, List<String> strings) {
-        StringView sv = StringView.of(strings);
+        testStringView(StringView.of(strings), fullString);
+        testStringView(StringView.of(fullString.toCharArray()), fullString);
+        char[] charArray = new char[fullString.length() + 2];
+        System.arraycopy(fullString.toCharArray(), 0, charArray, 1, fullString.length());
+        testStringView(StringView.of(charArray, 1, fullString.length() + 1), fullString);
+    }
+
+    private void testStringView(StringView sv, String fullString) {
         assertEquals(sv.length(), fullString.length());
         assertEquals(sv.toString(), fullString);
         for (int i = 0; i < 10; i++) {
