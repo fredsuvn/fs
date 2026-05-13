@@ -113,7 +113,7 @@ public interface JsonData extends ByteData, CharData {
      * @return a {@link JsonData} represents JSON null
      */
     static @Nonnull JsonData ofNull() {
-        return JsonDataBack.JsonNull.INST;
+        return JsonDataBack.ofNull();
     }
 
     /**
@@ -123,7 +123,7 @@ public interface JsonData extends ByteData, CharData {
      * @return a {@link JsonData} represents a JSON string whose value is the given string
      */
     static @Nonnull JsonData ofString(@Nonnull String string) {
-        return new JsonDataBack.JsonString(string);
+        return JsonDataBack.ofString(string);
     }
 
     /**
@@ -133,7 +133,7 @@ public interface JsonData extends ByteData, CharData {
      * @return a {@link JsonData} represents a JSON number whose value is the given number
      */
     static @Nonnull JsonData ofNumber(@Nonnull Number number) {
-        return new JsonDataBack.JsonNumber(number);
+        return JsonDataBack.ofNumber(number);
     }
 
     /**
@@ -143,7 +143,7 @@ public interface JsonData extends ByteData, CharData {
      * @return a {@link JsonData} represents a JSON boolean whose value is the given boolean
      */
     static @Nonnull JsonData ofBoolean(boolean bool) {
-        return bool ? JsonDataBack.JsonBoolean.TRUE : JsonDataBack.JsonBoolean.FALSE;
+        return JsonDataBack.ofBoolean(bool);
     }
 
     /**
@@ -153,7 +153,7 @@ public interface JsonData extends ByteData, CharData {
      * @return a {@link JsonData} represents a JSON object whose value is the given map
      */
     static @Nonnull JsonData ofMap(@Nonnull @RetainedParam Map<@Nonnull String, @Nullable Object> map) {
-        return new JsonDataBack.JsonObject(map);
+        return JsonDataBack.ofMap(map);
     }
 
     /**
@@ -163,7 +163,7 @@ public interface JsonData extends ByteData, CharData {
      * @return a {@link JsonData} represents a JSON array whose value is the given list
      */
     static @Nonnull JsonData ofList(@Nonnull @RetainedParam List<@Nullable Object> array) {
-        return new JsonDataBack.JsonArray(array);
+        return JsonDataBack.ofList(array);
     }
 
     /**
@@ -173,7 +173,7 @@ public interface JsonData extends ByteData, CharData {
      * @return a {@link JsonData} represents a JSON array whose value is the given array
      */
     static @Nonnull JsonData ofArray(@Nullable Object @Nonnull @RetainedParam ... array) {
-        return new JsonDataBack.JsonArray(array);
+        return JsonDataBack.ofArray(array);
     }
 
     /**

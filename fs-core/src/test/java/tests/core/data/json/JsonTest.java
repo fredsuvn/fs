@@ -38,6 +38,7 @@ import tests.core.object.convert.ConvertTest;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -65,6 +66,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -350,10 +352,20 @@ public class JsonTest implements TestPrint {
             assertEquals(11, e5.getOccurIndex());
             assertEquals("\"", e5.getExpectedChars());
             assertNull(e5.getUnexpectedChars());
+            JsonDataParsingException e6 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.parse("\"").toObject(DataTarget.class);
+            });
+            assertEquals(1, e6.getOccurIndex());
+            assertEquals("\"", e6.getExpectedChars());
+            assertNull(e6.getUnexpectedChars());
         }
         {
             // number
-            Integer a = 12345;
+            Integer a0 = 6;
+            String jsonA0 = jsonMapper.writeValueAsString(a0);
+            assertEquals(jsonA0, formatter.format(a0));
+            assertEquals(a0, parser.parse(jsonA0).asInt());
+            Integer a = 123;
             String jsonA = jsonMapper.writeValueAsString(a);
             assertEquals(jsonA, formatter.format(a));
             assertEquals(a, parser.parse(jsonA).asInt());
@@ -957,6 +969,91 @@ public class JsonTest implements TestPrint {
         assertEquals(pack, JsonData.from(json.toCharArray()).toObject(DataPack.class));
         assertEquals(pack, JsonData.from(json).toObject(DataPack.class));
         assertEquals(pack, JsonData.from(new StringReader(json)).toObject(DataPack.class));
+    }
+
+    @Test
+    public void testEqualsHashCode() throws Exception {
+        JsonData ofNull1 = JsonData.ofNull();
+        JsonData ofNull2 = JsonData.ofNull();
+        JsonData ofTrue1 = JsonData.ofBoolean(true);
+        JsonData ofTrue2 = JsonData.ofBoolean(true);
+        JsonData ofFalse1 = JsonData.ofBoolean(false);
+        JsonData ofFalse2 = JsonData.ofBoolean(false);
+        JsonData ofString1 = JsonData.ofString("abc");
+        JsonData ofString2 = JsonData.ofString("abc");
+        JsonData ofNumber1 = JsonData.ofNumber(123);
+        JsonData ofNumber2 = JsonData.ofNumber(123);
+        JsonData ofMap1 = JsonData.ofMap(MapKit.map("a", 1, "b", 2));
+        JsonData ofMap2 = JsonData.ofMap(MapKit.map("a", 1, "b", 2));
+        JsonData ofList1 = JsonData.ofList(ListKit.list(1, 2, 3));
+        JsonData ofList2 = JsonData.ofArray(1, 2, 3);
+        testEqualsHashCode(ofNull1, ofNull2, ofString1);
+        testEqualsHashCode(ofTrue1, ofTrue2, ofString1);
+        testEqualsHashCode(ofFalse1, ofFalse2, ofString1);
+        testEqualsHashCode(ofString1, ofString2, ofNumber1);
+        testEqualsHashCode(ofNumber1, ofNumber2, ofString1);
+        testEqualsHashCode(ofMap1, ofMap2, ofString2);
+        testEqualsHashCode(ofList1, ofList2, ofString2);
+        assertNotEquals(ofTrue1, ofFalse1);
+        assertNotEquals(ofString1, JsonData.ofString("qqq"));
+        assertNotEquals(ofNumber1, JsonData.ofNumber(666));
+        assertNotEquals(ofMap1, JsonData.ofMap(MapKit.map("a", 11, "b", 22)));
+        assertNotEquals(ofList1, JsonData.ofArray(1));
+        assertEquals(ofTrue1, new JsonData() {
+            @Override
+            public @Nonnull JsonType type() {
+                return JsonType.BOOLEAN;
+            }
+
+            @Override
+            public @Nonnull String asString() throws JsonDataException {
+                return null;
+            }
+
+            @Override
+            public @Nonnull Map<String, Object> asMap() throws JsonDataException {
+                return null;
+            }
+
+            @Override
+            public @Nonnull List<Object> asList() throws JsonDataException {
+                return null;
+            }
+
+            @Override
+            public @Nonnull Number asNumber() throws JsonDataException {
+                return null;
+            }
+
+            @Override
+            public boolean asBoolean() throws JsonDataException {
+                return true;
+            }
+
+            @Override
+            public void writeTo(@Nonnull OutputStream out) throws IORuntimeException {
+            }
+
+            @Override
+            public void writeTo(@Nonnull WritableByteChannel channel) throws IORuntimeException {
+            }
+
+            @Override
+            public void writeTo(@Nonnull Appendable appender) throws IORuntimeException {
+            }
+        });
+    }
+
+    private void testEqualsHashCode(JsonData d1, JsonData d2, JsonData otherType) throws Exception {
+        // Test equals
+        assertEquals(d1, d2);
+        assertTrue(d1.equals(d1));
+        assertFalse(d1.equals(null));
+        assertFalse(d1.equals(""));
+        assertNotEquals(d1, otherType);
+        assertNotEquals(d2, otherType);
+        // Test hash code
+        assertEquals(d1.hashCode(), d2.hashCode());
     }
 
     public enum DataEnum {

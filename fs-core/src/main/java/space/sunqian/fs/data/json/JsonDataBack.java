@@ -2,6 +2,7 @@ package space.sunqian.fs.data.json;
 
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
+import space.sunqian.annotation.RetainedParam;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.collect.ArrayKit;
 import space.sunqian.fs.io.IOKit;
@@ -12,8 +13,37 @@ import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 final class JsonDataBack {
+
+    static @Nonnull JsonData ofNull() {
+        return JsonNull.INST;
+    }
+
+    static @Nonnull JsonData ofBoolean(boolean bool) {
+        return bool ? JsonBoolean.TRUE : JsonBoolean.FALSE;
+    }
+
+    static @Nonnull JsonData ofString(@Nonnull String string) {
+        return new JsonString(string);
+    }
+
+    static @Nonnull JsonData ofNumber(@Nonnull Number number) {
+        return new JsonNumber(number);
+    }
+
+    static @Nonnull JsonData ofMap(@Nonnull @RetainedParam Map<@Nonnull String, @Nullable Object> map) {
+        return new JsonObject(map);
+    }
+
+    static @Nonnull JsonData ofList(@Nonnull @RetainedParam List<@Nullable Object> array) {
+        return new JsonArray(array);
+    }
+
+    static @Nonnull JsonData ofArray(@Nullable Object @Nonnull @RetainedParam ... array) {
+        return new JsonArray(array);
+    }
 
     private interface DefaultData extends JsonData {
 
@@ -74,8 +104,9 @@ final class JsonDataBack {
         protected abstract void doWrite(@Nonnull Appendable appender) throws Exception;
     }
 
-    enum JsonNull implements DefaultData {
-        INST;
+    private static final class JsonNull implements DefaultData {
+
+        private static final @Nonnull JsonNull INST = new JsonNull();
 
         @Override
         public @Nonnull JsonType type() {
@@ -91,10 +122,30 @@ final class JsonDataBack {
         public @Nonnull String toString() {
             return Fs.NULL_STRING;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o instanceof JsonData) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
+                JsonData that = (JsonData) o;
+                return type().equals(that.type());
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return toString().hashCode();
+        }
     }
 
-    enum JsonBoolean implements DefaultData {
-        TRUE(true), FALSE(false);
+    private static final class JsonBoolean implements DefaultData {
+
+        private static final @Nonnull JsonBoolean TRUE = new JsonBoolean(true);
+        private static final @Nonnull JsonBoolean FALSE = new JsonBoolean(false);
 
         private final boolean bool;
 
@@ -120,6 +171,24 @@ final class JsonDataBack {
         @Override
         public @Nonnull String toString() {
             return Boolean.toString(bool);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o instanceof JsonData) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
+                JsonData that = (JsonData) o;
+                return type().equals(that.type()) && Objects.equals(bool, that.asBoolean());
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Boolean.valueOf(bool).hashCode();
         }
     }
 
@@ -147,6 +216,24 @@ final class JsonDataBack {
             appender.append(string);
             appender.append("\"");
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o instanceof JsonData) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
+                JsonData that = (JsonData) o;
+                return type().equals(that.type()) && Objects.equals(string, that.asString());
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return string.hashCode();
+        }
     }
 
     static final class JsonNumber extends AbsData {
@@ -171,6 +258,24 @@ final class JsonDataBack {
         public void doWrite(@Nonnull Appendable appender) throws Exception {
             appender.append(number.toString());
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o instanceof JsonData) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
+                JsonData that = (JsonData) o;
+                return type().equals(that.type()) && Objects.equals(number, that.asNumber());
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return number.hashCode();
+        }
     }
 
     static final class JsonObject extends AbsData {
@@ -194,6 +299,24 @@ final class JsonDataBack {
         @Override
         public void doWrite(@Nonnull Appendable appender) {
             JsonKit.toJsonString(dataMap, appender);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o instanceof JsonData) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
+                JsonData that = (JsonData) o;
+                return type().equals(that.type()) && Objects.equals(dataMap, that.asMap());
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return dataMap.hashCode();
         }
     }
 
@@ -222,6 +345,24 @@ final class JsonDataBack {
         @Override
         public void doWrite(@Nonnull Appendable appender) {
             JsonKit.toJsonString(dataList, appender);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o instanceof JsonData) {
+                @SuppressWarnings("PatternVariableCanBeUsed")
+                JsonData that = (JsonData) o;
+                return type().equals(that.type()) && Objects.equals(dataList, that.asList());
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return dataList.hashCode();
         }
     }
 
