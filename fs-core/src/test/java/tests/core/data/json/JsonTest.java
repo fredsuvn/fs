@@ -13,6 +13,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.chars.CharsKit;
 import space.sunqian.fs.base.string.StringView;
 import space.sunqian.fs.collect.ListKit;
@@ -36,12 +37,15 @@ import tests.core.object.convert.ConvertTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -100,6 +104,49 @@ public class JsonTest implements TestPrint {
     }
 
     private void testFormattingAndParsing(
+        JsonFormatter formatter,
+        boolean ignoreNull,
+        JsonParser parser
+    ) throws Exception {
+        JsonParser parserWrapper = new JsonParser() {
+
+            @Override
+            public @Nonnull JsonData parse(byte @Nonnull [] bytes) throws JsonDataParsingException {
+                return parser.parse(bytes);
+            }
+
+            @Override
+            public @Nonnull JsonData parse(@Nonnull InputStream input) throws JsonDataParsingException {
+                return parser.parse(input);
+            }
+
+            @Override
+            public @Nonnull JsonData parse(@Nonnull ReadableByteChannel channel) throws JsonDataParsingException {
+                return parser.parse(channel);
+            }
+
+            @Override
+            public @Nonnull JsonData parse(char @Nonnull [] chars) throws JsonDataParsingException {
+                return parser.parse(chars);
+            }
+
+            @Override
+            public @Nonnull JsonData parse(@Nonnull CharSequence charSequence) throws JsonDataParsingException {
+                JsonData result = parser.parse(charSequence);
+                JsonData result2 = parser.parse(IOKit.newInputStream(charSequence.toString().getBytes(CharsKit.defaultCharset())));
+                assertEquals(result, result2);
+                return result;
+            }
+
+            @Override
+            public @Nonnull JsonData parse(@Nonnull Reader reader) throws JsonDataParsingException {
+                return parser.parse(reader);
+            }
+        };
+        testFormattingAndParsing0(formatter, ignoreNull, parserWrapper);
+    }
+
+    private void testFormattingAndParsing0(
         JsonFormatter formatter,
         boolean ignoreNull,
         JsonParser parser
@@ -297,6 +344,12 @@ public class JsonTest implements TestPrint {
             assertEquals(7, e4.getOccurIndex());
             assertNull(e4.getExpectedChars());
             assertNull(e4.getUnexpectedChars());
+            JsonDataParsingException e5 = assertThrows(JsonDataParsingException.class, () -> {
+                parser.parse("\"b\\u0000123").toObject(DataTarget.class);
+            });
+            assertEquals(11, e5.getOccurIndex());
+            assertEquals("\"", e5.getExpectedChars());
+            assertNull(e5.getUnexpectedChars());
         }
         {
             // number

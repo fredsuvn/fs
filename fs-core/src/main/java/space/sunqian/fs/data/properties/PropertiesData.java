@@ -366,7 +366,7 @@ public interface PropertiesData extends ByteData, CharData {
      * return asProperties().hashCode();
      * }</pre>
      *
-     * @return the hash code value for the current properties.
+     * @return the hash code value for the current properties
      */
     int hashCode();
 

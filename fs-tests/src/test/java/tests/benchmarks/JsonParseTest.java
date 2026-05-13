@@ -5,8 +5,8 @@ import internal.data.TestJsonData;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.collect.ListKit;
 import space.sunqian.fs.data.json.JsonKit;
+import space.sunqian.fs.io.IOKit;
 
-import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
@@ -16,12 +16,12 @@ public class JsonParseTest {
 
     private final TestJsonData testData;
     private final String testJson;
-    private final ByteArrayInputStream testInput;
+    private final byte[] testJsonBytes;
 
     {
         testData = createTestData();
         testJson = JsonKit.toJsonString(testData);
-        testInput = new ByteArrayInputStream(testJson.getBytes(StandardCharsets.UTF_8));
+        testJsonBytes = testJson.getBytes(StandardCharsets.UTF_8);
 
         // Verify initial serialization/deserialization works
         TestJsonData parsed = JsonKit.parse(testJson).toObject(TestJsonData.class);
@@ -39,8 +39,7 @@ public class JsonParseTest {
         JsonParseApi parseApi = JsonParseApi.createApi(parseType);
         Object stringParsed = parseApi.parse(testJson, TestJsonData.class);
         assertEquals(testData, stringParsed);
-        testInput.reset();
-        Object inputParsed = parseApi.parse(testInput, TestJsonData.class);
+        Object inputParsed = parseApi.parse(IOKit.newInputStream(testJsonBytes), TestJsonData.class);
         assertEquals(testData, inputParsed);
     }
 

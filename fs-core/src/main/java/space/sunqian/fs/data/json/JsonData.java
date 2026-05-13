@@ -381,6 +381,23 @@ public interface JsonData extends ByteData, CharData {
     }
 
     /**
+     * Returns {@code true} if the given object is an instance of {@link JsonData} and their contents are equal,
+     * otherwise {@code false}.
+     *
+     * @param that the given object to compare.
+     * @return {@code true} if the given object is an instance of {@link JsonData} and their contents are equal,
+     * otherwise {@code false}
+     */
+    boolean equals(@Nullable Object that);
+
+    /**
+     * Returns the hash code value for the current JSON data.
+     *
+     * @return the hash code value for the current JSON data
+     */
+    int hashCode();
+
+    /**
      * Returns the JSON string of the current JSON data.
      *
      * @return the JSON string of the current JSON data
