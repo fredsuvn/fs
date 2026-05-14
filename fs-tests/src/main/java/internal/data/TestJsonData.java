@@ -1,9 +1,12 @@
 package internal.data;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import space.sunqian.fs.object.annotation.DatePattern;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -36,4 +39,16 @@ public class TestJsonData {
     private long[] la3;
     private BigDecimal[] ba3;
     private List<String> sa3;
+
+    @DatePattern(value = "yyyy-MM", zoneId = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM", timezone = "GMT+8")
+    private Date d1;
+
+    @DatePattern(value = "yyyy-MM-dd", zoneId = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date d2;
+
+    @DatePattern(value = "yyyy-MM-dd HH:mm:ss", zoneId = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date d3;
 }

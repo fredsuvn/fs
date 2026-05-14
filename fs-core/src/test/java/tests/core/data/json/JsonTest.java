@@ -134,10 +134,24 @@ public class JsonTest implements TestPrint {
 
             @Override
             public @Nonnull JsonData parse(@Nonnull CharSequence charSequence) throws JsonDataParsingException {
-                JsonData result = parser.parse(charSequence);
-                JsonData result2 = parser.parse(IOKit.newInputStream(charSequence.toString().getBytes(CharsKit.defaultCharset())));
-                assertEquals(result, result2);
-                return result;
+                RuntimeException err = null;
+                JsonData result1 = null;
+                try {
+                    result1 = parser.parse(charSequence);
+                } catch (RuntimeException e) {
+                    err = e;
+                }
+                JsonData result2 = null;
+                try {
+                    result2 = parser.parse(IOKit.newInputStream(charSequence.toString().getBytes(CharsKit.defaultCharset())));
+                } catch (RuntimeException e) {
+                    err = e;
+                }
+                assertEquals(result1, result2);
+                if (err != null) {
+                    throw err;
+                }
+                return result2;
             }
 
             @Override
@@ -145,6 +159,7 @@ public class JsonTest implements TestPrint {
                 return parser.parse(reader);
             }
         };
+        testFormattingAndParsing0(formatter, ignoreNull, parser);
         testFormattingAndParsing0(formatter, ignoreNull, parserWrapper);
     }
 

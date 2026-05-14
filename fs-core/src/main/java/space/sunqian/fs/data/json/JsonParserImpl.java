@@ -22,67 +22,9 @@ import java.util.Map;
 enum JsonParserImpl implements JsonParser {
     INST;
 
-    // private static boolean isWhitespace(char c) {
-    //     return c == ' ' || c == '\t' || c == '\r' || c == '\n';
-    // }
-
     private static final char @Nonnull [] EXPECT_NULL = {'u', 'l', 'l'};
     private static final char @Nonnull [] EXPECT_TRUE = {'r', 'u', 'e'};
     private static final char @Nonnull [] EXPECT_FALSE = {'a', 'l', 's', 'e'};
-
-    private static void parseEscape(
-        @Nonnull JsonReader reader, @Nonnull StringBuilder builder
-    ) throws Exception {
-        int i = reader.nextChar();
-        if (i != -1) {
-            char c = (char) i;
-            switch (c) {
-                case '\"':
-                case '\\':
-                    builder.append(c);
-                    return;
-                case 'r':
-                    builder.append('\r');
-                    return;
-                case 'n':
-                    builder.append('\n');
-                    return;
-                case 't':
-                    builder.append('\t');
-                    return;
-                case 'b':
-                    builder.append('\b');
-                    return;
-                case 'f':
-                    builder.append('\f');
-                    return;
-                case 'u':
-                    parseUnicode(reader, builder);
-                    return;
-                default:
-                    throw new JsonDataParsingException(reader.nextIndex(), String.valueOf(c), null);
-            }
-        }
-        throw new JsonDataParsingException(reader.nextIndex(), null, null);
-    }
-
-    private static void parseUnicode(
-        @Nonnull JsonReader reader, @Nonnull StringBuilder builder
-    ) throws Exception {
-        char c1 = nextChar(reader);
-        char c2 = nextChar(reader);
-        char c3 = nextChar(reader);
-        char c4 = nextChar(reader);
-        builder.append(CharsKit.unicodeToChar(c1, c2, c3, c4));
-    }
-
-    private static char nextChar(@Nonnull JsonReader reader) throws Exception {
-        int i = reader.nextChar();
-        if (i == -1) {
-            throw new JsonDataParsingException(reader.nextIndex(), null, null);
-        }
-        return (char) i;
-    }
 
     private static boolean isNumberMember(char c) {
         return (c >= '0' && c <= '9')
@@ -135,7 +77,7 @@ enum JsonParserImpl implements JsonParser {
 
     private @Nonnull JsonData parse(@Nonnull JsonReader jsonReader) throws JsonDataParsingException {
         try {
-            Object result = parseJson(jsonReader, new StringBuilder(), true);
+            Object result = parseJson(jsonReader, true);
             if (result == null) {
                 return JsonData.ofNull();
             }
@@ -159,49 +101,37 @@ enum JsonParserImpl implements JsonParser {
         }
     }
 
-    private Object parseJson(
-        @Nonnull JsonReader reader, @Nonnull StringBuilder strBuilder, boolean toEnd
-    ) throws Exception {
+    private Object parseJson(@Nonnull JsonReader reader, boolean toEnd) throws Exception {
         Object result = null;
         int i;
-        PARSING:
-        while ((i = reader.nextCharSkipWhitespace()) != -1) {
+        if ((i = reader.nextCharSkipWhitespace()) != -1) {
             char c = (char) i;
-            // if (isWhitespace(c)) {
-            //     continue;
-            // }
             switch (c) {
                 case 'n':
-                    // parseNull(reader);
                     reader.expect(EXPECT_NULL);
                     result = NULL;
-                    break PARSING;
+                    break;
                 case 't':
-                    // parseTrue(reader);
                     reader.expect(EXPECT_TRUE);
                     result = true;
-                    break PARSING;
+                    break;
                 case 'f':
-                    // parseFalse(reader);
                     reader.expect(EXPECT_FALSE);
                     result = false;
-                    break PARSING;
+                    break;
                 case '\"':
-                    // parseString(reader, strBuilder);
-                    // result = strBuilder.toString();
                     result = reader.nextString();
-                    strBuilder.setLength(0);
-                    break PARSING;
+                    break;
                 case '{':
                     Map<String, Object> objBuilder = new LinkedHashMap<>();
-                    parseObject(reader, objBuilder, strBuilder);
+                    parseObject(reader, objBuilder);
                     result = objBuilder;
-                    break PARSING;
+                    break;
                 case '[':
                     List<Object> arrBuilder = new ArrayList<>();
-                    parseArray(reader, arrBuilder, strBuilder);
+                    parseArray(reader, arrBuilder);
                     result = arrBuilder;
-                    break PARSING;
+                    break;
                 case '0':
                 case '1':
                 case '2':
@@ -213,13 +143,8 @@ enum JsonParserImpl implements JsonParser {
                 case '8':
                 case '9':
                 case '-':
-                    // strBuilder.append(c);
-                    //@SuppressWarnings("UnnecessaryLocalVariable")
-                    // Number number = parseNumber(reader, strBuilder);
-                    // result = number;
-                    result = reader.nextNumber(c);
-                    strBuilder.setLength(0);
-                    break PARSING;
+                    result = reader.nextNumber();
+                    break;
                 default:
                     throw new JsonDataParsingException(reader.nextIndex() - 1, String.valueOf(c), null);
             }
@@ -238,24 +163,17 @@ enum JsonParserImpl implements JsonParser {
 
     private void parseObject(
         @Nonnull JsonReader reader,
-        @Nonnull Map<@Nonnull String, @Nullable Object> objBuilder,
-        @Nonnull StringBuilder strBuilder
+        @Nonnull Map<@Nonnull String, @Nullable Object> objBuilder
     ) throws Exception {
         boolean first = true;
         int i;
         while ((i = reader.nextCharSkipWhitespace()) != -1) {
             char c = (char) i;
-            // if (isWhitespace(c)) {
-            //     continue;
-            // }
             switch (c) {
                 case '\"':
-                    // parseString(reader, strBuilder);
-                    // String key = strBuilder.toString();
                     String key = reader.nextString();
-                    strBuilder.setLength(0);
                     reader.skipToChar(':');
-                    Object obj = parseJson(reader, strBuilder, false);
+                    Object obj = parseJson(reader, false);
                     objBuilder.put(key, obj);
                     first = false;
                     continue;
@@ -276,16 +194,12 @@ enum JsonParserImpl implements JsonParser {
 
     private void parseArray(
         @Nonnull JsonReader reader,
-        @Nonnull List<@Nullable Object> arrBuilder,
-        @Nonnull StringBuilder strBuilder
+        @Nonnull List<@Nullable Object> arrBuilder
     ) throws Exception {
         int count = 0;
         int i;
         while ((i = reader.nextCharSkipWhitespace()) != -1) {
             char c = (char) i;
-            // if (isWhitespace(c)) {
-            //     continue;
-            // }
             if (c == ',') {
                 if (count == 0) {
                     throw new JsonDataParsingException(reader.nextIndex() - 1, String.valueOf(c), null);
@@ -297,14 +211,14 @@ enum JsonParserImpl implements JsonParser {
             }
             // parsing element
             reader.swallow(i);
-            Object element = parseJson(reader, strBuilder, false);
+            Object element = parseJson(reader, false);
             arrBuilder.add(element);
             count++;
         }
         throw new JsonDataParsingException(reader.nextIndex(), null, "]");
     }
 
-    private interface JsonReader {
+    private static abstract class JsonReader {
 
         static JsonReader from(@Nonnull Reader reader) {
             return new OfReader(reader);
@@ -314,9 +228,9 @@ enum JsonParserImpl implements JsonParser {
             return new OfString(charSequence);
         }
 
-        int nextChar() throws Exception;
+        public abstract int nextChar() throws Exception;
 
-        default int nextCharSkipWhitespace() throws Exception {
+        public int nextCharSkipWhitespace() throws Exception {
             int c;
             do {
                 c = nextChar();
@@ -324,7 +238,7 @@ enum JsonParserImpl implements JsonParser {
             return c;
         }
 
-        default void expect(char @Nonnull [] shouldBe) throws Exception {
+        public void expect(char @Nonnull [] shouldBe) throws Exception {
             for (char value : shouldBe) {
                 int ci = nextChar();
                 if (ci == -1) {
@@ -337,13 +251,11 @@ enum JsonParserImpl implements JsonParser {
             }
         }
 
-        @Nonnull
-        String nextString() throws Exception;
+        public abstract @Nonnull String nextString() throws Exception;
 
-        @Nonnull
-        Number nextNumber(char first) throws Exception;
+        public abstract @Nonnull Number nextNumber() throws Exception;
 
-        default void skipToEof() throws Exception {
+        public void skipToEof() throws Exception {
             int i;
             if ((i = nextCharSkipWhitespace()) != -1) {
                 char c = (char) i;
@@ -352,7 +264,7 @@ enum JsonParserImpl implements JsonParser {
         }
 
         @SuppressWarnings("SameParameterValue")
-        default void skipToChar(char target) throws Exception {
+        public void skipToChar(char target) throws Exception {
             int i;
             if ((i = nextCharSkipWhitespace()) != -1) {
                 char c = (char) i;
@@ -364,12 +276,62 @@ enum JsonParserImpl implements JsonParser {
             throw new JsonDataParsingException(nextIndex(), null, String.valueOf(target));
         }
 
-        int nextIndex();
+        public abstract int nextIndex();
 
-        void swallow(int aChar);
+        public abstract void swallow(int aChar);
+
+        protected void parseEscape(@Nonnull StringBuilder builder) throws Exception {
+            int i = nextChar();
+            if (i != -1) {
+                char c = (char) i;
+                switch (c) {
+                    case '\"':
+                    case '\\':
+                        builder.append(c);
+                        return;
+                    case 'r':
+                        builder.append('\r');
+                        return;
+                    case 'n':
+                        builder.append('\n');
+                        return;
+                    case 't':
+                        builder.append('\t');
+                        return;
+                    case 'b':
+                        builder.append('\b');
+                        return;
+                    case 'f':
+                        builder.append('\f');
+                        return;
+                    case 'u':
+                        parseUnicode(builder);
+                        return;
+                    default:
+                        throw new JsonDataParsingException(nextIndex(), String.valueOf(c), null);
+                }
+            }
+            throw new JsonDataParsingException(nextIndex(), null, null);
+        }
+
+        private void parseUnicode(@Nonnull StringBuilder builder) throws Exception {
+            char c1 = nextCharExplicit();
+            char c2 = nextCharExplicit();
+            char c3 = nextCharExplicit();
+            char c4 = nextCharExplicit();
+            builder.append(CharsKit.unicodeToChar(c1, c2, c3, c4));
+        }
+
+        private char nextCharExplicit() throws Exception {
+            int i = nextChar();
+            if (i == -1) {
+                throw new JsonDataParsingException(nextIndex(), null, null);
+            }
+            return (char) i;
+        }
     }
 
-    private static final class OfString implements JsonReader {
+    private static final class OfString extends JsonReader {
 
         private final @Nonnull CharSequence charSequence;
         private int index = 0;
@@ -406,8 +368,26 @@ enum JsonParserImpl implements JsonParser {
             throw new JsonDataParsingException(index, null, "\"");
         }
 
+        private @Nonnull String nextStringWithEscape(@Nonnull StringBuilder builder) throws Exception {
+            parseEscape(builder);
+            int i;
+            while ((i = nextChar()) != -1) {
+                char c = (char) i;
+                switch (c) {
+                    case '\"':
+                        return builder.toString();
+                    case '\\':
+                        parseEscape(builder);
+                        continue;
+                    default:
+                        builder.append(c);
+                }
+            }
+            throw new JsonDataParsingException(index, null, "\"");
+        }
+
         @Override
-        public @Nonnull Number nextNumber(char first) {
+        public @Nonnull Number nextNumber() {
             int start = index - 1;
             int i;
             while ((i = nextChar()) != -1) {
@@ -425,24 +405,6 @@ enum JsonParserImpl implements JsonParser {
             }
         }
 
-        private @Nonnull String nextStringWithEscape(@Nonnull StringBuilder builder) throws Exception {
-            parseEscape(this, builder);
-            int i;
-            while ((i = nextChar()) != -1) {
-                char c = (char) i;
-                switch (c) {
-                    case '\"':
-                        return builder.toString();
-                    case '\\':
-                        parseEscape(this, builder);
-                        continue;
-                    default:
-                        builder.append(c);
-                }
-            }
-            throw new JsonDataParsingException(index, null, "\"");
-        }
-
         @Override
         public int nextIndex() {
             return index;
@@ -455,18 +417,20 @@ enum JsonParserImpl implements JsonParser {
         }
     }
 
-    private static final class OfReader implements JsonReader {
+    private static final class OfReader extends JsonReader {
 
-        private static final @Nonnull ThreadLocal<char @Nonnull []> BUFFER =
-            ThreadLocal.withInitial(() -> new char[IOKit.bufferSize()]);
+        // private static final @Nonnull ThreadLocal<char @Nonnull []> BUFFER =
+        //     ThreadLocal.withInitial(() -> new char[IOKit.bufferSize()]);
 
         private final @Nonnull Reader reader;
         private int position = 0;
         private int swallowedChar = -1;
 
-        // private final char @Nonnull [] buffer = new char[1024];
+        private final char @Nonnull [] buffer = new char[256];
         private int index = 0;
         private int length = 0;
+
+        private final @Nonnull StringBuilder builder = new StringBuilder();;
 
         private OfReader(@Nonnull Reader reader) {
             this.reader = reader;
@@ -474,22 +438,70 @@ enum JsonParserImpl implements JsonParser {
 
         @Override
         public int nextChar() throws IOException {
+            return nextChar(false);
+        }
+
+        private int nextChar(boolean versionFlag) throws IOException {
             if (swallowedChar != -1) {
                 int result = swallowedChar;
                 swallowedChar = -1;
+                position++;
                 return result;
             }
-            refreshBuffer();
             if (length == -1) {
                 return -1;
             }
+            if (index >= length) {
+                if (length > 0 && length < buffer.length) {
+                    return -1;
+                }
+                if (versionFlag) {
+                    return -2;
+                }
+                index = 0;
+                length = reader.read(buffer);
+                if (length == -1) {
+                    return -1;
+                }
+            }
             position++;
-            return BUFFER.get()[index++];
+            return buffer[index++];
         }
 
         @Override
         public @Nonnull String nextString() throws Exception {
-            StringBuilder builder = new StringBuilder();
+            int start = index;
+            while (true) {
+                int i = nextChar(true);
+                if (i == -1) {
+                    break;
+                }
+                if (i == -2) {
+                    int count = length - start;
+                    //StringBuilder builder = new StringBuilder(count);
+                    builder.setLength(0);
+                    builder.append(buffer, start, count);
+                    return nextStringWithBuilder(builder);
+                }
+                char c = (char) i;
+                switch (c) {
+                    case '\"':
+                        return new String(buffer, start, index - 1 - start);
+                    case '\\':
+                        int count = index - 1 - start;
+                        //StringBuilder builder = new StringBuilder(count);
+                        builder.setLength(0);
+                        builder.append(buffer, start, count);
+                        parseEscape(builder);
+                        return nextStringWithBuilder(builder);
+                    default:
+                        // builder.append(c);
+                }
+            }
+            throw new JsonDataParsingException(index, null, "\"");
+        }
+
+        private @Nonnull String nextStringWithBuilder(@Nonnull StringBuilder builder) throws Exception {
             int i;
             while ((i = nextChar()) != -1) {
                 char c = (char) i;
@@ -497,7 +509,7 @@ enum JsonParserImpl implements JsonParser {
                     case '\"':
                         return builder.toString();
                     case '\\':
-                        parseEscape(this, builder);
+                        parseEscape(builder);
                         continue;
                     default:
                         builder.append(c);
@@ -506,21 +518,62 @@ enum JsonParserImpl implements JsonParser {
             throw new JsonDataParsingException(nextIndex(), null, "\"");
         }
 
+        // @Override
+        // public @Nonnull String nextString() throws Exception {
+        //     StringBuilder builder = new StringBuilder();
+        //     int i;
+        //     while ((i = nextChar()) != -1) {
+        //         char c = (char) i;
+        //         switch (c) {
+        //             case '\"':
+        //                 return builder.toString();
+        //             case '\\':
+        //                 parseEscape(builder);
+        //                 continue;
+        //             default:
+        //                 builder.append(c);
+        //         }
+        //     }
+        //     throw new JsonDataParsingException(nextIndex(), null, "\"");
+        // }
+
         @Override
-        public @Nonnull Number nextNumber(char first) throws Exception {
-            StringBuilder builder = new StringBuilder();
-            builder.append(first);
+        public @Nonnull Number nextNumber() throws Exception {
+            int start = index - 1;
+            CharSequence numberString;
+            while (true) {
+                int i = nextChar(true);
+                if (i == -1) {
+                    numberString = new String(buffer, start, index - start);
+                    break;
+                }
+                if (i == -2) {
+                    int count = length - start;
+                    //StringBuilder builder = new StringBuilder(count);
+                    builder.setLength(0);
+                    builder.append(buffer, start, count);
+                    return nextNumberWithBuilder(builder);
+                }
+                char c = (char) i;
+                if (!isNumberMember(c)) {
+                    swallow(i);
+                    numberString = new String(buffer, start, index - 1 - start);
+                    break;
+                }
+            }
+            try {
+                return NumberKit.toNumber(numberString);
+            } catch (Exception e) {
+                throw new JsonDataParsingException(start, numberString.toString(), null);
+            }
+        }
+
+        private @Nonnull Number nextNumberWithBuilder(@Nonnull StringBuilder builder) throws Exception {
             int startIndex = nextIndex() - 1;
             int i;
             while ((i = nextChar()) != -1) {
                 char c = (char) i;
-                if (
-                    (c >= '0' && c <= '9')
-                        || (c == '.')
-                        || (c == 'e')
-                        || (c == 'E')
-                        || (c == '+')
-                ) {
+                if (isNumberMember(c)) {
                     builder.append(c);
                     // continue;
                 } else {
@@ -528,13 +581,35 @@ enum JsonParserImpl implements JsonParser {
                     break;
                 }
             }
-            // String numberString = strBuilder.toString();
             try {
                 return NumberKit.toNumber(builder);
             } catch (Exception e) {
                 throw new JsonDataParsingException(startIndex, builder.toString(), null);
             }
         }
+
+        // @Override
+        // public @Nonnull Number nextNumber(char first) throws Exception {
+        //     StringBuilder builder = new StringBuilder();
+        //     builder.append(first);
+        //     int startIndex = nextIndex() - 1;
+        //     int i;
+        //     while ((i = nextChar()) != -1) {
+        //         char c = (char) i;
+        //         if (isNumberMember(c)) {
+        //             builder.append(c);
+        //             // continue;
+        //         } else {
+        //             swallow(i);
+        //             break;
+        //         }
+        //     }
+        //     try {
+        //         return NumberKit.toNumber(builder);
+        //     } catch (Exception e) {
+        //         throw new JsonDataParsingException(startIndex, builder.toString(), null);
+        //     }
+        // }
 
         @Override
         public int nextIndex() {
@@ -545,14 +620,6 @@ enum JsonParserImpl implements JsonParser {
         public void swallow(int aChar) {
             this.swallowedChar = aChar;
             position--;
-        }
-
-        private void refreshBuffer() throws IOException {
-            if (index < length) {
-                return;
-            }
-            this.index = 0;
-            this.length = reader.read(BUFFER.get());
         }
     }
 }
