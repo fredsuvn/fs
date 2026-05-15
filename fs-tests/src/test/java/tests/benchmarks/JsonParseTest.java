@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.fs.data.json.JsonKit;
 import space.sunqian.fs.io.IOKit;
 
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,5 +39,7 @@ public class JsonParseTest {
         assertEquals(data, stringParsed);
         Object inputParsed = parseApi.parse(IOKit.newInputStream(dataJsonBytes), TestJsonData.class);
         assertEquals(data, inputParsed);
+        Object readerParsed = parseApi.parse(new StringReader(dataJson), TestJsonData.class);
+        assertEquals(data, readerParsed);
     }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import space.sunqian.fs.data.json.JsonKit;
 
 import java.io.InputStream;
+import java.io.Reader;
 
 public interface JsonParseApi {
 
@@ -21,6 +22,8 @@ public interface JsonParseApi {
 
     Object parse(InputStream json, Class<?> objType) throws Exception;
 
+    Object parse(Reader json, Class<?> objType) throws Exception;
+
     class FsImpl implements JsonParseApi {
 
         @Override
@@ -30,6 +33,11 @@ public interface JsonParseApi {
 
         @Override
         public Object parse(InputStream json, Class<?> objType) throws Exception {
+            return JsonKit.parse(json).toObject(objType);
+        }
+
+        @Override
+        public Object parse(Reader json, Class<?> objType) throws Exception {
             return JsonKit.parse(json).toObject(objType);
         }
     }
@@ -47,6 +55,11 @@ public interface JsonParseApi {
         public Object parse(InputStream json, Class<?> objType) throws Exception {
             return mapper.readValue(json, objType);
         }
+
+        @Override
+        public Object parse(Reader json, Class<?> objType) throws Exception {
+            return mapper.readValue(json, objType);
+        }
     }
 
     class FastJsonImpl implements JsonParseApi {
@@ -58,6 +71,11 @@ public interface JsonParseApi {
 
         @Override
         public Object parse(InputStream json, Class<?> objType) throws Exception {
+            return JSON.parseObject(json, objType);
+        }
+
+        @Override
+        public Object parse(Reader json, Class<?> objType) throws Exception {
             return JSON.parseObject(json, objType);
         }
     }

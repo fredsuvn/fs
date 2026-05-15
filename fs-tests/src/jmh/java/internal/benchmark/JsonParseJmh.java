@@ -11,6 +11,7 @@ import org.openjdk.jmh.infra.Blackhole;
 import space.sunqian.fs.data.json.JsonKit;
 import space.sunqian.fs.io.IOKit;
 
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -61,15 +62,28 @@ public class JsonParseJmh extends AbstractJmhBenchmark {
     //     }
     // }
 
+    // @Benchmark
+    // public void parseInputJson(Blackhole blackhole) throws Exception {
+    //     if ("object".equals(parseType)) {
+    //         // dataJsonInput.reset();
+    //         Object data = jsonParseApi.parse(IOKit.newInputStream(dataJsonBytes), TestJsonData.class);
+    //         blackhole.consume(data);
+    //     } else {
+    //         // mapJsonInput.reset();
+    //         Object map = jsonParseApi.parse(IOKit.newInputStream(mapJsonBytes), Map.class);
+    //         blackhole.consume(map);
+    //     }
+    // }
+
     @Benchmark
-    public void parseInputJson(Blackhole blackhole) throws Exception {
+    public void parseReader(Blackhole blackhole) throws Exception {
         if ("object".equals(parseType)) {
             // dataJsonInput.reset();
-            Object data = jsonParseApi.parse(IOKit.newInputStream(dataJsonBytes), TestJsonData.class);
+            Object data = jsonParseApi.parse(new StringReader(dataJson), TestJsonData.class);
             blackhole.consume(data);
         } else {
             // mapJsonInput.reset();
-            Object map = jsonParseApi.parse(IOKit.newInputStream(mapJsonBytes), Map.class);
+            Object map = jsonParseApi.parse(new StringReader(mapJson), Map.class);
             blackhole.consume(map);
         }
     }

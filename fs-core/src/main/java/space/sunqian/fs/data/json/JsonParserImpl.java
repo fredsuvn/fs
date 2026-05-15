@@ -430,7 +430,7 @@ enum JsonParserImpl implements JsonParser {
         private int index = 0;
         private int length = 0;
 
-        private final @Nonnull StringBuilder builder = new StringBuilder();;
+        private final @Nonnull StringBuilder builder = new StringBuilder(1024);;
 
         private OfReader(@Nonnull Reader reader) {
             this.reader = reader;
