@@ -40,12 +40,12 @@ final class ArrayBack {
         INST;
 
         @Override
-        public Object get(@Nonnull Object array, int index) {
+        public Object get(@Nonnull Object array, int index) throws ArrayIndexOutOfBoundsException {
             return ((boolean[]) array)[index];
         }
 
         @Override
-        public void set(@Nonnull Object array, int index, Object value) {
+        public void set(@Nonnull Object array, int index, Object value) throws ArrayIndexOutOfBoundsException {
             ((boolean[]) array)[index] = (boolean) value;
         }
 
@@ -60,12 +60,12 @@ final class ArrayBack {
         INST;
 
         @Override
-        public Object get(@Nonnull Object array, int index) {
+        public Object get(@Nonnull Object array, int index) throws ArrayIndexOutOfBoundsException {
             return ((byte[]) array)[index];
         }
 
         @Override
-        public void set(@Nonnull Object array, int index, Object value) {
+        public void set(@Nonnull Object array, int index, Object value) throws ArrayIndexOutOfBoundsException {
             ((byte[]) array)[index] = (byte) value;
         }
 
@@ -80,12 +80,12 @@ final class ArrayBack {
         INST;
 
         @Override
-        public Object get(@Nonnull Object array, int index) {
+        public Object get(@Nonnull Object array, int index) throws ArrayIndexOutOfBoundsException {
             return ((short[]) array)[index];
         }
 
         @Override
-        public void set(@Nonnull Object array, int index, Object value) {
+        public void set(@Nonnull Object array, int index, Object value) throws ArrayIndexOutOfBoundsException {
             ((short[]) array)[index] = (short) value;
         }
 
@@ -100,12 +100,12 @@ final class ArrayBack {
         INST;
 
         @Override
-        public Object get(@Nonnull Object array, int index) {
+        public Object get(@Nonnull Object array, int index) throws ArrayIndexOutOfBoundsException {
             return ((char[]) array)[index];
         }
 
         @Override
-        public void set(@Nonnull Object array, int index, Object value) {
+        public void set(@Nonnull Object array, int index, Object value) throws ArrayIndexOutOfBoundsException {
             ((char[]) array)[index] = (char) value;
         }
 
@@ -120,12 +120,12 @@ final class ArrayBack {
         INST;
 
         @Override
-        public Object get(@Nonnull Object array, int index) {
+        public Object get(@Nonnull Object array, int index) throws ArrayIndexOutOfBoundsException {
             return ((int[]) array)[index];
         }
 
         @Override
-        public void set(@Nonnull Object array, int index, Object value) {
+        public void set(@Nonnull Object array, int index, Object value) throws ArrayIndexOutOfBoundsException {
             ((int[]) array)[index] = (int) value;
         }
 
@@ -140,12 +140,12 @@ final class ArrayBack {
         INST;
 
         @Override
-        public Object get(@Nonnull Object array, int index) {
+        public Object get(@Nonnull Object array, int index) throws ArrayIndexOutOfBoundsException {
             return ((long[]) array)[index];
         }
 
         @Override
-        public void set(@Nonnull Object array, int index, Object value) {
+        public void set(@Nonnull Object array, int index, Object value) throws ArrayIndexOutOfBoundsException {
             ((long[]) array)[index] = (long) value;
         }
 
@@ -160,12 +160,12 @@ final class ArrayBack {
         INST;
 
         @Override
-        public Object get(@Nonnull Object array, int index) {
+        public Object get(@Nonnull Object array, int index) throws ArrayIndexOutOfBoundsException {
             return ((float[]) array)[index];
         }
 
         @Override
-        public void set(@Nonnull Object array, int index, Object value) {
+        public void set(@Nonnull Object array, int index, Object value) throws ArrayIndexOutOfBoundsException {
             ((float[]) array)[index] = (float) value;
         }
 
@@ -180,12 +180,12 @@ final class ArrayBack {
         INST;
 
         @Override
-        public Object get(@Nonnull Object array, int index) {
+        public Object get(@Nonnull Object array, int index) throws ArrayIndexOutOfBoundsException {
             return ((double[]) array)[index];
         }
 
         @Override
-        public void set(@Nonnull Object array, int index, Object value) {
+        public void set(@Nonnull Object array, int index, Object value) throws ArrayIndexOutOfBoundsException {
             ((double[]) array)[index] = (double) value;
         }
 
@@ -200,12 +200,12 @@ final class ArrayBack {
         INST;
 
         @Override
-        public Object get(@Nonnull Object array, int index) {
+        public Object get(@Nonnull Object array, int index) throws ArrayIndexOutOfBoundsException {
             return ((Object[]) array)[index];
         }
 
         @Override
-        public void set(@Nonnull Object array, int index, Object value) {
+        public void set(@Nonnull Object array, int index, Object value) throws ArrayIndexOutOfBoundsException {
             ((Object[]) array)[index] = value;
         }
 

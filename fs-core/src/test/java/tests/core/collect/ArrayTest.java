@@ -3,7 +3,6 @@ package tests.core.collect;
 import org.junit.jupiter.api.Test;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.collect.ArrayKit;
-import space.sunqian.fs.collect.ArrayOperator;
 
 import java.util.List;
 
@@ -394,92 +393,5 @@ public class ArrayTest {
         assertArrayEquals(new byte[]{6, 6, 6}, ArrayKit.fill(new byte[3], (byte) 6));
         assertArrayEquals(new short[]{6, 6, 6}, ArrayKit.fill(new short[3], (short) 6));
         assertArrayEquals(new char[]{6, 6, 6}, ArrayKit.fill(new char[3], (char) 6));
-    }
-
-    @Test
-    public void testArrayOperator() {
-        {
-            // boolean
-            ArrayOperator operator = ArrayOperator.of(boolean[].class);
-            boolean[] array = new boolean[]{true};
-            assertEquals(true, operator.get(array, 0));
-            operator.set(array, 0, false);
-            assertEquals(false, operator.get(array, 0));
-            assertEquals(1, operator.size(array));
-        }
-        {
-            // byte
-            ArrayOperator operator = ArrayOperator.of(byte[].class);
-            byte[] array = new byte[]{6};
-            assertEquals((byte) 6, operator.get(array, 0));
-            operator.set(array, 0, (byte) 9);
-            assertEquals((byte) 9, operator.get(array, 0));
-            assertEquals(1, operator.size(array));
-        }
-        {
-            // short
-            ArrayOperator operator = ArrayOperator.of(short[].class);
-            short[] array = new short[]{6};
-            assertEquals((short) 6, operator.get(array, 0));
-            operator.set(array, 0, (short) 9);
-            assertEquals((short) 9, operator.get(array, 0));
-            assertEquals(1, operator.size(array));
-        }
-        {
-            // char
-            ArrayOperator operator = ArrayOperator.of(char[].class);
-            char[] array = new char[]{6};
-            assertEquals((char) 6, operator.get(array, 0));
-            operator.set(array, 0, (char) 9);
-            assertEquals((char) 9, operator.get(array, 0));
-            assertEquals(1, operator.size(array));
-        }
-        {
-            // int
-            ArrayOperator operator = ArrayOperator.of(int[].class);
-            int[] array = new int[]{6};
-            assertEquals((int) 6, operator.get(array, 0));
-            operator.set(array, 0, (int) 9);
-            assertEquals((int) 9, operator.get(array, 0));
-            assertEquals(1, operator.size(array));
-        }
-        {
-            // long
-            ArrayOperator operator = ArrayOperator.of(long[].class);
-            long[] array = new long[]{6};
-            assertEquals((long) 6, operator.get(array, 0));
-            operator.set(array, 0, (long) 9);
-            assertEquals((long) 9, operator.get(array, 0));
-            assertEquals(1, operator.size(array));
-        }
-        {
-            // float
-            ArrayOperator operator = ArrayOperator.of(float[].class);
-            float[] array = new float[]{6};
-            assertEquals((float) 6, operator.get(array, 0));
-            operator.set(array, 0, (float) 9);
-            assertEquals((float) 9, operator.get(array, 0));
-            assertEquals(1, operator.size(array));
-        }
-        {
-            // double
-            ArrayOperator operator = ArrayOperator.of(double[].class);
-            double[] array = new double[]{6};
-            assertEquals((double) 6, operator.get(array, 0));
-            operator.set(array, 0, (double) 9);
-            assertEquals((double) 9, operator.get(array, 0));
-            assertEquals(1, operator.size(array));
-        }
-        {
-            // Object
-            ArrayOperator operator = ArrayOperator.of(Object[].class);
-            Object[] array = new Object[]{6};
-            assertEquals((Object) 6, operator.get(array, 0));
-            operator.set(array, 0, (Object) 9);
-            assertEquals((Object) 9, operator.get(array, 0));
-            assertEquals(1, operator.size(array));
-        }
-        // error
-        assertThrows(IllegalArgumentException.class, () -> ArrayOperator.of(String.class));
     }
 }

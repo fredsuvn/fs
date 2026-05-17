@@ -26,8 +26,9 @@ public interface ArrayOperator {
      * @param array the given array
      * @param index the specified index of the element
      * @return the element at the specified index in the given array
+     * @throws ArrayIndexOutOfBoundsException if the specified index is out of bounds
      */
-    Object get(@Nonnull Object array, int index);
+    Object get(@Nonnull Object array, int index) throws ArrayIndexOutOfBoundsException;
 
     /**
      * Sets the element at the specified index in the given array.
@@ -35,8 +36,9 @@ public interface ArrayOperator {
      * @param array the given array
      * @param index the specified index of the element
      * @param value the value to be set
+     * @throws ArrayIndexOutOfBoundsException if the specified index is out of bounds
      */
-    void set(@Nonnull Object array, int index, Object value);
+    void set(@Nonnull Object array, int index, Object value) throws ArrayIndexOutOfBoundsException;
 
     /**
      * Returns the size of the given array.
