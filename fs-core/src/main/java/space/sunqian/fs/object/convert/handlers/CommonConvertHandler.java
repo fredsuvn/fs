@@ -301,11 +301,11 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             Class<?> srcClass = (Class<?>) srcType;
             if (srcClass.isArray()) {
                 ArrayOperator srcOperator = ArrayOperator.of(srcClass);
-                int size = srcOperator.size(src);
-                Object newArray = ArrayKit.newArray(target.getComponentType(), size);
+                int length = srcOperator.length(src);
+                Object newArray = ArrayKit.newArray(target.getComponentType(), length);
                 Class<?> srcComponentType = srcClass.getComponentType();
                 ArrayOperator targetOperator = ArrayOperator.of(target);
-                for (int i = 0; i < size; i++) {
+                for (int i = 0; i < length; i++) {
                     Object srcElement = srcOperator.get(src, i);
                     Object targetElement = converter.convert(srcElement, srcComponentType, targetComponentType, options);
                     targetOperator.set(newArray, i, targetElement);
@@ -351,7 +351,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             Class<?> srcClass = (Class<?>) srcType;
             if (srcClass.isArray()) {
                 ArrayOperator srcOperator = ArrayOperator.of(srcClass);
-                int size = srcOperator.size(src);
+                int size = srcOperator.length(src);
                 Collection<Object> newCollection = collectionFunc.apply(size);
                 Class<?> srcComponentType = srcClass.getComponentType();
                 for (int i = 0; i < size; i++) {
@@ -498,14 +498,14 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
                 return dateFormatter.format((TemporalAccessor) src);
             }
-            //Charset charset = ConvertOption.getCharset(options);
+            // Charset charset = ConvertOption.getCharset(options);
             if (src instanceof byte[]) {
                 return new String((byte[]) src, ConvertOption.getCharset(options));
             }
             if (src instanceof ByteBuffer) {
                 return BufferKit.string((ByteBuffer) src, ConvertOption.getCharset(options));
             }
-            //IOOperator ioOperator = ConvertOption.getIOOperator(options);
+            // IOOperator ioOperator = ConvertOption.getIOOperator(options);
             if (src instanceof Reader) {
                 return ConvertOption.getIOOperator(options).string((Reader) src);
             }
@@ -593,7 +593,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) {
-            //DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
+            // DateFormatter dateFormatter = ConvertOption.getDateFormatter(options);
             if (src instanceof String) {
                 return ConvertOption.getDateFormatter(options).parse((String) src, target);
             }

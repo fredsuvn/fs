@@ -15,7 +15,7 @@ public class ArrayOperatorTest {
         assertEquals(true, operator.get(array, 0));
         operator.set(array, 0, false);
         assertEquals(false, operator.get(array, 0));
-        assertEquals(1, operator.size(array));
+        assertEquals(1, operator.length(array));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, -1));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.set(array, -1, false));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, 100));
@@ -29,7 +29,7 @@ public class ArrayOperatorTest {
         assertEquals((byte) 6, operator.get(array, 0));
         operator.set(array, 0, (byte) 9);
         assertEquals((byte) 9, operator.get(array, 0));
-        assertEquals(1, operator.size(array));
+        assertEquals(1, operator.length(array));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, -1));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.set(array, -1, (byte) 9));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, 100));
@@ -43,7 +43,7 @@ public class ArrayOperatorTest {
         assertEquals((short) 6, operator.get(array, 0));
         operator.set(array, 0, (short) 9);
         assertEquals((short) 9, operator.get(array, 0));
-        assertEquals(1, operator.size(array));
+        assertEquals(1, operator.length(array));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, -1));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.set(array, -1, (short) 9));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, 100));
@@ -57,7 +57,7 @@ public class ArrayOperatorTest {
         assertEquals((char) 6, operator.get(array, 0));
         operator.set(array, 0, (char) 9);
         assertEquals((char) 9, operator.get(array, 0));
-        assertEquals(1, operator.size(array));
+        assertEquals(1, operator.length(array));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, -1));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.set(array, -1, (char) 9));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, 100));
@@ -71,7 +71,7 @@ public class ArrayOperatorTest {
         assertEquals((int) 6, operator.get(array, 0));
         operator.set(array, 0, (int) 9);
         assertEquals((int) 9, operator.get(array, 0));
-        assertEquals(1, operator.size(array));
+        assertEquals(1, operator.length(array));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, -1));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.set(array, -1, (int) 9));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, 100));
@@ -85,7 +85,7 @@ public class ArrayOperatorTest {
         assertEquals((long) 6, operator.get(array, 0));
         operator.set(array, 0, (long) 9);
         assertEquals((long) 9, operator.get(array, 0));
-        assertEquals(1, operator.size(array));
+        assertEquals(1, operator.length(array));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, -1));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.set(array, -1, (long) 9));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, 100));
@@ -99,7 +99,7 @@ public class ArrayOperatorTest {
         assertEquals((float) 6, operator.get(array, 0));
         operator.set(array, 0, (float) 9);
         assertEquals((float) 9, operator.get(array, 0));
-        assertEquals(1, operator.size(array));
+        assertEquals(1, operator.length(array));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, -1));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.set(array, -1, (float) 9));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, 100));
@@ -113,7 +113,7 @@ public class ArrayOperatorTest {
         assertEquals((double) 6, operator.get(array, 0));
         operator.set(array, 0, (double) 9);
         assertEquals((double) 9, operator.get(array, 0));
-        assertEquals(1, operator.size(array));
+        assertEquals(1, operator.length(array));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, -1));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.set(array, -1, (double) 9));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, 100));
@@ -127,7 +127,7 @@ public class ArrayOperatorTest {
         assertEquals((Object) 6, operator.get(array, 0));
         operator.set(array, 0, (Object) 9);
         assertEquals((Object) 9, operator.get(array, 0));
-        assertEquals(1, operator.size(array));
+        assertEquals(1, operator.length(array));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, -1));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.set(array, -1, (Object) 9));
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> operator.get(array, 100));

@@ -41,10 +41,10 @@ public interface ArrayOperator {
     void set(@Nonnull Object array, int index, Object value) throws ArrayIndexOutOfBoundsException;
 
     /**
-     * Returns the size of the given array.
+     * Returns the length of the given array.
      *
      * @param array the given array
-     * @return the size of the given array
+     * @return the length of the given array
      */
-    int size(@Nonnull Object array);
+    int length(@Nonnull Object array);
 }

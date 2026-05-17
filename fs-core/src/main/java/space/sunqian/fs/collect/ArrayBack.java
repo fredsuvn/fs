@@ -50,7 +50,7 @@ final class ArrayBack {
         }
 
         @Override
-        public int size(@Nonnull Object array) {
+        public int length(@Nonnull Object array) {
             return ((boolean[]) array).length;
         }
     }
@@ -70,7 +70,7 @@ final class ArrayBack {
         }
 
         @Override
-        public int size(@Nonnull Object array) {
+        public int length(@Nonnull Object array) {
             return ((byte[]) array).length;
         }
     }
@@ -90,7 +90,7 @@ final class ArrayBack {
         }
 
         @Override
-        public int size(@Nonnull Object array) {
+        public int length(@Nonnull Object array) {
             return ((short[]) array).length;
         }
     }
@@ -110,7 +110,7 @@ final class ArrayBack {
         }
 
         @Override
-        public int size(@Nonnull Object array) {
+        public int length(@Nonnull Object array) {
             return ((char[]) array).length;
         }
     }
@@ -130,7 +130,7 @@ final class ArrayBack {
         }
 
         @Override
-        public int size(@Nonnull Object array) {
+        public int length(@Nonnull Object array) {
             return ((int[]) array).length;
         }
     }
@@ -150,7 +150,7 @@ final class ArrayBack {
         }
 
         @Override
-        public int size(@Nonnull Object array) {
+        public int length(@Nonnull Object array) {
             return ((long[]) array).length;
         }
     }
@@ -170,7 +170,7 @@ final class ArrayBack {
         }
 
         @Override
-        public int size(@Nonnull Object array) {
+        public int length(@Nonnull Object array) {
             return ((float[]) array).length;
         }
     }
@@ -190,7 +190,7 @@ final class ArrayBack {
         }
 
         @Override
-        public int size(@Nonnull Object array) {
+        public int length(@Nonnull Object array) {
             return ((double[]) array).length;
         }
     }
@@ -210,7 +210,7 @@ final class ArrayBack {
         }
 
         @Override
-        public int size(@Nonnull Object array) {
+        public int length(@Nonnull Object array) {
             return ((Object[]) array).length;
         }
     }
