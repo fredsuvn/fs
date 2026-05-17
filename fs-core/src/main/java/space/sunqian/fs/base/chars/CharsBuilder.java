@@ -1,12 +1,15 @@
 package space.sunqian.fs.base.chars;
 
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.Checker;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;
 
 import java.io.CharArrayWriter;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
@@ -321,6 +324,64 @@ public class CharsBuilder extends Writer implements CharSequence {
      */
     public @Nonnull CharsBuilder append(@Nonnull CharsBuilder builder) {
         write(builder.buf, 0, builder.count);
+        return this;
+    }
+
+    /**
+     * Appends the given char sequence to this builder, or {@code "null"} if the given char sequence is {@code null}.
+     *
+     * @param csq the given char sequence
+     * @return this builder
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    public @Nonnull CharsBuilder append(@Nullable CharSequence csq) throws IOException {
+        if (csq == null) {
+            write(Fs.NULL_STRING);
+            return this;
+        }
+        ensureCapacity(count + csq.length());
+        if (csq instanceof String) {
+            ((String) csq).getChars(0, csq.length(), buf, count);
+            count += csq.length();
+            return this;
+        }
+        for (int i = 0; i < csq.length(); i++) {
+            buf[count++] = csq.charAt(i);
+        }
+        return this;
+    }
+
+    /**
+     * Appends the specified subsequence of the given char sequence to this builder, or {@code "null"} if the given char
+     * sequence is {@code null}.
+     *
+     * @param csq   the given char sequence
+     * @param start the start index of the subsequence, inclusive
+     * @param end   the end index of the subsequence, exclusive
+     * @return this builder
+     * @throws IndexOutOfBoundsException if the start or end index is out of bounds
+     * @throws IOException               if an I/O error occurs
+     */
+    @Override
+    public @Nonnull CharsBuilder append(
+        @Nullable CharSequence csq, int start, int end
+    ) throws IndexOutOfBoundsException, IOException {
+        if (csq == null) {
+            write(Fs.NULL_STRING);
+            return this;
+        }
+        Checker.checkInBounds(start, end, 0, csq.length());
+        int length = end - start;
+        ensureCapacity(count + length);
+        if (csq instanceof String) {
+            ((String) csq).getChars(start, end, buf, count);
+            count += length;
+            return this;
+        }
+        for (int i = start; i < end; i++) {
+            buf[count++] = csq.charAt(i);
+        }
         return this;
     }
 

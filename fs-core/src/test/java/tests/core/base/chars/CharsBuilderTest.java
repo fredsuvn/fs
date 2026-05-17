@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.chars.CharsBuilder;
 import space.sunqian.fs.base.chars.CharsKit;
+import space.sunqian.fs.base.string.StringView;
 import space.sunqian.fs.io.BufferKit;
 import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IORuntimeException;
@@ -39,6 +40,23 @@ public class CharsBuilderTest implements DataGen, Asserter {
     public void testCharsBuilderAppendMethods() throws Exception {
         testCharsBuilderAppendMethods(512);
         testCharsBuilderAppendMethods(1024);
+        {
+            // Append CharSequence
+            CharsBuilder builder = new CharsBuilder();
+            builder.append((CharSequence) null);
+            assertEquals("null", builder.toString());
+            builder.append("hhh1");
+            assertEquals("nullhhh1", builder.toString());
+            builder.append(StringView.of("hhh1"));
+            assertEquals("nullhhh1hhh1", builder.toString());
+            builder.append((CharSequence) null, 2, 99);
+            assertEquals("nullhhh1hhh1null", builder.toString());
+            builder.append("hhh1", 1, 3);
+            assertEquals("nullhhh1hhh1nullhh", builder.toString());
+            builder.append(StringView.of("hhh1"), 1, 3);
+            assertEquals("nullhhh1hhh1nullhhhh", builder.toString());
+            assertThrows(IndexOutOfBoundsException.class, () -> builder.append("", 99, 1));
+        }
     }
 
     @Test
