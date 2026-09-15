@@ -8,7 +8,6 @@ import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.SQLType;
 import java.sql.Types;
-import java.util.Objects;
 
 /**
  * Represents a parameter in a SQL statement. It can be used to set a SQL parameter on a {@link PreparedStatement}
@@ -56,51 +55,7 @@ public interface SqlParameter {
      * @return the newly created {@link SqlParameter}
      */
     static @Nonnull SqlParameter of(@Nullable Object value, int sqlTypeCode, @Nonnull SQLType sqlType) {
-
-        class SqlParameterImpl implements SqlParameter {
-
-            @Override
-            public Object value() {
-                return value;
-            }
-
-            @Override
-            public int sqlTypeCode() {
-                return sqlTypeCode;
-            }
-
-            @Override
-            public @Nonnull SQLType sqlType() {
-                return sqlType;
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(value, sqlTypeCode, sqlType);
-            }
-
-            @Override
-            public boolean equals(Object obj) {
-                if (this == obj) {
-                    return true;
-                }
-                if (!(obj instanceof SqlParameter)) {
-                    return false;
-                }
-                @SuppressWarnings("PatternVariableCanBeUsed")
-                SqlParameter that = (SqlParameter) obj;
-                return Objects.equals(value, that.value())
-                    && sqlTypeCode == that.sqlTypeCode()
-                    && Objects.equals(sqlType, that.sqlType());
-            }
-
-            @Override
-            public String toString() {
-                return "SqlParameter[" + value + ", " + sqlTypeCode + ", " + sqlType.getName() + "]";
-            }
-        }
-
-        return new SqlParameterImpl();
+        return ParameterBack.newParameter(value, sqlTypeCode, sqlType);
     }
 
     /**
