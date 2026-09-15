@@ -48,7 +48,8 @@ dependencies {
   testImplementation("javax.servlet:javax.servlet-api")
 
   // h2 database
-  testImplementation("com.h2database:h2")
+  //testImplementation("com.h2database:h2")
+  testImplementation("org.hsqldb:hsqldb:2.7.4")
 }
 
 java {
