@@ -140,8 +140,8 @@ public class SqlKitTest {
             );
             queryStatement.close();
             queryResult.close();
-            // clear table
-            clearTable();
+            // clear data
+            clearData();
             // exception
             assertThrows(
                 SqlRuntimeException.class,
@@ -178,8 +178,8 @@ public class SqlKitTest {
             assertEquals(6, procStatement.getInt(4));
             assertEquals(10, procStatement.getInt(5));
             procStatement.close();
-            // clear table
-            clearTable();
+            // clear data
+            clearData();
             // exception
             assertThrows(
                 SqlRuntimeException.class,
@@ -228,8 +228,8 @@ public class SqlKitTest {
             assertNull(queryResult.getTimestamp("BIRTHDAY"));
             queryStatement.close();
             queryResult.close();
-            // clear table
-            clearTable();
+            // clear data
+            clearData();
             // exception
             assertThrows(
                 SqlRuntimeException.class,
@@ -238,14 +238,8 @@ public class SqlKitTest {
         }
     }
 
-    private void clearTable() throws Exception {
-        Statement clearStatement = connection.createStatement();
-        clearStatement.execute("delete from `USER`;");
-        clearStatement.close();
-    }
-
     @Test
-    public void testMapRow() throws Exception {
+    public void testReadRow() throws Exception {
         Date now = new Date();
         {
             // init data
@@ -255,17 +249,17 @@ public class SqlKitTest {
                 Fs.list("Bob", 18, now),
                 Fs.list("Charlie", 22, now)
             );
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            SqlKit.setParameterBatches(preparedStatement, params);
-            int inserted = preparedStatement.executeBatch().length;
+            PreparedStatement statement = connection.prepareStatement(sql);
+            SqlKit.setParameterBatches(statement, params);
+            int inserted = statement.executeBatch().length;
             assertEquals(3, inserted);
-            preparedStatement.close();
+            statement.close();
         }
         {
-            // map row
+            // test next row
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
-            User alice = SqlKit.mapRow(
+            User alice = SqlKit.nextRow(
                 resultSet,
                 User.class,
                 ObjectMetaIntrospector.defaultIntrospector(),
@@ -275,7 +269,7 @@ public class SqlKitTest {
             assertEquals("Alice", alice.getUserName());
             assertEquals(25, alice.getAge());
             assertEquals(ZonedDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault()), alice.getBirthday());
-            Map<String, Object> userMap = SqlKit.mapRow(
+            Map<String, Object> userMap = SqlKit.nextRow(
                 resultSet,
                 SqlNameMapper.defaultMapper().toPropertyNameMapper()
             );
@@ -285,7 +279,8 @@ public class SqlKitTest {
                 now.toInstant(),
                 ((Timestamp) userMap.get("birthday")).toInstant()
             );
-            User charlie = SqlKit.mapRow(
+            // test next row with type ref
+            User charlie = SqlKit.nextRow(
                 resultSet,
                 new TypeRef<User>() {},
                 ObjectMetaIntrospector.defaultIntrospector(),
@@ -300,7 +295,7 @@ public class SqlKitTest {
             // exception
             assertThrows(
                 SqlRuntimeException.class,
-                () -> SqlKit.mapRow(
+                () -> SqlKit.nextRow(
                     resultSet,
                     User.class,
                     ObjectMetaIntrospector.defaultIntrospector(),
@@ -310,14 +305,14 @@ public class SqlKitTest {
             );
             assertThrows(
                 SqlRuntimeException.class,
-                () -> SqlKit.mapRow(
+                () -> SqlKit.nextRow(
                     resultSet,
                     SqlNameMapper.defaultMapper().toPropertyNameMapper()
                 )
             );
             assertThrows(
                 SqlRuntimeException.class,
-                () -> SqlKit.mapRow(
+                () -> SqlKit.nextRow(
                     resultSet,
                     new TypeRef<User>() {},
                     ObjectMetaIntrospector.defaultIntrospector(),
@@ -327,10 +322,10 @@ public class SqlKitTest {
             );
         }
         {
-            // map rows
+            // test read rows
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
-            List<User> users = SqlKit.mapRows(
+            List<User> users = SqlKit.readRows(
                 resultSet,
                 User.class,
                 ObjectMetaIntrospector.defaultIntrospector(),
@@ -351,7 +346,7 @@ public class SqlKitTest {
             // exception
             assertThrows(
                 SqlRuntimeException.class,
-                () -> SqlKit.mapRows(
+                () -> SqlKit.readRows(
                     resultSet,
                     User.class,
                     ObjectMetaIntrospector.defaultIntrospector(),
@@ -361,10 +356,10 @@ public class SqlKitTest {
             );
         }
         {
-            // map rows
+            // test read rows with type ref
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
-            List<User> users = SqlKit.mapRows(
+            List<User> users = SqlKit.readRows(
                 resultSet,
                 new TypeRef<User>() {},
                 ObjectMetaIntrospector.defaultIntrospector(),
@@ -385,7 +380,7 @@ public class SqlKitTest {
             // exception
             assertThrows(
                 SqlRuntimeException.class,
-                () -> SqlKit.mapRows(
+                () -> SqlKit.readRows(
                     resultSet,
                     new TypeRef<User>() {},
                     ObjectMetaIntrospector.defaultIntrospector(),
@@ -395,10 +390,10 @@ public class SqlKitTest {
             );
         }
         {
-            // map rows
+            // test read rows to a list map
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
-            List<Map<String, Object>> users = SqlKit.mapRows(
+            List<Map<String, Object>> users = SqlKit.readRows(
                 resultSet,
                 SqlNameMapper.defaultMapper().toPropertyNameMapper()
             );
@@ -425,7 +420,7 @@ public class SqlKitTest {
             // exception
             assertThrows(
                 SqlRuntimeException.class,
-                () -> SqlKit.mapRows(
+                () -> SqlKit.readRows(
                     resultSet,
                     SqlNameMapper.defaultMapper().toPropertyNameMapper()
                 )
@@ -433,10 +428,14 @@ public class SqlKitTest {
         }
         {
             // clear data
-            Statement clear = connection.createStatement();
-            clear.execute("delete from `USER`;");
-            clear.close();
+            clearData();
         }
+    }
+
+    private void clearData() throws Exception {
+        Statement clearStatement = connection.createStatement();
+        clearStatement.execute("delete from `USER`;");
+        clearStatement.close();
     }
 
     @Test
