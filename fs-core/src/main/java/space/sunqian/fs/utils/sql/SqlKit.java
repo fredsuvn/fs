@@ -456,17 +456,18 @@ public class SqlKit {
      *
      * @param propertyName     the name of the specified property
      * @param sqlColumn        the {@link SqlColumn} annotation on the specified property
-     * @param columnNameMapper the default mapping policy if the value of the {@link SqlColumn} is empty
+     * @param columnNameMapper the default mapping policy if the {@link SqlColumn#value()} of the {@link SqlColumn} is
+     *                         empty
      * @return the mapped column name
      */
     public static @Nonnull String toColumnName(
         @Nonnull String propertyName,
         @Nonnull SqlColumn sqlColumn,
-        @Nonnull NameMapper columnNameMapper
+        @Nonnull SqlNameMapper columnNameMapper
     ) {
         String value = sqlColumn.value();
         if (value.isEmpty()) {
-            return columnNameMapper.map(propertyName);
+            return columnNameMapper.toColumnName(propertyName);
         }
         return value;
     }
@@ -476,17 +477,18 @@ public class SqlKit {
      *
      * @param typeName        the type name of the specified java type
      * @param sqlTable        the {@link SqlTable} annotation on the specified java type
-     * @param tableNameMapper the default mapping policy if the value of the {@link SqlTable} is empty
+     * @param tableNameMapper the default mapping policy if the {@link SqlTable#value()} of the {@link SqlTable} is
+     *                        empty
      * @return the mapped table name
      */
     public static @Nonnull String toTableName(
         @Nonnull String typeName,
         @Nonnull SqlTable sqlTable,
-        @Nonnull NameMapper tableNameMapper
+        @Nonnull SqlNameMapper tableNameMapper
     ) {
         String value = sqlTable.value();
         if (value.isEmpty()) {
-            return tableNameMapper.map(typeName);
+            return tableNameMapper.toTableName(typeName);
         }
         return value;
     }
@@ -496,15 +498,20 @@ public class SqlKit {
      *
      * @param javaType        the specified java type
      * @param sqlTable        the {@link SqlTable} annotation on the specified java type
-     * @param tableNameMapper the default mapping policy if the value of the {@link SqlTable} is empty
+     * @param tableNameMapper the default mapping policy if the {@link SqlTable#value()} of the {@link SqlTable} is
+     *                        empty
      * @return the mapped table name
      */
     public static @Nonnull String toTableName(
         @Nonnull Type javaType,
         @Nonnull SqlTable sqlTable,
-        @Nonnull NameMapper tableNameMapper
+        @Nonnull SqlNameMapper tableNameMapper
     ) {
-        return toTableName(javaType.getTypeName(), sqlTable, tableNameMapper);
+        String value = sqlTable.value();
+        if (value.isEmpty()) {
+            return tableNameMapper.toTableName(javaType);
+        }
+        return value;
     }
 
     private SqlKit() {

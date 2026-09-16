@@ -440,33 +440,47 @@ public class SqlKitTest {
 
     @Test
     public void testNameMapping() throws Exception {
+        ObjectMeta tableMeta = ObjectMeta.of(SomeTable.class);
+        ObjectMeta tableXMeta = ObjectMeta.of(SomeTableX.class);
         {
-            ObjectMeta objectMeta = ObjectMeta.of(SomeTable.class);
-            assertEquals("SOME_TABLE", SqlKit.toTableName(
-                    SomeTable.class,
-                    objectMeta.annotations().annotation(SqlTable.class),
-                    SqlNameMapper.defaultMapper().toTableNameMapper()
-                )
-            );
+            // test column name mapping
             assertEquals("USER_NAME", SqlKit.toColumnName(
                     "userName",
-                    objectMeta.getProperty("userName").annotations().annotation(SqlColumn.class),
-                    SqlNameMapper.defaultMapper().toColumnNameMapper()
+                    tableMeta.getProperty("userName").annotations().annotation(SqlColumn.class),
+                    SqlNameMapper.defaultMapper()
                 )
             );
             assertEquals("USER_AGE", SqlKit.toColumnName(
                     "age",
-                    objectMeta.getProperty("age").annotations().annotation(SqlColumn.class),
-                    SqlNameMapper.defaultMapper().toColumnNameMapper()
+                    tableMeta.getProperty("age").annotations().annotation(SqlColumn.class),
+                    SqlNameMapper.defaultMapper()
                 )
             );
         }
         {
-            ObjectMeta objectMeta = ObjectMeta.of(SomeTableX.class);
+            // test table name mapping
+            assertEquals("SOME_TABLE", SqlKit.toTableName(
+                    SomeTable.class,
+                    tableMeta.annotations().annotation(SqlTable.class),
+                    SqlNameMapper.defaultMapper()
+                )
+            );
             assertEquals("SOME_TABLE_XXX", SqlKit.toTableName(
                     SomeTableX.class,
-                    objectMeta.annotations().annotation(SqlTable.class),
-                    SqlNameMapper.defaultMapper().toTableNameMapper()
+                    tableXMeta.annotations().annotation(SqlTable.class),
+                    SqlNameMapper.defaultMapper()
+                )
+            );
+            assertEquals("SOME_TABLE", SqlKit.toTableName(
+                    SomeTable.class.getName(),
+                    tableMeta.annotations().annotation(SqlTable.class),
+                    SqlNameMapper.defaultMapper()
+                )
+            );
+            assertEquals("SOME_TABLE_XXX", SqlKit.toTableName(
+                    SomeTableX.class.getName(),
+                    tableXMeta.annotations().annotation(SqlTable.class),
+                    SqlNameMapper.defaultMapper()
                 )
             );
         }
