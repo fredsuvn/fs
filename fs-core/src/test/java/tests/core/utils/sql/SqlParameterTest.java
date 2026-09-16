@@ -1,7 +1,7 @@
 package tests.core.utils.sql;
 
 import org.junit.jupiter.api.Test;
-import space.sunqian.fs.utils.sql.CallableParameter;
+import space.sunqian.fs.utils.sql.SqlCallableParameter;
 import space.sunqian.fs.utils.sql.SqlParameter;
 
 import java.sql.JDBCType;
@@ -76,48 +76,48 @@ public class SqlParameterTest {
     public void testCallableParameter() throws Exception {
 
         // p1: 1L, BIGINT, IN
-        CallableParameter p1 = CallableParameter.of(1L, Types.BIGINT, CallableParameter.Mode.IN);
+        SqlCallableParameter p1 = SqlCallableParameter.of(1L, Types.BIGINT, SqlCallableParameter.Mode.IN);
         assertEquals(1L, p1.value());
         assertEquals(Types.BIGINT, p1.sqlTypeCode());
         assertEquals(JDBCType.valueOf(Types.BIGINT), p1.sqlType());
-        assertEquals(CallableParameter.Mode.IN, p1.mode());
+        assertEquals(SqlCallableParameter.Mode.IN, p1.mode());
 
         // p2: "Alice", VARCHAR, OUT
-        CallableParameter p2 = CallableParameter.of("Alice", Types.VARCHAR, CallableParameter.Mode.OUT);
+        SqlCallableParameter p2 = SqlCallableParameter.of("Alice", Types.VARCHAR, SqlCallableParameter.Mode.OUT);
         assertEquals("Alice", p2.value());
         assertEquals(Types.VARCHAR, p2.sqlTypeCode());
         assertEquals(JDBCType.valueOf(Types.VARCHAR), p2.sqlType());
-        assertEquals(CallableParameter.Mode.OUT, p2.mode());
+        assertEquals(SqlCallableParameter.Mode.OUT, p2.mode());
 
         // p3: "Bob", VARCHAR, IN_OUT
-        CallableParameter p3 = CallableParameter.of("Bob", JDBCType.VARCHAR, CallableParameter.Mode.IN_OUT);
+        SqlCallableParameter p3 = SqlCallableParameter.of("Bob", JDBCType.VARCHAR, SqlCallableParameter.Mode.IN_OUT);
         assertEquals("Bob", p3.value());
         assertEquals(Types.VARCHAR, p3.sqlTypeCode());
         assertSame(JDBCType.VARCHAR, p3.sqlType());
-        assertEquals(CallableParameter.Mode.IN_OUT, p3.mode());
+        assertEquals(SqlCallableParameter.Mode.IN_OUT, p3.mode());
 
         // test equals
         assertEquals(p1, p1);
-        assertEquals(p1, CallableParameter.of(1L, JDBCType.BIGINT, CallableParameter.Mode.IN));
-        assertEquals(p1, CallableParameter.of(1L, Types.BIGINT, CallableParameter.Mode.IN));
+        assertEquals(p1, SqlCallableParameter.of(1L, JDBCType.BIGINT, SqlCallableParameter.Mode.IN));
+        assertEquals(p1, SqlCallableParameter.of(1L, Types.BIGINT, SqlCallableParameter.Mode.IN));
         assertNotEquals(p1, p2);
         assertNotEquals(p1, p3);
-        assertNotEquals(p1, CallableParameter.of(1L, Types.VARCHAR, CallableParameter.Mode.IN));
-        assertNotEquals(p1, CallableParameter.of(1L, Types.BIGINT, JDBCType.VARCHAR, CallableParameter.Mode.IN));
-        assertNotEquals(p1, CallableParameter.of(1L, Types.BIGINT, JDBCType.BIGINT, CallableParameter.Mode.OUT));
+        assertNotEquals(p1, SqlCallableParameter.of(1L, Types.VARCHAR, SqlCallableParameter.Mode.IN));
+        assertNotEquals(p1, SqlCallableParameter.of(1L, Types.BIGINT, JDBCType.VARCHAR, SqlCallableParameter.Mode.IN));
+        assertNotEquals(p1, SqlCallableParameter.of(1L, Types.BIGINT, JDBCType.BIGINT, SqlCallableParameter.Mode.OUT));
         assertNotEquals(p1, "");
 
         // test hashCode
-        assertEquals(p1.hashCode(), CallableParameter.of(1L, JDBCType.BIGINT, CallableParameter.Mode.IN).hashCode());
+        assertEquals(p1.hashCode(), SqlCallableParameter.of(1L, JDBCType.BIGINT, SqlCallableParameter.Mode.IN).hashCode());
         assertNotEquals(p1.hashCode(), p2.hashCode());
-        assertNotEquals(p1.hashCode(), CallableParameter.of(1L, JDBCType.BIGINT, CallableParameter.Mode.OUT).hashCode());
+        assertNotEquals(p1.hashCode(), SqlCallableParameter.of(1L, JDBCType.BIGINT, SqlCallableParameter.Mode.OUT).hashCode());
 
         // test toString
         assertEquals(
-            "CallableParameter[1, " + Types.BIGINT + ", " + JDBCType.BIGINT.getName() + ", " + CallableParameter.Mode.IN + "]",
+            "CallableParameter[1, " + Types.BIGINT + ", " + JDBCType.BIGINT.getName() + ", " + SqlCallableParameter.Mode.IN + "]",
             p1.toString()
         );
-        assertNotEquals(p1, CallableParameter.of(1L, Types.BIGINT, new SQLType() {
+        assertNotEquals(p1, SqlCallableParameter.of(1L, Types.BIGINT, new SQLType() {
             @Override
             public String getName() {
                 return "";
@@ -132,6 +132,6 @@ public class SqlParameterTest {
             public Integer getVendorTypeNumber() {
                 return 0;
             }
-        }, CallableParameter.Mode.IN));
+        }, SqlCallableParameter.Mode.IN));
     }
 }

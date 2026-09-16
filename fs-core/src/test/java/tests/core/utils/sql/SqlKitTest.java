@@ -13,7 +13,7 @@ import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.reflect.TypeRef;
-import space.sunqian.fs.utils.sql.CallableParameter;
+import space.sunqian.fs.utils.sql.SqlCallableParameter;
 import space.sunqian.fs.utils.sql.SqlKit;
 import space.sunqian.fs.utils.sql.SqlNameMapper;
 import space.sunqian.fs.utils.sql.SqlParameter;
@@ -166,11 +166,11 @@ public class SqlKitTest {
             // perform as callable statement
             CallableStatement csp = h2Connection.prepareCall("call test_proc(?, ?, ?, ?, ?);");
             List<?> cspParams = Fs.list(
-                CallableParameter.of(1, Types.INTEGER, CallableParameter.Mode.IN),
+                SqlCallableParameter.of(1, Types.INTEGER, SqlCallableParameter.Mode.IN),
                 SqlParameter.of(2, Types.INTEGER),
                 3,
-                CallableParameter.of(4, Types.INTEGER, CallableParameter.Mode.OUT),
-                CallableParameter.of(5, Types.INTEGER, CallableParameter.Mode.IN_OUT)
+                SqlCallableParameter.of(4, Types.INTEGER, SqlCallableParameter.Mode.OUT),
+                SqlCallableParameter.of(5, Types.INTEGER, SqlCallableParameter.Mode.IN_OUT)
             );
             SqlKit.setParameters(csp, cspParams);
             csp.execute();

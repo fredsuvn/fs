@@ -8,26 +8,26 @@ import java.util.Objects;
 
 final class ParameterBack {
 
-    static @Nonnull SqlParameter newParameter(@Nullable Object value, int sqlTypeCode, @Nonnull SQLType sqlType) {
+    static @Nonnull SqlParameter newSqlParameter(@Nullable Object value, int sqlTypeCode, @Nonnull SQLType sqlType) {
         return new SqlParameterImpl(value, sqlTypeCode, sqlType);
     }
 
-    static @Nonnull CallableParameter newCallableParameter(
+    static @Nonnull SqlCallableParameter newCallableParameter(
         @Nullable Object value,
         int sqlTypeCode,
         @Nonnull SQLType sqlType,
-        @Nonnull CallableParameter.Mode mode
+        @Nonnull SqlCallableParameter.Mode mode
     ) {
-        return new CallableParameterImpl(value, sqlTypeCode, sqlType, mode);
+        return new SqlCallableParameterImpl(value, sqlTypeCode, sqlType, mode);
     }
 
-    private static class BaseParameterImpl implements SqlParameter {
+    private static class BaseSqlParameterImpl implements SqlParameter {
 
         protected final @Nullable Object value;
         protected final int sqlTypeCode;
         protected final @Nonnull SQLType sqlType;
 
-        protected BaseParameterImpl(@Nullable Object value, int sqlTypeCode, @Nonnull SQLType sqlType) {
+        protected BaseSqlParameterImpl(@Nullable Object value, int sqlTypeCode, @Nonnull SQLType sqlType) {
             this.value = value;
             this.sqlTypeCode = sqlTypeCode;
             this.sqlType = sqlType;
@@ -49,7 +49,7 @@ final class ParameterBack {
         }
     }
 
-    private static final class SqlParameterImpl extends BaseParameterImpl {
+    private static final class SqlParameterImpl extends BaseSqlParameterImpl {
 
         private SqlParameterImpl(@Nullable Object value, int sqlTypeCode, @Nonnull SQLType sqlType) {
             super(value, sqlTypeCode, sqlType);
@@ -81,11 +81,11 @@ final class ParameterBack {
         }
     }
 
-    private static final class CallableParameterImpl extends BaseParameterImpl implements CallableParameter {
+    private static final class SqlCallableParameterImpl extends BaseSqlParameterImpl implements SqlCallableParameter {
 
         private final @Nonnull Mode mode;
 
-        private CallableParameterImpl(
+        private SqlCallableParameterImpl(
             @Nullable Object value,
             int sqlTypeCode,
             @Nonnull SQLType sqlType,
@@ -110,11 +110,11 @@ final class ParameterBack {
             if (this == obj) {
                 return true;
             }
-            if (!(obj instanceof CallableParameterImpl)) {
+            if (!(obj instanceof SqlCallableParameterImpl)) {
                 return false;
             }
             @SuppressWarnings("PatternVariableCanBeUsed")
-            CallableParameterImpl that = (CallableParameterImpl) obj;
+            SqlCallableParameterImpl that = (SqlCallableParameterImpl) obj;
             return Objects.equals(value, that.value())
                 && sqlTypeCode == that.sqlTypeCode()
                 && Objects.equals(sqlType, that.sqlType())

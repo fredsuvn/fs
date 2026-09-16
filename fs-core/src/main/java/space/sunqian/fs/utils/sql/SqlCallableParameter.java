@@ -15,48 +15,48 @@ import java.sql.SQLType;
  * @author Sunqian
  */
 @Immutable
-public interface CallableParameter extends SqlParameter {
+public interface SqlCallableParameter extends SqlParameter {
 
     /**
-     * Creates and returns a new {@link CallableParameter} with the given value, SQL type, and mode.
+     * Creates and returns a new {@link SqlCallableParameter} with the given value, SQL type, and mode.
      * <p>
-     * The {@link #sqlTypeCode()} of the returned {@link CallableParameter} will be retrieved by calling
+     * The {@link #sqlTypeCode()} of the returned {@link SqlCallableParameter} will be retrieved by calling
      * {@link SQLType#getVendorTypeNumber()}.
      *
      * @param value   the value of the parameter, can be {@code null}
      * @param sqlType the SQL type of the parameter
      * @param mode    the mode of the parameter
-     * @return the newly created {@link CallableParameter}
+     * @return the newly created {@link SqlCallableParameter}
      */
-    static @Nonnull CallableParameter of(@Nullable Object value, @Nonnull SQLType sqlType, @Nonnull Mode mode) {
+    static @Nonnull SqlCallableParameter of(@Nullable Object value, @Nonnull SQLType sqlType, @Nonnull Mode mode) {
         return of(value, sqlType.getVendorTypeNumber(), sqlType, mode);
     }
 
     /**
-     * Creates and returns a new {@link CallableParameter} with the given value, SQL type code, and mode.
+     * Creates and returns a new {@link SqlCallableParameter} with the given value, SQL type code, and mode.
      * <p>
-     * The {@link #sqlType()} of the returned {@link CallableParameter} will be found by calling
+     * The {@link #sqlType()} of the returned {@link SqlCallableParameter} will be found by calling
      * {@link JDBCType#valueOf(int)}.
      *
      * @param value       the value of the parameter, can be {@code null}
      * @param sqlTypeCode the SQL type code of the parameter
      * @param mode        the mode of the parameter
-     * @return the newly created {@link CallableParameter}
+     * @return the newly created {@link SqlCallableParameter}
      */
-    static @Nonnull CallableParameter of(@Nullable Object value, int sqlTypeCode, @Nonnull Mode mode) {
+    static @Nonnull SqlCallableParameter of(@Nullable Object value, int sqlTypeCode, @Nonnull Mode mode) {
         return of(value, sqlTypeCode, JDBCType.valueOf(sqlTypeCode), mode);
     }
 
     /**
-     * Creates and returns a new {@link CallableParameter} with the given value, SQL type code, SQL type, and mode.
+     * Creates and returns a new {@link SqlCallableParameter} with the given value, SQL type code, SQL type, and mode.
      *
      * @param value       the value of the parameter, can be {@code null}
      * @param sqlTypeCode the SQL type code of the parameter
      * @param sqlType     the SQL type of the parameter
      * @param mode        the mode of the parameter
-     * @return the newly created {@link CallableParameter}
+     * @return the newly created {@link SqlCallableParameter}
      */
-    static @Nonnull CallableParameter of(
+    static @Nonnull SqlCallableParameter of(
         @Nullable Object value,
         int sqlTypeCode,
         @Nonnull SQLType sqlType,

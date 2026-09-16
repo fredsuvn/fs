@@ -55,7 +55,7 @@ public interface SqlParameter {
      * @return the newly created {@link SqlParameter}
      */
     static @Nonnull SqlParameter of(@Nullable Object value, int sqlTypeCode, @Nonnull SQLType sqlType) {
-        return ParameterBack.newParameter(value, sqlTypeCode, sqlType);
+        return ParameterBack.newSqlParameter(value, sqlTypeCode, sqlType);
     }
 
     /**
