@@ -37,15 +37,15 @@ public class SqlKit {
     /**
      * Sets the given parameter on the specified statement.
      * <p>
-     * If the statement is a {@link CallableStatement} and the parameter is a {@link CallableParameter}, its
-     * {@link CallableParameter.Mode mode} determines how it will be set:
+     * If the statement is a {@link CallableStatement} and the parameter is a {@link SqlCallableParameter}, its
+     * {@link SqlCallableParameter.Mode mode} determines how it will be set:
      * <ul>
      *     <li>
-     *         if the mode is {@link CallableParameter.Mode#OUT}, it will be registered as an output parameter by
+     *         if the mode is {@link SqlCallableParameter.Mode#OUT}, it will be registered as an output parameter by
      *         {@link CallableStatement#registerOutParameter(int, SQLType)};
      *     </li>
      *     <li>
-     *         if the mode is {@link CallableParameter.Mode#IN_OUT}, it will be registered as an output parameter by
+     *         if the mode is {@link SqlCallableParameter.Mode#IN_OUT}, it will be registered as an output parameter by
      *         {@link CallableStatement#registerOutParameter(int, SQLType)} and then set by
      *         {@link CallableStatement#setObject(int, Object, SQLType)};
      *     </li>
@@ -58,7 +58,8 @@ public class SqlKit {
      * type by {@link PreparedStatement#setObject(int, Object, SQLType)}; if the parameter is {@code null}, it will be
      * set as {@link Types#NULL}; otherwise, the parameter will be set by
      * {@link PreparedStatement#setObject(int, Object)}. Note if the statement is a {@link CallableStatement} but the
-     * parameter is not a {@link CallableParameter}, the mode will be considered as {@link CallableParameter.Mode#IN}.
+     * parameter is not a {@link SqlCallableParameter}, the mode will be considered as
+     * {@link SqlCallableParameter.Mode#IN}.
      *
      * @param statement the specified statement, which may be a {@link CallableStatement}
      * @param index     the parameter index of the statement
@@ -103,17 +104,17 @@ public class SqlKit {
         int index,
         @Nullable Object parameter
     ) throws SqlRuntimeException {
-        if (parameter instanceof CallableParameter) {
+        if (parameter instanceof SqlCallableParameter) {
             try {
                 @SuppressWarnings({"PatternVariableCanBeUsed"})
-                CallableParameter callableParameter = (CallableParameter) parameter;
+                SqlCallableParameter callableParameter = (SqlCallableParameter) parameter;
                 SQLType type = callableParameter.sqlType();
-                CallableParameter.Mode mode = callableParameter.mode();
-                if (CallableParameter.Mode.OUT.equals(mode)) {
+                SqlCallableParameter.Mode mode = callableParameter.mode();
+                if (SqlCallableParameter.Mode.OUT.equals(mode)) {
                     statement.registerOutParameter(index, type);
                     return;
                 }
-                if (CallableParameter.Mode.IN_OUT.equals(mode)) {
+                if (SqlCallableParameter.Mode.IN_OUT.equals(mode)) {
                     statement.registerOutParameter(index, type);
                 }
                 statement.setObject(index, callableParameter.value(), type);
