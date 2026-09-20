@@ -13,7 +13,7 @@ import java.nio.CharBuffer;
  *
  * @author sunqian
  */
-public interface CharReader extends SimpleCloseable {
+public interface CharReader extends RuntimeCloseable {
 
     /**
      * Wraps the given reader as a new {@link CharReader}.

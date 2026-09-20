@@ -15,7 +15,7 @@ import java.nio.channels.WritableByteChannel;
  *
  * @author sunqian
  */
-public interface ByteReader extends SimpleCloseable {
+public interface ByteReader extends RuntimeCloseable {
 
     /**
      * Wraps the given stream as a new {@link ByteReader}.

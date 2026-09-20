@@ -12,7 +12,7 @@ import space.sunqian.fs.io.IOKit;
 import space.sunqian.fs.io.IOMode;
 import space.sunqian.fs.io.IOOperator;
 import space.sunqian.fs.io.IORuntimeException;
-import space.sunqian.fs.io.SimpleCloseable;
+import space.sunqian.fs.io.RuntimeCloseable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -810,8 +810,8 @@ public class IOTest implements DataGen {
     }
 
     @Test
-    public void testSimpleCloseable() {
-        class X implements SimpleCloseable {
+    public void testRuntimeCloseable() {
+        class X implements RuntimeCloseable {
             @Override
             public void close() throws IORuntimeException {
             }
