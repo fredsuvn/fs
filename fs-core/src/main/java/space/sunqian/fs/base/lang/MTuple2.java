@@ -24,7 +24,7 @@ public final class MTuple2<T0, T1> implements Cloneable {
      * @param <T1> the type of the second element
      * @param t0   the first element
      * @param t1   the second element
-     * @return a new two-element tuple
+     * @return a new mutable two-element tuple
      */
     public static <T0, T1> @Nonnull MTuple2<T0, T1> of(T0 t0, T1 t1) {
         return new MTuple2<>(t0, t1);
@@ -35,7 +35,7 @@ public final class MTuple2<T0, T1> implements Cloneable {
      *
      * @param <T0> the type of the first element
      * @param <T1> the type of the second element
-     * @return a new empty two-element tuple
+     * @return a new mutable empty two-element tuple
      */
     public static <T0, T1> @Nonnull MTuple2<T0, T1> newTuple() {
         return new MTuple2<>();
