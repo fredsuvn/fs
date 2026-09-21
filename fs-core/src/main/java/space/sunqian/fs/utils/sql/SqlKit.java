@@ -4,6 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.lang.Tuple2;
+import space.sunqian.fs.base.lang.Tuple3;
 import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.object.convert.ObjectConverter;
@@ -639,6 +640,157 @@ public class SqlKit {
     }
 
     /**
+     * Updates a row by the primary key. The table info comes from the class of the value by {@link Object#getClass()}:
+     * the table name should be specified by {@link SqlTable} on the class, and the columns should be specified by
+     * {@link SqlColumn} on the properties of the class. The primary key column should be specified by
+     * {@link SqlColumn#primary()} on only one of the columns found, and its value in the condition is specified by the
+     * corresponding property value. If no primary key column is found, then this operation will throw an exception.
+     * <p>
+     * Only columns whose corresponding property values are non-null will be updated, and the primary key column will
+     * also not be updated.
+     *
+     * @param connection   the specified connection to use for the update operation
+     * @param value        the value to provide table info and updated values
+     * @param introspector the introspector used to introspect the type of the value
+     * @param nameMapper   the name mapper used to map names between java and SQL
+     * @return the number of affected rows
+     * @throws SqlRuntimeException if any error occurs
+     */
+    public static int updateByPrimaryKey(
+        @Nonnull Connection connection,
+        @Nonnull Object value,
+        @Nonnull ObjectMetaIntrospector introspector,
+        @Nonnull SqlNameMapper nameMapper
+    ) throws SqlRuntimeException {
+        return updateRows(connection, value, null, introspector, nameMapper);
+    }
+
+    /**
+     * Updates the rows by the specified primary keys. The table info comes from the class of the value by
+     * {@link Object#getClass()}: the table name should be specified by {@link SqlTable} on the class, and the columns
+     * should be specified by {@link SqlColumn} on the properties of the class. The primary key column should be
+     * specified by {@link SqlColumn#primary()} on only one of the columns found, but its values in the condition are
+     * specified by {@code primaryKeys}. If no primary key column is found, then this operation will throw an
+     * exception.
+     * <p>
+     * Only columns whose corresponding property values are non-null will be updated, and the primary key column will
+     * also not be updated.
+     *
+     * @param connection   the specified connection to use for the update operation
+     * @param value        the value to provide table info and updated values
+     * @param primaryKeys  the specified primary keys
+     * @param introspector the introspector used to introspect the type of the value
+     * @param nameMapper   the name mapper used to map names between java and SQL
+     * @return the number of affected rows
+     * @throws SqlRuntimeException if any error occurs
+     */
+    public static int updateByPrimaryKeys(
+        @Nonnull Connection connection,
+        @Nonnull Object value,
+        @Nonnull List<@Nonnull ?> primaryKeys,
+        @Nonnull ObjectMetaIntrospector introspector,
+        @Nonnull SqlNameMapper nameMapper
+    ) throws SqlRuntimeException {
+        if (primaryKeys.isEmpty()) {
+            throw new SqlRuntimeException("Primary keys are empty.");
+        }
+        return updateRows(connection, value, primaryKeys, introspector, nameMapper);
+    }
+
+    private static int updateRows(
+        @Nonnull Connection connection,
+        @Nonnull Object value,
+        @Nullable List<@Nonnull ?> ids,
+        @Nonnull ObjectMetaIntrospector introspector,
+        @Nonnull SqlNameMapper nameMapper
+    ) throws SqlRuntimeException {
+        Class<?> tableType = value.getClass();
+        ObjectMeta beanMeta = introspector.introspect(tableType);
+        SqlTable sqlTable = beanMeta.annotations().annotation(SqlTable.class);
+        if (sqlTable == null) {
+            throw new SqlRuntimeException(
+                "No SQL table annotation found on " + tableType.getTypeName() + ": " + SqlTable.class.getName() + "."
+            );
+        }
+        String tableName = SqlKit.toTableName(tableType, sqlTable, nameMapper);
+        List<Tuple3<SqlColumn, PropertyMeta, Object>> columns = new ArrayList<>();
+        Tuple3<SqlColumn, PropertyMeta, Object> primaryKey = null;
+        for (PropertyMeta propertyMeta : beanMeta.properties().values()) {
+            SqlColumn sqlColumn = propertyMeta.annotations().annotation(SqlColumn.class);
+            if (sqlColumn == null) {
+                continue;
+            }
+            Object propertyValue = propertyMeta.getValue(value);
+            if (sqlColumn.primary()) {
+                if (primaryKey != null) {
+                    throw new SqlRuntimeException("Multiple primary keys found on " + tableType.getTypeName() + ".");
+                }
+                if (ids == null && propertyValue == null) {
+                    throw new SqlRuntimeException("Primary key value is null on " + tableType.getTypeName() + ".");
+                }
+                primaryKey = Tuple3.of(sqlColumn, propertyMeta, propertyValue);
+                continue;
+            }
+            if (propertyValue == null) {
+                continue;
+            }
+            columns.add(Tuple3.of(sqlColumn, propertyMeta, propertyValue));
+        }
+        if (primaryKey == null) {
+            throw new SqlRuntimeException("No primary key found on " + tableType.getTypeName() + ".");
+        }
+        if (columns.isEmpty()) {
+            throw new SqlRuntimeException("No updatable columns found on " + tableType.getTypeName() + ".");
+        }
+        StringBuilder sql = new StringBuilder("UPDATE ").append(tableName).append(" SET ");
+        int columnCount = columns.size();
+        for (int i = 0; i < columnCount; i++) {
+            Tuple3<SqlColumn, PropertyMeta, Object> column = columns.get(i);
+            SqlColumn sqlColumn = column.get0();
+            PropertyMeta propertyMeta = column.get1();
+            sql.append(SqlKit.toColumnName(propertyMeta.name(), sqlColumn, nameMapper));
+            sql.append(" = ?");
+            if (i < columnCount - 1) {
+                sql.append(", ");
+            }
+        }
+        sql.append(" WHERE ");
+        SqlColumn primaryColumn = primaryKey.get0();
+        PropertyMeta primaryMeta = primaryKey.get1();
+        sql.append(SqlKit.toColumnName(primaryMeta.name(), primaryColumn, nameMapper));
+        if (ids == null) {
+            sql.append(" = ?");
+        } else {
+            sql.append(" IN (");
+            for (int i = 0; i < ids.size(); i++) {
+                sql.append("?");
+                if (i < ids.size() - 1) {
+                    sql.append(", ");
+                }
+            }
+            sql.append(")");
+        }
+        try (
+            PreparedStatement statement = connection.prepareStatement(sql.toString())
+        ) {
+            int index = 1;
+            for (Tuple3<SqlColumn, PropertyMeta, Object> column : columns) {
+                setParameter(statement, index++, column.get2());
+            }
+            if (ids == null) {
+                setParameter(statement, index, primaryKey.get2());
+            } else {
+                for (Object id : ids) {
+                    setParameter(statement, index++, id);
+                }
+            }
+            return statement.executeUpdate();
+        } catch (Exception e) {
+            throw new SqlRuntimeException(e);
+        }
+    }
+
+    /**
      * Returns the column name mapped from the specified property which is annotated by {@link SqlColumn}.
      *
      * @param propertyName     the name of the specified property
@@ -716,6 +868,24 @@ public class SqlKit {
             this.preparedSql = preparedSql;
             this.columns = columns;
             this.hasAutoGeneratedKey = hasAutoGeneratedKey;
+        }
+    }
+
+    @SuppressWarnings("ClassCanBeRecord")
+    private static final class UpdateInfo {
+
+        private final @Nonnull StringBuilder preparedSql;
+        private final @Nonnull List<@Nonnull Tuple2<@Nonnull SqlColumn, @Nonnull PropertyMeta>> columns;
+        private final @Nonnull Tuple2<@Nonnull SqlColumn, @Nonnull PropertyMeta> primaryKey;
+
+        private UpdateInfo(
+            @Nonnull StringBuilder preparedSql,
+            @Nonnull List<@Nonnull Tuple2<@Nonnull SqlColumn, @Nonnull PropertyMeta>> columns,
+            @Nonnull Tuple2<@Nonnull SqlColumn, @Nonnull PropertyMeta> primaryKey
+        ) {
+            this.preparedSql = preparedSql;
+            this.columns = columns;
+            this.primaryKey = primaryKey;
         }
     }
 
