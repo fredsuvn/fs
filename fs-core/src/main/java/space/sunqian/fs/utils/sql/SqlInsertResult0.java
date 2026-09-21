@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author sunqian
  */
-public interface SqlInsert extends SqlOperation {
+public interface SqlInsertResult0 extends SqlExecutionResult {
 
     /**
      * Returns the auto-generated keys of this operation.

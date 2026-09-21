@@ -14,6 +14,7 @@ import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.reflect.TypeRef;
 import space.sunqian.fs.utils.sql.SqlCallableParameter;
+import space.sunqian.fs.utils.sql.SqlInsertResult;
 import space.sunqian.fs.utils.sql.SqlKit;
 import space.sunqian.fs.utils.sql.SqlNameMapper;
 import space.sunqian.fs.utils.sql.SqlParameter;
@@ -33,12 +34,14 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -54,6 +57,10 @@ public class SqlKitTest {
     private static final String DB_URL = "jdbc:hsqldb:mem:" + SqlKitTest.class.getName() + ";sql.syntax_mys=true";
     private static final String DB_USER = "SA";
     private static final String DB_PASSWORD = "";
+
+    private static final ObjectMetaIntrospector INTROSPECTOR = ObjectMetaIntrospector.defaultIntrospector();
+    private static final SqlNameMapper NAME_MAPPER = SqlNameMapper.defaultMapper();
+    private static final ObjectConverter CONVERTER = ObjectConverter.defaultConverter();
 
     private static Connection connection;
 
@@ -75,6 +82,17 @@ public class SqlKitTest {
                     "AGE int, " +
                     "BIRTHDAY timestamp, " +
                     "USER_PASSWORD varchar(255)" +
+                    ")"
+            );
+        }
+
+        // create table `USER_PASSWORD`
+        // USER_ID, USER_PASSWORD
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(
+                "create table if not exists `USER_PASSWORD` (" +
+                    "USER_ID INTEGER, " +
+                    "USER_PASSWORD varchar(256)" +
                     ")"
             );
         }
@@ -262,16 +280,16 @@ public class SqlKitTest {
             User alice = SqlKit.nextRow(
                 resultSet,
                 User.class,
-                ObjectMetaIntrospector.defaultIntrospector(),
-                SqlNameMapper.defaultMapper().toPropertyNameMapper(),
-                ObjectConverter.defaultConverter()
+                INTROSPECTOR,
+                NAME_MAPPER.toPropertyNameMapper(),
+                CONVERTER
             );
             assertEquals("Alice", alice.getUserName());
             assertEquals(25, alice.getAge());
             assertEquals(ZonedDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault()), alice.getBirthday());
             Map<String, Object> userMap = SqlKit.nextRow(
                 resultSet,
-                SqlNameMapper.defaultMapper().toPropertyNameMapper()
+                NAME_MAPPER.toPropertyNameMapper()
             );
             assertEquals("Bob", userMap.get("userName"));
             assertEquals(18, userMap.get("age"));
@@ -283,9 +301,9 @@ public class SqlKitTest {
             User charlie = SqlKit.nextRow(
                 resultSet,
                 new TypeRef<User>() {},
-                ObjectMetaIntrospector.defaultIntrospector(),
-                SqlNameMapper.defaultMapper().toPropertyNameMapper(),
-                ObjectConverter.defaultConverter()
+                INTROSPECTOR,
+                NAME_MAPPER.toPropertyNameMapper(),
+                CONVERTER
             );
             assertEquals("Charlie", charlie.getUserName());
             assertEquals(22, charlie.getAge());
@@ -298,16 +316,16 @@ public class SqlKitTest {
                 () -> SqlKit.nextRow(
                     resultSet,
                     User.class,
-                    ObjectMetaIntrospector.defaultIntrospector(),
-                    SqlNameMapper.defaultMapper().toPropertyNameMapper(),
-                    ObjectConverter.defaultConverter()
+                    INTROSPECTOR,
+                    NAME_MAPPER.toPropertyNameMapper(),
+                    CONVERTER
                 )
             );
             assertThrows(
                 SqlRuntimeException.class,
                 () -> SqlKit.nextRow(
                     resultSet,
-                    SqlNameMapper.defaultMapper().toPropertyNameMapper()
+                    NAME_MAPPER.toPropertyNameMapper()
                 )
             );
             assertThrows(
@@ -315,9 +333,9 @@ public class SqlKitTest {
                 () -> SqlKit.nextRow(
                     resultSet,
                     new TypeRef<User>() {},
-                    ObjectMetaIntrospector.defaultIntrospector(),
-                    SqlNameMapper.defaultMapper().toPropertyNameMapper(),
-                    ObjectConverter.defaultConverter()
+                    INTROSPECTOR,
+                    NAME_MAPPER.toPropertyNameMapper(),
+                    CONVERTER
                 )
             );
         }
@@ -328,9 +346,9 @@ public class SqlKitTest {
             List<User> users = SqlKit.readRows(
                 resultSet,
                 User.class,
-                ObjectMetaIntrospector.defaultIntrospector(),
-                SqlNameMapper.defaultMapper().toPropertyNameMapper(),
-                ObjectConverter.defaultConverter()
+                INTROSPECTOR,
+                NAME_MAPPER.toPropertyNameMapper(),
+                CONVERTER
             );
             assertEquals("Alice", users.get(0).getUserName());
             assertEquals(25, users.get(0).getAge());
@@ -349,9 +367,9 @@ public class SqlKitTest {
                 () -> SqlKit.readRows(
                     resultSet,
                     User.class,
-                    ObjectMetaIntrospector.defaultIntrospector(),
-                    SqlNameMapper.defaultMapper().toPropertyNameMapper(),
-                    ObjectConverter.defaultConverter()
+                    INTROSPECTOR,
+                    NAME_MAPPER.toPropertyNameMapper(),
+                    CONVERTER
                 )
             );
         }
@@ -362,9 +380,9 @@ public class SqlKitTest {
             List<User> users = SqlKit.readRows(
                 resultSet,
                 new TypeRef<User>() {},
-                ObjectMetaIntrospector.defaultIntrospector(),
-                SqlNameMapper.defaultMapper().toPropertyNameMapper(),
-                ObjectConverter.defaultConverter()
+                INTROSPECTOR,
+                NAME_MAPPER.toPropertyNameMapper(),
+                CONVERTER
             );
             assertEquals("Alice", users.get(0).getUserName());
             assertEquals(25, users.get(0).getAge());
@@ -383,9 +401,9 @@ public class SqlKitTest {
                 () -> SqlKit.readRows(
                     resultSet,
                     new TypeRef<User>() {},
-                    ObjectMetaIntrospector.defaultIntrospector(),
-                    SqlNameMapper.defaultMapper().toPropertyNameMapper(),
-                    ObjectConverter.defaultConverter()
+                    INTROSPECTOR,
+                    NAME_MAPPER.toPropertyNameMapper(),
+                    CONVERTER
                 )
             );
         }
@@ -395,7 +413,7 @@ public class SqlKitTest {
             ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
             List<Map<String, Object>> users = SqlKit.readRows(
                 resultSet,
-                SqlNameMapper.defaultMapper().toPropertyNameMapper()
+                NAME_MAPPER.toPropertyNameMapper()
             );
             assertEquals("Alice", users.get(0).get("userName"));
             assertEquals(25, users.get(0).get("age"));
@@ -422,7 +440,7 @@ public class SqlKitTest {
                 SqlRuntimeException.class,
                 () -> SqlKit.readRows(
                     resultSet,
-                    SqlNameMapper.defaultMapper().toPropertyNameMapper()
+                    NAME_MAPPER.toPropertyNameMapper()
                 )
             );
         }
@@ -432,10 +450,133 @@ public class SqlKitTest {
         }
     }
 
+    @Test
+    public void testInsertRow() throws Exception {
+        ZonedDateTime birthday = ZonedDateTime.ofInstant(new Date().toInstant(), ZoneId.systemDefault());
+        {
+            // insert one row
+            User user = new User();
+            user.setUserName("Alice");
+            user.setAge(25);
+            user.setBirthday(birthday);
+            user.setOther1("other1");
+            user.setOther2("other2");
+            SqlInsertResult<Long> userResult =
+                SqlKit.insertRow(connection, user, Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER);
+            assertEquals(1, userResult.insertedRows());
+            assertEquals(1L, userResult.autoGeneratedKeys().get(0));
+            // test no generated key
+            UserPassword userPassword = new UserPassword();
+            userPassword.setUserId(userResult.autoGeneratedKeys().get(0));
+            userPassword.setUserPassword("123456");
+            SqlInsertResult<Long> passwordResult =
+                SqlKit.insertRow(connection, userPassword, Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER);
+            assertEquals(1, passwordResult.insertedRows());
+            assertTrue(passwordResult.autoGeneratedKeys().isEmpty());
+            // exception
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.insertRow(connection, new NoTable(), Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER)
+            );
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.insertRow(connection, new NoColumn(), Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER)
+            );
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.insertRow(connection, new SomeTable(), Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER)
+            );
+        }
+        {
+            // insert rows
+            List<User> users = new ArrayList<>();
+            User bob = new User();
+            bob.setUserName("Bob");
+            bob.setAge(18);
+            bob.setBirthday(birthday);
+            users.add(bob);
+            User charlie = new User();
+            charlie.setUserName("Charlie");
+            charlie.setAge(22);
+            charlie.setBirthday(birthday);
+            users.add(charlie);
+            SqlInsertResult<Long> userResult =
+                SqlKit.insertRows(connection, users, Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER);
+            assertEquals(2, userResult.insertedRows());
+            assertEquals(2L, userResult.autoGeneratedKeys().get(0));
+            assertEquals(3L, userResult.autoGeneratedKeys().get(1));
+            // test no generated key
+            UserPassword bobPassword = new UserPassword();
+            bobPassword.setUserId(userResult.autoGeneratedKeys().get(0));
+            bobPassword.setUserPassword("123456");
+            UserPassword charliePassword = new UserPassword();
+            charliePassword.setUserId(userResult.autoGeneratedKeys().get(1));
+            charliePassword.setUserPassword("123456");
+            SqlInsertResult<Long> passwordResult = SqlKit.insertRows(
+                connection, Fs.list(bobPassword, charliePassword), Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER
+            );
+            assertEquals(2, passwordResult.insertedRows());
+            assertTrue(passwordResult.autoGeneratedKeys().isEmpty());
+            // exception
+            assertSame(
+                SqlInsertResult.empty(),
+                SqlKit.insertRows(connection, Fs.list(), Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER)
+            );
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.insertRows(connection, Fs.list(new NoTable()), Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER)
+            );
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.insertRows(connection, Fs.list(new NoColumn()), Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER)
+            );
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.insertRows(connection, Fs.list(new NoColumn()), Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER)
+            );
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.insertRows(connection, Fs.list(new SomeTable()), Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER)
+            );
+        }
+        {
+            // check inserted rows
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
+            List<User> insertedUsers = SqlKit.readRows(
+                resultSet,
+                new TypeRef<User>() {},
+                INTROSPECTOR,
+                NAME_MAPPER.toPropertyNameMapper(),
+                CONVERTER
+            );
+            assertEquals(3, insertedUsers.size());
+            assertEquals(1L, insertedUsers.get(0).getId());
+            assertEquals("Alice", insertedUsers.get(0).getUserName());
+            assertEquals(25, insertedUsers.get(0).getAge());
+            assertEquals(birthday, insertedUsers.get(0).getBirthday());
+            assertEquals(2L, insertedUsers.get(1).getId());
+            assertEquals("Bob", insertedUsers.get(1).getUserName());
+            assertEquals(18, insertedUsers.get(1).getAge());
+            assertEquals(birthday, insertedUsers.get(1).getBirthday());
+            assertEquals(3L, insertedUsers.get(2).getId());
+            assertEquals("Charlie", insertedUsers.get(2).getUserName());
+            assertEquals(22, insertedUsers.get(2).getAge());
+            assertEquals(birthday, insertedUsers.get(2).getBirthday());
+            statement.close();
+            resultSet.close();
+        }
+        {
+            // clear data
+            clearData();
+        }
+    }
+
     private void clearData() throws Exception {
-        Statement clearStatement = connection.createStatement();
-        clearStatement.execute("delete from `USER`;");
-        clearStatement.close();
+        try (Statement clearStatement = connection.createStatement()) {
+            clearStatement.execute("delete from `USER`;");
+            clearStatement.execute("delete from `USER_PASSWORD`;");
+        }
     }
 
     @Test
@@ -447,13 +588,13 @@ public class SqlKitTest {
             assertEquals("USER_NAME", SqlKit.toColumnName(
                     "userName",
                     tableMeta.getProperty("userName").annotations().annotation(SqlColumn.class),
-                    SqlNameMapper.defaultMapper()
+                    NAME_MAPPER
                 )
             );
             assertEquals("USER_AGE", SqlKit.toColumnName(
                     "age",
                     tableMeta.getProperty("age").annotations().annotation(SqlColumn.class),
-                    SqlNameMapper.defaultMapper()
+                    NAME_MAPPER
                 )
             );
         }
@@ -462,25 +603,25 @@ public class SqlKitTest {
             assertEquals("SOME_TABLE", SqlKit.toTableName(
                     SomeTable.class,
                     tableMeta.annotations().annotation(SqlTable.class),
-                    SqlNameMapper.defaultMapper()
+                    NAME_MAPPER
                 )
             );
             assertEquals("SOME_TABLE_XXX", SqlKit.toTableName(
                     SomeTableX.class,
                     tableXMeta.annotations().annotation(SqlTable.class),
-                    SqlNameMapper.defaultMapper()
+                    NAME_MAPPER
                 )
             );
             assertEquals("SOME_TABLE", SqlKit.toTableName(
                     SomeTable.class.getName(),
                     tableMeta.annotations().annotation(SqlTable.class),
-                    SqlNameMapper.defaultMapper()
+                    NAME_MAPPER
                 )
             );
             assertEquals("SOME_TABLE_XXX", SqlKit.toTableName(
                     SomeTableX.class.getName(),
                     tableXMeta.annotations().annotation(SqlTable.class),
-                    SqlNameMapper.defaultMapper()
+                    NAME_MAPPER
                 )
             );
         }
@@ -492,7 +633,7 @@ public class SqlKitTest {
     @EqualsAndHashCode
     @SqlTable
     public static class User {
-        @SqlColumn
+        @SqlColumn(autoGenerated = true, primary = true)
         private Long id;
         @SqlColumn
         private String userName;
@@ -500,6 +641,22 @@ public class SqlKitTest {
         private int age;
         @SqlColumn
         private ZonedDateTime birthday;
+
+        // other fields
+        private String other1;
+        private String other2;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @EqualsAndHashCode
+    @SqlTable
+    public static class UserPassword {
+        @SqlColumn
+        private Long userId;
+        @SqlColumn
+        private String userPassword;
     }
 
     @Data
@@ -518,5 +675,26 @@ public class SqlKitTest {
     @Data
     @SqlTable("SOME_TABLE_XXX")
     public static class SomeTableX {
+    }
+
+    @Data
+    public static class NoTable {
+        @SqlColumn
+        private Long id;
+        @SqlColumn
+        private String userName;
+        @SqlColumn("USER_AGE")
+        private int age;
+        @SqlColumn
+        private ZonedDateTime birthday;
+    }
+
+    @Data
+    @SqlTable
+    public static class NoColumn {
+        private Long id;
+        private String userName;
+        private int age;
+        private ZonedDateTime birthday;
     }
 }
