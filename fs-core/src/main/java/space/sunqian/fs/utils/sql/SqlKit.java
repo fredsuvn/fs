@@ -670,31 +670,31 @@ public class SqlKit {
      * {@link Object#getClass()}: the table name should be specified by {@link SqlTable} on the class, and the columns
      * should be specified by {@link SqlColumn} on the properties of the class. The primary key column should be
      * specified by {@link SqlColumn#primary()} on only one of the columns found, but its values in the condition are
-     * specified by {@code primaryKeys}. If no primary key column is found, then this operation will throw an
+     * specified by {@code primaryKeyValues}. If no primary key column is found, then this operation will throw an
      * exception.
      * <p>
      * Only columns whose corresponding property values are non-null will be updated, and the primary key column will
      * also not be updated.
      *
-     * @param connection   the specified connection to use for the update operation
-     * @param value        the value to provide table info and updated values
-     * @param primaryKeys  the specified primary keys
-     * @param introspector the introspector used to introspect the type of the value
-     * @param nameMapper   the name mapper used to map names between java and SQL
+     * @param connection       the specified connection to use for the update operation
+     * @param value            the value to provide table info and updated values
+     * @param primaryKeyValues the specified primary key values
+     * @param introspector     the introspector used to introspect the type of the value
+     * @param nameMapper       the name mapper used to map names between java and SQL
      * @return the number of affected rows
      * @throws SqlRuntimeException if any error occurs
      */
     public static int updateByPrimaryKeys(
         @Nonnull Connection connection,
         @Nonnull Object value,
-        @Nonnull List<@Nonnull ?> primaryKeys,
+        @Nonnull List<@Nonnull ?> primaryKeyValues,
         @Nonnull ObjectMetaIntrospector introspector,
         @Nonnull SqlNameMapper nameMapper
     ) throws SqlRuntimeException {
-        if (primaryKeys.isEmpty()) {
+        if (primaryKeyValues.isEmpty()) {
             throw new SqlRuntimeException("Primary keys are empty.");
         }
-        return updateRows(connection, value, primaryKeys, introspector, nameMapper);
+        return updateRows(connection, value, primaryKeyValues, introspector, nameMapper);
     }
 
     private static int updateRows(
@@ -791,6 +791,132 @@ public class SqlKit {
     }
 
     /**
+     * Deletes a row by the primary key. The table info comes from the class of the value by {@link Object#getClass()}:
+     * the table name should be specified by {@link SqlTable} on the class, and the columns should be specified by
+     * {@link SqlColumn} on the properties of the class. The primary key column should be specified by
+     * {@link SqlColumn#primary()} on only one of the columns found, and its value in the condition is specified by the
+     * corresponding property value. If no primary key column is found, then this operation will throw an exception.
+     *
+     * @param connection   the specified connection to use for the delete operation
+     * @param value        the value to provide table info and primary key value
+     * @param introspector the introspector used to introspect the type of the value
+     * @param nameMapper   the name mapper used to map names between java and SQL
+     * @return the number of affected rows
+     * @throws SqlRuntimeException if any error occurs
+     */
+    public static int deleteByPrimaryKey(
+        @Nonnull Connection connection,
+        @Nonnull Object value,
+        @Nonnull ObjectMetaIntrospector introspector,
+        @Nonnull SqlNameMapper nameMapper
+    ) throws SqlRuntimeException {
+        ObjectMeta beanMeta = introspector.introspect(value.getClass());
+        Tuple2<SqlColumn, PropertyMeta> primaryKey = findPrimaryKey(beanMeta);
+        Object id = primaryKey.get1().getValue(value);
+        if (id == null) {
+            throw new SqlRuntimeException("Primary key value is null on " + beanMeta.type().getTypeName() + ".");
+        }
+        return deleteRows(connection, Collections.singletonList(id), beanMeta, primaryKey, nameMapper);
+    }
+
+    /**
+     * Deletes the rows by the specified primary keys. The table info comes from the specified table type: the table
+     * name should be specified by {@link SqlTable} on the class, and the columns should be specified by
+     * {@link SqlColumn} on the properties of the class. The primary key column should be specified by
+     * {@link SqlColumn#primary()} on only one of the columns found, but its values in the condition are specified by
+     * {@code primaryKeyValues}. If no primary key column is found, then this operation will throw an exception.
+     *
+     * @param connection       the specified connection to use for the delete operation
+     * @param tableType        the specified table type to provide table info
+     * @param primaryKeyValues the specified primary key values
+     * @param introspector     the introspector used to introspect the specified table type
+     * @param nameMapper       the name mapper used to map names between java and SQL
+     * @return the number of affected rows
+     * @throws SqlRuntimeException if any error occurs
+     */
+    public static int deleteByPrimaryKeys(
+        @Nonnull Connection connection,
+        @Nonnull Type tableType,
+        @Nonnull List<@Nonnull ?> primaryKeyValues,
+        @Nonnull ObjectMetaIntrospector introspector,
+        @Nonnull SqlNameMapper nameMapper
+    ) throws SqlRuntimeException {
+        if (primaryKeyValues.isEmpty()) {
+            throw new SqlRuntimeException("Primary keys are empty.");
+        }
+        ObjectMeta beanMeta = introspector.introspect(tableType);
+        Tuple2<SqlColumn, PropertyMeta> primaryKey = findPrimaryKey(beanMeta);
+        return deleteRows(connection, primaryKeyValues, beanMeta, primaryKey, nameMapper);
+    }
+
+    private static int deleteRows(
+        @Nonnull Connection connection,
+        @Nonnull List<@Nonnull ?> ids,
+        @Nonnull ObjectMeta beanMeta,
+        @Nonnull Tuple2<@Nonnull SqlColumn, @Nonnull PropertyMeta> primaryKey,
+        @Nonnull SqlNameMapper nameMapper
+    ) throws SqlRuntimeException {
+        Type tableType = beanMeta.type();
+        SqlTable sqlTable = beanMeta.annotations().annotation(SqlTable.class);
+        if (sqlTable == null) {
+            throw new SqlRuntimeException(
+                "No SQL table annotation found on " + tableType.getTypeName() + ": " + SqlTable.class.getName() + "."
+            );
+        }
+        String tableName = SqlKit.toTableName(tableType, sqlTable, nameMapper);
+        StringBuilder sql = new StringBuilder("DELETE FROM ").append(tableName).append(" WHERE ");
+        SqlColumn primaryColumn = primaryKey.get0();
+        PropertyMeta primaryMeta = primaryKey.get1();
+        sql.append(SqlKit.toColumnName(primaryMeta.name(), primaryColumn, nameMapper));
+        if (ids.size() == 1) {
+            sql.append(" = ?");
+        } else {
+            sql.append(" IN (");
+            for (int i = 0; i < ids.size(); i++) {
+                sql.append("?");
+                if (i < ids.size() - 1) {
+                    sql.append(", ");
+                }
+            }
+            sql.append(")");
+        }
+        try (
+            PreparedStatement statement = connection.prepareStatement(sql.toString())
+        ) {
+            int index = 1;
+            for (Object id : ids) {
+                setParameter(statement, index++, id);
+            }
+            return statement.executeUpdate();
+        } catch (Exception e) {
+            throw new SqlRuntimeException(e);
+        }
+    }
+
+    private static @Nonnull Tuple2<@Nonnull SqlColumn, @Nonnull PropertyMeta> findPrimaryKey(
+        @Nonnull ObjectMeta beanMeta
+    ) throws SqlRuntimeException {
+        Type tableType = beanMeta.type();
+        Tuple2<SqlColumn, PropertyMeta> primaryKey = null;
+        for (PropertyMeta propertyMeta : beanMeta.properties().values()) {
+            SqlColumn sqlColumn = propertyMeta.annotations().annotation(SqlColumn.class);
+            if (sqlColumn == null) {
+                continue;
+            }
+            if (sqlColumn.primary()) {
+                if (primaryKey != null) {
+                    throw new SqlRuntimeException("Multiple primary keys found on " + tableType.getTypeName() + ".");
+                }
+                primaryKey = Tuple2.of(sqlColumn, propertyMeta);
+            }
+        }
+        if (primaryKey == null) {
+            throw new SqlRuntimeException("No primary key found on " + tableType.getTypeName() + ".");
+        }
+        return primaryKey;
+    }
+
+    /**
      * Returns the column name mapped from the specified property which is annotated by {@link SqlColumn}.
      *
      * @param propertyName     the name of the specified property
@@ -868,24 +994,6 @@ public class SqlKit {
             this.preparedSql = preparedSql;
             this.columns = columns;
             this.hasAutoGeneratedKey = hasAutoGeneratedKey;
-        }
-    }
-
-    @SuppressWarnings("ClassCanBeRecord")
-    private static final class UpdateInfo {
-
-        private final @Nonnull StringBuilder preparedSql;
-        private final @Nonnull List<@Nonnull Tuple2<@Nonnull SqlColumn, @Nonnull PropertyMeta>> columns;
-        private final @Nonnull Tuple2<@Nonnull SqlColumn, @Nonnull PropertyMeta> primaryKey;
-
-        private UpdateInfo(
-            @Nonnull StringBuilder preparedSql,
-            @Nonnull List<@Nonnull Tuple2<@Nonnull SqlColumn, @Nonnull PropertyMeta>> columns,
-            @Nonnull Tuple2<@Nonnull SqlColumn, @Nonnull PropertyMeta> primaryKey
-        ) {
-            this.preparedSql = preparedSql;
-            this.columns = columns;
-            this.primaryKey = primaryKey;
         }
     }
 
