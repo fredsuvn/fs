@@ -629,14 +629,17 @@ public class SqlKitTest {
             updateAlice.setUserName("Alice2");
             updateAlice.setAge(66);
             updateAlice.setBirthday(null);
-            assertEquals(1, SqlKit.updateByPrimaryKey(connection, updateAlice, INTROSPECTOR, NAME_MAPPER));
+            assertEquals(
+                1,
+                SqlKit.updateByPrimaryKey(connection, updateAlice, INTROSPECTOR, NAME_MAPPER).updatedRows()
+            );
             User updateAll = new User();
             updateAll.setAge(99);
             updateAll.setUserName(null);
             updateAll.setBirthday(null);
             assertEquals(
                 2,
-                SqlKit.updateByPrimaryKeys(connection, updateAll, Fs.list(2L, 3L), INTROSPECTOR, NAME_MAPPER)
+                SqlKit.updateByPrimaryKeys(connection, updateAll, Fs.list(2L, 3L), INTROSPECTOR, NAME_MAPPER).updatedRows()
             );
         }
         {
@@ -758,7 +761,10 @@ public class SqlKitTest {
             User updateAlice = new User();
             updateAlice.setId(1L);
             updateAlice.setUserName("aaa");
-            assertEquals(1, SqlKit.deleteByPrimaryKey(connection, updateAlice, INTROSPECTOR, NAME_MAPPER));
+            assertEquals(
+                1,
+                SqlKit.deleteByPrimaryKey(connection, updateAlice, INTROSPECTOR, NAME_MAPPER).deletedRows()
+            );
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc");
             List<User> insertedUsers = SqlKit.readRows(
@@ -784,7 +790,7 @@ public class SqlKitTest {
             // delete rows
             assertEquals(
                 2,
-                SqlKit.deleteByPrimaryKeys(connection, User.class, Fs.list(2L, 3L), INTROSPECTOR, NAME_MAPPER)
+                SqlKit.deleteByPrimaryKeys(connection, User.class, Fs.list(2L, 3L), INTROSPECTOR, NAME_MAPPER).deletedRows()
             );
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc");

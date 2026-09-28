@@ -487,7 +487,7 @@ public class SqlKit {
      * any
      * @throws SqlRuntimeException if any error occurs
      */
-    public static <I> @Nonnull SqlResult.OfInsert<I> insertRow(
+    public static <I> SqlResult.@Nonnull OfInsert<I> insertRow(
         @Nonnull Connection connection,
         @Nonnull Object value,
         @Nonnull Class<I> targetType,
@@ -548,7 +548,7 @@ public class SqlKit {
      * any
      * @throws SqlRuntimeException if any error occurs
      */
-    public static <I> @Nonnull SqlResult.OfInsert<I> insertRows(
+    public static <I> SqlResult.@Nonnull OfInsert<I> insertRows(
         @Nonnull Connection connection,
         @Nonnull List<?> values,
         @Nonnull Class<I> targetType,
@@ -660,10 +660,10 @@ public class SqlKit {
      * @param value        the value to provide table info and updated values
      * @param introspector the introspector used to introspect the type of the value
      * @param nameMapper   the name mapper used to map names between java and SQL
-     * @return the number of affected rows
+     * @return the result of the update operation, including the number of rows updated
      * @throws SqlRuntimeException if any error occurs
      */
-    public static int updateByPrimaryKey(
+    public static SqlResult.@Nonnull OfUpdate updateByPrimaryKey(
         @Nonnull Connection connection,
         @Nonnull Object value,
         @Nonnull ObjectMetaIntrospector introspector,
@@ -688,10 +688,10 @@ public class SqlKit {
      * @param primaryKeyValues the specified primary key values
      * @param introspector     the introspector used to introspect the type of the value
      * @param nameMapper       the name mapper used to map names between java and SQL
-     * @return the number of affected rows
+     * @return the result of the update operation, including the number of rows updated
      * @throws SqlRuntimeException if any error occurs
      */
-    public static int updateByPrimaryKeys(
+    public static SqlResult.@Nonnull OfUpdate updateByPrimaryKeys(
         @Nonnull Connection connection,
         @Nonnull Object value,
         @Nonnull List<@Nonnull ?> primaryKeyValues,
@@ -704,7 +704,7 @@ public class SqlKit {
         return updateRows(connection, value, primaryKeyValues, introspector, nameMapper);
     }
 
-    private static int updateRows(
+    private static SqlResult.@Nonnull OfUpdate updateRows(
         @Nonnull Connection connection,
         @Nonnull Object value,
         @Nullable List<@Nonnull ?> ids,
@@ -791,7 +791,7 @@ public class SqlKit {
                     setParameter(statement, index++, id);
                 }
             }
-            return statement.executeUpdate();
+            return SqlResult.ofUpdate(statement.executeUpdate());
         } catch (Exception e) {
             throw new SqlRuntimeException(e);
         }
@@ -808,10 +808,10 @@ public class SqlKit {
      * @param value        the value to provide table info and primary key value
      * @param introspector the introspector used to introspect the type of the value
      * @param nameMapper   the name mapper used to map names between java and SQL
-     * @return the number of affected rows
+     * @return the result of the delete operation, including the number of rows deleted
      * @throws SqlRuntimeException if any error occurs
      */
-    public static int deleteByPrimaryKey(
+    public static SqlResult.@Nonnull OfDelete deleteByPrimaryKey(
         @Nonnull Connection connection,
         @Nonnull Object value,
         @Nonnull ObjectMetaIntrospector introspector,
@@ -838,10 +838,10 @@ public class SqlKit {
      * @param primaryKeyValues the specified primary key values
      * @param introspector     the introspector used to introspect the specified table type
      * @param nameMapper       the name mapper used to map names between java and SQL
-     * @return the number of affected rows
+     * @return the result of the delete operation, including the number of rows deleted
      * @throws SqlRuntimeException if any error occurs
      */
-    public static int deleteByPrimaryKeys(
+    public static SqlResult.@Nonnull OfDelete deleteByPrimaryKeys(
         @Nonnull Connection connection,
         @Nonnull Type tableType,
         @Nonnull List<@Nonnull ?> primaryKeyValues,
@@ -856,7 +856,7 @@ public class SqlKit {
         return deleteRows(connection, primaryKeyValues, beanMeta, primaryKey, nameMapper);
     }
 
-    private static int deleteRows(
+    private static SqlResult.@Nonnull OfDelete deleteRows(
         @Nonnull Connection connection,
         @Nonnull List<@Nonnull ?> ids,
         @Nonnull ObjectMeta beanMeta,
@@ -894,7 +894,7 @@ public class SqlKit {
             for (Object id : ids) {
                 setParameter(statement, index++, id);
             }
-            return statement.executeUpdate();
+            return SqlResult.ofDelete(statement.executeUpdate());
         } catch (Exception e) {
             throw new SqlRuntimeException(e);
         }
