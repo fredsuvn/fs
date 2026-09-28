@@ -1,7 +1,7 @@
 package space.sunqian.fs.utils.sql;
 
 import space.sunqian.annotation.Nullable;
-import space.sunqian.fs.base.exception.FsRuntimeException;
+import space.sunqian.fs.io.IORuntimeException;
 
 import java.sql.SQLException;
 
@@ -10,7 +10,7 @@ import java.sql.SQLException;
  *
  * @author sunqian
  */
-public class SqlRuntimeException extends FsRuntimeException {
+public class SqlRuntimeException extends IORuntimeException {
 
     /**
      * Empty constructor.
