@@ -11,10 +11,10 @@ import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.reflect.TypeRef;
 import space.sunqian.fs.utils.sql.SqlCallableParameter;
-import space.sunqian.fs.utils.sql.SqlInsertResult;
 import space.sunqian.fs.utils.sql.SqlKit;
 import space.sunqian.fs.utils.sql.SqlNameMapper;
 import space.sunqian.fs.utils.sql.SqlParameter;
+import space.sunqian.fs.utils.sql.SqlResult;
 import space.sunqian.fs.utils.sql.SqlRuntimeException;
 import space.sunqian.fs.utils.sql.annotation.SqlColumn;
 import space.sunqian.fs.utils.sql.annotation.SqlTable;
@@ -119,7 +119,7 @@ public class SqlKitTest {
         }
         // Drop procedure `test_proc`
         try (Statement statement = connection.createStatement()) {
-            statement.execute("drop procedure if exists test_proc;");
+            statement.execute("drop procedure if exists test_proc");
         }
         // Close connection
         if (connection != null && !connection.isClosed()) {
@@ -132,7 +132,7 @@ public class SqlKitTest {
         {
             // for SqlParameter
             Date now = new Date();
-            String insertSql = "insert into `USER` (USER_NAME, AGE, BIRTHDAY) values (?, ?, ?);";
+            String insertSql = "insert into `USER` (USER_NAME, AGE, BIRTHDAY) values (?, ?, ?)";
             List<?> insertParams = Fs.list(
                 "Alice",
                 null,
@@ -144,7 +144,7 @@ public class SqlKitTest {
             assertEquals(1, inserted);
             insertStatement.close();
             Statement queryStatement = connection.createStatement();
-            ResultSet queryResult = queryStatement.executeQuery("select * from `USER`;");
+            ResultSet queryResult = queryStatement.executeQuery("select * from `USER`");
             assertTrue(queryResult.next());
             assertEquals("Alice", queryResult.getString("USER_NAME"));
             assertEquals(0, queryResult.getInt("AGE"));
@@ -153,8 +153,8 @@ public class SqlKitTest {
                 now.toInstant(),
                 queryResult.getTimestamp("BIRTHDAY").toInstant()
             );
-            queryStatement.close();
             queryResult.close();
+            queryStatement.close();
             // clear data
             clearData();
             // exception
@@ -166,7 +166,7 @@ public class SqlKitTest {
         {
             // for SqlCallableParameter
             Date now = new Date();
-            String insertSql = "insert into `USER` (USER_NAME, AGE, BIRTHDAY) values (?, ?, ?);";
+            String insertSql = "insert into `USER` (USER_NAME, AGE, BIRTHDAY) values (?, ?, ?)";
             List<?> insertParams = Fs.list(
                 "Alice",
                 null,
@@ -208,7 +208,7 @@ public class SqlKitTest {
         {
             // for batches
             Date now = new Date();
-            String insertSql = "insert into `USER` (USER_NAME, AGE, BIRTHDAY) values (?, ?, ?);";
+            String insertSql = "insert into `USER` (USER_NAME, AGE, BIRTHDAY) values (?, ?, ?)";
             List<List<?>> insertParams = Fs.list(
                 Fs.list(
                     SqlParameter.of("Alice", JDBCType.VARCHAR),
@@ -227,7 +227,7 @@ public class SqlKitTest {
             assertEquals(2, inserted);
             insertStatement.close();
             Statement queryStatement = connection.createStatement();
-            ResultSet queryResult = queryStatement.executeQuery("select * from `USER` order by ID asc;");
+            ResultSet queryResult = queryStatement.executeQuery("select * from `USER` order by ID asc");
             assertTrue(queryResult.next());
             assertEquals("Alice", queryResult.getString("USER_NAME"));
             assertEquals(0, queryResult.getInt("AGE"));
@@ -241,8 +241,8 @@ public class SqlKitTest {
             assertEquals(18, queryResult.getInt("AGE"));
             assertNull(queryResult.getObject("BIRTHDAY"));
             assertNull(queryResult.getTimestamp("BIRTHDAY"));
-            queryStatement.close();
             queryResult.close();
+            queryStatement.close();
             // clear data
             clearData();
             // exception
@@ -258,7 +258,7 @@ public class SqlKitTest {
         Date now = new Date();
         {
             // init data
-            String sql = "insert into `USER` (USER_NAME, AGE, BIRTHDAY) values (?, ?, ?);";
+            String sql = "insert into `USER` (USER_NAME, AGE, BIRTHDAY) values (?, ?, ?)";
             List<List<?>> params = Fs.list(
                 Fs.list("Alice", 25, now),
                 Fs.list("Bob", 18, now),
@@ -273,7 +273,7 @@ public class SqlKitTest {
         {
             // test next row
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
+            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc");
             User alice = SqlKit.nextRow(
                 resultSet,
                 User.class,
@@ -305,8 +305,31 @@ public class SqlKitTest {
             assertEquals("Charlie", charlie.getUserName());
             assertEquals(22, charlie.getAge());
             assertEquals(ZonedDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault()), charlie.getBirthday());
-            statement.close();
             resultSet.close();
+            statement.close();
+            // test no row available
+            Statement emptyStatement = connection.createStatement();
+            ResultSet emptyResult = emptyStatement.executeQuery("select * from `USER` where `ID` = 9999");
+            assertNull(SqlKit.nextRow(
+                emptyResult,
+                User.class,
+                INTROSPECTOR,
+                NAME_MAPPER.toPropertyNameMapper(),
+                CONVERTER
+            ));
+            assertNull(SqlKit.nextRow(
+                emptyResult,
+                new TypeRef<User>() {},
+                INTROSPECTOR,
+                NAME_MAPPER.toPropertyNameMapper(),
+                CONVERTER
+            ));
+            assertNull(SqlKit.nextRow(
+                emptyResult,
+                NAME_MAPPER.toPropertyNameMapper()
+            ));
+            emptyResult.close();
+            emptyStatement.close();
             // exception
             assertThrows(
                 SqlRuntimeException.class,
@@ -339,7 +362,7 @@ public class SqlKitTest {
         {
             // test read rows
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
+            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc");
             List<User> users = SqlKit.readRows(
                 resultSet,
                 User.class,
@@ -356,8 +379,8 @@ public class SqlKitTest {
             assertEquals("Charlie", users.get(2).getUserName());
             assertEquals(22, users.get(2).getAge());
             assertEquals(ZonedDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault()), users.get(2).getBirthday());
-            statement.close();
             resultSet.close();
+            statement.close();
             // exception
             assertThrows(
                 SqlRuntimeException.class,
@@ -373,7 +396,7 @@ public class SqlKitTest {
         {
             // test read rows with type ref
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
+            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc");
             List<User> users = SqlKit.readRows(
                 resultSet,
                 new TypeRef<User>() {},
@@ -390,8 +413,8 @@ public class SqlKitTest {
             assertEquals("Charlie", users.get(2).getUserName());
             assertEquals(22, users.get(2).getAge());
             assertEquals(ZonedDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault()), users.get(2).getBirthday());
-            statement.close();
             resultSet.close();
+            statement.close();
             // exception
             assertThrows(
                 SqlRuntimeException.class,
@@ -407,7 +430,7 @@ public class SqlKitTest {
         {
             // test read rows to a list map
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
+            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc");
             List<Map<String, Object>> users = SqlKit.readRows(
                 resultSet,
                 NAME_MAPPER.toPropertyNameMapper()
@@ -430,8 +453,8 @@ public class SqlKitTest {
                 now.toInstant(),
                 ((Timestamp) users.get(2).get("birthday")).toInstant()
             );
-            statement.close();
             resultSet.close();
+            statement.close();
             // exception
             assertThrows(
                 SqlRuntimeException.class,
@@ -458,7 +481,7 @@ public class SqlKitTest {
             user.setBirthday(birthday);
             user.setOther1("other1");
             user.setOther2("other2");
-            SqlInsertResult<Long> userResult =
+            SqlResult.OfInsert<Long> userResult =
                 SqlKit.insertRow(connection, user, Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER);
             assertEquals(1, userResult.insertedRows());
             assertEquals(1L, userResult.autoGeneratedKeys().get(0));
@@ -466,7 +489,7 @@ public class SqlKitTest {
             UserPassword userPassword = new UserPassword();
             userPassword.setUserId(userResult.autoGeneratedKeys().get(0));
             userPassword.setUserPassword("123456");
-            SqlInsertResult<Long> passwordResult =
+            SqlResult.OfInsert<Long> passwordResult =
                 SqlKit.insertRow(connection, userPassword, Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER);
             assertEquals(1, passwordResult.insertedRows());
             assertTrue(passwordResult.autoGeneratedKeys().isEmpty());
@@ -497,7 +520,7 @@ public class SqlKitTest {
             charlie.setAge(22);
             charlie.setBirthday(birthday);
             users.add(charlie);
-            SqlInsertResult<Long> userResult =
+            SqlResult.OfInsert<Long> userResult =
                 SqlKit.insertRows(connection, users, Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER);
             assertEquals(2, userResult.insertedRows());
             assertEquals(2L, userResult.autoGeneratedKeys().get(0));
@@ -509,14 +532,14 @@ public class SqlKitTest {
             UserPassword charliePassword = new UserPassword();
             charliePassword.setUserId(userResult.autoGeneratedKeys().get(1));
             charliePassword.setUserPassword("123456");
-            SqlInsertResult<Long> passwordResult = SqlKit.insertRows(
+            SqlResult.OfInsert<Long> passwordResult = SqlKit.insertRows(
                 connection, Fs.list(bobPassword, charliePassword), Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER
             );
             assertEquals(2, passwordResult.insertedRows());
             assertTrue(passwordResult.autoGeneratedKeys().isEmpty());
             // exception
             assertSame(
-                SqlInsertResult.empty(),
+                SqlResult.emptyInsert(),
                 SqlKit.insertRows(connection, Fs.list(), Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER)
             );
             assertThrows(
@@ -539,7 +562,7 @@ public class SqlKitTest {
         {
             // check inserted rows
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
+            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc");
             List<User> insertedUsers = SqlKit.readRows(
                 resultSet,
                 new TypeRef<User>() {},
@@ -560,8 +583,8 @@ public class SqlKitTest {
             assertEquals("Charlie", insertedUsers.get(2).getUserName());
             assertEquals(22, insertedUsers.get(2).getAge());
             assertEquals(birthday, insertedUsers.get(2).getBirthday());
-            statement.close();
             resultSet.close();
+            statement.close();
         }
         {
             // clear data
@@ -590,7 +613,7 @@ public class SqlKitTest {
             charlie.setAge(22);
             charlie.setBirthday(birthday);
             users.add(charlie);
-            SqlInsertResult<Long> userResult =
+            SqlResult.OfInsert<Long> userResult =
                 SqlKit.insertRows(connection, users, Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER);
             UserPassword bobPassword = new UserPassword();
             bobPassword.setUserId(userResult.autoGeneratedKeys().get(0));
@@ -619,7 +642,7 @@ public class SqlKitTest {
         {
             // check updated rows
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
+            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc");
             List<User> insertedUsers = SqlKit.readRows(
                 resultSet,
                 new TypeRef<User>() {},
@@ -640,8 +663,8 @@ public class SqlKitTest {
             assertEquals("Charlie", insertedUsers.get(2).getUserName());
             assertEquals(99, insertedUsers.get(2).getAge());
             assertEquals(birthday, insertedUsers.get(2).getBirthday());
-            statement.close();
             resultSet.close();
+            statement.close();
         }
         {
             // exception
@@ -721,7 +744,7 @@ public class SqlKitTest {
             charlie.setAge(22);
             charlie.setBirthday(birthday);
             users.add(charlie);
-            SqlInsertResult<Long> userResult =
+            SqlResult.OfInsert<Long> userResult =
                 SqlKit.insertRows(connection, users, Long.class, INTROSPECTOR, NAME_MAPPER, CONVERTER);
             UserPassword bobPassword = new UserPassword();
             bobPassword.setUserId(userResult.autoGeneratedKeys().get(0));
@@ -737,7 +760,7 @@ public class SqlKitTest {
             updateAlice.setUserName("aaa");
             assertEquals(1, SqlKit.deleteByPrimaryKey(connection, updateAlice, INTROSPECTOR, NAME_MAPPER));
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
+            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc");
             List<User> insertedUsers = SqlKit.readRows(
                 resultSet,
                 new TypeRef<User>() {},
@@ -754,8 +777,8 @@ public class SqlKitTest {
             assertEquals("Charlie", insertedUsers.get(1).getUserName());
             assertEquals(22, insertedUsers.get(1).getAge());
             assertEquals(birthday, insertedUsers.get(1).getBirthday());
-            statement.close();
             resultSet.close();
+            statement.close();
         }
         {
             // delete rows
@@ -764,7 +787,7 @@ public class SqlKitTest {
                 SqlKit.deleteByPrimaryKeys(connection, User.class, Fs.list(2L, 3L), INTROSPECTOR, NAME_MAPPER)
             );
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc;");
+            ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc");
             List<User> insertedUsers = SqlKit.readRows(
                 resultSet,
                 new TypeRef<User>() {},
@@ -773,8 +796,8 @@ public class SqlKitTest {
                 CONVERTER
             );
             assertEquals(0, insertedUsers.size());
-            statement.close();
             resultSet.close();
+            statement.close();
         }
         {
             // // exception
@@ -831,8 +854,8 @@ public class SqlKitTest {
 
     private void clearData() throws Exception {
         try (Statement clearStatement = connection.createStatement()) {
-            clearStatement.execute("delete from `USER`;");
-            clearStatement.execute("delete from `USER_PASSWORD`;");
+            clearStatement.execute("delete from `USER`");
+            clearStatement.execute("delete from `USER_PASSWORD`");
         }
     }
 

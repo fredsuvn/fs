@@ -196,7 +196,8 @@ public class SqlKit {
     }
 
     /**
-     * Reads the next row from the given {@link ResultSet} and converts it to the specified Java type.
+     * Reads the next row from the given {@link ResultSet} and converts it to the specified Java type. If no more rows
+     * are available, returns {@code null}.
      *
      * @param <T>              the specified Java type
      * @param resultSet        the given {@link ResultSet}
@@ -206,10 +207,10 @@ public class SqlKit {
      *                         type
      * @param converter        the converter used to convert the JDBC type to the Java type
      * @param options          the options for the converter
-     * @return the converted Java object
+     * @return the converted Java object, or {@code null} if no more rows are available
      * @throws SqlRuntimeException if any error occurs
      */
-    public static <T> @Nonnull T nextRow(
+    public static <T> @Nullable T nextRow(
         @Nonnull ResultSet resultSet,
         @Nonnull Class<T> javaType,
         @Nonnull ObjectMetaIntrospector introspector,
@@ -225,7 +226,8 @@ public class SqlKit {
     }
 
     /**
-     * Reads the next row from the given {@link ResultSet} and converts it to the specified Java type.
+     * Reads the next row from the given {@link ResultSet} and converts it to the specified Java type. If no more rows
+     * are available, returns {@code null}.
      *
      * @param <T>              the specified Java type
      * @param resultSet        the given {@link ResultSet}
@@ -235,10 +237,10 @@ public class SqlKit {
      *                         type
      * @param converter        the converter used to convert the JDBC type to the Java type
      * @param options          the options for the converter
-     * @return the converted Java object
+     * @return the converted Java object, or {@code null} if no more rows are available
      * @throws SqlRuntimeException if any error occurs
      */
-    public static <T> @Nonnull T nextRow(
+    public static <T> @Nullable T nextRow(
         @Nonnull ResultSet resultSet,
         @Nonnull TypeRef<T> javaTypeRef,
         @Nonnull ObjectMetaIntrospector introspector,
@@ -253,7 +255,7 @@ public class SqlKit {
         }
     }
 
-    private static @Nonnull Object nextRow0(
+    private static @Nullable Object nextRow0(
         @Nonnull ResultSet resultSet,
         @Nonnull Type javaType,
         @Nonnull ObjectMetaIntrospector introspector,
@@ -261,10 +263,12 @@ public class SqlKit {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SQLException {
+        if (!resultSet.next()) {
+            return null;
+        }
         ObjectMeta javaMeta = introspector.introspect(javaType);
         Map<String, Object> sqlData = new HashMap<>();
         ResultSetMetaData sqlMeta = resultSet.getMetaData();
-        resultSet.next();
         int columnCount = sqlMeta.getColumnCount();
         for (int i = 1; i <= columnCount; i++) {
             String columnName = sqlMeta.getColumnName(i);
@@ -280,14 +284,15 @@ public class SqlKit {
     }
 
     /**
-     * Reads the next row from the given {@link ResultSet} and converts it to a {@link Map}.
+     * Reads the next row from the given {@link ResultSet} and converts it to a {@link Map}. If no more rows are
+     * available, returns {@code null}.
      *
      * @param resultSet        the given {@link ResultSet}
      * @param columnNameMapper the name mapper used to map the column name to the key of the returned map
-     * @return the converted {@link Map}
+     * @return the converted {@link Map}, or {@code null} if no more rows are available
      * @throws SqlRuntimeException if any error occurs
      */
-    public static @Nonnull Map<@Nonnull String, Object> nextRow(
+    public static @Nullable Map<@Nonnull String, Object> nextRow(
         @Nonnull ResultSet resultSet,
         @Nonnull NameMapper columnNameMapper
     ) throws SqlRuntimeException {
@@ -298,13 +303,15 @@ public class SqlKit {
         }
     }
 
-    private static @Nonnull Map<@Nonnull String, Object> nextRow0(
+    private static @Nullable Map<@Nonnull String, Object> nextRow0(
         @Nonnull ResultSet sqlResult,
         @Nonnull NameMapper columnNameMapper
     ) throws SQLException {
+        if (!sqlResult.next()) {
+            return null;
+        }
         Map<String, Object> sqlData = new HashMap<>();
         ResultSetMetaData sqlMeta = sqlResult.getMetaData();
-        sqlResult.next();
         int columnCount = sqlMeta.getColumnCount();
         for (int i = 1; i <= columnCount; i++) {
             String columnName = sqlMeta.getColumnName(i);
@@ -480,7 +487,7 @@ public class SqlKit {
      * any
      * @throws SqlRuntimeException if any error occurs
      */
-    public static <I> @Nonnull SqlInsertResult<I> insertRow(
+    public static <I> @Nonnull SqlResult.OfInsert<I> insertRow(
         @Nonnull Connection connection,
         @Nonnull Object value,
         @Nonnull Class<I> targetType,
@@ -504,14 +511,14 @@ public class SqlKit {
             }
             int insertedRows = statement.executeUpdate();
             if (!insertInfo.hasAutoGeneratedKey) {
-                return new SqlInsertResult<>(insertedRows, Collections.emptyList());
+                return SqlResult.ofInsert(insertedRows, Collections.emptyList());
             }
             try (ResultSet resultSet = statement.getGeneratedKeys()) {
                 resultSet.next();
                 Object generatedKey = resultSet.getObject(1);
                 Class<?> generatedKeyType = Fs.nonnull(generatedKey.getClass(), Object.class);
                 I autoGeneratedKey = converter.convert(generatedKey, generatedKeyType, targetType, options);
-                return new SqlInsertResult<>(insertedRows, Collections.singletonList(autoGeneratedKey));
+                return SqlResult.ofInsert(insertedRows, Collections.singletonList(autoGeneratedKey));
             }
         } catch (Exception e) {
             throw new SqlRuntimeException(e);
@@ -541,7 +548,7 @@ public class SqlKit {
      * any
      * @throws SqlRuntimeException if any error occurs
      */
-    public static <I> @Nonnull SqlInsertResult<I> insertRows(
+    public static <I> @Nonnull SqlResult.OfInsert<I> insertRows(
         @Nonnull Connection connection,
         @Nonnull List<?> values,
         @Nonnull Class<I> targetType,
@@ -551,7 +558,7 @@ public class SqlKit {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws SqlRuntimeException {
         if (values.isEmpty()) {
-            return SqlInsertResult.empty();
+            return SqlResult.emptyInsert();
         }
         Type tableType = values.get(0).getClass();
         InsertInfo insertInfo = buildPreparedInsertSql(tableType, introspector, nameMapper);
@@ -572,7 +579,7 @@ public class SqlKit {
             int[] affectedRows = statement.executeBatch();
             int insertedRows = Arrays.stream(affectedRows).sum();
             if (!insertInfo.hasAutoGeneratedKey) {
-                return new SqlInsertResult<>(insertedRows, Collections.emptyList());
+                return SqlResult.ofInsert(insertedRows, Collections.emptyList());
             }
             try (ResultSet resultSet = statement.getGeneratedKeys()) {
                 List<I> result = new ArrayList<>(values.size());
@@ -581,7 +588,7 @@ public class SqlKit {
                     Class<?> generatedKeyType = Fs.nonnull(generatedKey.getClass(), Object.class);
                     result.add(converter.convert(generatedKey, generatedKeyType, targetType, options));
                 }
-                return new SqlInsertResult<>(insertedRows, result);
+                return SqlResult.ofInsert(insertedRows, result);
             }
         } catch (Exception e) {
             throw new SqlRuntimeException(e);
