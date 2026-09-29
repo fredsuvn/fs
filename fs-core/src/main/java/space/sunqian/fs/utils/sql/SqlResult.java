@@ -1,12 +1,19 @@
 package space.sunqian.fs.utils.sql;
 
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.fs.io.RuntimeCloseable;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
 
-public interface SqlResult {
+/**
+ * The result of a SQL statement execution, typically bound to an executed {@link Statement} or
+ * {@link PreparedStatement}.
+ *
+ * @author sunqian
+ */
+public interface SqlResult extends RuntimeCloseable {
 
     /**
      * Returns an empty {@link OfInsert} whose inserted rows is 0 and auto-generated key list is empty.
@@ -78,7 +85,21 @@ public interface SqlResult {
     }
 
     /**
-     * Represents the result of a SQL insert operation.
+     * Closes the bound statement of this result.
+     *
+     * @throws SqlRuntimeException if an error occurs during the close operation
+     */
+    @Override
+    default void close() throws SqlRuntimeException {
+        try {
+            statement().close();
+        } catch (Exception e) {
+            throw new SqlRuntimeException(e);
+        }
+    }
+
+    /**
+     * The result of a SQL insert operation.
      *
      * @param <I> the type of the auto-generated key at the first column of the result set
      * @author sunqian
@@ -103,7 +124,7 @@ public interface SqlResult {
     }
 
     /**
-     * Represents the result of a SQL update operation.
+     * The result of a SQL update operation.
      *
      * @author sunqian
      */
@@ -118,7 +139,7 @@ public interface SqlResult {
     }
 
     /**
-     * Represents the result of a SQL delete operation.
+     * The result of a SQL delete operation.
      *
      * @author sunqian
      */

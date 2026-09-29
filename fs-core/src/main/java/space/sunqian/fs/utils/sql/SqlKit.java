@@ -466,62 +466,6 @@ public class SqlKit {
         return columnNames;
     }
 
-    // /**
-    //  * Reads the next row from the given {@link ResultSet} and converts it to the specified Java type. If no more rows
-    //  * are available, returns {@code null}.
-    //  *
-    //  * @param <T>              the specified Java type
-    //  * @param resultSet        the given {@link ResultSet}
-    //  * @param javaType         the specified Java type
-    //  * @param introspector     the introspector used to introspect the specified Java type
-    //  * @param columnNameMapper the name mapper used to map the column name to the property name of the specified Java
-    //  *                         type
-    //  * @param converter        the converter used to convert the JDBC type to the Java type
-    //  * @param options          the options for the converter
-    //  * @return the converted Java object, or {@code null} if no more rows are available
-    //  * @throws SqlRuntimeException if any error occurs
-    //  */
-    // public static <T> @Nullable T readOutParam(
-    //     @Nonnull CallableStatement statement,
-    //     @Nonnull String procedureName,
-    //     @Nonnull Class<T> javaType,
-    //     @Nonnull ObjectMetaIntrospector introspector,
-    //     @Nonnull NameMapper columnNameMapper,
-    //     @Nonnull ObjectConverter converter,
-    //     @Nonnull Option<?, ?> @Nonnull ... options
-    // ) throws SqlRuntimeException {
-    //     try {
-    //         ObjectMeta javaMeta = introspector.introspect(javaType);
-    //         Map<String, Object> sqlData = new HashMap<>();
-    //         Connection connection = statement.getConnection();
-    //         String catalog = connection.getCatalog();
-    //         String schema = connection.getSchema();
-    //         ResultSet resultSet = connection.getMetaData()
-    //             .getProcedureColumns(catalog, schema, procedureName, "%");
-    //         ParameterMetaData sqlMeta = statement.getParameterMetaData();
-    //         int parameterCount = sqlMeta.getParameterCount();
-    //         for (int i = 1; i <= parameterCount; i++) {
-    //             int mode = sqlMeta.getParameterMode(i);
-    //             if (mode != ParameterMetaData.parameterModeOut &&  mode != ParameterMetaData.parameterModeInOut) {
-    //                 continue;
-    //             }
-    //             String parameterName = sqlMeta.
-    //             String propertyName = columnNameMapper.map(parameterName);
-    //             PropertyMeta propertyMeta = javaMeta.getProperty(propertyName);
-    //             if (propertyMeta == null) {
-    //                 continue;
-    //             }
-    //             Object jdbcObject = resultSet.getObject(i);
-    //             sqlData.put(propertyName, jdbcObject);
-    //         }
-    //         return converter.convert(sqlData, javaType, options);
-    //     } catch (Exception e) {
-    //         throw new SqlRuntimeException(e);
-    //     }
-    // }
-    //
-    // public static @Nonnull Map<@Nonnull String, SqlCallableParameter.@Nonnull Mode> readOutParam()
-
     /**
      * Inserts the given value as one row into the specified connection. The table info comes from the class of the
      * value by {@link Object#getClass()}: the table name should be specified by {@link SqlTable} on the class, and the
