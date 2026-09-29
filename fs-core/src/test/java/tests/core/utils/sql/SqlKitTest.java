@@ -10,7 +10,6 @@ import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.meta.ObjectMeta;
 import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.reflect.TypeRef;
-import space.sunqian.fs.utils.sql.SqlCallableParameter;
 import space.sunqian.fs.utils.sql.SqlKit;
 import space.sunqian.fs.utils.sql.SqlNameMapper;
 import space.sunqian.fs.utils.sql.SqlParameter;
@@ -182,11 +181,11 @@ public class SqlKitTest {
             String procSql = "{call test_proc(?, ?, ?, ?, ?)}";
             CallableStatement procStatement = connection.prepareCall(procSql);
             List<?> procParams = Fs.list(
-                SqlCallableParameter.of(1, Types.INTEGER, SqlCallableParameter.Mode.IN),
+                SqlParameter.of(1, Types.INTEGER, SqlParameter.Mode.IN),
                 SqlParameter.of(2, Types.INTEGER),
                 3,
-                SqlCallableParameter.of(4, Types.INTEGER, SqlCallableParameter.Mode.OUT),
-                SqlCallableParameter.of(5, Types.INTEGER, SqlCallableParameter.Mode.IN_OUT)
+                SqlParameter.of(4, Types.INTEGER, SqlParameter.Mode.OUT),
+                SqlParameter.of(5, Types.INTEGER, SqlParameter.Mode.IN_OUT)
             );
             SqlKit.setParameters(procStatement, procParams);
             procStatement.execute();

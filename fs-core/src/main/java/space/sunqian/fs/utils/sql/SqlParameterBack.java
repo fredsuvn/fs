@@ -6,19 +6,19 @@ import space.sunqian.annotation.Nullable;
 import java.sql.SQLType;
 import java.util.Objects;
 
-final class ParameterBack {
+final class SqlParameterBack {
 
     static @Nonnull SqlParameter newSqlParameter(@Nullable Object value, int sqlTypeCode, @Nonnull SQLType sqlType) {
         return new SqlParameterImpl(value, sqlTypeCode, sqlType);
     }
 
-    static @Nonnull SqlCallableParameter newCallableParameter(
+    static @Nonnull SqlParameter newCallableParameter(
         @Nullable Object value,
         int sqlTypeCode,
         @Nonnull SQLType sqlType,
-        @Nonnull SqlCallableParameter.Mode mode
+        @Nonnull SqlParameter.Mode mode
     ) {
-        return new SqlCallableParameterImpl(value, sqlTypeCode, sqlType, mode);
+        return new CallableParameterImpl(value, sqlTypeCode, sqlType, mode);
     }
 
     private static class BaseSqlParameterImpl implements SqlParameter {
@@ -46,6 +46,11 @@ final class ParameterBack {
         @Override
         public @Nonnull SQLType sqlType() {
             return sqlType;
+        }
+
+        @Override
+        public @Nullable Mode mode() {
+            return null;
         }
     }
 
@@ -81,11 +86,11 @@ final class ParameterBack {
         }
     }
 
-    private static final class SqlCallableParameterImpl extends BaseSqlParameterImpl implements SqlCallableParameter {
+    private static final class CallableParameterImpl extends BaseSqlParameterImpl {
 
         private final @Nonnull Mode mode;
 
-        private SqlCallableParameterImpl(
+        private CallableParameterImpl(
             @Nullable Object value,
             int sqlTypeCode,
             @Nonnull SQLType sqlType,
@@ -110,11 +115,11 @@ final class ParameterBack {
             if (this == obj) {
                 return true;
             }
-            if (!(obj instanceof SqlCallableParameterImpl)) {
+            if (!(obj instanceof CallableParameterImpl)) {
                 return false;
             }
             @SuppressWarnings("PatternVariableCanBeUsed")
-            SqlCallableParameterImpl that = (SqlCallableParameterImpl) obj;
+            CallableParameterImpl that = (CallableParameterImpl) obj;
             return Objects.equals(value, that.value())
                 && sqlTypeCode == that.sqlTypeCode()
                 && Objects.equals(sqlType, that.sqlType())
@@ -127,6 +132,6 @@ final class ParameterBack {
         }
     }
 
-    private ParameterBack() {
+    private SqlParameterBack() {
     }
 }

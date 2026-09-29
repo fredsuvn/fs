@@ -43,32 +43,34 @@ public class SqlKit {
     /**
      * Sets the given parameter on the specified statement.
      * <p>
-     * If the statement is a {@link CallableStatement} and the parameter is a {@link SqlCallableParameter}, its
-     * {@link SqlCallableParameter.Mode mode} determines how it will be set:
+     * If the statement is a {@link CallableStatement} and the parameter is a {@link SqlParameter}, its
+     * {@link SqlParameter.Mode mode} determines how it will be set:
      * <ul>
      *     <li>
-     *         if the mode is {@link SqlCallableParameter.Mode#OUT}, it will be registered as an output parameter by
+     *         if the mode is {@link SqlParameter.Mode#OUT}, it will be registered as an output parameter by
      *         {@link CallableStatement#registerOutParameter(int, SQLType)};
      *     </li>
      *     <li>
-     *         if the mode is {@link SqlCallableParameter.Mode#IN_OUT}, it will be registered as an output parameter by
-     *         {@link CallableStatement#registerOutParameter(int, SQLType)} and then set by
+     *         if the mode is {@link SqlParameter.Mode#IN_OUT}, it will be registered as an output parameter by
+     *         {@link CallableStatement#registerOutParameter(int, SQLType)} and then its value will be set by
      *         {@link CallableStatement#setObject(int, Object, SQLType)};
      *     </li>
      *     <li>
-     *         otherwise, it will be set by {@link CallableStatement#setObject(int, Object, SQLType)}.
+     *         otherwise, its value will be set by {@link CallableStatement#setObject(int, Object, SQLType)}.
      *     </li>
      * </ul>
      * <p>
-     * Otherwise, if the parameter is an instance of {@link SqlParameter}, its value will be set as the specified SQL
-     * type by {@link PreparedStatement#setObject(int, Object, SQLType)}; if the parameter is {@code null}, it will be
-     * set as {@link Types#NULL}; otherwise, the parameter will be set by
-     * {@link PreparedStatement#setObject(int, Object)}. Note if the statement is a {@link CallableStatement} but the
-     * parameter is not a {@link SqlCallableParameter}, the mode will be considered as
-     * {@link SqlCallableParameter.Mode#IN}.
+     * If the statement is a {@link CallableStatement} but the parameter is not an instance of {@link SqlParameter}, the
+     * mode will be treated as {@link SqlParameter.Mode#IN} and its value will be set by
+     * {@link CallableStatement#setObject(int, Object, SQLType)}.
+     * <p>
+     * In other cases, if the parameter is an instance of {@link SqlParameter}, its value will be set by
+     * {@link PreparedStatement#setObject(int, Object, SQLType)}; if the parameter is {@code null}, it will be
+     * set with {@link Types#NULL}; otherwise, its value will be set by
+     * {@link PreparedStatement#setObject(int, Object)}.
      *
      * @param statement the specified statement, which may be a {@link CallableStatement}
-     * @param index     the parameter index of the statement
+     * @param index     the parameter index of the statement, starting from 1
      * @param parameter the given parameter
      * @throws SqlRuntimeException if any error occurs
      */
@@ -110,20 +112,20 @@ public class SqlKit {
         int index,
         @Nullable Object parameter
     ) throws SqlRuntimeException {
-        if (parameter instanceof SqlCallableParameter) {
+        if (parameter instanceof SqlParameter) {
             try {
                 @SuppressWarnings({"PatternVariableCanBeUsed"})
-                SqlCallableParameter callableParameter = (SqlCallableParameter) parameter;
-                SQLType type = callableParameter.sqlType();
-                SqlCallableParameter.Mode mode = callableParameter.mode();
-                if (SqlCallableParameter.Mode.OUT.equals(mode)) {
+                SqlParameter sqlParameter = (SqlParameter) parameter;
+                SQLType type = sqlParameter.sqlType();
+                SqlParameter.Mode mode = sqlParameter.mode();
+                if (SqlParameter.Mode.OUT.equals(mode)) {
                     statement.registerOutParameter(index, type);
                     return;
                 }
-                if (SqlCallableParameter.Mode.IN_OUT.equals(mode)) {
+                if (SqlParameter.Mode.IN_OUT.equals(mode)) {
                     statement.registerOutParameter(index, type);
                 }
-                statement.setObject(index, callableParameter.value(), type);
+                statement.setObject(index, sqlParameter.value(), type);
             } catch (Exception e) {
                 throw new SqlRuntimeException(e);
             }
@@ -152,7 +154,7 @@ public class SqlKit {
      * {@link #setParameter(PreparedStatement, int, Object)} in the order of the list.
      *
      * @param statement  the specified statement, which may be a {@link CallableStatement}
-     * @param index      the start index, must be {@code >= 1}
+     * @param index      the start parameter index in the statement, must be {@code >= 1}
      * @param parameters the given parameters
      * @throws SqlRuntimeException if any error occurs
      */
@@ -463,6 +465,62 @@ public class SqlKit {
         }
         return columnNames;
     }
+
+    // /**
+    //  * Reads the next row from the given {@link ResultSet} and converts it to the specified Java type. If no more rows
+    //  * are available, returns {@code null}.
+    //  *
+    //  * @param <T>              the specified Java type
+    //  * @param resultSet        the given {@link ResultSet}
+    //  * @param javaType         the specified Java type
+    //  * @param introspector     the introspector used to introspect the specified Java type
+    //  * @param columnNameMapper the name mapper used to map the column name to the property name of the specified Java
+    //  *                         type
+    //  * @param converter        the converter used to convert the JDBC type to the Java type
+    //  * @param options          the options for the converter
+    //  * @return the converted Java object, or {@code null} if no more rows are available
+    //  * @throws SqlRuntimeException if any error occurs
+    //  */
+    // public static <T> @Nullable T readOutParam(
+    //     @Nonnull CallableStatement statement,
+    //     @Nonnull String procedureName,
+    //     @Nonnull Class<T> javaType,
+    //     @Nonnull ObjectMetaIntrospector introspector,
+    //     @Nonnull NameMapper columnNameMapper,
+    //     @Nonnull ObjectConverter converter,
+    //     @Nonnull Option<?, ?> @Nonnull ... options
+    // ) throws SqlRuntimeException {
+    //     try {
+    //         ObjectMeta javaMeta = introspector.introspect(javaType);
+    //         Map<String, Object> sqlData = new HashMap<>();
+    //         Connection connection = statement.getConnection();
+    //         String catalog = connection.getCatalog();
+    //         String schema = connection.getSchema();
+    //         ResultSet resultSet = connection.getMetaData()
+    //             .getProcedureColumns(catalog, schema, procedureName, "%");
+    //         ParameterMetaData sqlMeta = statement.getParameterMetaData();
+    //         int parameterCount = sqlMeta.getParameterCount();
+    //         for (int i = 1; i <= parameterCount; i++) {
+    //             int mode = sqlMeta.getParameterMode(i);
+    //             if (mode != ParameterMetaData.parameterModeOut &&  mode != ParameterMetaData.parameterModeInOut) {
+    //                 continue;
+    //             }
+    //             String parameterName = sqlMeta.
+    //             String propertyName = columnNameMapper.map(parameterName);
+    //             PropertyMeta propertyMeta = javaMeta.getProperty(propertyName);
+    //             if (propertyMeta == null) {
+    //                 continue;
+    //             }
+    //             Object jdbcObject = resultSet.getObject(i);
+    //             sqlData.put(propertyName, jdbcObject);
+    //         }
+    //         return converter.convert(sqlData, javaType, options);
+    //     } catch (Exception e) {
+    //         throw new SqlRuntimeException(e);
+    //     }
+    // }
+    //
+    // public static @Nonnull Map<@Nonnull String, SqlCallableParameter.@Nonnull Mode> readOutParam()
 
     /**
      * Inserts the given value as one row into the specified connection. The table info comes from the class of the
