@@ -128,7 +128,7 @@ final class SqlParameterBack {
 
         @Override
         public String toString() {
-            return "CallableParameter[" + value + ", " + sqlTypeCode + ", " + sqlType.getName() + ", " + mode + "]";
+            return "SqlParameter[" + value + ", " + sqlTypeCode + ", " + sqlType.getName() + ", " + mode + "]";
         }
     }
 

@@ -149,8 +149,7 @@ public interface SqlParameter {
     Mode mode();
 
     /**
-     * Represents the mode of the parameter, which can be {@link #IN}, {@link #OUT}, {@link #IN_OUT} or
-     * {@link #UNKNOWN}.
+     * Represents the mode of a parameter, which can be {@link #IN}, {@link #OUT}, {@link #IN_OUT} or {@link #UNKNOWN}.
      */
     enum Mode {
 

@@ -118,7 +118,7 @@ public class SqlParameterTest {
 
         // test toString
         assertEquals(
-            "CallableParameter[1, " + Types.BIGINT + ", " + JDBCType.BIGINT.getName() + ", " + SqlParameter.Mode.IN + "]",
+            "SqlParameter[1, " + Types.BIGINT + ", " + JDBCType.BIGINT.getName() + ", " + SqlParameter.Mode.IN + "]",
             p1.toString()
         );
         assertNotEquals(p1, SqlParameter.of(1L, Types.BIGINT, new SQLType() {
