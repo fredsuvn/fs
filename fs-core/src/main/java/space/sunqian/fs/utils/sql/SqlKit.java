@@ -5,13 +5,10 @@ import space.sunqian.annotation.Nullable;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.lang.Tuple2;
 import space.sunqian.fs.base.lang.Tuple3;
-import space.sunqian.fs.base.option.Option;
 import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.object.convert.ObjectConverter;
 import space.sunqian.fs.object.meta.ObjectMeta;
-import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.object.meta.PropertyMeta;
-import space.sunqian.fs.reflect.TypeRef;
 import space.sunqian.fs.utils.sql.annotation.SqlColumn;
 import space.sunqian.fs.utils.sql.annotation.SqlTable;
 
@@ -26,12 +23,11 @@ import java.sql.SQLType;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * Utilities for SQL operations.
@@ -198,385 +194,226 @@ public class SqlKit {
     }
 
     /**
-     * Reads the next row from the given {@link ResultSet} and converts it to the specified Java type. If no more rows
-     * are available, returns {@code null}.
+     * Reads the next row from the given {@link ResultSet} and converts it to a bean. If no more rows are available,
+     * returns {@code null}.
      *
-     * @param <T>              the specified Java type
-     * @param resultSet        the given {@link ResultSet}
-     * @param javaType         the specified Java type
-     * @param introspector     the introspector used to introspect the specified Java type
-     * @param columnNameMapper the name mapper used to map the column name to the property name of the specified Java
-     *                         type
-     * @param converter        the converter used to convert the JDBC type to the Java type
-     * @param options          the options for the converter
-     * @return the converted Java object, or {@code null} if no more rows are available
+     * @param resultSet  the given {@link ResultSet} to read from
+     * @param beanMeta   the metadata of the bean
+     * @param nameMapper the mapper that maps column names to bean property names
+     * @param converter  the converter that converts objects from the {@link ResultSet} into the bean
+     * @return the converted bean, or {@code null} if no more rows are available
      * @throws SqlRuntimeException if any error occurs
      */
-    public static <T> @Nullable T nextRow(
+    public static @Nullable Object nextRow(
         @Nonnull ResultSet resultSet,
-        @Nonnull Class<T> javaType,
-        @Nonnull ObjectMetaIntrospector introspector,
-        @Nonnull NameMapper columnNameMapper,
-        @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull ... options
+        @Nonnull ObjectMeta beanMeta,
+        @Nonnull NameMapper nameMapper,
+        @Nonnull ObjectConverter converter
     ) throws SqlRuntimeException {
         try {
-            return Fs.as(nextRow0(resultSet, javaType, introspector, columnNameMapper, converter, options));
+            if (!resultSet.next()) {
+                return null;
+            }
+            ResultSetMetaData sqlMeta = resultSet.getMetaData();
+            return nextRow0(resultSet, sqlMeta, beanMeta, nameMapper, converter);
         } catch (Exception e) {
             throw new SqlRuntimeException(e);
         }
     }
 
     /**
-     * Reads the next row from the given {@link ResultSet} and converts it to the specified Java type. If no more rows
-     * are available, returns {@code null}.
+     * Reads all rows from the given {@link ResultSet} and converts them into a list of beans. If no rows are available,
+     * returns an empty list.
      *
-     * @param <T>              the specified Java type
-     * @param resultSet        the given {@link ResultSet}
-     * @param javaTypeRef      the reference to the specified Java type
-     * @param introspector     the introspector used to introspect the specified Java type
-     * @param columnNameMapper the name mapper used to map the column name to the property name of the specified Java
-     *                         type
-     * @param converter        the converter used to convert the JDBC type to the Java type
-     * @param options          the options for the converter
-     * @return the converted Java object, or {@code null} if no more rows are available
+     * @param resultSet  the given {@link ResultSet} to read from
+     * @param beanMeta   the metadata of the bean
+     * @param nameMapper the mapper that maps column names to bean property names
+     * @param converter  the converter that converts objects from the {@link ResultSet} into the list of beans
+     * @return a list of the converted beans, or an empty list if no rows are available
      * @throws SqlRuntimeException if any error occurs
      */
-    public static <T> @Nullable T nextRow(
+    public static @Nonnull List<@Nonnull Object> readRows(
         @Nonnull ResultSet resultSet,
-        @Nonnull TypeRef<T> javaTypeRef,
-        @Nonnull ObjectMetaIntrospector introspector,
-        @Nonnull NameMapper columnNameMapper,
-        @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull ... options
+        @Nonnull ObjectMeta beanMeta,
+        @Nonnull NameMapper nameMapper,
+        @Nonnull ObjectConverter converter
     ) throws SqlRuntimeException {
         try {
-            return Fs.as(nextRow0(resultSet, javaTypeRef.type(), introspector, columnNameMapper, converter, options));
+            ArrayList<Object> rows = new ArrayList<>();
+            ResultSetMetaData sqlMeta = resultSet.getMetaData();
+            while (resultSet.next()) {
+                rows.add(nextRow0(resultSet, sqlMeta, beanMeta, nameMapper, converter));
+            }
+            return rows;
         } catch (Exception e) {
             throw new SqlRuntimeException(e);
         }
     }
 
-    private static @Nullable Object nextRow0(
+    private static @Nonnull Object nextRow0(
         @Nonnull ResultSet resultSet,
-        @Nonnull Type javaType,
-        @Nonnull ObjectMetaIntrospector introspector,
-        @Nonnull NameMapper columnNameMapper,
-        @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull ... options
+        @Nonnull ResultSetMetaData sqlMeta,
+        @Nonnull ObjectMeta beanMeta,
+        @Nonnull NameMapper nameMapper,
+        @Nonnull ObjectConverter converter
     ) throws SQLException {
-        if (!resultSet.next()) {
-            return null;
-        }
-        ObjectMeta javaMeta = introspector.introspect(javaType);
         Map<String, Object> sqlData = new HashMap<>();
-        ResultSetMetaData sqlMeta = resultSet.getMetaData();
         int columnCount = sqlMeta.getColumnCount();
         for (int i = 1; i <= columnCount; i++) {
-            String columnName = sqlMeta.getColumnName(i);
-            String propertyName = columnNameMapper.map(columnName);
-            PropertyMeta propertyMeta = javaMeta.getProperty(propertyName);
+            String columnName = sqlMeta.getColumnLabel(i);
+            String propertyName = nameMapper.map(columnName);
+            PropertyMeta propertyMeta = beanMeta.getProperty(propertyName);
             if (propertyMeta == null) {
                 continue;
             }
             Object jdbcObject = resultSet.getObject(i);
             sqlData.put(propertyName, jdbcObject);
         }
-        return converter.convert(sqlData, javaType, options);
+        return converter.convert(sqlData, beanMeta.type());
     }
 
     /**
-     * Reads the next row from the given {@link ResultSet} and converts it to a {@link Map}. If no more rows are
-     * available, returns {@code null}.
-     *
-     * @param resultSet        the given {@link ResultSet}
-     * @param columnNameMapper the name mapper used to map the column name to the key of the returned map
-     * @return the converted {@link Map}, or {@code null} if no more rows are available
-     * @throws SqlRuntimeException if any error occurs
-     */
-    public static @Nullable Map<@Nonnull String, Object> nextRow(
-        @Nonnull ResultSet resultSet,
-        @Nonnull NameMapper columnNameMapper
-    ) throws SqlRuntimeException {
-        try {
-            return nextRow0(resultSet, columnNameMapper);
-        } catch (Exception e) {
-            throw new SqlRuntimeException(e);
-        }
-    }
-
-    private static @Nullable Map<@Nonnull String, Object> nextRow0(
-        @Nonnull ResultSet sqlResult,
-        @Nonnull NameMapper columnNameMapper
-    ) throws SQLException {
-        if (!sqlResult.next()) {
-            return null;
-        }
-        Map<String, Object> sqlData = new HashMap<>();
-        ResultSetMetaData sqlMeta = sqlResult.getMetaData();
-        int columnCount = sqlMeta.getColumnCount();
-        for (int i = 1; i <= columnCount; i++) {
-            String columnName = sqlMeta.getColumnName(i);
-            String key = columnNameMapper.map(columnName);
-            Object jdbcObject = sqlResult.getObject(i);
-            sqlData.put(key, jdbcObject);
-        }
-        return sqlData;
-    }
-
-    /**
-     * Reads all rows from the given {@link ResultSet} and converts them to the specified Java type.
-     *
-     * @param <T>              the specified Java type
-     * @param resultSet        the given {@link ResultSet}
-     * @param javaType         the specified Java type
-     * @param introspector     the introspector used to introspect the specified Java type
-     * @param columnNameMapper the name mapper used to map the column name to the property name of the specified Java
-     *                         type
-     * @param converter        the converter used to convert the JDBC type to the Java type
-     * @param options          the options for the converter
-     * @return a list of the converted Java objects
-     * @throws SqlRuntimeException if any error occurs
-     */
-    public static <T> @Nonnull List<@Nonnull T> readRows(
-        @Nonnull ResultSet resultSet,
-        @Nonnull Class<T> javaType,
-        @Nonnull ObjectMetaIntrospector introspector,
-        @Nonnull NameMapper columnNameMapper,
-        @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws SqlRuntimeException {
-        try {
-            return Fs.as(readRows0(resultSet, javaType, introspector, columnNameMapper, converter, options));
-        } catch (Exception e) {
-            throw new SqlRuntimeException(e);
-        }
-    }
-
-    /**
-     * Reads all rows from the given {@link ResultSet} and converts them to the specified Java type.
-     *
-     * @param <T>              the specified Java type
-     * @param resultSet        the given {@link ResultSet}
-     * @param javaTypeRef      the type reference to the specified Java type
-     * @param introspector     the introspector used to introspect the specified Java type
-     * @param columnNameMapper the name mapper used to map the column name to the property name of the specified Java
-     *                         type
-     * @param converter        the converter used to convert the JDBC type to the Java type
-     * @param options          the options for the converter
-     * @return a list of the converted Java objects
-     * @throws SqlRuntimeException if any error occurs
-     */
-    public static <T> @Nonnull List<@Nonnull T> readRows(
-        @Nonnull ResultSet resultSet,
-        @Nonnull TypeRef<T> javaTypeRef,
-        @Nonnull ObjectMetaIntrospector introspector,
-        @Nonnull NameMapper columnNameMapper,
-        @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws SqlRuntimeException {
-        try {
-            return Fs.as(readRows0(resultSet, javaTypeRef.type(), introspector, columnNameMapper, converter, options));
-        } catch (Exception e) {
-            throw new SqlRuntimeException(e);
-        }
-    }
-
-    private static @Nonnull List<@Nonnull Object> readRows0(
-        @Nonnull ResultSet resultSet,
-        @Nonnull Type javaType,
-        @Nonnull ObjectMetaIntrospector introspector,
-        @Nonnull NameMapper columnNameMapper,
-        @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws SQLException {
-        ObjectMeta javaMeta = introspector.introspect(javaType);
-        Map<String, Object> sqlData = new HashMap<>();
-        ResultSetMetaData sqlMeta = resultSet.getMetaData();
-        int columnCount = sqlMeta.getColumnCount();
-        List<String> propertyNames = resolveSqlMeta(sqlMeta, columnNameMapper);
-        ArrayList<Object> objects = new ArrayList<>();
-        while (resultSet.next()) {
-            for (int i = 1; i <= columnCount; i++) {
-                Object jdbcObject = resultSet.getObject(i);
-                String propertyName = propertyNames.get(i - 1);
-                PropertyMeta propertyMeta = javaMeta.getProperty(propertyName);
-                if (propertyMeta == null) {
-                    continue;
-                }
-                sqlData.put(propertyName, jdbcObject);
-            }
-            Object javaData = converter.convert(sqlData, javaType, options);
-            objects.add(javaData);
-            sqlData.clear();
-        }
-        objects.trimToSize();
-        return objects;
-    }
-
-    /**
-     * Reads all rows from the given {@link ResultSet} and converts them to a list of {@link Map}.
-     *
-     * @param resultSet        the given {@link ResultSet}
-     * @param columnNameMapper the name mapper used to map the column name to the key of the {@link Map}s
-     * @return a list of the converted {@link Map}s
-     * @throws SqlRuntimeException if any error occurs
-     */
-    public static @Nonnull List<@Nonnull Map<@Nonnull String, Object>> readRows(
-        @Nonnull ResultSet resultSet,
-        @Nonnull NameMapper columnNameMapper
-    ) throws SqlRuntimeException {
-        try {
-            return readRows0(resultSet, columnNameMapper);
-        } catch (Exception e) {
-            throw new SqlRuntimeException(e);
-        }
-    }
-
-    private static @Nonnull List<@Nonnull Map<@Nonnull String, Object>> readRows0(
-        @Nonnull ResultSet resultSet,
-        @Nonnull NameMapper columnNameMapper
-    ) throws SQLException {
-        ResultSetMetaData sqlMeta = resultSet.getMetaData();
-        int columnCount = sqlMeta.getColumnCount();
-        List<String> keys = resolveSqlMeta(sqlMeta, columnNameMapper);
-        List<Map<String, Object>> objects = new ArrayList<>();
-        while (resultSet.next()) {
-            Map<String, Object> sqlData = new LinkedHashMap<>();
-            for (int i = 1; i <= columnCount; i++) {
-                Object jdbcObject = resultSet.getObject(i);
-                String key = keys.get(i - 1);
-                sqlData.put(key, jdbcObject);
-            }
-            objects.add(sqlData);
-        }
-        return objects;
-    }
-
-    private static @Nonnull List<@Nonnull String> resolveSqlMeta(
-        @Nonnull ResultSetMetaData sqlMeta,
-        @Nonnull NameMapper columnNameMapper
-    ) throws SQLException {
-        List<String> columnNames = new ArrayList<>(sqlMeta.getColumnCount());
-        for (int i = 1; i <= sqlMeta.getColumnCount(); i++) {
-            String columnName = sqlMeta.getColumnName(i);
-            String propertyName = columnNameMapper.map(columnName);
-            columnNames.add(propertyName);
-        }
-        return columnNames;
-    }
-
-    /**
-     * Inserts the given value as one row into the specified connection. The table info comes from the class of the
-     * value by {@link Object#getClass()}: the table name should be specified by {@link SqlTable} on the class, and the
-     * columns should be specified by {@link SqlColumn} on the properties of the class. Only columns whose
-     * {@link SqlColumn#autoGenerated()} is false are included.
+     * Inserts the given bean as a row using the given connection.
      * <p>
-     * If there exists an auto-generated key column in the table, then this operation will enable the
-     * {@link Statement#RETURN_GENERATED_KEYS} feature to get the auto-generated key from the first column of the
-     * generated keys result set, and the auto-generated key will be converted to the target type using the given
-     * converter.
+     * The table info is resolved from {@code beanMeta}: the table name comes from the {@link SqlTable} annotation on
+     * the bean type, and columns come from the {@link SqlColumn} annotations on the bean properties.
+     * <p>
+     * Auto-generated columns are not set in this insert operation. If any exist, the statement is prepared with
+     * {@link Statement#RETURN_GENERATED_KEYS}; after execution, the key is read from the first column of the result set
+     * returned by {@link PreparedStatement#getGeneratedKeys()} and converted into the Java type of one of the
+     * auto-generated properties (specified by {@link SqlColumn#autoGenerated()}). If there are multiple auto-generated
+     * columns, only one is used, typically the first one found, though the order is not guaranteed.
+     * <p>
+     * The inserted-row count is the value returned by {@link PreparedStatement#executeUpdate()}.
      *
-     * @param <I>          the type to which the auto-generated key is converted
-     * @param connection   the specified connection to use for the insert operation
-     * @param value        the value to be inserted as one row
-     * @param targetType   the target type for the auto-generated key
-     * @param introspector the introspector used to introspect the type of the value
-     * @param nameMapper   the name mapper used to map names between java and SQL
-     * @param converter    the given converter
-     * @param options      the options to be used for the conversion process
-     * @return the result of the insert operation, including the number of rows inserted and the auto-generated keys if
-     * any
-     * @throws SqlRuntimeException if any error occurs
+     * @param connection the given connection to use
+     * @param beanMeta   the metadata of the bean
+     * @param nameMapper the mapper between Java and JDBC names
+     * @param converter  the converter that converts the generated key into the corresponding Java type
+     * @param bean       the bean to insert
+     * @return the insert result, including the inserted-row count and the generated key, if any
+     * @throws SqlRuntimeException if an error occurs
      */
-    public static <I> SqlResult.@Nonnull OfInsert<I> insertRow(
+    public static SqlResult.@Nonnull OfInsert insertRow(
         @Nonnull Connection connection,
-        @Nonnull Object value,
-        @Nonnull Class<I> targetType,
-        @Nonnull ObjectMetaIntrospector introspector,
+        @Nonnull ObjectMeta beanMeta,
         @Nonnull SqlNameMapper nameMapper,
         @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull ... options
+        @Nonnull Object bean
     ) throws SqlRuntimeException {
-        Type tableType = value.getClass();
-        InsertInfo insertInfo = buildPreparedInsertSql(tableType, introspector, nameMapper);
-        try {
-            PreparedStatement statement = insertInfo.hasAutoGeneratedKey ?
+        InsertInfo insertInfo = buildPreparedInsertSql(beanMeta, nameMapper);
+        PropertyMeta autoGeneratedKeyProperty = insertInfo.autoGeneratedKeyProperty;
+        try (
+            PreparedStatement statement = autoGeneratedKeyProperty != null ?
                 connection.prepareStatement(insertInfo.preparedSql, Statement.RETURN_GENERATED_KEYS)
                 :
-                connection.prepareStatement(insertInfo.preparedSql);
+                connection.prepareStatement(insertInfo.preparedSql)
+        ) {
             int index = 1;
             for (Tuple2<SqlColumn, PropertyMeta> column : insertInfo.columns) {
-                Object propertyValue = column.get1().getValue(value);
+                Object propertyValue = column.get1().getValue(bean);
                 setParameter(statement, index++, propertyValue);
             }
             int insertedRows = statement.executeUpdate();
-            if (!insertInfo.hasAutoGeneratedKey) {
-                SqlResult.OfInsert<I> ofInsert = SqlResult.ofInsert(insertedRows, Collections.emptyList());
-                statement.close();
-                return ofInsert;
+            if (autoGeneratedKeyProperty == null) {
+                return SqlResult.ofInsert(insertedRows, Collections.emptyList());
             }
-            SqlResult.OfInsert<I> ofInsert;
-            try {
-                ResultSet resultSet = statement.getGeneratedKeys();
-                resultSet.next();
-                Object generatedKey = resultSet.getObject(1);
-                Class<?> generatedKeyType = Fs.nonnull(generatedKey.getClass(), Object.class);
-                I autoGeneratedKey = converter.convert(generatedKey, generatedKeyType, targetType, options);
-                ofInsert = SqlResult.ofInsert(insertedRows, Collections.singletonList(autoGeneratedKey));
-                resultSet.close();
-            } finally {
-                statement.close();
-            }
-            return ofInsert;
+            return nextAutoGeneratedKeys(statement, insertedRows, autoGeneratedKeyProperty, converter);
         } catch (Exception e) {
             throw new SqlRuntimeException(e);
         }
     }
 
     /**
-     * Inserts the given values as rows into the specified connection. The table info comes from the class of the first
-     * value ({@code values.get(0)}) by {@link Object#getClass()}: the table name should be specified by
-     * {@link SqlTable} on the class, and the columns should be specified by {@link SqlColumn} on the properties of the
-     * class. Only columns whose {@link SqlColumn#autoGenerated()} is false are included.
+     * Inserts the given beans as rows using the given connection.
      * <p>
-     * If there exists an auto-generated key column in the table, then this operation will enable the
-     * {@link Statement#RETURN_GENERATED_KEYS} feature to get the auto-generated key from the first column of the
-     * generated keys result set, and the auto-generated key will be converted to the target type using the given
-     * converter.
+     * The table info is resolved from {@code beanMeta}: the table name comes from the {@link SqlTable} annotation on
+     * the bean type, and columns come from the {@link SqlColumn} annotations on the bean properties.
+     * <p>
+     * Auto-generated columns are not set in this insert operation. If any exist, the statement is prepared with
+     * {@link Statement#RETURN_GENERATED_KEYS}; after execution, the keys are read from the first column of the result
+     * set returned by {@link PreparedStatement#getGeneratedKeys()} and converted into the Java type of one of the
+     * auto-generated properties (specified by {@link SqlColumn#autoGenerated()}). If there are multiple auto-generated
+     * columns, only one is used, typically the first one found, though the order is not guaranteed.
+     * <p>
+     * The inserted-row count is the sum of the values returned by {@link PreparedStatement#executeBatch()}, added
+     * directly with no special handling for special update counts such as {@link Statement#SUCCESS_NO_INFO} or
+     * {@link Statement#EXECUTE_FAILED}.
      *
-     * @param <I>          the type to which the auto-generated key is converted
-     * @param connection   the specified connection to use for the insert operation
-     * @param values       the values to be inserted as rows
-     * @param targetType   the target type for the auto-generated key
-     * @param introspector the introspector used to introspect the type of the value
-     * @param nameMapper   the name mapper used to map names between java and SQL
-     * @param converter    the given converter
-     * @param options      the options to be used for the conversion process
-     * @return the result of the insert operation, including the number of rows inserted and the auto-generated keys if
-     * any
-     * @throws SqlRuntimeException if any error occurs
+     * @param connection the given connection to use
+     * @param beanMeta   the metadata of the bean
+     * @param nameMapper the mapper between Java and JDBC names
+     * @param converter  the converter that converts generated keys into the corresponding Java type
+     * @param beans      the beans to insert
+     * @return the insert result, including the inserted-row count and the generated keys, if any
+     * @throws SqlRuntimeException if an error occurs
      */
-    public static <I> SqlResult.@Nonnull OfInsert<I> insertRows(
+    public static SqlResult.@Nonnull OfInsert insertRows(
         @Nonnull Connection connection,
-        @Nonnull List<?> values,
-        @Nonnull Class<I> targetType,
-        @Nonnull ObjectMetaIntrospector introspector,
+        @Nonnull ObjectMeta beanMeta,
         @Nonnull SqlNameMapper nameMapper,
         @Nonnull ObjectConverter converter,
-        @Nonnull Option<?, ?> @Nonnull ... options
+        @Nonnull Object @Nonnull ... beans
     ) throws SqlRuntimeException {
-        if (values.isEmpty()) {
+        if (beans.length == 0) {
             return SqlResult.emptyInsert();
         }
-        Type tableType = values.get(0).getClass();
-        InsertInfo insertInfo = buildPreparedInsertSql(tableType, introspector, nameMapper);
-        try {
-            PreparedStatement statement = insertInfo.hasAutoGeneratedKey ?
+        return insertRows0(connection, beanMeta, nameMapper, converter, Fs.list(beans));
+    }
+
+    /**
+     * Inserts the given beans as rows using the given connection.
+     * <p>
+     * The table info is resolved from {@code beanMeta}: the table name comes from the {@link SqlTable} annotation on
+     * the bean type, and columns come from the {@link SqlColumn} annotations on the bean properties.
+     * <p>
+     * Auto-generated columns are not set in this insert operation. If any exist, the statement is prepared with
+     * {@link Statement#RETURN_GENERATED_KEYS}; after execution, the keys are read from the first column of the result
+     * set returned by {@link PreparedStatement#getGeneratedKeys()} and converted into the Java type of one of the
+     * auto-generated properties (specified by {@link SqlColumn#autoGenerated()}). If there are multiple auto-generated
+     * columns, only one is used, typically the first one found, though the order is not guaranteed.
+     * <p>
+     * The inserted-row count is the sum of the values returned by {@link PreparedStatement#executeBatch()}, added
+     * directly with no special handling for special update counts such as {@link Statement#SUCCESS_NO_INFO} or
+     * {@link Statement#EXECUTE_FAILED}.
+     *
+     * @param connection the given connection to use
+     * @param beanMeta   the metadata of the bean
+     * @param nameMapper the mapper between Java and JDBC names
+     * @param converter  the converter that converts generated keys into the corresponding Java type
+     * @param beans      the beans to insert
+     * @return the insert result, including the inserted-row count and the generated keys, if any
+     * @throws SqlRuntimeException if an error occurs
+     */
+    public static SqlResult.@Nonnull OfInsert insertRows(
+        @Nonnull Connection connection,
+        @Nonnull ObjectMeta beanMeta,
+        @Nonnull SqlNameMapper nameMapper,
+        @Nonnull ObjectConverter converter,
+        @Nonnull List<@Nonnull ?> beans
+    ) throws SqlRuntimeException {
+        if (beans.isEmpty()) {
+            return SqlResult.emptyInsert();
+        }
+        return insertRows0(connection, beanMeta, nameMapper, converter, beans);
+    }
+
+    private static SqlResult.@Nonnull OfInsert insertRows0(
+        @Nonnull Connection connection,
+        @Nonnull ObjectMeta beanMeta,
+        @Nonnull SqlNameMapper nameMapper,
+        @Nonnull ObjectConverter converter,
+        @Nonnull List<@Nonnull ?> beans
+    ) throws SqlRuntimeException {
+        InsertInfo insertInfo = buildPreparedInsertSql(beanMeta, nameMapper);
+        PropertyMeta autoGeneratedKeyProperty = insertInfo.autoGeneratedKeyProperty;
+        try (
+            PreparedStatement statement = autoGeneratedKeyProperty != null ?
                 connection.prepareStatement(insertInfo.preparedSql, Statement.RETURN_GENERATED_KEYS)
                 :
-                connection.prepareStatement(insertInfo.preparedSql);
-            for (Object value : values) {
+                connection.prepareStatement(insertInfo.preparedSql)
+        ) {
+            for (Object value : beans) {
                 int index = 1;
                 for (Tuple2<SqlColumn, PropertyMeta> column : insertInfo.columns) {
                     Object propertyValue = column.get1().getValue(value);
@@ -584,39 +421,21 @@ public class SqlKit {
                 }
                 statement.addBatch();
             }
-            int[] affectedRows = statement.executeBatch();
-            int insertedRows = Arrays.stream(affectedRows).sum();
-            if (!insertInfo.hasAutoGeneratedKey) {
-                SqlResult.OfInsert<I> ofInsert = SqlResult.ofInsert(insertedRows, Collections.emptyList());
-                statement.close();
-                return ofInsert;
+            int insertedRows = IntStream.of(statement.executeBatch()).sum();
+            if (autoGeneratedKeyProperty == null) {
+                return SqlResult.ofInsert(insertedRows, Collections.emptyList());
             }
-            SqlResult.OfInsert<I> ofInsert;
-            try {
-                ResultSet resultSet = statement.getGeneratedKeys();
-                List<I> result = new ArrayList<>(values.size());
-                while (resultSet.next()) {
-                    Object generatedKey = resultSet.getObject(1);
-                    Class<?> generatedKeyType = Fs.nonnull(generatedKey.getClass(), Object.class);
-                    result.add(converter.convert(generatedKey, generatedKeyType, targetType, options));
-                }
-                ofInsert = SqlResult.ofInsert(insertedRows, result);
-                resultSet.close();
-            } finally {
-                statement.close();
-            }
-            return ofInsert;
+            return nextAutoGeneratedKeys(statement, insertedRows, autoGeneratedKeyProperty, converter);
         } catch (Exception e) {
             throw new SqlRuntimeException(e);
         }
     }
 
     private static @Nonnull InsertInfo buildPreparedInsertSql(
-        @Nonnull Type tableType,
-        @Nonnull ObjectMetaIntrospector introspector,
+        @Nonnull ObjectMeta beanMeta,
         @Nonnull SqlNameMapper nameMapper
     ) throws SqlRuntimeException {
-        ObjectMeta beanMeta = introspector.introspect(tableType);
+        Type tableType = beanMeta.type();
         SqlTable sqlTable = beanMeta.annotations().annotation(SqlTable.class);
         if (sqlTable == null) {
             throw new SqlRuntimeException(
@@ -625,14 +444,16 @@ public class SqlKit {
         }
         String tableName = SqlKit.toTableName(tableType, sqlTable, nameMapper);
         List<Tuple2<SqlColumn, PropertyMeta>> columns = new ArrayList<>();
-        boolean hasAutoGeneratedKey = false;
+        PropertyMeta autoGeneratedKeyProperty = null;
         for (PropertyMeta propertyMeta : beanMeta.properties().values()) {
             SqlColumn sqlColumn = propertyMeta.annotations().annotation(SqlColumn.class);
             if (sqlColumn == null) {
                 continue;
             }
             if (sqlColumn.autoGenerated()) {
-                hasAutoGeneratedKey = true;
+                if (autoGeneratedKeyProperty == null) {
+                    autoGeneratedKeyProperty = propertyMeta;
+                }
                 continue;
             }
             columns.add(Tuple2.of(sqlColumn, propertyMeta));
@@ -659,76 +480,139 @@ public class SqlKit {
             }
         }
         sql.append(")");
-        return new InsertInfo(sql.toString(), columns, hasAutoGeneratedKey);
+        return new InsertInfo(sql.toString(), columns, autoGeneratedKeyProperty);
+    }
+
+    private static SqlResult.@Nonnull OfInsert nextAutoGeneratedKeys(
+        @Nonnull PreparedStatement statement,
+        int insertedRows,
+        @Nonnull PropertyMeta autoGeneratedKeyProperty,
+        @Nonnull ObjectConverter converter
+    ) throws SQLException {
+        try (
+            ResultSet resultSet = statement.getGeneratedKeys();
+        ) {
+            List<Object> result = new ArrayList<>(insertedRows);
+            while (resultSet.next()) {
+                Object generatedKey = resultSet.getObject(1);
+                result.add(converter.convert(generatedKey, autoGeneratedKeyProperty.type()));
+            }
+            return SqlResult.ofInsert(insertedRows, result);
+        }
     }
 
     /**
-     * Updates a row by the primary key. The table info comes from the class of the value by {@link Object#getClass()}:
-     * the table name should be specified by {@link SqlTable} on the class, and the columns should be specified by
-     * {@link SqlColumn} on the properties of the class. The primary key column should be specified by
-     * {@link SqlColumn#primary()} on only one of the columns found, and its value in the condition is specified by the
-     * corresponding property value. If no primary key column is found, then this operation will throw an exception.
+     * Updates one row identified by the given primary-key value using the given connection.
      * <p>
-     * Only columns whose corresponding property values are non-null will be updated, and the primary key column will
-     * also not be updated.
+     * The table info is resolved from {@code beanMeta}: the table name comes from the {@link SqlTable} annotation on
+     * the bean type, and columns come from the {@link SqlColumn} annotations on the bean properties. Exactly one of
+     * those columns is the primary key column: its {@link SqlColumn#primary()} attribute is {@code true}.
+     * <p>
+     * The {@code SET} clause contains every property annotated with {@link SqlColumn} whose value read from
+     * {@code bean} is non-null, including the primary-key property when its value is non-null. Therefore, the
+     * primary-key value in {@code bean} is not used as the {@code WHERE} condition and may itself be updated by this
+     * operation.
+     * <p>
+     * The {@code WHERE} clause matches the primary-key column by {@code id} only.
      *
-     * @param connection   the specified connection to use for the update operation
-     * @param value        the value to provide table info and updated values
-     * @param introspector the introspector used to introspect the type of the value
-     * @param nameMapper   the name mapper used to map names between java and SQL
-     * @return the result of the update operation, including the number of rows updated
+     * @param connection the connection to use
+     * @param beanMeta   the metadata of the bean
+     * @param nameMapper the mapper between Java and JDBC names
+     * @param bean       the bean providing the values to update
+     * @param id         the primary-key value to match
+     * @return the update result, including the number of rows updated
      * @throws SqlRuntimeException if any error occurs
      */
-    public static SqlResult.@Nonnull OfUpdate updateByPrimaryKey(
+    public static SqlResult.@Nonnull OfUpdate updateById(
         @Nonnull Connection connection,
-        @Nonnull Object value,
-        @Nonnull ObjectMetaIntrospector introspector,
-        @Nonnull SqlNameMapper nameMapper
+        @Nonnull ObjectMeta beanMeta,
+        @Nonnull SqlNameMapper nameMapper,
+        @Nonnull Object bean,
+        @Nonnull Object id
     ) throws SqlRuntimeException {
-        return updateRows(connection, value, null, introspector, nameMapper);
+        return updateByIds0(connection, beanMeta, nameMapper, bean, Fs.list(id));
     }
 
     /**
-     * Updates the rows by the specified primary keys. The table info comes from the class of the value by
-     * {@link Object#getClass()}: the table name should be specified by {@link SqlTable} on the class, and the columns
-     * should be specified by {@link SqlColumn} on the properties of the class. The primary key column should be
-     * specified by {@link SqlColumn#primary()} on only one of the columns found, but its values in the condition are
-     * specified by {@code primaryKeyValues}. If no primary key column is found, then this operation will throw an
-     * exception.
+     * Updates rows identified by the given primary-key values using the given connection.
      * <p>
-     * Only columns whose corresponding property values are non-null will be updated, and the primary key column will
-     * also not be updated.
+     * The table info is resolved from {@code beanMeta}: the table name comes from the {@link SqlTable} annotation on
+     * the bean type, and columns come from the {@link SqlColumn} annotations on the bean properties. Exactly one of
+     * those columns is the primary key column: its {@link SqlColumn#primary()} attribute is {@code true}.
+     * <p>
+     * The {@code SET} clause contains every property annotated with {@link SqlColumn} whose value read from
+     * {@code bean} is non-null, including the primary-key property when its value is non-null. Therefore, the
+     * primary-key value in {@code bean} is not used as the {@code WHERE} condition and may itself be updated by this
+     * operation.
+     * <p>
+     * The {@code WHERE} clause matches the primary-key column by {@code ids} only: a single id uses {@code = ?};
+     * multiple ids use {@code IN (?, ...)}.
      *
-     * @param connection       the specified connection to use for the update operation
-     * @param value            the value to provide table info and updated values
-     * @param primaryKeyValues the specified primary key values
-     * @param introspector     the introspector used to introspect the type of the value
-     * @param nameMapper       the name mapper used to map names between java and SQL
-     * @return the result of the update operation, including the number of rows updated
+     * @param connection the connection to use
+     * @param beanMeta   the metadata of the bean
+     * @param nameMapper the mapper between Java and JDBC names
+     * @param bean       the bean providing the values to update
+     * @param ids        the primary-key values to match; must contain at least one value
+     * @return the update result, including the number of rows updated
      * @throws SqlRuntimeException if any error occurs
      */
-    public static SqlResult.@Nonnull OfUpdate updateByPrimaryKeys(
+    public static SqlResult.@Nonnull OfUpdate updateByIds(
         @Nonnull Connection connection,
-        @Nonnull Object value,
-        @Nonnull List<@Nonnull ?> primaryKeyValues,
-        @Nonnull ObjectMetaIntrospector introspector,
-        @Nonnull SqlNameMapper nameMapper
+        @Nonnull ObjectMeta beanMeta,
+        @Nonnull SqlNameMapper nameMapper,
+        @Nonnull Object bean,
+        @Nonnull Object @Nonnull ... ids
     ) throws SqlRuntimeException {
-        if (primaryKeyValues.isEmpty()) {
+        if (ids.length == 0) {
             throw new SqlRuntimeException("Primary keys are empty.");
         }
-        return updateRows(connection, value, primaryKeyValues, introspector, nameMapper);
+        return updateByIds0(connection, beanMeta, nameMapper, bean, Fs.list(ids));
     }
 
-    private static SqlResult.@Nonnull OfUpdate updateRows(
+    /**
+     * Updates rows identified by the given primary-key values using the given connection.
+     * <p>
+     * The table info is resolved from {@code beanMeta}: the table name comes from the {@link SqlTable} annotation on
+     * the bean type, and columns come from the {@link SqlColumn} annotations on the bean properties. Exactly one of
+     * those columns is the primary key column: its {@link SqlColumn#primary()} attribute is {@code true}.
+     * <p>
+     * The {@code SET} clause contains every property annotated with {@link SqlColumn} whose value read from
+     * {@code bean} is non-null, including the primary-key property when its value is non-null. Therefore, the
+     * primary-key value in {@code bean} is not used as the {@code WHERE} condition and may itself be updated by this
+     * operation.
+     * <p>
+     * The {@code WHERE} clause matches the primary-key column by {@code ids} only: a single id uses {@code = ?};
+     * multiple ids use {@code IN (?, ...)}.
+     *
+     * @param connection the connection to use
+     * @param beanMeta   the metadata of the bean
+     * @param nameMapper the mapper between Java and JDBC names
+     * @param bean       the bean providing the values to update
+     * @param ids        the primary-key values to match; must contain at least one value
+     * @return the update result, including the number of rows updated
+     * @throws SqlRuntimeException if any error occurs
+     */
+    public static SqlResult.@Nonnull OfUpdate updateByIds(
         @Nonnull Connection connection,
-        @Nonnull Object value,
-        @Nullable List<@Nonnull ?> ids,
-        @Nonnull ObjectMetaIntrospector introspector,
-        @Nonnull SqlNameMapper nameMapper
+        @Nonnull ObjectMeta beanMeta,
+        @Nonnull SqlNameMapper nameMapper,
+        @Nonnull Object bean,
+        @Nonnull List<@Nonnull ?> ids
     ) throws SqlRuntimeException {
-        Class<?> tableType = value.getClass();
-        ObjectMeta beanMeta = introspector.introspect(tableType);
+        if (ids.isEmpty()) {
+            throw new SqlRuntimeException("Primary keys are empty.");
+        }
+        return updateByIds0(connection, beanMeta, nameMapper, bean, ids);
+    }
+
+    private static SqlResult.@Nonnull OfUpdate updateByIds0(
+        @Nonnull Connection connection,
+        @Nonnull ObjectMeta beanMeta,
+        @Nonnull SqlNameMapper nameMapper,
+        @Nonnull Object bean,
+        @Nonnull List<@Nonnull ?> ids
+    ) throws SqlRuntimeException {
+        Type tableType = beanMeta.type();
         SqlTable sqlTable = beanMeta.annotations().annotation(SqlTable.class);
         if (sqlTable == null) {
             throw new SqlRuntimeException(
@@ -743,16 +627,12 @@ public class SqlKit {
             if (sqlColumn == null) {
                 continue;
             }
-            Object propertyValue = propertyMeta.getValue(value);
+            Object propertyValue = propertyMeta.getValue(bean);
             if (sqlColumn.primary()) {
                 if (primaryKey != null) {
                     throw new SqlRuntimeException("Multiple primary keys found on " + tableType.getTypeName() + ".");
                 }
-                if (ids == null && propertyValue == null) {
-                    throw new SqlRuntimeException("Primary key value is null on " + tableType.getTypeName() + ".");
-                }
                 primaryKey = Tuple3.of(sqlColumn, propertyMeta, propertyValue);
-                continue;
             }
             if (propertyValue == null) {
                 continue;
@@ -781,7 +661,7 @@ public class SqlKit {
         SqlColumn primaryColumn = primaryKey.get0();
         PropertyMeta primaryMeta = primaryKey.get1();
         sql.append(SqlKit.toColumnName(primaryMeta.name(), primaryColumn, nameMapper));
-        if (ids == null) {
+        if (ids.size() == 1) {
             sql.append(" = ?");
         } else {
             sql.append(" IN (");
@@ -793,92 +673,118 @@ public class SqlKit {
             }
             sql.append(")");
         }
-        try {
-            PreparedStatement statement = connection.prepareStatement(sql.toString());
+        try (
+            PreparedStatement statement = connection.prepareStatement(sql.toString())
+        ) {
             int index = 1;
             for (Tuple3<SqlColumn, PropertyMeta, Object> column : columns) {
                 setParameter(statement, index++, column.get2());
             }
-            if (ids == null) {
-                setParameter(statement, index, primaryKey.get2());
+            if (ids.size() == 1) {
+                setParameter(statement, index, ids.get(0));
             } else {
                 for (Object id : ids) {
                     setParameter(statement, index++, id);
                 }
             }
-            SqlResult.OfUpdate ofUpdate = SqlResult.ofUpdate(statement.executeUpdate());
-            statement.close();
-            return ofUpdate;
+            return SqlResult.ofUpdate(statement.executeUpdate());
         } catch (Exception e) {
             throw new SqlRuntimeException(e);
         }
     }
 
     /**
-     * Deletes a row by the primary key. The table info comes from the class of the value by {@link Object#getClass()}:
-     * the table name should be specified by {@link SqlTable} on the class, and the columns should be specified by
-     * {@link SqlColumn} on the properties of the class. The primary key column should be specified by
-     * {@link SqlColumn#primary()} on only one of the columns found, and its value in the condition is specified by the
-     * corresponding property value. If no primary key column is found, then this operation will throw an exception.
+     * Deletes the row or rows identified by the given primary-key value using the given connection.
+     * <p>
+     * The table info is resolved from {@code beanMeta}: the table name comes from the {@link SqlTable} annotation on
+     * the bean type, and columns come from the {@link SqlColumn} annotations on the bean properties. Exactly one of
+     * those columns is the primary key column: its {@link SqlColumn#primary()} attribute is {@code true}.
+     * <p>
+     * The {@code WHERE} clause matches the primary-key column by {@code id} only.
      *
-     * @param connection   the specified connection to use for the delete operation
-     * @param value        the value to provide table info and primary key value
-     * @param introspector the introspector used to introspect the type of the value
-     * @param nameMapper   the name mapper used to map names between java and SQL
-     * @return the result of the delete operation, including the number of rows deleted
+     * @param connection the connection to use
+     * @param beanMeta   the metadata of the bean
+     * @param nameMapper the mapper between Java and JDBC names
+     * @param id         the primary-key value to match
+     * @return the delete result, including the number of rows deleted
      * @throws SqlRuntimeException if any error occurs
      */
-    public static SqlResult.@Nonnull OfDelete deleteByPrimaryKey(
+    public static SqlResult.@Nonnull OfDelete deleteById(
         @Nonnull Connection connection,
-        @Nonnull Object value,
-        @Nonnull ObjectMetaIntrospector introspector,
-        @Nonnull SqlNameMapper nameMapper
+        @Nonnull ObjectMeta beanMeta,
+        @Nonnull SqlNameMapper nameMapper,
+        @Nonnull Object id
     ) throws SqlRuntimeException {
-        ObjectMeta beanMeta = introspector.introspect(value.getClass());
         Tuple2<SqlColumn, PropertyMeta> primaryKey = findPrimaryKey(beanMeta);
-        Object id = primaryKey.get1().getValue(value);
-        if (id == null) {
-            throw new SqlRuntimeException("Primary key value is null on " + beanMeta.type().getTypeName() + ".");
-        }
-        return deleteRows(connection, Collections.singletonList(id), beanMeta, primaryKey, nameMapper);
+        return deleteByIds0(connection, beanMeta, primaryKey, nameMapper, Fs.list(id));
     }
 
     /**
-     * Deletes the rows by the specified primary keys. The table info comes from the specified table type: the table
-     * name should be specified by {@link SqlTable} on the class, and the columns should be specified by
-     * {@link SqlColumn} on the properties of the class. The primary key column should be specified by
-     * {@link SqlColumn#primary()} on only one of the columns found, but its values in the condition are specified by
-     * {@code primaryKeyValues}. If no primary key column is found, then this operation will throw an exception.
+     * Deletes rows identified by the given primary-key values using the given connection.
+     * <p>
+     * The table info is resolved from {@code beanMeta}: the table name comes from the {@link SqlTable} annotation on
+     * the bean type, and columns come from the {@link SqlColumn} annotations on the bean properties. Exactly one of
+     * those columns is the primary key column: its {@link SqlColumn#primary()} attribute is {@code true}.
+     * <p>
+     * The {@code WHERE} clause matches the primary-key column by {@code ids} only: a single id uses {@code = ?};
+     * multiple ids use {@code IN (?, ...)}.
      *
-     * @param connection       the specified connection to use for the delete operation
-     * @param tableType        the specified table type to provide table info
-     * @param primaryKeyValues the specified primary key values
-     * @param introspector     the introspector used to introspect the specified table type
-     * @param nameMapper       the name mapper used to map names between java and SQL
-     * @return the result of the delete operation, including the number of rows deleted
+     * @param connection the connection to use
+     * @param beanMeta   the metadata of the bean
+     * @param nameMapper the mapper between Java and JDBC names
+     * @param ids        the primary-key values to match; must contain at least one value
+     * @return the delete result, including the number of rows deleted
      * @throws SqlRuntimeException if any error occurs
      */
-    public static SqlResult.@Nonnull OfDelete deleteByPrimaryKeys(
+    public static SqlResult.@Nonnull OfDelete deleteByIds(
         @Nonnull Connection connection,
-        @Nonnull Type tableType,
-        @Nonnull List<@Nonnull ?> primaryKeyValues,
-        @Nonnull ObjectMetaIntrospector introspector,
-        @Nonnull SqlNameMapper nameMapper
+        @Nonnull ObjectMeta beanMeta,
+        @Nonnull SqlNameMapper nameMapper,
+        @Nonnull Object @Nonnull ... ids
     ) throws SqlRuntimeException {
-        if (primaryKeyValues.isEmpty()) {
+        if (ids.length == 0) {
             throw new SqlRuntimeException("Primary keys are empty.");
         }
-        ObjectMeta beanMeta = introspector.introspect(tableType);
         Tuple2<SqlColumn, PropertyMeta> primaryKey = findPrimaryKey(beanMeta);
-        return deleteRows(connection, primaryKeyValues, beanMeta, primaryKey, nameMapper);
+        return deleteByIds0(connection, beanMeta, primaryKey, nameMapper, Fs.list(ids));
     }
 
-    private static SqlResult.@Nonnull OfDelete deleteRows(
+    /**
+     * Deletes rows identified by the given primary-key values using the given connection.
+     * <p>
+     * The table info is resolved from {@code beanMeta}: the table name comes from the {@link SqlTable} annotation on
+     * the bean type, and columns come from the {@link SqlColumn} annotations on the bean properties. Exactly one of
+     * those columns is the primary key column: its {@link SqlColumn#primary()} attribute is {@code true}.
+     * <p>
+     * The {@code WHERE} clause matches the primary-key column by {@code ids} only: a single id uses {@code = ?};
+     * multiple ids use {@code IN (?, ...)}.
+     *
+     * @param connection the connection to use
+     * @param beanMeta   the metadata of the bean
+     * @param nameMapper the mapper between Java and JDBC names
+     * @param ids        the primary-key values to match; must contain at least one value
+     * @return the delete result, including the number of rows deleted
+     * @throws SqlRuntimeException if any error occurs
+     */
+    public static SqlResult.@Nonnull OfDelete deleteByIds(
         @Nonnull Connection connection,
-        @Nonnull List<@Nonnull ?> ids,
+        @Nonnull ObjectMeta beanMeta,
+        @Nonnull SqlNameMapper nameMapper,
+        @Nonnull List<@Nonnull ?> ids
+    ) throws SqlRuntimeException {
+        if (ids.isEmpty()) {
+            throw new SqlRuntimeException("Primary keys are empty.");
+        }
+        Tuple2<SqlColumn, PropertyMeta> primaryKey = findPrimaryKey(beanMeta);
+        return deleteByIds0(connection, beanMeta, primaryKey, nameMapper, ids);
+    }
+
+    private static SqlResult.@Nonnull OfDelete deleteByIds0(
+        @Nonnull Connection connection,
         @Nonnull ObjectMeta beanMeta,
         @Nonnull Tuple2<@Nonnull SqlColumn, @Nonnull PropertyMeta> primaryKey,
-        @Nonnull SqlNameMapper nameMapper
+        @Nonnull SqlNameMapper nameMapper,
+        @Nonnull List<@Nonnull ?> ids
     ) throws SqlRuntimeException {
         Type tableType = beanMeta.type();
         SqlTable sqlTable = beanMeta.annotations().annotation(SqlTable.class);
@@ -904,15 +810,14 @@ public class SqlKit {
             }
             sql.append(")");
         }
-        try {
-            PreparedStatement statement = connection.prepareStatement(sql.toString());
+        try (
+            PreparedStatement statement = connection.prepareStatement(sql.toString())
+        ) {
             int index = 1;
             for (Object id : ids) {
                 setParameter(statement, index++, id);
             }
-            SqlResult.OfDelete ofDelete = SqlResult.ofDelete(statement.executeUpdate());
-            statement.close();
-            return ofDelete;
+            return SqlResult.ofDelete(statement.executeUpdate());
         } catch (Exception e) {
             throw new SqlRuntimeException(e);
         }
@@ -1009,16 +914,16 @@ public class SqlKit {
 
         private final @Nonnull String preparedSql;
         private final @Nonnull List<@Nonnull Tuple2<@Nonnull SqlColumn, @Nonnull PropertyMeta>> columns;
-        private final boolean hasAutoGeneratedKey;
+        private final @Nullable PropertyMeta autoGeneratedKeyProperty;
 
         private InsertInfo(
             @Nonnull String preparedSql,
             @Nonnull List<@Nonnull Tuple2<@Nonnull SqlColumn, @Nonnull PropertyMeta>> columns,
-            boolean hasAutoGeneratedKey
+            @Nullable PropertyMeta autoGeneratedKeyProperty
         ) {
             this.preparedSql = preparedSql;
             this.columns = columns;
-            this.hasAutoGeneratedKey = hasAutoGeneratedKey;
+            this.autoGeneratedKeyProperty = autoGeneratedKeyProperty;
         }
     }
 
