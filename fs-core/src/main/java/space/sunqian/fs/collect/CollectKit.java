@@ -59,11 +59,11 @@ public class CollectKit {
     }
 
     /**
-     * Collects the given iterable to an array of the component type.
+     * Collects the given iterable to an array of the type of elements.
      *
      * @param it            the given iterable
-     * @param componentType the component type
-     * @param <T>           the component type
+     * @param componentType the type of elements
+     * @param <T>           the type of elements
      * @return the array
      */
     public static <T> T @Nonnull [] toArray(@Nonnull Iterable<?> it, @Nonnull Class<?> componentType) {
@@ -83,7 +83,7 @@ public class CollectKit {
      *
      * @param collection the given collection
      * @param array      the given array
-     * @param <T>        the component type
+     * @param <T>        the type of elements
      * @param <C>        the type of the given collection
      * @return the given collection
      */
@@ -101,7 +101,7 @@ public class CollectKit {
      *
      * @param collection the given collection
      * @param it         the given iterable
-     * @param <T>        the component type
+     * @param <T>        the type of elements
      * @param <C>        the type of the given collection
      * @return the given collection
      */
@@ -123,7 +123,7 @@ public class CollectKit {
      * Returns the given enumeration as an {@link Iterator}.
      *
      * @param enumeration the given enumeration
-     * @param <T>         the component type
+     * @param <T>         the type of elements
      * @return the given enumeration as an {@link Iterator}
      */
     public static <T> @Nonnull Iterator<T> asIterator(@Nonnull Enumeration<? extends T> enumeration) {
@@ -144,7 +144,7 @@ public class CollectKit {
      * Returns the given iterator as an {@link Enumeration}.
      *
      * @param iterator the given iterator
-     * @param <T>      the component type
+     * @param <T>      the type of elements
      * @return the given iterator as an {@link Enumeration}
      */
     public static <T> @Nonnull Enumeration<T> asEnumeration(@Nonnull Iterator<? extends T> iterator) {

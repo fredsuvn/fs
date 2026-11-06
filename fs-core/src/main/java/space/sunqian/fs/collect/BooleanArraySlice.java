@@ -4,7 +4,7 @@ import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.Checker;
 
 /**
- * This interface represents a slice of a boolean array, boolean array implementation of {@link ArraySlice}.
+ * This interface represents a slice of a boolean array. It is the boolean array implementation of {@link ArraySlice}.
  *
  * @author sunqian
  */

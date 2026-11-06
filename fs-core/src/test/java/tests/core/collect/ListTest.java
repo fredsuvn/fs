@@ -142,18 +142,39 @@ public class ListTest {
         List<Integer> list123 = ListKit.arrayList(1, 2, 3);
         List<Integer> list456 = ListKit.arrayList(4, 5, 6);
         List<Integer> list789 = ListKit.arrayList(7, 8, 9);
-        List<Integer> compositeView = ListKit.compositeView(list123, list456, list789);
-        assertEquals(compositeView, ListKit.intList(1, 2, 3, 4, 5, 6, 7, 8, 9));
+        List<Integer> arraysView = ListKit.compositeView(list123, list456, list789);
+        List<Integer> listsView = ListKit.compositeView(Arrays.asList(list123, list456, list789));
+        assertEquals(ListKit.intList(1, 2, 3, 4, 5, 6, 7, 8, 9), arraysView);
+        assertEquals(ListKit.intList(1, 2, 3, 4, 5, 6, 7, 8, 9), listsView);
         list456.set(1, 10);
-        assertEquals(compositeView, ListKit.intList(1, 2, 3, 4, 10, 6, 7, 8, 9));
-        for (int i = 0; i < compositeView.size(); i++) {
-            compositeView.set(i, compositeView.get(i) + 1);
+        assertEquals(ListKit.intList(1, 2, 3, 4, 10, 6, 7, 8, 9), arraysView);
+        assertEquals(ListKit.intList(1, 2, 3, 4, 10, 6, 7, 8, 9), listsView);
+        arraysView.replaceAll(integer -> integer + 1);
+        assertEquals(ListKit.intList(2, 3, 4, 5, 11, 7, 8, 9, 10), arraysView);
+        assertEquals(ListKit.intList(2, 3, 4), list123);
+        assertEquals(ListKit.intList(5, 11, 7), list456);
+        assertEquals(ListKit.intList(8, 9, 10), list789);
+        listsView.replaceAll(integer -> integer + 1);
+        assertEquals(ListKit.intList(3, 4, 5, 6, 12, 8, 9, 10, 11), listsView);
+        assertEquals(ListKit.intList(3, 4, 5), list123);
+        assertEquals(ListKit.intList(6, 12, 8), list456);
+        assertEquals(ListKit.intList(9, 10, 11), list789);
+        // exception
+        assertThrows(IndexOutOfBoundsException.class, () -> arraysView.set(-1, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> arraysView.set(100, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> listsView.set(-1, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> listsView.set(100, 10));
+    }
+
+    @Test
+    public void testNullList() {
+        List<Integer> list = ListKit.nullList(66);
+        assertEquals(66, list.size());
+        for (Integer i : list) {
+            assertNull(i);
         }
-        assertEquals(compositeView, ListKit.intList(2, 3, 4, 5, 11, 7, 8, 9, 10));
-        assertEquals(list123, ListKit.intList(2, 3, 4));
-        assertEquals(list456, ListKit.intList(5, 11, 7));
-        assertEquals(list789, ListKit.intList(8, 9, 10));
-        assertThrows(IndexOutOfBoundsException.class, () -> compositeView.set(-1, 10));
-        assertThrows(IndexOutOfBoundsException.class, () -> compositeView.set(100, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.get(-1));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.get(66));
+        assertThrows(IllegalArgumentException.class, () -> ListKit.nullList(-1));
     }
 }

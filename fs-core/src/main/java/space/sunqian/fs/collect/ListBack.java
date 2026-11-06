@@ -81,7 +81,15 @@ final class ListBack {
 
     @SafeVarargs
     static <T> @Nonnull List<T> compositeList(@Nonnull List<T> @Nonnull ... lists) {
-        return new CompositeList<>(lists);
+        return new CompositeListOfArray<>(lists);
+    }
+
+    static <T> @Nonnull List<T> compositeList(@Nonnull List<@Nonnull List<T>> lists) {
+        return new CompositeListOfList<>(lists);
+    }
+
+    static <T> @Nonnull @Immutable List<T> nullList(int size) throws IllegalArgumentException {
+        return new NullList<>(size);
     }
 
     private static final class BooleanArrayList
@@ -489,12 +497,12 @@ final class ListBack {
         }
     }
 
-    private static final class CompositeList<T>
+    private static final class CompositeListOfArray<T>
         extends AbstractList<T> implements RandomAccess, Serializable {
 
         private final @Nonnull List<T> @Nonnull [] lists;
 
-        private CompositeList(@Nonnull List<T> @Nonnull [] lists) {
+        private CompositeListOfArray(@Nonnull List<T> @Nonnull [] lists) {
             this.lists = lists;
         }
 
@@ -524,7 +532,7 @@ final class ListBack {
                     x -= list.size();
                 }
             }
-            throw new IndexOutOfBoundsException("index: " + index + ".");
+            throw new IndexOutOfBoundsException("Index: " + index + ".");
         }
 
         @Override
@@ -533,6 +541,81 @@ final class ListBack {
             for (List<T> list : lists) {
                 size += list.size();
             }
+            return size;
+        }
+    }
+
+    private static final class CompositeListOfList<T>
+        extends AbstractList<T> implements RandomAccess, Serializable {
+
+        private final @Nonnull List<@Nonnull List<T>> lists;
+
+        private CompositeListOfList(@Nonnull List<@Nonnull List<T>> lists) {
+            this.lists = lists;
+        }
+
+        @Override
+        public T get(int index) {
+            long pos = getElementPos(index);
+            int listIndex = (int) (pos >>> 32);
+            int elementIndex = (int) (pos & 0x00000000ffffffffL);
+            return lists.get(listIndex).get(elementIndex);
+        }
+
+        @Override
+        public T set(int index, T element) {
+            long pos = getElementPos(index);
+            int listIndex = (int) (pos >>> 32);
+            int elementIndex = (int) (pos & 0x00000000ffffffffL);
+            return lists.get(listIndex).set(elementIndex, element);
+        }
+
+        private long getElementPos(final int index) {
+            int x = index;
+            int i = 0;
+            for (List<T> list : lists) {
+                // List<T> list = lists.get(i);
+                if (x < list.size()) {
+                    return ((long) i << 32) | (x & 0x00000000ffffffffL);
+                } else {
+                    x -= list.size();
+                }
+                i++;
+            }
+            throw new IndexOutOfBoundsException("Index: " + index + ".");
+        }
+
+        @Override
+        public int size() {
+            int size = 0;
+            for (List<T> list : lists) {
+                size += list.size();
+            }
+            return size;
+        }
+    }
+
+    private static final class NullList<T> extends AbstractList<T> implements RandomAccess, Serializable {
+
+        private final int size;
+
+        private NullList(int size) {
+            if (size < 0) {
+                throw new IllegalArgumentException("Size: " + size + ".");
+            }
+            this.size = size;
+        }
+
+        @Override
+        public T get(int index) {
+            if (index < 0 || index >= size) {
+                throw new IndexOutOfBoundsException("Index: " + index + ".");
+            }
+            return null;
+        }
+
+        @Override
+        public int size() {
             return size;
         }
     }

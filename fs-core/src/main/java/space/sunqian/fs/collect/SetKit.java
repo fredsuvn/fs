@@ -33,7 +33,7 @@ public class SetKit {
      * }</pre>
      *
      * @param array the given array
-     * @param <T>   the component type
+     * @param <T>   the type of elements
      * @return a new immutable set of which content is added from the given array
      */
     @SafeVarargs
@@ -45,7 +45,7 @@ public class SetKit {
      * Returns a new {@link HashSet} initialing with the given array.
      *
      * @param array the given array
-     * @param <T>   the component type
+     * @param <T>   the type of elements
      * @return a new {@link HashSet} initialing with the given array
      */
     @SafeVarargs
@@ -57,7 +57,7 @@ public class SetKit {
      * Returns a new {@link LinkedHashSet} initialing with the given array.
      *
      * @param array the given array
-     * @param <T>   the component type
+     * @param <T>   the type of elements
      * @return a new {@link LinkedHashSet} initialing with the given array
      */
     @SafeVarargs
@@ -71,7 +71,7 @@ public class SetKit {
      * {@link #set(Object[])}.
      *
      * @param it  the given iterable
-     * @param <T> the component type
+     * @param <T> the type of elements
      * @return a new immutable set of which content is added from the given iterable
      */
     public static <T> @Nonnull @Immutable Set<T> toSet(@Nonnull Iterable<? extends T> it) {
@@ -84,7 +84,7 @@ public class SetKit {
      * Returns a new {@link HashSet} initialing with the given iterable.
      *
      * @param it  the given iterable
-     * @param <T> the component type
+     * @param <T> the type of elements
      * @return a new {@link HashSet} initialing with the given iterable
      */
     public static <T> @Nonnull HashSet<T> toHashSet(@Nonnull Iterable<T> it) {
@@ -98,7 +98,7 @@ public class SetKit {
      * Returns a new {@link LinkedHashSet} initialing with the given iterable.
      *
      * @param it  the given iterable
-     * @param <T> the component type
+     * @param <T> the type of elements
      * @return a new {@link LinkedHashSet} initialing with the given iterable
      */
     public static <T> @Nonnull LinkedHashSet<T> toLinkedHashSet(@Nonnull Iterable<T> it) {

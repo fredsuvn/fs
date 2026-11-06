@@ -30,7 +30,7 @@ public class ListKit {
      * implements {@link RandomAccess}.
      *
      * @param array the given array
-     * @param <T>   the component type
+     * @param <T>   the type of elements
      * @return an immutable list backed by the given array
      */
     @SafeVarargs
@@ -138,7 +138,7 @@ public class ListKit {
      * Returns a new {@link ArrayList} initialing with the given array.
      *
      * @param array the given array
-     * @param <T>   the component type
+     * @param <T>   the type of elements
      * @return a new {@link ArrayList} initialing with the given array
      */
     @SafeVarargs
@@ -150,7 +150,7 @@ public class ListKit {
      * Returns a new {@link LinkedList} initialing with the given array.
      *
      * @param array the given array
-     * @param <T>   the component type
+     * @param <T>   the type of elements
      * @return a new {@link LinkedList} initialing with the given array
      */
     @SafeVarargs
@@ -163,7 +163,7 @@ public class ListKit {
      * added in its order.
      *
      * @param it  the given iterable
-     * @param <T> the component type
+     * @param <T> the type of elements
      * @return a new immutable list of which content is added from the given iterable
      */
     public static <T> @Nonnull @Immutable List<T> toList(@Nonnull Iterable<? extends T> it) {
@@ -176,7 +176,7 @@ public class ListKit {
      * Returns a new {@link ArrayList} initialing with the given iterable.
      *
      * @param it  the given iterable
-     * @param <T> the component type
+     * @param <T> the type of elements
      * @return a new {@link ArrayList} initialing with the given iterable
      */
     public static <T> @Nonnull ArrayList<T> toArrayList(@Nonnull Iterable<T> it) {
@@ -190,7 +190,7 @@ public class ListKit {
      * Returns a new {@link LinkedList} initialing with the given iterable.
      *
      * @param it  the given iterable
-     * @param <T> the component type
+     * @param <T> the type of elements
      * @return a new {@link LinkedList} initialing with the given iterable
      */
     public static <T> @Nonnull LinkedList<T> toLinkedList(@Nonnull Iterable<T> it) {
@@ -209,12 +209,40 @@ public class ListKit {
      * corresponding underlying list is mutable.
      *
      * @param lists the lists to be composited as a view
-     * @param <T>   the component type
+     * @param <T>   the type of elements
      * @return a composite view of multiple lists
      */
     @SafeVarargs
     public static <T> @Nonnull List<T> compositeView(@Nonnull List<T> @Nonnull ... lists) {
         return ListBack.compositeList(lists);
+    }
+
+    /**
+     * Returns a composite view of multiple lists as a single list. The returned list provides a unified view of all
+     * elements from the provided lists, in the order they are specified. Changes to the underlying lists will be
+     * reflected in the composite view.
+     * <p>
+     * The returned list is un-variable-size, serializable and implements {@link RandomAccess}, and is mutable if the
+     * corresponding underlying list is mutable.
+     *
+     * @param lists the lists to be composited as a view
+     * @param <T>   the type of elements
+     * @return a composite view of multiple lists
+     */
+    public static <T> @Nonnull List<T> compositeView(@Nonnull List<@Nonnull List<T>> lists) {
+        return ListBack.compositeList(lists);
+    }
+
+    /**
+     * Returns an immutable list of the given size, but all elements are {@code null}.
+     *
+     * @param size the size of the list
+     * @param <T>  the type of elements
+     * @return an immutable list of the given size, but all elements are {@code null}
+     * @throws IllegalArgumentException if the given size is negative
+     */
+    public static <T> @Nonnull @Immutable List<T> nullList(int size) throws IllegalArgumentException {
+        return ListBack.nullList(size);
     }
 
     /**

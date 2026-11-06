@@ -3,6 +3,11 @@ package space.sunqian.fs.collect;
 import space.sunqian.annotation.Nonnull;
 import space.sunqian.fs.base.Checker;
 
+/**
+ * This interface represents a slice of a double array. It is the double array implementation of {@link ArraySlice}.
+ *
+ * @author sunqian
+ */
 public final class DoubleArraySlice implements ArraySlice<double[]> {
 
     /**

@@ -28,7 +28,7 @@ public class StreamKit {
      * Returns a {@link Stream} from the given elements.
      *
      * @param elements the given elements
-     * @param <T>      the component type
+     * @param <T>      the type of elements
      * @return a {@link Stream} from the given elements
      */
     @SafeVarargs
@@ -43,7 +43,7 @@ public class StreamKit {
      * Returns a {@link Stream} from the given elements.
      *
      * @param elements the given elements
-     * @param <T>      the component type
+     * @param <T>      the type of elements
      * @return a {@link Stream} from the given elements
      */
     public static <T> @Nonnull Stream<T> stream(@Nonnull Iterable<T> elements) {
@@ -61,7 +61,7 @@ public class StreamKit {
      * throw {@link NoSuchElementException} if the stream reaches the end.
      *
      * @param stream the given stream
-     * @param <T>    the component type
+     * @param <T>    the type of elements
      * @return a {@link Supplier} whose result is the next element of the given {@link Stream}
      */
     public static <T> @Nonnull Supplier<T> toSupplier(@Nonnull Stream<? extends T> stream) {

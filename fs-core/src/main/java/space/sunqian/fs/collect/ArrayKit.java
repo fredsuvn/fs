@@ -27,7 +27,7 @@ public class ArrayKit {
      * Returns whether the given array is null or empty.
      *
      * @param array the given array
-     * @param <T>   the component type of the given array
+     * @param <T>   the type of elements of the given array
      * @return whether the given array is null or empty
      */
     public static <T> boolean isEmpty(T @Nullable [] array) {
@@ -118,7 +118,7 @@ public class ArrayKit {
      * Returns whether the given array is not null and empty.
      *
      * @param array the given array
-     * @param <T>   the component type of the given array
+     * @param <T>   the type of elements of the given array
      * @return whether the given array is not null and empty
      */
     public static <T> boolean isNotEmpty(T @Nullable [] array) {
@@ -210,7 +210,7 @@ public class ArrayKit {
      *
      * @param array the given array
      * @param value the given value
-     * @param <T>   the component type of the given array
+     * @param <T>   the type of elements of the given array
      * @return the given array
      */
     public static <T> T @Nonnull [] fill(T @Nonnull @OutParam [] array, T value) {
@@ -326,8 +326,8 @@ public class ArrayKit {
      * @param source the source array
      * @param dest   the dest array
      * @param mapper the specified mapper
-     * @param <T>    the component type of the source array
-     * @param <R>    the component type of the dest array
+     * @param <T>    the type of elements of the source array
+     * @param <R>    the type of elements of the dest array
      * @return the given dest or a new result array
      */
     public static <T, R> R @Nonnull [] map(
@@ -355,8 +355,8 @@ public class ArrayKit {
      *
      * @param source the source array
      * @param mapper the specified mapper
-     * @param <T>    the component type of the source array
-     * @param <R>    the component type of the dest array
+     * @param <T>    the type of elements of the source array
+     * @param <R>    the type of elements of the dest array
      * @return a new result array
      * @throws UnsupportedOperationException if all new elements are null
      */
@@ -372,7 +372,7 @@ public class ArrayKit {
                 return dest;
             }
         }
-        throw new UnsupportedOperationException("Can not resolve the component type.");
+        throw new UnsupportedOperationException("Can not resolve the type of elements.");
     }
 
     private static <T, R> void map0(
@@ -393,7 +393,7 @@ public class ArrayKit {
      *
      * @param componentType the specified component type
      * @param length        the specified length
-     * @param <A>           the type of created array, not the component type
+     * @param <A>           the type of created array, not the type of elements
      * @return the created array
      */
     public static <A> @Nonnull A newArray(@Nonnull Class<?> componentType, int length) {
@@ -407,7 +407,7 @@ public class ArrayKit {
      * @param array        the given array
      * @param index        the specified index
      * @param defaultValue the default value
-     * @param <T>          the component type
+     * @param <T>          the type of elements
      * @return the value from the given array at the specified index
      */
     public static <T> T get(T @Nullable [] array, int index, T defaultValue) {
@@ -552,7 +552,7 @@ public class ArrayKit {
      *
      * @param array the given array
      * @param value the specified value
-     * @param <T>   the component type
+     * @param <T>   the type of elements
      * @return the first index of the element which equals the specified value via {@link Fs#equals(Object, Object)} at
      * the given array
      */
@@ -707,7 +707,7 @@ public class ArrayKit {
      *
      * @param array     the given array
      * @param predicate the specified predication
-     * @param <T>       the component type
+     * @param <T>       the type of elements
      * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
     public static <T> int indexOf(T @Nonnull [] array, @Nonnull IndexedPredicate<T> predicate) {
@@ -872,7 +872,7 @@ public class ArrayKit {
      *
      * @param array the given array
      * @param value the specified value
-     * @param <T>   the component type
+     * @param <T>   the type of elements
      * @return the last index of the element which equals the specified value via {@link Fs#equals(Object, Object)} at
      * the given array
      */
@@ -1045,7 +1045,7 @@ public class ArrayKit {
      *
      * @param array     the given array
      * @param predicate the specified predication
-     * @param <T>       the component type
+     * @param <T>       the type of elements
      * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
     public static <T> int lastIndexOf(T @Nonnull [] array, @Nonnull IndexedPredicate<T> predicate) {
@@ -1222,7 +1222,7 @@ public class ArrayKit {
      * Directly returns the given variable arguments as an array.
      *
      * @param elements the given variable arguments
-     * @param <T>      the component type
+     * @param <T>      the type of elements
      * @return the given variable arguments as an array
      */
     @SafeVarargs
@@ -1235,7 +1235,7 @@ public class ArrayKit {
      * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
      *
      * @param array the given array
-     * @param <T>   the component type
+     * @param <T>   the type of elements
      * @return a fixed-size list backed by the given array
      */
     public static <T> @Nonnull List<T> asList(T @Nonnull @RetainedParam [] array) {
