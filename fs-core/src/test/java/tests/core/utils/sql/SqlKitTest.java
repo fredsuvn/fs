@@ -12,7 +12,6 @@ import space.sunqian.fs.object.meta.ObjectMetaIntrospector;
 import space.sunqian.fs.utils.sql.SqlKit;
 import space.sunqian.fs.utils.sql.SqlNameMapper;
 import space.sunqian.fs.utils.sql.SqlParameter;
-import space.sunqian.fs.utils.sql.SqlResult;
 import space.sunqian.fs.utils.sql.SqlRuntimeException;
 import space.sunqian.fs.utils.sql.annotation.SqlColumn;
 import space.sunqian.fs.utils.sql.annotation.SqlTable;
@@ -29,10 +28,14 @@ import java.sql.Types;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -280,10 +283,10 @@ public class SqlKitTest {
             statement.close();
         }
         {
-            // test next row with bean
+            // test next row
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc");
-            User alice = Fs.as(SqlKit.nextRow(
+            User alice = Fs.as(SqlKit.readOne(
                 resultSet,
                 INTROSPECTOR.introspect(User.class),
                 NAME_MAPPER.toPropertyNameMapper(),
@@ -298,7 +301,7 @@ public class SqlKitTest {
             // test no row available
             Statement emptyStatement = connection.createStatement();
             ResultSet emptyResult = emptyStatement.executeQuery("select * from `USER` where `ID` = 9999");
-            assertNull(SqlKit.nextRow(
+            assertNull(SqlKit.readOne(
                 emptyResult,
                 INTROSPECTOR.introspect(User.class),
                 NAME_MAPPER.toPropertyNameMapper(),
@@ -310,7 +313,7 @@ public class SqlKitTest {
             // SQL error: closed ResultSet
             assertThrows(
                 SqlRuntimeException.class,
-                () -> SqlKit.nextRow(
+                () -> SqlKit.readOne(
                     resultSet,
                     INTROSPECTOR.introspect(User.class),
                     NAME_MAPPER.toPropertyNameMapper(),
@@ -319,7 +322,7 @@ public class SqlKitTest {
             );
         }
         {
-            // test read rows with bean
+            // test read rows
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc");
             List<User> users = Fs.as(SqlKit.readRows(
@@ -358,6 +361,198 @@ public class SqlKitTest {
     }
 
     @Test
+    public void testSelectRow() throws Exception {
+        Date now = new Date();
+        ZonedDateTime birthday = ZonedDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault());
+        {
+            // init data
+            String sql = "insert into `USER` (USER_NAME, AGE, BIRTHDAY) values (?, ?, ?)";
+            List<List<?>> params = Fs.list(
+                Fs.list("Alice", 25, now),
+                Fs.list("Bob", 18, now),
+                Fs.list("Charlie", 22, now)
+            );
+            PreparedStatement statement = connection.prepareStatement(sql);
+            SqlKit.setParameterBatches(statement, params);
+            int inserted = statement.executeBatch().length;
+            assertEquals(3, inserted);
+            statement.close();
+        }
+        {
+            // test select one
+            User alice = Fs.as(SqlKit.selectOne(
+                connection,
+                INTROSPECTOR.introspect(User.class),
+                NAME_MAPPER,
+                CONVERTER,
+                1
+            ));
+            assertNotNull(alice);
+            assertEquals(1L, alice.getId());
+            assertEquals("Alice", alice.getUserName());
+            assertEquals(25, alice.getAge());
+            assertEquals(birthday, alice.getBirthday());
+            // test no row available
+            assertNull(SqlKit.selectOne(
+                connection,
+                INTROSPECTOR.introspect(User.class),
+                NAME_MAPPER,
+                CONVERTER,
+                9999
+            ));
+        }
+        {
+            // test select rows
+            Map<Object, User> users1 = Fs.as(SqlKit.selectByIds(
+                connection,
+                INTROSPECTOR.introspect(User.class),
+                NAME_MAPPER,
+                CONVERTER,
+                1, 2, 3
+            ));
+            assertEquals(3, users1.size());
+            assertEquals(
+                Fs.list(1L, 2L, 3L),
+                users1.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())
+            );
+            assertEquals(1L, users1.get(1L).getId());
+            assertEquals("Alice", users1.get(1L).getUserName());
+            assertEquals(25, users1.get(1L).getAge());
+            assertEquals(birthday, users1.get(1L).getBirthday());
+            assertEquals(2L, users1.get(2L).getId());
+            assertEquals("Bob", users1.get(2L).getUserName());
+            assertEquals(18, users1.get(2L).getAge());
+            assertEquals(birthday, users1.get(2L).getBirthday());
+            assertEquals(3L, users1.get(3L).getId());
+            assertEquals("Charlie", users1.get(3L).getUserName());
+            assertEquals(22, users1.get(3L).getAge());
+            assertEquals(birthday, users1.get(3L).getBirthday());
+            Map<Object, User> users2 = Fs.as(SqlKit.selectByIds(
+                connection,
+                INTROSPECTOR.introspect(User.class),
+                NAME_MAPPER,
+                CONVERTER,
+                Fs.list(3, 2, 1)
+            ));
+            assertEquals(3, users2.size());
+            assertEquals(
+                Fs.list(3L, 2L, 1L),
+                users2.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())
+            );
+            assertEquals(3L, users2.get(3L).getId());
+            assertEquals("Charlie", users2.get(3L).getUserName());
+            assertEquals(22, users2.get(3L).getAge());
+            assertEquals(birthday, users2.get(3L).getBirthday());
+            assertEquals(2L, users2.get(2L).getId());
+            assertEquals("Bob", users2.get(2L).getUserName());
+            assertEquals(18, users2.get(2L).getAge());
+            assertEquals(birthday, users2.get(2L).getBirthday());
+            assertEquals(1L, users2.get(1L).getId());
+            assertEquals("Alice", users2.get(1L).getUserName());
+            assertEquals(25, users2.get(1L).getAge());
+            assertEquals(birthday, users2.get(1L).getBirthday());
+            // test select rows with duplicate ids
+            Map<Object, User> users3 = Fs.as(SqlKit.selectByIds(
+                connection,
+                INTROSPECTOR.introspect(User.class),
+                NAME_MAPPER,
+                CONVERTER,
+                1, 2, 2, 3
+            ));
+            assertEquals(3, users3.size());
+            assertEquals(
+                Fs.list(1L, 2L, 3L),
+                users3.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())
+            );
+            assertEquals(1L, users3.get(1L).getId());
+            assertEquals("Alice", users3.get(1L).getUserName());
+            assertEquals(25, users3.get(1L).getAge());
+            assertEquals(birthday, users3.get(1L).getBirthday());
+            assertEquals(2L, users3.get(2L).getId());
+            assertEquals("Bob", users3.get(2L).getUserName());
+            assertEquals(18, users3.get(2L).getAge());
+            assertEquals(birthday, users3.get(2L).getBirthday());
+            assertEquals(3L, users3.get(3L).getId());
+            assertEquals("Charlie", users3.get(3L).getUserName());
+            assertEquals(22, users3.get(3L).getAge());
+            assertEquals(birthday, users3.get(3L).getBirthday());
+            // test select rows with null values
+            Map<Object, User> users4 = Fs.as(SqlKit.selectByIds(
+                connection,
+                INTROSPECTOR.introspect(User.class),
+                NAME_MAPPER,
+                CONVERTER,
+                1, 9999, 3
+            ));
+            assertEquals(3, users4.size());
+            assertEquals(
+                Fs.list(1L, 9999L, 3L),
+                users4.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())
+            );
+            assertEquals(1L, users4.get(1L).getId());
+            assertEquals("Alice", users4.get(1L).getUserName());
+            assertEquals(25, users4.get(1L).getAge());
+            assertEquals(birthday, users4.get(1L).getBirthday());
+            assertNull(users4.get(9999L));
+            assertEquals(3L, users4.get(3L).getId());
+            assertEquals("Charlie", users4.get(3L).getUserName());
+            assertEquals(22, users4.get(3L).getAge());
+            assertEquals(birthday, users4.get(3L).getBirthday());
+        }
+        {
+            // exception
+            // empty primary key values
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.selectByIds(connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, CONVERTER)
+            );
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.selectByIds(connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, CONVERTER, Fs.list())
+            );
+            // multi primary keys
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.selectByIds(
+                    connection, INTROSPECTOR.introspect(MultiPrimary.class), NAME_MAPPER, CONVERTER, CONVERTER, 1
+                )
+            );
+            // no primary key
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.selectByIds(
+                    connection, INTROSPECTOR.introspect(NoPrimary.class), NAME_MAPPER, CONVERTER, CONVERTER, 1
+                )
+            );
+            // no table annotation
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.selectByIds(
+                    connection, INTROSPECTOR.introspect(NoTable.class), NAME_MAPPER, CONVERTER, CONVERTER, 1
+                )
+            );
+            // no column annotation
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.selectByIds(
+                    connection, INTROSPECTOR.introspect(NoColumn.class), NAME_MAPPER, CONVERTER, CONVERTER, 1
+                )
+            );
+            // SQL error: no table mapping
+            assertThrows(
+                SqlRuntimeException.class,
+                () -> SqlKit.selectByIds(
+                    connection, INTROSPECTOR.introspect(NoMapping.class), NAME_MAPPER, CONVERTER, CONVERTER, 1
+                )
+            );
+        }
+        {
+            // clear data
+            clearData();
+        }
+    }
+
+    @Test
     public void testInsertRow() throws Exception {
         ZonedDateTime birthday = ZonedDateTime.ofInstant(new Date().toInstant(), ZoneId.systemDefault());
         {
@@ -368,46 +563,43 @@ public class SqlKitTest {
             user.setBirthday(birthday);
             user.setOther1("other1");
             user.setOther2("other2");
-            SqlResult.OfInsert userResult = SqlKit.insertRow(
+            Object userId = SqlKit.insertOne(
                 connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, CONVERTER, user
             );
-            assertEquals(1, userResult.insertedRows());
-            assertEquals(1L, userResult.autoGeneratedKeys().get(0));
+            assertEquals(1L, userId);
             // test no auto-generated key
             UserPassword userPassword = new UserPassword();
-            userPassword.setUserId((Long) userResult.autoGeneratedKeys().get(0));
+            userPassword.setUserId((Long) userId);
             userPassword.setUserPassword("111");
-            SqlResult.OfInsert passwordResult = SqlKit.insertRow(
+            Object passwordId = SqlKit.insertOne(
                 connection, INTROSPECTOR.introspect(UserPassword.class), NAME_MAPPER, CONVERTER, userPassword
             );
-            assertEquals(1, passwordResult.insertedRows());
-            assertTrue(passwordResult.autoGeneratedKeys().isEmpty());
+            assertNull(passwordId);
             // test multi auto-generated keys
             UserCount userCount = new UserCount();
             userCount.setId(111L);
             userCount.setUserName("Alice");
             userCount.setUserCount(1111L);
-            SqlResult.OfInsert countResult = SqlKit.insertRow(
+            Object countId = SqlKit.insertOne(
                 connection, INTROSPECTOR.introspect(UserCount.class), NAME_MAPPER, CONVERTER, userCount
             );
-            assertEquals(1, countResult.insertedRows());
-            assertEquals(1L, countResult.autoGeneratedKeys().get(0));
+            assertEquals(1L, countId);
             // exception
             assertThrows(
                 SqlRuntimeException.class,
-                () -> SqlKit.insertRow(
+                () -> SqlKit.insertOne(
                     connection, INTROSPECTOR.introspect(NoTable.class), NAME_MAPPER, CONVERTER, new NoTable()
                 )
             );
             assertThrows(
                 SqlRuntimeException.class,
-                () -> SqlKit.insertRow(
+                () -> SqlKit.insertOne(
                     connection, INTROSPECTOR.introspect(NoColumn.class), NAME_MAPPER, CONVERTER, new NoColumn()
                 )
             );
             assertThrows(
                 SqlRuntimeException.class,
-                () -> SqlKit.insertRow(
+                () -> SqlKit.insertOne(
                     connection, INTROSPECTOR.introspect(SomeTable.class), NAME_MAPPER, CONVERTER, new SomeTable()
                 )
             );
@@ -422,23 +614,23 @@ public class SqlKitTest {
             charlie.setUserName("Charlie");
             charlie.setAge(22);
             charlie.setBirthday(birthday);
-            SqlResult.OfInsert userResult = SqlKit.insertRows(
+            List<Object> userIds = SqlKit.insertRows(
                 connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, CONVERTER, bob, charlie
             );
-            assertEquals(2, userResult.insertedRows());
-            assertEquals(Fs.list(2L, 3L), userResult.autoGeneratedKeys());
+            assertEquals(2, userIds.size());
+            assertEquals(Fs.list(2L, 3L), userIds);
             // test no auto-generated key
             UserPassword bobPassword = new UserPassword();
-            bobPassword.setUserId((Long) userResult.autoGeneratedKeys().get(0));
+            bobPassword.setUserId((Long) userIds.get(0));
             bobPassword.setUserPassword("222");
             UserPassword charliePassword = new UserPassword();
-            charliePassword.setUserId((Long) userResult.autoGeneratedKeys().get(1));
+            charliePassword.setUserId((Long) userIds.get(1));
             charliePassword.setUserPassword("333");
-            SqlResult.OfInsert passwordResult = SqlKit.insertRows(
+            List<Object> passwordIds = SqlKit.insertRows(
                 connection, INTROSPECTOR.introspect(UserPassword.class), NAME_MAPPER, CONVERTER, bobPassword, charliePassword
             );
-            assertEquals(2, passwordResult.insertedRows());
-            assertTrue(passwordResult.autoGeneratedKeys().isEmpty());
+            assertEquals(2, passwordIds.size());
+            assertEquals(Fs.list(null, null), passwordIds);
             // test multi auto-generated keys
             UserCount bobCount = new UserCount();
             bobCount.setId(222L);
@@ -448,22 +640,21 @@ public class SqlKitTest {
             charlieCount.setId(333L);
             charlieCount.setUserName("Charlie");
             charlieCount.setUserCount(3333L);
-            SqlResult.OfInsert countResult = SqlKit.insertRows(
+            List<Object> countIds = SqlKit.insertRows(
                 connection, INTROSPECTOR.introspect(UserCount.class), NAME_MAPPER, CONVERTER, Fs.list(bobCount, charlieCount)
             );
-            assertEquals(2, countResult.insertedRows());
-            assertEquals(2L, countResult.autoGeneratedKeys().size());
-            assertEquals(Fs.list(2L, 3L), countResult.autoGeneratedKeys());
+            assertEquals(2, countIds.size());
+            assertEquals(Fs.list(2L, 3L), countIds);
             // exception
             // empty beans
             assertSame(
-                SqlResult.emptyInsert(),
+                Collections.emptyList(),
                 SqlKit.insertRows(
                     connection, INTROSPECTOR.introspect(UserPassword.class), NAME_MAPPER, CONVERTER
                 )
             );
             assertSame(
-                SqlResult.emptyInsert(),
+                Collections.emptyList(),
                 SqlKit.insertRows(
                     connection, INTROSPECTOR.introspect(UserPassword.class), NAME_MAPPER, CONVERTER, Fs.list()
                 )
@@ -471,7 +662,7 @@ public class SqlKitTest {
             // no table annotation
             assertThrows(
                 SqlRuntimeException.class,
-                () -> SqlKit.insertRow(
+                () -> SqlKit.insertOne(
                     connection, INTROSPECTOR.introspect(NoTable.class), NAME_MAPPER, CONVERTER, new NoTable()
                 )
             );
@@ -484,7 +675,7 @@ public class SqlKitTest {
             // no column annotation
             assertThrows(
                 SqlRuntimeException.class,
-                () -> SqlKit.insertRow(
+                () -> SqlKit.insertOne(
                     connection, INTROSPECTOR.introspect(NoColumn.class), NAME_MAPPER, CONVERTER, new NoColumn()
                 )
             );
@@ -605,8 +796,7 @@ public class SqlKitTest {
             dave.setAge(30);
             dave.setBirthday(birthday);
             users.add(dave);
-            SqlResult.OfInsert userResult =
-                SqlKit.insertRows(connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, CONVERTER, users);
+            SqlKit.insertRows(connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, CONVERTER, users);
         }
         {
             // test update rows
@@ -619,7 +809,7 @@ public class SqlKitTest {
                 1,
                 SqlKit.updateById(
                     connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, updateAlice, 1L
-                ).updatedRows()
+                )
             );
             User updateAll = new User();
             updateAll.setAge(99);
@@ -629,13 +819,13 @@ public class SqlKitTest {
                 2,
                 SqlKit.updateByIds(
                     connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, updateAll, 2L, 3L
-                ).updatedRows()
+                )
             );
             assertEquals(
                 1,
                 SqlKit.updateByIds(
                     connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, updateAll, Fs.list(4L)
-                ).updatedRows()
+                )
             );
         }
         {
@@ -763,8 +953,7 @@ public class SqlKitTest {
             dave.setAge(30);
             dave.setBirthday(birthday);
             users.add(dave);
-            SqlResult.OfInsert userResult =
-                SqlKit.insertRows(connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, CONVERTER, users);
+            SqlKit.insertRows(connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, CONVERTER, users);
         }
         {
             // delete one row
@@ -772,7 +961,7 @@ public class SqlKitTest {
                 1,
                 SqlKit.deleteById(
                     connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, 1L
-                ).deletedRows()
+                )
             );
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from `USER` order by ID asc");
@@ -804,7 +993,7 @@ public class SqlKitTest {
                 2,
                 SqlKit.deleteByIds(
                     connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, 2L, 3L
-                ).deletedRows()
+                )
             );
             {
                 Statement statement = connection.createStatement();
@@ -827,7 +1016,7 @@ public class SqlKitTest {
                 1,
                 SqlKit.deleteByIds(
                     connection, INTROSPECTOR.introspect(User.class), NAME_MAPPER, Fs.list(4L)
-                ).deletedRows()
+                )
             );
             {
                 Statement statement = connection.createStatement();
@@ -1020,15 +1209,6 @@ public class SqlKitTest {
 
     @Data
     @SqlTable
-    public static class NoUpdatable {
-        @SqlColumn(primary = true)
-        private Long id;
-        @SqlColumn
-        private String userName;
-    }
-
-    @Data
-    @SqlTable
     public static class MultiPrimary {
         @SqlColumn(primary = true)
         private Long id1;
@@ -1048,19 +1228,6 @@ public class SqlKitTest {
     @Data
     @SqlTable
     public static class NoMapping {
-        @SqlColumn(primary = true)
-        private Long id;
-    }
-
-    @Data
-    public static class NoTableHasId {
-        @SqlColumn(primary = true)
-        private Long id;
-    }
-
-    @Data
-    @SqlTable
-    public static class NoMappingHasTableHasId {
         @SqlColumn(primary = true)
         private Long id;
     }
