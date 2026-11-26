@@ -8,10 +8,7 @@ import space.sunqian.fs.object.meta.ObjectMeta;
 import java.util.Map;
 
 /**
- * Represents a mapping between a Java bean and a SQL structure, such as a table, a view, or a query result set.
- * <p>
- * The mapping can be used both to read query results into Java beans and to generate SQL statements such as
- * {@code INSERT}, {@code UPDATE}, and {@code DELETE}.
+ * Represents a mapping from a Java bean to a SQL table, view, or query result set.
  *
  * @author sunqian
  */
@@ -19,70 +16,70 @@ import java.util.Map;
 public interface SqlBeanMapping {
 
     /**
-     * Returns the name of the underlying SQL source. For a table or a view, this is the table name or view name; for a
-     * query result set, this method returns {@code null}.
+     * Returns the name of the target SQL structure. For a table or view, this method returns the table name or view
+     * name; for a query result set, this method returns {@code null}.
      *
-     * @return the name of the underlying SQL source, or {@code null} if the source has no name
+     * @return the name of the target SQL structure, or {@code null} if the target SQL structure has no name
      */
     @Nullable
-    String sourceName();
+    String targetName();
 
     /**
-     * Returns an immutable map from column names to column mappings.
+     * Returns an immutable map from the property names to the property mappings.
      *
-     * @return an immutable map from column names to column mappings
+     * @return an immutable map from the property names to the property mappings
      */
     @Immutable
     @Nonnull
-    Map<@Nonnull String, @Nonnull SqlColumnMapping> columnsByColumnName();
+    Map<@Nonnull String, @Nonnull SqlPropertyMapping> propertyMappingsByPropertyName();
 
     /**
-     * Returns the column mapping with the specified column name, or {@code null} if no such column mapping exists.
+     * Returns an immutable map from the column names to the property mappings.
      *
-     * @param columnName the specified column name
-     * @return the column mapping with the specified column name, or {@code null} if no such column mapping exists
-     */
-    default @Nullable SqlColumnMapping getColumnByColumnName(@Nonnull String columnName) {
-        return columnsByColumnName().get(columnName);
-    }
-
-    /**
-     * Returns an immutable map from bean property names to column mappings.
-     *
-     * @return an immutable map from bean property names to column mappings
+     * @return an immutable map from the column names to the property mappings
      */
     @Immutable
     @Nonnull
-    Map<@Nonnull String, @Nonnull SqlColumnMapping> columnsByPropertyName();
+    Map<@Nonnull String, @Nonnull SqlPropertyMapping> propertyMappingsByColumnName();
 
     /**
-     * Returns the column mapping with the specified bean property name, or {@code null} if no such column mapping
+     * Returns the property mapping with the specified bean property name, or {@code null} if no such property mapping
      * exists.
      *
      * @param propertyName the specified bean property name
-     * @return the column mapping with the specified bean property name, or {@code null} if no such column mapping
+     * @return the property mapping with the specified bean property name, or {@code null} if no such property mapping
      * exists
      */
-    default @Nullable SqlColumnMapping getColumnByPropertyName(@Nonnull String propertyName) {
-        return columnsByPropertyName().get(propertyName);
+    default @Nullable SqlPropertyMapping getPropertyMappingByPropertyName(@Nonnull String propertyName) {
+        return propertyMappingsByPropertyName().get(propertyName);
     }
 
     /**
-     * Returns the primary key column mapping of this bean mapping, or {@code null} if this bean mapping has no primary
-     * key. If this bean mapping has multiple primary key columns, this method returns the first one encountered in the
-     * properties of the mapped Java bean.
+     * Returns the property mapping with the specified column name, or {@code null} if no such property mapping exists.
      *
-     * @return the primary key column mapping of this bean mapping, or {@code null} if this bean mapping has no primary
-     * key column
+     * @param columnName the specified column name
+     * @return the property mapping with the specified column name, or {@code null} if no such property mapping exists
      */
-    @Nullable
-    SqlColumnMapping primaryKey();
+    default @Nullable SqlPropertyMapping getPropertyMappingByColumnName(@Nonnull String columnName) {
+        return propertyMappingsByColumnName().get(columnName);
+    }
 
     /**
-     * Returns the metadata of the mapped Java bean.
+     * Returns the property mapping of the primary key column of this bean mapping, or {@code null} if this bean mapping
+     * has no primary key column mapping. If this bean mapping has multiple primary key column mappings, this method
+     * returns the first one encountered in the properties of the mapped Java bean.
      *
-     * @return the metadata of the mapped Java bean
+     * @return the property mapping of the primary key column of this bean mapping, or {@code null} if this bean mapping
+     * has no primary key column mapping
+     */
+    @Nullable
+    SqlPropertyMapping primaryKey();
+
+    /**
+     * Returns the type of the mapped Java bean.
+     *
+     * @return the type of the mapped Java bean
      */
     @Nonnull
-    ObjectMeta beanMeta();
+    ObjectMeta beanType();
 }
