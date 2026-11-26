@@ -25,6 +25,13 @@ public interface SqlBeanMapping {
     String targetName();
 
     /**
+     * Returns the number of property mappings in this bean mapping.
+     *
+     * @return the number of property mappings in this bean mapping
+     */
+    int propertyMappingCount();
+
+    /**
      * Returns an immutable map from the property names to the property mappings.
      *
      * @return an immutable map from the property names to the property mappings

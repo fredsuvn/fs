@@ -22,7 +22,18 @@ import java.util.Map;
 final class SqlBeanMapperBack {
 
     static @Nonnull SqlBeanMapper defaultMapper() {
-        return SqlBeanMapperImpl.INST;
+        return DefaultSqlBeanMapper.INST;
+    }
+
+    static @Nonnull SqlBeanMapper newMapper(
+        @Nonnull SqlBeanMapper.TableResolver tableResolver,
+        @Nonnull SqlBeanMapper.ColumnResolver columnResolver,
+        @Nullable SimpleCache<@Nonnull ObjectMeta, @Nonnull SqlBeanMapping> cache
+    ) {
+        return cache == null ?
+            new FinalSqlBeanMapperImpl(tableResolver, columnResolver)
+            :
+            new CachedSqlBeanMapperImpl(tableResolver, columnResolver, cache);
     }
 
     static @Nonnull NameMapper defaultToColumnNameMapper() {
@@ -37,43 +48,46 @@ final class SqlBeanMapperBack {
         return NameMappers.TO_TABLE_NAME_MAPPER;
     }
 
-    private enum SqlBeanMapperImpl implements SqlBeanMapper {
+    private static class SqlBeanMapperImpl implements SqlBeanMapper {
 
-        INST;
+        private final @Nonnull TableResolver tableResolver;
+        private final @Nonnull ColumnResolver columnResolver;
 
-        private static final @Nonnull SimpleCache<@Nonnull ObjectMeta, @Nonnull SqlBeanMapping> CACHE =
-            SimpleCache.ofSoft();
-
-        static {
-            Fs.registerGlobalCache(CACHE);
+        private SqlBeanMapperImpl(@Nonnull TableResolver tableResolver, @Nonnull ColumnResolver columnResolver) {
+            this.tableResolver = tableResolver;
+            this.columnResolver = columnResolver;
         }
 
         @Override
-        public @Nonnull SqlBeanMapping toBeanMapping(@Nonnull ObjectMeta beanType) {
-            return CACHE.get(beanType, this::toBeanMapping0);
-        }
-
-        private @Nonnull SqlBeanMapping toBeanMapping0(@Nonnull ObjectMeta beanMeta) {
-            return new SqlBeanMappingImpl(beanMeta);
+        public @Nonnull SqlBeanMapping toBeanMapping(@Nonnull ObjectMeta beanType) throws SqlRuntimeException {
+            return new SqlBeanMappingImpl(beanType, tableResolver, columnResolver);
         }
 
         private static final class SqlBeanMappingImpl implements SqlBeanMapping {
 
-            private final @Nullable String sourceName;
+            private final @Nullable String targetName;
             private final @Immutable
             @Nonnull Map<@Nonnull String, @Nonnull SqlPropertyMapping> propertyMappingsByColumnName;
             private final @Immutable
             @Nonnull Map<@Nonnull String, @Nonnull SqlPropertyMapping> propertyMappingsByPropertyName;
             private final @Nullable SqlPropertyMapping primaryKey;
-            private final @Nonnull ObjectMeta beanMeta;
+            private final @Nonnull ObjectMeta beanType;
 
-            private SqlBeanMappingImpl(@Nonnull ObjectMeta beanMeta) {
-                Type tableType = beanMeta.type();
+            private SqlBeanMappingImpl(
+                @Nonnull ObjectMeta beanType,
+                @Nonnull TableResolver tableResolver,
+                @Nonnull ColumnResolver columnResolver
+            ) throws SqlRuntimeException {
 
-                // table name
+                // table info
                 {
-                    SqlTable sqlTable = beanMeta.annotations().annotation(SqlTable.class);
-                    this.sourceName = toTableNameMapper(sqlTable, tableType);
+                    SqlTableInfo tableInfo = tableResolver.resolve(beanType);
+                    if (tableInfo == null) {
+                        throw new SqlRuntimeException(
+                            "Bean " + beanType + " can not be mapped to the target SQL structure"
+                        );
+                    }
+                    this.targetName = tableInfo.name();
                 }
 
                 // columns
@@ -81,21 +95,20 @@ final class SqlBeanMapperBack {
                     Map<String, SqlPropertyMapping> propertyMappingsByPropertyName = new LinkedHashMap<>();
                     Map<String, SqlPropertyMapping> propertyMappingsByColumnName = new LinkedHashMap<>();
                     SqlPropertyMapping primaryKey = null;
-                    for (PropertyMeta propertyMeta : beanMeta.properties().values()) {
-                        SqlColumn sqlColumn = propertyMeta.annotations().annotation(SqlColumn.class);
-                        if (sqlColumn == null) {
+                    for (PropertyMeta propertyType : beanType.properties().values()) {
+                        SqlColumnInfo columnInfo = columnResolver.resolve(propertyType);
+                        if (columnInfo == null) {
                             continue;
                         }
-                        String propertyName = propertyMeta.name();
-                        String columnName = sqlColumn.value().isEmpty() ?
-                            SqlBeanMapper.defaultToColumnNameMapper().map(propertyName) : sqlColumn.value();
-                        boolean isPrimaryKey = sqlColumn.primaryKey();
-                        boolean isAutoGenerated = sqlColumn.autoGenerated();
+                        String propertyName = propertyType.name();
+                        String columnName = columnInfo.name();
+                        boolean isPrimaryKey = columnInfo.isPrimaryKey();
+                        boolean isAutoGenerated = columnInfo.isAutoGenerated();
                         SqlPropertyMapping columnMapping = new SqlPropertyMappingImpl(
                             columnName,
                             isPrimaryKey,
                             isAutoGenerated,
-                            propertyMeta
+                            propertyType
                         );
                         propertyMappingsByPropertyName.put(propertyName, columnMapping);
                         propertyMappingsByColumnName.put(columnName, columnMapping);
@@ -111,23 +124,18 @@ final class SqlBeanMapperBack {
 
                 // set bean meta
                 {
-                    this.beanMeta = beanMeta;
+                    this.beanType = beanType;
                 }
-            }
-
-            private @Nonnull String toTableNameMapper(@Nullable SqlTable sqlTable, @Nonnull Type tableType) {
-                if (sqlTable != null) {
-                    String value = sqlTable.value();
-                    if (!value.isEmpty()) {
-                        return value;
-                    }
-                }
-                return SqlBeanMapper.defaultToTableNameMapper().map(tableType.getTypeName());
             }
 
             @Override
             public @Nullable String targetName() {
-                return sourceName;
+                return targetName;
+            }
+
+            @Override
+            public int propertyMappingCount() {
+                return propertyMappingsByPropertyName.size();
             }
 
             @Override
@@ -147,7 +155,7 @@ final class SqlBeanMapperBack {
 
             @Override
             public @Nonnull ObjectMeta beanType() {
-                return beanMeta;
+                return beanType;
             }
 
             private final class SqlPropertyMappingImpl implements SqlPropertyMapping {
@@ -155,18 +163,18 @@ final class SqlBeanMapperBack {
                 private final @Nonnull String columnName;
                 private final boolean isPrimaryKey;
                 private final boolean isAutoGenerated;
-                private final @Nonnull PropertyMeta propertyMeta;
+                private final @Nonnull PropertyMeta propertyType;
 
                 private SqlPropertyMappingImpl(
                     @Nonnull String columnName,
                     boolean isPrimaryKey,
                     boolean isAutoGenerated,
-                    @Nonnull PropertyMeta propertyMeta
+                    @Nonnull PropertyMeta propertyType
                 ) {
                     this.columnName = columnName;
                     this.isPrimaryKey = isPrimaryKey;
                     this.isAutoGenerated = isAutoGenerated;
-                    this.propertyMeta = propertyMeta;
+                    this.propertyType = propertyType;
                 }
 
                 @Override
@@ -191,9 +199,106 @@ final class SqlBeanMapperBack {
 
                 @Override
                 public @Nonnull PropertyMeta propertyType() {
-                    return propertyMeta;
+                    return propertyType;
                 }
             }
+        }
+    }
+
+    private static final class FinalSqlBeanMapperImpl extends SqlBeanMapperImpl {
+
+        private FinalSqlBeanMapperImpl(@Nonnull TableResolver tableResolver, @Nonnull ColumnResolver columnResolver) {
+            super(tableResolver, columnResolver);
+        }
+    }
+
+    private static final class CachedSqlBeanMapperImpl extends SqlBeanMapperImpl {
+
+        private final @Nonnull SimpleCache<@Nonnull ObjectMeta, @Nonnull SqlBeanMapping> cache;
+
+        private CachedSqlBeanMapperImpl(
+            @Nonnull TableResolver tableResolver,
+            @Nonnull ColumnResolver columnResolver,
+            @Nonnull SimpleCache<@Nonnull ObjectMeta, @Nonnull SqlBeanMapping> cache
+        ) {
+            super(tableResolver, columnResolver);
+            this.cache = cache;
+        }
+
+        @Override
+        public @Nonnull SqlBeanMapping toBeanMapping(@Nonnull ObjectMeta beanType) throws SqlRuntimeException {
+            return cache.get(beanType, super::toBeanMapping);
+        }
+    }
+
+    private enum DefaultSqlBeanMapper implements SqlBeanMapper {
+
+        INST;
+
+        private static @Nonnull String resolveTableName(@Nullable SqlTable sqlTable, @Nonnull Type tableType) {
+            if (sqlTable != null) {
+                String value = sqlTable.value();
+                if (!value.isEmpty()) {
+                    return value;
+                }
+            }
+            return SqlBeanMapper.defaultToTableNameMapper().map(tableType.getTypeName());
+        }
+
+        private static final @Nonnull TableResolver DEFAULT_TABLE_RESOLVER = bt -> {
+            SqlTable sqlTable = bt.annotations().annotation(SqlTable.class);
+            String name = resolveTableName(sqlTable, bt.type());
+            return new SqlTableInfo() {
+                @Override
+                public @Nonnull String name() {
+                    return name;
+                }
+            };
+        };
+
+        private static final @Nonnull ColumnResolver DEFAULT_COLUMN_RESOLVER = pt -> {
+            SqlColumn sqlColumn = pt.annotations().annotation(SqlColumn.class);
+            if (sqlColumn == null) {
+                return null;
+            }
+            String columnName = sqlColumn.value().isEmpty() ?
+                SqlBeanMapper.defaultToColumnNameMapper().map(pt.name()) : sqlColumn.value();
+            boolean isPrimaryKey = sqlColumn.primaryKey();
+            boolean isAutoGenerated = sqlColumn.autoGenerated();
+            return new SqlColumnInfo() {
+
+                @Override
+                public @Nonnull String name() {
+                    return columnName;
+                }
+
+                @Override
+                public boolean isPrimaryKey() {
+                    return isPrimaryKey;
+                }
+
+                @Override
+                public boolean isAutoGenerated() {
+                    return isAutoGenerated;
+                }
+            };
+        };
+
+        private static final @Nonnull SimpleCache<@Nonnull ObjectMeta, @Nonnull SqlBeanMapping> CACHE =
+            SimpleCache.ofSoft();
+
+        static {
+            Fs.registerGlobalCache(CACHE);
+        }
+
+        private static final @Nonnull SqlBeanMapper DELEGATE = SqlBeanMapper.of(
+            DEFAULT_TABLE_RESOLVER, DEFAULT_COLUMN_RESOLVER, CACHE
+        );
+
+
+        @Override
+        public @Nonnull SqlBeanMapping toBeanMapping(@Nonnull ObjectMeta beanType) {
+            return DELEGATE.toBeanMapping(beanType);
         }
     }
 

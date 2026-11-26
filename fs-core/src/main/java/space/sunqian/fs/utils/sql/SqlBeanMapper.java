@@ -1,10 +1,13 @@
 package space.sunqian.fs.utils.sql;
 
 import space.sunqian.annotation.Nonnull;
+import space.sunqian.annotation.Nullable;
+import space.sunqian.annotation.ThreadSafe;
 import space.sunqian.fs.Fs;
 import space.sunqian.fs.base.string.NameMapper;
 import space.sunqian.fs.cache.SimpleCache;
 import space.sunqian.fs.object.meta.ObjectMeta;
+import space.sunqian.fs.object.meta.PropertyMeta;
 import space.sunqian.fs.utils.sql.annotation.SqlColumn;
 import space.sunqian.fs.utils.sql.annotation.SqlTable;
 
@@ -13,6 +16,7 @@ import space.sunqian.fs.utils.sql.annotation.SqlTable;
  *
  * @author sunqian
  */
+@ThreadSafe
 public interface SqlBeanMapper {
 
     /**
@@ -40,6 +44,25 @@ public interface SqlBeanMapper {
      */
     static @Nonnull SqlBeanMapper defaultMapper() {
         return SqlBeanMapperBack.defaultMapper();
+    }
+
+    /**
+     * Creates a new {@link SqlBeanMapper} with the given resolvers and cache. If the cache is {@code null}, then the
+     * returned {@link SqlBeanMapper} does not cache the mappings.
+     * <p>
+     * The returned {@link SqlBeanMapper} is thread-safe if the given resolvers and cache are thread-safe.
+     *
+     * @param tableResolver  the table resolver
+     * @param columnResolver the column resolver
+     * @param cache          the cache to store the mappings, or {@code null} to not cache the mappings
+     * @return a new {@link SqlBeanMapper}
+     */
+    static @Nonnull SqlBeanMapper of(
+        @Nonnull TableResolver tableResolver,
+        @Nonnull ColumnResolver columnResolver,
+        @Nullable SimpleCache<@Nonnull ObjectMeta, @Nonnull SqlBeanMapping> cache
+    ) {
+        return SqlBeanMapperBack.newMapper(tableResolver, columnResolver, cache);
     }
 
     /**
@@ -96,7 +119,43 @@ public interface SqlBeanMapper {
      *
      * @param beanType the type of the given Java bean
      * @return the SQL bean mapping for the Java bean type
+     * @throws SqlRuntimeException if the bean can not be mapped to the target SQL structure
      */
     @Nonnull
-    SqlBeanMapping toBeanMapping(@Nonnull ObjectMeta beanType);
+    SqlBeanMapping toBeanMapping(@Nonnull ObjectMeta beanType) throws SqlRuntimeException;
+
+    /**
+     * Resolves the info about a SQL table, view, or query result set for a Java bean type.
+     */
+    @FunctionalInterface
+    interface TableResolver {
+
+        /**
+         * Resolves the info about the SQL table, view, or query result set for the given Java bean type. If the bean
+         * can not be mapped to the target SQL structure, it returns {@code null}.
+         *
+         * @param beanType the Java bean type
+         * @return the info about the target SQL structure, or {@code null} if the bean can not be mapped to the target
+         * SQL structure
+         */
+        @Nullable
+        SqlTableInfo resolve(@Nonnull ObjectMeta beanType);
+    }
+
+    /**
+     * Resolves the SQL column info for a Java bean property.
+     */
+    @FunctionalInterface
+    interface ColumnResolver {
+
+        /**
+         * Resolves the SQL column info for the given property. If the property can not be mapped to a column, it
+         * returns {@code null}.
+         *
+         * @param propertyType the Java bean property type
+         * @return the SQL column info, or {@code null} if the property can not be mapped to a column
+         */
+        @Nullable
+        SqlColumnInfo resolve(@Nonnull PropertyMeta propertyType);
+    }
 }
